@@ -1,0 +1,566 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.7.2.dev1+gaf23904" />
+<title>serde.compat API documentation</title>
+<meta name="description" content="" />
+<link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
+<link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
+<style>.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{font-weight:bold}#index h4 + ul{margin-bottom:.6em}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>serde.compat</code></h1>
+</header>
+<section id="section-intro">
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">from dataclasses import fields, is_dataclass
+from itertools import zip_longest
+from typing import Iterator, Optional, Tuple, Type, TypeVar, Union
+
+from typing_inspect import get_args, get_origin, is_optional_type, is_union_type
+
+T = TypeVar(&#39;T&#39;)
+
+
+def typename(typ) -&gt; str:
+    &#34;&#34;&#34;
+    &gt;&gt;&gt; from typing import List, Dict
+    &gt;&gt;&gt; typename(int)
+    &#39;int&#39;
+    &gt;&gt;&gt; class Foo: pass
+    &gt;&gt;&gt; typename(Foo)
+    &#39;Foo&#39;
+    &gt;&gt;&gt; typename(List[Foo])
+    &#39;List[Foo]&#39;
+    &gt;&gt;&gt; typename(Dict[str, Foo])
+    &#39;Dict[str, Foo]&#39;
+    &gt;&gt;&gt; typename(Tuple[int, str, Foo, List[int], Dict[str, Foo]])
+    &#39;Tuple[int, str, Foo, List[int], Dict[str, Foo]]&#39;
+    &gt;&gt;&gt; typename(Optional[List[Foo]])
+    &#39;Optional[List[Foo]]&#39;
+    &gt;&gt;&gt; typename(Union[Optional[Foo], List[Foo], Union[str, int]])
+    &#39;Union[Optional[Foo], List[Foo], str, int]&#39;
+    &#34;&#34;&#34;
+    if is_opt(typ):
+        return f&#39;Optional[{typename(type_args(typ)[0])}]&#39;
+    elif is_union(typ):
+        return f&#39;Union[{&#34;, &#34;.join([typename(e) for e in union_args(typ)])}]&#39;
+    elif is_list(typ):
+        et = typename(type_args(typ)[0])
+        return f&#39;List[{et}]&#39;
+    elif is_dict(typ):
+        kt = typename(type_args(typ)[0])
+        vt = typename(type_args(typ)[1])
+        return f&#39;Dict[{kt}, {vt}]&#39;
+    elif is_tuple(typ):
+        return f&#39;Tuple[{&#34;, &#34;.join([typename(e) for e in type_args(typ)])}]&#39;
+    else:
+        return typ.__name__
+
+
+def type_args(cls: Type):
+    &#34;&#34;&#34;
+    Wrapepr to suppress type error for accessing private members.
+    &#34;&#34;&#34;
+    return cls.__args__  # type: ignore
+
+
+def union_args(typ: Union) -&gt; Tuple:
+    if not is_union(typ):
+        raise TypeError(f&#39;{typ} is not Union&#39;)
+    args = type_args(typ)
+    if len(args) == 1:
+        return args[0]
+    it = iter(args)
+    types = []
+    for (i1, i2) in zip_longest(it, it):
+        if not i2:
+            types.append(i1)
+        elif is_none(i2):
+            types.append(Optional[i1])
+        else:
+            types.extend((i1, i2))
+    return tuple(types)
+
+
+def iter_types(cls: Type) -&gt; Iterator[Type]:
+    &#34;&#34;&#34;
+    Iterate field types recursively.
+    &#34;&#34;&#34;
+    if is_dataclass(cls):
+        yield cls
+        for f in fields(cls):
+            yield from iter_types(f.type)
+    elif isinstance(cls, str):
+        yield cls
+    elif is_opt(cls):
+        yield from iter_types(type_args(cls)[0])
+    elif is_union(cls):
+        for arg in type_args(cls):
+            yield from iter_types(arg)
+    elif is_list(cls):
+        yield from iter_types(type_args(cls)[0])
+    elif is_tuple(cls):
+        for arg in type_args(cls):
+            yield from iter_types(arg)
+    elif is_dict(cls):
+        yield from iter_types(type_args(cls)[0])
+        yield from iter_types(type_args(cls)[1])
+    else:
+        yield cls
+
+
+def is_union(typ: Type) -&gt; bool:
+    &#34;&#34;&#34;
+    Test if the type is `typing.Union`.
+    &#34;&#34;&#34;
+    return is_union_type(typ) and not is_opt(typ)
+
+
+def is_opt(typ: Type) -&gt; bool:
+    &#34;&#34;&#34;
+    Test if the type is `typing.Optional`.
+    &#34;&#34;&#34;
+    args = get_args(typ)
+    return is_optional_type(typ) and len(args) == 2 and not is_none(args[0]) and is_none(args[1])
+
+
+def is_list(typ: Type) -&gt; bool:
+    &#34;&#34;&#34;
+    Test if the type is `typing.List`.
+    &#34;&#34;&#34;
+    try:
+        return issubclass(get_origin(typ), list)
+    except TypeError:
+        return isinstance(typ, list)
+
+
+def is_tuple(typ: Type) -&gt; bool:
+    &#34;&#34;&#34;
+    Test if the type is `typing.Tuple`.
+    &#34;&#34;&#34;
+    try:
+        return issubclass(get_origin(typ), tuple)
+    except TypeError:
+        return isinstance(typ, tuple)
+
+
+def is_dict(typ: Type) -&gt; bool:
+    &#34;&#34;&#34;
+    Test if the type is `typing.Dict`.
+    &#34;&#34;&#34;
+    try:
+        return issubclass(get_origin(typ), dict)
+    except TypeError:
+        return isinstance(typ, dict)
+
+
+def is_none(typ: Type) -&gt; bool:
+    &#34;&#34;&#34;
+    &gt;&gt;&gt; is_none(int)
+    False
+    &gt;&gt;&gt; is_none(type(None))
+    True
+    &gt;&gt;&gt; is_none(None)
+    False
+    &#34;&#34;&#34;
+    return typ is type(None)  # noqa
+
+
+PRIMITIVES = [int, float, bool, str]
+
+
+def is_primitive(typ: Type) -&gt; bool:
+    &#34;&#34;&#34;
+    Test if the type is primitive.
+
+    &gt;&gt;&gt; is_primitive(int)
+    True
+    &gt;&gt;&gt; is_primitive(float)
+    True
+    &gt;&gt;&gt; class CustomInt(int):
+    ...     pass
+    &gt;&gt;&gt; is_primitive(CustomInt)
+    True
+    &#34;&#34;&#34;
+    try:
+        return any(issubclass(typ, ty) for ty in PRIMITIVES)
+    except TypeError:
+        return any(isinstance(typ, ty) for ty in PRIMITIVES)
+
+
+def assert_type(typ: Type, obj, throw=False) -&gt; None:
+    if not isinstance(obj, typ):
+        if throw:
+            raise ValueError(f&#39;{obj} is not instance of {typ}&#39;)</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-functions">Functions</h2>
+<dl>
+<dt id="serde.compat.assert_type"><code class="name flex">
+<span>def <span class="ident">assert_type</span></span>(<span>typ, obj, throw=False)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def assert_type(typ: Type, obj, throw=False) -&gt; None:
+    if not isinstance(obj, typ):
+        if throw:
+            raise ValueError(f&#39;{obj} is not instance of {typ}&#39;)</code></pre>
+</details>
+</dd>
+<dt id="serde.compat.is_dict"><code class="name flex">
+<span>def <span class="ident">is_dict</span></span>(<span>typ)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Test if the type is <code>typing.Dict</code>.</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def is_dict(typ: Type) -&gt; bool:
+    &#34;&#34;&#34;
+    Test if the type is `typing.Dict`.
+    &#34;&#34;&#34;
+    try:
+        return issubclass(get_origin(typ), dict)
+    except TypeError:
+        return isinstance(typ, dict)</code></pre>
+</details>
+</dd>
+<dt id="serde.compat.is_list"><code class="name flex">
+<span>def <span class="ident">is_list</span></span>(<span>typ)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Test if the type is <code>typing.List</code>.</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def is_list(typ: Type) -&gt; bool:
+    &#34;&#34;&#34;
+    Test if the type is `typing.List`.
+    &#34;&#34;&#34;
+    try:
+        return issubclass(get_origin(typ), list)
+    except TypeError:
+        return isinstance(typ, list)</code></pre>
+</details>
+</dd>
+<dt id="serde.compat.is_none"><code class="name flex">
+<span>def <span class="ident">is_none</span></span>(<span>typ)</span>
+</code></dt>
+<dd>
+<section class="desc"><pre><code>&gt;&gt;&gt; is_none(int)
+False
+&gt;&gt;&gt; is_none(type(None))
+True
+&gt;&gt;&gt; is_none(None)
+False
+</code></pre></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def is_none(typ: Type) -&gt; bool:
+    &#34;&#34;&#34;
+    &gt;&gt;&gt; is_none(int)
+    False
+    &gt;&gt;&gt; is_none(type(None))
+    True
+    &gt;&gt;&gt; is_none(None)
+    False
+    &#34;&#34;&#34;
+    return typ is type(None)  # noqa</code></pre>
+</details>
+</dd>
+<dt id="serde.compat.is_opt"><code class="name flex">
+<span>def <span class="ident">is_opt</span></span>(<span>typ)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Test if the type is <code>typing.Optional</code>.</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def is_opt(typ: Type) -&gt; bool:
+    &#34;&#34;&#34;
+    Test if the type is `typing.Optional`.
+    &#34;&#34;&#34;
+    args = get_args(typ)
+    return is_optional_type(typ) and len(args) == 2 and not is_none(args[0]) and is_none(args[1])</code></pre>
+</details>
+</dd>
+<dt id="serde.compat.is_primitive"><code class="name flex">
+<span>def <span class="ident">is_primitive</span></span>(<span>typ)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Test if the type is primitive.</p>
+<pre><code>&gt;&gt;&gt; is_primitive(int)
+True
+&gt;&gt;&gt; is_primitive(float)
+True
+&gt;&gt;&gt; class CustomInt(int):
+...     pass
+&gt;&gt;&gt; is_primitive(CustomInt)
+True
+</code></pre></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def is_primitive(typ: Type) -&gt; bool:
+    &#34;&#34;&#34;
+    Test if the type is primitive.
+
+    &gt;&gt;&gt; is_primitive(int)
+    True
+    &gt;&gt;&gt; is_primitive(float)
+    True
+    &gt;&gt;&gt; class CustomInt(int):
+    ...     pass
+    &gt;&gt;&gt; is_primitive(CustomInt)
+    True
+    &#34;&#34;&#34;
+    try:
+        return any(issubclass(typ, ty) for ty in PRIMITIVES)
+    except TypeError:
+        return any(isinstance(typ, ty) for ty in PRIMITIVES)</code></pre>
+</details>
+</dd>
+<dt id="serde.compat.is_tuple"><code class="name flex">
+<span>def <span class="ident">is_tuple</span></span>(<span>typ)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Test if the type is <code>typing.Tuple</code>.</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def is_tuple(typ: Type) -&gt; bool:
+    &#34;&#34;&#34;
+    Test if the type is `typing.Tuple`.
+    &#34;&#34;&#34;
+    try:
+        return issubclass(get_origin(typ), tuple)
+    except TypeError:
+        return isinstance(typ, tuple)</code></pre>
+</details>
+</dd>
+<dt id="serde.compat.is_union"><code class="name flex">
+<span>def <span class="ident">is_union</span></span>(<span>typ)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Test if the type is <code>typing.Union</code>.</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def is_union(typ: Type) -&gt; bool:
+    &#34;&#34;&#34;
+    Test if the type is `typing.Union`.
+    &#34;&#34;&#34;
+    return is_union_type(typ) and not is_opt(typ)</code></pre>
+</details>
+</dd>
+<dt id="serde.compat.iter_types"><code class="name flex">
+<span>def <span class="ident">iter_types</span></span>(<span>cls)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Iterate field types recursively.</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def iter_types(cls: Type) -&gt; Iterator[Type]:
+    &#34;&#34;&#34;
+    Iterate field types recursively.
+    &#34;&#34;&#34;
+    if is_dataclass(cls):
+        yield cls
+        for f in fields(cls):
+            yield from iter_types(f.type)
+    elif isinstance(cls, str):
+        yield cls
+    elif is_opt(cls):
+        yield from iter_types(type_args(cls)[0])
+    elif is_union(cls):
+        for arg in type_args(cls):
+            yield from iter_types(arg)
+    elif is_list(cls):
+        yield from iter_types(type_args(cls)[0])
+    elif is_tuple(cls):
+        for arg in type_args(cls):
+            yield from iter_types(arg)
+    elif is_dict(cls):
+        yield from iter_types(type_args(cls)[0])
+        yield from iter_types(type_args(cls)[1])
+    else:
+        yield cls</code></pre>
+</details>
+</dd>
+<dt id="serde.compat.type_args"><code class="name flex">
+<span>def <span class="ident">type_args</span></span>(<span>cls)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Wrapepr to suppress type error for accessing private members.</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def type_args(cls: Type):
+    &#34;&#34;&#34;
+    Wrapepr to suppress type error for accessing private members.
+    &#34;&#34;&#34;
+    return cls.__args__  # type: ignore</code></pre>
+</details>
+</dd>
+<dt id="serde.compat.typename"><code class="name flex">
+<span>def <span class="ident">typename</span></span>(<span>typ)</span>
+</code></dt>
+<dd>
+<section class="desc"><pre><code>&gt;&gt;&gt; from typing import List, Dict
+&gt;&gt;&gt; typename(int)
+'int'
+&gt;&gt;&gt; class Foo: pass
+&gt;&gt;&gt; typename(Foo)
+'Foo'
+&gt;&gt;&gt; typename(List[Foo])
+'List[Foo]'
+&gt;&gt;&gt; typename(Dict[str, Foo])
+'Dict[str, Foo]'
+&gt;&gt;&gt; typename(Tuple[int, str, Foo, List[int], Dict[str, Foo]])
+'Tuple[int, str, Foo, List[int], Dict[str, Foo]]'
+&gt;&gt;&gt; typename(Optional[List[Foo]])
+'Optional[List[Foo]]'
+&gt;&gt;&gt; typename(Union[Optional[Foo], List[Foo], Union[str, int]])
+'Union[Optional[Foo], List[Foo], str, int]'
+</code></pre></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def typename(typ) -&gt; str:
+    &#34;&#34;&#34;
+    &gt;&gt;&gt; from typing import List, Dict
+    &gt;&gt;&gt; typename(int)
+    &#39;int&#39;
+    &gt;&gt;&gt; class Foo: pass
+    &gt;&gt;&gt; typename(Foo)
+    &#39;Foo&#39;
+    &gt;&gt;&gt; typename(List[Foo])
+    &#39;List[Foo]&#39;
+    &gt;&gt;&gt; typename(Dict[str, Foo])
+    &#39;Dict[str, Foo]&#39;
+    &gt;&gt;&gt; typename(Tuple[int, str, Foo, List[int], Dict[str, Foo]])
+    &#39;Tuple[int, str, Foo, List[int], Dict[str, Foo]]&#39;
+    &gt;&gt;&gt; typename(Optional[List[Foo]])
+    &#39;Optional[List[Foo]]&#39;
+    &gt;&gt;&gt; typename(Union[Optional[Foo], List[Foo], Union[str, int]])
+    &#39;Union[Optional[Foo], List[Foo], str, int]&#39;
+    &#34;&#34;&#34;
+    if is_opt(typ):
+        return f&#39;Optional[{typename(type_args(typ)[0])}]&#39;
+    elif is_union(typ):
+        return f&#39;Union[{&#34;, &#34;.join([typename(e) for e in union_args(typ)])}]&#39;
+    elif is_list(typ):
+        et = typename(type_args(typ)[0])
+        return f&#39;List[{et}]&#39;
+    elif is_dict(typ):
+        kt = typename(type_args(typ)[0])
+        vt = typename(type_args(typ)[1])
+        return f&#39;Dict[{kt}, {vt}]&#39;
+    elif is_tuple(typ):
+        return f&#39;Tuple[{&#34;, &#34;.join([typename(e) for e in type_args(typ)])}]&#39;
+    else:
+        return typ.__name__</code></pre>
+</details>
+</dd>
+<dt id="serde.compat.union_args"><code class="name flex">
+<span>def <span class="ident">union_args</span></span>(<span>typ)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def union_args(typ: Union) -&gt; Tuple:
+    if not is_union(typ):
+        raise TypeError(f&#39;{typ} is not Union&#39;)
+    args = type_args(typ)
+    if len(args) == 1:
+        return args[0]
+    it = iter(args)
+    types = []
+    for (i1, i2) in zip_longest(it, it):
+        if not i2:
+            types.append(i1)
+        elif is_none(i2):
+            types.append(Optional[i1])
+        else:
+            types.extend((i1, i2))
+    return tuple(types)</code></pre>
+</details>
+</dd>
+</dl>
+</section>
+<section>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="serde" href="index.html">serde</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="two-column">
+<li><code><a title="serde.compat.assert_type" href="#serde.compat.assert_type">assert_type</a></code></li>
+<li><code><a title="serde.compat.is_dict" href="#serde.compat.is_dict">is_dict</a></code></li>
+<li><code><a title="serde.compat.is_list" href="#serde.compat.is_list">is_list</a></code></li>
+<li><code><a title="serde.compat.is_none" href="#serde.compat.is_none">is_none</a></code></li>
+<li><code><a title="serde.compat.is_opt" href="#serde.compat.is_opt">is_opt</a></code></li>
+<li><code><a title="serde.compat.is_primitive" href="#serde.compat.is_primitive">is_primitive</a></code></li>
+<li><code><a title="serde.compat.is_tuple" href="#serde.compat.is_tuple">is_tuple</a></code></li>
+<li><code><a title="serde.compat.is_union" href="#serde.compat.is_union">is_union</a></code></li>
+<li><code><a title="serde.compat.iter_types" href="#serde.compat.iter_types">iter_types</a></code></li>
+<li><code><a title="serde.compat.type_args" href="#serde.compat.type_args">type_args</a></code></li>
+<li><code><a title="serde.compat.typename" href="#serde.compat.typename">typename</a></code></li>
+<li><code><a title="serde.compat.union_args" href="#serde.compat.union_args">union_args</a></code></li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.7.2.dev1+gaf23904</a>.</p>
+</footer>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad()</script>
+</body>
+</html>

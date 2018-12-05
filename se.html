@@ -1,0 +1,1310 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.7.2.dev1+gaf23904" />
+<title>serde.se API documentation</title>
+<meta name="description" content="Defines classess and functions for `serialize` decorator." />
+<link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
+<link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
+<style>.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{font-weight:bold}#index h4 + ul{margin-bottom:.6em}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>serde.se</code></h1>
+</header>
+<section id="section-intro">
+<p>Defines classess and functions for <a title="serde.se.serialize" href="#serde.se.serialize"><code>serialize()</code></a> decorator.</p>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">&#34;&#34;&#34;
+Defines classess and functions for `serialize` decorator.
+
+&#34;&#34;&#34;
+import abc
+import copy  # noqa
+import functools
+from dataclasses import Field as DataclassField
+from dataclasses import asdict as _asdict
+from dataclasses import astuple as _astuple
+from dataclasses import dataclass
+from dataclasses import fields as dataclass_fields  # noqa
+from dataclasses import is_dataclass
+from typing import Any, Callable, Dict, List, Optional, Tuple, Type
+
+import jinja2
+
+from .compat import is_dict, is_list, is_opt, is_primitive, is_tuple, is_union, type_args
+from .core import HIDDEN_NAME, SE_NAME, SETTINGS, TO_DICT, TO_ITER, Field, Hidden, T, conv, fields, gen
+from .more_types import serialize as custom
+
+Custom = Optional[Callable[[Any], Any]]
+
+
+class Serializer(metaclass=abc.ABCMeta):
+    &#34;&#34;&#34;
+    `Serializer` base class. Subclass this to custonize serialize bahaviour.
+
+    See `serde.json.JsonSerializer` and `serde.msgpack.MsgPackSerializer` for example usage.
+    &#34;&#34;&#34;
+
+    @abc.abstractclassmethod
+    def serialize(cls, obj):
+        pass
+
+
+def serialize(_cls=None, rename_all: Optional[str] = None) -&gt; Type:
+    &#34;&#34;&#34;
+    `serialize` decorator. A dataclass with this decorator can be serialized
+    into an object in various data format such as JSON and MsgPack.
+
+    &gt;&gt;&gt; from serde import serialize
+    &gt;&gt;&gt; from serde.json import to_json
+    &gt;&gt;&gt;
+    &gt;&gt;&gt; # Mark the class serializable.
+    &gt;&gt;&gt; @serialize
+    ... @dataclass
+    ... class Foo:
+    ...     i: int
+    ...     s: str
+    ...     f: float
+    ...     b: bool
+    &gt;&gt;&gt;
+    &gt;&gt;&gt; to_json(Foo(i=10, s=&#39;foo&#39;, f=100.0, b=True))
+    &#39;{&#34;i&#34;: 10, &#34;s&#34;: &#34;foo&#34;, &#34;f&#34;: 100.0, &#34;b&#34;: true}&#39;
+    &gt;&gt;&gt;
+
+    Additionally, `serialize` supports case conversion. Pass case name in
+    `serialize` decorator as shown below.
+
+    &gt;&gt;&gt; @serialize(rename_all = &#39;camelcase&#39;)
+    ... @dataclass
+    ... class Foo:
+    ...     int_field: int
+    ...     str_field: str
+    &gt;&gt;&gt;
+    &gt;&gt;&gt; to_json(Foo(int_field=10, str_field=&#39;foo&#39;))
+    &#39;{&#34;intField&#34;: 10, &#34;strField&#34;: &#34;foo&#34;}&#39;
+    &gt;&gt;&gt;
+    &#34;&#34;&#34;
+
+    @functools.wraps(_cls)
+    def wrap(cls: Type[T]) -&gt; Type[T]:
+        if not hasattr(cls, HIDDEN_NAME):
+            setattr(cls, HIDDEN_NAME, Hidden())
+
+        def serialize(self, ser, **opts) -&gt; None:
+            return ser.serialize(self, **opts)
+
+        setattr(cls, SE_NAME, serialize)
+
+        g: Dict[str, Any] = globals().copy()
+        for f in sefields(cls):
+            if f.skip_if:
+                g[f.skip_if.mangled] = f.skip_if
+        g[&#39;__custom_serializer__&#39;] = custom
+        cls = se_func(cls, TO_ITER, render_astuple(cls, custom), g)
+        cls = se_func(cls, TO_DICT, render_asdict(cls, rename_all, custom), g)
+        return cls
+
+    if _cls is None:
+        return wrap
+
+    return wrap(_cls)
+
+
+def is_serializable(instance_or_class: Any) -&gt; bool:
+    &#34;&#34;&#34;
+    Test if arg can `serialize`. Arg must be either an instance of class.
+
+    &gt;&gt;&gt; from dataclasses import dataclass
+    &gt;&gt;&gt; from serde import serialize, is_serializable
+    &gt;&gt;&gt;
+    &gt;&gt;&gt; @serialize
+    ... @dataclass
+    ... class Foo:
+    ...     pass
+    &gt;&gt;&gt;
+    &gt;&gt;&gt; is_serializable(Foo)
+    True
+    &gt;&gt;&gt;
+    &#34;&#34;&#34;
+    return hasattr(instance_or_class, &#39;__serde_serialize__&#39;)
+
+
+def to_dict(o) -&gt; Dict:
+    &#34;&#34;&#34;
+    Convert object into dictionary.
+
+    &gt;&gt;&gt; @serialize
+    ... @dataclass
+    ... class Foo:
+    ...     i: int
+    &gt;&gt;&gt;
+    &gt;&gt;&gt; to_dict(Foo(10))
+    {&#39;i&#39;: 10}
+    &gt;&gt;&gt;
+    &gt;&gt;&gt; to_dict([Foo(10), Foo(20)])
+    [{&#39;i&#39;: 10}, {&#39;i&#39;: 20}]
+    &gt;&gt;&gt;
+    &gt;&gt;&gt; to_dict({&#39;a&#39;: Foo(10), &#39;b&#39;: Foo(20)})
+    {&#39;a&#39;: {&#39;i&#39;: 10}, &#39;b&#39;: {&#39;i&#39;: 20}}
+    &gt;&gt;&gt;
+    &gt;&gt;&gt; to_dict((Foo(10), Foo(20)))
+    ({&#39;i&#39;: 10}, {&#39;i&#39;: 20})
+    &#34;&#34;&#34;
+    if o is None:
+        v = None
+    if is_serializable(o):
+        v = asdict(o)
+    elif isinstance(o, list):
+        v = [to_dict(e) for e in o]
+    elif isinstance(o, tuple):
+        v = tuple(to_dict(e) for e in o)
+    elif isinstance(o, dict):
+        v = {k: to_dict(v) for k, v in o.items()}
+    else:
+        v = o
+
+    return v
+
+
+def astuple(v):
+    &#34;&#34;&#34;
+    Convert `serialize` class to `tuple`.
+    &#34;&#34;&#34;
+    if is_serializable(v):
+        return getattr(v, TO_ITER)()
+    elif is_dataclass(v):
+        return _astuple(v)
+    elif isinstance(v, Dict):
+        return tuple(astuple(e) for e in v.values())
+    elif isinstance(v, (Tuple, List)):
+        return tuple(astuple(e) for e in v)
+    else:
+        return v
+
+
+def asdict(v):
+    &#34;&#34;&#34;
+    Convert `serialize` class to `dict`.
+    &#34;&#34;&#34;
+    if is_serializable(v):
+        return getattr(v, TO_DICT)()
+    elif is_dataclass(v):
+        return _asdict(v)
+    elif isinstance(v, Dict):
+        return {asdict(k): asdict(v) for k, v in v.items()}
+    elif isinstance(v, (Tuple, List)):
+        return tuple(asdict(e) for e in v)
+    else:
+        return v
+
+
+@dataclass
+class SeField(Field):
+    parent: Optional[&#39;Field&#39;] = None
+
+    @property
+    def varname(self) -&gt; str:
+        var = self.parent.varname if self.parent else None
+        if var:
+            return f&#39;{var}.{self.name}&#39;
+        else:
+            return self.name
+
+    def __getitem__(self, n) -&gt; &#39;SeField&#39;:
+        typ = type_args(self.type)[n]
+        return SeField(typ, None)
+
+    @staticmethod
+    def mangle(field: DataclassField, name: str) -&gt; str:
+        return f&#39;{field.name}_{name}&#39;
+
+
+sefields = functools.partial(fields, SeField)
+
+
+def to_arg(f: SeField) -&gt; SeField:
+    f.parent = SeField(None, &#39;obj&#39;)
+    return f
+
+
+def render_astuple(cls: Type, custom: Custom = None) -&gt; str:
+    template = &#34;&#34;&#34;
+def {{func}}(obj):
+  if not is_dataclass(obj):
+    return copy.deepcopy(obj)
+
+  {% if cls|is_dataclass %}
+  res = []
+  {% for f in cls|fields -%}
+  {% if not f.skip|default(False) %}
+  res.append({{f|arg|rvalue()}})
+  {% endif %}
+  {% endfor -%}
+  return tuple(res)
+  {% endif %}
+    &#34;&#34;&#34;
+
+    renderer = Renderer(TO_ITER, custom)
+    env = jinja2.Environment(loader=jinja2.DictLoader({&#39;iter&#39;: template}))
+    env.filters.update({&#39;fields&#39;: sefields})
+    env.filters.update({&#39;is_dataclass&#39;: is_dataclass})
+    env.filters.update({&#39;rvalue&#39;: renderer.render})
+    env.filters.update({&#39;arg&#39;: to_arg})
+    return env.get_template(&#39;iter&#39;).render(func=TO_ITER, cls=cls)
+
+
+def render_asdict(cls: Type, case: Optional[str] = None, custom: Custom = None) -&gt; str:
+    template = &#34;&#34;&#34;
+def {{func}}(obj):
+  if not is_dataclass(obj):
+    return copy.deepcopy(obj)
+
+  {% if cls|is_dataclass %}
+  res = {}
+  {% for f in cls|fields -%}
+
+  {% if not f.skip %}
+    {% if f.skip_if %}
+  if not {{f.skip_if.mangled}}({{f|arg|rvalue()}}):
+    res[&#34;{{f|case}}&#34;] = {{f|arg|rvalue()}}
+    {% else %}
+  res[&#34;{{f|case}}&#34;] = {{f|arg|rvalue()}}
+    {% endif %}
+  {% endif %}
+
+  {% endfor -%}
+  return res
+  {% endif %}
+    &#34;&#34;&#34;
+    renderer = Renderer(TO_DICT, custom)
+    env = jinja2.Environment(loader=jinja2.DictLoader({&#39;dict&#39;: template}))
+    env.filters.update({&#39;fields&#39;: sefields})
+    env.filters.update({&#39;is_dataclass&#39;: is_dataclass})
+    env.filters.update({&#39;rvalue&#39;: renderer.render})
+    env.filters.update({&#39;arg&#39;: to_arg})
+    env.filters.update({&#39;case&#39;: functools.partial(conv, case=case)})
+    return env.get_template(&#39;dict&#39;).render(func=TO_DICT, cls=cls)
+
+
+@dataclass
+class Renderer:
+    &#34;&#34;&#34;
+    Render rvalue for variouls types.
+    &#34;&#34;&#34;
+
+    func: str
+    custom: Custom = None
+
+    def render(self, arg: SeField) -&gt; str:
+        &#34;&#34;&#34;
+        Render rvalue
+
+        &gt;&gt;&gt; Renderer(TO_ITER).render(SeField(int, &#39;i&#39;))
+        &#39;i&#39;
+
+        &gt;&gt;&gt; Renderer(TO_ITER).render(SeField(List[int], &#39;l&#39;))
+        &#39;[v for v in l]&#39;
+
+        &gt;&gt;&gt; @serialize
+        ... @dataclass(unsafe_hash=True)
+        ... class Foo:
+        ...    val: int
+        &gt;&gt;&gt; Renderer(TO_ITER).render(SeField(Foo, &#39;foo&#39;))
+        &#39;foo.__serde_to_iter__()&#39;
+
+        &gt;&gt;&gt; Renderer(TO_ITER).render(SeField(List[Foo], &#39;foo&#39;))
+        &#39;[v.__serde_to_iter__() for v in foo]&#39;
+
+        &gt;&gt;&gt; Renderer(TO_ITER).render(SeField(Dict[str, Foo], &#39;foo&#39;))
+        &#39;{k: v.__serde_to_iter__() for k, v in foo.items()}&#39;
+
+        &gt;&gt;&gt; Renderer(TO_ITER).render(SeField(Dict[Foo, Foo], &#39;foo&#39;))
+        &#39;{k.__serde_to_iter__(): v.__serde_to_iter__() for k, v in foo.items()}&#39;
+
+        &gt;&gt;&gt; Renderer(TO_ITER).render(SeField(Tuple[str, Foo, int], &#39;foo&#39;))
+        &#39;(foo[0], foo[1].__serde_to_iter__(), foo[2])&#39;
+        &gt;&gt;&gt;
+        &#34;&#34;&#34;
+        if is_dataclass(arg.type):
+            return self.dataclass(arg)
+        elif is_opt(arg.type):
+            return self.opt(arg)
+        elif is_list(arg.type):
+            return self.list(arg)
+        elif is_dict(arg.type):
+            return self.dict(arg)
+        elif is_tuple(arg.type):
+            return self.tuple(arg)
+        elif any(f(arg.type) for f in (is_primitive, is_union)):
+            return self.primitive(arg)
+        else:
+            return f&#39;__custom_serializer__({arg.varname})&#39;
+
+    def dataclass(self, arg: SeField) -&gt; str:
+        &#34;&#34;&#34;
+        Render rvalue for dataclass.
+        &#34;&#34;&#34;
+        return f&#39;{arg.varname}.{self.func}()&#39;
+
+    def opt(self, arg: SeField) -&gt; str:
+        &#34;&#34;&#34;
+        Render rvalue for optional.
+        &#34;&#34;&#34;
+        inner = arg[0]
+        inner.name = arg.varname
+        return f&#39;{self.render(inner)} if {arg.varname} is not None else None&#39;
+
+    def list(self, arg: SeField) -&gt; str:
+        &#34;&#34;&#34;
+        Render rvalue for list.
+        &#34;&#34;&#34;
+        earg = arg[0]
+        earg.name = &#39;v&#39;
+        return f&#39;[{self.render(earg)} for v in {arg.varname}]&#39;
+
+    def tuple(self, arg: SeField) -&gt; str:
+        &#34;&#34;&#34;
+        Render rvalue for tuple.
+        &#34;&#34;&#34;
+        rvalues = []
+        for i, _ in enumerate(type_args(arg.type)):
+            r = arg[i]
+            r.name = f&#39;{arg.varname}[{i}]&#39;
+            rvalues.append(self.render(r))
+        return f&#34;({&#39;, &#39;.join(rvalues)})&#34;
+
+    def dict(self, arg: SeField) -&gt; str:
+        &#34;&#34;&#34;
+        Render rvalue for dict.
+        &#34;&#34;&#34;
+        karg = arg[0]
+        karg.name = &#39;k&#39;
+        varg = arg[1]
+        varg.name = &#39;v&#39;
+        return f&#39;{{{self.render(karg)}: {self.render(varg)} for k, v in {arg.varname}.items()}}&#39;
+
+    def primitive(self, arg: SeField) -&gt; str:
+        &#34;&#34;&#34;
+        Render rvalue for primitives.
+        &#34;&#34;&#34;
+        return f&#39;{arg.varname}&#39;
+
+
+def se_func(cls: Type[T], func: str, code: str, g: Dict = None, local: Dict = None) -&gt; Type[T]:
+    &#34;&#34;&#34;
+    Generate function to serialize into an object.
+    &#34;&#34;&#34;
+    # Generate serialize function.
+    if not g:
+        g = globals().copy()
+    if not local:
+        local = locals().copy()
+    code = gen(code, g, local, cls=cls)
+
+    setattr(cls, func, local[func])
+    if SETTINGS[&#39;debug&#39;]:
+        hidden = getattr(cls, HIDDEN_NAME)
+        hidden.code[func] = code
+
+    return cls</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-functions">Functions</h2>
+<dl>
+<dt id="serde.se.asdict"><code class="name flex">
+<span>def <span class="ident">asdict</span></span>(<span>v)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Convert <a title="serde.se.serialize" href="#serde.se.serialize"><code>serialize()</code></a> class to <code>dict</code>.</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def asdict(v):
+    &#34;&#34;&#34;
+    Convert `serialize` class to `dict`.
+    &#34;&#34;&#34;
+    if is_serializable(v):
+        return getattr(v, TO_DICT)()
+    elif is_dataclass(v):
+        return _asdict(v)
+    elif isinstance(v, Dict):
+        return {asdict(k): asdict(v) for k, v in v.items()}
+    elif isinstance(v, (Tuple, List)):
+        return tuple(asdict(e) for e in v)
+    else:
+        return v</code></pre>
+</details>
+</dd>
+<dt id="serde.se.astuple"><code class="name flex">
+<span>def <span class="ident">astuple</span></span>(<span>v)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Convert <a title="serde.se.serialize" href="#serde.se.serialize"><code>serialize()</code></a> class to <code>tuple</code>.</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def astuple(v):
+    &#34;&#34;&#34;
+    Convert `serialize` class to `tuple`.
+    &#34;&#34;&#34;
+    if is_serializable(v):
+        return getattr(v, TO_ITER)()
+    elif is_dataclass(v):
+        return _astuple(v)
+    elif isinstance(v, Dict):
+        return tuple(astuple(e) for e in v.values())
+    elif isinstance(v, (Tuple, List)):
+        return tuple(astuple(e) for e in v)
+    else:
+        return v</code></pre>
+</details>
+</dd>
+<dt id="serde.se.is_serializable"><code class="name flex">
+<span>def <span class="ident">is_serializable</span></span>(<span>instance_or_class)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Test if arg can <a title="serde.se.serialize" href="#serde.se.serialize"><code>serialize()</code></a>. Arg must be either an instance of class.</p>
+<pre><code>&gt;&gt;&gt; from dataclasses import dataclass
+&gt;&gt;&gt; from serde import serialize, is_serializable
+&gt;&gt;&gt;
+&gt;&gt;&gt; @serialize
+... @dataclass
+... class Foo:
+...     pass
+&gt;&gt;&gt;
+&gt;&gt;&gt; is_serializable(Foo)
+True
+&gt;&gt;&gt;
+</code></pre></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def is_serializable(instance_or_class: Any) -&gt; bool:
+    &#34;&#34;&#34;
+    Test if arg can `serialize`. Arg must be either an instance of class.
+
+    &gt;&gt;&gt; from dataclasses import dataclass
+    &gt;&gt;&gt; from serde import serialize, is_serializable
+    &gt;&gt;&gt;
+    &gt;&gt;&gt; @serialize
+    ... @dataclass
+    ... class Foo:
+    ...     pass
+    &gt;&gt;&gt;
+    &gt;&gt;&gt; is_serializable(Foo)
+    True
+    &gt;&gt;&gt;
+    &#34;&#34;&#34;
+    return hasattr(instance_or_class, &#39;__serde_serialize__&#39;)</code></pre>
+</details>
+</dd>
+<dt id="serde.se.render_asdict"><code class="name flex">
+<span>def <span class="ident">render_asdict</span></span>(<span>cls, case=None, custom=None)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def render_asdict(cls: Type, case: Optional[str] = None, custom: Custom = None) -&gt; str:
+    template = &#34;&#34;&#34;
+def {{func}}(obj):
+  if not is_dataclass(obj):
+    return copy.deepcopy(obj)
+
+  {% if cls|is_dataclass %}
+  res = {}
+  {% for f in cls|fields -%}
+
+  {% if not f.skip %}
+    {% if f.skip_if %}
+  if not {{f.skip_if.mangled}}({{f|arg|rvalue()}}):
+    res[&#34;{{f|case}}&#34;] = {{f|arg|rvalue()}}
+    {% else %}
+  res[&#34;{{f|case}}&#34;] = {{f|arg|rvalue()}}
+    {% endif %}
+  {% endif %}
+
+  {% endfor -%}
+  return res
+  {% endif %}
+    &#34;&#34;&#34;
+    renderer = Renderer(TO_DICT, custom)
+    env = jinja2.Environment(loader=jinja2.DictLoader({&#39;dict&#39;: template}))
+    env.filters.update({&#39;fields&#39;: sefields})
+    env.filters.update({&#39;is_dataclass&#39;: is_dataclass})
+    env.filters.update({&#39;rvalue&#39;: renderer.render})
+    env.filters.update({&#39;arg&#39;: to_arg})
+    env.filters.update({&#39;case&#39;: functools.partial(conv, case=case)})
+    return env.get_template(&#39;dict&#39;).render(func=TO_DICT, cls=cls)</code></pre>
+</details>
+</dd>
+<dt id="serde.se.render_astuple"><code class="name flex">
+<span>def <span class="ident">render_astuple</span></span>(<span>cls, custom=None)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def render_astuple(cls: Type, custom: Custom = None) -&gt; str:
+    template = &#34;&#34;&#34;
+def {{func}}(obj):
+  if not is_dataclass(obj):
+    return copy.deepcopy(obj)
+
+  {% if cls|is_dataclass %}
+  res = []
+  {% for f in cls|fields -%}
+  {% if not f.skip|default(False) %}
+  res.append({{f|arg|rvalue()}})
+  {% endif %}
+  {% endfor -%}
+  return tuple(res)
+  {% endif %}
+    &#34;&#34;&#34;
+
+    renderer = Renderer(TO_ITER, custom)
+    env = jinja2.Environment(loader=jinja2.DictLoader({&#39;iter&#39;: template}))
+    env.filters.update({&#39;fields&#39;: sefields})
+    env.filters.update({&#39;is_dataclass&#39;: is_dataclass})
+    env.filters.update({&#39;rvalue&#39;: renderer.render})
+    env.filters.update({&#39;arg&#39;: to_arg})
+    return env.get_template(&#39;iter&#39;).render(func=TO_ITER, cls=cls)</code></pre>
+</details>
+</dd>
+<dt id="serde.se.se_func"><code class="name flex">
+<span>def <span class="ident">se_func</span></span>(<span>cls, func, code, g=None, local=None)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Generate function to serialize into an object.</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def se_func(cls: Type[T], func: str, code: str, g: Dict = None, local: Dict = None) -&gt; Type[T]:
+    &#34;&#34;&#34;
+    Generate function to serialize into an object.
+    &#34;&#34;&#34;
+    # Generate serialize function.
+    if not g:
+        g = globals().copy()
+    if not local:
+        local = locals().copy()
+    code = gen(code, g, local, cls=cls)
+
+    setattr(cls, func, local[func])
+    if SETTINGS[&#39;debug&#39;]:
+        hidden = getattr(cls, HIDDEN_NAME)
+        hidden.code[func] = code
+
+    return cls</code></pre>
+</details>
+</dd>
+<dt id="serde.se.serialize"><code class="name flex">
+<span>def <span class="ident">serialize</span></span>(<span>rename_all=None)</span>
+</code></dt>
+<dd>
+<section class="desc"><p><a title="serde.se.serialize" href="#serde.se.serialize"><code>serialize()</code></a> decorator. A dataclass with this decorator can be serialized
+into an object in various data format such as JSON and MsgPack.</p>
+<pre><code>&gt;&gt;&gt; from serde import serialize
+&gt;&gt;&gt; from serde.json import to_json
+&gt;&gt;&gt;
+&gt;&gt;&gt; # Mark the class serializable.
+&gt;&gt;&gt; @serialize
+... @dataclass
+... class Foo:
+...     i: int
+...     s: str
+...     f: float
+...     b: bool
+&gt;&gt;&gt;
+&gt;&gt;&gt; to_json(Foo(i=10, s='foo', f=100.0, b=True))
+'{"i": 10, "s": "foo", "f": 100.0, "b": true}'
+&gt;&gt;&gt;
+</code></pre>
+<p>Additionally, <a title="serde.se.serialize" href="#serde.se.serialize"><code>serialize()</code></a> supports case conversion. Pass case name in
+<a title="serde.se.serialize" href="#serde.se.serialize"><code>serialize()</code></a> decorator as shown below.</p>
+<pre><code>&gt;&gt;&gt; @serialize(rename_all = 'camelcase')
+... @dataclass
+... class Foo:
+...     int_field: int
+...     str_field: str
+&gt;&gt;&gt;
+&gt;&gt;&gt; to_json(Foo(int_field=10, str_field='foo'))
+'{"intField": 10, "strField": "foo"}'
+&gt;&gt;&gt;
+</code></pre></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def serialize(_cls=None, rename_all: Optional[str] = None) -&gt; Type:
+    &#34;&#34;&#34;
+    `serialize` decorator. A dataclass with this decorator can be serialized
+    into an object in various data format such as JSON and MsgPack.
+
+    &gt;&gt;&gt; from serde import serialize
+    &gt;&gt;&gt; from serde.json import to_json
+    &gt;&gt;&gt;
+    &gt;&gt;&gt; # Mark the class serializable.
+    &gt;&gt;&gt; @serialize
+    ... @dataclass
+    ... class Foo:
+    ...     i: int
+    ...     s: str
+    ...     f: float
+    ...     b: bool
+    &gt;&gt;&gt;
+    &gt;&gt;&gt; to_json(Foo(i=10, s=&#39;foo&#39;, f=100.0, b=True))
+    &#39;{&#34;i&#34;: 10, &#34;s&#34;: &#34;foo&#34;, &#34;f&#34;: 100.0, &#34;b&#34;: true}&#39;
+    &gt;&gt;&gt;
+
+    Additionally, `serialize` supports case conversion. Pass case name in
+    `serialize` decorator as shown below.
+
+    &gt;&gt;&gt; @serialize(rename_all = &#39;camelcase&#39;)
+    ... @dataclass
+    ... class Foo:
+    ...     int_field: int
+    ...     str_field: str
+    &gt;&gt;&gt;
+    &gt;&gt;&gt; to_json(Foo(int_field=10, str_field=&#39;foo&#39;))
+    &#39;{&#34;intField&#34;: 10, &#34;strField&#34;: &#34;foo&#34;}&#39;
+    &gt;&gt;&gt;
+    &#34;&#34;&#34;
+
+    @functools.wraps(_cls)
+    def wrap(cls: Type[T]) -&gt; Type[T]:
+        if not hasattr(cls, HIDDEN_NAME):
+            setattr(cls, HIDDEN_NAME, Hidden())
+
+        def serialize(self, ser, **opts) -&gt; None:
+            return ser.serialize(self, **opts)
+
+        setattr(cls, SE_NAME, serialize)
+
+        g: Dict[str, Any] = globals().copy()
+        for f in sefields(cls):
+            if f.skip_if:
+                g[f.skip_if.mangled] = f.skip_if
+        g[&#39;__custom_serializer__&#39;] = custom
+        cls = se_func(cls, TO_ITER, render_astuple(cls, custom), g)
+        cls = se_func(cls, TO_DICT, render_asdict(cls, rename_all, custom), g)
+        return cls
+
+    if _cls is None:
+        return wrap
+
+    return wrap(_cls)</code></pre>
+</details>
+</dd>
+<dt id="serde.se.to_arg"><code class="name flex">
+<span>def <span class="ident">to_arg</span></span>(<span>f)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def to_arg(f: SeField) -&gt; SeField:
+    f.parent = SeField(None, &#39;obj&#39;)
+    return f</code></pre>
+</details>
+</dd>
+<dt id="serde.se.to_dict"><code class="name flex">
+<span>def <span class="ident">to_dict</span></span>(<span>o)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Convert object into dictionary.</p>
+<pre><code>&gt;&gt;&gt; @serialize
+... @dataclass
+... class Foo:
+...     i: int
+&gt;&gt;&gt;
+&gt;&gt;&gt; to_dict(Foo(10))
+{'i': 10}
+&gt;&gt;&gt;
+&gt;&gt;&gt; to_dict([Foo(10), Foo(20)])
+[{'i': 10}, {'i': 20}]
+&gt;&gt;&gt;
+&gt;&gt;&gt; to_dict({'a': Foo(10), 'b': Foo(20)})
+{'a': {'i': 10}, 'b': {'i': 20}}
+&gt;&gt;&gt;
+&gt;&gt;&gt; to_dict((Foo(10), Foo(20)))
+({'i': 10}, {'i': 20})
+</code></pre></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def to_dict(o) -&gt; Dict:
+    &#34;&#34;&#34;
+    Convert object into dictionary.
+
+    &gt;&gt;&gt; @serialize
+    ... @dataclass
+    ... class Foo:
+    ...     i: int
+    &gt;&gt;&gt;
+    &gt;&gt;&gt; to_dict(Foo(10))
+    {&#39;i&#39;: 10}
+    &gt;&gt;&gt;
+    &gt;&gt;&gt; to_dict([Foo(10), Foo(20)])
+    [{&#39;i&#39;: 10}, {&#39;i&#39;: 20}]
+    &gt;&gt;&gt;
+    &gt;&gt;&gt; to_dict({&#39;a&#39;: Foo(10), &#39;b&#39;: Foo(20)})
+    {&#39;a&#39;: {&#39;i&#39;: 10}, &#39;b&#39;: {&#39;i&#39;: 20}}
+    &gt;&gt;&gt;
+    &gt;&gt;&gt; to_dict((Foo(10), Foo(20)))
+    ({&#39;i&#39;: 10}, {&#39;i&#39;: 20})
+    &#34;&#34;&#34;
+    if o is None:
+        v = None
+    if is_serializable(o):
+        v = asdict(o)
+    elif isinstance(o, list):
+        v = [to_dict(e) for e in o]
+    elif isinstance(o, tuple):
+        v = tuple(to_dict(e) for e in o)
+    elif isinstance(o, dict):
+        v = {k: to_dict(v) for k, v in o.items()}
+    else:
+        v = o
+
+    return v</code></pre>
+</details>
+</dd>
+</dl>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="serde.se.Renderer"><code class="flex name class">
+<span>class <span class="ident">Renderer</span></span>
+<span>(</span><span>func, custom=None)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Render rvalue for variouls types.</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Renderer:
+    &#34;&#34;&#34;
+    Render rvalue for variouls types.
+    &#34;&#34;&#34;
+
+    func: str
+    custom: Custom = None
+
+    def render(self, arg: SeField) -&gt; str:
+        &#34;&#34;&#34;
+        Render rvalue
+
+        &gt;&gt;&gt; Renderer(TO_ITER).render(SeField(int, &#39;i&#39;))
+        &#39;i&#39;
+
+        &gt;&gt;&gt; Renderer(TO_ITER).render(SeField(List[int], &#39;l&#39;))
+        &#39;[v for v in l]&#39;
+
+        &gt;&gt;&gt; @serialize
+        ... @dataclass(unsafe_hash=True)
+        ... class Foo:
+        ...    val: int
+        &gt;&gt;&gt; Renderer(TO_ITER).render(SeField(Foo, &#39;foo&#39;))
+        &#39;foo.__serde_to_iter__()&#39;
+
+        &gt;&gt;&gt; Renderer(TO_ITER).render(SeField(List[Foo], &#39;foo&#39;))
+        &#39;[v.__serde_to_iter__() for v in foo]&#39;
+
+        &gt;&gt;&gt; Renderer(TO_ITER).render(SeField(Dict[str, Foo], &#39;foo&#39;))
+        &#39;{k: v.__serde_to_iter__() for k, v in foo.items()}&#39;
+
+        &gt;&gt;&gt; Renderer(TO_ITER).render(SeField(Dict[Foo, Foo], &#39;foo&#39;))
+        &#39;{k.__serde_to_iter__(): v.__serde_to_iter__() for k, v in foo.items()}&#39;
+
+        &gt;&gt;&gt; Renderer(TO_ITER).render(SeField(Tuple[str, Foo, int], &#39;foo&#39;))
+        &#39;(foo[0], foo[1].__serde_to_iter__(), foo[2])&#39;
+        &gt;&gt;&gt;
+        &#34;&#34;&#34;
+        if is_dataclass(arg.type):
+            return self.dataclass(arg)
+        elif is_opt(arg.type):
+            return self.opt(arg)
+        elif is_list(arg.type):
+            return self.list(arg)
+        elif is_dict(arg.type):
+            return self.dict(arg)
+        elif is_tuple(arg.type):
+            return self.tuple(arg)
+        elif any(f(arg.type) for f in (is_primitive, is_union)):
+            return self.primitive(arg)
+        else:
+            return f&#39;__custom_serializer__({arg.varname})&#39;
+
+    def dataclass(self, arg: SeField) -&gt; str:
+        &#34;&#34;&#34;
+        Render rvalue for dataclass.
+        &#34;&#34;&#34;
+        return f&#39;{arg.varname}.{self.func}()&#39;
+
+    def opt(self, arg: SeField) -&gt; str:
+        &#34;&#34;&#34;
+        Render rvalue for optional.
+        &#34;&#34;&#34;
+        inner = arg[0]
+        inner.name = arg.varname
+        return f&#39;{self.render(inner)} if {arg.varname} is not None else None&#39;
+
+    def list(self, arg: SeField) -&gt; str:
+        &#34;&#34;&#34;
+        Render rvalue for list.
+        &#34;&#34;&#34;
+        earg = arg[0]
+        earg.name = &#39;v&#39;
+        return f&#39;[{self.render(earg)} for v in {arg.varname}]&#39;
+
+    def tuple(self, arg: SeField) -&gt; str:
+        &#34;&#34;&#34;
+        Render rvalue for tuple.
+        &#34;&#34;&#34;
+        rvalues = []
+        for i, _ in enumerate(type_args(arg.type)):
+            r = arg[i]
+            r.name = f&#39;{arg.varname}[{i}]&#39;
+            rvalues.append(self.render(r))
+        return f&#34;({&#39;, &#39;.join(rvalues)})&#34;
+
+    def dict(self, arg: SeField) -&gt; str:
+        &#34;&#34;&#34;
+        Render rvalue for dict.
+        &#34;&#34;&#34;
+        karg = arg[0]
+        karg.name = &#39;k&#39;
+        varg = arg[1]
+        varg.name = &#39;v&#39;
+        return f&#39;{{{self.render(karg)}: {self.render(varg)} for k, v in {arg.varname}.items()}}&#39;
+
+    def primitive(self, arg: SeField) -&gt; str:
+        &#34;&#34;&#34;
+        Render rvalue for primitives.
+        &#34;&#34;&#34;
+        return f&#39;{arg.varname}&#39;</code></pre>
+</details>
+<h3>Class variables</h3>
+<dl>
+<dt id="serde.se.Renderer.custom"><code class="name">var <span class="ident">custom</span></code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="serde.se.Renderer.dataclass"><code class="name flex">
+<span>def <span class="ident">dataclass</span></span>(<span>self, arg)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Render rvalue for dataclass.</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def dataclass(self, arg: SeField) -&gt; str:
+    &#34;&#34;&#34;
+    Render rvalue for dataclass.
+    &#34;&#34;&#34;
+    return f&#39;{arg.varname}.{self.func}()&#39;</code></pre>
+</details>
+</dd>
+<dt id="serde.se.Renderer.dict"><code class="name flex">
+<span>def <span class="ident">dict</span></span>(<span>self, arg)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Render rvalue for dict.</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def dict(self, arg: SeField) -&gt; str:
+    &#34;&#34;&#34;
+    Render rvalue for dict.
+    &#34;&#34;&#34;
+    karg = arg[0]
+    karg.name = &#39;k&#39;
+    varg = arg[1]
+    varg.name = &#39;v&#39;
+    return f&#39;{{{self.render(karg)}: {self.render(varg)} for k, v in {arg.varname}.items()}}&#39;</code></pre>
+</details>
+</dd>
+<dt id="serde.se.Renderer.list"><code class="name flex">
+<span>def <span class="ident">list</span></span>(<span>self, arg)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Render rvalue for list.</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def list(self, arg: SeField) -&gt; str:
+    &#34;&#34;&#34;
+    Render rvalue for list.
+    &#34;&#34;&#34;
+    earg = arg[0]
+    earg.name = &#39;v&#39;
+    return f&#39;[{self.render(earg)} for v in {arg.varname}]&#39;</code></pre>
+</details>
+</dd>
+<dt id="serde.se.Renderer.opt"><code class="name flex">
+<span>def <span class="ident">opt</span></span>(<span>self, arg)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Render rvalue for optional.</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def opt(self, arg: SeField) -&gt; str:
+    &#34;&#34;&#34;
+    Render rvalue for optional.
+    &#34;&#34;&#34;
+    inner = arg[0]
+    inner.name = arg.varname
+    return f&#39;{self.render(inner)} if {arg.varname} is not None else None&#39;</code></pre>
+</details>
+</dd>
+<dt id="serde.se.Renderer.primitive"><code class="name flex">
+<span>def <span class="ident">primitive</span></span>(<span>self, arg)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Render rvalue for primitives.</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def primitive(self, arg: SeField) -&gt; str:
+    &#34;&#34;&#34;
+    Render rvalue for primitives.
+    &#34;&#34;&#34;
+    return f&#39;{arg.varname}&#39;</code></pre>
+</details>
+</dd>
+<dt id="serde.se.Renderer.render"><code class="name flex">
+<span>def <span class="ident">render</span></span>(<span>self, arg)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Render rvalue</p>
+<pre><code>&gt;&gt;&gt; Renderer(TO_ITER).render(SeField(int, 'i'))
+'i'
+
+&gt;&gt;&gt; Renderer(TO_ITER).render(SeField(List[int], 'l'))
+'[v for v in l]'
+
+&gt;&gt;&gt; @serialize
+... @dataclass(unsafe_hash=True)
+... class Foo:
+...    val: int
+&gt;&gt;&gt; Renderer(TO_ITER).render(SeField(Foo, 'foo'))
+'foo.__serde_to_iter__()'
+
+&gt;&gt;&gt; Renderer(TO_ITER).render(SeField(List[Foo], 'foo'))
+'[v.__serde_to_iter__() for v in foo]'
+
+&gt;&gt;&gt; Renderer(TO_ITER).render(SeField(Dict[str, Foo], 'foo'))
+'{k: v.__serde_to_iter__() for k, v in foo.items()}'
+
+&gt;&gt;&gt; Renderer(TO_ITER).render(SeField(Dict[Foo, Foo], 'foo'))
+'{k.__serde_to_iter__(): v.__serde_to_iter__() for k, v in foo.items()}'
+
+&gt;&gt;&gt; Renderer(TO_ITER).render(SeField(Tuple[str, Foo, int], 'foo'))
+'(foo[0], foo[1].__serde_to_iter__(), foo[2])'
+&gt;&gt;&gt;
+</code></pre></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def render(self, arg: SeField) -&gt; str:
+    &#34;&#34;&#34;
+    Render rvalue
+
+    &gt;&gt;&gt; Renderer(TO_ITER).render(SeField(int, &#39;i&#39;))
+    &#39;i&#39;
+
+    &gt;&gt;&gt; Renderer(TO_ITER).render(SeField(List[int], &#39;l&#39;))
+    &#39;[v for v in l]&#39;
+
+    &gt;&gt;&gt; @serialize
+    ... @dataclass(unsafe_hash=True)
+    ... class Foo:
+    ...    val: int
+    &gt;&gt;&gt; Renderer(TO_ITER).render(SeField(Foo, &#39;foo&#39;))
+    &#39;foo.__serde_to_iter__()&#39;
+
+    &gt;&gt;&gt; Renderer(TO_ITER).render(SeField(List[Foo], &#39;foo&#39;))
+    &#39;[v.__serde_to_iter__() for v in foo]&#39;
+
+    &gt;&gt;&gt; Renderer(TO_ITER).render(SeField(Dict[str, Foo], &#39;foo&#39;))
+    &#39;{k: v.__serde_to_iter__() for k, v in foo.items()}&#39;
+
+    &gt;&gt;&gt; Renderer(TO_ITER).render(SeField(Dict[Foo, Foo], &#39;foo&#39;))
+    &#39;{k.__serde_to_iter__(): v.__serde_to_iter__() for k, v in foo.items()}&#39;
+
+    &gt;&gt;&gt; Renderer(TO_ITER).render(SeField(Tuple[str, Foo, int], &#39;foo&#39;))
+    &#39;(foo[0], foo[1].__serde_to_iter__(), foo[2])&#39;
+    &gt;&gt;&gt;
+    &#34;&#34;&#34;
+    if is_dataclass(arg.type):
+        return self.dataclass(arg)
+    elif is_opt(arg.type):
+        return self.opt(arg)
+    elif is_list(arg.type):
+        return self.list(arg)
+    elif is_dict(arg.type):
+        return self.dict(arg)
+    elif is_tuple(arg.type):
+        return self.tuple(arg)
+    elif any(f(arg.type) for f in (is_primitive, is_union)):
+        return self.primitive(arg)
+    else:
+        return f&#39;__custom_serializer__({arg.varname})&#39;</code></pre>
+</details>
+</dd>
+<dt id="serde.se.Renderer.tuple"><code class="name flex">
+<span>def <span class="ident">tuple</span></span>(<span>self, arg)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Render rvalue for tuple.</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def tuple(self, arg: SeField) -&gt; str:
+    &#34;&#34;&#34;
+    Render rvalue for tuple.
+    &#34;&#34;&#34;
+    rvalues = []
+    for i, _ in enumerate(type_args(arg.type)):
+        r = arg[i]
+        r.name = f&#39;{arg.varname}[{i}]&#39;
+        rvalues.append(self.render(r))
+    return f&#34;({&#39;, &#39;.join(rvalues)})&#34;</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="serde.se.SeField"><code class="flex name class">
+<span>class <span class="ident">SeField</span></span>
+<span>(</span><span>type, name, default=&lt;factory&gt;, case=None, rename=None, skip=None, skip_if=None, skip_if_false=None, parent=None)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>SeField(type:Type, name:str, default:Any=<factory>, case:Union[str, NoneType]=None, rename:Union[str, NoneType]=None, skip:Union[bool, NoneType]=None, skip_if:Union[Callable[[Any], bool], NoneType]=None, skip_if_false:Union[bool, NoneType]=None, parent:Union[_ForwardRef('Field'), NoneType]=None)</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class SeField(Field):
+    parent: Optional[&#39;Field&#39;] = None
+
+    @property
+    def varname(self) -&gt; str:
+        var = self.parent.varname if self.parent else None
+        if var:
+            return f&#39;{var}.{self.name}&#39;
+        else:
+            return self.name
+
+    def __getitem__(self, n) -&gt; &#39;SeField&#39;:
+        typ = type_args(self.type)[n]
+        return SeField(typ, None)
+
+    @staticmethod
+    def mangle(field: DataclassField, name: str) -&gt; str:
+        return f&#39;{field.name}_{name}&#39;</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="serde.core.Field" href="core.html#serde.core.Field">Field</a></li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="serde.se.SeField.parent"><code class="name">var <span class="ident">parent</span></code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+</dl>
+<h3>Static methods</h3>
+<dl>
+<dt id="serde.se.SeField.mangle"><code class="name flex">
+<span>def <span class="ident">mangle</span></span>(<span>field, name)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@staticmethod
+def mangle(field: DataclassField, name: str) -&gt; str:
+    return f&#39;{field.name}_{name}&#39;</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Instance variables</h3>
+<dl>
+<dt id="serde.se.SeField.varname"><code class="name">var <span class="ident">varname</span></code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def varname(self) -&gt; str:
+    var = self.parent.varname if self.parent else None
+    if var:
+        return f&#39;{var}.{self.name}&#39;
+    else:
+        return self.name</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="serde.se.Serializer"><code class="flex name class">
+<span>class <span class="ident">Serializer</span></span>
+<span>(</span><span>*args, **kwargs)</span>
+</code></dt>
+<dd>
+<section class="desc"><p><a title="serde.se.Serializer" href="#serde.se.Serializer"><code>Serializer</code></a> base class. Subclass this to custonize serialize bahaviour.</p>
+<p>See <a title="serde.json.JsonSerializer" href="json.html#serde.json.JsonSerializer"><code>JsonSerializer</code></a> and <a title="serde.msgpack.MsgPackSerializer" href="msgpack.html#serde.msgpack.MsgPackSerializer"><code>MsgPackSerializer</code></a> for example usage.</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Serializer(metaclass=abc.ABCMeta):
+    &#34;&#34;&#34;
+    `Serializer` base class. Subclass this to custonize serialize bahaviour.
+
+    See `serde.json.JsonSerializer` and `serde.msgpack.MsgPackSerializer` for example usage.
+    &#34;&#34;&#34;
+
+    @abc.abstractclassmethod
+    def serialize(cls, obj):
+        pass</code></pre>
+</details>
+<h3>Subclasses</h3>
+<ul class="hlist">
+<li><a title="serde.csv.CsvSerializer" href="csv.html#serde.csv.CsvSerializer">CsvSerializer</a></li>
+<li><a title="serde.toml.TomlSerializer" href="toml.html#serde.toml.TomlSerializer">TomlSerializer</a></li>
+<li><a title="serde.msgpack.MsgPackSerializer" href="msgpack.html#serde.msgpack.MsgPackSerializer">MsgPackSerializer</a></li>
+<li><a title="serde.yaml.YamlSerializer" href="yaml.html#serde.yaml.YamlSerializer">YamlSerializer</a></li>
+<li><a title="serde.json.JsonSerializer" href="json.html#serde.json.JsonSerializer">JsonSerializer</a></li>
+</ul>
+<h3>Static methods</h3>
+<dl>
+<dt id="serde.se.Serializer.serialize"><code class="name flex">
+<span>def <span class="ident">serialize</span></span>(<span>obj)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@abc.abstractclassmethod
+def serialize(cls, obj):
+    pass</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="serde" href="index.html">serde</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="two-column">
+<li><code><a title="serde.se.asdict" href="#serde.se.asdict">asdict</a></code></li>
+<li><code><a title="serde.se.astuple" href="#serde.se.astuple">astuple</a></code></li>
+<li><code><a title="serde.se.is_serializable" href="#serde.se.is_serializable">is_serializable</a></code></li>
+<li><code><a title="serde.se.render_asdict" href="#serde.se.render_asdict">render_asdict</a></code></li>
+<li><code><a title="serde.se.render_astuple" href="#serde.se.render_astuple">render_astuple</a></code></li>
+<li><code><a title="serde.se.se_func" href="#serde.se.se_func">se_func</a></code></li>
+<li><code><a title="serde.se.serialize" href="#serde.se.serialize">serialize</a></code></li>
+<li><code><a title="serde.se.to_arg" href="#serde.se.to_arg">to_arg</a></code></li>
+<li><code><a title="serde.se.to_dict" href="#serde.se.to_dict">to_dict</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="serde.se.Renderer" href="#serde.se.Renderer">Renderer</a></code></h4>
+<ul class="two-column">
+<li><code><a title="serde.se.Renderer.custom" href="#serde.se.Renderer.custom">custom</a></code></li>
+<li><code><a title="serde.se.Renderer.dataclass" href="#serde.se.Renderer.dataclass">dataclass</a></code></li>
+<li><code><a title="serde.se.Renderer.dict" href="#serde.se.Renderer.dict">dict</a></code></li>
+<li><code><a title="serde.se.Renderer.list" href="#serde.se.Renderer.list">list</a></code></li>
+<li><code><a title="serde.se.Renderer.opt" href="#serde.se.Renderer.opt">opt</a></code></li>
+<li><code><a title="serde.se.Renderer.primitive" href="#serde.se.Renderer.primitive">primitive</a></code></li>
+<li><code><a title="serde.se.Renderer.render" href="#serde.se.Renderer.render">render</a></code></li>
+<li><code><a title="serde.se.Renderer.tuple" href="#serde.se.Renderer.tuple">tuple</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="serde.se.SeField" href="#serde.se.SeField">SeField</a></code></h4>
+<ul class="">
+<li><code><a title="serde.se.SeField.mangle" href="#serde.se.SeField.mangle">mangle</a></code></li>
+<li><code><a title="serde.se.SeField.parent" href="#serde.se.SeField.parent">parent</a></code></li>
+<li><code><a title="serde.se.SeField.varname" href="#serde.se.SeField.varname">varname</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="serde.se.Serializer" href="#serde.se.Serializer">Serializer</a></code></h4>
+<ul class="">
+<li><code><a title="serde.se.Serializer.serialize" href="#serde.se.Serializer.serialize">serialize</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.7.2.dev1+gaf23904</a>.</p>
+</footer>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad()</script>
+</body>
+</html>
