@@ -1,0 +1,10 @@
+build
+_build
+dist
+__pycache__
+.mypy_cache
+.pytest_cache
+.eggs
+*.egg-info
+*.pyc
+htmlcov
