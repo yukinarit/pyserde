@@ -11,7 +11,14 @@ dataclasses = { version = "*", markers="python_version < '3.7'" }
 msgpack = "*"
 
 [dev-packages]
-pycodestyle = "*"
+flake8 = "*"
 pytest = "*"
-pytest-pycodestyle = "*"
+pytest-flake8 = "*"
+flake8-per-file-ignores = "*"
 mypy = "*"
+dataclasses-json = "*"
+dataclasses-jsonschema = "*"
+dacite = "*"
+pavlova = "*"
+mashumaro = "*"
+ix = { git = "https://github.com/JoshKarpel/ix.git" }

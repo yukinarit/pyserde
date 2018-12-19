@@ -2,7 +2,7 @@ import json
 from typing import Type, Any, Dict, Tuple
 from dataclasses import asdict
 
-from .core import T, DE_NAME, JsonValue
+from .core import T, JsonValue
 from .se import Serializer
 from .de import Deserializer
 
@@ -22,9 +22,10 @@ def to_json(obj: Any, serializer=JsonSerializer) -> str:
 
 
 def from_json(c: Type[T], s: str,
-              de: Type[Deserializer]=JsonDeserializer) -> Type[T]:
-    dct = de().deserialize(s)
-    return getattr(c, DE_NAME)(astuple(dct))
+              de: Type[Deserializer]=JsonDeserializer) -> T:
+    # dct = de().deserialize(s)
+    # return c.__serde_from_dict__(dct)
+    return c.__serde_from_dict__(json.loads(s))
 
 
 def astuple(v):

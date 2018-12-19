@@ -2,7 +2,7 @@ import msgpack
 from typing import Type, Any, Tuple
 from dataclasses import astuple
 
-from .core import T, DE_NAME
+from .core import T, FROM_TUPLE
 from .se import Serializer
 from .de import Deserializer
 
@@ -24,4 +24,4 @@ def to_msgpack(obj: Any, serializer=MsgPackSerializer) -> bytes:
 def from_msgpack(c: Type[T], s: str,
                  de: Type[Deserializer]=MsgPackDeserializer) -> Type[T]:
     dct = de().deserialize(s)
-    return getattr(c, DE_NAME)(dct)
+    return getattr(c, FROM_TUPLE)(dct)

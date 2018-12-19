@@ -17,8 +17,5 @@ pep8:
 mypy:
 	pipenv run mypy serde
 
-docs:
-	pipenv run pdoc serde.py --html --html-dir docs --overwrite
-
-serve-docs:
-	pipenv run pdoc --http --http-dir docs
+bench:
+	pipenv run python bench.py

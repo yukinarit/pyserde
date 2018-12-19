@@ -9,7 +9,9 @@ T = TypeVar('T')
 
 SE_NAME = '__serde_serialize__'
 
-DE_NAME = '__serde_deserialize__'
+FROM_TUPLE = '__serde_from_tuple__'
+
+FROM_DICT = '__serde_from_dict__'
 
 
 class SerdeError(TypeError):
@@ -19,7 +21,7 @@ class SerdeError(TypeError):
 
 def gen(code: str, globals: Dict=None, locals: Dict=None, echo=False):
     """
-    Customized exec function.
+    Customized `exec` function.
     """
     if echo:
         print(code)

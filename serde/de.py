@@ -1,29 +1,43 @@
 from typing import Type, Any, Dict
-from dataclasses import fields, Field, is_dataclass
+from dataclasses import fields, is_dataclass
 
-from .core import T, DE_NAME, gen
+from .core import T, FROM_TUPLE, FROM_DICT, gen
 
 
-def gen_de_params(idx: int, f: Field) -> str:
+def param_from_tuple(cls) -> str:
     """
     Generate parameters for deserialize function.
     """
     # If a member is also pyserde class, invoke the deserialize
     # function on its own.
-    if is_deserializable(f.type):
-        nested = f'{f.type.__name__}'
-        return f"{f.name}={nested}.{DE_NAME}(tpl[{idx}])"
-    else:
-        return f"{f.name}=tpl[{idx}]"
+    params = []
+    for i, f in enumerate(fields(cls)):
+        if is_deserializable(f.type):
+            nested = f'{f.type.__name__}'
+            params.append(f"{f.name}={nested}.{FROM_TUPLE}(data[{i}])")
+        else:
+            params.append(f"{f.name}=data[{i}]")
+    return ', '.join(params)
 
 
-def gen_de(cls: Type[T]) -> Type[T]:
+def param_from_dict(cls) -> str:
+    # If a member is also pyserde class, invoke the deserialize
+    # function on its own.
+    params = []
+    for f in fields(cls):
+        if is_deserializable(f.type):
+            nested = f'{f.type.__name__}'
+            params.append(f"{f.name}={nested}.{FROM_DICT}(data['{f.name}'])")
+        else:
+            params.append(f"{f.name}=data['{f.name}']")
+    return ', '.join(params)
+
+
+def gen_from_any(cls: Type[T], name, params) -> Type[T]:
     """
-    Generate deserialize function by exec.
+    Generate function to deserialize from tuple.
     """
-    params = ', '.join([gen_de_params(i, f)
-                        for i, f in enumerate(fields(cls))])
-    body = (f'def {DE_NAME}(tpl):\n'
+    body = (f'def {name}(data):\n'
             f' return cls({params})')
 
     globals: Dict[str, Any] = dict(cls=cls)
@@ -33,10 +47,10 @@ def gen_de(cls: Type[T]) -> Type[T]:
         if is_dataclass(f.type):
             globals[f.type.__name__] = f.type
 
-    gen(body, globals, echo=True)
-    if DE_NAME in globals:
+    gen(body, globals, echo=False)
+    if name in globals:
         pass
-    setattr(cls, DE_NAME, staticmethod(globals[DE_NAME]))
+    setattr(cls, name, staticmethod(globals[name]))
 
     return cls
 
@@ -45,7 +59,7 @@ def is_deserializable(instance_or_class: Any) -> bool:
     """
     Test if `instance_or_class` is deserializable.
     """
-    return hasattr(instance_or_class, DE_NAME)
+    return hasattr(instance_or_class, FROM_TUPLE)
 
 
 class Deserializer:
@@ -63,7 +77,9 @@ def deserialize(_cls=None, rename_all: bool=False) -> Type:
     such as JSON and MsgPack.
     """
     def wrap(cls) -> Type:
-        return gen_de(cls)
+        cls = gen_from_any(cls, FROM_TUPLE, param_from_tuple(cls))
+        cls = gen_from_any(cls, FROM_DICT, param_from_dict(cls))
+        return cls
 
     if _cls is None:
         wrap

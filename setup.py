@@ -2,11 +2,11 @@ import pathlib
 import re
 import sys
 from codecs import open
-from setuptools import setup
+from setuptools import setup, find_packages
 
 root = pathlib.Path(__file__).parent.absolute()
 
-with open('serde.py', 'r', encoding='utf8') as f:
+with open('serde/__init__.py', 'r', encoding='utf8') as f:
     version = re.search(r'__version__ = \'(.*?)\'', f.read()).group(1)
 
 with open('README.md', 'r', encoding='utf8') as f:
@@ -35,12 +35,8 @@ tests_require = [
     'flake8',
 ]
 
-docs_require = [
-    'pdoc',
-]
-
 setup(
-    name='serde',
+    name='pyserde',
     version=version,
     description='',
     long_description=readme,
@@ -48,19 +44,18 @@ setup(
     author='yukinarit',
     author_email='yukinarit84@gmail.com',
     url='https://github.com/yukinarit/pyserde',
-    py_modules=['serde'],
+    packages=find_packages(exclude=['test_serde']),
     python_requires=">=3.6",
     setup_requires=setup_requires,
     install_requires=requires,
     tests_require=tests_require,
     extras_require={
-        'docs': docs_require,
         'test': tests_require,
     },
     license='MIT',
     zip_safe=False,
     classifiers=[
-        'Development Status :: 4 - Beta',
+        'Development Status :: 2 - Pre-Alpha',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: MIT License',
         'Programming Language :: Python :: 3.6',
