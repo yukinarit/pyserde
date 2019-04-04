@@ -1,11 +1,12 @@
 import json
+from typing import Dict, List
+
 import msgpack
 from dataclasses import dataclass, field
-from typing import List, Dict
 
-from serde import serialize, deserialize
-from serde.json import to_json, from_json
-from serde.msgpack import to_msgpack, from_msgpack
+from serde import deserialize, serialize
+from serde.json import from_json, to_json
+from serde.msgpack import from_msgpack, to_msgpack
 
 
 def test_json_se_primitive():
@@ -31,7 +32,8 @@ def test_json_de_primitive():
         b: bool
 
     h = Hoge(i=10, s='hoge', f=100.0, b=True)
-    assert h == from_json(Hoge, """
+    assert h == from_json(
+        Hoge, """
                                 {"i": 10,
                                  "s": "hoge",
                                  "f": 100.0,
@@ -57,7 +59,8 @@ def test_json_de_complex():
         d: Dict[str, int] = field(default_factory=dict)
 
     h = Hoge(v=[1, 2, 3, 4, 5], d={'hoge': 10, 'fuga': 20})
-    assert h == from_json(Hoge, """
+    assert h == from_json(
+        Hoge, """
                                 {"v": [1, 2, 3, 4, 5],
                                  "d": {"hoge": 10, "fuga": 20}
                                  }""")
@@ -117,7 +120,8 @@ def test_json_de_nested():
 
     f = Foo(i=20, s='foo', f=200.0, b=False)
     h = Hoge(i=10, s='hoge', f=100.0, b=True, foo=f)
-    hh = from_json(Hoge, """
+    hh = from_json(
+        Hoge, """
                          {"i": 10,
                           "s": "hoge",
                           "f": 100.0,
@@ -179,7 +183,8 @@ def test_json_de_nested_complex():
 
     f = Foo(v=[1, 2, 3, 4, 5], d={'hoge': 10, 'fuga': 20})
     h = Hoge(i=10, s='hoge', f=100.0, b=True, foo=f)
-    hh = from_json(Hoge, """
+    hh = from_json(
+        Hoge, """
                          {"i": 10,
                           "s": "hoge",
                           "f": 100.0,

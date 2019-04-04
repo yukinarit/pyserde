@@ -19,7 +19,7 @@ class SerdeError(TypeError):
     """
 
 
-def gen(code: str, globals: Dict=None, locals: Dict=None, echo=False):
+def gen(code: str, globals: Dict = None, locals: Dict = None, echo=False):
     """
     Customized `exec` function.
     """

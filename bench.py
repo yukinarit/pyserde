@@ -1,16 +1,18 @@
 import functools
 import json
 import timeit
-from typing import Type, List, Dict
-from dataclasses import dataclass, field, asdict
+from typing import Dict, List, Type
+
+import dacite
+import dataclasses_json
+import dataclasses_jsonschema
+import ix
+import mashumaro
+import pavlova
+from dataclasses import asdict, dataclass, field
+
 import serde
 import serde.json
-import dataclasses_json
-import dacite
-import dataclasses_jsonschema
-import pavlova
-import mashumaro
-import ix
 
 
 @dataclass
@@ -276,11 +278,9 @@ def de_raw_small():
 
 def de_raw_medium():
     dct = json.loads(json_md)
-    return RawMedium(dct['i'], dct['s'], dct['f'], dct['b'],
-                     dct['i2'], dct['s2'], dct['f2'], dct['b2'],
-                     dct['i3'], dct['s3'], dct['f3'], dct['b3'],
-                     dct['i4'], dct['s4'], dct['f4'], dct['b4'],
-                     dct['i5'], dct['s5'], dct['f5'], dct['b5'])
+    return RawMedium(dct['i'], dct['s'], dct['f'], dct['b'], dct['i2'], dct['s2'], dct['f2'], dct['b2'], dct['i3'],
+                     dct['s3'], dct['f3'], dct['b3'], dct['i4'], dct['s4'], dct['f4'], dct['b4'], dct['i5'], dct['s5'],
+                     dct['f5'], dct['b5'])
 
 
 def de_raw_complex():
@@ -353,40 +353,40 @@ def de_ix(cls: Type, data: str):
 
 def main():
     print('--- deserialize small ---')
-    # profile('raw', de_raw_small)
-    # profile('pyserde', de_pyserde, SerdeSmall, json_sm)
-    # profile('dacite', de_dacite, RawSmall, json_sm)
-    # profile('dataclasses_json', de_dataclasses_json, DJsonSmall, json_sm)
-    # profile('dataclasses_jsonschema', de_dataclasses_jsonschema, DJSchemaSmall, json_sm)
-    # profile('pavlova', de_pavlova, RawSmall, json_sm)
-    # profile('mashumaro', de_mashumaro, MashumaroSmall, json_sm)
-    # profile('ix', de_ix, IXSmall, ix_json_sm)
+    profile('raw', de_raw_small)
+    profile('pyserde', de_pyserde, SerdeSmall, json_sm)
+    profile('dacite', de_dacite, RawSmall, json_sm)
+    profile('dataclasses_json', de_dataclasses_json, DJsonSmall, json_sm)
+    profile('dataclasses_jsonschema', de_dataclasses_jsonschema, DJSchemaSmall, json_sm)
+    profile('pavlova', de_pavlova, RawSmall, json_sm)
+    profile('mashumaro', de_mashumaro, MashumaroSmall, json_sm)
+    profile('ix', de_ix, IXSmall, ix_json_sm)
 
     print('--- deserialize medium ---')
-    # profile('raw', de_raw_medium)
-    # profile('pyserde', de_pyserde, SerdeMedium, json_md)
-    # profile('dacite', de_dacite, RawMedium, json_md)
-    # profile('dataclasses_json', de_dataclasses_json, DJsonMedium, json_md)
-    # profile('dataclasses_jsonschema', de_dataclasses_jsonschema, DJSchemaMedium, json_md)
-    # profile('pavlova', de_pavlova, RawMedium, json_md)
-    # profile('mashumaro', de_mashumaro, MashumaroMedium, json_md)
-    # profile('ix', de_ix, IXMedium, ix_json_md)
+    profile('raw', de_raw_medium)
+    profile('pyserde', de_pyserde, SerdeMedium, json_md)
+    profile('dacite', de_dacite, RawMedium, json_md)
+    profile('dataclasses_json', de_dataclasses_json, DJsonMedium, json_md)
+    profile('dataclasses_jsonschema', de_dataclasses_jsonschema, DJSchemaMedium, json_md)
+    profile('pavlova', de_pavlova, RawMedium, json_md)
+    profile('mashumaro', de_mashumaro, MashumaroMedium, json_md)
+    profile('ix', de_ix, IXMedium, ix_json_md)
 
     print('--- deserialize complex ---')
-    # profile('raw', de_raw_complex)
-    # profile('pyserde', de_pyserde, SerdeComplex, json_complex)
-    # profile('dacite', de_dacite, RawComplex, json_complex)
-    # profile('dataclasses_json', de_dataclasses_json, DJsonComplex, json_complex)
-    # profile('dataclasses_jsonschema', de_dataclasses_jsonschema, DJSchemaComplex, json_complex)
-    # profile('pavlova', de_pavlova, RawComplex, json_complex)
-    # profile('mashumaro', de_mashumaro, MashumaroComplex, json_complex)
+    profile('raw', de_raw_complex)
+    profile('pyserde', de_pyserde, SerdeComplex, json_complex)
+    profile('dacite', de_dacite, RawComplex, json_complex)
+    profile('dataclasses_json', de_dataclasses_json, DJsonComplex, json_complex)
+    profile('dataclasses_jsonschema', de_dataclasses_jsonschema, DJSchemaComplex, json_complex)
+    profile('pavlova', de_pavlova, RawComplex, json_complex)
+    profile('mashumaro', de_mashumaro, MashumaroComplex, json_complex)
 
     print('--- serialize small ---')
     profile('raw', se_raw, RawSmall, **args_sm)
     profile('pyserde', se_pyserde, SerdeSmall, **args_sm)
     profile('dacite', se_dacite, RawSmall, **args_sm)
     profile('pavlova', se_pavlova, RawSmall, **args_sm)
-    # profile('dataclasses_json', se_dataclasses_json, DJsonSmall, **args_sm)
+    profile('dataclasses_json', se_dataclasses_json, DJsonSmall, **args_sm)
     profile('dataclasses_jsonschema', se_dataclasses_jsonschema, DJSchemaSmall, **args_sm)
     profile('mashumaro', se_mashumaro, MashumaroSmall, **args_sm)
 

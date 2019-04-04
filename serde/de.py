@@ -1,7 +1,8 @@
-from typing import Type, Any, Dict
+from typing import Any, Dict, Type
+
 from dataclasses import fields, is_dataclass
 
-from .core import T, FROM_TUPLE, FROM_DICT, gen
+from .core import FROM_DICT, FROM_TUPLE, T, gen
 
 
 def param_from_tuple(cls) -> str:
@@ -37,8 +38,7 @@ def gen_from_any(cls: Type[T], name, params) -> Type[T]:
     """
     Generate function to deserialize from tuple.
     """
-    body = (f'def {name}(data):\n'
-            f' return cls({params})')
+    body = (f'def {name}(data):\n' f' return cls({params})')
 
     globals: Dict[str, Any] = dict(cls=cls)
 
@@ -66,16 +66,18 @@ class Deserializer:
     """
     Deserializer base class.
     """
+
     def deserialize(self, obj: Any) -> Dict[str, Any]:
         pass
 
 
-def deserialize(_cls=None, rename_all: bool=False) -> Type:
+def deserialize(_cls=None, rename_all: bool = False) -> Type:
     """
     `deserialize` decorator. A dataclass with this decorator can be
     deserialized into an object from various data interchange format
     such as JSON and MsgPack.
     """
+
     def wrap(cls) -> Type:
         cls = gen_from_any(cls, FROM_TUPLE, param_from_tuple(cls))
         cls = gen_from_any(cls, FROM_DICT, param_from_dict(cls))
