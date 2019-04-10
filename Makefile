@@ -1,10 +1,14 @@
-.PHONY: all setup test unittest pep8 mypy bench
+.PHONY: all setup build test unittest pep8 mypy bench
 
 all: setup test pep8 mypy
 
 setup:
 	pipenv install --dev --skip-lock
 	pipenv run pip list
+
+build:
+	pipenv run python setup.py sdist
+	pipenv run python setup.py bdist_wheel
 
 test: 
 	pipenv run pytest -s

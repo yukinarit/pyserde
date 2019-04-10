@@ -16,10 +16,17 @@ def serialize(_cls: Type[T]) -> Type[T]:
 
     @functools.wraps(_cls)
     def wrap(cls: Type[T]) -> Type[T]:
-        def serialize(self, ser) -> None:
-            return ser().serialize(self)
+        def serialize(self, ser, **opts) -> None:
+            return ser().serialize(self, **opts)
 
         setattr(cls, SE_NAME, serialize)
         return cls
 
     return wrap(_cls)
+
+
+def is_serializable(instance_or_class: Any) -> bool:
+    """
+    Test if `instance_or_class` is serializable.
+    """
+    return hasattr(instance_or_class, '__serde_serialize__')

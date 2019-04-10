@@ -4,8 +4,8 @@ from typing import Any, Dict, Tuple, Type
 from dataclasses import asdict
 
 from .core import JsonValue, T
-from .de import Deserializer
-from .se import Serializer
+from .de import Deserializer, from_obj
+from .se import Serializer, is_serializable
 
 
 class JsonSerializer(Serializer):
@@ -19,20 +19,11 @@ class JsonDeserializer(Deserializer):
 
 
 def to_json(obj: Any, serializer=JsonSerializer) -> str:
-    return obj.__serde_serialize__(serializer)
+    if is_serializable(obj):
+        return obj.__serde_serialize__(serializer)
+    else:
+        return json.dumps(obj)
 
 
 def from_json(c: Type[T], s: str, de: Type[Deserializer] = JsonDeserializer) -> T:
-    # dct = de().deserialize(s)
-    # return c.__serde_from_dict__(dct)
-    return c.__serde_from_dict__(json.loads(s))
-
-
-def astuple(v):
-    """
-    Convert decoded JSON `dict` to `tuple`.
-    """
-    if isinstance(v, dict):
-        return tuple(astuple(v) for v in v.values())
-    else:
-        return v
+    return from_obj(c, s, de)
