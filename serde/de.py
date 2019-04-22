@@ -13,7 +13,7 @@ def from_any(cls, o):
         return cls.__serde_from_tuple__(o)
     elif isinstance(o, Dict):
         return cls.__serde_from_dict__(o)
-    elif isinstance(o, cls):
+    elif isinstance(o, cls) or o is None:
         return o
     else:
         raise SerdeError(f'`o` must be either List, Tuple, Dict or cls but {type(o)}.')
@@ -43,12 +43,12 @@ def from_value(typ: Type, varname: str) -> str:
     """
     Generate function to deserialize from value.
     """
-    # If a member is also pyserde class, invoke the own deserialize function
     if is_deserializable(typ):
         nested = f'{typ.__name__}'
         s = f"from_any({nested}, {varname})"
     elif is_optional_type(typ):
-        s = varname
+        element_typ = typ.__args__[0]
+        s = f"{from_value(element_typ, varname)}"
     elif issubclass(typ, List):
         element_typ = typ.__args__[0]
         s = f"[{from_value(element_typ, 'd')} for d in {varname}]"
@@ -96,7 +96,7 @@ class Deserializer:
     """
     Deserializer base class.
     """
-    def deserialize(self, obj):
+    def deserialize(self, obj, **opts):
         return obj
 
 

@@ -419,15 +419,25 @@ def test_from_obj_complex():
     class Hoge:
         d: Dict[Foo, List[Foo]]
         lst: List[Foo]
+        lst2: List[int]
+        opt: Optional[Foo]
 
     f = Foo(i=100)
     f2 = Foo(i=100)
     lst = [f, f2]
-    h = Hoge(d={f: lst}, lst=lst)
-    assert h == from_obj(Hoge, {'d': {(100,): lst}, 'lst': lst})
-    hh = from_obj(Hoge, ({(100,): lst}, lst))
+    lst2 = [1, 2, 3]
+    h = Hoge(d={f: lst}, lst=lst, lst2=lst2, opt=f)
+    hh = from_obj(Hoge, ({(100,): lst}, lst, lst2, f))
     assert h.d == hh.d
     assert h.lst == hh.lst
+    assert h.lst2 == hh.lst2
+    assert h.opt == hh.opt
+
+    hh == from_obj(Hoge, {'d': {(100,): lst}, 'lst': lst, 'lst2': lst2, 'opt': None})
+    assert h.d == hh.d
+    assert h.lst == hh.lst
+    assert h.lst2 == hh.lst2
+    assert h.opt == hh.opt
 
 
 def test_json():
@@ -465,16 +475,17 @@ def test_msgpack():
         f: float
         b: bool
         d: Dict[Foo, int]
+        lst: List[Foo]
 
     f = Foo(i=100)
-    # h = Hoge(i=10, s='hoge', f=100.0, b=True, d={f: [f, f]})
-    # p = msgpack.packb((10, 'hoge', 100.0, True, {(100,): [(100,), (100,)]}))
-    h = Hoge(i=10, s='hoge', f=100.0, b=True, d={f: 100})
-    p = msgpack.packb((10, 'hoge', 100.0, True, {(100,): 100}))
-    assert p == to_msgpack(h)
+    lst = [f, f, f]
+    h = Hoge(i=10, s='hoge', f=100.0, b=True, d={f: 100}, lst=lst)
+    p = msgpack.packb((10, 'hoge', 100.0, True, {(100,): 100}, [(100,), (100,), (100,)]))
     hh = from_msgpack(Hoge, p, use_list=False)
+    assert p == to_msgpack(h)
     assert h.i == hh.i
     assert h.s == hh.s
     assert h.f == hh.f
     assert h.b == hh.b
     assert h.d == hh.d
+    assert lst == hh.lst

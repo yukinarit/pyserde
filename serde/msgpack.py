@@ -3,7 +3,7 @@ from typing import Any, Tuple, Type
 import msgpack
 from dataclasses import astuple
 
-from .core import FROM_TUPLE, T
+from .core import T, logger
 from .de import Deserializer, from_obj
 from .se import Serializer
 
@@ -16,7 +16,7 @@ class MsgPackSerializer(Serializer):
 class MsgPackDeserializer(Deserializer):
     def deserialize(self, s: bytes, **opts) -> Tuple:
         unp = msgpack.unpackb(s, raw=False, use_list=False, **opts)
-        print(f'unpack from msgpack: {unp}')
+        logger.debug('unpack from msgpack: {unp}')
         return unp
 
 
