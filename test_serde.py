@@ -2,10 +2,11 @@ import enum
 import json
 import logging
 import msgpack
+import pytest
 from typing import Dict, List, Tuple, Optional
-from dataclasses import dataclass, field, fields, asdict
+from dataclasses import dataclass, field, fields
 
-from serde import deserialize, serialize, iter_types, astuple, from_obj
+from serde import deserialize, serialize, iter_types, astuple, asdict, from_obj
 from serde.de import from_value
 from serde.json import from_json, to_json
 from serde.msgpack import from_msgpack, to_msgpack
@@ -38,20 +39,23 @@ def test_from_value():
         lst2: List[Foo]
         dct: Dict[str, int]
         dct2: Dict[str, Foo]
+        dct3: Dict[Foo, Foo]
         tpl: Tuple[int, str, float]
         tpl2: Tuple[str, Foo]
 
-    assert 'data' == from_value(fields(Hoge)[0].type, 'func', 'data')
-    assert 'data' == from_value(fields(Hoge)[1].type, 'func', 'data')
-    assert 'data' == from_value(fields(Hoge)[2].type, 'func', 'data')
-    assert 'data' == from_value(fields(Hoge)[3].type, 'func', 'data')
-    assert 'Foo.func(data)' == from_value(fields(Hoge)[4].type, 'func', 'data')
-    assert '[d for d in data]' == from_value(fields(Hoge)[5].type, 'func', 'data')
-    assert '[Foo.func(d) for d in data]' == from_value(fields(Hoge)[6].type, 'func', 'data')
-    assert '{ k: v for k, v in data.items() }' == from_value(fields(Hoge)[7].type, 'func', 'data')
-    assert '{ k: Foo.func(v) for k, v in data.items() }' == from_value(fields(Hoge)[8].type, 'func', 'data')
-    assert '(data[0], data[1], data[2], )' == from_value(fields(Hoge)[9].type, 'func', 'data')
-    assert '(data[0], Foo.func(data[1]), )' == from_value(fields(Hoge)[10].type, 'func', 'data')
+    assert 'data' == from_value(fields(Hoge)[0].type, 'data')
+    assert 'data' == from_value(fields(Hoge)[1].type, 'data')
+    assert 'data' == from_value(fields(Hoge)[2].type, 'data')
+    assert 'data' == from_value(fields(Hoge)[3].type, 'data')
+    assert 'from_any(Foo, data)' == from_value(fields(Hoge)[4].type, 'data')
+    assert '[d for d in data]' == from_value(fields(Hoge)[5].type, 'data')
+    assert '[from_any(Foo, d) for d in data]' == from_value(fields(Hoge)[6].type, 'data')
+    assert '{ k: v for k, v in data.items() }' == from_value(fields(Hoge)[7].type, 'data')
+    assert '{ k: from_any(Foo, v) for k, v in data.items() }' == from_value(fields(Hoge)[8].type, 'data')
+    assert '{ from_any(Foo, k): from_any(Foo, v) for k, v in data.items() }' == \
+        from_value(fields(Hoge)[9].type, 'data')
+    assert '(data[0], data[1], data[2], )' == from_value(fields(Hoge)[10].type, 'data')
+    assert '(data[0], from_any(Foo, data[1]), )' == from_value(fields(Hoge)[11].type, 'data')
 
 
 def test_iter_types():
@@ -148,24 +152,40 @@ def test_optional():
         i: Optional[int]
         f: Foo
 
-    h = Hoge(i=10, f=Foo(i=20))
+    f = Foo(i=20)
+    h = Hoge(i=10, f=f)
     s = '{"i": 10, "f": {"i": 20}}'
     assert s == to_json(h)
+    assert f == from_json(Foo, '{"i": 20}')
     assert h == from_json(Hoge, s)
 
 
 def test_container():
     @deserialize
     @serialize
+    @dataclass(unsafe_hash=True)
+    class Foo:
+        i: int
+
+    @deserialize
+    @serialize
     @dataclass
     class Hoge:
         v: List[int] = field(default_factory=list)
         d: Dict[str, int] = field(default_factory=dict)
+        d2: Dict[Foo, int] = field(default_factory=dict)
 
-    h = Hoge(v=[1, 2, 3, 4, 5], d={'hoge': 10, 'fuga': 20})
-    s = '{"v": [1, 2, 3, 4, 5], "d": {"hoge": 10, "fuga": 20}}'
-    assert s == to_json(h)
-    assert h == from_json(Hoge, s)
+    f = Foo(i=100)
+    h = Hoge(v=[1, 2, 3, 4, 5], d={'hoge': 10, 'fuga': 20}, d2={f: 100})
+    with pytest.raises(TypeError):
+        # dict (Foo in this case) cannot be a dict key.
+        asdict(h)
+
+    # tuple is ok
+    assert astuple(h) == ([1, 2, 3, 4, 5], {'hoge': 10, 'fuga': 20}, {(100,): 100})
+
+    with pytest.raises(TypeError):
+        to_json(h)
 
 
 def test_nested():
@@ -298,6 +318,12 @@ def test_astuple():
 def test_from_obj():
     @deserialize
     @serialize
+    @dataclass(unsafe_hash=True)
+    class Bar:
+        i: int
+
+    @deserialize
+    @serialize
     @dataclass
     class Foo:
         i: int
@@ -313,6 +339,8 @@ def test_from_obj():
         f2: Foo
 
     f = Foo(i=10, s='s', f=20.0, b=False)
+    assert Bar(100) == from_obj(Bar, (100,))
+    assert Bar(100) == from_obj(Bar, {'i': 100})
     assert f == from_obj(Foo, (10, 's', 20.0, False))
     assert f == from_obj(Optional[Foo], [10, 's', 20.0, False])
     assert from_obj(Optional[Foo], None) is None
@@ -325,6 +353,30 @@ def test_from_obj():
     assert d == from_obj(Dict[str, Foo], {'foo': (10, 's', 20.0, False)})
     d = {'foo': [f, f]}
     assert d == from_obj(Optional[Dict[str, List[Foo]]], {'foo': [(10, 's', 20.0, False), (10, 's', 20.0, False)]})
+
+
+def test_from_obj_complex():
+    @deserialize
+    @serialize
+    @dataclass(unsafe_hash=True)
+    class Foo:
+        i: int
+
+    @deserialize
+    @serialize
+    @dataclass
+    class Hoge:
+        d: Dict[Foo, List[Foo]]
+        lst: List[Foo]
+
+    f = Foo(i=100)
+    f2 = Foo(i=100)
+    lst = [f, f2]
+    h = Hoge(d={f: lst}, lst=lst)
+    assert h == from_obj(Hoge, {'d': {(100,): lst}, 'lst': lst})
+    hh = from_obj(Hoge, ({(100,): lst}, lst))
+    assert h.d == hh.d
+    assert h.lst == hh.lst
 
 
 def test_json():
@@ -349,14 +401,29 @@ def test_json():
 def test_msgpack():
     @deserialize
     @serialize
+    @dataclass(unsafe_hash=True)
+    class Foo:
+        i: int
+
+    @deserialize
+    @serialize
     @dataclass
     class Hoge:
         i: int
         s: str
         f: float
         b: bool
+        d: Dict[Foo, int]
 
-    h = Hoge(i=10, s='hoge', f=100.0, b=True)
-    p = msgpack.packb((10, 'hoge', 100.0, True))
+    f = Foo(i=100)
+    # h = Hoge(i=10, s='hoge', f=100.0, b=True, d={f: [f, f]})
+    # p = msgpack.packb((10, 'hoge', 100.0, True, {(100,): [(100,), (100,)]}))
+    h = Hoge(i=10, s='hoge', f=100.0, b=True, d={f: 100})
+    p = msgpack.packb((10, 'hoge', 100.0, True, {(100,): 100}))
     assert p == to_msgpack(h)
-    assert h == from_msgpack(Hoge, p)
+    hh = from_msgpack(Hoge, p, use_list=False)
+    assert h.i == hh.i
+    assert h.s == hh.s
+    assert h.f == hh.f
+    assert h.b == hh.b
+    assert h.d == hh.d

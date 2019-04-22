@@ -15,7 +15,9 @@ class MsgPackSerializer(Serializer):
 
 class MsgPackDeserializer(Deserializer):
     def deserialize(self, s: bytes, **opts) -> Tuple:
-        return msgpack.unpackb(s, raw=False, use_list=False)
+        unp = msgpack.unpackb(s, raw=False, use_list=False, **opts)
+        print(f'unpack from msgpack: {unp}')
+        return unp
 
 
 def to_msgpack(obj: Any, serializer=MsgPackSerializer, **opts) -> bytes:

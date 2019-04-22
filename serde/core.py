@@ -1,7 +1,7 @@
 import logging
 from typing import Dict, List, TypeVar, Iterator, Type, Tuple
 from typing_inspect import is_optional_type
-from dataclasses import fields, is_dataclass, astuple as _astuple
+from dataclasses import fields, is_dataclass, astuple as _astuple, asdict as _asdict
 
 logger = logging.getLogger('serde')
 
@@ -64,3 +64,7 @@ def astuple(v):
         return tuple(astuple(e) for e in v)
     else:
         return v
+
+
+def asdict(v):
+    return _asdict(v)

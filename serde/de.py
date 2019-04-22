@@ -5,46 +5,28 @@ from dataclasses import fields, is_dataclass
 from .core import SerdeError, FROM_DICT, FROM_TUPLE, T, gen, iter_types
 
 
+def from_any(cls, o):
+    if not is_deserializable(cls):
+        raise SerdeError('`cls` must be deserializable.')
+
+    if isinstance(o, (List, Tuple)):
+        return cls.__serde_from_tuple__(o)
+    elif isinstance(o, Dict):
+        return cls.__serde_from_dict__(o)
+    elif isinstance(o, cls):
+        return o
+    else:
+        raise SerdeError(f'`o` must be either List, Tuple, Dict or cls but {type(o)}.')
+
+
 def from_tuple(cls) -> str:
     """
     Generate function to deserialize from tuple.
     """
     params = []
     for i, f in enumerate(fields(cls)):
-        # If a member is also pyserde class, invoke the own deserialize function
-        if is_deserializable(f.type):
-            nested = f'{f.type.__name__}'
-            params.append(f"{f.name}={nested}.{FROM_TUPLE}(data[{i}])")
-        else:
-            params.append(f"{f.name}=data[{i}]")
+        params.append(f'{f.name}=' + from_value(f.type, f'data[{i}]'))
     return ', '.join(params)
-
-
-def from_value(typ: Type, funcname: str, varname: str) -> str:
-    """
-    Generate function to deserialize from value.
-    """
-    # if not issubclass(typ, Type):
-    #     raise TypeError(f'`from_value` arg 1 must a class but {typ} {type(typ)}')
-
-    # If a member is also pyserde class, invoke the own deserialize function
-    if is_deserializable(typ):
-        nested = f'{typ.__name__}'
-        s = f"{nested}.{funcname}({varname})"
-    elif is_optional_type(typ):
-        s = varname
-    elif issubclass(typ, List):
-        element_typ = typ.__args__[0]
-        s = f"[{from_value(element_typ, funcname, 'd')} for d in {varname}]"
-    elif issubclass(typ, Dict):
-        element_typ = typ.__args__[1]
-        s = f"{{ k: {from_value(element_typ, funcname, 'v')} for k, v in {varname}.items() }}"
-    elif issubclass(typ, Tuple):
-        elements = [from_value(arg, funcname, varname + f'[{i}]') + ', ' for i, arg in enumerate(typ.__args__)]
-        s = f"({''.join(elements)})"
-    else:
-        s = varname
-    return s
 
 
 def from_dict(cls) -> str:
@@ -53,15 +35,41 @@ def from_dict(cls) -> str:
     """
     params = []
     for f in fields(cls):
-        params.append(f'{f.name}=' + from_value(f.type, FROM_DICT, f'data["{f.name}"]'))
+        params.append(f'{f.name}=' + from_value(f.type, f'data["{f.name}"]'))
     return ', '.join(params)
 
 
-def gen_from_any(cls: Type[T], funcname: str, params: str) -> Type[T]:
+def from_value(typ: Type, varname: str) -> str:
+    """
+    Generate function to deserialize from value.
+    """
+    # If a member is also pyserde class, invoke the own deserialize function
+    if is_deserializable(typ):
+        nested = f'{typ.__name__}'
+        s = f"from_any({nested}, {varname})"
+    elif is_optional_type(typ):
+        s = varname
+    elif issubclass(typ, List):
+        element_typ = typ.__args__[0]
+        s = f"[{from_value(element_typ, 'd')} for d in {varname}]"
+    elif issubclass(typ, Dict):
+        key_typ = typ.__args__[0]
+        value_typ = typ.__args__[1]
+        s = (f"{{ {from_value(key_typ, 'k')}: {from_value(value_typ, 'v')} "
+             f"for k, v in {varname}.items() }}")
+    elif issubclass(typ, Tuple):
+        elements = [from_value(arg, varname + f'[{i}]') + ', ' for i, arg in enumerate(typ.__args__)]
+        s = f"({''.join(elements)})"
+    else:
+        s = varname
+    return s
+
+
+def gen_from_function(cls: Type[T], funcname: str, params: str) -> Type[T]:
     """
     Generate function to deserialize from tuple.
     """
-    body = (f'def {funcname}(data):\n' f' return cls({params})')
+    body = (f'def {funcname}(data):\n return cls({params})')
 
     globals: Dict[str, Any] = dict(cls=cls)
 
@@ -69,6 +77,7 @@ def gen_from_any(cls: Type[T], funcname: str, params: str) -> Type[T]:
     for typ in iter_types(cls):
         if is_dataclass(typ):
             globals[typ.__name__] = typ
+    globals['from_any'] = from_any
 
     gen(body, globals)
     setattr(cls, funcname, staticmethod(globals[funcname]))
@@ -97,10 +106,9 @@ def deserialize(_cls=None, rename_all: bool = False) -> Type:
     deserialized into an object from various data interchange format
     such as JSON and MsgPack.
     """
-
     def wrap(cls) -> Type:
-        cls = gen_from_any(cls, FROM_TUPLE, from_tuple(cls))
-        cls = gen_from_any(cls, FROM_DICT, from_dict(cls))
+        cls = gen_from_function(cls, FROM_TUPLE, from_tuple(cls))
+        cls = gen_from_function(cls, FROM_DICT, from_dict(cls))
         return cls
 
     if _cls is None:
@@ -114,13 +122,8 @@ def from_obj(c: Type[T], o: Any, de: Type[Deserializer] = None, **opts) -> T:
         o = de().deserialize(o, **opts)
     if o is None:
         return None
-    elif is_deserializable(c):
-        if isinstance(o, Dict):
-            return c.__serde_from_dict__(o)
-        elif isinstance(o, (Tuple, List)):
-            return c.__serde_from_tuple__(o)
-        else:
-            raise SerdeError(f'Type {type(o)} is not supported by from_obj.')
+    if is_deserializable(c):
+        return from_any(c, o)
     elif is_optional_type(c):
         return from_obj(c.__args__[0], o)
     elif issubclass(c, List):
