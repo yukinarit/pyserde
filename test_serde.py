@@ -67,6 +67,19 @@ class PriTuple:
     b: Tuple[bool, bool, bool, bool, bool, bool]
 
 
+@deserialize
+@serialize
+@dataclass(unsafe_hash=True)
+class PriOpt:
+    """
+    Optional Primitives.
+    """
+    i: Optional[int]
+    s: Optional[str]
+    f: Optional[float]
+    b: Optional[bool]
+
+
 def test_non_dataclass():
     with pytest.raises(TypeError):
         @deserialize
@@ -109,36 +122,13 @@ def test_from_value():
 
 
 def test_iter_types():
-    @deserialize
-    @serialize
-    @dataclass
-    class Foo:
-        i: int
-
-    @deserialize
-    @serialize
-    @dataclass
-    class Opt:
-        i: Optional[int]
-
-    @deserialize
-    @serialize
-    @dataclass
-    class Hoge:
-        i: int
-        foo: Foo
-        lst: List[int]
-        lst2: List[Foo]
-
-    assert [Pri, int, str, float] == list(iter_types(Pri))
-    assert [Foo, int] == list(iter_types(Foo))
-    assert [Foo, int] == list(iter_types(List[Foo]))
-    assert [str, Foo, int] == list(iter_types(Dict[str, Foo]))
-    assert [str, Foo, int, float] == list(iter_types(Tuple[str, Foo, float]))
-    assert [Opt, int] == list(iter_types(Opt))
-    assert [Foo, int, str, Foo, int] == list(iter_types(Tuple[List[Foo], Dict[str, Foo]]))
-    assert [str, str, int, bool, float] == list(iter_types(Tuple[Tuple[str, str], Tuple[int, bool, float]]))
-    assert [Hoge, int, Foo, int, int, Foo, int] == list(iter_types(Hoge))
+    assert [Pri, int, str, float, bool] == list(iter_types(Pri))
+    assert [str, Pri, int, str, float, bool] == list(iter_types(Dict[str, Pri]))
+    assert [str] == list(iter_types(List[str]))
+    assert [int, str, bool, float] == list(iter_types(Tuple[int, str, bool, float]))
+    assert [PriOpt, int, str, float, bool] == list(iter_types(PriOpt))
+    assert [Pri, int, str, float, bool, Pri, int, str, float, bool,
+            Pri, int, str, float, bool] == list(iter_types(Tuple[List[Pri], Tuple[Pri, Pri]]))
 
 
 def test_primitive():
@@ -168,47 +158,24 @@ def test_enum():
         V1 = 'v1'
         V2 = 'v2'
 
-    # Only IntEnum is supported now.
-    try:
-        @deserialize
-        @serialize
-        @dataclass
-        class Hoge:
-            ie0: IEnum
-            ie1: IEnum
-            ie2: IEnum
-            se0: SEnum
-            se1: SEnum
-            se2: SEnum
-    except TypeError:
-        pass
-
-    # h = Hoge(ie0=IEnum.V0, ie1=IEnum.V1, ie2=IEnum.V2, se0=SEnum.V0, se1=SEnum.V1, se2=SEnum.V2)
-    # s = '{"ie0": 1, "ie1": 2, "ie2": 3}'
-    # assert s == to_json(h)
-    # assert h == from_json(Hoge, s)
-
-
-def test_optional():
-    @deserialize
-    @serialize
-    @dataclass
-    class Foo:
-        i: int
-
+    # NOTE: Only IntEnum is supported now.
     @deserialize
     @serialize
     @dataclass
     class Hoge:
-        i: Optional[int]
-        f: Foo
+        ie0: IEnum
+        ie1: IEnum
+        ie2: IEnum
+        se0: SEnum
+        se1: SEnum
+        se2: SEnum
 
-    f = Foo(i=20)
-    h = Hoge(i=10, f=f)
-    s = '{"i": 10, "f": {"i": 20}}'
-    assert s == to_json(h)
-    assert f == from_json(Foo, '{"i": 20}')
-    assert h == from_json(Hoge, s)
+
+def test_optional():
+    p = PriOpt(i=20, f=100.0, s=None, b=True)
+    s = '{"i": 20, "s": null, "f": 100.0, "b": true}'
+    assert s == to_json(p)
+    assert p == from_json(PriOpt, s)
 
 
 def test_container():

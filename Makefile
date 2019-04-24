@@ -14,7 +14,7 @@ test:
 	pipenv run pytest -v
 
 pep8:
-	pipenv run pytest --codestyle
+	pipenv run flake8
 
 mypy:
 	pipenv run mypy serde

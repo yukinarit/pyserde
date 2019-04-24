@@ -16,15 +16,14 @@ setup_requires = [
     'pytest-runner',
 ]
 
+requires = [
+    'msgpack',
+    'typing_inspect>=0.4.0',
+]
+
 # Installs dataclasses from PyPI for python < 3.7
 if sys.version_info < (3, 7):
-    requires = [
-        'dataclasses',
-    ]
-# Native dataclasses support for python >= 3.7
-else:
-    requires = [
-    ]
+    requires.append('dataclasses')
 
 tests_require = [
     'coverage',

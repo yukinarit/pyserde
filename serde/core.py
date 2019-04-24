@@ -30,6 +30,13 @@ def gen(code: str, globals: Dict = None, locals: Dict = None):
     exec(code, globals, locals)
 
 
+def type_args(cls: Type):
+    """
+    Wrapepr to suppress
+    """
+    return cls.__args__  # type: ignore
+
+
 def iter_types(cls: Type) -> Iterator[Type]:
     """
     Iterate field types recursively.
@@ -39,15 +46,15 @@ def iter_types(cls: Type) -> Iterator[Type]:
         for f in fields(cls):
             yield from iter_types(f.type)
     elif is_optional_type(cls):
-        yield from iter_types(cls.__args__[0])
+        yield from iter_types(type_args(cls)[0])
     elif issubclass(cls, List):
-        yield from iter_types(cls.__args__[0])
-    elif issubclass(cls, Tuple):
-        for arg in cls.__args__:
+        yield from iter_types(type_args(cls)[0])
+    elif issubclass(cls, tuple):
+        for arg in type_args(cls):
             yield from iter_types(arg)
     elif issubclass(cls, Dict):
-        yield from iter_types(cls.__args__[0])
-        yield from iter_types(cls.__args__[1])
+        yield from iter_types(type_args(cls)[0])
+        yield from iter_types(type_args(cls)[1])
     else:
         yield cls
 

@@ -8,13 +8,11 @@ python_version = "3.6"
 
 [packages]
 dataclasses = { version = "*", markers="python_version < '3.7'" }
-typing_inspect = "==0.4.0"
+typing_inspect = ">=0.4.0"
 msgpack = "*"
 
 [dev-packages]
 flake8 = "*"
 pytest = "*"
-pytest-flake8 = "*"
-flake8-per-file-ignores = "*"
 mypy = "*"
 twine = "*"

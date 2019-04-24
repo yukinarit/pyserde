@@ -2,7 +2,7 @@ from typing import Any, Dict, Tuple, List, Type
 from typing_inspect import is_optional_type
 from dataclasses import fields, is_dataclass
 
-from .core import SerdeError, FROM_DICT, FROM_TUPLE, T, gen, iter_types
+from .core import SerdeError, FROM_DICT, FROM_TUPLE, T, gen, iter_types, type_args
 
 
 def from_any(cls, o):
@@ -47,18 +47,18 @@ def from_value(typ: Type, varname: str) -> str:
         nested = f'{typ.__name__}'
         s = f"from_any({nested}, {varname})"
     elif is_optional_type(typ):
-        element_typ = typ.__args__[0]
+        element_typ = type_args(typ)[0]
         s = f"{from_value(element_typ, varname)}"
     elif issubclass(typ, List):
-        element_typ = typ.__args__[0]
+        element_typ = type_args(typ)[0]
         s = f"[{from_value(element_typ, 'd')} for d in {varname}]"
     elif issubclass(typ, Dict):
-        key_typ = typ.__args__[0]
-        value_typ = typ.__args__[1]
+        key_typ = type_args(typ)[0]
+        value_typ = type_args(typ)[1]
         s = (f"{{ {from_value(key_typ, 'k')}: {from_value(value_typ, 'v')} "
              f"for k, v in {varname}.items() }}")
-    elif issubclass(typ, Tuple):
-        elements = [from_value(arg, varname + f'[{i}]') + ', ' for i, arg in enumerate(typ.__args__)]
+    elif issubclass(typ, tuple):
+        elements = [from_value(arg, varname + f'[{i}]') + ', ' for i, arg in enumerate(type_args(typ))]
         s = f"({''.join(elements)})"
     else:
         s = varname
@@ -117,7 +117,7 @@ def deserialize(_cls=None, rename_all: bool = False) -> Type:
     return wrap(_cls)
 
 
-def from_obj(c: Type[T], o: Any, de: Type[Deserializer] = None, **opts) -> T:
+def from_obj(c: Type[T], o: Any, de: Type[Deserializer] = None, **opts):
     if de:
         o = de().deserialize(o, **opts)
     if o is None:
@@ -125,12 +125,12 @@ def from_obj(c: Type[T], o: Any, de: Type[Deserializer] = None, **opts) -> T:
     if is_deserializable(c):
         return from_any(c, o)
     elif is_optional_type(c):
-        return from_obj(c.__args__[0], o)
+        return from_obj(type_args(c)[0], o)
     elif issubclass(c, List):
-        return [from_obj(c.__args__[0], e) for e in o]
-    elif issubclass(c, Tuple):
-        return tuple(from_obj(c.__args__[i], e) for i, e in enumerate(o))
+        return [from_obj(type_args(c)[0], e) for e in o]
+    elif issubclass(c, tuple):
+        return tuple(from_obj(type_args(c)[i], e) for i, e in enumerate(o))
     elif issubclass(c, Dict):
-        return {from_obj(c.__args__[0], k): from_obj(c.__args__[1], v) for k, v in o.items()}
+        return {from_obj(type_args(c)[0], k): from_obj(type_args(c)[1], v) for k, v in o.items()}
     else:
         return o

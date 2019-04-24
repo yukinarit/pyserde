@@ -1,21 +1,21 @@
 import json
-from typing import Any, Dict, Tuple, Type
+from typing import Any, Type
 
 from dataclasses import asdict
 
-from .core import JsonValue, T
+from .core import T
 from .de import Deserializer, from_obj
 from .se import Serializer, is_serializable
 
 
 class JsonSerializer(Serializer):
-    def serialize(self, obj: Any) -> str:
-        return json.dumps(asdict(obj))
+    def serialize(self, obj: Any, **opts) -> str:
+        return json.dumps(asdict(obj), **opts)
 
 
 class JsonDeserializer(Deserializer):
-    def deserialize(self, s: str) -> Dict[str, JsonValue]:
-        return json.loads(s)
+    def deserialize(self, s, **opts):
+        return json.loads(s, **opts)
 
 
 def to_json(obj: Any, serializer=JsonSerializer) -> str:

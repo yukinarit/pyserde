@@ -2,8 +2,6 @@
 
 [![CircleCI](https://circleci.com/gh/yukinarit/pyserde.svg?style=svg)](https://circleci.com/gh/yukinarit/pyserde)
 
-[![CircleCI](https://circleci.com/gh/yukinarit/pyserde.svg?style=svg)](https://circleci.com/gh/yukinarit/pyserde)
-
 Serialization library on top of dataclasses.
 
 
