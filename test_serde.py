@@ -15,17 +15,67 @@ logging.basicConfig(level=logging.DEBUG)
 
 logger = logging.getLogger('serde')
 
+@deserialize
+@serialize
+@dataclass(unsafe_hash=True)
+class Pri:
+    """
+    Primitives.
+    """
+    i: int
+    s: str
+    f: float
+    b: bool
+
+
+@deserialize
+@serialize
+@dataclass
+class PriList:
+    """
+    List containing primitives.
+    """
+    i: List[int]
+    s: List[str]
+    f: List[float]
+    b: List[bool]
+
+
+@deserialize
+@serialize
+@dataclass
+class PriDict:
+    """
+    Dict containing primitives.
+    """
+    i: Dict[int, int]
+    s: Dict[str, str]
+    f: Dict[float, float]
+    b: Dict[bool, bool]
+
+
+@deserialize
+@serialize
+@dataclass
+class PriTuple:
+    """
+    Tuple containing primitives.
+    """
+    i: Tuple[int, int, int]
+    s: Tuple[str, str, str, str]
+    f: Tuple[float, float, float, float, float]
+    b: Tuple[bool, bool, bool, bool, bool, bool]
+
+
+def test_non_dataclass():
+    with pytest.raises(TypeError):
+        @deserialize
+        @serialize
+        class Hoge:
+            i: int
+
 
 def test_from_value():
-    @deserialize
-    @serialize
-    @dataclass
-    class Foo:
-        i: int
-        s: str
-        f: float
-        b: bool
-
     @deserialize
     @serialize
     @dataclass
@@ -34,28 +84,28 @@ def test_from_value():
         s: str
         f: float
         b: bool
-        foo: Foo
+        pri: Pri
         lst: List[int]
-        lst2: List[Foo]
+        lst2: List[Pri]
         dct: Dict[str, int]
-        dct2: Dict[str, Foo]
-        dct3: Dict[Foo, Foo]
+        dct2: Dict[str, Pri]
+        dct3: Dict[Pri, Pri]
         tpl: Tuple[int, str, float]
-        tpl2: Tuple[str, Foo]
+        tpl2: Tuple[str, Pri]
 
     assert 'data' == from_value(fields(Hoge)[0].type, 'data')
     assert 'data' == from_value(fields(Hoge)[1].type, 'data')
     assert 'data' == from_value(fields(Hoge)[2].type, 'data')
     assert 'data' == from_value(fields(Hoge)[3].type, 'data')
-    assert 'from_any(Foo, data)' == from_value(fields(Hoge)[4].type, 'data')
+    assert 'from_any(Pri, data)' == from_value(fields(Hoge)[4].type, 'data')
     assert '[d for d in data]' == from_value(fields(Hoge)[5].type, 'data')
-    assert '[from_any(Foo, d) for d in data]' == from_value(fields(Hoge)[6].type, 'data')
+    assert '[from_any(Pri, d) for d in data]' == from_value(fields(Hoge)[6].type, 'data')
     assert '{ k: v for k, v in data.items() }' == from_value(fields(Hoge)[7].type, 'data')
-    assert '{ k: from_any(Foo, v) for k, v in data.items() }' == from_value(fields(Hoge)[8].type, 'data')
-    assert '{ from_any(Foo, k): from_any(Foo, v) for k, v in data.items() }' == \
+    assert '{ k: from_any(Pri, v) for k, v in data.items() }' == from_value(fields(Hoge)[8].type, 'data')
+    assert '{ from_any(Pri, k): from_any(Pri, v) for k, v in data.items() }' == \
         from_value(fields(Hoge)[9].type, 'data')
     assert '(data[0], data[1], data[2], )' == from_value(fields(Hoge)[10].type, 'data')
-    assert '(data[0], from_any(Foo, data[1]), )' == from_value(fields(Hoge)[11].type, 'data')
+    assert '(data[0], from_any(Pri, data[1]), )' == from_value(fields(Hoge)[11].type, 'data')
 
 
 def test_iter_types():
@@ -80,6 +130,7 @@ def test_iter_types():
         lst: List[int]
         lst2: List[Foo]
 
+    assert [Pri, int, str, float] == list(iter_types(Pri))
     assert [Foo, int] == list(iter_types(Foo))
     assert [Foo, int] == list(iter_types(List[Foo]))
     assert [str, Foo, int] == list(iter_types(Dict[str, Foo]))
