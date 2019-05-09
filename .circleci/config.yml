@@ -1,0 +1,31 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: circleci/python:3.6.1
+
+    working_directory: ~/repo
+
+    steps:
+      - checkout
+
+      # Download and cache dependencies
+      - restore_cache:
+          keys:
+            - deps-{{ checksum "Pipfile.lock" }}
+
+      - run:
+          name: install dependencies
+          command: |
+            sudo pip install pipenv
+            make setup
+
+      - save_cache:
+          paths:
+            - ".local"
+          key: deps-{{ checksum "Pipfile.lock" }}
+
+      - run:
+          name: run tests
+          command: |
+            make test

@@ -3,7 +3,7 @@
 all: setup test pep8 mypy
 
 setup:
-	pipenv install --dev --skip-lock
+	pipenv install --dev
 	pipenv run pip list
 
 build:
