@@ -11,7 +11,7 @@ build:
 	pipenv run python setup.py bdist_wheel
 
 test: 
-	pipenv run pytest -s
+	pipenv run pytest -v
 
 pep8:
 	pipenv run pytest --codestyle
