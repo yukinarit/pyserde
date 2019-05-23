@@ -1,6 +1,7 @@
 # pyserde
 
-[![CircleCI](https://circleci.com/gh/yukinarit/pyserde.svg?style=svg)](https://circleci.com/gh/yukinarit/pyserde)
+[![Build Status](https://travis-ci.org/yukinarit/pyserde.svg?branch=master)](https://travis-ci.org/yukinarit/pyserde)
+[![Build status](https://ci.appveyor.com/api/projects/status/w4i5x8x9d4sbxhn2?svg=true)](https://ci.appveyor.com/project/yukinarit/pyserde)
 
 Serialization library on top of dataclasses.
 

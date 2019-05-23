@@ -1,0 +1,17 @@
+dist: xenial
+language: python
+python:
+  - "3.6"
+  - "3.7"
+env:
+  - PIP_CACHE_DIR: $HOME/.cache/pip
+  - PIPENV_CACHE_DIR: $HOME/.cache/pipenv
+install:
+  - pip install pipenv
+  - make setup
+script:
+  - make test
+cache:
+  directories:
+    $HOME/.cache/pip
+    $HOME/.cache/pipenv
