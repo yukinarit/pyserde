@@ -45,6 +45,8 @@ def iter_types(cls: Type) -> Iterator[Type]:
         yield cls
         for f in fields(cls):
             yield from iter_types(f.type)
+    elif isinstance(cls, str):
+        yield cls
     elif is_optional_type(cls):
         yield from iter_types(type_args(cls)[0])
     elif issubclass(cls, List):

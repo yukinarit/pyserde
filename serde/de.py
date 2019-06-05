@@ -43,9 +43,13 @@ def from_value(typ: Type, varname: str) -> str:
     """
     Generate function to deserialize from value.
     """
+
     if is_deserializable(typ):
         nested = f'{typ.__name__}'
         s = f"from_any({nested}, {varname})"
+    elif isinstance(typ, str):
+        # When `typ` is of string, type name is specified as forward declaration.
+        s = f"from_any({typ}, {varname})"
     elif is_optional_type(typ):
         element_typ = type_args(typ)[0]
         s = f"{from_value(element_typ, varname)}"

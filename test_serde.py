@@ -15,6 +15,7 @@ logging.basicConfig(level=logging.DEBUG)
 
 logger = logging.getLogger('serde')
 
+
 @deserialize
 @serialize
 @dataclass(unsafe_hash=True)
@@ -132,19 +133,28 @@ def test_iter_types():
 
 
 def test_primitive():
-    @deserialize
+    p = Pri(i=10, s='hoge', f=100.0, b=True)
+    s = '{"i": 10, "s": "hoge", "f": 100.0, "b": true}'
+    assert s == to_json(p)
+    assert p == from_json(Pri, s)
+
+
+def test_forward_declaration():
+    print(locals())
     @serialize
+    @deserialize
     @dataclass
     class Hoge:
-        i: int
-        s: str
-        f: float
-        b: bool
+        fuga: 'Fuga'
 
-    h = Hoge(i=10, s='hoge', f=100.0, b=True)
-    s = '{"i": 10, "s": "hoge", "f": 100.0, "b": true}'
-    assert s == to_json(h)
-    assert h == from_json(Hoge, s)
+    @serialize
+    @deserialize
+    @dataclass
+    class Fuga:
+        i: int
+
+    h = Hoge(fuga=Fuga(i=10))
+    assert h.fuga.i == 10
 
 
 def test_enum():
