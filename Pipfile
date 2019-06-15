@@ -3,9 +3,6 @@ url = "https://pypi.python.org/simple"
 verify_ssl = true
 name = "pypi"
 
-[requires]
-python_version = "3.6"
-
 [packages]
 dataclasses = { version = "*", markers="python_version < '3.7'" }
 typing_inspect = ">=0.4.0"

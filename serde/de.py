@@ -1,8 +1,8 @@
 from typing import Any, Dict, Tuple, List, Type
-from typing_inspect import is_optional_type
 from dataclasses import fields, is_dataclass
 
 from .core import SerdeError, FROM_DICT, FROM_TUPLE, T, gen, iter_types, type_args
+from .utils import is_opt, is_list, is_tuple, is_dict
 
 
 def from_any(cls, o):
@@ -50,18 +50,18 @@ def from_value(typ: Type, varname: str) -> str:
     elif isinstance(typ, str):
         # When `typ` is of string, type name is specified as forward declaration.
         s = f"from_any({typ}, {varname})"
-    elif is_optional_type(typ):
+    elif is_opt(typ):
         element_typ = type_args(typ)[0]
         s = f"{from_value(element_typ, varname)}"
-    elif issubclass(typ, List):
+    elif is_list(typ):
         element_typ = type_args(typ)[0]
         s = f"[{from_value(element_typ, 'd')} for d in {varname}]"
-    elif issubclass(typ, Dict):
+    elif is_dict(typ):
         key_typ = type_args(typ)[0]
         value_typ = type_args(typ)[1]
         s = (f"{{ {from_value(key_typ, 'k')}: {from_value(value_typ, 'v')} "
              f"for k, v in {varname}.items() }}")
-    elif issubclass(typ, tuple):
+    elif is_tuple(typ):
         elements = [from_value(arg, varname + f'[{i}]') + ', ' for i, arg in enumerate(type_args(typ))]
         s = f"({''.join(elements)})"
     else:
@@ -128,13 +128,13 @@ def from_obj(c: Type[T], o: Any, de: Type[Deserializer] = None, **opts):
         return None
     if is_deserializable(c):
         return from_any(c, o)
-    elif is_optional_type(c):
+    elif is_opt(c):
         return from_obj(type_args(c)[0], o)
-    elif issubclass(c, List):
+    elif is_list(c):
         return [from_obj(type_args(c)[0], e) for e in o]
-    elif issubclass(c, tuple):
+    elif is_tuple(c):
         return tuple(from_obj(type_args(c)[i], e) for i, e in enumerate(o))
-    elif issubclass(c, Dict):
+    elif is_dict(c):
         return {from_obj(type_args(c)[0], k): from_obj(type_args(c)[1], v) for k, v in o.items()}
     else:
         return o

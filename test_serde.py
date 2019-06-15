@@ -4,12 +4,14 @@ import logging
 import msgpack
 import pytest
 from typing import Dict, List, Tuple, Optional
+from typing_inspect import get_origin
 from dataclasses import dataclass, field, fields
 
 from serde import deserialize, serialize, iter_types, astuple, asdict, from_obj
 from serde.de import from_value
 from serde.json import from_json, to_json
 from serde.msgpack import from_msgpack, to_msgpack
+from serde.utils import is_list, is_tuple, is_dict, is_opt
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -87,6 +89,13 @@ def test_non_dataclass():
         @serialize
         class Hoge:
             i: int
+
+
+def test_types():
+    assert is_opt(Optional[int])
+    assert is_list(List[int])
+    assert is_tuple(Tuple[int, int, int])
+    assert is_dict(Dict[str, int])
 
 
 def test_from_value():
@@ -373,14 +382,10 @@ def test_from_obj():
     assert f == from_obj(Optional[Foo], [10, 's', 20.0, False])
     assert from_obj(Optional[Foo], None) is None
     assert f == from_obj(Foo, dict(i=10, s='s', f=20.0, b=False))
-    v = (f,)
-    assert v == from_obj(Tuple[Foo], ((10, 's', 20.0, False),))
-    v = [f]
-    assert v == from_obj(List[Foo], [(10, 's', 20.0, False)])
-    d = {'foo': f}
-    assert d == from_obj(Dict[str, Foo], {'foo': (10, 's', 20.0, False)})
-    d = {'foo': [f, f]}
-    assert d == from_obj(Optional[Dict[str, List[Foo]]], {'foo': [(10, 's', 20.0, False), (10, 's', 20.0, False)]})
+    assert (f,) == from_obj(Tuple[Foo], ((10, 's', 20.0, False),))
+    assert [f] == from_obj(List[Foo], [(10, 's', 20.0, False)])
+    assert {'foo': f} == from_obj(Dict[str, Foo], {'foo': (10, 's', 20.0, False)})
+    assert {'foo': [f, f]} == from_obj(Optional[Dict[str, List[Foo]]], {'foo': [(10, 's', 20.0, False), (10, 's', 20.0, False)]})
 
 
 def test_from_obj_complex():

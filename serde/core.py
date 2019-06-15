@@ -1,7 +1,8 @@
 import logging
 from typing import Dict, List, TypeVar, Iterator, Type, Tuple
-from typing_inspect import is_optional_type
 from dataclasses import fields, is_dataclass, astuple as _astuple, asdict as _asdict
+
+from .utils import is_opt, is_list, is_tuple, is_dict
 
 logger = logging.getLogger('serde')
 
@@ -47,14 +48,14 @@ def iter_types(cls: Type) -> Iterator[Type]:
             yield from iter_types(f.type)
     elif isinstance(cls, str):
         yield cls
-    elif is_optional_type(cls):
+    elif is_opt(cls):
         yield from iter_types(type_args(cls)[0])
-    elif issubclass(cls, List):
+    elif is_list(cls):
         yield from iter_types(type_args(cls)[0])
-    elif issubclass(cls, tuple):
+    elif is_tuple(cls):
         for arg in type_args(cls):
             yield from iter_types(arg)
-    elif issubclass(cls, Dict):
+    elif is_dict(cls):
         yield from iter_types(type_args(cls)[0])
         yield from iter_types(type_args(cls)[1])
     else:
