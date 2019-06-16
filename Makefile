@@ -13,6 +13,9 @@ build:
 test: 
 	pipenv run pytest -v
 
+coverage:
+	pipenv run pytest --cov=serde --cov-report term --cov-report xml
+
 pep8:
 	pipenv run flake8
 

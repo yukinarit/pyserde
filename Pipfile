@@ -11,5 +11,7 @@ msgpack = "*"
 [dev-packages]
 flake8 = "*"
 pytest = "*"
+pytest-cov = "*"
+python-coveralls = "*"
 mypy = "*"
 twine = "*"
