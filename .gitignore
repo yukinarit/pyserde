@@ -10,3 +10,4 @@ __pycache__
 htmlcov
 Pipfile.lock
 coverage.xml
+html/

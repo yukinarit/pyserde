@@ -7,6 +7,7 @@ name = "pypi"
 dataclasses = { version = "*", markers="python_version < '3.7'" }
 typing_inspect = ">=0.4.0"
 msgpack = "*"
+stringcase = "*"
 
 [dev-packages]
 flake8 = "*"
@@ -14,4 +15,6 @@ pytest = "*"
 pytest-cov = "*"
 python-coveralls = "*"
 mypy = "*"
+pdoc3 = "*"
 twine = "*"
+black = "==19.3b0"

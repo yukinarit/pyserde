@@ -7,15 +7,17 @@ from typing import Dict, List, Tuple, Optional
 from typing_inspect import get_origin
 from dataclasses import dataclass, field, fields
 
-from serde import deserialize, serialize, iter_types, astuple, asdict, from_obj
-from serde.de import from_value
+from serde import init as serde_init, deserialize, serialize, iter_types, astuple, asdict, from_obj
+from serde.de import de_value
 from serde.json import from_json, to_json
 from serde.msgpack import from_msgpack, to_msgpack
-from serde.utils import is_list, is_tuple, is_dict, is_opt
+from serde.compat import is_list, is_tuple, is_dict, is_opt
 
 logging.basicConfig(level=logging.DEBUG)
 
 logger = logging.getLogger('serde')
+
+serde_init(True)
 
 
 @deserialize
@@ -116,19 +118,19 @@ def test_from_value():
         tpl: Tuple[int, str, float]
         tpl2: Tuple[str, Pri]
 
-    assert 'data' == from_value(fields(Hoge)[0].type, 'data')
-    assert 'data' == from_value(fields(Hoge)[1].type, 'data')
-    assert 'data' == from_value(fields(Hoge)[2].type, 'data')
-    assert 'data' == from_value(fields(Hoge)[3].type, 'data')
-    assert 'from_any(Pri, data)' == from_value(fields(Hoge)[4].type, 'data')
-    assert '[d for d in data]' == from_value(fields(Hoge)[5].type, 'data')
-    assert '[from_any(Pri, d) for d in data]' == from_value(fields(Hoge)[6].type, 'data')
-    assert '{ k: v for k, v in data.items() }' == from_value(fields(Hoge)[7].type, 'data')
-    assert '{ k: from_any(Pri, v) for k, v in data.items() }' == from_value(fields(Hoge)[8].type, 'data')
-    assert '{ from_any(Pri, k): from_any(Pri, v) for k, v in data.items() }' == \
-        from_value(fields(Hoge)[9].type, 'data')
-    assert '(data[0], data[1], data[2], )' == from_value(fields(Hoge)[10].type, 'data')
-    assert '(data[0], from_any(Pri, data[1]), )' == from_value(fields(Hoge)[11].type, 'data')
+    assert 'data' == de_value(fields(Hoge)[0].type, 'data')
+    assert 'data' == de_value(fields(Hoge)[1].type, 'data')
+    assert 'data' == de_value(fields(Hoge)[2].type, 'data')
+    assert 'data' == de_value(fields(Hoge)[3].type, 'data')
+    assert 'from_dict_or_tuple(Pri, data)' == de_value(fields(Hoge)[4].type, 'data')
+    assert '[d for d in data]' == de_value(fields(Hoge)[5].type, 'data')
+    assert '[from_dict_or_tuple(Pri, d) for d in data]' == de_value(fields(Hoge)[6].type, 'data')
+    assert '{ k: v for k, v in data.items() }' == de_value(fields(Hoge)[7].type, 'data')
+    assert '{ k: from_dict_or_tuple(Pri, v) for k, v in data.items() }' == de_value(fields(Hoge)[8].type, 'data')
+    assert '{ from_dict_or_tuple(Pri, k): from_dict_or_tuple(Pri, v) for k, v in data.items() }' == \
+        de_value(fields(Hoge)[9].type, 'data')
+    assert '(data[0], data[1], data[2], )' == de_value(fields(Hoge)[10].type, 'data')
+    assert '(data[0], from_dict_or_tuple(Pri, data[1]), )' == de_value(fields(Hoge)[11].type, 'data')
 
 
 def test_iter_types():
@@ -374,6 +376,13 @@ def test_from_obj():
     class Hoge:
         f: Foo
         f2: Foo
+
+
+    # Primityve types
+    assert 10 == from_obj(int, 10)
+    assert 0.1 == from_obj(float, 0.1)
+    assert 'hoge' == from_obj(str, 'hoge')
+    assert not from_obj(bool, False)
 
     f = Foo(i=10, s='s', f=20.0, b=False)
     assert Bar(100) == from_obj(Bar, (100,))

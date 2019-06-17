@@ -1,6 +1,9 @@
-from .core import astuple, asdict, iter_types, SerdeError # noqa
-from .se import serialize  # noqa
-from .de import deserialize, from_obj  # noqa
+"""
+.. include:: ../README.md
+"""
+from .core import init, astuple, asdict, iter_types, SerdeError # noqa
+from .se import serialize, is_serializable  # noqa
+from .de import deserialize, is_deserializable, from_obj  # noqa
 
-__version__ = '0.0.6'
 """ Version of pyserde. """
+__version__ = '0.0.6'

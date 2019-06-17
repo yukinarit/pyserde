@@ -2,7 +2,7 @@ import logging
 from typing import Dict, List, TypeVar, Iterator, Type, Tuple
 from dataclasses import fields, is_dataclass, astuple as _astuple, asdict as _asdict
 
-from .utils import is_opt, is_list, is_tuple, is_dict
+from .compat import is_opt, is_list, is_tuple, is_dict
 
 logger = logging.getLogger('serde')
 
@@ -16,6 +16,13 @@ FROM_TUPLE = '__serde_from_tuple__'
 
 FROM_DICT = '__serde_from_dict__'
 
+debug = False
+
+
+def init(dbg: bool=False):
+    global debug
+    debug = dbg
+
 
 class SerdeError(TypeError):
     """
@@ -27,13 +34,18 @@ def gen(code: str, globals: Dict = None, locals: Dict = None):
     """
     Customized `exec` function.
     """
-    logger.debug(code)
+    try:
+        from black import format_str, FileMode
+        code = format_str(code, mode=FileMode(line_length=100))
+    except:
+        pass
+    logger.debug(f'Generating...\n{code}')
     exec(code, globals, locals)
 
 
 def type_args(cls: Type):
     """
-    Wrapepr to suppress
+    Wrapepr to suppress type error for accessing private members.
     """
     return cls.__args__  # type: ignore
 

@@ -37,7 +37,7 @@ tests_require = [
 setup(
     name='pyserde',
     version=version,
-    description='Dataclass based serialization library inspired by serde.',
+    description='Serialization library on top of dataclasses.',
     long_description=readme,
     long_description_content_type='text/markdown',
     author='yukinarit',
