@@ -243,7 +243,7 @@ def args_from_dict(cls, case: str=None) -> str:
     ...     b: bool
     >>>
     >>> args_from_dict(Hoge)
-    's=data["s"], i=data["i"], f=data["f"], b=data["b"]'
+    's=data.get("s"), i=data.get("i"), f=data.get("f"), b=data.get("b")'
 
     `case` enables string case conversion e.g. snake_case to camelCase.
     `case` must be one of 'camelcase', 'capitalcase', 'constcase', 'lowercase',
@@ -260,16 +260,16 @@ def args_from_dict(cls, case: str=None) -> str:
     ...     str_field: str
     >>>
     >>> args_from_dict(Hoge)
-    'str_field=data["str_field"]'
+    'str_field=data.get("str_field")'
     >>> args_from_dict(Hoge, case='camelcase')
-    'str_field=data["strField"]'
+    'str_field=data.get("strField")'
     >>> args_from_dict(Hoge, case='pascalcase')
-    'str_field=data["StrField"]'
+    'str_field=data.get("StrField")'
     >>>
     """
     params = []
     for f in fields(cls):
-        params.append(f'{f.name}=' + de_value(f.type, f'data["{to_case(f.name, case)}"]'))
+        params.append(f'{f.name}=' + de_value(f.type, f'data.get("{to_case(f.name, case)}")'))
     return ', '.join(params)
 
 

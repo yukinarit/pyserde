@@ -18,6 +18,8 @@ setup_requires = [
 
 requires = [
     'msgpack',
+    'toml',
+    'stringcase',
     'typing_inspect>=0.4.0',
 ]
 

@@ -7,6 +7,7 @@ name = "pypi"
 dataclasses = { version = "*", markers="python_version < '3.7'" }
 typing_inspect = ">=0.4.0"
 msgpack = "*"
+toml = "*"
 stringcase = "*"
 
 [dev-packages]

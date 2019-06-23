@@ -55,6 +55,7 @@ From Json: Hoge(i=10, s='hoge', f=100.0, b=True)
 * Serializer
 	* Json
 	* MsgPack
+	* [Toml](./examples/tomlfile.py)
 
 ## Documentation
 
