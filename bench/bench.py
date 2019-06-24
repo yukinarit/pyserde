@@ -1,7 +1,8 @@
+import sys
 import functools
 import json
 import timeit
-from typing import Dict, List, Type
+from typing import Dict, List, Type, Tuple
 
 import dacite
 import dataclasses_json
@@ -214,36 +215,41 @@ class IXMedium:
 
 
 @dataclass
-class RawComplex:
+class RawPriContainer:
     v: List[int] = field(default_factory=list)
     d: Dict[str, int] = field(default_factory=dict)
+    t: Tuple[bool] = field(default_factory=tuple)
 
 
 @serde.serialize
 @serde.deserialize
 @dataclass
-class SerdeComplex:
+class SerdePriContainer:
     v: List[int] = field(default_factory=list)
     d: Dict[str, int] = field(default_factory=dict)
+    t: Tuple[bool] = field(default_factory=tuple)
 
 
 @dataclasses_json.dataclass_json
 @dataclass
-class DJsonComplex:
+class DJsonPriContainer:
     v: List[int] = field(default_factory=list)
     d: Dict[str, int] = field(default_factory=dict)
+    t: Tuple[bool] = field(default_factory=tuple)
 
 
 @dataclass
-class DJSchemaComplex(dataclasses_jsonschema.JsonSchemaMixin):
+class DJSchemaPriContainer(dataclasses_jsonschema.JsonSchemaMixin):
     v: List[int] = field(default_factory=list)
     d: Dict[str, int] = field(default_factory=dict)
+    t: Tuple[bool] = field(default_factory=tuple)
 
 
 @dataclass
-class MashumaroComplex(mashumaro.DataClassJSONMixin):
+class MashmaroPriContainer(mashumaro.DataClassJSONMixin):
     v: List[int] = field(default_factory=list)
     d: Dict[str, int] = field(default_factory=dict)
+    t: Tuple[bool] = field(default_factory=tuple)
 
 
 json_sm = '{"i": 10, "s": "hoge", "f": 100.0, "b": true}'
@@ -254,7 +260,7 @@ json_md = ('{"i": 10, "s": "hoge", "f": 100.0, "b": true,'
            '"i4": 10, "s4": "hoge", "f4": 100.0, "b4": true,'
            '"i5": 10, "s5": "hoge", "f5": 100.0, "b5": true}')
 
-json_complex = '{"v": [1, 2, 3, 4, 5], "d": {"hoge": 10, "fuga": 20}}'
+json_pri_container = '{"v": [1, 2, 3, 4, 5], "d": {"hoge": 10, "fuga": 20}, "foo": 30, "t": [true, false, true]}'
 
 ix_json_sm = f'[{json_sm}]'
 
@@ -283,9 +289,9 @@ def de_raw_medium():
                      dct['f5'], dct['b5'])
 
 
-def de_raw_complex():
-    dct = json.loads(json_complex)
-    return RawComplex(dct['v'], dct['d'])
+def de_raw_pri_container():
+    dct = json.loads(json_pri_container)
+    return RawPriContainer(dct['v'], dct['d'], dct['t'])
 
 
 def se_raw(cls: Type, **kwargs):
@@ -343,7 +349,6 @@ def de_mashumaro(cls: Type, data: str):
 
 def se_mashumaro(cls: Type, **kwargs):
     c = cls(**args_sm)
-    # print(c.to_json())
     return c.to_json()
 
 
@@ -352,6 +357,18 @@ def de_ix(cls: Type, data: str):
 
 
 def main():
+    if len(sys.argv) >= 2:
+        f = globals().get(sys.argv[1], None)
+        if f:
+            f()
+    else:
+        de_small()
+        de_medium()
+        de_pri_container()
+        se_small()
+
+
+def de_small():
     print('--- deserialize small ---')
     profile('raw', de_raw_small)
     profile('pyserde', de_pyserde, SerdeSmall, json_sm)
@@ -362,6 +379,8 @@ def main():
     profile('mashumaro', de_mashumaro, MashumaroSmall, json_sm)
     profile('ix', de_ix, IXSmall, ix_json_sm)
 
+
+def de_medium():
     print('--- deserialize medium ---')
     profile('raw', de_raw_medium)
     profile('pyserde', de_pyserde, SerdeMedium, json_md)
@@ -372,15 +391,19 @@ def main():
     profile('mashumaro', de_mashumaro, MashumaroMedium, json_md)
     profile('ix', de_ix, IXMedium, ix_json_md)
 
-    print('--- deserialize complex ---')
-    profile('raw', de_raw_complex)
-    profile('pyserde', de_pyserde, SerdeComplex, json_complex)
-    profile('dacite', de_dacite, RawComplex, json_complex)
-    profile('dataclasses_json', de_dataclasses_json, DJsonComplex, json_complex)
-    profile('dataclasses_jsonschema', de_dataclasses_jsonschema, DJSchemaComplex, json_complex)
-    profile('pavlova', de_pavlova, RawComplex, json_complex)
-    profile('mashumaro', de_mashumaro, MashumaroComplex, json_complex)
 
+def de_pri_container():
+    print('--- deserialize primitive containers ---')
+    profile('raw', de_raw_pri_container)
+    profile('pyserde', de_pyserde, SerdePriContainer, json_pri_container)
+    # profile('dacite', de_dacite, RawPriContainer, json_pri_container)
+    profile('dataclasses_json', de_dataclasses_json, DJsonPriContainer, json_pri_container)
+    # profile('dataclasses_jsonschema', de_dataclasses_jsonschema, DJSchemaPriContainer, json_pri_container)
+    # profile('pavlova', de_pavlova, RawPriContainer, json_pri_container)
+    profile('mashumaro', de_mashumaro, MashmaroPriContainer, json_pri_container)
+
+
+def se_small():
     print('--- serialize small ---')
     profile('raw', se_raw, RawSmall, **args_sm)
     profile('pyserde', se_pyserde, SerdeSmall, **args_sm)

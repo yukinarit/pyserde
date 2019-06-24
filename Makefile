@@ -34,4 +34,4 @@ open-docs:
 	pipenv run pdoc serde --html -o html --force --http 127.0.0.1:5001
 
 bench:
-	pipenv run python bench.py
+	pushd bench && pipenv run python bench.py && popd

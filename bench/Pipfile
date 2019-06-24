@@ -1,0 +1,16 @@
+[[source]]
+url = "https://pypi.python.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[requires]
+python_version = "3.6"
+
+[packages]
+pyserde = { path = "../" }
+dacite = "*"
+dataclasses-json = "*"
+dataclasses-jsonschema = "*"
+pavlova = "*"
+mashumaro = "*"
+ix = { git = "https://github.com/JoshKarpel/ix.git" }
