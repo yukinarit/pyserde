@@ -32,7 +32,7 @@ class Requires:
 class Package:
     path: Optional[str] = None
     version: Optional[str] = None
-    editable: bool = False
+    editable: Optional[bool] = False
 
 
 @deserialize

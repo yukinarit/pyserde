@@ -8,15 +8,14 @@ Defines classess and functions for `deserialize` decorator.
 `from_obj` deserializes from an object into an instance of the class with
 `deserialize`.
 
-`args_from_seq` and `args_from_dict` are private functions but they are the core
+`args_from_iter` and `args_from_dict` are private functions but they are the core
 parts of pyserde.
 """
 import abc
-import dataclasses # noqa
 import enum
 import stringcase
 from typing import Any, Dict, Tuple, List, Type, Optional
-from dataclasses import fields, is_dataclass
+from dataclasses import dataclass, Field, fields, is_dataclass
 
 from .core import SerdeError, FROM_DICT, FROM_TUPLE, T, gen, iter_types, type_args
 from .compat import is_opt, is_list, is_tuple, is_dict
@@ -26,7 +25,7 @@ __all__ = [
     'is_deserializable',
     'Deserializer',
     'from_obj',
-    'args_from_seq',
+    'args_from_iter',
     'args_from_dict',
 ]
 
@@ -36,7 +35,6 @@ def deserialize(_cls=None, rename_all: Optional[str] = None) -> Type:
     `deserialize` decorator. A dataclass with this decorator can be deserialized
     into an object from various data format such as JSON and MsgPack.
 
-    >>> from dataclasses import dataclass
     >>> from serde import deserialize
     >>> from serde.json import from_json
     >>>
@@ -55,7 +53,6 @@ def deserialize(_cls=None, rename_all: Optional[str] = None) -> Type:
     Additionally, `deserialize` supports case conversion. Pass case name in
     `deserialize` decorator as shown below.
 
-    >>> from dataclasses import dataclass
     >>> from serde import deserialize
     >>>
     >>> @deserialize(rename_all = 'camelcase')
@@ -69,7 +66,7 @@ def deserialize(_cls=None, rename_all: Optional[str] = None) -> Type:
     >>>
     """
     def wrap(cls) -> Type:
-        cls = de_func(cls, FROM_TUPLE, args_from_seq(cls))
+        cls = de_func(cls, FROM_TUPLE, args_from_iter(cls))
         cls = de_func(cls, FROM_DICT, args_from_dict(cls, case=rename_all))
         return cls
 
@@ -83,7 +80,6 @@ def is_deserializable(instance_or_class: Any) -> bool:
     """
     Test if arg can `deserialize`. Arg must be either an instance of class.
 
-    >>> from dataclasses import dataclass
     >>> from serde import deserialize, is_deserializable
     >>>
     >>> @deserialize
@@ -121,7 +117,6 @@ def from_obj(c: Type[T], o: Any, de: Type[Deserializer] = None, **opts):
 
     ### Dataclass
 
-    >>> from dataclasses import dataclass
     >>> from serde import deserialize
     >>>
     >>> @deserialize
@@ -138,7 +133,6 @@ def from_obj(c: Type[T], o: Any, de: Type[Deserializer] = None, **opts):
 
     ### Containers
 
-    >>> from dataclasses import dataclass
     >>> from serde import deserialize
     >>>
     >>> @deserialize
@@ -200,7 +194,7 @@ def to_case(s: str, case: Optional[str]) -> str:
         return s
 
 
-def args_from_seq(cls) -> str:
+def args_from_iter(cls) -> str:
     """
     Create string of ctor args for sequence type such as Tuple or List.
     The returned string will be used in `deserialize` decorator to
@@ -217,19 +211,20 @@ def args_from_seq(cls) -> str:
     ...     f: float
     ...     b: bool
     >>>
-    >>> args_from_seq(Hoge)
+    >>> args_from_iter(Hoge)
     's=data[0], i=data[1], f=data[2], b=data[3]'
     >>>
     """
     params = []
     for i, f in enumerate(fields(cls)):
-        params.append(f'{f.name}=' + de_value(f.type, f'data[{i}]'))
+        arg = IterArg(f.type, f.name, 'data', index=i)
+        params.append(f'{f.name}=' + de_value(arg))
     return ', '.join(params)
 
 
 def args_from_dict(cls, case: str=None) -> str:
     """
-    Similar to `args_from_seq` but from dict.
+    Similar to `args_from_iter` but from dict.
 
     >>> from dataclasses import dataclass
     >>> from serde import deserialize
@@ -238,12 +233,12 @@ def args_from_dict(cls, case: str=None) -> str:
     ... @dataclass
     ... class Hoge:
     ...     s: str
-    ...     i: int
-    ...     f: float
+    ...     i: List[int]
+    ...     f: Optional[List[float]]
     ...     b: bool
     >>>
     >>> args_from_dict(Hoge)
-    's=data.get("s"), i=data.get("i"), f=data.get("f"), b=data.get("b")'
+    's=data["s"], i=[d for d in data["i"]], f=(data.get("f") and [d for d in data["f"]]), b=data["b"]'
 
     `case` enables string case conversion e.g. snake_case to camelCase.
     `case` must be one of 'camelcase', 'capitalcase', 'constcase', 'lowercase',
@@ -260,44 +255,126 @@ def args_from_dict(cls, case: str=None) -> str:
     ...     str_field: str
     >>>
     >>> args_from_dict(Hoge)
-    'str_field=data.get("str_field")'
+    'str_field=data["str_field"]'
     >>> args_from_dict(Hoge, case='camelcase')
-    'str_field=data.get("strField")'
+    'str_field=data["strField"]'
     >>> args_from_dict(Hoge, case='pascalcase')
-    'str_field=data.get("StrField")'
+    'str_field=data["StrField"]'
     >>>
     """
     params = []
     for f in fields(cls):
-        params.append(f'{f.name}=' + de_value(f.type, f'data.get("{to_case(f.name, case)}")'))
+        arg = DictArg(f.type, f.name, 'data', case=case)
+        params.append(f'{f.name}=' + de_value(arg))
     return ', '.join(params)
 
 
-def de_value(typ: Type, varname: str) -> str:
+@dataclass
+class Arg:
     """
-    Create string of args to be used to `de_func`.
+    Constructor argument for `deserialize` class.
     """
+    type: Type  # Field type.
+    field: str  # Field name.
+    var: str    # Variable name.
+    case: Optional[str] = None  # Case name.
+
+    def __getitem__(self, n) -> 'Arg':
+        typ = type_args(self.type)[n]
+        if isinstance(self, IterArg):
+            return IterArg(typ, self.field, self.var, case=self.case, index=self.index)
+        else:
+            return DictArg(typ, self.field, self.var, case=self.case)
+
+
+@dataclass
+class IterArg(Arg):
+    """ Argument for Iterable like classes e.g. List """
+    index: int = 0
+
+    @property
+    def varname(self) -> str:
+        """
+        Render variable name for Iterable like classes e.g. List.
+
+        >>> IterArg(int, 'hoge', 'data', index=3).varname
+        'data[3]'
+        """
+        return f'{self.var}[{self.index}]'
+
+
+@dataclass
+class DictArg(Arg):
+    """ Argument for Dict like classes """
+    @property
+    def varname(self) -> str:
+        """
+        Render variable name for Dict like classes.
+
+        >>> DictArg(int, 'hoge', 'data').varname
+        'data["hoge"]'
+        >>>
+        >>> DictArg(int, 'hoge_foo', 'data', case='camelcase').varname
+        'data["hogeFoo"]'
+        >>>
+        >>> DictArg(Optional[int], 'hoge', 'data').varname
+        'data.get("hoge")'
+        """
+        if is_opt(self.type):
+            return f'{self.var}.get("{to_case(self.field, self.case)}")'
+        else:
+            return f'{self.var}["{to_case(self.field, self.case)}"]'
+
+
+def de_value(arg: Arg, varname: str='') -> str:
+    """
+    Render string of args used in `de_func`.
+
+    >>> @deserialize
+    ... @dataclass
+    ... class Hoge:
+    ...     i: int
+    >>>
+    >>> de_value(DictArg(Hoge, 'hoge', 'data'))
+    'from_dict_or_tuple(Hoge, data["hoge"])'
+    >>>
+    >>> de_value(DictArg(Optional[Hoge], 'hoge', 'data'))
+    '(data.get("hoge") and from_dict_or_tuple(Hoge, data["hoge"]))'
+    >>>
+    >>> de_value(DictArg(List[int], 'hoge', 'data'))
+    '[d for d in data["hoge"]]'
+    >>>
+    >>> de_value(DictArg(Optional[List[int]], 'hoge', 'data'))
+    '(data.get("hoge") and [d for d in data["hoge"]])'
+    >>>
+    >>> de_value(DictArg(Tuple[int, str], 'hoge', 'data'))
+    '(data["hoge"][0], data["hoge"][1], )'
+    >>>
+    >>> de_value(DictArg(Dict[str, int], 'hoge', 'data'))
+    '{ k: v for k, v in data["hoge"].items() }'
+    >>>
+    >>> de_value(DictArg(int, 'hoge', 'data'))
+    'data["hoge"]'
+    >>>
+    """
+    typ = arg.type
+    varname = varname or arg.varname
 
     if is_deserializable(typ):
-        nested = f'{typ.__name__}'
-        s = f"from_dict_or_tuple({nested}, {varname})"
+        s = f"from_dict_or_tuple({typ.__name__}, {varname})"
     elif isinstance(typ, str):
         # When `typ` is of string, type name is specified as forward declaration.
         s = f"from_dict_or_tuple({typ}, {varname})"
     elif is_opt(typ):
-        element_typ = type_args(typ)[0]
-        s = f"{de_value(element_typ, varname)}"
+        s = f"({varname} and {de_value(arg[0])})"
     elif is_list(typ):
-        element_typ = type_args(typ)[0]
-        s = f"[{de_value(element_typ, 'd')} for d in {varname}]"
-    elif is_dict(typ):
-        key_typ = type_args(typ)[0]
-        value_typ = type_args(typ)[1]
-        s = (f"{{ {de_value(key_typ, 'k')}: {de_value(value_typ, 'v')} "
-             f"for k, v in {varname}.items() }}")
+        s = f"[{de_value(arg[0], 'd')} for d in {varname}]"
     elif is_tuple(typ):
-        elements = [de_value(arg, varname + f'[{i}]') + ', ' for i, arg in enumerate(type_args(typ))]
-        s = f"({''.join(elements)})"
+        values = [de_value(arg[i], varname + f'[{i}]') + ', ' for i, _ in enumerate(type_args(typ))]
+        s = f"({''.join(values)})"
+    elif is_dict(typ):
+        s = (f"{{ {de_value(arg[0], 'k')}: {de_value(arg[1], 'v')} "
+             f"for k, v in {varname}.items() }}")
     else:
         s = varname
     return s
