@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.6.2" />
-<title>serde.se API documentation</title>
-<meta name="description" content="Defines classess and functions for `serialize` decorator." />
+<title>serde.toml API documentation</title>
+<meta name="description" content="" />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
@@ -17,84 +17,82 @@
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>serde.se</code></h1>
+<h1 class="title">Module <code>serde.toml</code></h1>
 </header>
 <section id="section-intro">
-<p>Defines classess and functions for <a title="serde.se.serialize" href="#serde.se.serialize"><code>serialize()</code></a> decorator.</p>
 <details class="source">
 <summary>Source code</summary>
-<pre><code class="python">&#34;&#34;&#34;
-Defines classess and functions for `serialize` decorator.
+<pre><code class="python">import toml
 
-&#34;&#34;&#34;
-import abc
-import functools
-from typing import Any, Type
+from typing import Type, List  # noqa
+from dataclasses import asdict
 
-from .core import SE_NAME, T
+from .core import T
+from .de import Deserializer, from_obj
+from .se import Serializer, is_serializable
 
 
-class Serializer(metaclass=abc.ABCMeta):
+class TomlSerializer(Serializer):
+    def serialize(self, obj, **opts) -&gt; str:
+        return toml.dumps(asdict(obj))
+
+
+class TomlDeserializer(Deserializer):
+    def deserialize(self, s, **opts):
+        return toml.loads(s)
+
+
+def to_toml(obj, se=TomlSerializer) -&gt; str:
     &#34;&#34;&#34;
-    `Serializer` base class. Subclass this to custonize serialize bahaviour.
-
-    See `serde.json.JsonSerializer` and `serde.msgpack.MsgPackSerializer` for example usage.
-    &#34;&#34;&#34;
-    @abc.abstractclassmethod
-    def serialize(self, obj):
-        pass
-
-
-def serialize(_cls: Type[T]) -&gt; Type[T]:
-    &#34;&#34;&#34;
-    `serialize` decorator. A dataclass with this decorator can be serialized
-    into an object in various data format such as JSON and MsgPack.
+    Take an object and return toml string.
 
     &gt;&gt;&gt; from dataclasses import dataclass
     &gt;&gt;&gt; from serde import serialize
-    &gt;&gt;&gt; from serde.json import to_json
+    &gt;&gt;&gt; from serde.toml import to_toml
     &gt;&gt;&gt;
-    &gt;&gt;&gt; # Mark the class serializable.
     &gt;&gt;&gt; @serialize
     ... @dataclass
-    ... class Hoge:
-    ...     i: int
-    ...     s: str
-    ...     f: float
-    ...     b: bool
+    ... class Settings:
+    ...     general: &#39;General&#39;
     &gt;&gt;&gt;
-    &gt;&gt;&gt; to_json(Hoge(i=10, s=&#39;hoge&#39;, f=100.0, b=True))
-    &#39;{&#34;i&#34;: 10, &#34;s&#34;: &#34;hoge&#34;, &#34;f&#34;: 100.0, &#34;b&#34;: true}&#39;
+    &gt;&gt;&gt; @serialize
+    ... @dataclass
+    ... class General:
+    ...     host: str
+    ...     port: int
+    ...     upstream: List[str]
+    &gt;&gt;&gt;
+    &gt;&gt;&gt; to_toml(Settings(General(host=&#39;localhost&#39;, port=8080, upstream=[&#39;localhost:8081&#39;, &#39;localhost:8082&#39;])))
+    &#39;[general]\\nhost = \&#34;localhost\&#34;\\nport = 8080\\nupstream = [ \&#34;localhost:8081\&#34;, \&#34;localhost:8082\&#34;,]\\n&#39;
     &gt;&gt;&gt;
     &#34;&#34;&#34;
-    @functools.wraps(_cls)
-    def wrap(cls: Type[T]) -&gt; Type[T]:
-        def serialize(self, ser, **opts) -&gt; None:
-            return ser().serialize(self, **opts)
-
-        setattr(cls, SE_NAME, serialize)
-        return cls
-
-    return wrap(_cls)
+    if is_serializable(obj):
+        return obj.__serde_serialize__(se)
+    else:
+        return se().serialize(obj)
 
 
-def is_serializable(instance_or_class: Any) -&gt; bool:
+def from_toml(c: Type[T], s: str, de: Type[Deserializer] = TomlDeserializer) -&gt; T:
     &#34;&#34;&#34;
-    Test if arg can `serialize`. Arg must be either an instance of class.
+    Take toml string and return deserialized object..
 
     &gt;&gt;&gt; from dataclasses import dataclass
-    &gt;&gt;&gt; from serde import serialize, is_serializable
+    &gt;&gt;&gt; from serde import deserialize
+    &gt;&gt;&gt; from serde.toml import to_toml
     &gt;&gt;&gt;
-    &gt;&gt;&gt; @serialize
+    &gt;&gt;&gt; @deserialize
     ... @dataclass
-    ... class Hoge:
-    ...     pass
+    ... class Settings:
+    ...     host: str
+    ...     port: int
+    ...     upstream: List[str]
     &gt;&gt;&gt;
-    &gt;&gt;&gt; is_serializable(Hoge)
-    True
+    &gt;&gt;&gt; s = &#39;host = \&#34;localhost\&#34;\\nport = 8080\\nupstream = [ \&#34;localhost:8081\&#34;, \&#34;localhost:8082\&#34;,]\\n&#39;
+    &gt;&gt;&gt; from_toml(Settings, s)
+    Settings(host=&#39;localhost&#39;, port=8080, upstream=[&#39;localhost:8081&#39;, &#39;localhost:8082&#39;])
     &gt;&gt;&gt;
     &#34;&#34;&#34;
-    return hasattr(instance_or_class, &#39;__serde_serialize__&#39;)</code></pre>
+    return from_obj(c, s, de)</code></pre>
 </details>
 </section>
 <section>
@@ -104,21 +102,25 @@ def is_serializable(instance_or_class: Any) -&gt; bool:
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
-<dt id="serde.se.is_serializable"><code class="name flex">
-<span>def <span class="ident">is_serializable</span></span>(<span>instance_or_class)</span>
+<dt id="serde.toml.from_toml"><code class="name flex">
+<span>def <span class="ident">from_toml</span></span>(<span>c, s, de=<class 'serde.toml.TomlDeserializer'>)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Test if arg can <a title="serde.se.serialize" href="#serde.se.serialize"><code>serialize()</code></a>. Arg must be either an instance of class.</p>
+<section class="desc"><p>Take toml string and return deserialized object..</p>
 <pre><code>&gt;&gt;&gt; from dataclasses import dataclass
-&gt;&gt;&gt; from serde import serialize, is_serializable
+&gt;&gt;&gt; from serde import deserialize
+&gt;&gt;&gt; from serde.toml import to_toml
 &gt;&gt;&gt;
-&gt;&gt;&gt; @serialize
+&gt;&gt;&gt; @deserialize
 ... @dataclass
-... class Hoge:
-...     pass
+... class Settings:
+...     host: str
+...     port: int
+...     upstream: List[str]
 &gt;&gt;&gt;
-&gt;&gt;&gt; is_serializable(Hoge)
-True
+&gt;&gt;&gt; s = 'host = "localhost"\nport = 8080\nupstream = [ "localhost:8081", "localhost:8082",]\n'
+&gt;&gt;&gt; from_toml(Settings, s)
+Settings(host='localhost', port=8080, upstream=['localhost:8081', 'localhost:8082'])
 </code></pre>
 <blockquote>
 <blockquote>
@@ -127,46 +129,52 @@ True
 </blockquote></section>
 <details class="source">
 <summary>Source code</summary>
-<pre><code class="python">def is_serializable(instance_or_class: Any) -&gt; bool:
+<pre><code class="python">def from_toml(c: Type[T], s: str, de: Type[Deserializer] = TomlDeserializer) -&gt; T:
     &#34;&#34;&#34;
-    Test if arg can `serialize`. Arg must be either an instance of class.
+    Take toml string and return deserialized object..
 
     &gt;&gt;&gt; from dataclasses import dataclass
-    &gt;&gt;&gt; from serde import serialize, is_serializable
+    &gt;&gt;&gt; from serde import deserialize
+    &gt;&gt;&gt; from serde.toml import to_toml
     &gt;&gt;&gt;
-    &gt;&gt;&gt; @serialize
+    &gt;&gt;&gt; @deserialize
     ... @dataclass
-    ... class Hoge:
-    ...     pass
+    ... class Settings:
+    ...     host: str
+    ...     port: int
+    ...     upstream: List[str]
     &gt;&gt;&gt;
-    &gt;&gt;&gt; is_serializable(Hoge)
-    True
+    &gt;&gt;&gt; s = &#39;host = \&#34;localhost\&#34;\\nport = 8080\\nupstream = [ \&#34;localhost:8081\&#34;, \&#34;localhost:8082\&#34;,]\\n&#39;
+    &gt;&gt;&gt; from_toml(Settings, s)
+    Settings(host=&#39;localhost&#39;, port=8080, upstream=[&#39;localhost:8081&#39;, &#39;localhost:8082&#39;])
     &gt;&gt;&gt;
     &#34;&#34;&#34;
-    return hasattr(instance_or_class, &#39;__serde_serialize__&#39;)</code></pre>
+    return from_obj(c, s, de)</code></pre>
 </details>
 </dd>
-<dt id="serde.se.serialize"><code class="name flex">
-<span>def <span class="ident">serialize</span></span>(<span>_cls)</span>
+<dt id="serde.toml.to_toml"><code class="name flex">
+<span>def <span class="ident">to_toml</span></span>(<span>obj, se=<class 'serde.toml.TomlSerializer'>)</span>
 </code></dt>
 <dd>
-<section class="desc"><p><a title="serde.se.serialize" href="#serde.se.serialize"><code>serialize()</code></a> decorator. A dataclass with this decorator can be serialized
-into an object in various data format such as JSON and MsgPack.</p>
+<section class="desc"><p>Take an object and return toml string.</p>
 <pre><code>&gt;&gt;&gt; from dataclasses import dataclass
 &gt;&gt;&gt; from serde import serialize
-&gt;&gt;&gt; from serde.json import to_json
+&gt;&gt;&gt; from serde.toml import to_toml
 &gt;&gt;&gt;
-&gt;&gt;&gt; # Mark the class serializable.
 &gt;&gt;&gt; @serialize
 ... @dataclass
-... class Hoge:
-...     i: int
-...     s: str
-...     f: float
-...     b: bool
+... class Settings:
+...     general: 'General'
 &gt;&gt;&gt;
-&gt;&gt;&gt; to_json(Hoge(i=10, s='hoge', f=100.0, b=True))
-'{"i": 10, "s": "hoge", "f": 100.0, "b": true}'
+&gt;&gt;&gt; @serialize
+... @dataclass
+... class General:
+...     host: str
+...     port: int
+...     upstream: List[str]
+&gt;&gt;&gt;
+&gt;&gt;&gt; to_toml(Settings(General(host='localhost', port=8080, upstream=['localhost:8081', 'localhost:8082'])))
+'[general]\nhost = "localhost"\nport = 8080\nupstream = [ "localhost:8081", "localhost:8082",]\n'
 </code></pre>
 <blockquote>
 <blockquote>
@@ -175,37 +183,34 @@ into an object in various data format such as JSON and MsgPack.</p>
 </blockquote></section>
 <details class="source">
 <summary>Source code</summary>
-<pre><code class="python">def serialize(_cls: Type[T]) -&gt; Type[T]:
+<pre><code class="python">def to_toml(obj, se=TomlSerializer) -&gt; str:
     &#34;&#34;&#34;
-    `serialize` decorator. A dataclass with this decorator can be serialized
-    into an object in various data format such as JSON and MsgPack.
+    Take an object and return toml string.
 
     &gt;&gt;&gt; from dataclasses import dataclass
     &gt;&gt;&gt; from serde import serialize
-    &gt;&gt;&gt; from serde.json import to_json
+    &gt;&gt;&gt; from serde.toml import to_toml
     &gt;&gt;&gt;
-    &gt;&gt;&gt; # Mark the class serializable.
     &gt;&gt;&gt; @serialize
     ... @dataclass
-    ... class Hoge:
-    ...     i: int
-    ...     s: str
-    ...     f: float
-    ...     b: bool
+    ... class Settings:
+    ...     general: &#39;General&#39;
     &gt;&gt;&gt;
-    &gt;&gt;&gt; to_json(Hoge(i=10, s=&#39;hoge&#39;, f=100.0, b=True))
-    &#39;{&#34;i&#34;: 10, &#34;s&#34;: &#34;hoge&#34;, &#34;f&#34;: 100.0, &#34;b&#34;: true}&#39;
+    &gt;&gt;&gt; @serialize
+    ... @dataclass
+    ... class General:
+    ...     host: str
+    ...     port: int
+    ...     upstream: List[str]
+    &gt;&gt;&gt;
+    &gt;&gt;&gt; to_toml(Settings(General(host=&#39;localhost&#39;, port=8080, upstream=[&#39;localhost:8081&#39;, &#39;localhost:8082&#39;])))
+    &#39;[general]\\nhost = \&#34;localhost\&#34;\\nport = 8080\\nupstream = [ \&#34;localhost:8081\&#34;, \&#34;localhost:8082\&#34;,]\\n&#39;
     &gt;&gt;&gt;
     &#34;&#34;&#34;
-    @functools.wraps(_cls)
-    def wrap(cls: Type[T]) -&gt; Type[T]:
-        def serialize(self, ser, **opts) -&gt; None:
-            return ser().serialize(self, **opts)
-
-        setattr(cls, SE_NAME, serialize)
-        return cls
-
-    return wrap(_cls)</code></pre>
+    if is_serializable(obj):
+        return obj.__serde_serialize__(se)
+    else:
+        return se().serialize(obj)</code></pre>
 </details>
 </dd>
 </dl>
@@ -213,44 +218,60 @@ into an object in various data format such as JSON and MsgPack.</p>
 <section>
 <h2 class="section-title" id="header-classes">Classes</h2>
 <dl>
-<dt id="serde.se.Serializer"><code class="flex name class">
-<span>class <span class="ident">Serializer</span></span>
+<dt id="serde.toml.TomlDeserializer"><code class="flex name class">
+<span>class <span class="ident">TomlDeserializer</span></span>
 <span>(</span><span>*args, **kwargs)</span>
 </code></dt>
 <dd>
-<section class="desc"><p><a title="serde.se.Serializer" href="#serde.se.Serializer"><code>Serializer</code></a> base class. Subclass this to custonize serialize bahaviour.</p>
+<section class="desc"><p><code>Deserializer</code> base class. Subclass this to custonize deserialize bahaviour.</p>
+<p>See <a title="serde.json.JsonDeserializer" href="json.html#serde.json.JsonDeserializer"><code>JsonDeserializer</code></a> and <a title="serde.msgpack.MsgPackDeserializer" href="msgpack.html#serde.msgpack.MsgPackDeserializer"><code>MsgPackDeserializer</code></a> for example usage.</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">class TomlDeserializer(Deserializer):
+    def deserialize(self, s, **opts):
+        return toml.loads(s)</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="serde.de.Deserializer" href="de.html#serde.de.Deserializer">Deserializer</a></li>
+</ul>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="serde.de.Deserializer" href="de.html#serde.de.Deserializer">Deserializer</a></b></code>:
+<ul class="hlist">
+<li><code><a title="serde.de.Deserializer.deserialize" href="de.html#serde.de.Deserializer.deserialize">deserialize</a></code></li>
+</ul>
+</li>
+</ul>
+</dd>
+<dt id="serde.toml.TomlSerializer"><code class="flex name class">
+<span>class <span class="ident">TomlSerializer</span></span>
+<span>(</span><span>*args, **kwargs)</span>
+</code></dt>
+<dd>
+<section class="desc"><p><code>Serializer</code> base class. Subclass this to custonize serialize bahaviour.</p>
 <p>See <a title="serde.json.JsonSerializer" href="json.html#serde.json.JsonSerializer"><code>JsonSerializer</code></a> and <a title="serde.msgpack.MsgPackSerializer" href="msgpack.html#serde.msgpack.MsgPackSerializer"><code>MsgPackSerializer</code></a> for example usage.</p></section>
 <details class="source">
 <summary>Source code</summary>
-<pre><code class="python">class Serializer(metaclass=abc.ABCMeta):
-    &#34;&#34;&#34;
-    `Serializer` base class. Subclass this to custonize serialize bahaviour.
-
-    See `serde.json.JsonSerializer` and `serde.msgpack.MsgPackSerializer` for example usage.
-    &#34;&#34;&#34;
-    @abc.abstractclassmethod
-    def serialize(self, obj):
-        pass</code></pre>
+<pre><code class="python">class TomlSerializer(Serializer):
+    def serialize(self, obj, **opts) -&gt; str:
+        return toml.dumps(asdict(obj))</code></pre>
 </details>
-<h3>Subclasses</h3>
+<h3>Ancestors</h3>
 <ul class="hlist">
-<li><a title="serde.toml.TomlSerializer" href="toml.html#serde.toml.TomlSerializer">TomlSerializer</a></li>
-<li><a title="serde.msgpack.MsgPackSerializer" href="msgpack.html#serde.msgpack.MsgPackSerializer">MsgPackSerializer</a></li>
-<li><a title="serde.yaml.YamlSerializer" href="yaml.html#serde.yaml.YamlSerializer">YamlSerializer</a></li>
-<li><a title="serde.json.JsonSerializer" href="json.html#serde.json.JsonSerializer">JsonSerializer</a></li>
+<li><a title="serde.se.Serializer" href="se.html#serde.se.Serializer">Serializer</a></li>
 </ul>
-<h3>Static methods</h3>
+<h3>Methods</h3>
 <dl>
-<dt id="serde.se.Serializer.serialize"><code class="name flex">
-<span>def <span class="ident">serialize</span></span>(<span>obj)</span>
+<dt id="serde.toml.TomlSerializer.serialize"><code class="name flex">
+<span>def <span class="ident">serialize</span></span>(<span>self, obj, **opts)</span>
 </code></dt>
 <dd>
 <section class="desc"></section>
 <details class="source">
 <summary>Source code</summary>
-<pre><code class="python">@abc.abstractclassmethod
-def serialize(self, obj):
-    pass</code></pre>
+<pre><code class="python">def serialize(self, obj, **opts) -&gt; str:
+    return toml.dumps(asdict(obj))</code></pre>
 </details>
 </dd>
 </dl>
@@ -271,16 +292,19 @@ def serialize(self, obj):
 </li>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
-<li><code><a title="serde.se.is_serializable" href="#serde.se.is_serializable">is_serializable</a></code></li>
-<li><code><a title="serde.se.serialize" href="#serde.se.serialize">serialize</a></code></li>
+<li><code><a title="serde.toml.from_toml" href="#serde.toml.from_toml">from_toml</a></code></li>
+<li><code><a title="serde.toml.to_toml" href="#serde.toml.to_toml">to_toml</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-classes">Classes</a></h3>
 <ul>
 <li>
-<h4><code><a title="serde.se.Serializer" href="#serde.se.Serializer">Serializer</a></code></h4>
+<h4><code><a title="serde.toml.TomlDeserializer" href="#serde.toml.TomlDeserializer">TomlDeserializer</a></code></h4>
+</li>
+<li>
+<h4><code><a title="serde.toml.TomlSerializer" href="#serde.toml.TomlSerializer">TomlSerializer</a></code></h4>
 <ul class="">
-<li><code><a title="serde.se.Serializer.serialize" href="#serde.se.Serializer.serialize">serialize</a></code></li>
+<li><code><a title="serde.toml.TomlSerializer.serialize" href="#serde.toml.TomlSerializer.serialize">serialize</a></code></li>
 </ul>
 </li>
 </ul>

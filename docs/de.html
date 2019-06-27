@@ -27,7 +27,7 @@
 <a title="serde.json.from_json" href="json.html#serde.json.from_json"><code>from_json()</code></a>. You can subclass it to make your own deserializer.
 <a title="serde.de.from_obj" href="#serde.de.from_obj"><code>from_obj()</code></a> deserializes from an object into an instance of the class with
 <a title="serde.de.deserialize" href="#serde.de.deserialize"><code>deserialize()</code></a>.</p>
-<p><a title="serde.de.args_from_seq" href="#serde.de.args_from_seq"><code>args_from_seq()</code></a> and <a title="serde.de.args_from_dict" href="#serde.de.args_from_dict"><code>args_from_dict()</code></a> are private functions but they are the core
+<p><a title="serde.de.args_from_iter" href="#serde.de.args_from_iter"><code>args_from_iter()</code></a> and <a title="serde.de.args_from_dict" href="#serde.de.args_from_dict"><code>args_from_dict()</code></a> are private functions but they are the core
 parts of pyserde.</p>
 <details class="source">
 <summary>Source code</summary>
@@ -41,15 +41,14 @@ Defines classess and functions for `deserialize` decorator.
 `from_obj` deserializes from an object into an instance of the class with
 `deserialize`.
 
-`args_from_seq` and `args_from_dict` are private functions but they are the core
+`args_from_iter` and `args_from_dict` are private functions but they are the core
 parts of pyserde.
 &#34;&#34;&#34;
 import abc
-import dataclasses # noqa
 import enum
 import stringcase
 from typing import Any, Dict, Tuple, List, Type, Optional
-from dataclasses import fields, is_dataclass
+from dataclasses import dataclass, Field, fields, is_dataclass
 
 from .core import SerdeError, FROM_DICT, FROM_TUPLE, T, gen, iter_types, type_args
 from .compat import is_opt, is_list, is_tuple, is_dict
@@ -59,7 +58,7 @@ __all__ = [
     &#39;is_deserializable&#39;,
     &#39;Deserializer&#39;,
     &#39;from_obj&#39;,
-    &#39;args_from_seq&#39;,
+    &#39;args_from_iter&#39;,
     &#39;args_from_dict&#39;,
 ]
 
@@ -69,7 +68,6 @@ def deserialize(_cls=None, rename_all: Optional[str] = None) -&gt; Type:
     `deserialize` decorator. A dataclass with this decorator can be deserialized
     into an object from various data format such as JSON and MsgPack.
 
-    &gt;&gt;&gt; from dataclasses import dataclass
     &gt;&gt;&gt; from serde import deserialize
     &gt;&gt;&gt; from serde.json import from_json
     &gt;&gt;&gt;
@@ -88,7 +86,6 @@ def deserialize(_cls=None, rename_all: Optional[str] = None) -&gt; Type:
     Additionally, `deserialize` supports case conversion. Pass case name in
     `deserialize` decorator as shown below.
 
-    &gt;&gt;&gt; from dataclasses import dataclass
     &gt;&gt;&gt; from serde import deserialize
     &gt;&gt;&gt;
     &gt;&gt;&gt; @deserialize(rename_all = &#39;camelcase&#39;)
@@ -102,7 +99,7 @@ def deserialize(_cls=None, rename_all: Optional[str] = None) -&gt; Type:
     &gt;&gt;&gt;
     &#34;&#34;&#34;
     def wrap(cls) -&gt; Type:
-        cls = de_func(cls, FROM_TUPLE, args_from_seq(cls))
+        cls = de_func(cls, FROM_TUPLE, args_from_iter(cls))
         cls = de_func(cls, FROM_DICT, args_from_dict(cls, case=rename_all))
         return cls
 
@@ -116,7 +113,6 @@ def is_deserializable(instance_or_class: Any) -&gt; bool:
     &#34;&#34;&#34;
     Test if arg can `deserialize`. Arg must be either an instance of class.
 
-    &gt;&gt;&gt; from dataclasses import dataclass
     &gt;&gt;&gt; from serde import deserialize, is_deserializable
     &gt;&gt;&gt;
     &gt;&gt;&gt; @deserialize
@@ -154,7 +150,6 @@ def from_obj(c: Type[T], o: Any, de: Type[Deserializer] = None, **opts):
 
     ### Dataclass
 
-    &gt;&gt;&gt; from dataclasses import dataclass
     &gt;&gt;&gt; from serde import deserialize
     &gt;&gt;&gt;
     &gt;&gt;&gt; @deserialize
@@ -171,7 +166,6 @@ def from_obj(c: Type[T], o: Any, de: Type[Deserializer] = None, **opts):
 
     ### Containers
 
-    &gt;&gt;&gt; from dataclasses import dataclass
     &gt;&gt;&gt; from serde import deserialize
     &gt;&gt;&gt;
     &gt;&gt;&gt; @deserialize
@@ -233,7 +227,7 @@ def to_case(s: str, case: Optional[str]) -&gt; str:
         return s
 
 
-def args_from_seq(cls) -&gt; str:
+def args_from_iter(cls) -&gt; str:
     &#34;&#34;&#34;
     Create string of ctor args for sequence type such as Tuple or List.
     The returned string will be used in `deserialize` decorator to
@@ -250,19 +244,20 @@ def args_from_seq(cls) -&gt; str:
     ...     f: float
     ...     b: bool
     &gt;&gt;&gt;
-    &gt;&gt;&gt; args_from_seq(Hoge)
+    &gt;&gt;&gt; args_from_iter(Hoge)
     &#39;s=data[0], i=data[1], f=data[2], b=data[3]&#39;
     &gt;&gt;&gt;
     &#34;&#34;&#34;
     params = []
     for i, f in enumerate(fields(cls)):
-        params.append(f&#39;{f.name}=&#39; + de_value(f.type, f&#39;data[{i}]&#39;))
+        arg = IterArg(f.type, f.name, &#39;data&#39;, index=i)
+        params.append(f&#39;{f.name}=&#39; + de_value(arg))
     return &#39;, &#39;.join(params)
 
 
 def args_from_dict(cls, case: str=None) -&gt; str:
     &#34;&#34;&#34;
-    Similar to `args_from_seq` but from dict.
+    Similar to `args_from_iter` but from dict.
 
     &gt;&gt;&gt; from dataclasses import dataclass
     &gt;&gt;&gt; from serde import deserialize
@@ -271,12 +266,12 @@ def args_from_dict(cls, case: str=None) -&gt; str:
     ... @dataclass
     ... class Hoge:
     ...     s: str
-    ...     i: int
-    ...     f: float
+    ...     i: List[int]
+    ...     f: Optional[List[float]]
     ...     b: bool
     &gt;&gt;&gt;
     &gt;&gt;&gt; args_from_dict(Hoge)
-    &#39;s=data[&#34;s&#34;], i=data[&#34;i&#34;], f=data[&#34;f&#34;], b=data[&#34;b&#34;]&#39;
+    &#39;s=data[&#34;s&#34;], i=[d for d in data[&#34;i&#34;]], f=(data.get(&#34;f&#34;) and [d for d in data[&#34;f&#34;]]), b=data[&#34;b&#34;]&#39;
 
     `case` enables string case conversion e.g. snake_case to camelCase.
     `case` must be one of &#39;camelcase&#39;, &#39;capitalcase&#39;, &#39;constcase&#39;, &#39;lowercase&#39;,
@@ -302,35 +297,117 @@ def args_from_dict(cls, case: str=None) -&gt; str:
     &#34;&#34;&#34;
     params = []
     for f in fields(cls):
-        params.append(f&#39;{f.name}=&#39; + de_value(f.type, f&#39;data[&#34;{to_case(f.name, case)}&#34;]&#39;))
+        arg = DictArg(f.type, f.name, &#39;data&#39;, case=case)
+        params.append(f&#39;{f.name}=&#39; + de_value(arg))
     return &#39;, &#39;.join(params)
 
 
-def de_value(typ: Type, varname: str) -&gt; str:
+@dataclass
+class Arg:
     &#34;&#34;&#34;
-    Create string of args to be used to `de_func`.
+    Constructor argument for `deserialize` class.
     &#34;&#34;&#34;
+    type: Type  # Field type.
+    field: str  # Field name.
+    var: str    # Variable name.
+    case: Optional[str] = None  # Case name.
+
+    def __getitem__(self, n) -&gt; &#39;Arg&#39;:
+        typ = type_args(self.type)[n]
+        if isinstance(self, IterArg):
+            return IterArg(typ, self.field, self.var, case=self.case, index=self.index)
+        else:
+            return DictArg(typ, self.field, self.var, case=self.case)
+
+
+@dataclass
+class IterArg(Arg):
+    &#34;&#34;&#34; Argument for Iterable like classes e.g. List &#34;&#34;&#34;
+    index: int = 0
+
+    @property
+    def varname(self) -&gt; str:
+        &#34;&#34;&#34;
+        Render variable name for Iterable like classes e.g. List.
+
+        &gt;&gt;&gt; IterArg(int, &#39;hoge&#39;, &#39;data&#39;, index=3).varname
+        &#39;data[3]&#39;
+        &#34;&#34;&#34;
+        return f&#39;{self.var}[{self.index}]&#39;
+
+
+@dataclass
+class DictArg(Arg):
+    &#34;&#34;&#34; Argument for Dict like classes &#34;&#34;&#34;
+    @property
+    def varname(self) -&gt; str:
+        &#34;&#34;&#34;
+        Render variable name for Dict like classes.
+
+        &gt;&gt;&gt; DictArg(int, &#39;hoge&#39;, &#39;data&#39;).varname
+        &#39;data[&#34;hoge&#34;]&#39;
+        &gt;&gt;&gt;
+        &gt;&gt;&gt; DictArg(int, &#39;hoge_foo&#39;, &#39;data&#39;, case=&#39;camelcase&#39;).varname
+        &#39;data[&#34;hogeFoo&#34;]&#39;
+        &gt;&gt;&gt;
+        &gt;&gt;&gt; DictArg(Optional[int], &#39;hoge&#39;, &#39;data&#39;).varname
+        &#39;data.get(&#34;hoge&#34;)&#39;
+        &#34;&#34;&#34;
+        if is_opt(self.type):
+            return f&#39;{self.var}.get(&#34;{to_case(self.field, self.case)}&#34;)&#39;
+        else:
+            return f&#39;{self.var}[&#34;{to_case(self.field, self.case)}&#34;]&#39;
+
+
+def de_value(arg: Arg, varname: str=&#39;&#39;) -&gt; str:
+    &#34;&#34;&#34;
+    Render string of args used in `de_func`.
+
+    &gt;&gt;&gt; @deserialize
+    ... @dataclass
+    ... class Hoge:
+    ...     i: int
+    &gt;&gt;&gt;
+    &gt;&gt;&gt; de_value(DictArg(Hoge, &#39;hoge&#39;, &#39;data&#39;))
+    &#39;from_dict_or_tuple(Hoge, data[&#34;hoge&#34;])&#39;
+    &gt;&gt;&gt;
+    &gt;&gt;&gt; de_value(DictArg(Optional[Hoge], &#39;hoge&#39;, &#39;data&#39;))
+    &#39;(data.get(&#34;hoge&#34;) and from_dict_or_tuple(Hoge, data[&#34;hoge&#34;]))&#39;
+    &gt;&gt;&gt;
+    &gt;&gt;&gt; de_value(DictArg(List[int], &#39;hoge&#39;, &#39;data&#39;))
+    &#39;[d for d in data[&#34;hoge&#34;]]&#39;
+    &gt;&gt;&gt;
+    &gt;&gt;&gt; de_value(DictArg(Optional[List[int]], &#39;hoge&#39;, &#39;data&#39;))
+    &#39;(data.get(&#34;hoge&#34;) and [d for d in data[&#34;hoge&#34;]])&#39;
+    &gt;&gt;&gt;
+    &gt;&gt;&gt; de_value(DictArg(Tuple[int, str], &#39;hoge&#39;, &#39;data&#39;))
+    &#39;(data[&#34;hoge&#34;][0], data[&#34;hoge&#34;][1], )&#39;
+    &gt;&gt;&gt;
+    &gt;&gt;&gt; de_value(DictArg(Dict[str, int], &#39;hoge&#39;, &#39;data&#39;))
+    &#39;{ k: v for k, v in data[&#34;hoge&#34;].items() }&#39;
+    &gt;&gt;&gt;
+    &gt;&gt;&gt; de_value(DictArg(int, &#39;hoge&#39;, &#39;data&#39;))
+    &#39;data[&#34;hoge&#34;]&#39;
+    &gt;&gt;&gt;
+    &#34;&#34;&#34;
+    typ = arg.type
+    varname = varname or arg.varname
 
     if is_deserializable(typ):
-        nested = f&#39;{typ.__name__}&#39;
-        s = f&#34;from_dict_or_tuple({nested}, {varname})&#34;
+        s = f&#34;from_dict_or_tuple({typ.__name__}, {varname})&#34;
     elif isinstance(typ, str):
         # When `typ` is of string, type name is specified as forward declaration.
         s = f&#34;from_dict_or_tuple({typ}, {varname})&#34;
     elif is_opt(typ):
-        element_typ = type_args(typ)[0]
-        s = f&#34;{de_value(element_typ, varname)}&#34;
+        s = f&#34;({varname} and {de_value(arg[0])})&#34;
     elif is_list(typ):
-        element_typ = type_args(typ)[0]
-        s = f&#34;[{de_value(element_typ, &#39;d&#39;)} for d in {varname}]&#34;
-    elif is_dict(typ):
-        key_typ = type_args(typ)[0]
-        value_typ = type_args(typ)[1]
-        s = (f&#34;{{ {de_value(key_typ, &#39;k&#39;)}: {de_value(value_typ, &#39;v&#39;)} &#34;
-             f&#34;for k, v in {varname}.items() }}&#34;)
+        s = f&#34;[{de_value(arg[0], &#39;d&#39;)} for d in {varname}]&#34;
     elif is_tuple(typ):
-        elements = [de_value(arg, varname + f&#39;[{i}]&#39;) + &#39;, &#39; for i, arg in enumerate(type_args(typ))]
-        s = f&#34;({&#39;&#39;.join(elements)})&#34;
+        values = [de_value(arg[i], varname + f&#39;[{i}]&#39;) + &#39;, &#39; for i, _ in enumerate(type_args(typ))]
+        s = f&#34;({&#39;&#39;.join(values)})&#34;
+    elif is_dict(typ):
+        s = (f&#34;{{ {de_value(arg[0], &#39;k&#39;)}: {de_value(arg[1], &#39;v&#39;)} &#34;
+             f&#34;for k, v in {varname}.items() }}&#34;)
     else:
         s = varname
     return s
@@ -367,7 +444,7 @@ def de_func(cls: Type[T], funcname: str, params: str) -&gt; Type[T]:
 <span>def <span class="ident">args_from_dict</span></span>(<span>cls, case=None)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Similar to <a title="serde.de.args_from_seq" href="#serde.de.args_from_seq"><code>args_from_seq()</code></a> but from dict.</p>
+<section class="desc"><p>Similar to <a title="serde.de.args_from_iter" href="#serde.de.args_from_iter"><code>args_from_iter()</code></a> but from dict.</p>
 <pre><code>&gt;&gt;&gt; from dataclasses import dataclass
 &gt;&gt;&gt; from serde import deserialize
 &gt;&gt;&gt;
@@ -375,12 +452,12 @@ def de_func(cls: Type[T], funcname: str, params: str) -&gt; Type[T]:
 ... @dataclass
 ... class Hoge:
 ...     s: str
-...     i: int
-...     f: float
+...     i: List[int]
+...     f: Optional[List[float]]
 ...     b: bool
 &gt;&gt;&gt;
 &gt;&gt;&gt; args_from_dict(Hoge)
-'s=data["s"], i=data["i"], f=data["f"], b=data["b"]'
+'s=data["s"], i=[d for d in data["i"]], f=(data.get("f") and [d for d in data["f"]]), b=data["b"]'
 </code></pre>
 <p><code>case</code> enables string case conversion e.g. snake_case to camelCase.
 <code>case</code> must be one of 'camelcase', 'capitalcase', 'constcase', 'lowercase',
@@ -410,7 +487,7 @@ def de_func(cls: Type[T], funcname: str, params: str) -&gt; Type[T]:
 <summary>Source code</summary>
 <pre><code class="python">def args_from_dict(cls, case: str=None) -&gt; str:
     &#34;&#34;&#34;
-    Similar to `args_from_seq` but from dict.
+    Similar to `args_from_iter` but from dict.
 
     &gt;&gt;&gt; from dataclasses import dataclass
     &gt;&gt;&gt; from serde import deserialize
@@ -419,12 +496,12 @@ def de_func(cls: Type[T], funcname: str, params: str) -&gt; Type[T]:
     ... @dataclass
     ... class Hoge:
     ...     s: str
-    ...     i: int
-    ...     f: float
+    ...     i: List[int]
+    ...     f: Optional[List[float]]
     ...     b: bool
     &gt;&gt;&gt;
     &gt;&gt;&gt; args_from_dict(Hoge)
-    &#39;s=data[&#34;s&#34;], i=data[&#34;i&#34;], f=data[&#34;f&#34;], b=data[&#34;b&#34;]&#39;
+    &#39;s=data[&#34;s&#34;], i=[d for d in data[&#34;i&#34;]], f=(data.get(&#34;f&#34;) and [d for d in data[&#34;f&#34;]]), b=data[&#34;b&#34;]&#39;
 
     `case` enables string case conversion e.g. snake_case to camelCase.
     `case` must be one of &#39;camelcase&#39;, &#39;capitalcase&#39;, &#39;constcase&#39;, &#39;lowercase&#39;,
@@ -450,12 +527,13 @@ def de_func(cls: Type[T], funcname: str, params: str) -&gt; Type[T]:
     &#34;&#34;&#34;
     params = []
     for f in fields(cls):
-        params.append(f&#39;{f.name}=&#39; + de_value(f.type, f&#39;data[&#34;{to_case(f.name, case)}&#34;]&#39;))
+        arg = DictArg(f.type, f.name, &#39;data&#39;, case=case)
+        params.append(f&#39;{f.name}=&#39; + de_value(arg))
     return &#39;, &#39;.join(params)</code></pre>
 </details>
 </dd>
-<dt id="serde.de.args_from_seq"><code class="name flex">
-<span>def <span class="ident">args_from_seq</span></span>(<span>cls)</span>
+<dt id="serde.de.args_from_iter"><code class="name flex">
+<span>def <span class="ident">args_from_iter</span></span>(<span>cls)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Create string of ctor args for sequence type such as Tuple or List.
@@ -472,7 +550,7 @@ generate the deserialize function.</p>
 ...     f: float
 ...     b: bool
 &gt;&gt;&gt;
-&gt;&gt;&gt; args_from_seq(Hoge)
+&gt;&gt;&gt; args_from_iter(Hoge)
 's=data[0], i=data[1], f=data[2], b=data[3]'
 </code></pre>
 <blockquote>
@@ -482,7 +560,7 @@ generate the deserialize function.</p>
 </blockquote></section>
 <details class="source">
 <summary>Source code</summary>
-<pre><code class="python">def args_from_seq(cls) -&gt; str:
+<pre><code class="python">def args_from_iter(cls) -&gt; str:
     &#34;&#34;&#34;
     Create string of ctor args for sequence type such as Tuple or List.
     The returned string will be used in `deserialize` decorator to
@@ -499,13 +577,14 @@ generate the deserialize function.</p>
     ...     f: float
     ...     b: bool
     &gt;&gt;&gt;
-    &gt;&gt;&gt; args_from_seq(Hoge)
+    &gt;&gt;&gt; args_from_iter(Hoge)
     &#39;s=data[0], i=data[1], f=data[2], b=data[3]&#39;
     &gt;&gt;&gt;
     &#34;&#34;&#34;
     params = []
     for i, f in enumerate(fields(cls)):
-        params.append(f&#39;{f.name}=&#39; + de_value(f.type, f&#39;data[{i}]&#39;))
+        arg = IterArg(f.type, f.name, &#39;data&#39;, index=i)
+        params.append(f&#39;{f.name}=&#39; + de_value(arg))
     return &#39;, &#39;.join(params)</code></pre>
 </details>
 </dd>
@@ -515,8 +594,7 @@ generate the deserialize function.</p>
 <dd>
 <section class="desc"><p><a title="serde.de.deserialize" href="#serde.de.deserialize"><code>deserialize()</code></a> decorator. A dataclass with this decorator can be deserialized
 into an object from various data format such as JSON and MsgPack.</p>
-<pre><code>&gt;&gt;&gt; from dataclasses import dataclass
-&gt;&gt;&gt; from serde import deserialize
+<pre><code>&gt;&gt;&gt; from serde import deserialize
 &gt;&gt;&gt; from serde.json import from_json
 &gt;&gt;&gt;
 &gt;&gt;&gt; # Mark the class deserializable.
@@ -533,8 +611,7 @@ Hoge(i=10, s='hoge', f=100.0, b=True)
 </code></pre>
 <p>Additionally, <a title="serde.de.deserialize" href="#serde.de.deserialize"><code>deserialize()</code></a> supports case conversion. Pass case name in
 <a title="serde.de.deserialize" href="#serde.de.deserialize"><code>deserialize()</code></a> decorator as shown below.</p>
-<pre><code>&gt;&gt;&gt; from dataclasses import dataclass
-&gt;&gt;&gt; from serde import deserialize
+<pre><code>&gt;&gt;&gt; from serde import deserialize
 &gt;&gt;&gt;
 &gt;&gt;&gt; @deserialize(rename_all = 'camelcase')
 ... @dataclass
@@ -557,7 +634,6 @@ Hoge(int_field=10, str_field='hoge')
     `deserialize` decorator. A dataclass with this decorator can be deserialized
     into an object from various data format such as JSON and MsgPack.
 
-    &gt;&gt;&gt; from dataclasses import dataclass
     &gt;&gt;&gt; from serde import deserialize
     &gt;&gt;&gt; from serde.json import from_json
     &gt;&gt;&gt;
@@ -576,7 +652,6 @@ Hoge(int_field=10, str_field='hoge')
     Additionally, `deserialize` supports case conversion. Pass case name in
     `deserialize` decorator as shown below.
 
-    &gt;&gt;&gt; from dataclasses import dataclass
     &gt;&gt;&gt; from serde import deserialize
     &gt;&gt;&gt;
     &gt;&gt;&gt; @deserialize(rename_all = &#39;camelcase&#39;)
@@ -590,7 +665,7 @@ Hoge(int_field=10, str_field='hoge')
     &gt;&gt;&gt;
     &#34;&#34;&#34;
     def wrap(cls) -&gt; Type:
-        cls = de_func(cls, FROM_TUPLE, args_from_seq(cls))
+        cls = de_func(cls, FROM_TUPLE, args_from_iter(cls))
         cls = de_func(cls, FROM_DICT, args_from_dict(cls, case=rename_all))
         return cls
 
@@ -606,8 +681,7 @@ Hoge(int_field=10, str_field='hoge')
 <dd>
 <section class="desc"><p>Deserialize from an object into an instance of the type specified as arg <code>c</code>. <code>c</code> can be either primitive type, <code>List</code>, <code>Tuple</code>, <code>Dict</code> or <a title="serde.de.deserialize" href="#serde.de.deserialize"><code>deserialize()</code></a> class.</p>
 <h3 id="dataclass">Dataclass</h3>
-<pre><code>&gt;&gt;&gt; from dataclasses import dataclass
-&gt;&gt;&gt; from serde import deserialize
+<pre><code>&gt;&gt;&gt; from serde import deserialize
 &gt;&gt;&gt;
 &gt;&gt;&gt; @deserialize
 ... @dataclass
@@ -622,8 +696,7 @@ Hoge(int_field=10, str_field='hoge')
 Hoge(i=10, f=0.1, s='hoge', b=False)
 </code></pre>
 <h3 id="containers">Containers</h3>
-<pre><code>&gt;&gt;&gt; from dataclasses import dataclass
-&gt;&gt;&gt; from serde import deserialize
+<pre><code>&gt;&gt;&gt; from serde import deserialize
 &gt;&gt;&gt;
 &gt;&gt;&gt; @deserialize
 ... @dataclass
@@ -650,7 +723,6 @@ Hoge(i=10, f=0.1, s='hoge', b=False)
 
     ### Dataclass
 
-    &gt;&gt;&gt; from dataclasses import dataclass
     &gt;&gt;&gt; from serde import deserialize
     &gt;&gt;&gt;
     &gt;&gt;&gt; @deserialize
@@ -667,7 +739,6 @@ Hoge(i=10, f=0.1, s='hoge', b=False)
 
     ### Containers
 
-    &gt;&gt;&gt; from dataclasses import dataclass
     &gt;&gt;&gt; from serde import deserialize
     &gt;&gt;&gt;
     &gt;&gt;&gt; @deserialize
@@ -706,8 +777,7 @@ Hoge(i=10, f=0.1, s='hoge', b=False)
 </code></dt>
 <dd>
 <section class="desc"><p>Test if arg can <a title="serde.de.deserialize" href="#serde.de.deserialize"><code>deserialize()</code></a>. Arg must be either an instance of class.</p>
-<pre><code>&gt;&gt;&gt; from dataclasses import dataclass
-&gt;&gt;&gt; from serde import deserialize, is_deserializable
+<pre><code>&gt;&gt;&gt; from serde import deserialize, is_deserializable
 &gt;&gt;&gt;
 &gt;&gt;&gt; @deserialize
 ... @dataclass
@@ -728,7 +798,6 @@ True
     &#34;&#34;&#34;
     Test if arg can `deserialize`. Arg must be either an instance of class.
 
-    &gt;&gt;&gt; from dataclasses import dataclass
     &gt;&gt;&gt; from serde import deserialize, is_deserializable
     &gt;&gt;&gt;
     &gt;&gt;&gt; @deserialize
@@ -775,7 +844,9 @@ True
 </details>
 <h3>Subclasses</h3>
 <ul class="hlist">
+<li><a title="serde.toml.TomlDeserializer" href="toml.html#serde.toml.TomlDeserializer">TomlDeserializer</a></li>
 <li><a title="serde.msgpack.MsgPackDeserializer" href="msgpack.html#serde.msgpack.MsgPackDeserializer">MsgPackDeserializer</a></li>
+<li><a title="serde.yaml.YamlDeserializer" href="yaml.html#serde.yaml.YamlDeserializer">YamlDeserializer</a></li>
 <li><a title="serde.json.JsonDeserializer" href="json.html#serde.json.JsonDeserializer">JsonDeserializer</a></li>
 </ul>
 <h3>Static methods</h3>
@@ -820,7 +891,7 @@ def deserialize(self, data, **opts):
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
 <li><code><a title="serde.de.args_from_dict" href="#serde.de.args_from_dict">args_from_dict</a></code></li>
-<li><code><a title="serde.de.args_from_seq" href="#serde.de.args_from_seq">args_from_seq</a></code></li>
+<li><code><a title="serde.de.args_from_iter" href="#serde.de.args_from_iter">args_from_iter</a></code></li>
 <li><code><a title="serde.de.deserialize" href="#serde.de.deserialize">deserialize</a></code></li>
 <li><code><a title="serde.de.from_obj" href="#serde.de.from_obj">from_obj</a></code></li>
 <li><code><a title="serde.de.is_deserializable" href="#serde.de.is_deserializable">is_deserializable</a></code></li>

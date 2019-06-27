@@ -21,7 +21,7 @@
 </header>
 <section id="section-intro">
 <h1 id="pyserde">pyserde</h1>
-<p><a href="https://pypi.org/project/requests/"><img alt="image" src="https://img.shields.io/pypi/pyversions/pyserde.svg"></a>
+<p><a href="https://pypi.org/project/pyserde/"><img alt="image" src="https://img.shields.io/pypi/pyversions/pyserde.svg"></a>
 <a href="https://travis-ci.org/yukinarit/pyserde"><img alt="Build Status" src="https://travis-ci.org/yukinarit/pyserde.svg?branch=master"></a>
 <a href="https://ci.appveyor.com/project/yukinarit/pyserde"><img alt="Build status" src="https://ci.appveyor.com/api/projects/status/w4i5x8x9d4sbxhn2?svg=true"></a>
 <a href="https://coveralls.io/github/yukinarit/pyserde?branch=master"><img alt="Coverage Status" src="https://coveralls.io/repos/github/yukinarit/pyserde/badge.svg?branch=master"></a></p>
@@ -62,8 +62,10 @@ From Json: Hoge(i=10, s='hoge', f=100.0, b=True)
 </code></pre>
 <h2 id="features">Features</h2>
 <ul>
-<li>Serializer<ul>
-<li>Json</li>
+<li>Data format<ul>
+<li><a href="./examples/jsonfile.py">Json</a></li>
+<li><a href="./examples/tomlfile.py">Toml</a></li>
+<li><a href="./examples/yamlfile.py">Yoml</a></li>
 <li>MsgPack</li>
 </ul>
 </li>
@@ -110,6 +112,14 @@ __version__ = &#39;0.0.6&#39;</code></pre>
 <dd>
 <section class="desc"><p>Defines classess and functions for <code>serialize</code> decorator.</p></section>
 </dd>
+<dt><code class="name"><a title="serde.toml" href="toml.html">serde.toml</a></code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+<dt><code class="name"><a title="serde.yaml" href="yaml.html">serde.yaml</a></code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
 </dl>
 </section>
 <section>
@@ -141,6 +151,8 @@ __version__ = &#39;0.0.6&#39;</code></pre>
 <li><code><a title="serde.json" href="json.html">serde.json</a></code></li>
 <li><code><a title="serde.msgpack" href="msgpack.html">serde.msgpack</a></code></li>
 <li><code><a title="serde.se" href="se.html">serde.se</a></code></li>
+<li><code><a title="serde.toml" href="toml.html">serde.toml</a></code></li>
+<li><code><a title="serde.yaml" href="yaml.html">serde.yaml</a></code></li>
 </ul>
 </li>
 </ul>
