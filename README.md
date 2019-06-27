@@ -53,9 +53,10 @@ From Json: Hoge(i=10, s='hoge', f=100.0, b=True)
 ## Features
 
 * Data format
-	* Json
-	* MsgPack
+	* [Json](./examples/jsonfile.py)
 	* [Toml](./examples/tomlfile.py)
+	* [Yoml](./examples/yamlfile.py)
+	* MsgPack
 
 ## Documentation
 
