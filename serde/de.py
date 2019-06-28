@@ -17,7 +17,7 @@ import stringcase
 from typing import Any, Dict, Tuple, List, Type, Optional
 from dataclasses import dataclass, Field, fields, is_dataclass
 
-from .core import SerdeError, FROM_DICT, FROM_TUPLE, T, gen, iter_types, type_args
+from .core import SerdeError, FROM_DICT, FROM_TUPLE, T, gen, iter_types, type_args, SETTINGS, Hidden, HIDDEN_NAME
 from .compat import is_opt, is_list, is_tuple, is_dict
 
 __all__ = [
@@ -66,6 +66,8 @@ def deserialize(_cls=None, rename_all: Optional[str] = None) -> Type:
     >>>
     """
     def wrap(cls) -> Type:
+        if not hasattr(cls, HIDDEN_NAME):
+            setattr(cls, HIDDEN_NAME, Hidden())
         cls = de_func(cls, FROM_TUPLE, args_from_iter(cls))
         cls = de_func(cls, FROM_DICT, args_from_dict(cls, case=rename_all))
         return cls
@@ -394,7 +396,10 @@ def de_func(cls: Type[T], funcname: str, params: str) -> Type[T]:
     globals['from_dict_or_tuple'] = from_dict_or_tuple
 
     # Generate deserialize function.
-    gen(body, globals)
+    code = gen(body, globals)
     setattr(cls, funcname, staticmethod(globals[funcname]))
+    if SETTINGS['debug']:
+        hidden = getattr(cls, HIDDEN_NAME)
+        hidden.code[funcname] = code
 
     return cls

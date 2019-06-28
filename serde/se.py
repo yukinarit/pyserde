@@ -6,7 +6,7 @@ import abc
 import functools
 from typing import Any, Type
 
-from .core import SE_NAME, T
+from .core import SE_NAME, T, Hidden, HIDDEN_NAME
 
 
 class Serializer(metaclass=abc.ABCMeta):
@@ -44,6 +44,8 @@ def serialize(_cls: Type[T]) -> Type[T]:
     """
     @functools.wraps(_cls)
     def wrap(cls: Type[T]) -> Type[T]:
+        if not hasattr(cls, HIDDEN_NAME):
+            setattr(cls, HIDDEN_NAME, Hidden())
         def serialize(self, ser, **opts) -> None:
             return ser().serialize(self, **opts)
 

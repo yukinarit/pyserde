@@ -1,6 +1,6 @@
 import logging
 from typing import Dict, List, TypeVar, Iterator, Type, Tuple
-from dataclasses import fields, is_dataclass, astuple as _astuple, asdict as _asdict
+from dataclasses import dataclass, field, fields, is_dataclass, astuple as _astuple, asdict as _asdict
 
 from .compat import is_opt, is_list, is_tuple, is_dict
 
@@ -16,12 +16,23 @@ FROM_TUPLE = '__serde_from_tuple__'
 
 FROM_DICT = '__serde_from_dict__'
 
-debug = False
+HIDDEN_NAME = '__serde_hidden__'
+
+SETTINGS = dict(
+    debug=False,
+)
 
 
-def init(dbg: bool=False):
-    global debug
-    debug = dbg
+@dataclass
+class Hidden:
+    """
+    Hidden infomation encoded in serde classes.
+    """
+    code: Dict[str, str] = field(default_factory=dict)
+
+
+def init(debug: bool=False):
+    SETTINGS['debug'] = debug
 
 
 class SerdeError(TypeError):
@@ -30,7 +41,7 @@ class SerdeError(TypeError):
     """
 
 
-def gen(code: str, globals: Dict = None, locals: Dict = None):
+def gen(code: str, globals: Dict = None, locals: Dict = None) -> str:
     """
     Customized `exec` function.
     """
@@ -41,6 +52,7 @@ def gen(code: str, globals: Dict = None, locals: Dict = None):
         pass
     logger.debug(f'Generating...\n{code}')
     exec(code, globals, locals)
+    return code
 
 
 def type_args(cls: Type):
