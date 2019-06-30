@@ -1,6 +1,7 @@
 import logging
-from typing import Dict, List, TypeVar, Iterator, Type, Tuple
 from dataclasses import dataclass, field, fields, is_dataclass, astuple as _astuple, asdict as _asdict
+from typing import Dict, List, TypeVar, Iterator, Type, Tuple
+from typing_inspect import get_origin
 
 from .compat import is_opt, is_list, is_tuple, is_dict
 
@@ -102,3 +103,50 @@ def astuple(v):
 
 def asdict(v):
     return _asdict(v)
+
+
+def typecheck(cls: Type[T], obj: T, recursive=True) -> None:
+    """
+    >>> @dataclass
+    ... class Hoge:
+    ...     s: str
+    >>>
+    >>> typecheck(Hoge, Hoge('hoge'))
+    >>>
+    >>> # Type mismatch raises `ValueError`.
+    >>> try:
+    ...     typecheck(Hoge, Hoge(10))
+    ... except:
+    ...     pass
+    >>>
+    """
+    if is_dataclass(obj):
+        for name, typ in obj.__annotations__.items():
+            prop = getattr(obj, name, None)
+            if prop is None:
+                raise ValueError(f"No property named '{name}' in {obj}")
+            # If dataclass, type check recursively.
+            if is_dataclass(prop):
+                typecheck(typ, prop)
+            if not isinstance(prop, typ):
+                raise ValueError(f"Property named '{name}' is not instance of {typ}")
+    elif is_opt(cls):
+        if obj is not None:
+            typ = type_args(cls)[0]
+            typecheck(typ, obj)
+    elif is_list(cls):
+        typ = type_args(cls)[0]
+        for e in obj:
+            typecheck(typ, e)
+    elif is_tuple(cls):
+        for i, typ in enumerate(type_args(cls)):
+            typecheck(typ, obj[i])
+    elif is_dict(cls):
+        ktyp = type_args(cls)[0]
+        vtyp = type_args(cls)[1]
+        for k, v in obj.items():
+            typecheck(ktyp, k)
+            typecheck(vtyp, v)
+    else:
+        if not isinstance(obj, cls):
+            raise ValueError(f'arg is not instance of {cls}')

@@ -7,7 +7,8 @@ from typing import Dict, List, Tuple, Optional
 from typing_inspect import get_origin
 from dataclasses import dataclass, field, fields
 
-from serde import init as serde_init, deserialize, serialize, iter_types, astuple, asdict, from_obj
+from serde import init as serde_init, deserialize, serialize, astuple, asdict, from_obj, typecheck
+from serde.core import iter_types
 from serde.de import de_value
 from serde.json import from_json, to_json
 from serde.msgpack import from_msgpack, to_msgpack
@@ -18,6 +19,46 @@ logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger('serde')
 
 serde_init(True)
+
+
+@deserialize
+@serialize
+@dataclass(unsafe_hash=True)
+class Int:
+    """
+    Integer.
+    """
+    i: int
+
+
+@deserialize
+@serialize
+@dataclass(unsafe_hash=True)
+class Str:
+    """
+    String.
+    """
+    s: str
+
+
+@deserialize
+@serialize
+@dataclass(unsafe_hash=True)
+class Float:
+    """
+    Float.
+    """
+    f: float
+
+
+@deserialize
+@serialize
+@dataclass(unsafe_hash=True)
+class Boolean:
+    """
+    Boolean.
+    """
+    b: bool
 
 
 @deserialize
@@ -480,3 +521,73 @@ def test_msgpack():
     assert h.b == hh.b
     assert h.d == hh.d
     assert lst == hh.lst
+
+
+def test_typecheck():
+    # Primitive
+    typecheck(int, 10)
+    with pytest.raises(ValueError):
+        typecheck(int, 10.0)
+
+    # Dataclass
+    p = Pri(i=10, s='hoge', f=100.0, b=True)
+    typecheck(Pri, p)
+
+    with pytest.raises(ValueError):
+        p.i = 10.0
+        typecheck(Pri, p)
+
+    # Dataclass (Nested)
+    @dataclass
+    class Hoge:
+        p: Pri
+
+    h = Hoge(Pri(i=10, s='hoge', f=100.0, b=True))
+    typecheck(Hoge, h)
+
+    with pytest.raises(ValueError):
+        h.p.i = 10.0
+        typecheck(Hoge, h)
+
+    # List
+    typecheck(List[int], [10])
+    with pytest.raises(ValueError):
+        typecheck(List[int], [10.0])
+
+    # List of dataclasses
+    typecheck(List[Int], [Int(n) for n in range(1, 10)])
+    with pytest.raises(ValueError):
+        typecheck(List[Pri], [Pri(i=10.0, s='hoge', f=100.0, b=True)])
+
+    # Tuple
+    typecheck(Tuple[int, str, float, bool], (10, 'hoge', 100.0, True))
+    with pytest.raises(ValueError):
+        typecheck(Tuple[int, str, float, bool], (10.0, 'hoge', 100.0, True))
+
+    # Tuple of dataclasses
+    typecheck(Tuple[Int, Str, Float, Boolean], (Int(10), Str('hoge'), Float(100.0), Boolean(True)))
+    with pytest.raises(ValueError):
+        typecheck(Tuple[Int, Str, Float, Boolean], (Int(10.0), Str('hoge'), Float(100.0), Boolean(True)))
+
+    # Dict
+    typecheck(Dict[str, int], dict(hoge=10, foo=20))
+    with pytest.raises(ValueError):
+        typecheck(Dict[str, int], dict(hoge=10.0, foo=20))
+
+    # Dict of dataclasses
+    typecheck(Dict[Str, Int], {Str('hoge'): Int(10), Str('foo'): Int(20)})
+    with pytest.raises(ValueError):
+        typecheck(Dict[Str, Int], {Str('hoge'): Int(10.0), Str('foo'): Int(20)})
+
+    # Optional
+    typecheck(Optional[int], 10)
+    typecheck(Optional[int], None)
+    with pytest.raises(ValueError):
+        typecheck(Optional[int], 10.0)
+
+    # Optional of dataclass
+    typecheck(Optional[Int], Int(10))
+    typecheck(Optional[Int], None)
+    with pytest.raises(ValueError):
+        typecheck(Optional[Int], 10.0)
+        typecheck(Optional[Int], Int(10.0))
