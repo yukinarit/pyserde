@@ -17,7 +17,7 @@ import stringcase
 from typing import Any, Dict, Tuple, List, Type, Optional
 from dataclasses import dataclass, Field, fields, is_dataclass
 
-from .core import SerdeError, FROM_DICT, FROM_TUPLE, T, gen, iter_types, type_args, SETTINGS, Hidden, HIDDEN_NAME
+from .core import SerdeError, FROM_DICT, FROM_TUPLE, T, gen, iter_types, type_args, SETTINGS, Hidden, HIDDEN_NAME, typecheck
 from .compat import is_opt, is_list, is_tuple, is_dict
 
 __all__ = [
@@ -113,7 +113,7 @@ class Deserializer(metaclass=abc.ABCMeta):
         """
 
 
-def from_obj(c: Type[T], o: Any, de: Type[Deserializer] = None, **opts):
+def from_obj(c: Type[T], o: Any, de: Type[Deserializer] = None, strict=True, **opts):
     """
     Deserialize from an object into an instance of the type specified as arg `c`. `c` can be either primitive type, `List`, `Tuple`, `Dict` or `deserialize` class.
 
@@ -153,19 +153,27 @@ def from_obj(c: Type[T], o: Any, de: Type[Deserializer] = None, **opts):
     if de:
         o = de().deserialize(o, **opts)
     if o is None:
-        return None
+        v = None
     if is_deserializable(c):
-        return from_dict_or_tuple(c, o)
+        v = from_dict_or_tuple(c, o)
     elif is_opt(c):
-        return from_obj(type_args(c)[0], o)
+        if o is None:
+            v = None
+        else:
+            v = from_obj(type_args(c)[0], o)
     elif is_list(c):
-        return [from_obj(type_args(c)[0], e) for e in o]
+        v = [from_obj(type_args(c)[0], e) for e in o]
     elif is_tuple(c):
-        return tuple(from_obj(type_args(c)[i], e) for i, e in enumerate(o))
+        v = tuple(from_obj(type_args(c)[i], e) for i, e in enumerate(o))
     elif is_dict(c):
-        return {from_obj(type_args(c)[0], k): from_obj(type_args(c)[1], v) for k, v in o.items()}
+        v = {from_obj(type_args(c)[0], k): from_obj(type_args(c)[1], v) for k, v in o.items()}
     else:
-        return o
+        v = o
+
+    if strict:
+        typecheck(c, v)
+
+    return v
 
 
 def from_dict_or_tuple(cls, o):
@@ -386,7 +394,8 @@ def de_func(cls: Type[T], funcname: str, params: str) -> Type[T]:
     """
     Generate function to deserialize into an instance of `deserialize` class.
     """
-    body = f'def {funcname}(data):\n return cls({params})'
+    body = (f'def {funcname}(data):\n'
+            f'  return cls({params})')
 
     # Collect types to be used in the `exec` scope.
     globals: Dict[str, Any] = dict(cls=cls)

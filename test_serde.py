@@ -419,7 +419,7 @@ def test_from_obj():
         f2: Foo
 
 
-    # Primityve types
+    # Primitrive types
     assert 10 == from_obj(int, 10)
     assert 0.1 == from_obj(float, 0.1)
     assert 'hoge' == from_obj(str, 'hoge')

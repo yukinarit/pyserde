@@ -105,7 +105,7 @@ def asdict(v):
     return _asdict(v)
 
 
-def typecheck(cls: Type[T], obj: T, recursive=True) -> None:
+def typecheck(cls: Type[T], obj: T) -> None:
     """
     >>> @dataclass
     ... class Hoge:
@@ -121,15 +121,9 @@ def typecheck(cls: Type[T], obj: T, recursive=True) -> None:
     >>>
     """
     if is_dataclass(obj):
-        for name, typ in obj.__annotations__.items():
-            prop = getattr(obj, name, None)
-            if prop is None:
-                raise ValueError(f"No property named '{name}' in {obj}")
-            # If dataclass, type check recursively.
-            if is_dataclass(prop):
-                typecheck(typ, prop)
-            if not isinstance(prop, typ):
-                raise ValueError(f"Property named '{name}' is not instance of {typ}")
+        # If dataclass, type check recursively.
+        for f in fields(obj):
+            typecheck(f.type, getattr(obj, f.name, None))
     elif is_opt(cls):
         if obj is not None:
             typ = type_args(cls)[0]
