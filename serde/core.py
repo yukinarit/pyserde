@@ -13,7 +13,7 @@ T = TypeVar('T')
 
 SE_NAME = '__serde_serialize__'
 
-FROM_TUPLE = '__serde_from_tuple__'
+FROM_ITER = '__serde_from_iter__'
 
 FROM_DICT = '__serde_from_dict__'
 

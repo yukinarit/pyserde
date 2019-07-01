@@ -17,7 +17,7 @@ import stringcase
 from typing import Any, Dict, Tuple, List, Type, Optional
 from dataclasses import dataclass, Field, fields, is_dataclass
 
-from .core import SerdeError, FROM_DICT, FROM_TUPLE, T, gen, iter_types, type_args, SETTINGS, Hidden, HIDDEN_NAME, typecheck
+from .core import SerdeError, FROM_DICT, FROM_ITER, T, gen, iter_types, type_args, SETTINGS, Hidden, HIDDEN_NAME, typecheck
 from .compat import is_opt, is_list, is_tuple, is_dict
 
 __all__ = [
@@ -68,7 +68,7 @@ def deserialize(_cls=None, rename_all: Optional[str] = None) -> Type:
     def wrap(cls) -> Type:
         if not hasattr(cls, HIDDEN_NAME):
             setattr(cls, HIDDEN_NAME, Hidden())
-        cls = de_func(cls, FROM_TUPLE, args_from_iter(cls))
+        cls = de_func(cls, FROM_ITER, args_from_iter(cls))
         cls = de_func(cls, FROM_DICT, args_from_dict(cls, case=rename_all))
         return cls
 
@@ -93,7 +93,7 @@ def is_deserializable(instance_or_class: Any) -> bool:
     True
     >>>
     """
-    return hasattr(instance_or_class, FROM_TUPLE) or hasattr(instance_or_class, FROM_DICT)
+    return hasattr(instance_or_class, FROM_ITER) or hasattr(instance_or_class, FROM_DICT)
 
 
 class Deserializer(metaclass=abc.ABCMeta):
@@ -155,7 +155,7 @@ def from_obj(c: Type[T], o: Any, de: Type[Deserializer] = None, strict=True, **o
     if o is None:
         v = None
     if is_deserializable(c):
-        v = from_dict_or_tuple(c, o)
+        v = from_dict_or_iter(c, o)
     elif is_opt(c):
         if o is None:
             v = None
@@ -176,15 +176,15 @@ def from_obj(c: Type[T], o: Any, de: Type[Deserializer] = None, strict=True, **o
     return v
 
 
-def from_dict_or_tuple(cls, o):
+def from_dict_or_iter(cls, o):
     """
-    Deserialize into an instance of `deserialize` class from either `dict` or `tuple`.
+    Deserialize into an instance of `deserialize` class from either `dict` or `iterable`.
     """
     if not is_deserializable(cls):
         raise SerdeError('`cls` must be deserializable.')
 
     if isinstance(o, (List, Tuple)):
-        return cls.__serde_from_tuple__(o)
+        return cls.__serde_from_iter__(o)
     elif isinstance(o, Dict):
         return cls.__serde_from_dict__(o)
     elif isinstance(o, cls) or o is None:
@@ -346,10 +346,10 @@ def de_value(arg: Arg, varname: str='') -> str:
     ...     i: int
     >>>
     >>> de_value(DictArg(Hoge, 'hoge', 'data'))
-    'from_dict_or_tuple(Hoge, data["hoge"])'
+    'from_obj(Hoge, data["hoge"])'
     >>>
     >>> de_value(DictArg(Optional[Hoge], 'hoge', 'data'))
-    '(data.get("hoge") and from_dict_or_tuple(Hoge, data["hoge"]))'
+    '(data.get("hoge") and from_obj(Hoge, data["hoge"]))'
     >>>
     >>> de_value(DictArg(List[int], 'hoge', 'data'))
     '[d for d in data["hoge"]]'
@@ -371,10 +371,10 @@ def de_value(arg: Arg, varname: str='') -> str:
     varname = varname or arg.varname
 
     if is_deserializable(typ):
-        s = f"from_dict_or_tuple({typ.__name__}, {varname})"
+        s = f"from_obj({typ.__name__}, {varname})"
     elif isinstance(typ, str):
         # When `typ` is of string, type name is specified as forward declaration.
-        s = f"from_dict_or_tuple({typ}, {varname})"
+        s = f"from_obj({typ}, {varname})"
     elif is_opt(typ):
         s = f"({varname} and {de_value(arg[0])})"
     elif is_list(typ):
@@ -402,7 +402,7 @@ def de_func(cls: Type[T], funcname: str, params: str) -> Type[T]:
     for typ in iter_types(cls):
         if is_dataclass(typ):
             globals[typ.__name__] = typ
-    globals['from_dict_or_tuple'] = from_dict_or_tuple
+    globals['from_obj'] = from_obj
 
     # Generate deserialize function.
     code = gen(body, globals)
