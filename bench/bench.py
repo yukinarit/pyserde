@@ -1,8 +1,9 @@
+import dataclasses
 import functools
 import json
 import sys
 import timeit
-from dataclasses import asdict, dataclass, field
+from dataclasses import asdict, astuple, dataclass, field
 from typing import Dict, List, Tuple, Type
 
 import dacite
@@ -270,10 +271,18 @@ ix_json_md = f'[{json_md}]'
 args_sm = {'i': 10, 's': 'hoge', 'f': 100.0, 'b': True}
 
 
-def profile(name, func, *args, **kwargs):
+def profile(name, func, *args, expected=None, **kwargs):
     if args:
         func = functools.partial(func, *args, **kwargs)
-    times = timeit.repeat(func, number=10000, repeat=5)
+    if expected:
+
+        def assert_func(*args, **kwargs):
+            assert func(*args, **kwargs) == expected
+
+        f = assert_func
+    else:
+        f = func
+    times = timeit.repeat(f, number=10000, repeat=5)
     times = ', '.join([f'{t:.6f}' for t in times])
     print(f'{name:40s}\t{times}')
 
@@ -376,6 +385,22 @@ def de_ix(cls: Type, data: str):
     return list(cls.from_jsons(data))[0]
 
 
+def astuple_raw(data):
+    return astuple(data)
+
+
+def asdict_raw(data):
+    return asdict(data)
+
+
+def astuple_pyserde(data):
+    return serde.astuple(data)
+
+
+def asdict_pyserde(data):
+    return serde.asdict(data)
+
+
 def main():
     if len(sys.argv) >= 2:
         f = globals().get(sys.argv[1], None)
@@ -386,6 +411,8 @@ def main():
         de_medium()
         de_pri_container()
         se_small()
+        se_astuple()
+        se_asdict()
 
 
 def de_small():
@@ -432,6 +459,90 @@ def se_small():
     profile('dataclasses_json', se_dataclasses_json, DJsonSmall, **args_sm)
     profile('dataclasses_jsonschema', se_dataclasses_jsonschema, DJSchemaSmall, **args_sm)
     profile('mashumaro', se_mashumaro, MashumaroSmall, **args_sm)
+
+
+def se_astuple():
+    print('--- astuple small ---')
+    exp = (10, 'hoge', 100.0, True)
+    profile('datclass', astuple_raw, RawSmall(10, 'hoge', 100.0, True), expected=exp)
+    profile('pyserde', astuple_pyserde, SerdeSmall(10, 'hoge', 100.0, True), expected=exp)
+
+    print('--- astuple medium ---')
+    exp = (
+        10,
+        'hoge',
+        100.0,
+        True,
+        10,
+        'hoge',
+        100.0,
+        True,
+        10,
+        'hoge',
+        100.0,
+        True,
+        10,
+        'hoge',
+        100.0,
+        True,
+        10,
+        'hoge',
+        100.0,
+        True,
+    )
+    raw = RawMedium(
+        10,
+        'hoge',
+        100.0,
+        True,
+        10,
+        'hoge',
+        100.0,
+        True,
+        10,
+        'hoge',
+        100.0,
+        True,
+        10,
+        'hoge',
+        100.0,
+        True,
+        10,
+        'hoge',
+        100.0,
+        True,
+    )
+    sm = SerdeMedium(
+        10,
+        'hoge',
+        100.0,
+        True,
+        10,
+        'hoge',
+        100.0,
+        True,
+        10,
+        'hoge',
+        100.0,
+        True,
+        10,
+        'hoge',
+        100.0,
+        True,
+        10,
+        'hoge',
+        100.0,
+        True,
+    )
+    profile('datclass', astuple_raw, raw, expected=exp)
+    profile('pyserde', astuple_pyserde, sm, expected=exp)
+
+
+def se_asdict():
+    print('--- asdict small ---')
+    exp = {'i': 10, 's': 'hoge', 'f': 100.0, 'b': True}
+    profile('datclass', asdict_raw, RawSmall(10, 'hoge', 100.0, True), expected=exp)
+    profile('pyserde', asdict_pyserde, SerdeSmall(10, 'hoge', 100.0, True), expected=exp)
 
 
 if __name__ == '__main__':

@@ -1,6 +1,4 @@
 import logging
-from dataclasses import asdict as _asdict
-from dataclasses import astuple as _astuple
 from dataclasses import dataclass, field, fields, is_dataclass
 from typing import Dict, List, Tuple, Type, TypeVar
 
@@ -18,7 +16,7 @@ FROM_DICT = '__serde_from_dict__'
 
 TO_ITER = '__serde_to_iter__'
 
-TO_DICT = '__serde_to_iter__'
+TO_DICT = '__serde_to_dict__'
 
 HIDDEN_NAME = '__serde_hidden__'
 
@@ -58,24 +56,6 @@ def gen(code: str, globals: Dict = None, locals: Dict = None, cls: Type = None) 
     logger.debug(f'Generating {for_class} ...\n{code}')
     exec(code, globals, locals)
     return code
-
-
-def astuple(v):
-    """
-    Convert decoded JSON `dict` to `tuple`.
-    """
-    if is_dataclass(v):
-        return _astuple(v)
-    elif isinstance(v, Dict):
-        return tuple(astuple(e) for e in v.values())
-    elif isinstance(v, (Tuple, List)):
-        return tuple(astuple(e) for e in v)
-    else:
-        return v
-
-
-def asdict(v):
-    return _asdict(v)
 
 
 def typecheck(cls: Type[T], obj: T) -> None:

@@ -3,11 +3,19 @@ Defines classess and functions for `serialize` decorator.
 
 """
 import abc
+import copy
 import functools
-from dataclasses import asdict, dataclass
-from typing import Any, Dict, Tuple, Type
+from dataclasses import Field as DataclassField
+from dataclasses import asdict as _asdict
+from dataclasses import astuple as _astuple
+from dataclasses import dataclass, fields, is_dataclass
+from typing import Any, ClassVar, Dict, List, Tuple, Type
 
-from .core import HIDDEN_NAME, SE_NAME, Hidden, T
+import jinja2
+
+from .compat import is_dict, is_list, is_tuple, type_args
+from .core import gen, HIDDEN_NAME, SE_NAME, SETTINGS, TO_DICT, TO_ITER, Hidden, T
+from .de import Arg
 
 
 class Serializer(metaclass=abc.ABCMeta):
@@ -54,6 +62,8 @@ def serialize(_cls=None) -> Type[T]:
             return ser().serialize(self, **opts)
 
         setattr(cls, SE_NAME, serialize)
+        cls = se_func(cls, TO_ITER, render_astuple(cls))
+        cls = se_func(cls, TO_DICT, render_asdict(cls))
         return cls
 
     if _cls is None:
@@ -118,20 +128,200 @@ def to_dict(o) -> Dict:
     return v
 
 
-def to_iter(obj) -> Tuple:
-    pass
+def astuple(v):
+    """
+    Convert `serialize` class to `tuple`.
+    """
+    if is_serializable(v):
+        return getattr(v, TO_ITER)()
+    elif is_dataclass(v):
+        return _astuple(v)
+    elif isinstance(v, Dict):
+        return tuple(astuple(e) for e in v.values())
+    elif isinstance(v, (Tuple, List)):
+        return tuple(astuple(e) for e in v)
+    else:
+        return v
 
 
-def se_func(cls: Type[T], funcname: str, params: str) -> Type[T]:
+def asdict(v):
+    """
+    Convert `serialize` class to `dict`.
+    """
+    if is_serializable(v):
+        return getattr(v, TO_DICT)()
+    else:
+        return _asdict(v)
+
+
+@dataclass
+class Field:
+    """
+    Field in pyserde class.
+    """
+
+    type: Type
+    name: str
+    parent: 'Field' = None
+
+    @staticmethod
+    def from_dataclass(f: DataclassField) -> '':
+        return Field(f.type, f.name)
+
+    @property
+    def varname(self) -> str:
+        var = self.parent.varname if self.parent else None
+        if var:
+            return f'{var}.{self.name}'
+        else:
+            return self.name
+
+    def __getitem__(self, n) -> 'Field':
+        typ = type_args(self.type)[n]
+        return Field(typ, None)
+
+
+def to_arg(f: DataclassField) -> Field:
+    ident = Field.from_dataclass(f)
+    ident.parent = Field(None, 'obj')
+    return ident
+
+
+def render_astuple(cls: Type) -> str:
+    template = '''
+def {{funcname}}(obj):
+  if not is_dataclass(obj):
+    return copy.deepcopy(obj)
+
+  {% if cls|is_dataclass %}
+  res = []
+  {% for f in cls|fields -%}
+  res.append({{f|arg|rvalue()}})
+  {% endfor -%}
+  return tuple(res)
+  {% endif %}
+    '''
+
+    renderer = Renderer(TO_ITER)
+    env = jinja2.Environment(loader=jinja2.DictLoader({'iter': template}))
+    env.filters.update({'fields': fields})
+    env.filters.update({'is_dataclass': is_dataclass})
+    env.filters.update({'rvalue': renderer.render})
+    env.filters.update({'arg': to_arg})
+    return env.get_template('iter').render(funcname=TO_ITER, cls=cls)
+
+
+def render_asdict(cls: Type) -> str:
+    template = '''
+def {{funcname}}(obj):
+  if not is_dataclass(obj):
+    return copy.deepcopy(obj)
+
+  {% if cls|is_dataclass %}
+  res = {}
+  {% for f in cls|fields -%}
+  res["{{f.name}}"] = {{f|arg|rvalue()}}
+  {% endfor -%}
+  return res
+  {% endif %}
+    '''
+
+    renderer = Renderer(TO_DICT)
+    env = jinja2.Environment(loader=jinja2.DictLoader({'dict': template}))
+    env.filters.update({'fields': fields})
+    env.filters.update({'is_dataclass': is_dataclass})
+    env.filters.update({'rvalue': renderer.render})
+    env.filters.update({'arg': to_arg})
+    return env.get_template('dict').render(funcname=TO_DICT, cls=cls)
+
+
+@dataclass
+class Renderer:
+    """
+    Render rvalue for variouls types.
+    """
+    func: str
+
+    def render(self, arg: Field) -> str:
+        """
+        Render rvalue
+
+        >>> Renderer(TO_ITER).render(Field(int, 'i'))
+        'i'
+
+        >>> Renderer(TO_ITER).render(Field(List[int], 'l'))
+        '[v for v in l]'
+
+        >>> @serialize
+        ... @dataclass(unsafe_hash=True)
+        ... class Hoge:
+        ...    val: int
+        >>> Renderer(TO_ITER).render(Field(Hoge, 'hoge'))
+        'hoge.__serde_to_iter__()'
+
+        >>> Renderer(TO_ITER).render(Field(List[Hoge], 'hoge'))
+        '[v.__serde_to_iter__() for v in hoge]'
+
+        >>> Renderer(TO_ITER).render(Field(Dict[str, Hoge], 'hoge'))
+        '{k: v.__serde_to_iter__() for k, v in hoge.items()}'
+
+        >>> Renderer(TO_ITER).render(Field(Dict[Hoge, Hoge], 'hoge'))
+        '{k.__serde_to_iter__(): v.__serde_to_iter__() for k, v in hoge.items()}'
+
+        >>> Renderer(TO_ITER).render(Field(Tuple[str, Hoge, int], 'hoge'))
+        '(hoge[0], hoge[1].__serde_to_iter__(), hoge[2])'
+        >>>
+        """
+        if is_dataclass(arg.type):
+            return self.dataclass(arg)
+        elif is_list(arg.type):
+            return self.list(arg)
+        elif is_dict(arg.type):
+            return self.dict(arg)
+        elif is_tuple(arg.type):
+            return self.tuple(arg)
+        else:
+            return self.primitive(arg)
+
+    def dataclass(self, arg: Field) -> str:
+        return f'{arg.varname}.{self.func}()'
+
+    def list(self, arg: Field) -> str:
+        earg = arg[0]
+        earg.name = 'v'
+        return f'[{self.render(earg)} for v in {arg.varname}]'
+
+    def tuple(self, arg: Field) -> str:
+        rvalues = []
+        for i, _ in enumerate(type_args(arg.type)):
+            r = arg[i]
+            r.name = f'{arg.varname}[{i}]'
+            rvalues.append(self.render(r))
+        return f"({', '.join(rvalues)})"
+
+    def dict(self, arg: Field) -> str:
+        karg = arg[0]
+        karg.name = 'k'
+        varg = arg[1]
+        varg.name = 'v'
+        return f'{{{self.render(karg)}: {self.render(varg)} for k, v in {arg.varname}.items()}}'
+
+    def primitive(self, arg: Field) -> str:
+        return f'{arg.varname}'
+
+
+def se_func(cls: Type[T], func: str, code: str) -> Type[T]:
     """
     Generate function to serialize into an object.
     """
-    body = f'def {funcname}({params}):\n' f'  return cls({params})'
+    g: Dict[str, Any] = globals().copy()
 
-    # Generate deserialize function.  code = gen(body, globals)
-    setattr(cls, funcname, staticmethod(globals[funcname]))
+    # Generate serialize function.
+    code = gen(code, g, cls=cls)
+
+    setattr(cls, func, g[func])
     if SETTINGS['debug']:
         hidden = getattr(cls, HIDDEN_NAME)
-        hidden.code[funcname] = code
+        hidden.code[func] = code
 
     return cls

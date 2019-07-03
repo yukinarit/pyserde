@@ -114,30 +114,30 @@ def is_list(typ: Type) -> bool:
     """
     Test if the type is `typing.List`.
     """
-    if sys.version_info < (3, 7):
-        return issubclass(typ, List)
-    else:
-        return get_origin(typ) is list
+    try:
+        return issubclass(get_origin(typ), list)
+    except TypeError:
+        return isinstance(typ, list)
 
 
 def is_tuple(typ: Type) -> bool:
     """
     Test if the type is `typing.Tuple`.
     """
-    if sys.version_info < (3, 7):
-        return issubclass(typ, Tuple)
-    else:
-        return get_origin(typ) is tuple
+    try:
+        return issubclass(get_origin(typ), tuple)
+    except TypeError:
+        return isinstance(typ, tuple)
 
 
 def is_dict(typ: Type) -> bool:
     """
     Test if the type is `typing.Dict`.
     """
-    if sys.version_info < (3, 7):
-        return issubclass(typ, Dict)
-    else:
-        return get_origin(typ) is dict
+    try:
+        return issubclass(get_origin(typ), dict)
+    except TypeError:
+        return isinstance(typ, dict)
 
 
 def is_none(typ: Type) -> bool:

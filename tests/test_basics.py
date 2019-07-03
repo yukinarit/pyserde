@@ -7,129 +7,19 @@ from typing import Dict, List, Optional, Tuple, Union
 import msgpack
 import pytest
 
-from serde import asdict, astuple, deserialize, from_obj, init as serde_init, logger, serialize, typecheck
-from serde.compat import is_dict, is_list, is_opt, is_tuple, is_union, type_args, union_args, iter_types
+from serde import asdict, astuple, deserialize, from_obj
+from serde import init as serde_init
+from serde import logger, serialize, typecheck
+from serde.compat import is_dict, is_list, is_opt, is_tuple, is_union, iter_types, type_args, union_args
 from serde.json import from_json, to_json
 from serde.msgpack import from_msgpack, to_msgpack
+
+from .data import Bool, Float, Int, Pri, PriDict, PriList, PriOpt, PriTuple, Str
 
 logging.basicConfig(level=logging.WARNING)
 logger.setLevel(logging.DEBUG)
 
 serde_init(True)
-
-
-@deserialize
-@serialize
-@dataclass(unsafe_hash=True)
-class Int:
-    """
-    Integer.
-    """
-
-    i: int
-
-
-@deserialize
-@serialize
-@dataclass(unsafe_hash=True)
-class Str:
-    """
-    String.
-    """
-
-    s: str
-
-
-@deserialize
-@serialize
-@dataclass(unsafe_hash=True)
-class Float:
-    """
-    Float.
-    """
-
-    f: float
-
-
-@deserialize
-@serialize
-@dataclass(unsafe_hash=True)
-class Boolean:
-    """
-    Boolean.
-    """
-
-    b: bool
-
-
-@deserialize
-@serialize
-@dataclass(unsafe_hash=True)
-class Pri:
-    """
-    Primitives.
-    """
-
-    i: int
-    s: str
-    f: float
-    b: bool
-
-
-@deserialize
-@serialize
-@dataclass
-class PriList:
-    """
-    List containing primitives.
-    """
-
-    i: List[int]
-    s: List[str]
-    f: List[float]
-    b: List[bool]
-
-
-@deserialize
-@serialize
-@dataclass
-class PriDict:
-    """
-    Dict containing primitives.
-    """
-
-    i: Dict[int, int]
-    s: Dict[str, str]
-    f: Dict[float, float]
-    b: Dict[bool, bool]
-
-
-@deserialize
-@serialize
-@dataclass
-class PriTuple:
-    """
-    Tuple containing primitives.
-    """
-
-    i: Tuple[int, int, int]
-    s: Tuple[str, str, str, str]
-    f: Tuple[float, float, float, float, float]
-    b: Tuple[bool, bool, bool, bool, bool, bool]
-
-
-@deserialize
-@serialize
-@dataclass
-class PriOpt:
-    """
-    Optional Primitives.
-    """
-
-    i: Optional[int]
-    s: Optional[str]
-    f: Optional[float]
-    b: Optional[bool]
 
 
 def test_non_dataclass():
@@ -148,10 +38,8 @@ def test_types():
     assert is_opt(Optional[int])
     assert is_union(Union[int, str])
     assert is_union(Union[Optional[int], Optional[str]])
-
     assert is_opt(Optional[int])
     assert not is_union(Optional[int])
-
     assert not is_opt(Union[Optional[int], Optional[str]])
     assert is_union(Union[Optional[int], Optional[str]])
 
@@ -599,9 +487,9 @@ def test_typecheck():
         typecheck(Tuple[int, str, float, bool], (10.0, 'hoge', 100.0, True))
 
     # Tuple of dataclasses
-    typecheck(Tuple[Int, Str, Float, Boolean], (Int(10), Str('hoge'), Float(100.0), Boolean(True)))
+    typecheck(Tuple[Int, Str, Float, Bool], (Int(10), Str('hoge'), Float(100.0), Bool(True)))
     with pytest.raises(ValueError):
-        typecheck(Tuple[Int, Str, Float, Boolean], (Int(10.0), Str('hoge'), Float(100.0), Boolean(True)))
+        typecheck(Tuple[Int, Str, Float, Bool], (Int(10.0), Str('hoge'), Float(100.0), Bool(True)))
 
     # Dict
     typecheck(Dict[str, int], dict(hoge=10, foo=20))

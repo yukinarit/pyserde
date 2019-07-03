@@ -22,6 +22,7 @@ requires = [
     'pyyaml',
     'stringcase',
     'typing_inspect>=0.4.0',
+    'jinja2',
 ]
 
 # Installs dataclasses from PyPI for python < 3.7

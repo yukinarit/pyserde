@@ -17,8 +17,8 @@ from typing import Any, Dict, List, Optional, Tuple, Type, Union
 
 import stringcase
 
-from .compat import assert_type, is_dict, is_list, is_opt, is_tuple, is_union, typename, iter_types, type_args
-from .core import (FROM_DICT, FROM_ITER, HIDDEN_NAME, SETTINGS, Hidden, SerdeError, T, gen, typecheck)
+from .compat import assert_type, is_dict, is_list, is_opt, is_tuple, is_union, iter_types, type_args, typename
+from .core import FROM_DICT, FROM_ITER, HIDDEN_NAME, SETTINGS, Hidden, SerdeError, T, gen, typecheck
 
 __all__ = ['deserialize', 'is_deserializable', 'Deserializer', 'from_obj', 'args_from_iter', 'args_from_dict']
 
@@ -302,8 +302,10 @@ class Arg:
         typ = type_args(self.type)[n]
         if isinstance(self, IterArg):
             return IterArg(typ, self.field, self.var, case=self.case, index=self.index)
-        else:
+        elif isinstance(self, DictArg):
             return DictArg(typ, self.field, self.var, case=self.case)
+        else:
+            return Arg(typ, self.field, self.var, case=self.case)
 
 
 @dataclass

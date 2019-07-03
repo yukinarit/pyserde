@@ -10,6 +10,7 @@ msgpack = "*"
 toml = "*"
 pyyaml = "*"
 stringcase = "*"
+jinja2 = "*"
 
 [dev-packages]
 flake8 = "*"
