@@ -1,7 +1,7 @@
-import yaml
-
-from typing import Type, List  # noqa
 from dataclasses import asdict
+from typing import List, Type  # noqa
+
+import yaml
 
 from .core import T
 from .de import Deserializer, from_obj
@@ -18,7 +18,7 @@ class YamlDeserializer(Deserializer):
         return yaml.safe_load(s, **opts)
 
 
-def to_yaml(obj, se: Type[Serializer]=YamlSerializer) -> str:
+def to_yaml(obj, se: Type[Serializer] = YamlSerializer) -> str:
     """
     Take an object and return yaml string.
 

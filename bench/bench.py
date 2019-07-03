@@ -1,8 +1,9 @@
-import sys
 import functools
 import json
+import sys
 import timeit
-from typing import Dict, List, Type, Tuple
+from dataclasses import asdict, dataclass, field
+from typing import Dict, List, Tuple, Type
 
 import dacite
 import dataclasses_json
@@ -10,8 +11,6 @@ import dataclasses_jsonschema
 import ix
 import mashumaro
 import pavlova
-from dataclasses import asdict, dataclass, field
-
 import serde
 import serde.json
 
@@ -254,11 +253,13 @@ class MashmaroPriContainer(mashumaro.DataClassJSONMixin):
 
 json_sm = '{"i": 10, "s": "hoge", "f": 100.0, "b": true}'
 
-json_md = ('{"i": 10, "s": "hoge", "f": 100.0, "b": true,'
-           '"i2": 10, "s2": "hoge", "f2": 100.0, "b2": true,'
-           '"i3": 10, "s3": "hoge", "f3": 100.0, "b3": true,'
-           '"i4": 10, "s4": "hoge", "f4": 100.0, "b4": true,'
-           '"i5": 10, "s5": "hoge", "f5": 100.0, "b5": true}')
+json_md = (
+    '{"i": 10, "s": "hoge", "f": 100.0, "b": true,'
+    '"i2": 10, "s2": "hoge", "f2": 100.0, "b2": true,'
+    '"i3": 10, "s3": "hoge", "f3": 100.0, "b3": true,'
+    '"i4": 10, "s4": "hoge", "f4": 100.0, "b4": true,'
+    '"i5": 10, "s5": "hoge", "f5": 100.0, "b5": true}'
+)
 
 json_pri_container = '{"v": [1, 2, 3, 4, 5], "d": {"hoge": 10, "fuga": 20}, "foo": 30, "t": [true, false, true]}'
 
@@ -284,9 +285,28 @@ def de_raw_small():
 
 def de_raw_medium():
     dct = json.loads(json_md)
-    return RawMedium(dct['i'], dct['s'], dct['f'], dct['b'], dct['i2'], dct['s2'], dct['f2'], dct['b2'], dct['i3'],
-                     dct['s3'], dct['f3'], dct['b3'], dct['i4'], dct['s4'], dct['f4'], dct['b4'], dct['i5'], dct['s5'],
-                     dct['f5'], dct['b5'])
+    return RawMedium(
+        dct['i'],
+        dct['s'],
+        dct['f'],
+        dct['b'],
+        dct['i2'],
+        dct['s2'],
+        dct['f2'],
+        dct['b2'],
+        dct['i3'],
+        dct['s3'],
+        dct['f3'],
+        dct['b3'],
+        dct['i4'],
+        dct['s4'],
+        dct['f4'],
+        dct['b4'],
+        dct['i5'],
+        dct['s5'],
+        dct['f5'],
+        dct['b5'],
+    )
 
 
 def de_raw_pri_container():
@@ -300,7 +320,7 @@ def se_raw(cls: Type, **kwargs):
 
 
 def de_pyserde(cls: Type, data: str):
-    return serde.json.from_json(cls, data)
+    return serde.json.from_json(cls, data, strict=False)
 
 
 def se_pyserde(cls: Type, **kwargs):
@@ -396,10 +416,10 @@ def de_pri_container():
     print('--- deserialize primitive containers ---')
     profile('raw', de_raw_pri_container)
     profile('pyserde', de_pyserde, SerdePriContainer, json_pri_container)
-    # profile('dacite', de_dacite, RawPriContainer, json_pri_container)
+    profile('dacite', de_dacite, RawPriContainer, json_pri_container)
     profile('dataclasses_json', de_dataclasses_json, DJsonPriContainer, json_pri_container)
-    # profile('dataclasses_jsonschema', de_dataclasses_jsonschema, DJSchemaPriContainer, json_pri_container)
-    # profile('pavlova', de_pavlova, RawPriContainer, json_pri_container)
+    profile('dataclasses_jsonschema', de_dataclasses_jsonschema, DJSchemaPriContainer, json_pri_container)
+    profile('pavlova', de_pavlova, RawPriContainer, json_pri_container)
     profile('mashumaro', de_mashumaro, MashmaroPriContainer, json_pri_container)
 
 

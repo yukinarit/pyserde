@@ -20,6 +20,7 @@ mypy = "*"
 pdoc3 = "*"
 twine = "*"
 black = "==19.3b0"
+isort = "==4.3.21"
 
 [pipenv]
 allow_prereleases = true

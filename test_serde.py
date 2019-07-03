@@ -1,18 +1,21 @@
 import enum
 import json
 import logging
+from dataclasses import dataclass, field, fields
+from typing import Dict, List, Optional, Tuple, Union
+
 import msgpack
 import pytest
-from typing import Dict, List, Tuple, Optional, Union
 from typing_inspect import get_origin
-from dataclasses import dataclass, field, fields
 
-from serde import init as serde_init, deserialize, serialize, astuple, asdict, from_obj, typecheck, logger
+from serde import asdict, astuple, deserialize, from_obj
+from serde import init as serde_init
+from serde import logger, serialize, typecheck
+from serde.compat import is_dict, is_list, is_opt, is_tuple, is_union, type_args, union_args
 from serde.core import iter_types
 from serde.de import de_value
 from serde.json import from_json, to_json
 from serde.msgpack import from_msgpack, to_msgpack
-from serde.compat import is_list, is_tuple, is_dict, is_opt, is_union, union_args, type_args
 
 logging.basicConfig(level=logging.WARNING)
 logger.setLevel(logging.DEBUG)
@@ -27,6 +30,7 @@ class Int:
     """
     Integer.
     """
+
     i: int
 
 
@@ -37,6 +41,7 @@ class Str:
     """
     String.
     """
+
     s: str
 
 
@@ -47,6 +52,7 @@ class Float:
     """
     Float.
     """
+
     f: float
 
 
@@ -57,6 +63,7 @@ class Boolean:
     """
     Boolean.
     """
+
     b: bool
 
 
@@ -67,6 +74,7 @@ class Pri:
     """
     Primitives.
     """
+
     i: int
     s: str
     f: float
@@ -80,6 +88,7 @@ class PriList:
     """
     List containing primitives.
     """
+
     i: List[int]
     s: List[str]
     f: List[float]
@@ -93,6 +102,7 @@ class PriDict:
     """
     Dict containing primitives.
     """
+
     i: Dict[int, int]
     s: Dict[str, str]
     f: Dict[float, float]
@@ -106,6 +116,7 @@ class PriTuple:
     """
     Tuple containing primitives.
     """
+
     i: Tuple[int, int, int]
     s: Tuple[str, str, str, str]
     f: Tuple[float, float, float, float, float]
@@ -119,6 +130,7 @@ class PriOpt:
     """
     Optional Primitives.
     """
+
     i: Optional[int]
     s: Optional[str]
     f: Optional[float]
@@ -132,6 +144,7 @@ class PriUnion:
     """
     Union Primitives.
     """
+
     v: Union[int, str, float, bool]
 
 
@@ -142,6 +155,7 @@ class PriOptUnion:
     """
     Union Primitives.
     """
+
     v: Union[Optional[int], Optional[str], Optional[float], Optional[bool]]
 
 
@@ -152,11 +166,13 @@ class ContUnion:
     """
     Union Containers.
     """
+
     v: Union[List[int], List[str], Dict[str, int]]
 
 
 def test_non_dataclass():
     with pytest.raises(TypeError):
+
         @deserialize
         @serialize
         class Hoge:
@@ -217,8 +233,9 @@ def test_iter_types():
     assert [str] == list(iter_types(List[str]))
     assert [int, str, bool, float] == list(iter_types(Tuple[int, str, bool, float]))
     assert [PriOpt, int, str, float, bool] == list(iter_types(PriOpt))
-    assert [Pri, int, str, float, bool, Pri, int, str, float, bool,
-            Pri, int, str, float, bool] == list(iter_types(Tuple[List[Pri], Tuple[Pri, Pri]]))
+    assert [Pri, int, str, float, bool, Pri, int, str, float, bool, Pri, int, str, float, bool] == list(
+        iter_types(Tuple[List[Pri], Tuple[Pri, Pri]])
+    )
 
 
 def test_primitive():
@@ -230,6 +247,7 @@ def test_primitive():
 
 def test_forward_declaration():
     print(locals())
+
     @serialize
     @deserialize
     @dataclass
@@ -291,6 +309,7 @@ def test_optional():
     s = '{"i": 20, "s": null, "f": 100.0, "b": true}'
     assert s == to_json(p)
     assert p == from_json(PriOpt, s)
+
 
 def test_union():
     v = PriUnion(10)
@@ -537,7 +556,6 @@ def test_from_obj():
         f: Foo
         f2: Foo
 
-
     # Primitrive types
     assert 10 == from_obj(int, 10)
     assert 0.1 == from_obj(float, 0.1)
@@ -554,7 +572,9 @@ def test_from_obj():
     assert (f,) == from_obj(Tuple[Foo], ((10, 's', 20.0, False),))
     assert [f] == from_obj(List[Foo], [(10, 's', 20.0, False)])
     assert {'foo': f} == from_obj(Dict[str, Foo], {'foo': (10, 's', 20.0, False)})
-    assert {'foo': [f, f]} == from_obj(Optional[Dict[str, List[Foo]]], {'foo': [(10, 's', 20.0, False), (10, 's', 20.0, False)]})
+    assert {'foo': [f, f]} == from_obj(
+        Optional[Dict[str, List[Foo]]], {'foo': [(10, 's', 20.0, False), (10, 's', 20.0, False)]}
+    )
 
 
 def test_from_obj_complex():

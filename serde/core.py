@@ -1,9 +1,12 @@
 import logging
-from dataclasses import dataclass, field, fields, is_dataclass, astuple as _astuple, asdict as _asdict
-from typing import Dict, List, TypeVar, Type, Tuple
+from dataclasses import asdict as _asdict
+from dataclasses import astuple as _astuple
+from dataclasses import dataclass, field, fields, is_dataclass
+from typing import Dict, List, Tuple, Type, TypeVar
+
 from typing_inspect import get_origin
 
-from .compat import T, iter_types, type_args, is_opt, is_union, is_list, is_tuple, is_dict, assert_type
+from .compat import T, assert_type, is_dict, is_list, is_opt, is_tuple, is_union, iter_types, type_args
 
 logger = logging.getLogger('serde')
 
@@ -15,11 +18,13 @@ FROM_ITER = '__serde_from_iter__'
 
 FROM_DICT = '__serde_from_dict__'
 
+TO_ITER = '__serde_to_iter__'
+
+TO_DICT = '__serde_to_iter__'
+
 HIDDEN_NAME = '__serde_hidden__'
 
-SETTINGS = dict(
-    debug=False,
-)
+SETTINGS = dict(debug=False)
 
 
 @dataclass
@@ -27,10 +32,11 @@ class Hidden:
     """
     Hidden infomation encoded in serde classes.
     """
+
     code: Dict[str, str] = field(default_factory=dict)
 
 
-def init(debug: bool=False):
+def init(debug: bool = False):
     SETTINGS['debug'] = debug
 
 
@@ -40,12 +46,13 @@ class SerdeError(TypeError):
     """
 
 
-def gen(code: str, globals: Dict = None, locals: Dict = None, cls: Type=None) -> str:
+def gen(code: str, globals: Dict = None, locals: Dict = None, cls: Type = None) -> str:
     """
     Customized `exec` function.
     """
     try:
         from black import format_str, FileMode
+
         code = format_str(code, mode=FileMode(line_length=100))
     except:
         pass

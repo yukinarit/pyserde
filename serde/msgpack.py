@@ -1,7 +1,7 @@
+from dataclasses import astuple
 from typing import Any, Tuple, Type
 
 import msgpack
-from dataclasses import astuple
 
 from .core import T, logger
 from .de import Deserializer, from_obj

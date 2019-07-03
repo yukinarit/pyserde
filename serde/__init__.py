@@ -1,9 +1,9 @@
 """
 .. include:: ../README.md
 """
-from .core import init, astuple, asdict, SerdeError, typecheck, logger  # noqa
-from .se import serialize, is_serializable  # noqa
-from .de import deserialize, is_deserializable, from_obj  # noqa
+from .core import SerdeError, asdict, astuple, init, logger, typecheck  # noqa
+from .de import deserialize, from_obj, is_deserializable  # noqa
+from .se import is_serializable, serialize  # noqa
 
 """ Version of pyserde. """
 __version__ = '0.0.6'

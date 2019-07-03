@@ -23,8 +23,8 @@ mypy:
 	pipenv run mypy serde
 
 fmt:
-	pipenv run yapf --recursive -i serde test_serde.py bench.py
-	pipenv run isort -rc --atomic serde test_serde.py bench.py
+	pipenv run black serde test_serde.py bench/bench.py
+	pipenv run isort -rc --atomic serde test_serde.py bench/bench.py
 
 docs:
 	pipenv run pdoc serde --html -o html --force

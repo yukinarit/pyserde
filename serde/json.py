@@ -1,7 +1,6 @@
 import json
-from typing import Any, Type
-
 from dataclasses import asdict
+from typing import Any, Type
 
 from .core import T
 from .de import Deserializer, from_obj

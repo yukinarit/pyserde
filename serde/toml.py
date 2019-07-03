@@ -1,7 +1,7 @@
-import toml
-
-from typing import Type, List  # noqa
 from dataclasses import asdict
+from typing import List, Type  # noqa
+
+import toml
 
 from .core import T
 from .de import Deserializer, from_obj

@@ -13,21 +13,16 @@ parts of pyserde.
 """
 import abc
 import enum
+from dataclasses import Field, dataclass, fields, is_dataclass
+from typing import Any, Dict, List, Optional, Tuple, Type, Union
+
 import stringcase
-from typing import Any, Dict, Tuple, List, Type, Optional, Union
-from dataclasses import dataclass, Field, fields, is_dataclass
 
-from .core import SerdeError, FROM_DICT, FROM_ITER, T, gen, iter_types, type_args, SETTINGS, Hidden, HIDDEN_NAME, typecheck
-from .compat import is_opt, is_union, is_list, is_tuple, is_dict, union_args, typename, assert_type
+from .compat import assert_type, is_dict, is_list, is_opt, is_tuple, is_union, typename, union_args
+from .core import (FROM_DICT, FROM_ITER, HIDDEN_NAME, SETTINGS, Hidden, SerdeError, T, gen, iter_types, type_args,
+                   typecheck)
 
-__all__ = [
-    'deserialize',
-    'is_deserializable',
-    'Deserializer',
-    'from_obj',
-    'args_from_iter',
-    'args_from_dict',
-]
+__all__ = ['deserialize', 'is_deserializable', 'Deserializer', 'from_obj', 'args_from_iter', 'args_from_dict']
 
 
 def deserialize(_cls=None, rename_all: Optional[str] = None) -> Type:
@@ -65,6 +60,7 @@ def deserialize(_cls=None, rename_all: Optional[str] = None) -> Type:
     Hoge(int_field=10, str_field='hoge')
     >>>
     """
+
     def wrap(cls) -> Type:
         if not hasattr(cls, HIDDEN_NAME):
             setattr(cls, HIDDEN_NAME, Hidden())
@@ -102,6 +98,7 @@ class Deserializer(metaclass=abc.ABCMeta):
 
     See `serde.json.JsonDeserializer` and `serde.msgpack.MsgPackDeserializer` for example usage.
     """
+
     @abc.abstractclassmethod
     def deserialize(self, data, **opts):
         """
@@ -208,8 +205,9 @@ def to_case(s: str, case: Optional[str]) -> str:
     if case:
         f = getattr(stringcase, case, None)
         if not f:
-            raise SerdeError((f"Unkown case type: {case}. Pass the name of case "
-                              f"supported by 'stringcase' package."))
+            raise SerdeError(
+                (f"Unkown case type: {case}. Pass the name of case " f"supported by 'stringcase' package.")
+            )
         return f(s)
     else:
         return s
@@ -243,7 +241,7 @@ def args_from_iter(cls) -> str:
     return ', '.join(params)
 
 
-def args_from_dict(cls, case: str=None) -> str:
+def args_from_dict(cls, case: str = None) -> str:
     """
     Similar to `args_from_iter` but from dict.
 
@@ -295,9 +293,10 @@ class Arg:
     """
     Constructor argument for `deserialize` class.
     """
+
     type: Type  # Field type.
     field: str  # Field name.
-    var: str    # Variable name.
+    var: str  # Variable name.
     case: Optional[str] = None  # Case name.
 
     def __getitem__(self, n) -> 'Arg':
@@ -311,6 +310,7 @@ class Arg:
 @dataclass
 class IterArg(Arg):
     """ Argument for Iterable like classes e.g. List """
+
     index: int = 0
 
     @property
@@ -327,6 +327,7 @@ class IterArg(Arg):
 @dataclass
 class DictArg(Arg):
     """ Argument for Dict like classes """
+
     @property
     def varname(self) -> str:
         """
@@ -347,7 +348,7 @@ class DictArg(Arg):
             return f'{self.var}["{to_case(self.field, self.case)}"]'
 
 
-def de_value(arg: Arg, varname: str='') -> str:
+def de_value(arg: Arg, varname: str = '') -> str:
     """
     Render string of args used in `de_func`.
 
@@ -398,8 +399,7 @@ def de_value(arg: Arg, varname: str='') -> str:
         values = [de_value(arg[i], varname + f'[{i}]') + ', ' for i, _ in enumerate(type_args(typ))]
         s = f"({''.join(values)})"
     elif is_dict(typ):
-        s = (f"{{ {de_value(arg[0], 'k')}: {de_value(arg[1], 'v')} "
-             f"for k, v in {varname}.items() }}")
+        s = f"{{ {de_value(arg[0], 'k')}: {de_value(arg[1], 'v')} " f"for k, v in {varname}.items() }}"
     else:
         s = varname
     return s
@@ -409,8 +409,7 @@ def de_func(cls: Type[T], funcname: str, params: str) -> Type[T]:
     """
     Generate function to deserialize into an instance of `deserialize` class.
     """
-    body = (f'def {funcname}(data):\n'
-            f'  return cls({params})')
+    body = f'def {funcname}(data):\n' f'  return cls({params})'
 
     # Collect types to be used in the `exec` scope.
     g: Dict[str, Any] = globals().copy()
@@ -420,6 +419,7 @@ def de_func(cls: Type[T], funcname: str, params: str) -> Type[T]:
     g['cls'] = cls
     g['from_obj'] = from_obj
     import typing
+
     g['typing'] = typing
     g['NoneType'] = type(None)
 

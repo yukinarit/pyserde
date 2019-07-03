@@ -1,8 +1,9 @@
 import sys
+from dataclasses import fields, is_dataclass
 from itertools import zip_longest
-from typing import TypeVar, Type, List, Tuple, Dict, Union, Optional, Iterator
-from typing_inspect import is_union_type, is_optional_type, get_origin, get_args
-from dataclasses import is_dataclass, fields
+from typing import Dict, Iterator, List, Optional, Tuple, Type, TypeVar, Union
+
+from typing_inspect import get_args, get_origin, is_optional_type, is_union_type
 
 T = TypeVar('T')
 
