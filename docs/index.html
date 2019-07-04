@@ -65,7 +65,7 @@ From Json: Hoge(i=10, s='hoge', f=100.0, b=True)
 <li>Data format<ul>
 <li><a href="./examples/jsonfile.py">Json</a></li>
 <li><a href="./examples/tomlfile.py">Toml</a></li>
-<li><a href="./examples/yamlfile.py">Yoml</a></li>
+<li><a href="./examples/yamlfile.py">Yaml</a></li>
 <li>MsgPack</li>
 </ul>
 </li>
@@ -77,7 +77,7 @@ From Json: Hoge(i=10, s='hoge', f=100.0, b=True)
 <pre><code class="python">&#34;&#34;&#34;
 .. include:: ../README.md
 &#34;&#34;&#34;
-from .core import init, astuple, asdict, iter_types, SerdeError # noqa
+from .core import init, astuple, asdict, SerdeError, typecheck, logger  # noqa
 from .se import serialize, is_serializable  # noqa
 from .de import deserialize, is_deserializable, from_obj  # noqa
 
@@ -99,6 +99,10 @@ __version__ = &#39;0.0.6&#39;</code></pre>
 <dt><code class="name"><a title="serde.de" href="de.html">serde.de</a></code></dt>
 <dd>
 <section class="desc"><p>Defines classess and functions for <code>deserialize</code> decorator …</p></section>
+</dd>
+<dt><code class="name"><a title="serde.inspect" href="inspect.html">serde.inspect</a></code></dt>
+<dd>
+<section class="desc"><p>pyserde inspect tool …</p></section>
 </dd>
 <dt><code class="name"><a title="serde.json" href="json.html">serde.json</a></code></dt>
 <dd>
@@ -148,6 +152,7 @@ __version__ = &#39;0.0.6&#39;</code></pre>
 <li><code><a title="serde.compat" href="compat.html">serde.compat</a></code></li>
 <li><code><a title="serde.core" href="core.html">serde.core</a></code></li>
 <li><code><a title="serde.de" href="de.html">serde.de</a></code></li>
+<li><code><a title="serde.inspect" href="inspect.html">serde.inspect</a></code></li>
 <li><code><a title="serde.json" href="json.html">serde.json</a></code></li>
 <li><code><a title="serde.msgpack" href="msgpack.html">serde.msgpack</a></code></li>
 <li><code><a title="serde.se" href="se.html">serde.se</a></code></li>

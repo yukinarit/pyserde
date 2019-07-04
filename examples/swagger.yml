@@ -15,7 +15,6 @@ paths:
       description: "Returns the 'message' to the caller"
       operationId: "echo"
       parameters:
-        #- name: X-header-param
         - name: headerParam
           in: header
           type: string

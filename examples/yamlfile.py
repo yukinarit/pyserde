@@ -7,7 +7,7 @@ Usage:
     $ pipenv install
     $ pipenv run yamlfile.py
 """
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, Union
 from dataclasses import dataclass
 from serde import serialize, deserialize
 from serde.yaml import from_yaml
@@ -42,7 +42,7 @@ class Response:
 class Path:
     description: str
     operation_id: str
-    parameters: List[Parameter]
+    parameters: List[Union[str, Parameter]]
     responses: Dict[str, Response]
 
 

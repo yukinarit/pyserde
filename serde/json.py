@@ -25,5 +25,5 @@ def to_json(obj: Any, serializer=JsonSerializer) -> str:
         return json.dumps(obj)
 
 
-def from_json(c: Type[T], s: str, de: Type[Deserializer] = JsonDeserializer) -> T:
-    return from_obj(c, s, de)
+def from_json(c: Type[T], s: str, de: Type[Deserializer] = JsonDeserializer, **opts) -> T:
+    return from_obj(c, s, de, **opts)

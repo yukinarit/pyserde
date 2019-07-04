@@ -47,11 +47,11 @@ parts of pyserde.
 import abc
 import enum
 import stringcase
-from typing import Any, Dict, Tuple, List, Type, Optional
+from typing import Any, Dict, Tuple, List, Type, Optional, Union
 from dataclasses import dataclass, Field, fields, is_dataclass
 
-from .core import SerdeError, FROM_DICT, FROM_TUPLE, T, gen, iter_types, type_args
-from .compat import is_opt, is_list, is_tuple, is_dict
+from .core import SerdeError, FROM_DICT, FROM_ITER, T, gen, iter_types, type_args, SETTINGS, Hidden, HIDDEN_NAME, typecheck
+from .compat import is_opt, is_union, is_list, is_tuple, is_dict, union_args, typename, assert_type
 
 __all__ = [
     &#39;deserialize&#39;,
@@ -99,7 +99,9 @@ def deserialize(_cls=None, rename_all: Optional[str] = None) -&gt; Type:
     &gt;&gt;&gt;
     &#34;&#34;&#34;
     def wrap(cls) -&gt; Type:
-        cls = de_func(cls, FROM_TUPLE, args_from_iter(cls))
+        if not hasattr(cls, HIDDEN_NAME):
+            setattr(cls, HIDDEN_NAME, Hidden())
+        cls = de_func(cls, FROM_ITER, args_from_iter(cls))
         cls = de_func(cls, FROM_DICT, args_from_dict(cls, case=rename_all))
         return cls
 
@@ -124,7 +126,7 @@ def is_deserializable(instance_or_class: Any) -&gt; bool:
     True
     &gt;&gt;&gt;
     &#34;&#34;&#34;
-    return hasattr(instance_or_class, FROM_TUPLE) or hasattr(instance_or_class, FROM_DICT)
+    return hasattr(instance_or_class, FROM_ITER) or hasattr(instance_or_class, FROM_DICT)
 
 
 class Deserializer(metaclass=abc.ABCMeta):
@@ -144,7 +146,7 @@ class Deserializer(metaclass=abc.ABCMeta):
         &#34;&#34;&#34;
 
 
-def from_obj(c: Type[T], o: Any, de: Type[Deserializer] = None, **opts):
+def from_obj(c: Type[T], o: Any, de: Type[Deserializer] = None, strict=True, **opts):
     &#34;&#34;&#34;
     Deserialize from an object into an instance of the type specified as arg `c`. `c` can be either primitive type, `List`, `Tuple`, `Dict` or `deserialize` class.
 
@@ -184,30 +186,49 @@ def from_obj(c: Type[T], o: Any, de: Type[Deserializer] = None, **opts):
     if de:
         o = de().deserialize(o, **opts)
     if o is None:
-        return None
+        v = None
     if is_deserializable(c):
-        return from_dict_or_tuple(c, o)
+        v = from_dict_or_iter(c, o)
     elif is_opt(c):
-        return from_obj(type_args(c)[0], o)
+        if o is None:
+            v = None
+        else:
+            v = from_obj(type_args(c)[0], o)
+    elif is_union(c):
+        v = None
+        for typ in type_args(c):
+            try:
+                v = from_obj(typ, o)
+                break
+            except (SerdeError, ValueError):
+                pass
     elif is_list(c):
-        return [from_obj(type_args(c)[0], e) for e in o]
+        assert_type(list, o, strict)
+        v = [from_obj(type_args(c)[0], e) for e in o]
     elif is_tuple(c):
-        return tuple(from_obj(type_args(c)[i], e) for i, e in enumerate(o))
+        assert_type(tuple, o, strict)
+        v = tuple(from_obj(type_args(c)[i], e) for i, e in enumerate(o))
     elif is_dict(c):
-        return {from_obj(type_args(c)[0], k): from_obj(type_args(c)[1], v) for k, v in o.items()}
+        assert_type(dict, o, strict)
+        v = {from_obj(type_args(c)[0], k): from_obj(type_args(c)[1], v) for k, v in o.items()}
     else:
-        return o
+        v = o
+
+    if strict:
+        typecheck(c, v)
+
+    return v
 
 
-def from_dict_or_tuple(cls, o):
+def from_dict_or_iter(cls, o):
     &#34;&#34;&#34;
-    Deserialize into an instance of `deserialize` class from either `dict` or `tuple`.
+    Deserialize into an instance of `deserialize` class from either `dict` or `iterable`.
     &#34;&#34;&#34;
     if not is_deserializable(cls):
         raise SerdeError(&#39;`cls` must be deserializable.&#39;)
 
     if isinstance(o, (List, Tuple)):
-        return cls.__serde_from_tuple__(o)
+        return cls.__serde_from_iter__(o)
     elif isinstance(o, Dict):
         return cls.__serde_from_dict__(o)
     elif isinstance(o, cls) or o is None:
@@ -369,10 +390,10 @@ def de_value(arg: Arg, varname: str=&#39;&#39;) -&gt; str:
     ...     i: int
     &gt;&gt;&gt;
     &gt;&gt;&gt; de_value(DictArg(Hoge, &#39;hoge&#39;, &#39;data&#39;))
-    &#39;from_dict_or_tuple(Hoge, data[&#34;hoge&#34;])&#39;
+    &#39;from_obj(Hoge, data[&#34;hoge&#34;])&#39;
     &gt;&gt;&gt;
     &gt;&gt;&gt; de_value(DictArg(Optional[Hoge], &#39;hoge&#39;, &#39;data&#39;))
-    &#39;(data.get(&#34;hoge&#34;) and from_dict_or_tuple(Hoge, data[&#34;hoge&#34;]))&#39;
+    &#39;(data.get(&#34;hoge&#34;) and from_obj(Hoge, data[&#34;hoge&#34;]))&#39;
     &gt;&gt;&gt;
     &gt;&gt;&gt; de_value(DictArg(List[int], &#39;hoge&#39;, &#39;data&#39;))
     &#39;[d for d in data[&#34;hoge&#34;]]&#39;
@@ -394,12 +415,16 @@ def de_value(arg: Arg, varname: str=&#39;&#39;) -&gt; str:
     varname = varname or arg.varname
 
     if is_deserializable(typ):
-        s = f&#34;from_dict_or_tuple({typ.__name__}, {varname})&#34;
+        s = f&#34;from_obj({typ.__name__}, {varname})&#34;
     elif isinstance(typ, str):
         # When `typ` is of string, type name is specified as forward declaration.
-        s = f&#34;from_dict_or_tuple({typ}, {varname})&#34;
+        s = f&#34;from_obj({typ}, {varname})&#34;
     elif is_opt(typ):
         s = f&#34;({varname} and {de_value(arg[0])})&#34;
+    elif is_union(typ):
+        # TODO doesn&#39;t work with imported classes? (e.g. Union[str, xxxx.Package])
+        # s = f&#34;from_obj(Union[{&#39;,&#39;.join([t.__qualname__ for t in type_args(typ)])}], {varname})&#34;
+        s = f&#34;from_obj({typename(typ)}, {varname})&#34;
     elif is_list(typ):
         s = f&#34;[{de_value(arg[0], &#39;d&#39;)} for d in {varname}]&#34;
     elif is_tuple(typ):
@@ -417,18 +442,26 @@ def de_func(cls: Type[T], funcname: str, params: str) -&gt; Type[T]:
     &#34;&#34;&#34;
     Generate function to deserialize into an instance of `deserialize` class.
     &#34;&#34;&#34;
-    body = f&#39;def {funcname}(data):\n return cls({params})&#39;
+    body = (f&#39;def {funcname}(data):\n&#39;
+            f&#39;  return cls({params})&#39;)
 
     # Collect types to be used in the `exec` scope.
-    globals: Dict[str, Any] = dict(cls=cls)
+    g: Dict[str, Any] = globals().copy()
     for typ in iter_types(cls):
         if is_dataclass(typ):
-            globals[typ.__name__] = typ
-    globals[&#39;from_dict_or_tuple&#39;] = from_dict_or_tuple
+            g[typ.__name__] = typ
+    g[&#39;cls&#39;] = cls
+    g[&#39;from_obj&#39;] = from_obj
+    import typing
+    g[&#39;typing&#39;] = typing
+    g[&#39;NoneType&#39;] = type(None)
 
     # Generate deserialize function.
-    gen(body, globals)
-    setattr(cls, funcname, staticmethod(globals[funcname]))
+    code = gen(body, g, cls=cls)
+    setattr(cls, funcname, staticmethod(g[funcname]))
+    if SETTINGS[&#39;debug&#39;]:
+        hidden = getattr(cls, HIDDEN_NAME)
+        hidden.code[funcname] = code
 
     return cls</code></pre>
 </details>
@@ -665,7 +698,9 @@ Hoge(int_field=10, str_field='hoge')
     &gt;&gt;&gt;
     &#34;&#34;&#34;
     def wrap(cls) -&gt; Type:
-        cls = de_func(cls, FROM_TUPLE, args_from_iter(cls))
+        if not hasattr(cls, HIDDEN_NAME):
+            setattr(cls, HIDDEN_NAME, Hidden())
+        cls = de_func(cls, FROM_ITER, args_from_iter(cls))
         cls = de_func(cls, FROM_DICT, args_from_dict(cls, case=rename_all))
         return cls
 
@@ -676,7 +711,7 @@ Hoge(int_field=10, str_field='hoge')
 </details>
 </dd>
 <dt id="serde.de.from_obj"><code class="name flex">
-<span>def <span class="ident">from_obj</span></span>(<span>c, o, de=None, **opts)</span>
+<span>def <span class="ident">from_obj</span></span>(<span>c, o, de=None, strict=True, **opts)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Deserialize from an object into an instance of the type specified as arg <code>c</code>. <code>c</code> can be either primitive type, <code>List</code>, <code>Tuple</code>, <code>Dict</code> or <a title="serde.de.deserialize" href="#serde.de.deserialize"><code>deserialize()</code></a> class.</p>
@@ -717,7 +752,7 @@ Hoge(i=10, f=0.1, s='hoge', b=False)
 </blockquote></section>
 <details class="source">
 <summary>Source code</summary>
-<pre><code class="python">def from_obj(c: Type[T], o: Any, de: Type[Deserializer] = None, **opts):
+<pre><code class="python">def from_obj(c: Type[T], o: Any, de: Type[Deserializer] = None, strict=True, **opts):
     &#34;&#34;&#34;
     Deserialize from an object into an instance of the type specified as arg `c`. `c` can be either primitive type, `List`, `Tuple`, `Dict` or `deserialize` class.
 
@@ -757,19 +792,38 @@ Hoge(i=10, f=0.1, s='hoge', b=False)
     if de:
         o = de().deserialize(o, **opts)
     if o is None:
-        return None
+        v = None
     if is_deserializable(c):
-        return from_dict_or_tuple(c, o)
+        v = from_dict_or_iter(c, o)
     elif is_opt(c):
-        return from_obj(type_args(c)[0], o)
+        if o is None:
+            v = None
+        else:
+            v = from_obj(type_args(c)[0], o)
+    elif is_union(c):
+        v = None
+        for typ in type_args(c):
+            try:
+                v = from_obj(typ, o)
+                break
+            except (SerdeError, ValueError):
+                pass
     elif is_list(c):
-        return [from_obj(type_args(c)[0], e) for e in o]
+        assert_type(list, o, strict)
+        v = [from_obj(type_args(c)[0], e) for e in o]
     elif is_tuple(c):
-        return tuple(from_obj(type_args(c)[i], e) for i, e in enumerate(o))
+        assert_type(tuple, o, strict)
+        v = tuple(from_obj(type_args(c)[i], e) for i, e in enumerate(o))
     elif is_dict(c):
-        return {from_obj(type_args(c)[0], k): from_obj(type_args(c)[1], v) for k, v in o.items()}
+        assert_type(dict, o, strict)
+        v = {from_obj(type_args(c)[0], k): from_obj(type_args(c)[1], v) for k, v in o.items()}
     else:
-        return o</code></pre>
+        v = o
+
+    if strict:
+        typecheck(c, v)
+
+    return v</code></pre>
 </details>
 </dd>
 <dt id="serde.de.is_deserializable"><code class="name flex">
@@ -809,7 +863,7 @@ True
     True
     &gt;&gt;&gt;
     &#34;&#34;&#34;
-    return hasattr(instance_or_class, FROM_TUPLE) or hasattr(instance_or_class, FROM_DICT)</code></pre>
+    return hasattr(instance_or_class, FROM_ITER) or hasattr(instance_or_class, FROM_DICT)</code></pre>
 </details>
 </dd>
 </dl>
@@ -844,10 +898,10 @@ True
 </details>
 <h3>Subclasses</h3>
 <ul class="hlist">
-<li><a title="serde.toml.TomlDeserializer" href="toml.html#serde.toml.TomlDeserializer">TomlDeserializer</a></li>
 <li><a title="serde.msgpack.MsgPackDeserializer" href="msgpack.html#serde.msgpack.MsgPackDeserializer">MsgPackDeserializer</a></li>
 <li><a title="serde.yaml.YamlDeserializer" href="yaml.html#serde.yaml.YamlDeserializer">YamlDeserializer</a></li>
 <li><a title="serde.json.JsonDeserializer" href="json.html#serde.json.JsonDeserializer">JsonDeserializer</a></li>
+<li><a title="serde.toml.TomlDeserializer" href="toml.html#serde.toml.TomlDeserializer">TomlDeserializer</a></li>
 </ul>
 <h3>Static methods</h3>
 <dl>

@@ -4,7 +4,7 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-dataclasses = { version = "*", markers="python_version < '3.7'" }
+dataclasses = {version = "*",markers = "python_version < '3.7'"}
 typing_inspect = ">=0.4.0"
 msgpack = "*"
 toml = "*"
@@ -20,3 +20,6 @@ mypy = "*"
 pdoc3 = "*"
 twine = "*"
 black = "==19.3b0"
+
+[pipenv]
+allow_prereleases = true

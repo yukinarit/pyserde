@@ -1,15 +1,13 @@
 import logging
 from dataclasses import dataclass, field, fields, is_dataclass, astuple as _astuple, asdict as _asdict
-from typing import Dict, List, TypeVar, Iterator, Type, Tuple
+from typing import Dict, List, TypeVar, Type, Tuple
 from typing_inspect import get_origin
 
-from .compat import is_opt, is_list, is_tuple, is_dict
+from .compat import T, iter_types, type_args, is_opt, is_union, is_list, is_tuple, is_dict, assert_type
 
 logger = logging.getLogger('serde')
 
 JsonValue = TypeVar('JsonValue', str, int, float, bool, Dict, List)
-
-T = TypeVar('T')
 
 SE_NAME = '__serde_serialize__'
 
@@ -42,7 +40,7 @@ class SerdeError(TypeError):
     """
 
 
-def gen(code: str, globals: Dict = None, locals: Dict = None) -> str:
+def gen(code: str, globals: Dict = None, locals: Dict = None, cls: Type=None) -> str:
     """
     Customized `exec` function.
     """
@@ -51,40 +49,10 @@ def gen(code: str, globals: Dict = None, locals: Dict = None) -> str:
         code = format_str(code, mode=FileMode(line_length=100))
     except:
         pass
-    logger.debug(f'Generating...\n{code}')
+    for_class = 'for ' + cls.__name__ if cls else ''
+    logger.debug(f'Generating {for_class} ...\n{code}')
     exec(code, globals, locals)
     return code
-
-
-def type_args(cls: Type):
-    """
-    Wrapepr to suppress type error for accessing private members.
-    """
-    return cls.__args__  # type: ignore
-
-
-def iter_types(cls: Type) -> Iterator[Type]:
-    """
-    Iterate field types recursively.
-    """
-    if is_dataclass(cls):
-        yield cls
-        for f in fields(cls):
-            yield from iter_types(f.type)
-    elif isinstance(cls, str):
-        yield cls
-    elif is_opt(cls):
-        yield from iter_types(type_args(cls)[0])
-    elif is_list(cls):
-        yield from iter_types(type_args(cls)[0])
-    elif is_tuple(cls):
-        for arg in type_args(cls):
-            yield from iter_types(arg)
-    elif is_dict(cls):
-        yield from iter_types(type_args(cls)[0])
-        yield from iter_types(type_args(cls)[1])
-    else:
-        yield cls
 
 
 def astuple(v):
@@ -107,6 +75,8 @@ def asdict(v):
 
 def typecheck(cls: Type[T], obj: T) -> None:
     """
+    type check type-annotated classes.
+
     >>> @dataclass
     ... class Hoge:
     ...     s: str
@@ -128,14 +98,28 @@ def typecheck(cls: Type[T], obj: T) -> None:
         if obj is not None:
             typ = type_args(cls)[0]
             typecheck(typ, obj)
+    elif is_union(cls):
+        success = False
+        for typ in type_args(cls):
+            try:
+                v = typecheck(typ, obj)
+                success = True
+                break
+            except (SerdeError, ValueError):
+                pass
+        if not success:
+            raise ValueError(f'{obj} is not instance of {cls}')
     elif is_list(cls):
+        assert_type(list, obj)
         typ = type_args(cls)[0]
         for e in obj:
             typecheck(typ, e)
     elif is_tuple(cls):
+        assert_type(tuple, obj)
         for i, typ in enumerate(type_args(cls)):
             typecheck(typ, obj[i])
     elif is_dict(cls):
+        assert_type(dict, obj)
         ktyp = type_args(cls)[0]
         vtyp = type_args(cls)[1]
         for k, v in obj.items():
@@ -143,4 +127,4 @@ def typecheck(cls: Type[T], obj: T) -> None:
             typecheck(vtyp, v)
     else:
         if not isinstance(obj, cls):
-            raise ValueError(f'arg is not instance of {cls}')
+            raise ValueError(f'{obj} is not instance of {cls}')

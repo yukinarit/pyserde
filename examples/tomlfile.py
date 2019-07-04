@@ -7,11 +7,11 @@ Usage:
     $ pipenv install
     $ pipenv run tomlfile.py
 """
-from typing import List, Dict, Optional
+import logging
+from typing import List, Dict, Optional, Union
 from dataclasses import dataclass
 from serde import serialize, deserialize
 from serde.toml import from_toml
-
 
 @deserialize
 @dataclass
@@ -40,7 +40,7 @@ class Package:
 class Pipfile:
     source: List[Source]
     requires: Requires
-    packages: Dict[str, Package]
+    packages: Dict[str, Union[str, Package]]
 
 
 def main():

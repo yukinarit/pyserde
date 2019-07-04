@@ -23,29 +23,39 @@
 <details class="source">
 <summary>Source code</summary>
 <pre><code class="python">import logging
-from typing import Dict, List, TypeVar, Iterator, Type, Tuple
-from dataclasses import fields, is_dataclass, astuple as _astuple, asdict as _asdict
+from dataclasses import dataclass, field, fields, is_dataclass, astuple as _astuple, asdict as _asdict
+from typing import Dict, List, TypeVar, Type, Tuple
+from typing_inspect import get_origin
 
-from .compat import is_opt, is_list, is_tuple, is_dict
+from .compat import T, iter_types, type_args, is_opt, is_union, is_list, is_tuple, is_dict, assert_type
 
 logger = logging.getLogger(&#39;serde&#39;)
 
 JsonValue = TypeVar(&#39;JsonValue&#39;, str, int, float, bool, Dict, List)
 
-T = TypeVar(&#39;T&#39;)
-
 SE_NAME = &#39;__serde_serialize__&#39;
 
-FROM_TUPLE = &#39;__serde_from_tuple__&#39;
+FROM_ITER = &#39;__serde_from_iter__&#39;
 
 FROM_DICT = &#39;__serde_from_dict__&#39;
 
-debug = False
+HIDDEN_NAME = &#39;__serde_hidden__&#39;
+
+SETTINGS = dict(
+    debug=False,
+)
 
 
-def init(dbg: bool=False):
-    global debug
-    debug = dbg
+@dataclass
+class Hidden:
+    &#34;&#34;&#34;
+    Hidden infomation encoded in serde classes.
+    &#34;&#34;&#34;
+    code: Dict[str, str] = field(default_factory=dict)
+
+
+def init(debug: bool=False):
+    SETTINGS[&#39;debug&#39;] = debug
 
 
 class SerdeError(TypeError):
@@ -54,7 +64,7 @@ class SerdeError(TypeError):
     &#34;&#34;&#34;
 
 
-def gen(code: str, globals: Dict = None, locals: Dict = None):
+def gen(code: str, globals: Dict = None, locals: Dict = None, cls: Type=None) -&gt; str:
     &#34;&#34;&#34;
     Customized `exec` function.
     &#34;&#34;&#34;
@@ -63,39 +73,10 @@ def gen(code: str, globals: Dict = None, locals: Dict = None):
         code = format_str(code, mode=FileMode(line_length=100))
     except:
         pass
-    logger.debug(f&#39;Generating...\n{code}&#39;)
+    for_class = &#39;for &#39; + cls.__name__ if cls else &#39;&#39;
+    logger.debug(f&#39;Generating {for_class} ...\n{code}&#39;)
     exec(code, globals, locals)
-
-
-def type_args(cls: Type):
-    &#34;&#34;&#34;
-    Wrapepr to suppress type error for accessing private members.
-    &#34;&#34;&#34;
-    return cls.__args__  # type: ignore
-
-
-def iter_types(cls: Type) -&gt; Iterator[Type]:
-    &#34;&#34;&#34;
-    Iterate field types recursively.
-    &#34;&#34;&#34;
-    if is_dataclass(cls):
-        yield cls
-        for f in fields(cls):
-            yield from iter_types(f.type)
-    elif isinstance(cls, str):
-        yield cls
-    elif is_opt(cls):
-        yield from iter_types(type_args(cls)[0])
-    elif is_list(cls):
-        yield from iter_types(type_args(cls)[0])
-    elif is_tuple(cls):
-        for arg in type_args(cls):
-            yield from iter_types(arg)
-    elif is_dict(cls):
-        yield from iter_types(type_args(cls)[0])
-        yield from iter_types(type_args(cls)[1])
-    else:
-        yield cls
+    return code
 
 
 def astuple(v):
@@ -113,7 +94,64 @@ def astuple(v):
 
 
 def asdict(v):
-    return _asdict(v)</code></pre>
+    return _asdict(v)
+
+
+def typecheck(cls: Type[T], obj: T) -&gt; None:
+    &#34;&#34;&#34;
+    type check type-annotated classes.
+
+    &gt;&gt;&gt; @dataclass
+    ... class Hoge:
+    ...     s: str
+    &gt;&gt;&gt;
+    &gt;&gt;&gt; typecheck(Hoge, Hoge(&#39;hoge&#39;))
+    &gt;&gt;&gt;
+    &gt;&gt;&gt; # Type mismatch raises `ValueError`.
+    &gt;&gt;&gt; try:
+    ...     typecheck(Hoge, Hoge(10))
+    ... except:
+    ...     pass
+    &gt;&gt;&gt;
+    &#34;&#34;&#34;
+    if is_dataclass(obj):
+        # If dataclass, type check recursively.
+        for f in fields(obj):
+            typecheck(f.type, getattr(obj, f.name, None))
+    elif is_opt(cls):
+        if obj is not None:
+            typ = type_args(cls)[0]
+            typecheck(typ, obj)
+    elif is_union(cls):
+        success = False
+        for typ in type_args(cls):
+            try:
+                v = typecheck(typ, obj)
+                success = True
+                break
+            except (SerdeError, ValueError):
+                pass
+        if not success:
+            raise ValueError(f&#39;{obj} is not instance of {cls}&#39;)
+    elif is_list(cls):
+        assert_type(list, obj)
+        typ = type_args(cls)[0]
+        for e in obj:
+            typecheck(typ, e)
+    elif is_tuple(cls):
+        assert_type(tuple, obj)
+        for i, typ in enumerate(type_args(cls)):
+            typecheck(typ, obj[i])
+    elif is_dict(cls):
+        assert_type(dict, obj)
+        ktyp = type_args(cls)[0]
+        vtyp = type_args(cls)[1]
+        for k, v in obj.items():
+            typecheck(ktyp, k)
+            typecheck(vtyp, v)
+    else:
+        if not isinstance(obj, cls):
+            raise ValueError(f&#39;{obj} is not instance of {cls}&#39;)</code></pre>
 </details>
 </section>
 <section>
@@ -156,13 +194,13 @@ def asdict(v):
 </details>
 </dd>
 <dt id="serde.core.gen"><code class="name flex">
-<span>def <span class="ident">gen</span></span>(<span>code, globals=None, locals=None)</span>
+<span>def <span class="ident">gen</span></span>(<span>code, globals=None, locals=None, cls=None)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Customized <code>exec</code> function.</p></section>
 <details class="source">
 <summary>Source code</summary>
-<pre><code class="python">def gen(code: str, globals: Dict = None, locals: Dict = None):
+<pre><code class="python">def gen(code: str, globals: Dict = None, locals: Dict = None, cls: Type=None) -&gt; str:
     &#34;&#34;&#34;
     Customized `exec` function.
     &#34;&#34;&#34;
@@ -171,65 +209,102 @@ def asdict(v):
         code = format_str(code, mode=FileMode(line_length=100))
     except:
         pass
-    logger.debug(f&#39;Generating...\n{code}&#39;)
-    exec(code, globals, locals)</code></pre>
+    for_class = &#39;for &#39; + cls.__name__ if cls else &#39;&#39;
+    logger.debug(f&#39;Generating {for_class} ...\n{code}&#39;)
+    exec(code, globals, locals)
+    return code</code></pre>
 </details>
 </dd>
 <dt id="serde.core.init"><code class="name flex">
-<span>def <span class="ident">init</span></span>(<span>dbg=False)</span>
+<span>def <span class="ident">init</span></span>(<span>debug=False)</span>
 </code></dt>
 <dd>
 <section class="desc"></section>
 <details class="source">
 <summary>Source code</summary>
-<pre><code class="python">def init(dbg: bool=False):
-    global debug
-    debug = dbg</code></pre>
+<pre><code class="python">def init(debug: bool=False):
+    SETTINGS[&#39;debug&#39;] = debug</code></pre>
 </details>
 </dd>
-<dt id="serde.core.iter_types"><code class="name flex">
-<span>def <span class="ident">iter_types</span></span>(<span>cls)</span>
+<dt id="serde.core.typecheck"><code class="name flex">
+<span>def <span class="ident">typecheck</span></span>(<span>cls, obj)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Iterate field types recursively.</p></section>
+<section class="desc"><p>type check type-annotated classes.</p>
+<pre><code>&gt;&gt;&gt; @dataclass
+... class Hoge:
+...     s: str
+&gt;&gt;&gt;
+&gt;&gt;&gt; typecheck(Hoge, Hoge('hoge'))
+&gt;&gt;&gt;
+&gt;&gt;&gt; # Type mismatch raises `ValueError`.
+&gt;&gt;&gt; try:
+...     typecheck(Hoge, Hoge(10))
+... except:
+...     pass
+</code></pre>
+<blockquote>
+<blockquote>
+<blockquote></blockquote>
+</blockquote>
+</blockquote></section>
 <details class="source">
 <summary>Source code</summary>
-<pre><code class="python">def iter_types(cls: Type) -&gt; Iterator[Type]:
+<pre><code class="python">def typecheck(cls: Type[T], obj: T) -&gt; None:
     &#34;&#34;&#34;
-    Iterate field types recursively.
+    type check type-annotated classes.
+
+    &gt;&gt;&gt; @dataclass
+    ... class Hoge:
+    ...     s: str
+    &gt;&gt;&gt;
+    &gt;&gt;&gt; typecheck(Hoge, Hoge(&#39;hoge&#39;))
+    &gt;&gt;&gt;
+    &gt;&gt;&gt; # Type mismatch raises `ValueError`.
+    &gt;&gt;&gt; try:
+    ...     typecheck(Hoge, Hoge(10))
+    ... except:
+    ...     pass
+    &gt;&gt;&gt;
     &#34;&#34;&#34;
-    if is_dataclass(cls):
-        yield cls
-        for f in fields(cls):
-            yield from iter_types(f.type)
-    elif isinstance(cls, str):
-        yield cls
+    if is_dataclass(obj):
+        # If dataclass, type check recursively.
+        for f in fields(obj):
+            typecheck(f.type, getattr(obj, f.name, None))
     elif is_opt(cls):
-        yield from iter_types(type_args(cls)[0])
+        if obj is not None:
+            typ = type_args(cls)[0]
+            typecheck(typ, obj)
+    elif is_union(cls):
+        success = False
+        for typ in type_args(cls):
+            try:
+                v = typecheck(typ, obj)
+                success = True
+                break
+            except (SerdeError, ValueError):
+                pass
+        if not success:
+            raise ValueError(f&#39;{obj} is not instance of {cls}&#39;)
     elif is_list(cls):
-        yield from iter_types(type_args(cls)[0])
+        assert_type(list, obj)
+        typ = type_args(cls)[0]
+        for e in obj:
+            typecheck(typ, e)
     elif is_tuple(cls):
-        for arg in type_args(cls):
-            yield from iter_types(arg)
+        assert_type(tuple, obj)
+        for i, typ in enumerate(type_args(cls)):
+            typecheck(typ, obj[i])
     elif is_dict(cls):
-        yield from iter_types(type_args(cls)[0])
-        yield from iter_types(type_args(cls)[1])
+        assert_type(dict, obj)
+        ktyp = type_args(cls)[0]
+        vtyp = type_args(cls)[1]
+        for k, v in obj.items():
+            typecheck(ktyp, k)
+            typecheck(vtyp, v)
     else:
-        yield cls</code></pre>
-</details>
-</dd>
-<dt id="serde.core.type_args"><code class="name flex">
-<span>def <span class="ident">type_args</span></span>(<span>cls)</span>
-</code></dt>
-<dd>
-<section class="desc"><p>Wrapepr to suppress type error for accessing private members.</p></section>
-<details class="source">
-<summary>Source code</summary>
-<pre><code class="python">def type_args(cls: Type):
-    &#34;&#34;&#34;
-    Wrapepr to suppress type error for accessing private members.
-    &#34;&#34;&#34;
-    return cls.__args__  # type: ignore</code></pre>
+        if not isinstance(obj, cls):
+            raise ValueError(f&#39;{obj} is not instance of {cls}&#39;)</code></pre>
 </details>
 </dd>
 </dl>
@@ -237,6 +312,21 @@ def asdict(v):
 <section>
 <h2 class="section-title" id="header-classes">Classes</h2>
 <dl>
+<dt id="serde.core.Hidden"><code class="flex name class">
+<span>class <span class="ident">Hidden</span></span>
+<span>(</span><span>code=<factory>)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Hidden infomation encoded in serde classes.</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">class Hidden:
+    &#34;&#34;&#34;
+    Hidden infomation encoded in serde classes.
+    &#34;&#34;&#34;
+    code: Dict[str, str] = field(default_factory=dict)</code></pre>
+</details>
+</dd>
 <dt id="serde.core.SerdeError"><code class="flex name class">
 <span>class <span class="ident">SerdeError</span></span>
 <span>(</span><span>*args, **kwargs)</span>
@@ -272,17 +362,19 @@ def asdict(v):
 </ul>
 </li>
 <li><h3><a href="#header-functions">Functions</a></h3>
-<ul class="two-column">
+<ul class="">
 <li><code><a title="serde.core.asdict" href="#serde.core.asdict">asdict</a></code></li>
 <li><code><a title="serde.core.astuple" href="#serde.core.astuple">astuple</a></code></li>
 <li><code><a title="serde.core.gen" href="#serde.core.gen">gen</a></code></li>
 <li><code><a title="serde.core.init" href="#serde.core.init">init</a></code></li>
-<li><code><a title="serde.core.iter_types" href="#serde.core.iter_types">iter_types</a></code></li>
-<li><code><a title="serde.core.type_args" href="#serde.core.type_args">type_args</a></code></li>
+<li><code><a title="serde.core.typecheck" href="#serde.core.typecheck">typecheck</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-classes">Classes</a></h3>
 <ul>
+<li>
+<h4><code><a title="serde.core.Hidden" href="#serde.core.Hidden">Hidden</a></code></h4>
+</li>
 <li>
 <h4><code><a title="serde.core.SerdeError" href="#serde.core.SerdeError">SerdeError</a></code></h4>
 </li>

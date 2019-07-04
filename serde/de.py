@@ -14,11 +14,11 @@ parts of pyserde.
 import abc
 import enum
 import stringcase
-from typing import Any, Dict, Tuple, List, Type, Optional
+from typing import Any, Dict, Tuple, List, Type, Optional, Union
 from dataclasses import dataclass, Field, fields, is_dataclass
 
 from .core import SerdeError, FROM_DICT, FROM_ITER, T, gen, iter_types, type_args, SETTINGS, Hidden, HIDDEN_NAME, typecheck
-from .compat import is_opt, is_list, is_tuple, is_dict
+from .compat import is_opt, is_union, is_list, is_tuple, is_dict, union_args, typename, assert_type
 
 __all__ = [
     'deserialize',
@@ -161,11 +161,22 @@ def from_obj(c: Type[T], o: Any, de: Type[Deserializer] = None, strict=True, **o
             v = None
         else:
             v = from_obj(type_args(c)[0], o)
+    elif is_union(c):
+        v = None
+        for typ in type_args(c):
+            try:
+                v = from_obj(typ, o)
+                break
+            except (SerdeError, ValueError):
+                pass
     elif is_list(c):
+        assert_type(list, o, strict)
         v = [from_obj(type_args(c)[0], e) for e in o]
     elif is_tuple(c):
+        assert_type(tuple, o, strict)
         v = tuple(from_obj(type_args(c)[i], e) for i, e in enumerate(o))
     elif is_dict(c):
+        assert_type(dict, o, strict)
         v = {from_obj(type_args(c)[0], k): from_obj(type_args(c)[1], v) for k, v in o.items()}
     else:
         v = o
@@ -377,6 +388,10 @@ def de_value(arg: Arg, varname: str='') -> str:
         s = f"from_obj({typ}, {varname})"
     elif is_opt(typ):
         s = f"({varname} and {de_value(arg[0])})"
+    elif is_union(typ):
+        # TODO doesn't work with imported classes? (e.g. Union[str, xxxx.Package])
+        # s = f"from_obj(Union[{','.join([t.__qualname__ for t in type_args(typ)])}], {varname})"
+        s = f"from_obj({typename(typ)}, {varname})"
     elif is_list(typ):
         s = f"[{de_value(arg[0], 'd')} for d in {varname}]"
     elif is_tuple(typ):
@@ -398,15 +413,19 @@ def de_func(cls: Type[T], funcname: str, params: str) -> Type[T]:
             f'  return cls({params})')
 
     # Collect types to be used in the `exec` scope.
-    globals: Dict[str, Any] = dict(cls=cls)
+    g: Dict[str, Any] = globals().copy()
     for typ in iter_types(cls):
         if is_dataclass(typ):
-            globals[typ.__name__] = typ
-    globals['from_obj'] = from_obj
+            g[typ.__name__] = typ
+    g['cls'] = cls
+    g['from_obj'] = from_obj
+    import typing
+    g['typing'] = typing
+    g['NoneType'] = type(None)
 
     # Generate deserialize function.
-    code = gen(body, globals)
-    setattr(cls, funcname, staticmethod(globals[funcname]))
+    code = gen(body, g, cls=cls)
+    setattr(cls, funcname, staticmethod(g[funcname]))
     if SETTINGS['debug']:
         hidden = getattr(cls, HIDDEN_NAME)
         hidden.code[funcname] = code

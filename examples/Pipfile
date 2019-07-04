@@ -8,6 +8,6 @@ python_version = "3.6"
 
 [packages]
 pyserde = { path = "../", editable = true }
-toml = { version = "*" }
-pytoml = { version = "*" }
-requests = { version = "*" }
+toml = "*"
+pytoml = "*"
+requests = "*"

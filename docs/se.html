@@ -31,7 +31,7 @@ import abc
 import functools
 from typing import Any, Type
 
-from .core import SE_NAME, T
+from .core import SE_NAME, T, Hidden, HIDDEN_NAME
 
 
 class Serializer(metaclass=abc.ABCMeta):
@@ -69,6 +69,8 @@ def serialize(_cls: Type[T]) -&gt; Type[T]:
     &#34;&#34;&#34;
     @functools.wraps(_cls)
     def wrap(cls: Type[T]) -&gt; Type[T]:
+        if not hasattr(cls, HIDDEN_NAME):
+            setattr(cls, HIDDEN_NAME, Hidden())
         def serialize(self, ser, **opts) -&gt; None:
             return ser().serialize(self, **opts)
 
@@ -199,6 +201,8 @@ into an object in various data format such as JSON and MsgPack.</p>
     &#34;&#34;&#34;
     @functools.wraps(_cls)
     def wrap(cls: Type[T]) -&gt; Type[T]:
+        if not hasattr(cls, HIDDEN_NAME):
+            setattr(cls, HIDDEN_NAME, Hidden())
         def serialize(self, ser, **opts) -&gt; None:
             return ser().serialize(self, **opts)
 
@@ -234,10 +238,10 @@ into an object in various data format such as JSON and MsgPack.</p>
 </details>
 <h3>Subclasses</h3>
 <ul class="hlist">
-<li><a title="serde.toml.TomlSerializer" href="toml.html#serde.toml.TomlSerializer">TomlSerializer</a></li>
 <li><a title="serde.msgpack.MsgPackSerializer" href="msgpack.html#serde.msgpack.MsgPackSerializer">MsgPackSerializer</a></li>
 <li><a title="serde.yaml.YamlSerializer" href="yaml.html#serde.yaml.YamlSerializer">YamlSerializer</a></li>
 <li><a title="serde.json.JsonSerializer" href="json.html#serde.json.JsonSerializer">JsonSerializer</a></li>
+<li><a title="serde.toml.TomlSerializer" href="toml.html#serde.toml.TomlSerializer">TomlSerializer</a></li>
 </ul>
 <h3>Static methods</h3>
 <dl>
