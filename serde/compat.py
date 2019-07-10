@@ -32,13 +32,13 @@ def typename(typ) -> str:
         return f'Union[{", ".join([typename(e) for e in union_args(typ)])}]'
     elif is_list(typ):
         et = typename(type_args(typ)[0])
-        return f'{typ.__name__}[{et}]'
+        return f'List[{et}]'
     elif is_dict(typ):
         kt = typename(type_args(typ)[0])
         vt = typename(type_args(typ)[1])
-        return f'{typ.__name__}[{kt}, {vt}]'
+        return f'Dict[{kt}, {vt}]'
     elif is_tuple(typ):
-        return f'{typ.__name__}[{", ".join([typename(e) for e in type_args(typ)])}]'
+        return f'Tuple[{", ".join([typename(e) for e in type_args(typ)])}]'
     else:
         return typ.__name__
 

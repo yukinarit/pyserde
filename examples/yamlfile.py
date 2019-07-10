@@ -9,7 +9,7 @@ Usage:
 """
 from typing import List, Dict, Optional, Union
 from dataclasses import dataclass
-from serde import serialize, deserialize
+from serde import deserialize
 from serde.yaml import from_yaml
 
 
@@ -58,6 +58,7 @@ class Prop:
 class Definition:
     required: Optional[List[str]]
     properties: Dict[str, Prop]
+
 
 @deserialize(rename_all='camelcase')
 @dataclass

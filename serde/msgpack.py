@@ -1,5 +1,5 @@
 from dataclasses import astuple
-from typing import Any, Tuple, Type
+from typing import Any, Type
 
 import msgpack
 

@@ -4,11 +4,10 @@ Defines classess and functions for `serialize` decorator.
 """
 import abc
 import functools
-from dataclasses import asdict, astuple, dataclass
+from dataclasses import asdict, dataclass
 from typing import Any, Dict, Tuple, Type
 
-from .compat import is_dict, is_list, is_tuple
-from .core import HIDDEN_NAME, SE_NAME, TO_DICT, TO_ITER, Hidden, T, gen
+from .core import HIDDEN_NAME, SE_NAME, Hidden, T
 
 
 class Serializer(metaclass=abc.ABCMeta):
@@ -89,7 +88,7 @@ def to_dict(o) -> Dict:
     >>> @serialize
     ... @dataclass
     ... class Hoge:
-    ...     i: int 
+    ...     i: int
     >>>
     >>> to_dict(Hoge(10))
     {'i': 10}

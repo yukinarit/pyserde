@@ -4,9 +4,7 @@ from dataclasses import astuple as _astuple
 from dataclasses import dataclass, field, fields, is_dataclass
 from typing import Dict, List, Tuple, Type, TypeVar
 
-from typing_inspect import get_origin
-
-from .compat import T, assert_type, is_dict, is_list, is_opt, is_tuple, is_union, iter_types, type_args
+from .compat import T, assert_type, is_dict, is_list, is_opt, is_tuple, is_union, type_args
 
 logger = logging.getLogger('serde')
 

@@ -1,8 +1,8 @@
-from typing import List, Dict, Optional, Union
 from dataclasses import dataclass
 from envclasses import envclass, load_env
 from serde import deserialize
 from serde.yaml import from_yaml
+
 
 @deserialize
 @envclass

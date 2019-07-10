@@ -9,9 +9,9 @@ Usage:
 """
 import requests
 
-from typing import List, Dict, Optional
+from typing import List, Optional
 from dataclasses import dataclass
-from serde import serialize, deserialize
+from serde import deserialize
 from serde.json import from_json
 
 
@@ -46,4 +46,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-

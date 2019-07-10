@@ -11,10 +11,10 @@ build:
 	pipenv run python setup.py bdist_wheel
 
 test:
-	pytest test_serde.py --doctest-modules serde -v
+	pytest tests --doctest-modules serde -v
 
 coverage:
-	pytest test_serde.py --doctest-modules serde -v --cov=serde --cov-report term --cov-report xml
+	pytest tests --doctest-modules serde -v --cov=serde --cov-report term --cov-report xml
 
 pep8:
 	pipenv run flake8
@@ -23,8 +23,8 @@ mypy:
 	pipenv run mypy serde
 
 fmt:
-	pipenv run black serde test_serde.py bench/bench.py
-	pipenv run isort -rc --atomic serde test_serde.py bench/bench.py
+	pipenv run black serde tests bench/bench.py
+	pipenv run isort -rc --atomic serde tests bench/bench.py
 
 docs:
 	pipenv run pdoc serde --html -o html --force

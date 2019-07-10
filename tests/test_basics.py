@@ -1,19 +1,14 @@
 import enum
 import json
 import logging
-from dataclasses import dataclass, field, fields
+from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Tuple, Union
 
 import msgpack
 import pytest
-from typing_inspect import get_origin
 
-from serde import asdict, astuple, deserialize, from_obj
-from serde import init as serde_init
-from serde import logger, serialize, typecheck
-from serde.compat import is_dict, is_list, is_opt, is_tuple, is_union, type_args, union_args
-from serde.core import iter_types
-from serde.de import de_value
+from serde import asdict, astuple, deserialize, from_obj, init as serde_init, logger, serialize, typecheck
+from serde.compat import is_dict, is_list, is_opt, is_tuple, is_union, type_args, union_args, iter_types
 from serde.json import from_json, to_json
 from serde.msgpack import from_msgpack, to_msgpack
 
@@ -135,39 +130,6 @@ class PriOpt:
     s: Optional[str]
     f: Optional[float]
     b: Optional[bool]
-
-
-@deserialize
-@serialize
-@dataclass(unsafe_hash=True)
-class PriUnion:
-    """
-    Union Primitives.
-    """
-
-    v: Union[int, str, float, bool]
-
-
-@deserialize
-@serialize
-@dataclass(unsafe_hash=True)
-class PriOptUnion:
-    """
-    Union Primitives.
-    """
-
-    v: Union[Optional[int], Optional[str], Optional[float], Optional[bool]]
-
-
-@deserialize
-@serialize
-@dataclass(unsafe_hash=True)
-class ContUnion:
-    """
-    Union Containers.
-    """
-
-    v: Union[List[int], List[str], Dict[str, int]]
 
 
 def test_non_dataclass():
@@ -309,73 +271,6 @@ def test_optional():
     s = '{"i": 20, "s": null, "f": 100.0, "b": true}'
     assert s == to_json(p)
     assert p == from_json(PriOpt, s)
-
-
-def test_union():
-    v = PriUnion(10)
-    s = '{"v": 10}'
-    assert s == to_json(v)
-    print(f'hoge {v.__serde_hidden__.code}')
-    assert v == from_json(PriUnion, s, strict=False)
-
-    v = PriUnion(10.0)
-    s = '{"v": 10.0}'
-    assert s == to_json(v)
-    assert v == from_json(PriUnion, s)
-
-    v = PriUnion('hoge')
-    s = '{"v": "hoge"}'
-    assert s == to_json(v)
-    assert v == from_json(PriUnion, s)
-
-    v = PriUnion(True)
-    s = '{"v": true}'
-    assert s == to_json(v)
-    assert v == from_json(PriUnion, s)
-
-
-def test_union_optional():
-    v = PriOptUnion(10)
-    s = '{"v": 10}'
-    assert s == to_json(v)
-    assert v == from_json(PriOptUnion, s)
-
-    v = PriOptUnion(None)
-    s = '{"v": null}'
-    assert s == to_json(v)
-    assert v == from_json(PriOptUnion, s)
-
-    v = PriOptUnion("hoge")
-    s = '{"v": "hoge"}'
-    assert s == to_json(v)
-    assert v == from_json(PriOptUnion, s)
-
-    v = PriOptUnion(10.0)
-    s = '{"v": 10.0}'
-    assert s == to_json(v)
-    assert v == from_json(PriOptUnion, s)
-
-    v = PriOptUnion(False)
-    s = '{"v": false}'
-    assert s == to_json(v)
-    assert v == from_json(PriOptUnion, s)
-
-
-def test_union_containers():
-    v = ContUnion([1, 2, 3])
-    s = '{"v": [1, 2, 3]}'
-    assert s == to_json(v)
-    assert v == from_json(ContUnion, s)
-
-    v = ContUnion(['1', '2', '3'])
-    s = '{"v": ["1", "2", "3"]}'
-    assert s == to_json(v)
-    assert v == from_json(ContUnion, s)
-
-    v = ContUnion({'a': 1, 'b': 2, 'c': 3})
-    s = '{"v": {"a": 1, "b": 2, "c": 3}}'
-    assert s == to_json(v)
-    assert v == from_json(ContUnion, s)
 
 
 def test_container():

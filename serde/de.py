@@ -12,15 +12,13 @@ Defines classess and functions for `deserialize` decorator.
 parts of pyserde.
 """
 import abc
-import enum
-from dataclasses import Field, dataclass, fields, is_dataclass
+from dataclasses import dataclass, fields, is_dataclass
 from typing import Any, Dict, List, Optional, Tuple, Type, Union
 
 import stringcase
 
-from .compat import assert_type, is_dict, is_list, is_opt, is_tuple, is_union, typename, union_args
-from .core import (FROM_DICT, FROM_ITER, HIDDEN_NAME, SETTINGS, Hidden, SerdeError, T, gen, iter_types, type_args,
-                   typecheck)
+from .compat import assert_type, is_dict, is_list, is_opt, is_tuple, is_union, typename, iter_types, type_args
+from .core import (FROM_DICT, FROM_ITER, HIDDEN_NAME, SETTINGS, Hidden, SerdeError, T, gen, typecheck)
 
 __all__ = ['deserialize', 'is_deserializable', 'Deserializer', 'from_obj', 'args_from_iter', 'args_from_dict']
 
@@ -112,7 +110,8 @@ class Deserializer(metaclass=abc.ABCMeta):
 
 def from_obj(c: Type[T], o: Any, de: Type[Deserializer] = None, strict=True, **opts):
     """
-    Deserialize from an object into an instance of the type specified as arg `c`. `c` can be either primitive type, `List`, `Tuple`, `Dict` or `deserialize` class.
+    Deserialize from an object into an instance of the type specified as arg `c`.
+    `c` can be either primitive type, `List`, `Tuple`, `Dict` or `deserialize` class.
 
     ### Dataclass
 

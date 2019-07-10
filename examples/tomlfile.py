@@ -7,11 +7,11 @@ Usage:
     $ pipenv install
     $ pipenv run tomlfile.py
 """
-import logging
 from typing import List, Dict, Optional, Union
 from dataclasses import dataclass
-from serde import serialize, deserialize
+from serde import deserialize
 from serde.toml import from_toml
+
 
 @deserialize
 @dataclass
