@@ -11,3 +11,4 @@ pyserde = { path = "../", editable = true }
 toml = "*"
 pytoml = "*"
 requests = "*"
+envclasses = "==0.2.1"

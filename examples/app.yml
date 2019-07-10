@@ -1,0 +1,5 @@
+---
+addr: localhost
+port: 8080
+secret: THIS_IS_SECRET
+workers: 4
