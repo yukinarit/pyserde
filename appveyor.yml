@@ -27,5 +27,5 @@ build_script:
 
 test_script:
   - ps: |
-      pipenv run pytest test_serde.py --doctest-modules serde -v
+      pipenv run pytest tests --doctest-modules serde -v
       if ($LastExitCode -ne 0) { $host.SetShouldExit($LastExitCode) }
