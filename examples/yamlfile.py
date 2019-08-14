@@ -43,7 +43,7 @@ class Path:
     description: str
     operation_id: str
     parameters: List[Union[str, Parameter]]
-    responses: Dict[str, Response]
+    responses: Dict[Union[str, int], Response]
 
 
 @deserialize(rename_all='camelcase')
