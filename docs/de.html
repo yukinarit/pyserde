@@ -3,13 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
-<meta name="generator" content="pdoc 0.6.2" />
+<meta name="generator" content="pdoc 0.6.3" />
 <title>serde.de API documentation</title>
 <meta name="description" content="Defines classess and functions for `deserialize` decorator …" />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
-<style>.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{font-weight:bold}#index h4 + ul{margin-bottom:.6em}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase;cursor:pointer}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}.admonition{padding:.1em .5em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style>.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{font-weight:bold}#index h4 + ul{margin-bottom:.6em}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase;cursor:pointer}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
 <style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
 <style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
 </head>
@@ -45,22 +45,15 @@ Defines classess and functions for `deserialize` decorator.
 parts of pyserde.
 &#34;&#34;&#34;
 import abc
-import enum
+from dataclasses import dataclass, fields, is_dataclass
+from typing import Any, Dict, List, Optional, Tuple, Type, Union
+
 import stringcase
-from typing import Any, Dict, Tuple, List, Type, Optional, Union
-from dataclasses import dataclass, Field, fields, is_dataclass
 
-from .core import SerdeError, FROM_DICT, FROM_ITER, T, gen, iter_types, type_args, SETTINGS, Hidden, HIDDEN_NAME, typecheck
-from .compat import is_opt, is_union, is_list, is_tuple, is_dict, union_args, typename, assert_type
+from .compat import assert_type, is_dict, is_list, is_opt, is_tuple, is_union, iter_types, type_args, typename
+from .core import FROM_DICT, FROM_ITER, HIDDEN_NAME, SETTINGS, Hidden, SerdeError, T, gen, typecheck
 
-__all__ = [
-    &#39;deserialize&#39;,
-    &#39;is_deserializable&#39;,
-    &#39;Deserializer&#39;,
-    &#39;from_obj&#39;,
-    &#39;args_from_iter&#39;,
-    &#39;args_from_dict&#39;,
-]
+__all__ = [&#39;deserialize&#39;, &#39;is_deserializable&#39;, &#39;Deserializer&#39;, &#39;from_obj&#39;, &#39;args_from_iter&#39;, &#39;args_from_dict&#39;]
 
 
 def deserialize(_cls=None, rename_all: Optional[str] = None) -&gt; Type:
@@ -98,6 +91,7 @@ def deserialize(_cls=None, rename_all: Optional[str] = None) -&gt; Type:
     Hoge(int_field=10, str_field=&#39;hoge&#39;)
     &gt;&gt;&gt;
     &#34;&#34;&#34;
+
     def wrap(cls) -&gt; Type:
         if not hasattr(cls, HIDDEN_NAME):
             setattr(cls, HIDDEN_NAME, Hidden())
@@ -135,6 +129,7 @@ class Deserializer(metaclass=abc.ABCMeta):
 
     See `serde.json.JsonDeserializer` and `serde.msgpack.MsgPackDeserializer` for example usage.
     &#34;&#34;&#34;
+
     @abc.abstractclassmethod
     def deserialize(self, data, **opts):
         &#34;&#34;&#34;
@@ -148,7 +143,8 @@ class Deserializer(metaclass=abc.ABCMeta):
 
 def from_obj(c: Type[T], o: Any, de: Type[Deserializer] = None, strict=True, **opts):
     &#34;&#34;&#34;
-    Deserialize from an object into an instance of the type specified as arg `c`. `c` can be either primitive type, `List`, `Tuple`, `Dict` or `deserialize` class.
+    Deserialize from an object into an instance of the type specified as arg `c`.
+    `c` can be either primitive type, `List`, `Tuple`, `Dict` or `deserialize` class.
 
     ### Dataclass
 
@@ -241,8 +237,9 @@ def to_case(s: str, case: Optional[str]) -&gt; str:
     if case:
         f = getattr(stringcase, case, None)
         if not f:
-            raise SerdeError((f&#34;Unkown case type: {case}. Pass the name of case &#34;
-                              f&#34;supported by &#39;stringcase&#39; package.&#34;))
+            raise SerdeError(
+                (f&#34;Unkown case type: {case}. Pass the name of case &#34; f&#34;supported by &#39;stringcase&#39; package.&#34;)
+            )
         return f(s)
     else:
         return s
@@ -276,7 +273,7 @@ def args_from_iter(cls) -&gt; str:
     return &#39;, &#39;.join(params)
 
 
-def args_from_dict(cls, case: str=None) -&gt; str:
+def args_from_dict(cls, case: str = None) -&gt; str:
     &#34;&#34;&#34;
     Similar to `args_from_iter` but from dict.
 
@@ -328,22 +325,26 @@ class Arg:
     &#34;&#34;&#34;
     Constructor argument for `deserialize` class.
     &#34;&#34;&#34;
+
     type: Type  # Field type.
     field: str  # Field name.
-    var: str    # Variable name.
+    var: str  # Variable name.
     case: Optional[str] = None  # Case name.
 
     def __getitem__(self, n) -&gt; &#39;Arg&#39;:
         typ = type_args(self.type)[n]
         if isinstance(self, IterArg):
             return IterArg(typ, self.field, self.var, case=self.case, index=self.index)
-        else:
+        elif isinstance(self, DictArg):
             return DictArg(typ, self.field, self.var, case=self.case)
+        else:
+            return Arg(typ, self.field, self.var, case=self.case)
 
 
 @dataclass
 class IterArg(Arg):
     &#34;&#34;&#34; Argument for Iterable like classes e.g. List &#34;&#34;&#34;
+
     index: int = 0
 
     @property
@@ -360,6 +361,7 @@ class IterArg(Arg):
 @dataclass
 class DictArg(Arg):
     &#34;&#34;&#34; Argument for Dict like classes &#34;&#34;&#34;
+
     @property
     def varname(self) -&gt; str:
         &#34;&#34;&#34;
@@ -380,7 +382,7 @@ class DictArg(Arg):
             return f&#39;{self.var}[&#34;{to_case(self.field, self.case)}&#34;]&#39;
 
 
-def de_value(arg: Arg, varname: str=&#39;&#39;) -&gt; str:
+def de_value(arg: Arg, varname: str = &#39;&#39;) -&gt; str:
     &#34;&#34;&#34;
     Render string of args used in `de_func`.
 
@@ -431,8 +433,7 @@ def de_value(arg: Arg, varname: str=&#39;&#39;) -&gt; str:
         values = [de_value(arg[i], varname + f&#39;[{i}]&#39;) + &#39;, &#39; for i, _ in enumerate(type_args(typ))]
         s = f&#34;({&#39;&#39;.join(values)})&#34;
     elif is_dict(typ):
-        s = (f&#34;{{ {de_value(arg[0], &#39;k&#39;)}: {de_value(arg[1], &#39;v&#39;)} &#34;
-             f&#34;for k, v in {varname}.items() }}&#34;)
+        s = f&#34;{{ {de_value(arg[0], &#39;k&#39;)}: {de_value(arg[1], &#39;v&#39;)} &#34; f&#34;for k, v in {varname}.items() }}&#34;
     else:
         s = varname
     return s
@@ -442,8 +443,7 @@ def de_func(cls: Type[T], funcname: str, params: str) -&gt; Type[T]:
     &#34;&#34;&#34;
     Generate function to deserialize into an instance of `deserialize` class.
     &#34;&#34;&#34;
-    body = (f&#39;def {funcname}(data):\n&#39;
-            f&#39;  return cls({params})&#39;)
+    body = f&#39;def {funcname}(data):\n&#39; f&#39;  return cls({params})&#39;
 
     # Collect types to be used in the `exec` scope.
     g: Dict[str, Any] = globals().copy()
@@ -453,6 +453,7 @@ def de_func(cls: Type[T], funcname: str, params: str) -&gt; Type[T]:
     g[&#39;cls&#39;] = cls
     g[&#39;from_obj&#39;] = from_obj
     import typing
+
     g[&#39;typing&#39;] = typing
     g[&#39;NoneType&#39;] = type(None)
 
@@ -510,15 +511,11 @@ def de_func(cls: Type[T], funcname: str, params: str) -&gt; Type[T]:
 'str_field=data["strField"]'
 &gt;&gt;&gt; args_from_dict(Hoge, case='pascalcase')
 'str_field=data["StrField"]'
-</code></pre>
-<blockquote>
-<blockquote>
-<blockquote></blockquote>
-</blockquote>
-</blockquote></section>
+&gt;&gt;&gt;
+</code></pre></section>
 <details class="source">
 <summary>Source code</summary>
-<pre><code class="python">def args_from_dict(cls, case: str=None) -&gt; str:
+<pre><code class="python">def args_from_dict(cls, case: str = None) -&gt; str:
     &#34;&#34;&#34;
     Similar to `args_from_iter` but from dict.
 
@@ -585,12 +582,8 @@ generate the deserialize function.</p>
 &gt;&gt;&gt;
 &gt;&gt;&gt; args_from_iter(Hoge)
 's=data[0], i=data[1], f=data[2], b=data[3]'
-</code></pre>
-<blockquote>
-<blockquote>
-<blockquote></blockquote>
-</blockquote>
-</blockquote></section>
+&gt;&gt;&gt;
+</code></pre></section>
 <details class="source">
 <summary>Source code</summary>
 <pre><code class="python">def args_from_iter(cls) -&gt; str:
@@ -654,12 +647,8 @@ Hoge(i=10, s='hoge', f=100.0, b=True)
 &gt;&gt;&gt;
 &gt;&gt;&gt; from_json(Hoge, '{"intField": 10, "strField": "hoge"}')
 Hoge(int_field=10, str_field='hoge')
-</code></pre>
-<blockquote>
-<blockquote>
-<blockquote></blockquote>
-</blockquote>
-</blockquote></section>
+&gt;&gt;&gt;
+</code></pre></section>
 <details class="source">
 <summary>Source code</summary>
 <pre><code class="python">def deserialize(_cls=None, rename_all: Optional[str] = None) -&gt; Type:
@@ -697,6 +686,7 @@ Hoge(int_field=10, str_field='hoge')
     Hoge(int_field=10, str_field=&#39;hoge&#39;)
     &gt;&gt;&gt;
     &#34;&#34;&#34;
+
     def wrap(cls) -&gt; Type:
         if not hasattr(cls, HIDDEN_NAME):
             setattr(cls, HIDDEN_NAME, Hidden())
@@ -714,7 +704,8 @@ Hoge(int_field=10, str_field='hoge')
 <span>def <span class="ident">from_obj</span></span>(<span>c, o, de=None, strict=True, **opts)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Deserialize from an object into an instance of the type specified as arg <code>c</code>. <code>c</code> can be either primitive type, <code>List</code>, <code>Tuple</code>, <code>Dict</code> or <a title="serde.de.deserialize" href="#serde.de.deserialize"><code>deserialize()</code></a> class.</p>
+<section class="desc"><p>Deserialize from an object into an instance of the type specified as arg <code>c</code>.
+<code>c</code> can be either primitive type, <code>List</code>, <code>Tuple</code>, <code>Dict</code> or <a title="serde.de.deserialize" href="#serde.de.deserialize"><code>deserialize()</code></a> class.</p>
 <h3 id="dataclass">Dataclass</h3>
 <pre><code>&gt;&gt;&gt; from serde import deserialize
 &gt;&gt;&gt;
@@ -744,17 +735,14 @@ Hoge(i=10, f=0.1, s='hoge', b=False)
 &gt;&gt;&gt;
 &gt;&gt;&gt; from_obj(Dict[str ,Hoge], {'hoge': ('hoge', 10), 'foo': ('foo', 20)})
 {'hoge': Hoge(s='hoge', i=10), 'foo': Hoge(s='foo', i=20)}
-</code></pre>
-<blockquote>
-<blockquote>
-<blockquote></blockquote>
-</blockquote>
-</blockquote></section>
+&gt;&gt;&gt;
+</code></pre></section>
 <details class="source">
 <summary>Source code</summary>
 <pre><code class="python">def from_obj(c: Type[T], o: Any, de: Type[Deserializer] = None, strict=True, **opts):
     &#34;&#34;&#34;
-    Deserialize from an object into an instance of the type specified as arg `c`. `c` can be either primitive type, `List`, `Tuple`, `Dict` or `deserialize` class.
+    Deserialize from an object into an instance of the type specified as arg `c`.
+    `c` can be either primitive type, `List`, `Tuple`, `Dict` or `deserialize` class.
 
     ### Dataclass
 
@@ -840,12 +828,8 @@ Hoge(i=10, f=0.1, s='hoge', b=False)
 &gt;&gt;&gt;
 &gt;&gt;&gt; is_deserializable(Hoge)
 True
-</code></pre>
-<blockquote>
-<blockquote>
-<blockquote></blockquote>
-</blockquote>
-</blockquote></section>
+&gt;&gt;&gt;
+</code></pre></section>
 <details class="source">
 <summary>Source code</summary>
 <pre><code class="python">def is_deserializable(instance_or_class: Any) -&gt; bool:
@@ -886,6 +870,7 @@ True
 
     See `serde.json.JsonDeserializer` and `serde.msgpack.MsgPackDeserializer` for example usage.
     &#34;&#34;&#34;
+
     @abc.abstractclassmethod
     def deserialize(self, data, **opts):
         &#34;&#34;&#34;
@@ -965,7 +950,7 @@ def deserialize(self, data, **opts):
 </nav>
 </main>
 <footer id="footer">
-<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.6.2</a>.</p>
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.6.3</a>.</p>
 </footer>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
 <script>hljs.initHighlightingOnLoad()</script>
