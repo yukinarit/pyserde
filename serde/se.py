@@ -9,9 +9,10 @@ from dataclasses import Field as DataclassField
 from dataclasses import asdict as _asdict
 from dataclasses import astuple as _astuple
 from dataclasses import dataclass, fields, is_dataclass
-from typing import Any, ClassVar, Dict, List, Tuple, Type
+from typing import Any, ClassVar, Dict, List, Tuple, Type, Optional
 
 import jinja2
+import stringcase
 
 from .compat import is_dict, is_list, is_tuple, type_args
 from .core import gen, HIDDEN_NAME, SE_NAME, SETTINGS, TO_DICT, TO_ITER, Hidden, T
@@ -30,12 +31,11 @@ class Serializer(metaclass=abc.ABCMeta):
         pass
 
 
-def serialize(_cls=None) -> Type[T]:
+def serialize(_cls=None, rename_all: Optional[str] = None) -> Type:
     """
     `serialize` decorator. A dataclass with this decorator can be serialized
     into an object in various data format such as JSON and MsgPack.
 
-    >>> from dataclasses import dataclass
     >>> from serde import serialize
     >>> from serde.json import to_json
     >>>
@@ -51,6 +51,19 @@ def serialize(_cls=None) -> Type[T]:
     >>> to_json(Hoge(i=10, s='hoge', f=100.0, b=True))
     '{"i": 10, "s": "hoge", "f": 100.0, "b": true}'
     >>>
+
+    Additionally, `serialize` supports case conversion. Pass case name in
+    `serialize` decorator as shown below.
+
+    >>> @serialize(rename_all = 'camelcase')
+    ... @dataclass
+    ... class Hoge:
+    ...     int_field: int
+    ...     str_field: str
+    >>>
+    >>> to_json(Hoge(int_field=10, str_field='hoge'))
+    '{"intField": 10, "strField": "hoge"}'
+    >>>
     """
 
     @functools.wraps(_cls)
@@ -63,7 +76,7 @@ def serialize(_cls=None) -> Type[T]:
 
         setattr(cls, SE_NAME, serialize)
         cls = se_func(cls, TO_ITER, render_astuple(cls))
-        cls = se_func(cls, TO_DICT, render_asdict(cls))
+        cls = se_func(cls, TO_DICT, render_asdict(cls, rename_all))
         return cls
 
     if _cls is None:
@@ -162,7 +175,8 @@ class Field:
 
     type: Type
     name: str
-    parent: 'Field' = None
+    parent: Optional['Field'] = None
+    case: Optional[str] = None
 
     @staticmethod
     def from_dataclass(f: DataclassField) -> '':
@@ -181,9 +195,10 @@ class Field:
         return Field(typ, None)
 
 
-def to_arg(f: DataclassField) -> Field:
+def to_arg(f: DataclassField, case: Optional[str] = None) -> Field:
     ident = Field.from_dataclass(f)
     ident.parent = Field(None, 'obj')
+    ident.case = case
     return ident
 
 
@@ -211,7 +226,7 @@ def {{funcname}}(obj):
     return env.get_template('iter').render(funcname=TO_ITER, cls=cls)
 
 
-def render_asdict(cls: Type) -> str:
+def render_asdict(cls: Type, case: Optional[str] = None) -> str:
     template = '''
 def {{funcname}}(obj):
   if not is_dataclass(obj):
@@ -220,7 +235,7 @@ def {{funcname}}(obj):
   {% if cls|is_dataclass %}
   res = {}
   {% for f in cls|fields -%}
-  res["{{f.name}}"] = {{f|arg|rvalue()}}
+  res["{{f.name|case}}"] = {{f|arg|rvalue()}}
   {% endfor -%}
   return res
   {% endif %}
@@ -232,6 +247,7 @@ def {{funcname}}(obj):
     env.filters.update({'is_dataclass': is_dataclass})
     env.filters.update({'rvalue': renderer.render})
     env.filters.update({'arg': to_arg})
+    env.filters.update({'case': getattr(stringcase, case or '', lambda s: s)})
     return env.get_template('dict').render(funcname=TO_DICT, cls=cls)
 
 

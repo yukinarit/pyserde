@@ -1,10 +1,9 @@
 import json
-from dataclasses import asdict
 from typing import Any, Type
 
 from .core import T
 from .de import Deserializer, from_obj
-from .se import Serializer, is_serializable
+from .se import Serializer, is_serializable, asdict
 
 
 class JsonSerializer(Serializer):
