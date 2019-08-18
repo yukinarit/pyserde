@@ -203,8 +203,8 @@ def to_arg(f: DataclassField, case: Optional[str] = None) -> Field:
 
 
 def render_astuple(cls: Type) -> str:
-    template = '''
-def {{funcname}}(obj):
+    template = """
+def {{func}}(obj):
   if not is_dataclass(obj):
     return copy.deepcopy(obj)
 
@@ -215,7 +215,7 @@ def {{funcname}}(obj):
   {% endfor -%}
   return tuple(res)
   {% endif %}
-    '''
+    """
 
     renderer = Renderer(TO_ITER)
     env = jinja2.Environment(loader=jinja2.DictLoader({'iter': template}))
@@ -223,12 +223,12 @@ def {{funcname}}(obj):
     env.filters.update({'is_dataclass': is_dataclass})
     env.filters.update({'rvalue': renderer.render})
     env.filters.update({'arg': to_arg})
-    return env.get_template('iter').render(funcname=TO_ITER, cls=cls)
+    return env.get_template('iter').render(func=TO_ITER, cls=cls)
 
 
 def render_asdict(cls: Type, case: Optional[str] = None) -> str:
-    template = '''
-def {{funcname}}(obj):
+    template = """
+def {{func}}(obj):
   if not is_dataclass(obj):
     return copy.deepcopy(obj)
 
@@ -239,7 +239,7 @@ def {{funcname}}(obj):
   {% endfor -%}
   return res
   {% endif %}
-    '''
+    """
 
     renderer = Renderer(TO_DICT)
     env = jinja2.Environment(loader=jinja2.DictLoader({'dict': template}))
@@ -248,7 +248,7 @@ def {{funcname}}(obj):
     env.filters.update({'rvalue': renderer.render})
     env.filters.update({'arg': to_arg})
     env.filters.update({'case': getattr(stringcase, case or '', lambda s: s)})
-    return env.get_template('dict').render(funcname=TO_DICT, cls=cls)
+    return env.get_template('dict').render(func=TO_DICT, cls=cls)
 
 
 @dataclass

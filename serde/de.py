@@ -12,9 +12,11 @@ Defines classess and functions for `deserialize` decorator.
 parts of pyserde.
 """
 import abc
+import functools
 from dataclasses import dataclass, fields, is_dataclass
 from typing import Any, Dict, List, Optional, Tuple, Type, Union
 
+import jinja2
 import stringcase
 
 from .compat import assert_type, is_dict, is_list, is_opt, is_tuple, is_union, iter_types, type_args, typename
@@ -62,8 +64,8 @@ def deserialize(_cls=None, rename_all: Optional[str] = None) -> Type:
     def wrap(cls) -> Type:
         if not hasattr(cls, HIDDEN_NAME):
             setattr(cls, HIDDEN_NAME, Hidden())
-        cls = de_func(cls, FROM_ITER, args_from_iter(cls))
-        cls = de_func(cls, FROM_DICT, args_from_dict(cls, case=rename_all))
+        cls = de_func(cls, FROM_ITER, render_from_iter(cls))
+        cls = de_func(cls, FROM_DICT, render_from_dict(cls, case=rename_all))
         return cls
 
     if _cls is None:
@@ -406,12 +408,32 @@ def de_value(arg: Arg, varname: str = '') -> str:
     return s
 
 
-def de_func(cls: Type[T], funcname: str, params: str) -> Type[T]:
+def render_from_iter(cls: Type) -> str:
+    template = """
+def {{func}}(data):
+  return cls({{cls|args}})
+    """
+
+    env = jinja2.Environment(loader=jinja2.DictLoader({'iter': template}))
+    env.filters.update({'args': args_from_iter})
+    return env.get_template('iter').render(func=FROM_ITER, cls=cls)
+
+
+def render_from_dict(cls: Type, case: Optional[str] = None) -> str:
+    template = """
+def {{func}}(data):
+  return cls({{cls|args}})
+    """
+
+    env = jinja2.Environment(loader=jinja2.DictLoader({'dict': template}))
+    env.filters.update({'args': functools.partial(args_from_dict, case=case)})
+    return env.get_template('dict').render(func=FROM_DICT, cls=cls)
+
+
+def de_func(cls: Type[T], func: str, code: str) -> Type[T]:
     """
     Generate function to deserialize into an instance of `deserialize` class.
     """
-    body = f'def {funcname}(data):\n' f'  return cls({params})'
-
     # Collect types to be used in the `exec` scope.
     g: Dict[str, Any] = globals().copy()
     for typ in iter_types(cls):
@@ -425,10 +447,10 @@ def de_func(cls: Type[T], funcname: str, params: str) -> Type[T]:
     g['NoneType'] = type(None)
 
     # Generate deserialize function.
-    code = gen(body, g, cls=cls)
-    setattr(cls, funcname, staticmethod(g[funcname]))
+    code = gen(code, g, cls=cls)
+    setattr(cls, func, staticmethod(g[func]))
     if SETTINGS['debug']:
         hidden = getattr(cls, HIDDEN_NAME)
-        hidden.code[funcname] = code
+        hidden.code[func] = code
 
     return cls
