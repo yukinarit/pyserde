@@ -61,6 +61,7 @@ From Json: Hoge(i=10, s='hoge', f=100.0, b=True)
 	* [Case conversion](#case-conversion) e.g. camelCase, kebab-case
 * Field attributes
     * [Rename](#rename-field)
+    * [Skip](#skip-field)
 
 ### Case conversion
 
@@ -86,7 +87,27 @@ From Json: Hoge(i=10, s='hoge', f=100.0, b=True)
 >>> to_json(Hoge(class_name='Hoge'))
 '{"class": "Hoge"}'
 ```
+
 For complete example, please see [./examples/rename.py](./examples/rename.py)
+
+### Skip field
+
+```python
+>>> @serialize
+... @dataclass
+... class Resource:
+...     name: str
+...     hash: str
+...     metadata: Dict[str, str] = field(default_factory=dict, metadata={'serde_skip': True})
+
+>>> resources = [
+...     Resource("Stack Overflow", "b6469c3f31653d281bbbfa6f94d60fea130abe38"),
+...     Resource("GitHub", "5cb7a0c47e53854cd00e1a968de5abce1c124601", metadata={"headquarters": "San Francisco"}) ]
+>>> to_json(resources)
+'[{"name": "Stack Overflow", "hash": "b6469c3f31653d281bbbfa6f94d60fea130abe38"}, {"name": "GitHub", "hash": "5cb7a0c47e53854cd00e1a968de5abce1c124601"}]'
+```
+
+For complete example, please see [./examples/skip.py](./examples/skip.py)
 
 ## Documentation
 

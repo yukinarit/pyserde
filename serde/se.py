@@ -8,7 +8,7 @@ import functools
 from dataclasses import Field as DataclassField
 from dataclasses import asdict as _asdict
 from dataclasses import astuple as _astuple
-from dataclasses import dataclass, fields, is_dataclass
+from dataclasses import dataclass, fields as dataclass_fields, is_dataclass
 from typing import Any, ClassVar, Dict, List, Optional, Tuple, Type
 
 import jinja2
@@ -163,8 +163,14 @@ def asdict(v):
     """
     if is_serializable(v):
         return getattr(v, TO_DICT)()
-    else:
+    elif is_dataclass(v):
         return _asdict(v)
+    elif isinstance(v, Dict):
+        return {asdict(k): asdict(v) for k, v in v.items()}
+    elif isinstance(v, (Tuple, List)):
+        return tuple(asdict(e) for e in v)
+    else:
+        return v
 
 
 @dataclass
@@ -178,10 +184,11 @@ class Field:
     parent: Optional['Field'] = None
     case: Optional[str] = None
     rename: Optional[str] = None
+    skip: Optional[bool] = None
 
     @staticmethod
     def from_dataclass(f: DataclassField) -> '':
-        return Field(f.type, f.name, rename = f.metadata.get('serde_rename'))
+        return Field(f.type, f.name, rename = f.metadata.get('serde_rename'), skip = f.metadata.get('serde_skip'))
 
     @property
     def varname(self) -> str:
@@ -196,11 +203,13 @@ class Field:
         return Field(typ, None)
 
 
-def to_arg(f: DataclassField, case: Optional[str] = None) -> Field:
-    ident = Field.from_dataclass(f)
-    ident.parent = Field(None, 'obj')
-    ident.case = case
-    return ident
+def fields(cls: Type) -> List[Field]:
+    return [Field.from_dataclass(f) for f in dataclass_fields(cls)]
+
+
+def to_arg(f: Field) -> Field:
+    f.parent = Field(None, 'obj')
+    return f
 
 
 def render_astuple(cls: Type) -> str:
@@ -212,7 +221,9 @@ def {{func}}(obj):
   {% if cls|is_dataclass %}
   res = []
   {% for f in cls|fields -%}
+  {% if not f.skip|default(False) %}
   res.append({{f|arg|rvalue()}})
+  {% endif %}
   {% endfor -%}
   return tuple(res)
   {% endif %}
@@ -236,7 +247,9 @@ def {{func}}(obj):
   {% if cls|is_dataclass %}
   res = {}
   {% for f in cls|fields -%}
-  res["{{f|arg|case}}"] = {{f|arg|rvalue()}}
+  {% if not f.skip|default(False) %}
+  res["{{f|case}}"] = {{f|arg|rvalue()}}
+  {% endif %}
   {% endfor -%}
   return res
   {% endif %}
