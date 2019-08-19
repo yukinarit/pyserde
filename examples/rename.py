@@ -1,0 +1,27 @@
+"""
+rename.py
+
+
+Usage:
+    $ pipenv install
+    $ pipenv run rename.py
+"""
+from typing import List, Optional
+from dataclasses import dataclass, field
+from serde import serialize
+from serde.json import to_json
+
+
+@serialize
+@dataclass
+class Hoge:
+    # Use 'class_name' because 'class' is a keyword.
+    class_name: str = field(metadata={'serde_rename': 'class'})
+
+
+def main():
+    print(to_json(Hoge(class_name='Hoge')))
+
+
+if __name__ == '__main__':
+    main()

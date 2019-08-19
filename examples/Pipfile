@@ -7,8 +7,11 @@ name = "pypi"
 python_version = "3.6"
 
 [packages]
-pyserde = { path = "../", editable = true }
+pyserde = {path = "../",editable = true}
 toml = "*"
 pytoml = "*"
 requests = "*"
 envclasses = "==0.2.1"
+
+[pipenv]
+allow_prereleases = true

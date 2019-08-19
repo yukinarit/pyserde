@@ -177,10 +177,11 @@ class Field:
     name: str
     parent: Optional['Field'] = None
     case: Optional[str] = None
+    rename: Optional[str] = None
 
     @staticmethod
     def from_dataclass(f: DataclassField) -> '':
-        return Field(f.type, f.name)
+        return Field(f.type, f.name, rename = f.metadata.get('serde_rename'))
 
     @property
     def varname(self) -> str:
@@ -235,11 +236,23 @@ def {{func}}(obj):
   {% if cls|is_dataclass %}
   res = {}
   {% for f in cls|fields -%}
-  res["{{f.name|case}}"] = {{f|arg|rvalue()}}
+  res["{{f|arg|case}}"] = {{f|arg|rvalue()}}
   {% endfor -%}
   return res
   {% endif %}
     """
+
+    def conv(f: Field) -> str:
+        """
+        Convert dict key name.
+        """
+        name = f.name
+        casef = getattr(stringcase, case or '', None)
+        if casef:
+            name = casef(name)
+        if f.rename:
+            name = f.rename
+        return name
 
     renderer = Renderer(TO_DICT)
     env = jinja2.Environment(loader=jinja2.DictLoader({'dict': template}))
@@ -247,7 +260,7 @@ def {{func}}(obj):
     env.filters.update({'is_dataclass': is_dataclass})
     env.filters.update({'rvalue': renderer.render})
     env.filters.update({'arg': to_arg})
-    env.filters.update({'case': getattr(stringcase, case or '', lambda s: s)})
+    env.filters.update({'case': conv})
     return env.get_template('dict').render(func=TO_DICT, cls=cls)
 
 

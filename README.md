@@ -58,7 +58,35 @@ From Json: Hoge(i=10, s='hoge', f=100.0, b=True)
 	* [Yaml](./examples/yamlfile.py)
 	* [MsgPack](./examples/msgpack.py)
 * Class attributes
-	* Case conversion e.g. camelCase, kebab-case
+	* [Case conversion](#case-conversion) e.g. camelCase, kebab-case
+* Field attributes
+    * [Rename](#rename-field)
+
+### Case conversion
+
+```python
+>>> @serialize(rename_all = 'camelcase')
+... @dataclass
+... class Hoge:
+...     int_field: int
+...     str_field: str
+>>>
+>>> to_json(Hoge(int_field=10, str_field='hoge'))
+'{"intField": 10, "strField": "hoge"}'
+```
+
+### Rename field
+
+```python
+>>> @serialize
+... @dataclass
+... class Hoge:
+...     # Use 'class_name' because 'class' is a keyword.
+...     class_name: str = field(metadata={'serde_rename': 'class'})
+>>> to_json(Hoge(class_name='Hoge'))
+'{"class": "Hoge"}'
+```
+For complete example, please see [./examples/rename.py](./examples/rename.py)
 
 ## Documentation
 
