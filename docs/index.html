@@ -70,10 +70,67 @@ From Json: Hoge(i=10, s='hoge', f=100.0, b=True)
 </ul>
 </li>
 <li>Class attributes<ul>
-<li>Case conversion e.g. camelCase, kebab-case</li>
+<li><a href="#case-conversion">Case conversion</a> e.g. camelCase, kebab-case</li>
+</ul>
+</li>
+<li>Field attributes<ul>
+<li><a href="#rename-field">Rename</a></li>
+<li><a href="#skip-field">Skip</a></li>
+<li><a href="#skip-if-value-is-evaluated-as-false">Skip if value is evaluated as False</a></li>
 </ul>
 </li>
 </ul>
+<h3 id="case-conversion">Case conversion</h3>
+<pre><code class="python">&gt;&gt;&gt; @serialize(rename_all = 'camelcase')
+... @dataclass
+... class Hoge:
+...     int_field: int
+...     str_field: str
+&gt;&gt;&gt;
+&gt;&gt;&gt; to_json(Hoge(int_field=10, str_field='hoge'))
+'{&quot;intField&quot;: 10, &quot;strField&quot;: &quot;hoge&quot;}'
+</code></pre>
+<h3 id="rename-field">Rename field</h3>
+<pre><code class="python">&gt;&gt;&gt; @serialize
+... @dataclass
+... class Hoge:
+...     # Use 'class_name' because 'class' is a keyword.
+...     class_name: str = field(metadata={'serde_rename': 'class'})
+&gt;&gt;&gt; to_json(Hoge(class_name='Hoge'))
+'{&quot;class&quot;: &quot;Hoge&quot;}'
+</code></pre>
+<p>For complete example, please see <a href="./examples/rename.py">./examples/rename.py</a></p>
+<h3 id="skip-field">Skip field</h3>
+<pre><code class="python">&gt;&gt;&gt; @serialize
+... @dataclass
+... class Resource:
+...     name: str
+...     hash: str
+...     metadata: Dict[str, str] = field(default_factory=dict, metadata={'serde_skip': True})
+
+&gt;&gt;&gt; resources = [
+...     Resource(&quot;Stack Overflow&quot;, &quot;b6469c3f31653d281bbbfa6f94d60fea130abe38&quot;),
+...     Resource(&quot;GitHub&quot;, &quot;5cb7a0c47e53854cd00e1a968de5abce1c124601&quot;, metadata={&quot;headquarters&quot;: &quot;San Francisco&quot;}) ]
+&gt;&gt;&gt; to_json(resources)
+'[{&quot;name&quot;: &quot;Stack Overflow&quot;, &quot;hash&quot;: &quot;b6469c3f31653d281bbbfa6f94d60fea130abe38&quot;}, {&quot;name&quot;: &quot;GitHub&quot;, &quot;hash&quot;: &quot;5cb7a0c47e53854cd00e1a968de5abce1c124601&quot;}]'
+</code></pre>
+<p>For complete example, please see <a href="./examples/skip.py">./examples/skip.py</a></p>
+<h3 id="skip-if-value-is-evaluated-as-false">Skip if value is evaluated as False</h3>
+<pre><code class="python">&gt;&gt;&gt; @serialize
+... @dataclass
+... class World:
+...     player: str
+...     enemies: List[str] = field(default_factory=list, metadata={'serde_skip_if_false': True})
+
+&gt;&gt;&gt; world = World('satoshi', ['Rattata', 'Pidgey'])
+&gt;&gt;&gt; to_json(world)
+'{&quot;player&quot;: &quot;satoshi&quot;, &quot;enemies&quot;: [&quot;Rattata&quot;, &quot;Pidgey&quot;]}'
+
+&gt;&gt;&gt; world = World('green', [])
+&gt;&gt;&gt; print(to_json(world))
+'{&quot;player&quot;: &quot;green&quot;}'
+</code></pre>
+<p>For complete example, please see <a href="./examples/skip.py">./examples/skip.py</a></p>
 <h2 id="documentation">Documentation</h2>
 <p><a href="https://yukinarit.github.io/pyserde/">https://yukinarit.github.io/pyserde/</a></p>
 <details class="source">
@@ -144,7 +201,13 @@ __version__ = &#39;0.0.7&#39;</code></pre>
 <li><a href="#pyserde">pyserde</a><ul>
 <li><a href="#installation">Installation</a></li>
 <li><a href="#quickstart">QuickStart</a></li>
-<li><a href="#features">Features</a></li>
+<li><a href="#features">Features</a><ul>
+<li><a href="#case-conversion">Case conversion</a></li>
+<li><a href="#rename-field">Rename field</a></li>
+<li><a href="#skip-field">Skip field</a></li>
+<li><a href="#skip-if-value-is-evaluated-as-false">Skip if value is evaluated as False</a></li>
+</ul>
+</li>
 <li><a href="#documentation">Documentation</a></li>
 </ul>
 </li>

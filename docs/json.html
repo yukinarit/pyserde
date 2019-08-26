@@ -27,24 +27,23 @@ from typing import Any, Type
 
 from .core import T
 from .de import Deserializer, from_obj
-from .se import Serializer, is_serializable, asdict
+from .se import Serializer, asdict, is_serializable
 
 
 class JsonSerializer(Serializer):
-    def serialize(self, obj: Any, **opts) -&gt; str:
+    @classmethod
+    def serialize(cls, obj: Any, **opts) -&gt; str:
         return json.dumps(asdict(obj), **opts)
 
 
 class JsonDeserializer(Deserializer):
-    def deserialize(self, s, **opts):
+    @classmethod
+    def deserialize(cls, s, **opts):
         return json.loads(s, **opts)
 
 
-def to_json(obj: Any, serializer=JsonSerializer) -&gt; str:
-    if is_serializable(obj):
-        return obj.__serde_serialize__(serializer)
-    else:
-        return json.dumps(obj)
+def to_json(obj: Any, cls: Type[JsonSerializer] = JsonSerializer) -&gt; str:
+    return cls.serialize(obj)
 
 
 def from_json(c: Type[T], s: str, de: Type[Deserializer] = JsonDeserializer, **opts) -&gt; T:
@@ -70,17 +69,14 @@ def from_json(c: Type[T], s: str, de: Type[Deserializer] = JsonDeserializer, **o
 </details>
 </dd>
 <dt id="serde.json.to_json"><code class="name flex">
-<span>def <span class="ident">to_json</span></span>(<span>obj, serializer=<class 'serde.json.JsonSerializer'>)</span>
+<span>def <span class="ident">to_json</span></span>(<span>obj, cls=<class 'serde.json.JsonSerializer'>)</span>
 </code></dt>
 <dd>
 <section class="desc"></section>
 <details class="source">
 <summary>Source code</summary>
-<pre><code class="python">def to_json(obj: Any, serializer=JsonSerializer) -&gt; str:
-    if is_serializable(obj):
-        return obj.__serde_serialize__(serializer)
-    else:
-        return json.dumps(obj)</code></pre>
+<pre><code class="python">def to_json(obj: Any, cls: Type[JsonSerializer] = JsonSerializer) -&gt; str:
+    return cls.serialize(obj)</code></pre>
 </details>
 </dd>
 </dl>
@@ -98,7 +94,8 @@ def from_json(c: Type[T], s: str, de: Type[Deserializer] = JsonDeserializer, **o
 <details class="source">
 <summary>Source code</summary>
 <pre><code class="python">class JsonDeserializer(Deserializer):
-    def deserialize(self, s, **opts):
+    @classmethod
+    def deserialize(cls, s, **opts):
         return json.loads(s, **opts)</code></pre>
 </details>
 <h3>Ancestors</h3>
@@ -124,23 +121,25 @@ def from_json(c: Type[T], s: str, de: Type[Deserializer] = JsonDeserializer, **o
 <details class="source">
 <summary>Source code</summary>
 <pre><code class="python">class JsonSerializer(Serializer):
-    def serialize(self, obj: Any, **opts) -&gt; str:
+    @classmethod
+    def serialize(cls, obj: Any, **opts) -&gt; str:
         return json.dumps(asdict(obj), **opts)</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li><a title="serde.se.Serializer" href="se.html#serde.se.Serializer">Serializer</a></li>
 </ul>
-<h3>Methods</h3>
+<h3>Static methods</h3>
 <dl>
 <dt id="serde.json.JsonSerializer.serialize"><code class="name flex">
-<span>def <span class="ident">serialize</span></span>(<span>self, obj, **opts)</span>
+<span>def <span class="ident">serialize</span></span>(<span>obj, **opts)</span>
 </code></dt>
 <dd>
 <section class="desc"></section>
 <details class="source">
 <summary>Source code</summary>
-<pre><code class="python">def serialize(self, obj: Any, **opts) -&gt; str:
+<pre><code class="python">@classmethod
+def serialize(cls, obj: Any, **opts) -&gt; str:
     return json.dumps(asdict(obj), **opts)</code></pre>
 </details>
 </dd>

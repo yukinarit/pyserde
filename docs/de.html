@@ -45,9 +45,11 @@ Defines classess and functions for `deserialize` decorator.
 parts of pyserde.
 &#34;&#34;&#34;
 import abc
+import functools
 from dataclasses import dataclass, fields, is_dataclass
 from typing import Any, Dict, List, Optional, Tuple, Type, Union
 
+import jinja2
 import stringcase
 
 from .compat import assert_type, is_dict, is_list, is_opt, is_tuple, is_union, iter_types, type_args, typename
@@ -95,8 +97,8 @@ def deserialize(_cls=None, rename_all: Optional[str] = None) -&gt; Type:
     def wrap(cls) -&gt; Type:
         if not hasattr(cls, HIDDEN_NAME):
             setattr(cls, HIDDEN_NAME, Hidden())
-        cls = de_func(cls, FROM_ITER, args_from_iter(cls))
-        cls = de_func(cls, FROM_DICT, args_from_dict(cls, case=rename_all))
+        cls = de_func(cls, FROM_ITER, render_from_iter(cls))
+        cls = de_func(cls, FROM_DICT, render_from_dict(cls, case=rename_all))
         return cls
 
     if _cls is None:
@@ -131,7 +133,7 @@ class Deserializer(metaclass=abc.ABCMeta):
     &#34;&#34;&#34;
 
     @abc.abstractclassmethod
-    def deserialize(self, data, **opts):
+    def deserialize(cls, data, **opts):
         &#34;&#34;&#34;
         deserialize `data` into an object typically `dict`, `list` or `tuple`.
 
@@ -180,7 +182,7 @@ def from_obj(c: Type[T], o: Any, de: Type[Deserializer] = None, strict=True, **o
     &gt;&gt;&gt;
     &#34;&#34;&#34;
     if de:
-        o = de().deserialize(o, **opts)
+        o = de.deserialize(o, **opts)
     if o is None:
         v = None
     if is_deserializable(c):
@@ -439,12 +441,32 @@ def de_value(arg: Arg, varname: str = &#39;&#39;) -&gt; str:
     return s
 
 
-def de_func(cls: Type[T], funcname: str, params: str) -&gt; Type[T]:
+def render_from_iter(cls: Type) -&gt; str:
+    template = &#34;&#34;&#34;
+def {{func}}(data):
+  return cls({{cls|args}})
+    &#34;&#34;&#34;
+
+    env = jinja2.Environment(loader=jinja2.DictLoader({&#39;iter&#39;: template}))
+    env.filters.update({&#39;args&#39;: args_from_iter})
+    return env.get_template(&#39;iter&#39;).render(func=FROM_ITER, cls=cls)
+
+
+def render_from_dict(cls: Type, case: Optional[str] = None) -&gt; str:
+    template = &#34;&#34;&#34;
+def {{func}}(data):
+  return cls({{cls|args}})
+    &#34;&#34;&#34;
+
+    env = jinja2.Environment(loader=jinja2.DictLoader({&#39;dict&#39;: template}))
+    env.filters.update({&#39;args&#39;: functools.partial(args_from_dict, case=case)})
+    return env.get_template(&#39;dict&#39;).render(func=FROM_DICT, cls=cls)
+
+
+def de_func(cls: Type[T], func: str, code: str) -&gt; Type[T]:
     &#34;&#34;&#34;
     Generate function to deserialize into an instance of `deserialize` class.
     &#34;&#34;&#34;
-    body = f&#39;def {funcname}(data):\n&#39; f&#39;  return cls({params})&#39;
-
     # Collect types to be used in the `exec` scope.
     g: Dict[str, Any] = globals().copy()
     for typ in iter_types(cls):
@@ -458,11 +480,11 @@ def de_func(cls: Type[T], funcname: str, params: str) -&gt; Type[T]:
     g[&#39;NoneType&#39;] = type(None)
 
     # Generate deserialize function.
-    code = gen(body, g, cls=cls)
-    setattr(cls, funcname, staticmethod(g[funcname]))
+    code = gen(code, g, cls=cls)
+    setattr(cls, func, staticmethod(g[func]))
     if SETTINGS[&#39;debug&#39;]:
         hidden = getattr(cls, HIDDEN_NAME)
-        hidden.code[funcname] = code
+        hidden.code[func] = code
 
     return cls</code></pre>
 </details>
@@ -690,8 +712,8 @@ Hoge(int_field=10, str_field='hoge')
     def wrap(cls) -&gt; Type:
         if not hasattr(cls, HIDDEN_NAME):
             setattr(cls, HIDDEN_NAME, Hidden())
-        cls = de_func(cls, FROM_ITER, args_from_iter(cls))
-        cls = de_func(cls, FROM_DICT, args_from_dict(cls, case=rename_all))
+        cls = de_func(cls, FROM_ITER, render_from_iter(cls))
+        cls = de_func(cls, FROM_DICT, render_from_dict(cls, case=rename_all))
         return cls
 
     if _cls is None:
@@ -778,7 +800,7 @@ Hoge(i=10, f=0.1, s='hoge', b=False)
     &gt;&gt;&gt;
     &#34;&#34;&#34;
     if de:
-        o = de().deserialize(o, **opts)
+        o = de.deserialize(o, **opts)
     if o is None:
         v = None
     if is_deserializable(c):
@@ -872,7 +894,7 @@ True
     &#34;&#34;&#34;
 
     @abc.abstractclassmethod
-    def deserialize(self, data, **opts):
+    def deserialize(cls, data, **opts):
         &#34;&#34;&#34;
         deserialize `data` into an object typically `dict`, `list` or `tuple`.
 
@@ -883,10 +905,10 @@ True
 </details>
 <h3>Subclasses</h3>
 <ul class="hlist">
+<li><a title="serde.toml.TomlDeserializer" href="toml.html#serde.toml.TomlDeserializer">TomlDeserializer</a></li>
 <li><a title="serde.msgpack.MsgPackDeserializer" href="msgpack.html#serde.msgpack.MsgPackDeserializer">MsgPackDeserializer</a></li>
 <li><a title="serde.yaml.YamlDeserializer" href="yaml.html#serde.yaml.YamlDeserializer">YamlDeserializer</a></li>
 <li><a title="serde.json.JsonDeserializer" href="json.html#serde.json.JsonDeserializer">JsonDeserializer</a></li>
-<li><a title="serde.toml.TomlDeserializer" href="toml.html#serde.toml.TomlDeserializer">TomlDeserializer</a></li>
 </ul>
 <h3>Static methods</h3>
 <dl>
@@ -901,7 +923,7 @@ deserialize into an object.</p></section>
 <details class="source">
 <summary>Source code</summary>
 <pre><code class="python">@abc.abstractclassmethod
-def deserialize(self, data, **opts):
+def deserialize(cls, data, **opts):
     &#34;&#34;&#34;
     deserialize `data` into an object typically `dict`, `list` or `tuple`.
 

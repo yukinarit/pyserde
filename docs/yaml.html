@@ -33,12 +33,14 @@ from .se import Serializer, is_serializable
 
 
 class YamlSerializer(Serializer):
-    def serialize(self, obj, **opts) -&gt; str:
+    @classmethod
+    def serialize(cls, obj, **opts) -&gt; str:
         return yaml.safe_dump(asdict(obj), **opts)
 
 
 class YamlDeserializer(Deserializer):
-    def deserialize(self, s, **opts):
+    @classmethod
+    def deserialize(cls, s, **opts):
         return yaml.safe_load(s, **opts)
 
 
@@ -63,7 +65,7 @@ def to_yaml(obj, se: Type[Serializer] = YamlSerializer) -&gt; str:
     if is_serializable(obj):
         return obj.__serde_serialize__(se)
     else:
-        return se().serialize(obj)
+        return se.serialize(obj)
 
 
 def from_yaml(c: Type[T], s: str, de: Type[Deserializer] = YamlDeserializer) -&gt; T:
@@ -178,7 +180,7 @@ Settings(host='localhost', port=8080, upstream=['localhost:8081', 'localhost:808
     if is_serializable(obj):
         return obj.__serde_serialize__(se)
     else:
-        return se().serialize(obj)</code></pre>
+        return se.serialize(obj)</code></pre>
 </details>
 </dd>
 </dl>
@@ -196,7 +198,8 @@ Settings(host='localhost', port=8080, upstream=['localhost:8081', 'localhost:808
 <details class="source">
 <summary>Source code</summary>
 <pre><code class="python">class YamlDeserializer(Deserializer):
-    def deserialize(self, s, **opts):
+    @classmethod
+    def deserialize(cls, s, **opts):
         return yaml.safe_load(s, **opts)</code></pre>
 </details>
 <h3>Ancestors</h3>
@@ -222,23 +225,25 @@ Settings(host='localhost', port=8080, upstream=['localhost:8081', 'localhost:808
 <details class="source">
 <summary>Source code</summary>
 <pre><code class="python">class YamlSerializer(Serializer):
-    def serialize(self, obj, **opts) -&gt; str:
+    @classmethod
+    def serialize(cls, obj, **opts) -&gt; str:
         return yaml.safe_dump(asdict(obj), **opts)</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li><a title="serde.se.Serializer" href="se.html#serde.se.Serializer">Serializer</a></li>
 </ul>
-<h3>Methods</h3>
+<h3>Static methods</h3>
 <dl>
 <dt id="serde.yaml.YamlSerializer.serialize"><code class="name flex">
-<span>def <span class="ident">serialize</span></span>(<span>self, obj, **opts)</span>
+<span>def <span class="ident">serialize</span></span>(<span>obj, **opts)</span>
 </code></dt>
 <dd>
 <section class="desc"></section>
 <details class="source">
 <summary>Source code</summary>
-<pre><code class="python">def serialize(self, obj, **opts) -&gt; str:
+<pre><code class="python">@classmethod
+def serialize(cls, obj, **opts) -&gt; str:
     return yaml.safe_dump(asdict(obj), **opts)</code></pre>
 </details>
 </dd>

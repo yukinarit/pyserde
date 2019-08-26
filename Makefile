@@ -1,6 +1,6 @@
 .PHONY: all setup build test coverage pep8 mypy fmt docs open-docs bench
 
-all: setup test pep8 mypy
+all: setup test pep8 mypy docs
 
 setup:
 	pipenv install --dev

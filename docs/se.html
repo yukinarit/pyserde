@@ -33,14 +33,14 @@ import functools
 from dataclasses import Field as DataclassField
 from dataclasses import asdict as _asdict
 from dataclasses import astuple as _astuple
-from dataclasses import dataclass, fields, is_dataclass
-from typing import Any, ClassVar, Dict, List, Tuple, Type, Optional
+from dataclasses import dataclass, fields as dataclass_fields, is_dataclass
+from typing import Any, ClassVar, Dict, List, Optional, Tuple, Type
 
 import jinja2
 import stringcase
 
 from .compat import is_dict, is_list, is_tuple, type_args
-from .core import gen, HIDDEN_NAME, SE_NAME, SETTINGS, TO_DICT, TO_ITER, Hidden, T
+from .core import HIDDEN_NAME, SE_NAME, SETTINGS, TO_DICT, TO_ITER, Hidden, T, gen
 from .de import Arg
 
 
@@ -52,7 +52,7 @@ class Serializer(metaclass=abc.ABCMeta):
     &#34;&#34;&#34;
 
     @abc.abstractclassmethod
-    def serialize(self, obj):
+    def serialize(cls, obj):
         pass
 
 
@@ -97,7 +97,7 @@ def serialize(_cls=None, rename_all: Optional[str] = None) -&gt; Type:
             setattr(cls, HIDDEN_NAME, Hidden())
 
         def serialize(self, ser, **opts) -&gt; None:
-            return ser().serialize(self, **opts)
+            return ser.serialize(self, **opts)
 
         setattr(cls, SE_NAME, serialize)
         cls = se_func(cls, TO_ITER, render_astuple(cls))
@@ -188,8 +188,14 @@ def asdict(v):
     &#34;&#34;&#34;
     if is_serializable(v):
         return getattr(v, TO_DICT)()
-    else:
+    elif is_dataclass(v):
         return _asdict(v)
+    elif isinstance(v, Dict):
+        return {asdict(k): asdict(v) for k, v in v.items()}
+    elif isinstance(v, (Tuple, List)):
+        return tuple(asdict(e) for e in v)
+    else:
+        return v
 
 
 @dataclass
@@ -202,10 +208,13 @@ class Field:
     name: str
     parent: Optional[&#39;Field&#39;] = None
     case: Optional[str] = None
+    rename: Optional[str] = None
+    skip: Optional[bool] = None
+    skip_if_false: Optional[bool] = None
 
     @staticmethod
     def from_dataclass(f: DataclassField) -&gt; &#39;&#39;:
-        return Field(f.type, f.name)
+        return Field(f.type, f.name, rename = f.metadata.get(&#39;serde_rename&#39;), skip = f.metadata.get(&#39;serde_skip&#39;), skip_if_false = f.metadata.get(&#39;serde_skip_if_false&#39;))
 
     @property
     def varname(self) -&gt; str:
@@ -220,27 +229,31 @@ class Field:
         return Field(typ, None)
 
 
-def to_arg(f: DataclassField, case: Optional[str] = None) -&gt; Field:
-    ident = Field.from_dataclass(f)
-    ident.parent = Field(None, &#39;obj&#39;)
-    ident.case = case
-    return ident
+def fields(cls: Type) -&gt; List[Field]:
+    return [Field.from_dataclass(f) for f in dataclass_fields(cls)]
+
+
+def to_arg(f: Field) -&gt; Field:
+    f.parent = Field(None, &#39;obj&#39;)
+    return f
 
 
 def render_astuple(cls: Type) -&gt; str:
-    template = &#39;&#39;&#39;
-def {{funcname}}(obj):
+    template = &#34;&#34;&#34;
+def {{func}}(obj):
   if not is_dataclass(obj):
     return copy.deepcopy(obj)
 
   {% if cls|is_dataclass %}
   res = []
   {% for f in cls|fields -%}
+  {% if not f.skip|default(False) %}
   res.append({{f|arg|rvalue()}})
+  {% endif %}
   {% endfor -%}
   return tuple(res)
   {% endif %}
-    &#39;&#39;&#39;
+    &#34;&#34;&#34;
 
     renderer = Renderer(TO_ITER)
     env = jinja2.Environment(loader=jinja2.DictLoader({&#39;iter&#39;: template}))
@@ -248,23 +261,42 @@ def {{funcname}}(obj):
     env.filters.update({&#39;is_dataclass&#39;: is_dataclass})
     env.filters.update({&#39;rvalue&#39;: renderer.render})
     env.filters.update({&#39;arg&#39;: to_arg})
-    return env.get_template(&#39;iter&#39;).render(funcname=TO_ITER, cls=cls)
+    return env.get_template(&#39;iter&#39;).render(func=TO_ITER, cls=cls)
 
 
 def render_asdict(cls: Type, case: Optional[str] = None) -&gt; str:
-    template = &#39;&#39;&#39;
-def {{funcname}}(obj):
+    template = &#34;&#34;&#34;
+def {{func}}(obj):
   if not is_dataclass(obj):
     return copy.deepcopy(obj)
 
   {% if cls|is_dataclass %}
   res = {}
   {% for f in cls|fields -%}
-  res[&#34;{{f.name|case}}&#34;] = {{f|arg|rvalue()}}
+  {% if not f.skip|default(False) %}
+    {% if f.skip_if_false|default(False) %}
+  if {{f|arg|rvalue()}}:
+    res[&#34;{{f|case}}&#34;] = {{f|arg|rvalue()}}
+    {% else %}
+  res[&#34;{{f|case}}&#34;] = {{f|arg|rvalue()}}
+    {% endif %}
+  {% endif %}
   {% endfor -%}
   return res
   {% endif %}
-    &#39;&#39;&#39;
+    &#34;&#34;&#34;
+
+    def conv(f: Field) -&gt; str:
+        &#34;&#34;&#34;
+        Convert dict key name.
+        &#34;&#34;&#34;
+        name = f.name
+        casef = getattr(stringcase, case or &#39;&#39;, None)
+        if casef:
+            name = casef(name)
+        if f.rename:
+            name = f.rename
+        return name
 
     renderer = Renderer(TO_DICT)
     env = jinja2.Environment(loader=jinja2.DictLoader({&#39;dict&#39;: template}))
@@ -272,8 +304,8 @@ def {{funcname}}(obj):
     env.filters.update({&#39;is_dataclass&#39;: is_dataclass})
     env.filters.update({&#39;rvalue&#39;: renderer.render})
     env.filters.update({&#39;arg&#39;: to_arg})
-    env.filters.update({&#39;case&#39;: getattr(stringcase, case or &#39;&#39;, lambda s: s)})
-    return env.get_template(&#39;dict&#39;).render(funcname=TO_DICT, cls=cls)
+    env.filters.update({&#39;case&#39;: conv})
+    return env.get_template(&#39;dict&#39;).render(func=TO_DICT, cls=cls)
 
 
 @dataclass
@@ -281,6 +313,7 @@ class Renderer:
     &#34;&#34;&#34;
     Render rvalue for variouls types.
     &#34;&#34;&#34;
+
     func: str
 
     def render(self, arg: Field) -&gt; str:
@@ -388,8 +421,14 @@ def se_func(cls: Type[T], func: str, code: str) -&gt; Type[T]:
     &#34;&#34;&#34;
     if is_serializable(v):
         return getattr(v, TO_DICT)()
+    elif is_dataclass(v):
+        return _asdict(v)
+    elif isinstance(v, Dict):
+        return {asdict(k): asdict(v) for k, v in v.items()}
+    elif isinstance(v, (Tuple, List)):
+        return tuple(asdict(e) for e in v)
     else:
-        return _asdict(v)</code></pre>
+        return v</code></pre>
 </details>
 </dd>
 <dt id="serde.se.astuple"><code class="name flex">
@@ -413,6 +452,17 @@ def se_func(cls: Type[T], func: str, code: str) -&gt; Type[T]:
         return tuple(astuple(e) for e in v)
     else:
         return v</code></pre>
+</details>
+</dd>
+<dt id="serde.se.fields"><code class="name flex">
+<span>def <span class="ident">fields</span></span>(<span>cls)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def fields(cls: Type) -&gt; List[Field]:
+    return [Field.from_dataclass(f) for f in dataclass_fields(cls)]</code></pre>
 </details>
 </dd>
 <dt id="serde.se.is_serializable"><code class="name flex">
@@ -461,19 +511,38 @@ True
 <details class="source">
 <summary>Source code</summary>
 <pre><code class="python">def render_asdict(cls: Type, case: Optional[str] = None) -&gt; str:
-    template = &#39;&#39;&#39;
-def {{funcname}}(obj):
+    template = &#34;&#34;&#34;
+def {{func}}(obj):
   if not is_dataclass(obj):
     return copy.deepcopy(obj)
 
   {% if cls|is_dataclass %}
   res = {}
   {% for f in cls|fields -%}
-  res[&#34;{{f.name|case}}&#34;] = {{f|arg|rvalue()}}
+  {% if not f.skip|default(False) %}
+    {% if f.skip_if_false|default(False) %}
+  if {{f|arg|rvalue()}}:
+    res[&#34;{{f|case}}&#34;] = {{f|arg|rvalue()}}
+    {% else %}
+  res[&#34;{{f|case}}&#34;] = {{f|arg|rvalue()}}
+    {% endif %}
+  {% endif %}
   {% endfor -%}
   return res
   {% endif %}
-    &#39;&#39;&#39;
+    &#34;&#34;&#34;
+
+    def conv(f: Field) -&gt; str:
+        &#34;&#34;&#34;
+        Convert dict key name.
+        &#34;&#34;&#34;
+        name = f.name
+        casef = getattr(stringcase, case or &#39;&#39;, None)
+        if casef:
+            name = casef(name)
+        if f.rename:
+            name = f.rename
+        return name
 
     renderer = Renderer(TO_DICT)
     env = jinja2.Environment(loader=jinja2.DictLoader({&#39;dict&#39;: template}))
@@ -481,8 +550,8 @@ def {{funcname}}(obj):
     env.filters.update({&#39;is_dataclass&#39;: is_dataclass})
     env.filters.update({&#39;rvalue&#39;: renderer.render})
     env.filters.update({&#39;arg&#39;: to_arg})
-    env.filters.update({&#39;case&#39;: getattr(stringcase, case or &#39;&#39;, lambda s: s)})
-    return env.get_template(&#39;dict&#39;).render(funcname=TO_DICT, cls=cls)</code></pre>
+    env.filters.update({&#39;case&#39;: conv})
+    return env.get_template(&#39;dict&#39;).render(func=TO_DICT, cls=cls)</code></pre>
 </details>
 </dd>
 <dt id="serde.se.render_astuple"><code class="name flex">
@@ -493,19 +562,21 @@ def {{funcname}}(obj):
 <details class="source">
 <summary>Source code</summary>
 <pre><code class="python">def render_astuple(cls: Type) -&gt; str:
-    template = &#39;&#39;&#39;
-def {{funcname}}(obj):
+    template = &#34;&#34;&#34;
+def {{func}}(obj):
   if not is_dataclass(obj):
     return copy.deepcopy(obj)
 
   {% if cls|is_dataclass %}
   res = []
   {% for f in cls|fields -%}
+  {% if not f.skip|default(False) %}
   res.append({{f|arg|rvalue()}})
+  {% endif %}
   {% endfor -%}
   return tuple(res)
   {% endif %}
-    &#39;&#39;&#39;
+    &#34;&#34;&#34;
 
     renderer = Renderer(TO_ITER)
     env = jinja2.Environment(loader=jinja2.DictLoader({&#39;iter&#39;: template}))
@@ -513,7 +584,7 @@ def {{funcname}}(obj):
     env.filters.update({&#39;is_dataclass&#39;: is_dataclass})
     env.filters.update({&#39;rvalue&#39;: renderer.render})
     env.filters.update({&#39;arg&#39;: to_arg})
-    return env.get_template(&#39;iter&#39;).render(funcname=TO_ITER, cls=cls)</code></pre>
+    return env.get_template(&#39;iter&#39;).render(func=TO_ITER, cls=cls)</code></pre>
 </details>
 </dd>
 <dt id="serde.se.se_func"><code class="name flex">
@@ -617,7 +688,7 @@ into an object in various data format such as JSON and MsgPack.</p>
             setattr(cls, HIDDEN_NAME, Hidden())
 
         def serialize(self, ser, **opts) -&gt; None:
-            return ser().serialize(self, **opts)
+            return ser.serialize(self, **opts)
 
         setattr(cls, SE_NAME, serialize)
         cls = se_func(cls, TO_ITER, render_astuple(cls))
@@ -631,17 +702,15 @@ into an object in various data format such as JSON and MsgPack.</p>
 </details>
 </dd>
 <dt id="serde.se.to_arg"><code class="name flex">
-<span>def <span class="ident">to_arg</span></span>(<span>f, case=None)</span>
+<span>def <span class="ident">to_arg</span></span>(<span>f)</span>
 </code></dt>
 <dd>
 <section class="desc"></section>
 <details class="source">
 <summary>Source code</summary>
-<pre><code class="python">def to_arg(f: DataclassField, case: Optional[str] = None) -&gt; Field:
-    ident = Field.from_dataclass(f)
-    ident.parent = Field(None, &#39;obj&#39;)
-    ident.case = case
-    return ident</code></pre>
+<pre><code class="python">def to_arg(f: Field) -&gt; Field:
+    f.parent = Field(None, &#39;obj&#39;)
+    return f</code></pre>
 </details>
 </dd>
 <dt id="serde.se.to_dict"><code class="name flex">
@@ -712,7 +781,7 @@ into an object in various data format such as JSON and MsgPack.</p>
 <dl>
 <dt id="serde.se.Field"><code class="flex name class">
 <span>class <span class="ident">Field</span></span>
-<span>(</span><span>type, name, parent=None, case=None)</span>
+<span>(</span><span>type, name, parent=None, case=None, rename=None, skip=None, skip_if_false=None)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Field in pyserde class.</p></section>
@@ -727,10 +796,13 @@ into an object in various data format such as JSON and MsgPack.</p>
     name: str
     parent: Optional[&#39;Field&#39;] = None
     case: Optional[str] = None
+    rename: Optional[str] = None
+    skip: Optional[bool] = None
+    skip_if_false: Optional[bool] = None
 
     @staticmethod
     def from_dataclass(f: DataclassField) -&gt; &#39;&#39;:
-        return Field(f.type, f.name)
+        return Field(f.type, f.name, rename = f.metadata.get(&#39;serde_rename&#39;), skip = f.metadata.get(&#39;serde_skip&#39;), skip_if_false = f.metadata.get(&#39;serde_skip_if_false&#39;))
 
     @property
     def varname(self) -&gt; str:
@@ -754,6 +826,18 @@ into an object in various data format such as JSON and MsgPack.</p>
 <dd>
 <section class="desc"></section>
 </dd>
+<dt id="serde.se.Field.rename"><code class="name">var <span class="ident">rename</span></code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+<dt id="serde.se.Field.skip"><code class="name">var <span class="ident">skip</span></code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+<dt id="serde.se.Field.skip_if_false"><code class="name">var <span class="ident">skip_if_false</span></code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
 </dl>
 <h3>Static methods</h3>
 <dl>
@@ -766,7 +850,7 @@ into an object in various data format such as JSON and MsgPack.</p>
 <summary>Source code</summary>
 <pre><code class="python">@staticmethod
 def from_dataclass(f: DataclassField) -&gt; &#39;&#39;:
-    return Field(f.type, f.name)</code></pre>
+    return Field(f.type, f.name, rename = f.metadata.get(&#39;serde_rename&#39;), skip = f.metadata.get(&#39;serde_skip&#39;), skip_if_false = f.metadata.get(&#39;serde_skip_if_false&#39;))</code></pre>
 </details>
 </dd>
 </dl>
@@ -800,6 +884,7 @@ def varname(self) -&gt; str:
     &#34;&#34;&#34;
     Render rvalue for variouls types.
     &#34;&#34;&#34;
+
     func: str
 
     def render(self, arg: Field) -&gt; str:
@@ -1031,15 +1116,15 @@ def varname(self) -&gt; str:
     &#34;&#34;&#34;
 
     @abc.abstractclassmethod
-    def serialize(self, obj):
+    def serialize(cls, obj):
         pass</code></pre>
 </details>
 <h3>Subclasses</h3>
 <ul class="hlist">
+<li><a title="serde.toml.TomlSerializer" href="toml.html#serde.toml.TomlSerializer">TomlSerializer</a></li>
 <li><a title="serde.msgpack.MsgPackSerializer" href="msgpack.html#serde.msgpack.MsgPackSerializer">MsgPackSerializer</a></li>
 <li><a title="serde.yaml.YamlSerializer" href="yaml.html#serde.yaml.YamlSerializer">YamlSerializer</a></li>
 <li><a title="serde.json.JsonSerializer" href="json.html#serde.json.JsonSerializer">JsonSerializer</a></li>
-<li><a title="serde.toml.TomlSerializer" href="toml.html#serde.toml.TomlSerializer">TomlSerializer</a></li>
 </ul>
 <h3>Static methods</h3>
 <dl>
@@ -1051,7 +1136,7 @@ def varname(self) -&gt; str:
 <details class="source">
 <summary>Source code</summary>
 <pre><code class="python">@abc.abstractclassmethod
-def serialize(self, obj):
+def serialize(cls, obj):
     pass</code></pre>
 </details>
 </dd>
@@ -1075,6 +1160,7 @@ def serialize(self, obj):
 <ul class="two-column">
 <li><code><a title="serde.se.asdict" href="#serde.se.asdict">asdict</a></code></li>
 <li><code><a title="serde.se.astuple" href="#serde.se.astuple">astuple</a></code></li>
+<li><code><a title="serde.se.fields" href="#serde.se.fields">fields</a></code></li>
 <li><code><a title="serde.se.is_serializable" href="#serde.se.is_serializable">is_serializable</a></code></li>
 <li><code><a title="serde.se.render_asdict" href="#serde.se.render_asdict">render_asdict</a></code></li>
 <li><code><a title="serde.se.render_astuple" href="#serde.se.render_astuple">render_astuple</a></code></li>
@@ -1088,10 +1174,13 @@ def serialize(self, obj):
 <ul>
 <li>
 <h4><code><a title="serde.se.Field" href="#serde.se.Field">Field</a></code></h4>
-<ul class="">
+<ul class="two-column">
 <li><code><a title="serde.se.Field.case" href="#serde.se.Field.case">case</a></code></li>
 <li><code><a title="serde.se.Field.from_dataclass" href="#serde.se.Field.from_dataclass">from_dataclass</a></code></li>
 <li><code><a title="serde.se.Field.parent" href="#serde.se.Field.parent">parent</a></code></li>
+<li><code><a title="serde.se.Field.rename" href="#serde.se.Field.rename">rename</a></code></li>
+<li><code><a title="serde.se.Field.skip" href="#serde.se.Field.skip">skip</a></code></li>
+<li><code><a title="serde.se.Field.skip_if_false" href="#serde.se.Field.skip_if_false">skip_if_false</a></code></li>
 <li><code><a title="serde.se.Field.varname" href="#serde.se.Field.varname">varname</a></code></li>
 </ul>
 </li>

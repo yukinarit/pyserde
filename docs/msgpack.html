@@ -33,12 +33,14 @@ from .se import Serializer
 
 
 class MsgPackSerializer(Serializer):
-    def serialize(self, obj: Any, **opts) -&gt; str:
+    @classmethod
+    def serialize(cls, obj: Any, **opts) -&gt; str:
         return msgpack.packb(astuple(obj), **opts)
 
 
 class MsgPackDeserializer(Deserializer):
-    def deserialize(self, s, **opts):
+    @classmethod
+    def deserialize(cls, s, **opts):
         unp = msgpack.unpackb(s, raw=False, use_list=False, **opts)
         logger.debug(&#39;unpack from msgpack: {unp}&#39;)
         return unp
@@ -96,7 +98,8 @@ def from_msgpack(c: Type[T], s: str, de: Type[Deserializer] = MsgPackDeserialize
 <details class="source">
 <summary>Source code</summary>
 <pre><code class="python">class MsgPackDeserializer(Deserializer):
-    def deserialize(self, s, **opts):
+    @classmethod
+    def deserialize(cls, s, **opts):
         unp = msgpack.unpackb(s, raw=False, use_list=False, **opts)
         logger.debug(&#39;unpack from msgpack: {unp}&#39;)
         return unp</code></pre>
@@ -124,23 +127,25 @@ def from_msgpack(c: Type[T], s: str, de: Type[Deserializer] = MsgPackDeserialize
 <details class="source">
 <summary>Source code</summary>
 <pre><code class="python">class MsgPackSerializer(Serializer):
-    def serialize(self, obj: Any, **opts) -&gt; str:
+    @classmethod
+    def serialize(cls, obj: Any, **opts) -&gt; str:
         return msgpack.packb(astuple(obj), **opts)</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li><a title="serde.se.Serializer" href="se.html#serde.se.Serializer">Serializer</a></li>
 </ul>
-<h3>Methods</h3>
+<h3>Static methods</h3>
 <dl>
 <dt id="serde.msgpack.MsgPackSerializer.serialize"><code class="name flex">
-<span>def <span class="ident">serialize</span></span>(<span>self, obj, **opts)</span>
+<span>def <span class="ident">serialize</span></span>(<span>obj, **opts)</span>
 </code></dt>
 <dd>
 <section class="desc"></section>
 <details class="source">
 <summary>Source code</summary>
-<pre><code class="python">def serialize(self, obj: Any, **opts) -&gt; str:
+<pre><code class="python">@classmethod
+def serialize(cls, obj: Any, **opts) -&gt; str:
     return msgpack.packb(astuple(obj), **opts)</code></pre>
 </details>
 </dd>
