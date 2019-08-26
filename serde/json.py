@@ -7,17 +7,19 @@ from .se import Serializer, asdict, is_serializable
 
 
 class JsonSerializer(Serializer):
-    def serialize(self, obj: Any, **opts) -> str:
+    @classmethod
+    def serialize(cls, obj: Any, **opts) -> str:
         return json.dumps(asdict(obj), **opts)
 
 
 class JsonDeserializer(Deserializer):
-    def deserialize(self, s, **opts):
+    @classmethod
+    def deserialize(cls, s, **opts):
         return json.loads(s, **opts)
 
 
-def to_json(obj: Any, cls=JsonSerializer) -> str:
-    return cls().serialize(obj)
+def to_json(obj: Any, cls: Type[JsonSerializer] = JsonSerializer) -> str:
+    return cls.serialize(obj)
 
 
 def from_json(c: Type[T], s: str, de: Type[Deserializer] = JsonDeserializer, **opts) -> T:

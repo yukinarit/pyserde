@@ -100,7 +100,7 @@ class Deserializer(metaclass=abc.ABCMeta):
     """
 
     @abc.abstractclassmethod
-    def deserialize(self, data, **opts):
+    def deserialize(cls, data, **opts):
         """
         deserialize `data` into an object typically `dict`, `list` or `tuple`.
 
@@ -149,7 +149,7 @@ def from_obj(c: Type[T], o: Any, de: Type[Deserializer] = None, strict=True, **o
     >>>
     """
     if de:
-        o = de().deserialize(o, **opts)
+        o = de.deserialize(o, **opts)
     if o is None:
         v = None
     if is_deserializable(c):

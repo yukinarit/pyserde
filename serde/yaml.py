@@ -9,12 +9,14 @@ from .se import Serializer, is_serializable
 
 
 class YamlSerializer(Serializer):
-    def serialize(self, obj, **opts) -> str:
+    @classmethod
+    def serialize(cls, obj, **opts) -> str:
         return yaml.safe_dump(asdict(obj), **opts)
 
 
 class YamlDeserializer(Deserializer):
-    def deserialize(self, s, **opts):
+    @classmethod
+    def deserialize(cls, s, **opts):
         return yaml.safe_load(s, **opts)
 
 
@@ -39,7 +41,7 @@ def to_yaml(obj, se: Type[Serializer] = YamlSerializer) -> str:
     if is_serializable(obj):
         return obj.__serde_serialize__(se)
     else:
-        return se().serialize(obj)
+        return se.serialize(obj)
 
 
 def from_yaml(c: Type[T], s: str, de: Type[Deserializer] = YamlDeserializer) -> T:

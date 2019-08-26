@@ -27,7 +27,7 @@ class Serializer(metaclass=abc.ABCMeta):
     """
 
     @abc.abstractclassmethod
-    def serialize(self, obj):
+    def serialize(cls, obj):
         pass
 
 
@@ -72,7 +72,7 @@ def serialize(_cls=None, rename_all: Optional[str] = None) -> Type:
             setattr(cls, HIDDEN_NAME, Hidden())
 
         def serialize(self, ser, **opts) -> None:
-            return ser().serialize(self, **opts)
+            return ser.serialize(self, **opts)
 
         setattr(cls, SE_NAME, serialize)
         cls = se_func(cls, TO_ITER, render_astuple(cls))
@@ -185,10 +185,11 @@ class Field:
     case: Optional[str] = None
     rename: Optional[str] = None
     skip: Optional[bool] = None
+    skip_if_false: Optional[bool] = None
 
     @staticmethod
     def from_dataclass(f: DataclassField) -> '':
-        return Field(f.type, f.name, rename = f.metadata.get('serde_rename'), skip = f.metadata.get('serde_skip'))
+        return Field(f.type, f.name, rename = f.metadata.get('serde_rename'), skip = f.metadata.get('serde_skip'), skip_if_false = f.metadata.get('serde_skip_if_false'))
 
     @property
     def varname(self) -> str:
@@ -248,7 +249,12 @@ def {{func}}(obj):
   res = {}
   {% for f in cls|fields -%}
   {% if not f.skip|default(False) %}
+    {% if f.skip_if_false|default(False) %}
+  if {{f|arg|rvalue()}}:
+    res["{{f|case}}"] = {{f|arg|rvalue()}}
+    {% else %}
   res["{{f|case}}"] = {{f|arg|rvalue()}}
+    {% endif %}
   {% endif %}
   {% endfor -%}
   return res

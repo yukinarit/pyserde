@@ -9,12 +9,14 @@ from .se import Serializer
 
 
 class MsgPackSerializer(Serializer):
-    def serialize(self, obj: Any, **opts) -> str:
+    @classmethod
+    def serialize(cls, obj: Any, **opts) -> str:
         return msgpack.packb(astuple(obj), **opts)
 
 
 class MsgPackDeserializer(Deserializer):
-    def deserialize(self, s, **opts):
+    @classmethod
+    def deserialize(cls, s, **opts):
         unp = msgpack.unpackb(s, raw=False, use_list=False, **opts)
         logger.debug('unpack from msgpack: {unp}')
         return unp

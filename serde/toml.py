@@ -9,16 +9,18 @@ from .se import Serializer, is_serializable
 
 
 class TomlSerializer(Serializer):
-    def serialize(self, obj, **opts) -> str:
+    @classmethod
+    def serialize(cls, obj, **opts) -> str:
         return toml.dumps(asdict(obj))
 
 
 class TomlDeserializer(Deserializer):
-    def deserialize(self, s, **opts):
+    @classmethod
+    def deserialize(cls, s, **opts):
         return toml.loads(s)
 
 
-def to_toml(obj, se=TomlSerializer) -> str:
+def to_toml(obj, se: Type[TomlSerializer]=TomlSerializer) -> str:
     """
     Take an object and return toml string.
 
@@ -45,7 +47,7 @@ def to_toml(obj, se=TomlSerializer) -> str:
     if is_serializable(obj):
         return obj.__serde_serialize__(se)
     else:
-        return se().serialize(obj)
+        return se.serialize(obj)
 
 
 def from_toml(c: Type[T], s: str, de: Type[Deserializer] = TomlDeserializer) -> T:
