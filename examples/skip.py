@@ -27,6 +27,7 @@ class Resource:
 class World:
     player: str
     enemies: List[str] = field(default_factory=list, metadata={'serde_skip_if_false': True})
+    buddy: str = field(default='', metadata={'serde_skip_if': lambda v: v == 'Pikachu'})
 
 
 def main():
@@ -36,10 +37,10 @@ def main():
     ]
     print(to_json(resources))
 
-    world = World('satoshi', ['Rattata', 'Pidgey'])
+    world = World('satoshi', ['Rattata', 'Pidgey'], 'Pikachu')
     print(to_json(world))
 
-    world = World('green', [])
+    world = World('green', [], 'Charmander')
     print(to_json(world))
 
 

@@ -8,8 +8,10 @@ import functools
 from dataclasses import Field as DataclassField
 from dataclasses import asdict as _asdict
 from dataclasses import astuple as _astuple
-from dataclasses import dataclass, fields as dataclass_fields, is_dataclass
-from typing import Any, ClassVar, Dict, List, Optional, Tuple, Type
+from dataclasses import dataclass
+from dataclasses import fields as dataclass_fields
+from dataclasses import is_dataclass
+from typing import Any, Callable, ClassVar, Dict, Iterator, List, Optional, Tuple, Type
 
 import jinja2
 import stringcase
@@ -75,8 +77,13 @@ def serialize(_cls=None, rename_all: Optional[str] = None) -> Type:
             return ser.serialize(self, **opts)
 
         setattr(cls, SE_NAME, serialize)
-        cls = se_func(cls, TO_ITER, render_astuple(cls))
-        cls = se_func(cls, TO_DICT, render_asdict(cls, rename_all))
+
+        g: Dict[str, Any] = globals().copy()
+        for f in fields(cls):
+            if f.skip_if:
+                g[f.skip_if.mangled] = f.skip_if
+        cls = se_func(cls, TO_ITER, render_astuple(cls), g)
+        cls = se_func(cls, TO_DICT, render_asdict(cls, rename_all), g)
         return cls
 
     if _cls is None:
@@ -185,11 +192,28 @@ class Field:
     case: Optional[str] = None
     rename: Optional[str] = None
     skip: Optional[bool] = None
+    skip_if: Optional[Callable[[Any], bool]] = None
     skip_if_false: Optional[bool] = None
 
     @staticmethod
     def from_dataclass(f: DataclassField) -> '':
-        return Field(f.type, f.name, rename = f.metadata.get('serde_rename'), skip = f.metadata.get('serde_skip'), skip_if_false = f.metadata.get('serde_skip_if_false'))
+        if f.metadata.get('serde_skip_if_false'):
+            skip_if_false = lambda v: not bool(v)
+            skip_if_false.mangled = Field.mangle(f, 'skip_if')
+        else:
+            skip_if_false = None
+
+        skip_if = f.metadata.get('serde_skip_if')
+        if skip_if:
+            skip_if.mangled = Field.mangle(f, 'skip_if')
+
+        return Field(
+            f.type,
+            f.name,
+            rename=f.metadata.get('serde_rename'),
+            skip=f.metadata.get('serde_skip'),
+            skip_if=skip_if or skip_if_false,
+        )
 
     @property
     def varname(self) -> str:
@@ -203,9 +227,13 @@ class Field:
         typ = type_args(self.type)[n]
         return Field(typ, None)
 
+    @staticmethod
+    def mangle(field: DataclassField, name: str) -> str:
+        return f'{field.name}_{name}'
 
-def fields(cls: Type) -> List[Field]:
-    return [Field.from_dataclass(f) for f in dataclass_fields(cls)]
+
+def fields(cls: Type) -> Iterator[Field]:
+    return iter(Field.from_dataclass(f) for f in dataclass_fields(cls))
 
 
 def to_arg(f: Field) -> Field:
@@ -248,14 +276,16 @@ def {{func}}(obj):
   {% if cls|is_dataclass %}
   res = {}
   {% for f in cls|fields -%}
-  {% if not f.skip|default(False) %}
-    {% if f.skip_if_false|default(False) %}
-  if {{f|arg|rvalue()}}:
+
+  {% if not f.skip %}
+    {% if f.skip_if %}
+  if not {{f.skip_if.mangled}}({{f|arg|rvalue()}}):
     res["{{f|case}}"] = {{f|arg|rvalue()}}
     {% else %}
   res["{{f|case}}"] = {{f|arg|rvalue()}}
     {% endif %}
   {% endif %}
+
   {% endfor -%}
   return res
   {% endif %}
@@ -359,16 +389,18 @@ class Renderer:
         return f'{arg.varname}'
 
 
-def se_func(cls: Type[T], func: str, code: str) -> Type[T]:
+def se_func(cls: Type[T], func: str, code: str, g: Dict = None, local: Dict = None) -> Type[T]:
     """
     Generate function to serialize into an object.
     """
-    g: Dict[str, Any] = globals().copy()
-
     # Generate serialize function.
-    code = gen(code, g, cls=cls)
+    if not g:
+        g = globals().copy()
+    if not local:
+        local = locals().copy()
+    code = gen(code, g, local, cls=cls)
 
-    setattr(cls, func, g[func])
+    setattr(cls, func, local[func])
     if SETTINGS['debug']:
         hidden = getattr(cls, HIDDEN_NAME)
         hidden.code[func] = code

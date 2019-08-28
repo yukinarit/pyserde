@@ -8,7 +8,7 @@ Usage:
     $ pipenv run yamlfile.py
 """
 from typing import List, Dict, Optional, Union
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from serde import deserialize
 from serde.yaml import from_yaml
 
@@ -25,8 +25,7 @@ class Info:
 @dataclass
 class Parameter:
     name: str
-    # in is reserved keyword.
-    # in: str
+    infield: str = field(metadata={'serde_rename': 'in'})
     type: str
     required: bool
 

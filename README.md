@@ -61,7 +61,8 @@ From Json: Hoge(i=10, s='hoge', f=100.0, b=True)
 	* [Case conversion](#case-conversion) e.g. camelCase, kebab-case
 * Field attributes
     * [Rename](#rename-field)
-    * [Skip](#skip-field)
+    * [Skip](#skip)
+    * [Skip-if](#skip-if)
     * [Skip if value is evaluated as False](#skip-if-value-is-evaluated-as-false)
 
 ### Case conversion
@@ -91,7 +92,7 @@ From Json: Hoge(i=10, s='hoge', f=100.0, b=True)
 
 For complete example, please see [./examples/rename.py](./examples/rename.py)
 
-### Skip field
+### Skip
 
 ```python
 >>> @serialize
@@ -106,6 +107,26 @@ For complete example, please see [./examples/rename.py](./examples/rename.py)
 ...     Resource("GitHub", "5cb7a0c47e53854cd00e1a968de5abce1c124601", metadata={"headquarters": "San Francisco"}) ]
 >>> to_json(resources)
 '[{"name": "Stack Overflow", "hash": "b6469c3f31653d281bbbfa6f94d60fea130abe38"}, {"name": "GitHub", "hash": "5cb7a0c47e53854cd00e1a968de5abce1c124601"}]'
+```
+
+For complete example, please see [./examples/skip.py](./examples/skip.py)
+
+### Skip if
+
+```python
+>>> @serialize
+... @dataclass
+... class World:
+...     player: str
+...     buddy: str = field(default='', metadata={'serde_skip_if': lambda v: v == 'Pikachu'})
+
+>>> world = World('satoshi', 'Pikachu')
+>>> to_json(world)
+'{"player": "satoshi"}'
+
+>>> world = World('green', 'Charmander')
+>>> print(to_json(world))
+'{"player": "green", "buddy": "Charmander"}'
 ```
 
 For complete example, please see [./examples/skip.py](./examples/skip.py)
