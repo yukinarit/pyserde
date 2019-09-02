@@ -1,20 +1,27 @@
-.PHONY: all setup build test coverage pep8 mypy fmt docs open-docs bench
+SHELL:=/bin/bash
 
-all: setup test pep8 mypy docs
+.PHONY: all setup build test examples coverage pep8 mypy fmt docs open-docs bench
+
+all: setup pep8 mypy docs test examples
 
 setup:
 	pipenv install --dev
 	pipenv run pip list
+	pushd examples && pipenv install --dev && popd
+	pushd bench && pipenv install --dev && popd
 
 build:
 	pipenv run python setup.py sdist
 	pipenv run python setup.py bdist_wheel
 
 test:
-	pytest tests --doctest-modules serde -v
+	pipenv run pytest tests --doctest-modules serde -v
+
+examples:
+	pushd examples && pipenv run python runner.py && popd
 
 coverage:
-	pytest tests --doctest-modules serde -v --cov=serde --cov-report term --cov-report xml
+	pipenv run pytest tests --doctest-modules serde -v --cov=serde --cov-report term --cov-report xml
 
 pep8:
 	pipenv run flake8

@@ -329,7 +329,7 @@ def se_raw(cls: Type, **kwargs):
 
 
 def de_pyserde(cls: Type, data: str):
-    return serde.json.from_json(cls, data, strict=False)
+    return serde.json.from_json(cls, data)
 
 
 def se_pyserde(cls: Type, **kwargs):
@@ -407,9 +407,9 @@ def main():
         if f:
             f()
     else:
-        de_small()
-        de_medium()
-        de_pri_container()
+        # de_small()
+        # de_medium()
+        # de_pri_container()
         se_small()
         se_astuple()
         se_asdict()
@@ -464,7 +464,7 @@ def se_small():
 def se_astuple():
     print('--- astuple small ---')
     exp = (10, 'hoge', 100.0, True)
-    profile('datclass', astuple_raw, RawSmall(10, 'hoge', 100.0, True), expected=exp)
+    profile('raw', astuple_raw, RawSmall(10, 'hoge', 100.0, True), expected=exp)
     profile('pyserde', astuple_pyserde, SerdeSmall(10, 'hoge', 100.0, True), expected=exp)
 
     print('--- astuple medium ---')
@@ -534,14 +534,14 @@ def se_astuple():
         100.0,
         True,
     )
-    profile('datclass', astuple_raw, raw, expected=exp)
+    profile('raw', astuple_raw, raw, expected=exp)
     profile('pyserde', astuple_pyserde, sm, expected=exp)
 
 
 def se_asdict():
     print('--- asdict small ---')
     exp = {'i': 10, 's': 'hoge', 'f': 100.0, 'b': True}
-    profile('datclass', asdict_raw, RawSmall(10, 'hoge', 100.0, True), expected=exp)
+    profile('raw', asdict_raw, RawSmall(10, 'hoge', 100.0, True), expected=exp)
     profile('pyserde', asdict_pyserde, SerdeSmall(10, 'hoge', 100.0, True), expected=exp)
 
 
