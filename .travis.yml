@@ -1,19 +1,24 @@
 dist: xenial
 language: python
-python:
-  - 3.6
-  - 3.7
 env:
-  - PIP_CACHE_DIR: $HOME/.cache/pip PIPENV_CACHE_DIR: $HOME/.cache/pipenv
+  - PIP_CACHE_DIR=$HOME/.cache/pip PIPENV_CACHE_DIR=$HOME/.cache/pipenv
 cache:
   directories:
     $HOME/.cache/pip
     $HOME/.cache/pipenv
-install:
+before_script:
   - pip install pipenv
   - make setup
-script:
-  - make test examples bench
-after_success:
-  - make coverage
-  - coveralls
+jobs:
+  include:
+    - stage: test
+      python: 3.6
+      script: make examples bench
+    - stage: test
+      python: 3.7
+      script: make examples bench
+    - stage: coverage
+      python: 3.7
+      script:
+        - make coverage
+        - coveralls
