@@ -21,7 +21,8 @@
 </header>
 <section id="section-intro">
 <h1 id="pyserde">pyserde</h1>
-<p><a href="https://pypi.org/project/pyserde/"><img alt="image" src="https://img.shields.io/pypi/pyversions/pyserde.svg"></a>
+<p><a href="https://pypi.org/project/pyserde/"><img alt="image" src="https://img.shields.io/pypi/v/pyserde.svg"></a>
+<a href="https://pypi.org/project/pyserde/"><img alt="image" src="https://img.shields.io/pypi/pyversions/pyserde.svg"></a>
 <a href="https://travis-ci.org/yukinarit/pyserde"><img alt="Build Status" src="https://travis-ci.org/yukinarit/pyserde.svg?branch=master"></a>
 <a href="https://ci.appveyor.com/project/yukinarit/pyserde"><img alt="Build status" src="https://ci.appveyor.com/api/projects/status/w4i5x8x9d4sbxhn2?svg=true"></a>
 <a href="https://coveralls.io/github/yukinarit/pyserde?branch=master"><img alt="Coverage Status" src="https://coveralls.io/repos/github/yukinarit/pyserde/badge.svg?branch=master"></a></p>
@@ -75,7 +76,8 @@ From Json: Hoge(i=10, s='hoge', f=100.0, b=True)
 </li>
 <li>Field attributes<ul>
 <li><a href="#rename-field">Rename</a></li>
-<li><a href="#skip-field">Skip</a></li>
+<li><a href="#skip">Skip</a></li>
+<li><a href="#skip-if">Skip-if</a></li>
 <li><a href="#skip-if-value-is-evaluated-as-false">Skip if value is evaluated as False</a></li>
 </ul>
 </li>
@@ -100,7 +102,7 @@ From Json: Hoge(i=10, s='hoge', f=100.0, b=True)
 '{&quot;class&quot;: &quot;Hoge&quot;}'
 </code></pre>
 <p>For complete example, please see <a href="./examples/rename.py">./examples/rename.py</a></p>
-<h3 id="skip-field">Skip field</h3>
+<h3 id="skip">Skip</h3>
 <pre><code class="python">&gt;&gt;&gt; @serialize
 ... @dataclass
 ... class Resource:
@@ -113,6 +115,22 @@ From Json: Hoge(i=10, s='hoge', f=100.0, b=True)
 ...     Resource(&quot;GitHub&quot;, &quot;5cb7a0c47e53854cd00e1a968de5abce1c124601&quot;, metadata={&quot;headquarters&quot;: &quot;San Francisco&quot;}) ]
 &gt;&gt;&gt; to_json(resources)
 '[{&quot;name&quot;: &quot;Stack Overflow&quot;, &quot;hash&quot;: &quot;b6469c3f31653d281bbbfa6f94d60fea130abe38&quot;}, {&quot;name&quot;: &quot;GitHub&quot;, &quot;hash&quot;: &quot;5cb7a0c47e53854cd00e1a968de5abce1c124601&quot;}]'
+</code></pre>
+<p>For complete example, please see <a href="./examples/skip.py">./examples/skip.py</a></p>
+<h3 id="skip-if">Skip if</h3>
+<pre><code class="python">&gt;&gt;&gt; @serialize
+... @dataclass
+... class World:
+...     player: str
+...     buddy: str = field(default='', metadata={'serde_skip_if': lambda v: v == 'Pikachu'})
+
+&gt;&gt;&gt; world = World('satoshi', 'Pikachu')
+&gt;&gt;&gt; to_json(world)
+'{&quot;player&quot;: &quot;satoshi&quot;}'
+
+&gt;&gt;&gt; world = World('green', 'Charmander')
+&gt;&gt;&gt; print(to_json(world))
+'{&quot;player&quot;: &quot;green&quot;, &quot;buddy&quot;: &quot;Charmander&quot;}'
 </code></pre>
 <p>For complete example, please see <a href="./examples/skip.py">./examples/skip.py</a></p>
 <h3 id="skip-if-value-is-evaluated-as-false">Skip if value is evaluated as False</h3>
@@ -139,7 +157,7 @@ From Json: Hoge(i=10, s='hoge', f=100.0, b=True)
 .. include:: ../README.md
 &#34;&#34;&#34;
 from .core import SerdeError, init, logger, typecheck  # noqa
-from .de import deserialize, from_obj, is_deserializable  # noqa
+from .de import deserialize, from_dict, from_obj, from_tuple, is_deserializable  # noqa
 from .se import asdict, astuple, is_serializable, serialize  # noqa
 
 &#34;&#34;&#34; Version of pyserde. &#34;&#34;&#34;
@@ -204,7 +222,8 @@ __version__ = &#39;0.0.7&#39;</code></pre>
 <li><a href="#features">Features</a><ul>
 <li><a href="#case-conversion">Case conversion</a></li>
 <li><a href="#rename-field">Rename field</a></li>
-<li><a href="#skip-field">Skip field</a></li>
+<li><a href="#skip">Skip</a></li>
+<li><a href="#skip-if">Skip if</a></li>
 <li><a href="#skip-if-value-is-evaluated-as-false">Skip if value is evaluated as False</a></li>
 </ul>
 </li>

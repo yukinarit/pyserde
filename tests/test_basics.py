@@ -2,24 +2,36 @@ import enum
 import json
 import logging
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Tuple, Union
+from typing import Dict, List
 
-import msgpack
 import pytest
 
-from serde import asdict, astuple, deserialize, from_obj
+from serde import asdict, astuple, deserialize, from_dict
 from serde import init as serde_init
-from serde import logger, serialize, typecheck
-from serde.compat import is_dict, is_list, is_opt, is_tuple, is_union, iter_types, type_args, union_args
+from serde import logger, serialize
 from serde.json import from_json, to_json
-from serde.msgpack import from_msgpack, to_msgpack
 
-from .data import Bool, Float, Int, Pri, PriDict, PriList, PriOpt, PriTuple, Str
+from .data import Bool, Float, Int, NestedPri, NestedPriOpt, NestedPriTuple, Pri, PriOpt, PriTuple, Str
 
 logging.basicConfig(level=logging.WARNING)
+
 logger.setLevel(logging.DEBUG)
 
 serde_init(True)
+
+
+def test_primitive():
+    p = Pri(10, 'foo', 100.0, True)
+    d = {"i": 10, "s": "foo", "f": 100.0, "b": True}
+    assert d == asdict(p)
+    assert p == from_dict(Pri, d)
+
+
+def test_nested_primitive():
+    p = NestedPri(Int(10), Str('foo'), Float(100.0), Bool(True))
+    d = {"i": {"i": 10}, "s": {"s": "foo"}, "f": {"f": 100.0}, "b": {"b": True}}
+    assert d == asdict(p)
+    assert p == from_dict(NestedPri, d)
 
 
 def test_non_dataclass():
@@ -31,87 +43,21 @@ def test_non_dataclass():
             i: int
 
 
-def test_types():
-    assert is_list(List[int])
-    assert is_tuple(Tuple[int, int, int])
-    assert is_dict(Dict[str, int])
-    assert is_opt(Optional[int])
-    assert is_union(Union[int, str])
-    assert is_union(Union[Optional[int], Optional[str]])
-    assert is_opt(Optional[int])
-    assert not is_union(Optional[int])
-    assert not is_opt(Union[Optional[int], Optional[str]])
-    assert is_union(Union[Optional[int], Optional[str]])
-
-
-def test_from_value():
-    @deserialize
-    @serialize
-    @dataclass
-    class Hoge:
-        i: int
-        s: str
-        f: float
-        b: bool
-        pri: Pri
-        lst: List[int]
-        lst2: List[Pri]
-        dct: Dict[str, int]
-        dct2: Dict[str, Pri]
-        dct3: Dict[Pri, Pri]
-        tpl: Tuple[int, str, float]
-        tpl2: Tuple[str, Pri]
-
-    # assert 'data' == de_value(fields(Hoge)[0].type, 'data')
-    # assert 'data' == de_value(fields(Hoge)[1].type, 'data')
-    # assert 'data' == de_value(fields(Hoge)[2].type, 'data')
-    # assert 'data' == de_value(fields(Hoge)[3].type, 'data')
-    # assert 'from_dict_or_iter(Pri, data)' == de_value(fields(Hoge)[4].type, 'data')
-    # assert '[d for d in data]' == de_value(fields(Hoge)[5].type, 'data')
-    # assert '[from_dict_or_iter(Pri, d) for d in data]' == de_value(fields(Hoge)[6].type, 'data')
-    # assert '{ k: v for k, v in data.items() }' == de_value(fields(Hoge)[7].type, 'data')
-    # assert '{ k: from_dict_or_iter(Pri, v) for k, v in data.items() }' == de_value(fields(Hoge)[8].type, 'data')
-    # assert '{ from_dict_or_iter(Pri, k): from_dict_or_iter(Pri, v) for k, v in data.items() }' == \
-    #     de_value(fields(Hoge)[9].type, 'data')
-    # assert '(data[0], data[1], data[2], )' == de_value(fields(Hoge)[10].type, 'data')
-    # assert '(data[0], from_dict_or_iter(Pri, data[1]), )' == de_value(fields(Hoge)[11].type, 'data')
-
-
-def test_iter_types():
-    assert [Pri, int, str, float, bool] == list(iter_types(Pri))
-    assert [str, Pri, int, str, float, bool] == list(iter_types(Dict[str, Pri]))
-    assert [str] == list(iter_types(List[str]))
-    assert [int, str, bool, float] == list(iter_types(Tuple[int, str, bool, float]))
-    assert [PriOpt, int, str, float, bool] == list(iter_types(PriOpt))
-    assert [Pri, int, str, float, bool, Pri, int, str, float, bool, Pri, int, str, float, bool] == list(
-        iter_types(Tuple[List[Pri], Tuple[Pri, Pri]])
-    )
-
-
-def test_primitive():
-    p = Pri(i=10, s='hoge', f=100.0, b=True)
-    s = '{"i": 10, "s": "hoge", "f": 100.0, "b": true}'
-    assert s == to_json(p)
-    assert p == from_json(Pri, s)
-
-
 def test_forward_declaration():
-    print(locals())
+    @serialize
+    @deserialize
+    @dataclass
+    class Foo:
+        bar: 'Bar'
 
     @serialize
     @deserialize
     @dataclass
-    class Hoge:
-        fuga: 'Fuga'
-
-    @serialize
-    @deserialize
-    @dataclass
-    class Fuga:
+    class Bar:
         i: int
 
-    h = Hoge(fuga=Fuga(i=10))
-    assert h.fuga.i == 10
+    h = Foo(bar=Bar(i=10))
+    assert h.bar.i == 10
 
 
 def test_enum():
@@ -138,27 +84,74 @@ def test_enum():
         se2: SEnum
 
 
-def test_type_args():
-    assert (int,) == type_args(List[int])
-    assert (int, str) == type_args(Dict[int, str])
-    assert (int, type(None)) == type_args(Optional[int])
-    assert (Optional[int],) == type_args(List[Optional[int]])
-    assert (List[int], type(None)) == type_args(Optional[List[int]])
-    assert (List[int], Dict[str, int]) == type_args(Union[List[int], Dict[str, int]])
-    assert (int, type(None), str) == type_args(Union[Optional[int], str])
+def test_tuple():
+    j = json.dumps(
+        {
+            'i': (10, 20, 30),
+            's': ('a', 'b', 'c', 'd'),
+            'f': (10.0, 20.0, 30.0, 40.0, 50.0),
+            'b': (True, False, True, False, True, False),
+        }
+    )
+    tpl: PriTuple = from_json(PriTuple, j)
+    assert tpl.i == (10, 20, 30)
+    assert tpl.s == ('a', 'b', 'c', 'd')
+    assert tpl.f == (10.0, 20.0, 30.0, 40.0, 50.0)
+    assert tpl.b == (True, False, True, False, True, False)
+
+    # List can also be used.
+    j = json.dumps(
+        {
+            'i': [10, 20, 30],
+            's': ['a', 'b', 'c', 'd'],
+            'f': [10.0, 20.0, 30.0, 40.0, 50.0],
+            'b': [True, False, True, False, True, False],
+        }
+    )
+    tpl: PriTuple = from_json(PriTuple, j)
+    assert tpl.i == (10, 20, 30)
+    assert tpl.s == ('a', 'b', 'c', 'd')
+    assert tpl.f == (10.0, 20.0, 30.0, 40.0, 50.0)
+    assert tpl.b == (True, False, True, False, True, False)
 
 
-def test_union_args():
-    assert (int, str) == union_args(Union[int, str])
-    assert (List[int], Dict[int, str]) == union_args(Union[List[int], Dict[int, str]])
-    assert (Optional[int], str) == union_args(Union[Optional[int], str])
+def test_dataclass_in_tuple():
+    src = NestedPriTuple(
+        (Int(10), Int(10), Int(10)),
+        (Str("10"), Str("10"), Str("10"), Str("10")),
+        (Float(10.0), Float(10.0), Float(10.0), Float(10.0), Float(10.0)),
+        (Bool(False), Bool(False), Bool(False), Bool(False), Bool(False), Bool(False)),
+    )
+    j = to_json(src)
+    dst: PriTuple = from_json(NestedPriTuple, j)
+    assert src == dst
+
+    with pytest.raises(IndexError):
+        j = json.dumps(
+            {
+                'i': (10, 20),
+                's': ('a', 'b', 'c', 'd'),
+                'f': (10.0, 20.0, 30.0, 40.0, 50.0),
+                'b': (True, False, True, False, True, False),
+            }
+        )
+        _: PriTuple = from_json(PriTuple, j)
 
 
 def test_optional():
-    p = PriOpt(i=20, f=100.0, s=None, b=True)
+    p = PriOpt(20, None, 100.0, True)
     s = '{"i": 20, "s": null, "f": 100.0, "b": true}'
     assert s == to_json(p)
     assert p == from_json(PriOpt, s)
+
+
+def test_optional_dataclass():
+    pass
+    # p = NestedPriOpt(Int(20), Str(None), Float(100.0), Bool(True))
+    # s = '{"i": 20, "s": null, "f": 100.0, "b": true}'
+    # TODO
+    # assert s == asdict(p)
+    # assert p == from_json(PriOpt, s)
 
 
 def test_container():
@@ -316,82 +309,82 @@ def test_astuple():
     assert 10 == astuple(10)
 
 
-def test_from_obj():
-    @deserialize
-    @serialize
-    @dataclass(unsafe_hash=True)
-    class Bar:
-        i: int
+# def test_from_obj():
+#     @deserialize
+#     @serialize
+#     @dataclass(unsafe_hash=True)
+#     class Bar:
+#         i: int
+#
+#     @deserialize
+#     @serialize
+#     @dataclass
+#     class Foo:
+#         i: int
+#         s: str
+#         f: float
+#         b: bool
+#
+#     @deserialize
+#     @serialize
+#     @dataclass
+#     class Hoge:
+#         f: Foo
+#         f2: Foo
+#
+#     # Primitrive types
+#     assert 10 == from_obj(int, 10)
+#     assert 0.1 == from_obj(float, 0.1)
+#     assert 'hoge' == from_obj(str, 'hoge')
+#     assert not from_obj(bool, False)
+#
+#     f = Foo(i=10, s='s', f=20.0, b=False)
+#     assert Bar(100) == from_obj(Bar, (100,))
+#     assert Bar(100) == from_obj(Bar, {'i': 100})
+#     assert f == from_obj(Foo, (10, 's', 20.0, False))
+#     assert f == from_obj(Optional[Foo], [10, 's', 20.0, False])
+#     assert from_obj(Optional[Foo], None) is None
+#     assert f == from_obj(Foo, dict(i=10, s='s', f=20.0, b=False))
+#     assert (f,) == from_obj(Tuple[Foo], ((10, 's', 20.0, False),))
+#     assert [f] == from_obj(List[Foo], [(10, 's', 20.0, False)])
+#     assert {'foo': f} == from_obj(Dict[str, Foo], {'foo': (10, 's', 20.0, False)})
+#     assert {'foo': [f, f]} == from_obj(
+#         Optional[Dict[str, List[Foo]]], {'foo': [(10, 's', 20.0, False), (10, 's', 20.0, False)]}
+#     )
 
-    @deserialize
-    @serialize
-    @dataclass
-    class Foo:
-        i: int
-        s: str
-        f: float
-        b: bool
 
-    @deserialize
-    @serialize
-    @dataclass
-    class Hoge:
-        f: Foo
-        f2: Foo
-
-    # Primitrive types
-    assert 10 == from_obj(int, 10)
-    assert 0.1 == from_obj(float, 0.1)
-    assert 'hoge' == from_obj(str, 'hoge')
-    assert not from_obj(bool, False)
-
-    f = Foo(i=10, s='s', f=20.0, b=False)
-    assert Bar(100) == from_obj(Bar, (100,))
-    assert Bar(100) == from_obj(Bar, {'i': 100})
-    assert f == from_obj(Foo, (10, 's', 20.0, False))
-    assert f == from_obj(Optional[Foo], [10, 's', 20.0, False])
-    assert from_obj(Optional[Foo], None) is None
-    assert f == from_obj(Foo, dict(i=10, s='s', f=20.0, b=False))
-    assert (f,) == from_obj(Tuple[Foo], ((10, 's', 20.0, False),))
-    assert [f] == from_obj(List[Foo], [(10, 's', 20.0, False)])
-    assert {'foo': f} == from_obj(Dict[str, Foo], {'foo': (10, 's', 20.0, False)})
-    assert {'foo': [f, f]} == from_obj(
-        Optional[Dict[str, List[Foo]]], {'foo': [(10, 's', 20.0, False), (10, 's', 20.0, False)]}
-    )
-
-
-def test_from_obj_complex():
-    @deserialize
-    @serialize
-    @dataclass(unsafe_hash=True)
-    class Foo:
-        i: int
-
-    @deserialize
-    @serialize
-    @dataclass
-    class Hoge:
-        d: Dict[Foo, List[Foo]]
-        lst: List[Foo]
-        lst2: List[int]
-        opt: Optional[Foo]
-
-    f = Foo(i=100)
-    f2 = Foo(i=100)
-    lst = [f, f2]
-    lst2 = [1, 2, 3]
-    h = Hoge(d={f: lst}, lst=lst, lst2=lst2, opt=f)
-    hh = from_obj(Hoge, ({(100,): lst}, lst, lst2, f))
-    assert h.d == hh.d
-    assert h.lst == hh.lst
-    assert h.lst2 == hh.lst2
-    assert h.opt == hh.opt
-
-    hh == from_obj(Hoge, {'d': {(100,): lst}, 'lst': lst, 'lst2': lst2, 'opt': None})
-    assert h.d == hh.d
-    assert h.lst == hh.lst
-    assert h.lst2 == hh.lst2
-    assert h.opt == hh.opt
+# def test_from_obj_complex():
+#     @deserialize
+#     @serialize
+#     @dataclass(unsafe_hash=True)
+#     class Foo:
+#         i: int
+#
+#     @deserialize
+#     @serialize
+#     @dataclass
+#     class Hoge:
+#         d: Dict[Foo, List[Foo]]
+#         lst: List[Foo]
+#         lst2: List[int]
+#         opt: Optional[Foo]
+#
+#     f = Foo(i=100)
+#     f2 = Foo(i=100)
+#     lst = [f, f2]
+#     lst2 = [1, 2, 3]
+#     h = Hoge(d={f: lst}, lst=lst, lst2=lst2, opt=f)
+#     hh = from_obj(Hoge, ({(100,): lst}, lst, lst2, f))
+#     assert h.d == hh.d
+#     assert h.lst == hh.lst
+#     assert h.lst2 == hh.lst2
+#     assert h.opt == hh.opt
+#
+#     hh == from_obj(Hoge, {'d': {(100,): lst}, 'lst': lst, 'lst2': lst2, 'opt': None})
+#     assert h.d == hh.d
+#     assert h.lst == hh.lst
+#     assert h.lst2 == hh.lst2
+#     assert h.opt == hh.opt
 
 
 def test_json():
@@ -413,103 +406,33 @@ def test_json():
     assert '{"hoge": 10, "fuga": 10}' == to_json({'hoge': 10, 'fuga': 10})
 
 
-def test_msgpack():
-    @deserialize
-    @serialize
-    @dataclass(unsafe_hash=True)
-    class Foo:
-        i: int
-
-    @deserialize
-    @serialize
-    @dataclass
-    class Hoge:
-        i: int
-        s: str
-        f: float
-        b: bool
-        d: Dict[Foo, int]
-        lst: List[Foo]
-
-    f = Foo(i=100)
-    lst = [f, f, f]
-    h = Hoge(i=10, s='hoge', f=100.0, b=True, d={f: 100}, lst=lst)
-    p = msgpack.packb((10, 'hoge', 100.0, True, {(100,): 100}, [(100,), (100,), (100,)]))
-    hh = from_msgpack(Hoge, p, use_list=False)
-    assert p == to_msgpack(h)
-    assert h.i == hh.i
-    assert h.s == hh.s
-    assert h.f == hh.f
-    assert h.b == hh.b
-    assert h.d == hh.d
-    assert lst == hh.lst
-
-
-def test_typecheck():
-    # Primitive
-    typecheck(int, 10)
-    with pytest.raises(ValueError):
-        typecheck(int, 10.0)
-
-    # Dataclass
-    p = Pri(i=10, s='hoge', f=100.0, b=True)
-    typecheck(Pri, p)
-
-    with pytest.raises(ValueError):
-        p.i = 10.0
-        typecheck(Pri, p)
-
-    # Dataclass (Nested)
-    @dataclass
-    class Hoge:
-        p: Pri
-
-    h = Hoge(Pri(i=10, s='hoge', f=100.0, b=True))
-    typecheck(Hoge, h)
-
-    with pytest.raises(ValueError):
-        h.p.i = 10.0
-        typecheck(Hoge, h)
-
-    # List
-    typecheck(List[int], [10])
-    with pytest.raises(ValueError):
-        typecheck(List[int], [10.0])
-
-    # List of dataclasses
-    typecheck(List[Int], [Int(n) for n in range(1, 10)])
-    with pytest.raises(ValueError):
-        typecheck(List[Pri], [Pri(i=10.0, s='hoge', f=100.0, b=True)])
-
-    # Tuple
-    typecheck(Tuple[int, str, float, bool], (10, 'hoge', 100.0, True))
-    with pytest.raises(ValueError):
-        typecheck(Tuple[int, str, float, bool], (10.0, 'hoge', 100.0, True))
-
-    # Tuple of dataclasses
-    typecheck(Tuple[Int, Str, Float, Bool], (Int(10), Str('hoge'), Float(100.0), Bool(True)))
-    with pytest.raises(ValueError):
-        typecheck(Tuple[Int, Str, Float, Bool], (Int(10.0), Str('hoge'), Float(100.0), Bool(True)))
-
-    # Dict
-    typecheck(Dict[str, int], dict(hoge=10, foo=20))
-    with pytest.raises(ValueError):
-        typecheck(Dict[str, int], dict(hoge=10.0, foo=20))
-
-    # Dict of dataclasses
-    typecheck(Dict[Str, Int], {Str('hoge'): Int(10), Str('foo'): Int(20)})
-    with pytest.raises(ValueError):
-        typecheck(Dict[Str, Int], {Str('hoge'): Int(10.0), Str('foo'): Int(20)})
-
-    # Optional
-    typecheck(Optional[int], 10)
-    typecheck(Optional[int], None)
-    with pytest.raises(ValueError):
-        typecheck(Optional[int], 10.0)
-
-    # Optional of dataclass
-    typecheck(Optional[Int], Int(10))
-    typecheck(Optional[Int], None)
-    with pytest.raises(ValueError):
-        typecheck(Optional[Int], 10.0)
-        typecheck(Optional[Int], Int(10.0))
+# def test_msgpack():
+#     @deserialize
+#     @serialize
+#     @dataclass(unsafe_hash=True)
+#     class Foo:
+#         i: int
+#
+#     @deserialize
+#     @serialize
+#     @dataclass
+#     class Hoge:
+#         i: int
+#         s: str
+#         f: float
+#         b: bool
+#         d: Dict[Foo, int]
+#         lst: List[Foo]
+#
+#     f = Foo(i=100)
+#     lst = [f, f, f]
+#     h = Hoge(i=10, s='hoge', f=100.0, b=True, d={f: 100}, lst=lst)
+#     p = msgpack.packb((10, 'hoge', 100.0, True, {(100,): 100}, [(100,), (100,), (100,)]))
+#     hh = from_msgpack(Hoge, p, use_list=False)
+#     assert p == to_msgpack(h)
+#     assert h.i == hh.i
+#     assert h.s == hh.s
+#     assert h.f == hh.f
+#     assert h.b == hh.b
+#     assert h.d == hh.d
+#     assert lst == hh.lst

@@ -1,7 +1,6 @@
-import sys
 from dataclasses import fields, is_dataclass
 from itertools import zip_longest
-from typing import Dict, Iterator, List, Optional, Tuple, Type, TypeVar, Union
+from typing import Iterator, Optional, Tuple, Type, TypeVar, Union
 
 from typing_inspect import get_args, get_origin, is_optional_type, is_union_type
 
@@ -10,6 +9,7 @@ T = TypeVar('T')
 
 def typename(typ) -> str:
     """
+    >>> from typing import List, Dict
     >>> typename(int)
     'int'
     >>> class Hoge: pass

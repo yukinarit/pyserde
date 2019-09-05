@@ -44,7 +44,7 @@ class TomlDeserializer(Deserializer):
         return toml.loads(s)
 
 
-def to_toml(obj, se: Type[TomlSerializer]=TomlSerializer) -&gt; str:
+def to_toml(obj, se: Type[TomlSerializer] = TomlSerializer) -&gt; str:
     &#34;&#34;&#34;
     Take an object and return toml string.
 
@@ -177,7 +177,7 @@ Settings(host='localhost', port=8080, upstream=['localhost:8081', 'localhost:808
 </code></pre></section>
 <details class="source">
 <summary>Source code</summary>
-<pre><code class="python">def to_toml(obj, se: Type[TomlSerializer]=TomlSerializer) -&gt; str:
+<pre><code class="python">def to_toml(obj, se: Type[TomlSerializer] = TomlSerializer) -&gt; str:
     &#34;&#34;&#34;
     Take an object and return toml string.
 

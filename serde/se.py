@@ -3,22 +3,21 @@ Defines classess and functions for `serialize` decorator.
 
 """
 import abc
-import copy
+import copy  # noqa
 import functools
 from dataclasses import Field as DataclassField
 from dataclasses import asdict as _asdict
 from dataclasses import astuple as _astuple
 from dataclasses import dataclass
-from dataclasses import fields as dataclass_fields
+from dataclasses import fields as dataclass_fields  # noqa
 from dataclasses import is_dataclass
-from typing import Any, Callable, ClassVar, Dict, Iterator, List, Optional, Tuple, Type
+from typing import Any, Dict, List, Optional, Tuple, Type
 
 import jinja2
 import stringcase
 
 from .compat import is_dict, is_list, is_tuple, type_args
-from .core import HIDDEN_NAME, SE_NAME, SETTINGS, TO_DICT, TO_ITER, Hidden, T, gen
-from .de import Arg
+from .core import HIDDEN_NAME, SE_NAME, SETTINGS, TO_DICT, TO_ITER, Field, Hidden, T, fields, gen
 
 
 class Serializer(metaclass=abc.ABCMeta):
@@ -79,7 +78,7 @@ def serialize(_cls=None, rename_all: Optional[str] = None) -> Type:
         setattr(cls, SE_NAME, serialize)
 
         g: Dict[str, Any] = globals().copy()
-        for f in fields(cls):
+        for f in sefields(cls):
             if f.skip_if:
                 g[f.skip_if.mangled] = f.skip_if
         cls = se_func(cls, TO_ITER, render_astuple(cls), g)
@@ -181,39 +180,8 @@ def asdict(v):
 
 
 @dataclass
-class Field:
-    """
-    Field in pyserde class.
-    """
-
-    type: Type
-    name: str
+class SeField(Field):
     parent: Optional['Field'] = None
-    case: Optional[str] = None
-    rename: Optional[str] = None
-    skip: Optional[bool] = None
-    skip_if: Optional[Callable[[Any], bool]] = None
-    skip_if_false: Optional[bool] = None
-
-    @staticmethod
-    def from_dataclass(f: DataclassField) -> '':
-        if f.metadata.get('serde_skip_if_false'):
-            skip_if_false = lambda v: not bool(v)
-            skip_if_false.mangled = Field.mangle(f, 'skip_if')
-        else:
-            skip_if_false = None
-
-        skip_if = f.metadata.get('serde_skip_if')
-        if skip_if:
-            skip_if.mangled = Field.mangle(f, 'skip_if')
-
-        return Field(
-            f.type,
-            f.name,
-            rename=f.metadata.get('serde_rename'),
-            skip=f.metadata.get('serde_skip'),
-            skip_if=skip_if or skip_if_false,
-        )
 
     @property
     def varname(self) -> str:
@@ -223,21 +191,20 @@ class Field:
         else:
             return self.name
 
-    def __getitem__(self, n) -> 'Field':
+    def __getitem__(self, n) -> 'SeField':
         typ = type_args(self.type)[n]
-        return Field(typ, None)
+        return SeField(typ, None)
 
     @staticmethod
     def mangle(field: DataclassField, name: str) -> str:
         return f'{field.name}_{name}'
 
 
-def fields(cls: Type) -> Iterator[Field]:
-    return iter(Field.from_dataclass(f) for f in dataclass_fields(cls))
+sefields = functools.partial(fields, SeField)
 
 
-def to_arg(f: Field) -> Field:
-    f.parent = Field(None, 'obj')
+def to_arg(f: SeField) -> SeField:
+    f.parent = SeField(None, 'obj')
     return f
 
 
@@ -260,7 +227,7 @@ def {{func}}(obj):
 
     renderer = Renderer(TO_ITER)
     env = jinja2.Environment(loader=jinja2.DictLoader({'iter': template}))
-    env.filters.update({'fields': fields})
+    env.filters.update({'fields': sefields})
     env.filters.update({'is_dataclass': is_dataclass})
     env.filters.update({'rvalue': renderer.render})
     env.filters.update({'arg': to_arg})
@@ -291,7 +258,7 @@ def {{func}}(obj):
   {% endif %}
     """
 
-    def conv(f: Field) -> str:
+    def conv(f: SeField) -> str:
         """
         Convert dict key name.
         """
@@ -305,7 +272,7 @@ def {{func}}(obj):
 
     renderer = Renderer(TO_DICT)
     env = jinja2.Environment(loader=jinja2.DictLoader({'dict': template}))
-    env.filters.update({'fields': fields})
+    env.filters.update({'fields': sefields})
     env.filters.update({'is_dataclass': is_dataclass})
     env.filters.update({'rvalue': renderer.render})
     env.filters.update({'arg': to_arg})
@@ -321,33 +288,33 @@ class Renderer:
 
     func: str
 
-    def render(self, arg: Field) -> str:
+    def render(self, arg: SeField) -> str:
         """
         Render rvalue
 
-        >>> Renderer(TO_ITER).render(Field(int, 'i'))
+        >>> Renderer(TO_ITER).render(SeField(int, 'i'))
         'i'
 
-        >>> Renderer(TO_ITER).render(Field(List[int], 'l'))
+        >>> Renderer(TO_ITER).render(SeField(List[int], 'l'))
         '[v for v in l]'
 
         >>> @serialize
         ... @dataclass(unsafe_hash=True)
         ... class Hoge:
         ...    val: int
-        >>> Renderer(TO_ITER).render(Field(Hoge, 'hoge'))
+        >>> Renderer(TO_ITER).render(SeField(Hoge, 'hoge'))
         'hoge.__serde_to_iter__()'
 
-        >>> Renderer(TO_ITER).render(Field(List[Hoge], 'hoge'))
+        >>> Renderer(TO_ITER).render(SeField(List[Hoge], 'hoge'))
         '[v.__serde_to_iter__() for v in hoge]'
 
-        >>> Renderer(TO_ITER).render(Field(Dict[str, Hoge], 'hoge'))
+        >>> Renderer(TO_ITER).render(SeField(Dict[str, Hoge], 'hoge'))
         '{k: v.__serde_to_iter__() for k, v in hoge.items()}'
 
-        >>> Renderer(TO_ITER).render(Field(Dict[Hoge, Hoge], 'hoge'))
+        >>> Renderer(TO_ITER).render(SeField(Dict[Hoge, Hoge], 'hoge'))
         '{k.__serde_to_iter__(): v.__serde_to_iter__() for k, v in hoge.items()}'
 
-        >>> Renderer(TO_ITER).render(Field(Tuple[str, Hoge, int], 'hoge'))
+        >>> Renderer(TO_ITER).render(SeField(Tuple[str, Hoge, int], 'hoge'))
         '(hoge[0], hoge[1].__serde_to_iter__(), hoge[2])'
         >>>
         """
@@ -362,15 +329,15 @@ class Renderer:
         else:
             return self.primitive(arg)
 
-    def dataclass(self, arg: Field) -> str:
+    def dataclass(self, arg: SeField) -> str:
         return f'{arg.varname}.{self.func}()'
 
-    def list(self, arg: Field) -> str:
+    def list(self, arg: SeField) -> str:
         earg = arg[0]
         earg.name = 'v'
         return f'[{self.render(earg)} for v in {arg.varname}]'
 
-    def tuple(self, arg: Field) -> str:
+    def tuple(self, arg: SeField) -> str:
         rvalues = []
         for i, _ in enumerate(type_args(arg.type)):
             r = arg[i]
@@ -378,14 +345,14 @@ class Renderer:
             rvalues.append(self.render(r))
         return f"({', '.join(rvalues)})"
 
-    def dict(self, arg: Field) -> str:
+    def dict(self, arg: SeField) -> str:
         karg = arg[0]
         karg.name = 'k'
         varg = arg[1]
         varg.name = 'v'
         return f'{{{self.render(karg)}: {self.render(varg)} for k, v in {arg.varname}.items()}}'
 
-    def primitive(self, arg: Field) -> str:
+    def primitive(self, arg: SeField) -> str:
         return f'{arg.varname}'
 
 

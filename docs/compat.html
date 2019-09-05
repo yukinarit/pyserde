@@ -22,10 +22,9 @@
 <section id="section-intro">
 <details class="source">
 <summary>Source code</summary>
-<pre><code class="python">import sys
-from dataclasses import fields, is_dataclass
+<pre><code class="python">from dataclasses import fields, is_dataclass
 from itertools import zip_longest
-from typing import Dict, Iterator, List, Optional, Tuple, Type, TypeVar, Union
+from typing import Iterator, Optional, Tuple, Type, TypeVar, Union
 
 from typing_inspect import get_args, get_origin, is_optional_type, is_union_type
 
@@ -34,6 +33,7 @@ T = TypeVar(&#39;T&#39;)
 
 def typename(typ) -&gt; str:
     &#34;&#34;&#34;
+    &gt;&gt;&gt; from typing import List, Dict
     &gt;&gt;&gt; typename(int)
     &#39;int&#39;
     &gt;&gt;&gt; class Hoge: pass
@@ -337,7 +337,8 @@ def assert_type(typ: Type, obj, throw=False) -&gt; None:
 <span>def <span class="ident">typename</span></span>(<span>typ)</span>
 </code></dt>
 <dd>
-<section class="desc"><pre><code>&gt;&gt;&gt; typename(int)
+<section class="desc"><pre><code>&gt;&gt;&gt; from typing import List, Dict
+&gt;&gt;&gt; typename(int)
 'int'
 &gt;&gt;&gt; class Hoge: pass
 &gt;&gt;&gt; typename(Hoge)
@@ -357,6 +358,7 @@ def assert_type(typ: Type, obj, throw=False) -&gt; None:
 <summary>Source code</summary>
 <pre><code class="python">def typename(typ) -&gt; str:
     &#34;&#34;&#34;
+    &gt;&gt;&gt; from typing import List, Dict
     &gt;&gt;&gt; typename(int)
     &#39;int&#39;
     &gt;&gt;&gt; class Hoge: pass

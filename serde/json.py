@@ -3,7 +3,7 @@ from typing import Any, Type
 
 from .core import T
 from .de import Deserializer, from_obj
-from .se import Serializer, asdict, is_serializable
+from .se import Serializer, asdict
 
 
 class JsonSerializer(Serializer):

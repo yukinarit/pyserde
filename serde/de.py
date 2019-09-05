@@ -13,16 +13,14 @@ parts of pyserde.
 """
 import abc
 import functools
-from dataclasses import dataclass, fields, is_dataclass
-from typing import Any, Dict, List, Optional, Tuple, Type, Union
+from dataclasses import dataclass, is_dataclass
+from typing import Any, Dict, List, Optional, Tuple, Type
 
 import jinja2
 import stringcase
 
-from .compat import assert_type, is_dict, is_list, is_opt, is_tuple, is_union, iter_types, type_args, typename
-from .core import FROM_DICT, FROM_ITER, HIDDEN_NAME, SETTINGS, Hidden, SerdeError, T, gen, typecheck
-
-__all__ = ['deserialize', 'is_deserializable', 'Deserializer', 'from_obj', 'args_from_iter', 'args_from_dict']
+from .compat import assert_type, is_dict, is_list, is_opt, is_tuple, is_union, iter_types, type_args
+from .core import FROM_DICT, FROM_ITER, HIDDEN_NAME, SETTINGS, Field, Hidden, SerdeError, T, fields, gen
 
 
 def deserialize(_cls=None, rename_all: Optional[str] = None) -> Type:
@@ -52,20 +50,20 @@ def deserialize(_cls=None, rename_all: Optional[str] = None) -> Type:
     >>>
     >>> @deserialize(rename_all = 'camelcase')
     ... @dataclass
-    ... class Hoge:
+    ... class RenameAll:
     ...     int_field: int
     ...     str_field: str
     >>>
-    >>> from_json(Hoge, '{"intField": 10, "strField": "hoge"}')
-    Hoge(int_field=10, str_field='hoge')
+    >>> from_json(RenameAll, '{"intField": 10, "strField": "hoge"}')
+    RenameAll(int_field=10, str_field='hoge')
     >>>
     """
 
-    def wrap(cls) -> Type:
+    def wrap(cls):
         if not hasattr(cls, HIDDEN_NAME):
             setattr(cls, HIDDEN_NAME, Hidden())
         cls = de_func(cls, FROM_ITER, render_from_iter(cls))
-        cls = de_func(cls, FROM_DICT, render_from_dict(cls, case=rename_all))
+        cls = de_func(cls, FROM_DICT, render_from_dict(cls, rename_all))
         return cls
 
     if _cls is None:
@@ -117,36 +115,36 @@ def from_obj(c: Type[T], o: Any, de: Type[Deserializer] = None, strict=True, **o
 
     ### Dataclass
 
-    >>> from serde import deserialize
-    >>>
-    >>> @deserialize
-    ... @dataclass
-    ... class Hoge:
-    ...     i: int
-    ...     f: float
-    ...     s: str
-    ...     b: bool
-    >>>
-    >>> obj = {'i': 10, 'f': 0.1, 's': 'hoge', 'b': False}
-    >>> from_obj(Hoge, obj)
-    Hoge(i=10, f=0.1, s='hoge', b=False)
+    # >>> from serde import deserialize
+    # >>>
+    # >>> @deserialize
+    # ... @dataclass
+    # ... class Hoge:
+    # ...     i: int
+    # ...     f: float
+    # ...     s: str
+    # ...     b: bool
+    # >>>
+    # >>> obj = {'i': 10, 'f': 0.1, 's': 'hoge', 'b': False}
+    # >>> from_obj(Hoge, obj)
+    # Hoge(i=10, f=0.1, s='hoge', b=False)
 
-    ### Containers
+    # ### Containers
 
-    >>> from serde import deserialize
-    >>>
-    >>> @deserialize
-    ... @dataclass
-    ... class Hoge:
-    ...     s: str
-    ...     i: int
-    >>>
-    >>> from_obj(List[Hoge], [('hoge', 10), ('foo', 20)])
-    [Hoge(s='hoge', i=10), Hoge(s='foo', i=20)]
-    >>>
-    >>> from_obj(Dict[str ,Hoge], {'hoge': ('hoge', 10), 'foo': ('foo', 20)})
-    {'hoge': Hoge(s='hoge', i=10), 'foo': Hoge(s='foo', i=20)}
-    >>>
+    # >>> from serde import deserialize
+    # >>>
+    # >>> @deserialize
+    # ... @dataclass
+    # ... class Hoge:
+    # ...     s: str
+    # ...     i: int
+    # >>>
+    # >>> from_obj(List[Hoge], [('hoge', 10), ('foo', 20)])
+    # [Hoge(s='hoge', i=10), Hoge(s='foo', i=20)]
+    # >>>
+    # >>> from_obj(Dict[str ,Hoge], {'hoge': ('hoge', 10), 'foo': ('foo', 20)})
+    # {'hoge': Hoge(s='hoge', i=10), 'foo': Hoge(s='foo', i=20)}
+    # >>>
     """
     if de:
         o = de.deserialize(o, **opts)
@@ -179,9 +177,6 @@ def from_obj(c: Type[T], o: Any, de: Type[Deserializer] = None, strict=True, **o
     else:
         v = o
 
-    if strict:
-        typecheck(c, v)
-
     return v
 
 
@@ -202,231 +197,245 @@ def from_dict_or_iter(cls, o):
         raise SerdeError(f'Arg must be either List, Tuple, Dict or Type but {type(o)}.')
 
 
-def to_case(s: str, case: Optional[str]) -> str:
+def from_dict(cls, o):
+    return cls.__serde_from_dict__(o)
+
+
+def from_tuple(cls, o):
+    return cls.__serde_from_tuple__(o)
+
+
+def case(s: str, case: Optional[str]) -> str:
     if case:
         f = getattr(stringcase, case, None)
         if not f:
-            raise SerdeError(
-                (f"Unkown case type: {case}. Pass the name of case " f"supported by 'stringcase' package.")
-            )
+            raise SerdeError((f"Unkown case type: {case}. Pass the name of case supported by 'stringcase' package."))
         return f(s)
     else:
         return s
 
 
-def args_from_iter(cls) -> str:
-    """
-    Create string of ctor args for sequence type such as Tuple or List.
-    The returned string will be used in `deserialize` decorator to
-    generate the deserialize function.
-
-    >>> from dataclasses import dataclass
-    >>> from serde import deserialize
-    >>>
-    >>> @deserialize
-    ... @dataclass
-    ... class Hoge:
-    ...     s: str
-    ...     i: int
-    ...     f: float
-    ...     b: bool
-    >>>
-    >>> args_from_iter(Hoge)
-    's=data[0], i=data[1], f=data[2], b=data[3]'
-    >>>
-    """
-    params = []
-    for i, f in enumerate(fields(cls)):
-        arg = IterArg(f.type, f.name, 'data', index=i)
-        params.append(f'{f.name}=' + de_value(arg))
-    return ', '.join(params)
-
-
-def args_from_dict(cls, case: str = None) -> str:
-    """
-    Similar to `args_from_iter` but from dict.
-
-    >>> from dataclasses import dataclass
-    >>> from serde import deserialize
-    >>>
-    >>> @deserialize
-    ... @dataclass
-    ... class Hoge:
-    ...     s: str
-    ...     i: List[int]
-    ...     f: Optional[List[float]]
-    ...     b: bool
-    >>>
-    >>> args_from_dict(Hoge)
-    's=data["s"], i=[d for d in data["i"]], f=(data.get("f") and [d for d in data["f"]]), b=data["b"]'
-
-    `case` enables string case conversion e.g. snake_case to camelCase.
-    `case` must be one of 'camelcase', 'capitalcase', 'constcase', 'lowercase',
-    'pascalcase', 'snakecase', 'uppercase'.
-
-    For more information on the case conversion, see python [stringcase](https://pypi.org/project/stringcase/) package.
-
-    >>> from dataclasses import dataclass
-    >>> from serde import deserialize
-    >>>
-    >>> @deserialize
-    ... @dataclass
-    ... class Hoge:
-    ...     str_field: str
-    >>>
-    >>> args_from_dict(Hoge)
-    'str_field=data["str_field"]'
-    >>> args_from_dict(Hoge, case='camelcase')
-    'str_field=data["strField"]'
-    >>> args_from_dict(Hoge, case='pascalcase')
-    'str_field=data["StrField"]'
-    >>>
-    """
-    params = []
-    for f in fields(cls):
-        arg = DictArg(f.type, f.name, 'data', case=case)
-        params.append(f'{f.name}=' + de_value(arg))
-    return ', '.join(params)
-
-
 @dataclass
-class Arg:
-    """
-    Constructor argument for `deserialize` class.
-    """
+class DeField(Field):
+    datavar: Optional[str] = None  # name of variable to deserialize from.
 
-    type: Type  # Field type.
-    field: str  # Field name.
-    var: str  # Variable name.
-    case: Optional[str] = None  # Case name.
-
-    def __getitem__(self, n) -> 'Arg':
+    def __getitem__(self, n) -> 'DeField':
         typ = type_args(self.type)[n]
-        if isinstance(self, IterArg):
-            return IterArg(typ, self.field, self.var, case=self.case, index=self.index)
-        elif isinstance(self, DictArg):
-            return DictArg(typ, self.field, self.var, case=self.case)
+        if is_list(self.type) or is_dict(self.type):
+            return ElementField(typ, 'v', datavar='v')
+        elif is_tuple(self.type):
+            return ElementField(typ, f'{self.data}[{n}]', datavar=f'{self.data}[{n}]')
         else:
-            return Arg(typ, self.field, self.var, case=self.case)
+            return DeField(typ, self.name, datavar=self.datavar)
+
+    def get_kv(self) -> Tuple['ElementField', 'ElementField']:
+        k = self[0]
+        k.name = 'k'
+        k.datavar = 'k'
+        v = self[1]
+        return (k, v)
+
+    @property
+    def data(self) -> str:
+        return f'{self.datavar}["{case(self.name, self.case)}"]'
+
+    @data.setter
+    def data(self, d):
+        self.datavar = d
 
 
 @dataclass
-class IterArg(Arg):
-    """ Argument for Iterable like classes e.g. List """
-
-    index: int = 0
+class ElementField(DeField):
+    """
+    Field for element type such as List[T].
+    """
 
     @property
-    def varname(self) -> str:
-        """
-        Render variable name for Iterable like classes e.g. List.
+    def data(self) -> str:
+        return self.datavar
 
-        >>> IterArg(int, 'hoge', 'data', index=3).varname
-        'data[3]'
-        """
-        return f'{self.var}[{self.index}]'
+    @data.setter
+    def data(self, d):
+        self.datavar = d
+
+
+defields = functools.partial(fields, DeField)
 
 
 @dataclass
-class DictArg(Arg):
-    """ Argument for Dict like classes """
+class Renderer:
+    """
+    Base Renderer class.
+    """
 
-    @property
-    def varname(self) -> str:
-        """
-        Render variable name for Dict like classes.
+    func: str
 
-        >>> DictArg(int, 'hoge', 'data').varname
-        'data["hoge"]'
-        >>>
-        >>> DictArg(int, 'hoge_foo', 'data', case='camelcase').varname
-        'data["hogeFoo"]'
-        >>>
-        >>> DictArg(Optional[int], 'hoge', 'data').varname
-        'data.get("hoge")'
+    def render(self, arg: DeField) -> str:
         """
-        if is_opt(self.type):
-            return f'{self.var}.get("{to_case(self.field, self.case)}")'
+        Render rvalue
+        """
+        if is_dataclass(arg.type):
+            return self.dataclass(arg)
+        elif is_opt(arg.type):
+            return self.opt(arg)
+        elif is_list(arg.type):
+            return self.list(arg)
+        elif is_dict(arg.type):
+            return self.dict(arg)
+        elif is_tuple(arg.type):
+            return self.tuple(arg)
         else:
-            return f'{self.var}["{to_case(self.field, self.case)}"]'
+            return self.primitive(arg)
+
+    def dataclass(self, arg: DeField) -> str:
+        pass
+
+    def opt(self, arg: DeField) -> str:
+        pass
+
+    def list(self, arg: DeField) -> str:
+        pass
+
+    def tuple(self, arg: DeField) -> str:
+        pass
+
+    def dict(self, arg: DeField) -> str:
+        pass
+
+    def primitive(self, arg: DeField) -> str:
+        pass
 
 
-def de_value(arg: Arg, varname: str = '') -> str:
+@dataclass
+class DictRenderer(Renderer):
     """
-    Render string of args used in `de_func`.
-
-    >>> @deserialize
-    ... @dataclass
-    ... class Hoge:
-    ...     i: int
-    >>>
-    >>> de_value(DictArg(Hoge, 'hoge', 'data'))
-    'from_obj(Hoge, data["hoge"])'
-    >>>
-    >>> de_value(DictArg(Optional[Hoge], 'hoge', 'data'))
-    '(data.get("hoge") and from_obj(Hoge, data["hoge"]))'
-    >>>
-    >>> de_value(DictArg(List[int], 'hoge', 'data'))
-    '[d for d in data["hoge"]]'
-    >>>
-    >>> de_value(DictArg(Optional[List[int]], 'hoge', 'data'))
-    '(data.get("hoge") and [d for d in data["hoge"]])'
-    >>>
-    >>> de_value(DictArg(Tuple[int, str], 'hoge', 'data'))
-    '(data["hoge"][0], data["hoge"][1], )'
-    >>>
-    >>> de_value(DictArg(Dict[str, int], 'hoge', 'data'))
-    '{ k: v for k, v in data["hoge"].items() }'
-    >>>
-    >>> de_value(DictArg(int, 'hoge', 'data'))
-    'data["hoge"]'
-    >>>
+    Render rvalue for various types.
     """
-    typ = arg.type
-    varname = varname or arg.varname
 
-    if is_deserializable(typ):
-        s = f"from_obj({typ.__name__}, {varname})"
-    elif isinstance(typ, str):
-        # When `typ` is of string, type name is specified as forward declaration.
-        s = f"from_obj({typ}, {varname})"
-    elif is_opt(typ):
-        s = f"({varname} and {de_value(arg[0])})"
-    elif is_union(typ):
-        # TODO doesn't work with imported classes? (e.g. Union[str, xxxx.Package])
-        # s = f"from_obj(Union[{','.join([t.__qualname__ for t in type_args(typ)])}], {varname})"
-        s = f"from_obj({typename(typ)}, {varname})"
-    elif is_list(typ):
-        s = f"[{de_value(arg[0], 'd')} for d in {varname}]"
-    elif is_tuple(typ):
-        values = [de_value(arg[i], varname + f'[{i}]') + ', ' for i, _ in enumerate(type_args(typ))]
-        s = f"({''.join(values)})"
-    elif is_dict(typ):
-        s = f"{{ {de_value(arg[0], 'k')}: {de_value(arg[1], 'v')} " f"for k, v in {varname}.items() }}"
-    else:
-        s = varname
-    return s
+    def dataclass(self, arg: DeField) -> str:
+        return f'{arg.type.__name__}.{self.func}({arg.data})'
+
+    def opt(self, arg: DeField) -> str:
+        """
+        Render rvalue for Optional.
+
+        >>> DictRenderer('hoge').render(DeField(Optional[int], 'o', datavar='data'))
+        'data["o"] if "o" in data else None'
+
+        >>> DictRenderer('hoge').render(DeField(Optional[List[int]], 'o', datavar='data'))
+        '[v for v in data["o"]] if "o" in data else None'
+
+        >>> DictRenderer('hoge').render(DeField(Optional[List[int]], 'o', datavar='data'))
+        '[v for v in data["o"]] if "o" in data else None'
+
+        >>> @deserialize
+        ... @dataclass
+        ... class Foo:
+        ...     o: Optional[List[int]]
+        >>> DictRenderer('hoge').render(DeField(Optional[Foo], 'f', datavar='data'))
+        'Foo.hoge(data["f"]) if "f" in data else None'
+        """
+        value = arg[0]
+        exists = f'"{value.name}" in {value.datavar}'
+        return f'{self.render(value)} if {exists} else None'
+
+    def list(self, arg: DeField) -> str:
+        """
+        Render rvalue for list.
+
+        >>> DictRenderer('hoge').render(DeField(List[int], 'l', datavar='data'))
+        '[v for v in data["l"]]'
+
+        >>> DictRenderer('hoge').render(DeField(List[List[int]], 'l', datavar='data'))
+        '[[v for v in v] for v in data["l"]]'
+        """
+        return f'[{self.render(arg[0])} for v in {arg.data}]'
+
+    def tuple(self, arg: DeField) -> str:
+        """
+        Render rvalue for tuple.
+
+        >>> @deserialize
+        ... @dataclass
+        ... class Foo: pass
+        >>> DictRenderer('hoge').render(DeField(Tuple[str, int, List[int], Foo], 'd', datavar='data'))
+        '(data["d"][0], data["d"][1], [v for v in data["d"][2]], Foo.hoge(data["d"][3]))'
+        """
+        values = []
+        for i, typ in enumerate(type_args(arg.type)):
+            inner = arg[i]
+            values.append(self.render(inner))
+        return f'({", ".join(values)})'
+
+    def dict(self, arg: DeField) -> str:
+        """
+        Render rvalue for dict.
+
+        >>> DictRenderer('hoge').render(DeField(Dict[str, int], 'd', datavar='data'))
+        '{k: v for k, v in data["d"].items()}'
+
+        >>> @deserialize
+        ... @dataclass
+        ... class Foo: pass
+        >>> DictRenderer('hoge').render(DeField(Dict[Foo, List[Foo]], 'f', datavar='data'))
+        '{Foo.hoge(k): [Foo.hoge(v) for v in v] for k, v in data["f"].items()}'
+        """
+        k, v = arg.get_kv()
+        return f'{{{self.render(k)}: {self.render(v)} for k, v in {arg.data}.items()}}'
+
+    def primitive(self, arg: DeField) -> str:
+        """
+        Render rvalue for primitives.
+
+        >>> DictRenderer('hoge').render(DeField(int, 'i', datavar='data'))
+        'data["i"]'
+
+        >>> DictRenderer('hoge').render(DeField(int, 'int_field', datavar='data', case='camelcase'))
+        'data["intField"]'
+        """
+        return arg.data
+
+
+def to_arg(f: Field, rename_all: Optional[str] = None) -> DeField:
+    f.data = 'data'
+    f.parent = DeField(None, 'data', datavar='data', case=f.case or rename_all)
+    f.case = f.case or rename_all
+    return f
 
 
 def render_from_iter(cls: Type) -> str:
     template = """
 def {{func}}(data):
-  return cls({{cls|args}})
+  return cls(
+  {% for f in cls|fields %}
+  {{f|arg|rvalue}},
+  {% endfor %}
+  )
     """
 
+    renderer = DictRenderer(FROM_ITER)
     env = jinja2.Environment(loader=jinja2.DictLoader({'iter': template}))
-    env.filters.update({'args': args_from_iter})
+    env.filters.update({'rvalue': renderer.render})
+    env.filters.update({'fields': defields})
+    env.filters.update({'arg': to_arg})
     return env.get_template('iter').render(func=FROM_ITER, cls=cls)
 
 
-def render_from_dict(cls: Type, case: Optional[str] = None) -> str:
+def render_from_dict(cls: Type, rename_all: Optional[str] = None) -> str:
     template = """
 def {{func}}(data):
-  return cls({{cls|args}})
+  return cls(
+  {% for f in cls|fields %}
+  {{f|arg|rvalue}},
+  {% endfor %}
+  )
     """
 
+    renderer = DictRenderer(FROM_DICT)
     env = jinja2.Environment(loader=jinja2.DictLoader({'dict': template}))
-    env.filters.update({'args': functools.partial(args_from_dict, case=case)})
+    env.filters.update({'rvalue': renderer.render})
+    env.filters.update({'fields': defields})
+    env.filters.update({'arg': functools.partial(to_arg, rename_all=rename_all)})
     return env.get_template('dict').render(func=FROM_DICT, cls=cls)
 
 
@@ -440,7 +449,6 @@ def de_func(cls: Type[T], func: str, code: str) -> Type[T]:
         if is_dataclass(typ):
             g[typ.__name__] = typ
     g['cls'] = cls
-    g['from_obj'] = from_obj
     import typing
 
     g['typing'] = typing

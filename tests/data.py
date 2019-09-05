@@ -65,6 +65,20 @@ class Pri:
 @deserialize
 @serialize
 @dataclass
+class PriOpt:
+    """
+    Optional Primitives.
+    """
+
+    i: Optional[int]
+    s: Optional[str]
+    f: Optional[float]
+    b: Optional[bool]
+
+
+@deserialize
+@serialize
+@dataclass
 class PriList:
     """
     List containing primitives.
@@ -132,15 +146,15 @@ class NestedPri:
 @deserialize
 @serialize
 @dataclass
-class PriOpt:
+class NestedPriOpt:
     """
     Optional Primitives.
     """
 
-    i: Optional[int]
-    s: Optional[str]
-    f: Optional[float]
-    b: Optional[bool]
+    i: Optional[Int]
+    s: Optional[Str]
+    f: Optional[Float]
+    b: Optional[Bool]
 
 
 @deserialize

@@ -28,20 +28,21 @@ Defines classess and functions for `serialize` decorator.
 
 &#34;&#34;&#34;
 import abc
-import copy
+import copy  # noqa
 import functools
 from dataclasses import Field as DataclassField
 from dataclasses import asdict as _asdict
 from dataclasses import astuple as _astuple
-from dataclasses import dataclass, fields as dataclass_fields, is_dataclass
-from typing import Any, ClassVar, Dict, List, Optional, Tuple, Type
+from dataclasses import dataclass
+from dataclasses import fields as dataclass_fields  # noqa
+from dataclasses import is_dataclass
+from typing import Any, Dict, List, Optional, Tuple, Type
 
 import jinja2
 import stringcase
 
 from .compat import is_dict, is_list, is_tuple, type_args
-from .core import HIDDEN_NAME, SE_NAME, SETTINGS, TO_DICT, TO_ITER, Hidden, T, gen
-from .de import Arg
+from .core import HIDDEN_NAME, SE_NAME, SETTINGS, TO_DICT, TO_ITER, Field, Hidden, T, fields, gen
 
 
 class Serializer(metaclass=abc.ABCMeta):
@@ -100,8 +101,13 @@ def serialize(_cls=None, rename_all: Optional[str] = None) -&gt; Type:
             return ser.serialize(self, **opts)
 
         setattr(cls, SE_NAME, serialize)
-        cls = se_func(cls, TO_ITER, render_astuple(cls))
-        cls = se_func(cls, TO_DICT, render_asdict(cls, rename_all))
+
+        g: Dict[str, Any] = globals().copy()
+        for f in sefields(cls):
+            if f.skip_if:
+                g[f.skip_if.mangled] = f.skip_if
+        cls = se_func(cls, TO_ITER, render_astuple(cls), g)
+        cls = se_func(cls, TO_DICT, render_asdict(cls, rename_all), g)
         return cls
 
     if _cls is None:
@@ -199,22 +205,8 @@ def asdict(v):
 
 
 @dataclass
-class Field:
-    &#34;&#34;&#34;
-    Field in pyserde class.
-    &#34;&#34;&#34;
-
-    type: Type
-    name: str
+class SeField(Field):
     parent: Optional[&#39;Field&#39;] = None
-    case: Optional[str] = None
-    rename: Optional[str] = None
-    skip: Optional[bool] = None
-    skip_if_false: Optional[bool] = None
-
-    @staticmethod
-    def from_dataclass(f: DataclassField) -&gt; &#39;&#39;:
-        return Field(f.type, f.name, rename = f.metadata.get(&#39;serde_rename&#39;), skip = f.metadata.get(&#39;serde_skip&#39;), skip_if_false = f.metadata.get(&#39;serde_skip_if_false&#39;))
 
     @property
     def varname(self) -&gt; str:
@@ -224,17 +216,20 @@ class Field:
         else:
             return self.name
 
-    def __getitem__(self, n) -&gt; &#39;Field&#39;:
+    def __getitem__(self, n) -&gt; &#39;SeField&#39;:
         typ = type_args(self.type)[n]
-        return Field(typ, None)
+        return SeField(typ, None)
+
+    @staticmethod
+    def mangle(field: DataclassField, name: str) -&gt; str:
+        return f&#39;{field.name}_{name}&#39;
 
 
-def fields(cls: Type) -&gt; List[Field]:
-    return [Field.from_dataclass(f) for f in dataclass_fields(cls)]
+sefields = functools.partial(fields, SeField)
 
 
-def to_arg(f: Field) -&gt; Field:
-    f.parent = Field(None, &#39;obj&#39;)
+def to_arg(f: SeField) -&gt; SeField:
+    f.parent = SeField(None, &#39;obj&#39;)
     return f
 
 
@@ -257,7 +252,7 @@ def {{func}}(obj):
 
     renderer = Renderer(TO_ITER)
     env = jinja2.Environment(loader=jinja2.DictLoader({&#39;iter&#39;: template}))
-    env.filters.update({&#39;fields&#39;: fields})
+    env.filters.update({&#39;fields&#39;: sefields})
     env.filters.update({&#39;is_dataclass&#39;: is_dataclass})
     env.filters.update({&#39;rvalue&#39;: renderer.render})
     env.filters.update({&#39;arg&#39;: to_arg})
@@ -273,20 +268,22 @@ def {{func}}(obj):
   {% if cls|is_dataclass %}
   res = {}
   {% for f in cls|fields -%}
-  {% if not f.skip|default(False) %}
-    {% if f.skip_if_false|default(False) %}
-  if {{f|arg|rvalue()}}:
+
+  {% if not f.skip %}
+    {% if f.skip_if %}
+  if not {{f.skip_if.mangled}}({{f|arg|rvalue()}}):
     res[&#34;{{f|case}}&#34;] = {{f|arg|rvalue()}}
     {% else %}
   res[&#34;{{f|case}}&#34;] = {{f|arg|rvalue()}}
     {% endif %}
   {% endif %}
+
   {% endfor -%}
   return res
   {% endif %}
     &#34;&#34;&#34;
 
-    def conv(f: Field) -&gt; str:
+    def conv(f: SeField) -&gt; str:
         &#34;&#34;&#34;
         Convert dict key name.
         &#34;&#34;&#34;
@@ -300,7 +297,7 @@ def {{func}}(obj):
 
     renderer = Renderer(TO_DICT)
     env = jinja2.Environment(loader=jinja2.DictLoader({&#39;dict&#39;: template}))
-    env.filters.update({&#39;fields&#39;: fields})
+    env.filters.update({&#39;fields&#39;: sefields})
     env.filters.update({&#39;is_dataclass&#39;: is_dataclass})
     env.filters.update({&#39;rvalue&#39;: renderer.render})
     env.filters.update({&#39;arg&#39;: to_arg})
@@ -316,33 +313,33 @@ class Renderer:
 
     func: str
 
-    def render(self, arg: Field) -&gt; str:
+    def render(self, arg: SeField) -&gt; str:
         &#34;&#34;&#34;
         Render rvalue
 
-        &gt;&gt;&gt; Renderer(TO_ITER).render(Field(int, &#39;i&#39;))
+        &gt;&gt;&gt; Renderer(TO_ITER).render(SeField(int, &#39;i&#39;))
         &#39;i&#39;
 
-        &gt;&gt;&gt; Renderer(TO_ITER).render(Field(List[int], &#39;l&#39;))
+        &gt;&gt;&gt; Renderer(TO_ITER).render(SeField(List[int], &#39;l&#39;))
         &#39;[v for v in l]&#39;
 
         &gt;&gt;&gt; @serialize
         ... @dataclass(unsafe_hash=True)
         ... class Hoge:
         ...    val: int
-        &gt;&gt;&gt; Renderer(TO_ITER).render(Field(Hoge, &#39;hoge&#39;))
+        &gt;&gt;&gt; Renderer(TO_ITER).render(SeField(Hoge, &#39;hoge&#39;))
         &#39;hoge.__serde_to_iter__()&#39;
 
-        &gt;&gt;&gt; Renderer(TO_ITER).render(Field(List[Hoge], &#39;hoge&#39;))
+        &gt;&gt;&gt; Renderer(TO_ITER).render(SeField(List[Hoge], &#39;hoge&#39;))
         &#39;[v.__serde_to_iter__() for v in hoge]&#39;
 
-        &gt;&gt;&gt; Renderer(TO_ITER).render(Field(Dict[str, Hoge], &#39;hoge&#39;))
+        &gt;&gt;&gt; Renderer(TO_ITER).render(SeField(Dict[str, Hoge], &#39;hoge&#39;))
         &#39;{k: v.__serde_to_iter__() for k, v in hoge.items()}&#39;
 
-        &gt;&gt;&gt; Renderer(TO_ITER).render(Field(Dict[Hoge, Hoge], &#39;hoge&#39;))
+        &gt;&gt;&gt; Renderer(TO_ITER).render(SeField(Dict[Hoge, Hoge], &#39;hoge&#39;))
         &#39;{k.__serde_to_iter__(): v.__serde_to_iter__() for k, v in hoge.items()}&#39;
 
-        &gt;&gt;&gt; Renderer(TO_ITER).render(Field(Tuple[str, Hoge, int], &#39;hoge&#39;))
+        &gt;&gt;&gt; Renderer(TO_ITER).render(SeField(Tuple[str, Hoge, int], &#39;hoge&#39;))
         &#39;(hoge[0], hoge[1].__serde_to_iter__(), hoge[2])&#39;
         &gt;&gt;&gt;
         &#34;&#34;&#34;
@@ -357,15 +354,15 @@ class Renderer:
         else:
             return self.primitive(arg)
 
-    def dataclass(self, arg: Field) -&gt; str:
+    def dataclass(self, arg: SeField) -&gt; str:
         return f&#39;{arg.varname}.{self.func}()&#39;
 
-    def list(self, arg: Field) -&gt; str:
+    def list(self, arg: SeField) -&gt; str:
         earg = arg[0]
         earg.name = &#39;v&#39;
         return f&#39;[{self.render(earg)} for v in {arg.varname}]&#39;
 
-    def tuple(self, arg: Field) -&gt; str:
+    def tuple(self, arg: SeField) -&gt; str:
         rvalues = []
         for i, _ in enumerate(type_args(arg.type)):
             r = arg[i]
@@ -373,27 +370,29 @@ class Renderer:
             rvalues.append(self.render(r))
         return f&#34;({&#39;, &#39;.join(rvalues)})&#34;
 
-    def dict(self, arg: Field) -&gt; str:
+    def dict(self, arg: SeField) -&gt; str:
         karg = arg[0]
         karg.name = &#39;k&#39;
         varg = arg[1]
         varg.name = &#39;v&#39;
         return f&#39;{{{self.render(karg)}: {self.render(varg)} for k, v in {arg.varname}.items()}}&#39;
 
-    def primitive(self, arg: Field) -&gt; str:
+    def primitive(self, arg: SeField) -&gt; str:
         return f&#39;{arg.varname}&#39;
 
 
-def se_func(cls: Type[T], func: str, code: str) -&gt; Type[T]:
+def se_func(cls: Type[T], func: str, code: str, g: Dict = None, local: Dict = None) -&gt; Type[T]:
     &#34;&#34;&#34;
     Generate function to serialize into an object.
     &#34;&#34;&#34;
-    g: Dict[str, Any] = globals().copy()
-
     # Generate serialize function.
-    code = gen(code, g, cls=cls)
+    if not g:
+        g = globals().copy()
+    if not local:
+        local = locals().copy()
+    code = gen(code, g, local, cls=cls)
 
-    setattr(cls, func, g[func])
+    setattr(cls, func, local[func])
     if SETTINGS[&#39;debug&#39;]:
         hidden = getattr(cls, HIDDEN_NAME)
         hidden.code[func] = code
@@ -454,17 +453,6 @@ def se_func(cls: Type[T], func: str, code: str) -&gt; Type[T]:
         return v</code></pre>
 </details>
 </dd>
-<dt id="serde.se.fields"><code class="name flex">
-<span>def <span class="ident">fields</span></span>(<span>cls)</span>
-</code></dt>
-<dd>
-<section class="desc"></section>
-<details class="source">
-<summary>Source code</summary>
-<pre><code class="python">def fields(cls: Type) -&gt; List[Field]:
-    return [Field.from_dataclass(f) for f in dataclass_fields(cls)]</code></pre>
-</details>
-</dd>
 <dt id="serde.se.is_serializable"><code class="name flex">
 <span>def <span class="ident">is_serializable</span></span>(<span>instance_or_class)</span>
 </code></dt>
@@ -519,20 +507,22 @@ def {{func}}(obj):
   {% if cls|is_dataclass %}
   res = {}
   {% for f in cls|fields -%}
-  {% if not f.skip|default(False) %}
-    {% if f.skip_if_false|default(False) %}
-  if {{f|arg|rvalue()}}:
+
+  {% if not f.skip %}
+    {% if f.skip_if %}
+  if not {{f.skip_if.mangled}}({{f|arg|rvalue()}}):
     res[&#34;{{f|case}}&#34;] = {{f|arg|rvalue()}}
     {% else %}
   res[&#34;{{f|case}}&#34;] = {{f|arg|rvalue()}}
     {% endif %}
   {% endif %}
+
   {% endfor -%}
   return res
   {% endif %}
     &#34;&#34;&#34;
 
-    def conv(f: Field) -&gt; str:
+    def conv(f: SeField) -&gt; str:
         &#34;&#34;&#34;
         Convert dict key name.
         &#34;&#34;&#34;
@@ -546,7 +536,7 @@ def {{func}}(obj):
 
     renderer = Renderer(TO_DICT)
     env = jinja2.Environment(loader=jinja2.DictLoader({&#39;dict&#39;: template}))
-    env.filters.update({&#39;fields&#39;: fields})
+    env.filters.update({&#39;fields&#39;: sefields})
     env.filters.update({&#39;is_dataclass&#39;: is_dataclass})
     env.filters.update({&#39;rvalue&#39;: renderer.render})
     env.filters.update({&#39;arg&#39;: to_arg})
@@ -580,7 +570,7 @@ def {{func}}(obj):
 
     renderer = Renderer(TO_ITER)
     env = jinja2.Environment(loader=jinja2.DictLoader({&#39;iter&#39;: template}))
-    env.filters.update({&#39;fields&#39;: fields})
+    env.filters.update({&#39;fields&#39;: sefields})
     env.filters.update({&#39;is_dataclass&#39;: is_dataclass})
     env.filters.update({&#39;rvalue&#39;: renderer.render})
     env.filters.update({&#39;arg&#39;: to_arg})
@@ -588,22 +578,24 @@ def {{func}}(obj):
 </details>
 </dd>
 <dt id="serde.se.se_func"><code class="name flex">
-<span>def <span class="ident">se_func</span></span>(<span>cls, func, code)</span>
+<span>def <span class="ident">se_func</span></span>(<span>cls, func, code, g=None, local=None)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Generate function to serialize into an object.</p></section>
 <details class="source">
 <summary>Source code</summary>
-<pre><code class="python">def se_func(cls: Type[T], func: str, code: str) -&gt; Type[T]:
+<pre><code class="python">def se_func(cls: Type[T], func: str, code: str, g: Dict = None, local: Dict = None) -&gt; Type[T]:
     &#34;&#34;&#34;
     Generate function to serialize into an object.
     &#34;&#34;&#34;
-    g: Dict[str, Any] = globals().copy()
-
     # Generate serialize function.
-    code = gen(code, g, cls=cls)
+    if not g:
+        g = globals().copy()
+    if not local:
+        local = locals().copy()
+    code = gen(code, g, local, cls=cls)
 
-    setattr(cls, func, g[func])
+    setattr(cls, func, local[func])
     if SETTINGS[&#39;debug&#39;]:
         hidden = getattr(cls, HIDDEN_NAME)
         hidden.code[func] = code
@@ -691,8 +683,13 @@ into an object in various data format such as JSON and MsgPack.</p>
             return ser.serialize(self, **opts)
 
         setattr(cls, SE_NAME, serialize)
-        cls = se_func(cls, TO_ITER, render_astuple(cls))
-        cls = se_func(cls, TO_DICT, render_asdict(cls, rename_all))
+
+        g: Dict[str, Any] = globals().copy()
+        for f in sefields(cls):
+            if f.skip_if:
+                g[f.skip_if.mangled] = f.skip_if
+        cls = se_func(cls, TO_ITER, render_astuple(cls), g)
+        cls = se_func(cls, TO_DICT, render_asdict(cls, rename_all), g)
         return cls
 
     if _cls is None:
@@ -708,8 +705,8 @@ into an object in various data format such as JSON and MsgPack.</p>
 <section class="desc"></section>
 <details class="source">
 <summary>Source code</summary>
-<pre><code class="python">def to_arg(f: Field) -&gt; Field:
-    f.parent = Field(None, &#39;obj&#39;)
+<pre><code class="python">def to_arg(f: SeField) -&gt; SeField:
+    f.parent = SeField(None, &#39;obj&#39;)
     return f</code></pre>
 </details>
 </dd>
@@ -779,99 +776,6 @@ into an object in various data format such as JSON and MsgPack.</p>
 <section>
 <h2 class="section-title" id="header-classes">Classes</h2>
 <dl>
-<dt id="serde.se.Field"><code class="flex name class">
-<span>class <span class="ident">Field</span></span>
-<span>(</span><span>type, name, parent=None, case=None, rename=None, skip=None, skip_if_false=None)</span>
-</code></dt>
-<dd>
-<section class="desc"><p>Field in pyserde class.</p></section>
-<details class="source">
-<summary>Source code</summary>
-<pre><code class="python">class Field:
-    &#34;&#34;&#34;
-    Field in pyserde class.
-    &#34;&#34;&#34;
-
-    type: Type
-    name: str
-    parent: Optional[&#39;Field&#39;] = None
-    case: Optional[str] = None
-    rename: Optional[str] = None
-    skip: Optional[bool] = None
-    skip_if_false: Optional[bool] = None
-
-    @staticmethod
-    def from_dataclass(f: DataclassField) -&gt; &#39;&#39;:
-        return Field(f.type, f.name, rename = f.metadata.get(&#39;serde_rename&#39;), skip = f.metadata.get(&#39;serde_skip&#39;), skip_if_false = f.metadata.get(&#39;serde_skip_if_false&#39;))
-
-    @property
-    def varname(self) -&gt; str:
-        var = self.parent.varname if self.parent else None
-        if var:
-            return f&#39;{var}.{self.name}&#39;
-        else:
-            return self.name
-
-    def __getitem__(self, n) -&gt; &#39;Field&#39;:
-        typ = type_args(self.type)[n]
-        return Field(typ, None)</code></pre>
-</details>
-<h3>Class variables</h3>
-<dl>
-<dt id="serde.se.Field.case"><code class="name">var <span class="ident">case</span></code></dt>
-<dd>
-<section class="desc"></section>
-</dd>
-<dt id="serde.se.Field.parent"><code class="name">var <span class="ident">parent</span></code></dt>
-<dd>
-<section class="desc"></section>
-</dd>
-<dt id="serde.se.Field.rename"><code class="name">var <span class="ident">rename</span></code></dt>
-<dd>
-<section class="desc"></section>
-</dd>
-<dt id="serde.se.Field.skip"><code class="name">var <span class="ident">skip</span></code></dt>
-<dd>
-<section class="desc"></section>
-</dd>
-<dt id="serde.se.Field.skip_if_false"><code class="name">var <span class="ident">skip_if_false</span></code></dt>
-<dd>
-<section class="desc"></section>
-</dd>
-</dl>
-<h3>Static methods</h3>
-<dl>
-<dt id="serde.se.Field.from_dataclass"><code class="name flex">
-<span>def <span class="ident">from_dataclass</span></span>(<span>f)</span>
-</code></dt>
-<dd>
-<section class="desc"></section>
-<details class="source">
-<summary>Source code</summary>
-<pre><code class="python">@staticmethod
-def from_dataclass(f: DataclassField) -&gt; &#39;&#39;:
-    return Field(f.type, f.name, rename = f.metadata.get(&#39;serde_rename&#39;), skip = f.metadata.get(&#39;serde_skip&#39;), skip_if_false = f.metadata.get(&#39;serde_skip_if_false&#39;))</code></pre>
-</details>
-</dd>
-</dl>
-<h3>Instance variables</h3>
-<dl>
-<dt id="serde.se.Field.varname"><code class="name">var <span class="ident">varname</span></code></dt>
-<dd>
-<section class="desc"></section>
-<details class="source">
-<summary>Source code</summary>
-<pre><code class="python">@property
-def varname(self) -&gt; str:
-    var = self.parent.varname if self.parent else None
-    if var:
-        return f&#39;{var}.{self.name}&#39;
-    else:
-        return self.name</code></pre>
-</details>
-</dd>
-</dl>
-</dd>
 <dt id="serde.se.Renderer"><code class="flex name class">
 <span>class <span class="ident">Renderer</span></span>
 <span>(</span><span>func)</span>
@@ -887,33 +791,33 @@ def varname(self) -&gt; str:
 
     func: str
 
-    def render(self, arg: Field) -&gt; str:
+    def render(self, arg: SeField) -&gt; str:
         &#34;&#34;&#34;
         Render rvalue
 
-        &gt;&gt;&gt; Renderer(TO_ITER).render(Field(int, &#39;i&#39;))
+        &gt;&gt;&gt; Renderer(TO_ITER).render(SeField(int, &#39;i&#39;))
         &#39;i&#39;
 
-        &gt;&gt;&gt; Renderer(TO_ITER).render(Field(List[int], &#39;l&#39;))
+        &gt;&gt;&gt; Renderer(TO_ITER).render(SeField(List[int], &#39;l&#39;))
         &#39;[v for v in l]&#39;
 
         &gt;&gt;&gt; @serialize
         ... @dataclass(unsafe_hash=True)
         ... class Hoge:
         ...    val: int
-        &gt;&gt;&gt; Renderer(TO_ITER).render(Field(Hoge, &#39;hoge&#39;))
+        &gt;&gt;&gt; Renderer(TO_ITER).render(SeField(Hoge, &#39;hoge&#39;))
         &#39;hoge.__serde_to_iter__()&#39;
 
-        &gt;&gt;&gt; Renderer(TO_ITER).render(Field(List[Hoge], &#39;hoge&#39;))
+        &gt;&gt;&gt; Renderer(TO_ITER).render(SeField(List[Hoge], &#39;hoge&#39;))
         &#39;[v.__serde_to_iter__() for v in hoge]&#39;
 
-        &gt;&gt;&gt; Renderer(TO_ITER).render(Field(Dict[str, Hoge], &#39;hoge&#39;))
+        &gt;&gt;&gt; Renderer(TO_ITER).render(SeField(Dict[str, Hoge], &#39;hoge&#39;))
         &#39;{k: v.__serde_to_iter__() for k, v in hoge.items()}&#39;
 
-        &gt;&gt;&gt; Renderer(TO_ITER).render(Field(Dict[Hoge, Hoge], &#39;hoge&#39;))
+        &gt;&gt;&gt; Renderer(TO_ITER).render(SeField(Dict[Hoge, Hoge], &#39;hoge&#39;))
         &#39;{k.__serde_to_iter__(): v.__serde_to_iter__() for k, v in hoge.items()}&#39;
 
-        &gt;&gt;&gt; Renderer(TO_ITER).render(Field(Tuple[str, Hoge, int], &#39;hoge&#39;))
+        &gt;&gt;&gt; Renderer(TO_ITER).render(SeField(Tuple[str, Hoge, int], &#39;hoge&#39;))
         &#39;(hoge[0], hoge[1].__serde_to_iter__(), hoge[2])&#39;
         &gt;&gt;&gt;
         &#34;&#34;&#34;
@@ -928,15 +832,15 @@ def varname(self) -&gt; str:
         else:
             return self.primitive(arg)
 
-    def dataclass(self, arg: Field) -&gt; str:
+    def dataclass(self, arg: SeField) -&gt; str:
         return f&#39;{arg.varname}.{self.func}()&#39;
 
-    def list(self, arg: Field) -&gt; str:
+    def list(self, arg: SeField) -&gt; str:
         earg = arg[0]
         earg.name = &#39;v&#39;
         return f&#39;[{self.render(earg)} for v in {arg.varname}]&#39;
 
-    def tuple(self, arg: Field) -&gt; str:
+    def tuple(self, arg: SeField) -&gt; str:
         rvalues = []
         for i, _ in enumerate(type_args(arg.type)):
             r = arg[i]
@@ -944,14 +848,14 @@ def varname(self) -&gt; str:
             rvalues.append(self.render(r))
         return f&#34;({&#39;, &#39;.join(rvalues)})&#34;
 
-    def dict(self, arg: Field) -&gt; str:
+    def dict(self, arg: SeField) -&gt; str:
         karg = arg[0]
         karg.name = &#39;k&#39;
         varg = arg[1]
         varg.name = &#39;v&#39;
         return f&#39;{{{self.render(karg)}: {self.render(varg)} for k, v in {arg.varname}.items()}}&#39;
 
-    def primitive(self, arg: Field) -&gt; str:
+    def primitive(self, arg: SeField) -&gt; str:
         return f&#39;{arg.varname}&#39;</code></pre>
 </details>
 <h3>Methods</h3>
@@ -963,7 +867,7 @@ def varname(self) -&gt; str:
 <section class="desc"></section>
 <details class="source">
 <summary>Source code</summary>
-<pre><code class="python">def dataclass(self, arg: Field) -&gt; str:
+<pre><code class="python">def dataclass(self, arg: SeField) -&gt; str:
     return f&#39;{arg.varname}.{self.func}()&#39;</code></pre>
 </details>
 </dd>
@@ -974,7 +878,7 @@ def varname(self) -&gt; str:
 <section class="desc"></section>
 <details class="source">
 <summary>Source code</summary>
-<pre><code class="python">def dict(self, arg: Field) -&gt; str:
+<pre><code class="python">def dict(self, arg: SeField) -&gt; str:
     karg = arg[0]
     karg.name = &#39;k&#39;
     varg = arg[1]
@@ -989,7 +893,7 @@ def varname(self) -&gt; str:
 <section class="desc"></section>
 <details class="source">
 <summary>Source code</summary>
-<pre><code class="python">def list(self, arg: Field) -&gt; str:
+<pre><code class="python">def list(self, arg: SeField) -&gt; str:
     earg = arg[0]
     earg.name = &#39;v&#39;
     return f&#39;[{self.render(earg)} for v in {arg.varname}]&#39;</code></pre>
@@ -1002,7 +906,7 @@ def varname(self) -&gt; str:
 <section class="desc"></section>
 <details class="source">
 <summary>Source code</summary>
-<pre><code class="python">def primitive(self, arg: Field) -&gt; str:
+<pre><code class="python">def primitive(self, arg: SeField) -&gt; str:
     return f&#39;{arg.varname}&#39;</code></pre>
 </details>
 </dd>
@@ -1011,61 +915,61 @@ def varname(self) -&gt; str:
 </code></dt>
 <dd>
 <section class="desc"><p>Render rvalue</p>
-<pre><code>&gt;&gt;&gt; Renderer(TO_ITER).render(Field(int, 'i'))
+<pre><code>&gt;&gt;&gt; Renderer(TO_ITER).render(SeField(int, 'i'))
 'i'
 
-&gt;&gt;&gt; Renderer(TO_ITER).render(Field(List[int], 'l'))
+&gt;&gt;&gt; Renderer(TO_ITER).render(SeField(List[int], 'l'))
 '[v for v in l]'
 
 &gt;&gt;&gt; @serialize
 ... @dataclass(unsafe_hash=True)
 ... class Hoge:
 ...    val: int
-&gt;&gt;&gt; Renderer(TO_ITER).render(Field(Hoge, 'hoge'))
+&gt;&gt;&gt; Renderer(TO_ITER).render(SeField(Hoge, 'hoge'))
 'hoge.__serde_to_iter__()'
 
-&gt;&gt;&gt; Renderer(TO_ITER).render(Field(List[Hoge], 'hoge'))
+&gt;&gt;&gt; Renderer(TO_ITER).render(SeField(List[Hoge], 'hoge'))
 '[v.__serde_to_iter__() for v in hoge]'
 
-&gt;&gt;&gt; Renderer(TO_ITER).render(Field(Dict[str, Hoge], 'hoge'))
+&gt;&gt;&gt; Renderer(TO_ITER).render(SeField(Dict[str, Hoge], 'hoge'))
 '{k: v.__serde_to_iter__() for k, v in hoge.items()}'
 
-&gt;&gt;&gt; Renderer(TO_ITER).render(Field(Dict[Hoge, Hoge], 'hoge'))
+&gt;&gt;&gt; Renderer(TO_ITER).render(SeField(Dict[Hoge, Hoge], 'hoge'))
 '{k.__serde_to_iter__(): v.__serde_to_iter__() for k, v in hoge.items()}'
 
-&gt;&gt;&gt; Renderer(TO_ITER).render(Field(Tuple[str, Hoge, int], 'hoge'))
+&gt;&gt;&gt; Renderer(TO_ITER).render(SeField(Tuple[str, Hoge, int], 'hoge'))
 '(hoge[0], hoge[1].__serde_to_iter__(), hoge[2])'
 &gt;&gt;&gt;
 </code></pre></section>
 <details class="source">
 <summary>Source code</summary>
-<pre><code class="python">def render(self, arg: Field) -&gt; str:
+<pre><code class="python">def render(self, arg: SeField) -&gt; str:
     &#34;&#34;&#34;
     Render rvalue
 
-    &gt;&gt;&gt; Renderer(TO_ITER).render(Field(int, &#39;i&#39;))
+    &gt;&gt;&gt; Renderer(TO_ITER).render(SeField(int, &#39;i&#39;))
     &#39;i&#39;
 
-    &gt;&gt;&gt; Renderer(TO_ITER).render(Field(List[int], &#39;l&#39;))
+    &gt;&gt;&gt; Renderer(TO_ITER).render(SeField(List[int], &#39;l&#39;))
     &#39;[v for v in l]&#39;
 
     &gt;&gt;&gt; @serialize
     ... @dataclass(unsafe_hash=True)
     ... class Hoge:
     ...    val: int
-    &gt;&gt;&gt; Renderer(TO_ITER).render(Field(Hoge, &#39;hoge&#39;))
+    &gt;&gt;&gt; Renderer(TO_ITER).render(SeField(Hoge, &#39;hoge&#39;))
     &#39;hoge.__serde_to_iter__()&#39;
 
-    &gt;&gt;&gt; Renderer(TO_ITER).render(Field(List[Hoge], &#39;hoge&#39;))
+    &gt;&gt;&gt; Renderer(TO_ITER).render(SeField(List[Hoge], &#39;hoge&#39;))
     &#39;[v.__serde_to_iter__() for v in hoge]&#39;
 
-    &gt;&gt;&gt; Renderer(TO_ITER).render(Field(Dict[str, Hoge], &#39;hoge&#39;))
+    &gt;&gt;&gt; Renderer(TO_ITER).render(SeField(Dict[str, Hoge], &#39;hoge&#39;))
     &#39;{k: v.__serde_to_iter__() for k, v in hoge.items()}&#39;
 
-    &gt;&gt;&gt; Renderer(TO_ITER).render(Field(Dict[Hoge, Hoge], &#39;hoge&#39;))
+    &gt;&gt;&gt; Renderer(TO_ITER).render(SeField(Dict[Hoge, Hoge], &#39;hoge&#39;))
     &#39;{k.__serde_to_iter__(): v.__serde_to_iter__() for k, v in hoge.items()}&#39;
 
-    &gt;&gt;&gt; Renderer(TO_ITER).render(Field(Tuple[str, Hoge, int], &#39;hoge&#39;))
+    &gt;&gt;&gt; Renderer(TO_ITER).render(SeField(Tuple[str, Hoge, int], &#39;hoge&#39;))
     &#39;(hoge[0], hoge[1].__serde_to_iter__(), hoge[2])&#39;
     &gt;&gt;&gt;
     &#34;&#34;&#34;
@@ -1088,13 +992,84 @@ def varname(self) -&gt; str:
 <section class="desc"></section>
 <details class="source">
 <summary>Source code</summary>
-<pre><code class="python">def tuple(self, arg: Field) -&gt; str:
+<pre><code class="python">def tuple(self, arg: SeField) -&gt; str:
     rvalues = []
     for i, _ in enumerate(type_args(arg.type)):
         r = arg[i]
         r.name = f&#39;{arg.varname}[{i}]&#39;
         rvalues.append(self.render(r))
     return f&#34;({&#39;, &#39;.join(rvalues)})&#34;</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="serde.se.SeField"><code class="flex name class">
+<span>class <span class="ident">SeField</span></span>
+<span>(</span><span>type, name, case=None, rename=None, skip=None, skip_if=None, skip_if_false=None, parent=None)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>SeField(type:Type, name:str, case:Union[str, NoneType]=None, rename:Union[str, NoneType]=None, skip:Union[bool, NoneType]=None, skip_if:Union[Callable[[Any], bool], NoneType]=None, skip_if_false:Union[bool, NoneType]=None, parent:Union[_ForwardRef('Field'), NoneType]=None)</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">class SeField(Field):
+    parent: Optional[&#39;Field&#39;] = None
+
+    @property
+    def varname(self) -&gt; str:
+        var = self.parent.varname if self.parent else None
+        if var:
+            return f&#39;{var}.{self.name}&#39;
+        else:
+            return self.name
+
+    def __getitem__(self, n) -&gt; &#39;SeField&#39;:
+        typ = type_args(self.type)[n]
+        return SeField(typ, None)
+
+    @staticmethod
+    def mangle(field: DataclassField, name: str) -&gt; str:
+        return f&#39;{field.name}_{name}&#39;</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="serde.core.Field" href="core.html#serde.core.Field">Field</a></li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="serde.se.SeField.parent"><code class="name">var <span class="ident">parent</span></code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+</dl>
+<h3>Static methods</h3>
+<dl>
+<dt id="serde.se.SeField.mangle"><code class="name flex">
+<span>def <span class="ident">mangle</span></span>(<span>field, name)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">@staticmethod
+def mangle(field: DataclassField, name: str) -&gt; str:
+    return f&#39;{field.name}_{name}&#39;</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Instance variables</h3>
+<dl>
+<dt id="serde.se.SeField.varname"><code class="name">var <span class="ident">varname</span></code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">@property
+def varname(self) -&gt; str:
+    var = self.parent.varname if self.parent else None
+    if var:
+        return f&#39;{var}.{self.name}&#39;
+    else:
+        return self.name</code></pre>
 </details>
 </dd>
 </dl>
@@ -1121,10 +1096,10 @@ def varname(self) -&gt; str:
 </details>
 <h3>Subclasses</h3>
 <ul class="hlist">
-<li><a title="serde.toml.TomlSerializer" href="toml.html#serde.toml.TomlSerializer">TomlSerializer</a></li>
 <li><a title="serde.msgpack.MsgPackSerializer" href="msgpack.html#serde.msgpack.MsgPackSerializer">MsgPackSerializer</a></li>
 <li><a title="serde.yaml.YamlSerializer" href="yaml.html#serde.yaml.YamlSerializer">YamlSerializer</a></li>
 <li><a title="serde.json.JsonSerializer" href="json.html#serde.json.JsonSerializer">JsonSerializer</a></li>
+<li><a title="serde.toml.TomlSerializer" href="toml.html#serde.toml.TomlSerializer">TomlSerializer</a></li>
 </ul>
 <h3>Static methods</h3>
 <dl>
@@ -1160,7 +1135,6 @@ def serialize(cls, obj):
 <ul class="two-column">
 <li><code><a title="serde.se.asdict" href="#serde.se.asdict">asdict</a></code></li>
 <li><code><a title="serde.se.astuple" href="#serde.se.astuple">astuple</a></code></li>
-<li><code><a title="serde.se.fields" href="#serde.se.fields">fields</a></code></li>
 <li><code><a title="serde.se.is_serializable" href="#serde.se.is_serializable">is_serializable</a></code></li>
 <li><code><a title="serde.se.render_asdict" href="#serde.se.render_asdict">render_asdict</a></code></li>
 <li><code><a title="serde.se.render_astuple" href="#serde.se.render_astuple">render_astuple</a></code></li>
@@ -1173,18 +1147,6 @@ def serialize(cls, obj):
 <li><h3><a href="#header-classes">Classes</a></h3>
 <ul>
 <li>
-<h4><code><a title="serde.se.Field" href="#serde.se.Field">Field</a></code></h4>
-<ul class="two-column">
-<li><code><a title="serde.se.Field.case" href="#serde.se.Field.case">case</a></code></li>
-<li><code><a title="serde.se.Field.from_dataclass" href="#serde.se.Field.from_dataclass">from_dataclass</a></code></li>
-<li><code><a title="serde.se.Field.parent" href="#serde.se.Field.parent">parent</a></code></li>
-<li><code><a title="serde.se.Field.rename" href="#serde.se.Field.rename">rename</a></code></li>
-<li><code><a title="serde.se.Field.skip" href="#serde.se.Field.skip">skip</a></code></li>
-<li><code><a title="serde.se.Field.skip_if_false" href="#serde.se.Field.skip_if_false">skip_if_false</a></code></li>
-<li><code><a title="serde.se.Field.varname" href="#serde.se.Field.varname">varname</a></code></li>
-</ul>
-</li>
-<li>
 <h4><code><a title="serde.se.Renderer" href="#serde.se.Renderer">Renderer</a></code></h4>
 <ul class="two-column">
 <li><code><a title="serde.se.Renderer.dataclass" href="#serde.se.Renderer.dataclass">dataclass</a></code></li>
@@ -1193,6 +1155,14 @@ def serialize(cls, obj):
 <li><code><a title="serde.se.Renderer.primitive" href="#serde.se.Renderer.primitive">primitive</a></code></li>
 <li><code><a title="serde.se.Renderer.render" href="#serde.se.Renderer.render">render</a></code></li>
 <li><code><a title="serde.se.Renderer.tuple" href="#serde.se.Renderer.tuple">tuple</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="serde.se.SeField" href="#serde.se.SeField">SeField</a></code></h4>
+<ul class="">
+<li><code><a title="serde.se.SeField.mangle" href="#serde.se.SeField.mangle">mangle</a></code></li>
+<li><code><a title="serde.se.SeField.parent" href="#serde.se.SeField.parent">parent</a></code></li>
+<li><code><a title="serde.se.SeField.varname" href="#serde.se.SeField.varname">varname</a></code></li>
 </ul>
 </li>
 <li>

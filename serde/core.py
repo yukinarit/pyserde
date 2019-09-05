@@ -1,6 +1,9 @@
 import logging
-from dataclasses import dataclass, field, fields, is_dataclass
-from typing import Dict, List, Tuple, Type, TypeVar
+from dataclasses import Field as DataclassField
+from dataclasses import dataclass, field
+from dataclasses import fields as dataclass_fields
+from dataclasses import is_dataclass
+from typing import Any, Callable, Dict, Iterator, List, Optional, Type, TypeVar
 
 from .compat import T, assert_type, is_dict, is_list, is_opt, is_tuple, is_union, type_args
 
@@ -77,7 +80,7 @@ def typecheck(cls: Type[T], obj: T) -> None:
     """
     if is_dataclass(obj):
         # If dataclass, type check recursively.
-        for f in fields(obj):
+        for f in dataclass_fields(obj):
             typecheck(f.type, getattr(obj, f.name, None))
     elif is_opt(cls):
         if obj is not None:
@@ -113,3 +116,42 @@ def typecheck(cls: Type[T], obj: T) -> None:
     else:
         if not isinstance(obj, cls):
             raise ValueError(f'{obj} is not instance of {cls}')
+
+
+@dataclass
+class Field:
+    """
+    Field in pyserde class.
+    """
+
+    type: Type
+    name: str
+    case: Optional[str] = None
+    rename: Optional[str] = None
+    skip: Optional[bool] = None
+    skip_if: Optional[Callable[[Any], bool]] = None
+    skip_if_false: Optional[bool] = None
+
+    @classmethod
+    def from_dataclass(cls, f: DataclassField) -> 'Field':
+        if f.metadata.get('serde_skip_if_false'):
+            skip_if_false = lambda v: not bool(v)
+            skip_if_false.mangled = cls.mangle(f, 'skip_if')
+        else:
+            skip_if_false = None
+
+        skip_if = f.metadata.get('serde_skip_if')
+        if skip_if:
+            skip_if.mangled = cls.mangle(f, 'skip_if')
+
+        return cls(
+            f.type,
+            f.name,
+            rename=f.metadata.get('serde_rename'),
+            skip=f.metadata.get('serde_skip'),
+            skip_if=skip_if or skip_if_false,
+        )
+
+
+def fields(FieldCls: Type, cls: Type) -> Iterator[Field]:
+    return iter(FieldCls.from_dataclass(f) for f in dataclass_fields(cls))

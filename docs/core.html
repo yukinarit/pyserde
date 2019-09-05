@@ -23,8 +23,11 @@
 <details class="source">
 <summary>Source code</summary>
 <pre><code class="python">import logging
-from dataclasses import dataclass, field, fields, is_dataclass
-from typing import Dict, List, Tuple, Type, TypeVar
+from dataclasses import Field as DataclassField
+from dataclasses import dataclass, field
+from dataclasses import fields as dataclass_fields
+from dataclasses import is_dataclass
+from typing import Any, Callable, Dict, Iterator, List, Optional, Type, TypeVar
 
 from .compat import T, assert_type, is_dict, is_list, is_opt, is_tuple, is_union, type_args
 
@@ -101,7 +104,7 @@ def typecheck(cls: Type[T], obj: T) -&gt; None:
     &#34;&#34;&#34;
     if is_dataclass(obj):
         # If dataclass, type check recursively.
-        for f in fields(obj):
+        for f in dataclass_fields(obj):
             typecheck(f.type, getattr(obj, f.name, None))
     elif is_opt(cls):
         if obj is not None:
@@ -136,7 +139,46 @@ def typecheck(cls: Type[T], obj: T) -&gt; None:
             typecheck(vtyp, v)
     else:
         if not isinstance(obj, cls):
-            raise ValueError(f&#39;{obj} is not instance of {cls}&#39;)</code></pre>
+            raise ValueError(f&#39;{obj} is not instance of {cls}&#39;)
+
+
+@dataclass
+class Field:
+    &#34;&#34;&#34;
+    Field in pyserde class.
+    &#34;&#34;&#34;
+
+    type: Type
+    name: str
+    case: Optional[str] = None
+    rename: Optional[str] = None
+    skip: Optional[bool] = None
+    skip_if: Optional[Callable[[Any], bool]] = None
+    skip_if_false: Optional[bool] = None
+
+    @classmethod
+    def from_dataclass(cls, f: DataclassField) -&gt; &#39;Field&#39;:
+        if f.metadata.get(&#39;serde_skip_if_false&#39;):
+            skip_if_false = lambda v: not bool(v)
+            skip_if_false.mangled = cls.mangle(f, &#39;skip_if&#39;)
+        else:
+            skip_if_false = None
+
+        skip_if = f.metadata.get(&#39;serde_skip_if&#39;)
+        if skip_if:
+            skip_if.mangled = cls.mangle(f, &#39;skip_if&#39;)
+
+        return cls(
+            f.type,
+            f.name,
+            rename=f.metadata.get(&#39;serde_rename&#39;),
+            skip=f.metadata.get(&#39;serde_skip&#39;),
+            skip_if=skip_if or skip_if_false,
+        )
+
+
+def fields(FieldCls: Type, cls: Type) -&gt; Iterator[Field]:
+    return iter(FieldCls.from_dataclass(f) for f in dataclass_fields(cls))</code></pre>
 </details>
 </section>
 <section>
@@ -146,6 +188,17 @@ def typecheck(cls: Type[T], obj: T) -&gt; None:
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
+<dt id="serde.core.fields"><code class="name flex">
+<span>def <span class="ident">fields</span></span>(<span>FieldCls, cls)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def fields(FieldCls: Type, cls: Type) -&gt; Iterator[Field]:
+    return iter(FieldCls.from_dataclass(f) for f in dataclass_fields(cls))</code></pre>
+</details>
+</dd>
 <dt id="serde.core.gen"><code class="name flex">
 <span>def <span class="ident">gen</span></span>(<span>code, globals=None, locals=None, cls=None)</span>
 </code></dt>
@@ -219,7 +272,7 @@ def typecheck(cls: Type[T], obj: T) -&gt; None:
     &#34;&#34;&#34;
     if is_dataclass(obj):
         # If dataclass, type check recursively.
-        for f in fields(obj):
+        for f in dataclass_fields(obj):
             typecheck(f.type, getattr(obj, f.name, None))
     elif is_opt(cls):
         if obj is not None:
@@ -262,6 +315,107 @@ def typecheck(cls: Type[T], obj: T) -&gt; None:
 <section>
 <h2 class="section-title" id="header-classes">Classes</h2>
 <dl>
+<dt id="serde.core.Field"><code class="flex name class">
+<span>class <span class="ident">Field</span></span>
+<span>(</span><span>type, name, case=None, rename=None, skip=None, skip_if=None, skip_if_false=None)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Field in pyserde class.</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">class Field:
+    &#34;&#34;&#34;
+    Field in pyserde class.
+    &#34;&#34;&#34;
+
+    type: Type
+    name: str
+    case: Optional[str] = None
+    rename: Optional[str] = None
+    skip: Optional[bool] = None
+    skip_if: Optional[Callable[[Any], bool]] = None
+    skip_if_false: Optional[bool] = None
+
+    @classmethod
+    def from_dataclass(cls, f: DataclassField) -&gt; &#39;Field&#39;:
+        if f.metadata.get(&#39;serde_skip_if_false&#39;):
+            skip_if_false = lambda v: not bool(v)
+            skip_if_false.mangled = cls.mangle(f, &#39;skip_if&#39;)
+        else:
+            skip_if_false = None
+
+        skip_if = f.metadata.get(&#39;serde_skip_if&#39;)
+        if skip_if:
+            skip_if.mangled = cls.mangle(f, &#39;skip_if&#39;)
+
+        return cls(
+            f.type,
+            f.name,
+            rename=f.metadata.get(&#39;serde_rename&#39;),
+            skip=f.metadata.get(&#39;serde_skip&#39;),
+            skip_if=skip_if or skip_if_false,
+        )</code></pre>
+</details>
+<h3>Subclasses</h3>
+<ul class="hlist">
+<li><a title="serde.de.DeField" href="de.html#serde.de.DeField">DeField</a></li>
+<li><a title="serde.se.SeField" href="se.html#serde.se.SeField">SeField</a></li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="serde.core.Field.case"><code class="name">var <span class="ident">case</span></code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+<dt id="serde.core.Field.rename"><code class="name">var <span class="ident">rename</span></code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+<dt id="serde.core.Field.skip"><code class="name">var <span class="ident">skip</span></code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+<dt id="serde.core.Field.skip_if"><code class="name">var <span class="ident">skip_if</span></code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+<dt id="serde.core.Field.skip_if_false"><code class="name">var <span class="ident">skip_if_false</span></code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+</dl>
+<h3>Static methods</h3>
+<dl>
+<dt id="serde.core.Field.from_dataclass"><code class="name flex">
+<span>def <span class="ident">from_dataclass</span></span>(<span>f)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">@classmethod
+def from_dataclass(cls, f: DataclassField) -&gt; &#39;Field&#39;:
+    if f.metadata.get(&#39;serde_skip_if_false&#39;):
+        skip_if_false = lambda v: not bool(v)
+        skip_if_false.mangled = cls.mangle(f, &#39;skip_if&#39;)
+    else:
+        skip_if_false = None
+
+    skip_if = f.metadata.get(&#39;serde_skip_if&#39;)
+    if skip_if:
+        skip_if.mangled = cls.mangle(f, &#39;skip_if&#39;)
+
+    return cls(
+        f.type,
+        f.name,
+        rename=f.metadata.get(&#39;serde_rename&#39;),
+        skip=f.metadata.get(&#39;serde_skip&#39;),
+        skip_if=skip_if or skip_if_false,
+    )</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
 <dt id="serde.core.Hidden"><code class="flex name class">
 <span>class <span class="ident">Hidden</span></span>
 <span>(</span><span>code=<factory>)</span>
@@ -314,6 +468,7 @@ def typecheck(cls: Type[T], obj: T) -&gt; None:
 </li>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
+<li><code><a title="serde.core.fields" href="#serde.core.fields">fields</a></code></li>
 <li><code><a title="serde.core.gen" href="#serde.core.gen">gen</a></code></li>
 <li><code><a title="serde.core.init" href="#serde.core.init">init</a></code></li>
 <li><code><a title="serde.core.typecheck" href="#serde.core.typecheck">typecheck</a></code></li>
@@ -321,6 +476,17 @@ def typecheck(cls: Type[T], obj: T) -&gt; None:
 </li>
 <li><h3><a href="#header-classes">Classes</a></h3>
 <ul>
+<li>
+<h4><code><a title="serde.core.Field" href="#serde.core.Field">Field</a></code></h4>
+<ul class="two-column">
+<li><code><a title="serde.core.Field.case" href="#serde.core.Field.case">case</a></code></li>
+<li><code><a title="serde.core.Field.from_dataclass" href="#serde.core.Field.from_dataclass">from_dataclass</a></code></li>
+<li><code><a title="serde.core.Field.rename" href="#serde.core.Field.rename">rename</a></code></li>
+<li><code><a title="serde.core.Field.skip" href="#serde.core.Field.skip">skip</a></code></li>
+<li><code><a title="serde.core.Field.skip_if" href="#serde.core.Field.skip_if">skip_if</a></code></li>
+<li><code><a title="serde.core.Field.skip_if_false" href="#serde.core.Field.skip_if_false">skip_if_false</a></code></li>
+</ul>
+</li>
 <li>
 <h4><code><a title="serde.core.Hidden" href="#serde.core.Hidden">Hidden</a></code></h4>
 </li>
