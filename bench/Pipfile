@@ -7,13 +7,12 @@ name = "pypi"
 python_version = "3.6"
 
 [packages]
+click = "*"
 pyserde = {path = "../", editable = true}
 dacite = "*"
 dataclasses-json = "*"
-dataclasses-jsonschema = "*"
-pavlova = "*"
 mashumaro = "*"
-ix = {git = "https://github.com/JoshKarpel/ix.git"}
+
 
 [pipenv]
 allow_prereleases = true
