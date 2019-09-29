@@ -11,3 +11,4 @@ htmlcov
 Pipfile.lock
 coverage.xml
 html/
+pip-wheel-metadata

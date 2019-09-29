@@ -2,7 +2,7 @@ import json
 from typing import Any, Type
 
 from .core import T
-from .de import Deserializer, from_obj
+from .de import Deserializer, from_dict
 from .se import Serializer, asdict
 
 
@@ -23,4 +23,4 @@ def to_json(obj: Any, cls: Type[JsonSerializer] = JsonSerializer) -> str:
 
 
 def from_json(c: Type[T], s: str, de: Type[Deserializer] = JsonDeserializer, **opts) -> T:
-    return from_obj(c, s, de, **opts)
+    return from_dict(c, de.deserialize(s, **opts))

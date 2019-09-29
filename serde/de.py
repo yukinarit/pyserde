@@ -288,22 +288,22 @@ class Renderer:
             return self.primitive(arg)
 
     def dataclass(self, arg: DeField) -> str:
-        pass
+        """ Render rvalue for dataclass. """
 
     def opt(self, arg: DeField) -> str:
-        pass
+        """ Render rvalue for optional. """
 
     def list(self, arg: DeField) -> str:
-        pass
+        """ Render rvalue for list. """
 
     def tuple(self, arg: DeField) -> str:
-        pass
+        """ Render rvalue for tuple. """
 
     def dict(self, arg: DeField) -> str:
-        pass
+        """ Render rvalue for dict. """
 
     def primitive(self, arg: DeField) -> str:
-        pass
+        """ Render rvalue for primitives. """
 
 
 @dataclass

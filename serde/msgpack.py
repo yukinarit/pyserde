@@ -1,17 +1,17 @@
-from dataclasses import astuple
+from dataclasses import asdict
 from typing import Any, Type
 
 import msgpack
 
 from .core import T, logger
-from .de import Deserializer, from_obj
+from .de import Deserializer, from_dict
 from .se import Serializer
 
 
 class MsgPackSerializer(Serializer):
     @classmethod
     def serialize(cls, obj: Any, **opts) -> str:
-        return msgpack.packb(astuple(obj), **opts)
+        return msgpack.packb(asdict(obj), use_bin_type=True, **opts)
 
 
 class MsgPackDeserializer(Deserializer):
@@ -27,4 +27,4 @@ def to_msgpack(obj: Any, serializer=MsgPackSerializer, **opts) -> bytes:
 
 
 def from_msgpack(c: Type[T], s: str, de: Type[Deserializer] = MsgPackDeserializer, **opts) -> Type[T]:
-    return from_obj(c, s, de)
+    return from_dict(c, de.deserialize(s, **opts))
