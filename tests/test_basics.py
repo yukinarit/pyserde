@@ -97,10 +97,7 @@ def test_enum():
 @pytest.mark.parametrize('se,de', all_formats)
 def test_tuple(se, de):
     p = PriTuple(
-        (10, 20, 30),
-        ('a', 'b', 'c', 'd'),
-        (10.0, 20.0, 30.0, 40.0, 50.0),
-        (True, False, True, False, True, False),
+        (10, 20, 30), ('a', 'b', 'c', 'd'), (10.0, 20.0, 30.0, 40.0, 50.0), (True, False, True, False, True, False)
     )
     tpl: PriTuple = de(PriTuple, se(p))
     assert tpl.i == (10, 20, 30)
@@ -110,10 +107,7 @@ def test_tuple(se, de):
 
     # List can also be used.
     p = PriTuple(
-        [10, 20, 30],
-        ['a', 'b', 'c', 'd'],
-        [10.0, 20.0, 30.0, 40.0, 50.0],
-        [True, False, True, False, True, False],
+        [10, 20, 30], ['a', 'b', 'c', 'd'], [10.0, 20.0, 30.0, 40.0, 50.0], [True, False, True, False, True, False]
     )
     tpl: PriTuple = de(PriTuple, se(p))
     assert tpl.i == (10, 20, 30)

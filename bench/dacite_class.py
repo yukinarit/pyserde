@@ -9,6 +9,6 @@ def de(cls: Type, data: str):
     return dacite.from_dict(data_class=cls, data=json.loads(data))
 
 
-def se_dacite(cls: Type, **kwargs):
+def se(cls: Type, **kwargs):
     c = cls(**args_sm)
     return json.dumps(asdict(c))

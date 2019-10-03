@@ -2,16 +2,16 @@ import serde
 import serde.json
 from dataclasses import dataclass, field
 from typing import List, Dict, Tuple, Type
+from tests.data import Pri
+
+Small = Pri
 
 
 @serde.serialize
 @serde.deserialize
 @dataclass
-class SerdeSmall:
-    i: int
-    s: str
-    f: float
-    b: bool
+class Medium:
+    inner: List[Small] = field(default_factory=list)
 
 
 @serde.serialize
@@ -49,17 +49,17 @@ class SerdePriContainer:
     t: Tuple[bool] = field(default_factory=tuple)
 
 
-def de_pyserde(cls: Type, data: str):
-    return serde.json.from_json(cls, data)
-
-
-def se_pyserde(cls: Type, **kwargs):
+def se(cls: Type, **kwargs):
     return serde.json.to_json(cls(**kwargs))
 
 
-def astuple_pyserde(data):
+def de(cls: Type, data: str):
+    return serde.json.from_json(cls, data)
+
+
+def astuple(data):
     return serde.astuple(data)
 
 
-def asdict_pyserde(data):
+def asdict(data):
     return serde.asdict(data)

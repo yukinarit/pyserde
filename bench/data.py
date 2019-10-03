@@ -1,4 +1,10 @@
-json_sm = '{"i": 10, "s": "foo", "f": 100.0, "b": true}'
+SMALL = '{"i": 10, "s": "foo", "f": 100.0, "b": true}'
+
+SMALL_TUPLE = (10, "foo", 100.0, True)
+
+MEDIUM = f'{{"inner": [{",".join([SMALL] * 50)}]}}'
+
+MEDIUM_TUPLE = tuple([[SMALL_TUPLE] * 50])
 
 json_md = (
     '{"i": 10, "s": "foo", "f": 100.0, "b": true,'
