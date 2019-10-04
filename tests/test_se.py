@@ -1,5 +1,18 @@
+from serde import astuple, asdict
+from . import data
 from .data import (Bool, Float, Int, NestedInt, NestedPri, NestedPriDict, NestedPriList, NestedPriTuple, Pri, PriDict,
                    PriList, PriOpt, PriTuple, Str)
+
+
+def test_asdict():
+    p = Pri(10, 'foo', 100.0, True)
+    assert {'b': True, 'f': 100.0, 'i': 10, 's': 'foo'} == asdict(p)
+
+
+def test_astuple():
+    assert data.PRI_TUPLE == astuple(data.PRI)
+    assert data.PRILIST == astuple(PriList(*data.PRILIST))
+    assert data.NESTED_PRILIST_TUPLE == astuple(NestedPriList(*data.NESTED_PRILIST))
 
 
 def test_se_func_iter():

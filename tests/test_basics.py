@@ -206,16 +206,6 @@ def test_complex():
     assert h.dct == hh.dct
 
 
-def test_asdict():
-    p = Pri(10, 'foo', 100.0, True)
-    assert {'b': True, 'f': 100.0, 'i': 10, 's': 'foo'} == asdict(p)
-
-
-def test_astuple():
-    p = Pri(10, 'foo', 100.0, True)
-    assert (10, 'foo', 100.0, True) == astuple(p)
-
-
 def test_json():
     p = Pri(10, 'foo', 100.0, True)
     s = '{"i": 10, "s": "foo", "f": 100.0, "b": true}'

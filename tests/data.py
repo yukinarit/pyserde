@@ -197,3 +197,22 @@ class NestedPriTuple:
     s: Tuple[Str, Str, Str, Str]
     f: Tuple[Float, Float, Float, Float, Float]
     b: Tuple[Bool, Bool, Bool, Bool, Bool, Bool]
+
+
+INT = Int(10)
+
+STR = Str('foo')
+
+FLOAT = Float(100.0)
+
+BOOL = Bool(True)
+
+PRI = Pri(10, 'foo', 100.0, True)
+
+PRI_TUPLE = (10, 'foo', 100.0, True)
+
+PRILIST = ([10], ['foo'], [100.0], [True])
+
+NESTED_PRILIST = ([INT], [STR], [FLOAT], [BOOL])
+
+NESTED_PRILIST_TUPLE = ([(10,)], [('foo',)], [(100.0,)], [(True,)])
