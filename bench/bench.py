@@ -13,9 +13,14 @@ import functools
 import json
 import sys
 import timeit
-from dataclasses import dataclass
+from pathlib import Path
+from dataclasses import dataclass, field
+from typing import List, Tuple
 
 import click
+import seaborn as sns
+import matplotlib.pyplot as plt
+import numpy as np
 
 import dacite_class as da
 import data
@@ -33,12 +38,21 @@ class Opt:
     """
 
     full: bool
+    chart: bool
+    output: Path
+
+    def __post_init__(self):
+        if not self.output.exists():
+            self.output.mkdir()
 
 
 @dataclass
 class Bencher:
+    name: str
+    opt: Opt
     number: int = 10000
     repeat: int = 5
+    result: List[Tuple[str, float]] = field(default_factory=list)
 
     def run(self, name, func, *args, expected=None, **kwargs):
         """
@@ -57,47 +71,56 @@ class Bencher:
                 sys.exit(1)
 
         times = timeit.repeat(f, number=self.number, repeat=self.repeat)
+        self.result.append((name, sum(times) / len(times)))
         times = ', '.join([f'{t:.6f}' for t in times])
         click.echo(f'{name:40s}\t{times}')
 
+    def __del__(self):
+        if self.opt.chart:
+            x = np.array([r[0] for r in self.result])
+            y = np.array([r[1] for r in self.result])
+            ax = sns.barplot(x=x, y=y, palette="rocket")
+            ax.set(ylabel=f'Elapsed time for {self.number} requests [sec]')
+            plt.savefig(str(self.opt.output / f'{self.name}.png'))
+            plt.close()
+
 
 def de_small(opt: Opt):
-    click.echo('--- deserialize small ---')
-    bench = Bencher()
+    bench = Bencher('deserialize_small', opt)
+    click.echo(f'--- {bench.name} ---')
     bench.run('raw', raw.de_small)
     bench.run('pyserde', ps.de, ps.Small, data.SMALL)
     if opt.full:
         bench.run('dacite', da.de, raw.Small, data.SMALL)
-        bench.run('dataclasses_json', dj.de, dj.Small, data.SMALL)
+        # bench.run('dataclasses_json', dj.de, dj.Small, data.SMALL)
         bench.run('mashumaro', mc.de, mc.Small, data.SMALL)
 
 
 def de_medium(opt: Opt):
-    click.echo('--- deserialize medium (number=1000) ---')
-    bench = Bencher(number=1000)
+    bench = Bencher('deserialize_medium', opt, number=1000)
+    click.echo(f'--- {bench.name} ---')
     bench.run('raw', raw.de_medium)
     bench.run('pyserde', ps.de, ps.Medium, data.MEDIUM)
     if opt.full:
         bench.run('dacite', da.de, ps.Medium, data.MEDIUM)
-        bench.run('dataclasses_json', dj.de, dj.Medium, data.MEDIUM)
+        # bench.run('dataclasses_json', dj.de, dj.Medium, data.MEDIUM)
         bench.run('mashumaro', mc.de, mc.Medium, data.MEDIUM)
 
 
 def se_small(opt: Opt):
-    click.echo('--- serialize small ---')
-    bench = Bencher()
+    bench = Bencher('serialize_small', opt)
+    click.echo(f'--- {bench.name} ---')
     bench.run('raw', raw.se_small, raw.Small, **data.args_sm)
-    bench.run('dataclass', dc.se, raw.Small, **data.args_sm)
     bench.run('pyserde', ps.se, ps.Small, **data.args_sm)
     if opt.full:
         bench.run('dacite', da.se, ps.Small, **data.args_sm)
-        bench.run('dataclasses_json', dj.se, dj.Small, **data.args_sm)
+        # bench.run('dataclasses_json', dj.se, dj.Small, **data.args_sm)
         bench.run('mashumaro', mc.se, mc.Small, **data.args_sm)
 
 
 def astuple_small(opt: Opt):
-    click.echo('--- astuple small ---')
-    bench = Bencher()
+    bench = Bencher('astuple_small', opt)
+    click.echo(f'--- {bench.name} ---')
     exp = tuple(json.loads(data.SMALL).values())
     bench.run('raw', raw.astuple_small, raw.Small(*exp), expected=exp)
     bench.run('dataclass', dc.astuple, dc.Small(*exp), expected=exp)
@@ -105,8 +128,8 @@ def astuple_small(opt: Opt):
 
 
 def astuple_medium(opt: Opt):
-    click.echo('--- astuple medium (number=1000) ---')
-    bench = Bencher(number=1000)
+    bench = Bencher('astuple medium', opt, number=1000)
+    click.echo(f'--- {bench.name} ---')
     exp = data.MEDIUM_TUPLE
     bench.run('raw', raw.astuple_medium, raw.Medium([dc.Small(*data.SMALL_TUPLE)] * 50), expected=exp)
     bench.run('dataclass', dc.astuple, dc.Medium([dc.Small(*data.SMALL_TUPLE)] * 50), expected=exp)
@@ -114,8 +137,8 @@ def astuple_medium(opt: Opt):
 
 
 def asdict(opt: Opt):
-    click.echo('--- asdict small ---')
-    bench = Bencher()
+    bench = Bencher('asdict_small', opt)
+    click.echo(f'--- {bench.name} ---')
     exp = {'i': 10, 's': 'foo', 'f': 100.0, 'b': True}
     bench.run('dataclass', dc.asdict, dc.Small(10, 'foo', 100.0, True), expected=exp)
     bench.run('pyserde', ps.asdict, ps.Small(10, 'foo', 100.0, True), expected=exp)
@@ -123,12 +146,15 @@ def asdict(opt: Opt):
 
 @click.command()
 @click.option('-f', '--full', type=bool, is_flag=True, default=False, help='Run full benchmark tests.')
-@click.option('-t', '--test', type=str, default='', help='Run specified test case only.')
-def main(full: bool, test: str):
+@click.option('-t', '--test', default='', help='Run specified test case only.')
+@click.option('-c', '--chart', type=bool, is_flag=True, default=False, help='Draw barcharts of benchmark results.')
+@click.option('-o', '--output', default='charts', callback=lambda _, __, p: Path(p),
+              help='Output directory for charts.')
+def main(full: bool, test: str, chart: bool, output: Path):
     """
     bench.py - Benchmarking pyserde.
     """
-    opt = Opt(full)
+    opt = Opt(full, chart, output)
     if test:
         f = globals().get(test, None)
         if f:

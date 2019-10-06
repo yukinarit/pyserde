@@ -51,6 +51,18 @@ Into Json: {"i": 10, "s": "hoge", "f": 100.0, "b": true}
 From Json: Hoge(i=10, s='hoge', f=100.0, b=True)
 ```
 
+## Benchmark
+
+Measured elapsed time to serialize and deserialize 10,000 [small structs](./bench/raw.py) into and from Json.
+
+* Serialize
+
+<img src="./bench/charts/serialize_small.png" width="60%">
+
+* Deserialize
+
+<img src="./bench/charts/deserialize_small.png" width="60%">
+
 ## Features
 
 * Data format
