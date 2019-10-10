@@ -79,8 +79,10 @@ class Bencher:
         if self.opt.chart:
             x = np.array([r[0] for r in self.result])
             y = np.array([r[1] for r in self.result])
-            ax = sns.barplot(x=x, y=y, palette="rocket")
-            ax.set(ylabel=f'Elapsed time for {self.number} requests [sec]')
+            chart = sns.barplot(x=x, y=y, palette="rocket")
+            chart.set(ylabel=f'Elapsed time for {self.number} requests [sec]')
+            for p in chart.patches:
+                chart.annotate(format(p.get_height(), '.4f'), (p.get_x() + p.get_width() / 2., p.get_height()), ha = 'center', va = 'center', xytext = (0, 10), textcoords = 'offset points')
             plt.savefig(str(self.opt.output / f'{self.name}.png'))
             plt.close()
 

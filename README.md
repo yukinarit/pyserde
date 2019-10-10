@@ -53,15 +53,25 @@ From Json: Hoge(i=10, s='hoge', f=100.0, b=True)
 
 ## Benchmark
 
-Measured elapsed time to serialize and deserialize 10,000 [small structs](./bench/raw.py) into and from Json.
+Serialize and Deserialize [a small struct](https://github.com/yukinarit/pyserde/blob/bench/bench/dataclasses_class.py#L7-L12) into and from json 10,000 times.
 
-* Serialize
+### Environment
 
-<img src="./bench/charts/serialize_small.png" width="60%">
+* macOS 10.14 Mojave
+* Intel 2.3GHz 8-core Intel Core i9
+* DDR4 32GB RAM
 
-* Deserialize
+### Result
 
-<img src="./bench/charts/deserialize_small.png" width="60%">
+| Serialize | Deserialize |
+|-----------|-------------|
+| <img src="./bench/charts/serialize_small.png"> | <img src="./bench/charts/deserialize_small.png"> |
+
+* `raw` Manual serialize and deserialize. Fastest in theory.
+* [`dacite`](https://github.com/konradhalas/dacite)
+* [`mashumaro`](https://github.com/Fatal1ty/mashumaro)
+
+You can check [the code](bench/bench.py) for more information.
 
 ## Features
 
