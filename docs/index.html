@@ -26,50 +26,44 @@
 <a href="https://travis-ci.org/yukinarit/pyserde"><img alt="Build Status" src="https://travis-ci.org/yukinarit/pyserde.svg?branch=master"></a>
 <a href="https://ci.appveyor.com/project/yukinarit/pyserde"><img alt="Build status" src="https://ci.appveyor.com/api/projects/status/w4i5x8x9d4sbxhn2?svg=true"></a>
 <a href="https://coveralls.io/github/yukinarit/pyserde?branch=master"><img alt="Coverage Status" src="https://coveralls.io/repos/github/yukinarit/pyserde/badge.svg?branch=master"></a></p>
-<p>Serialization library on top of <a href="https://docs.python.org/3/library/dataclasses.html">dataclasses</a>.</p>
-<h2 id="installation">Installation</h2>
+<p>Serialization Library on top of <a href="https://docs.python.org/3/library/dataclasses.html">dataclasses</a>.</p>
+<h2 id="quickstart">QuickStart</h2>
+<p>Install pyserde from PyPI.</p>
 <pre><code class="bash">$ pip install pyserde
 </code></pre>
-<h2 id="quickstart">QuickStart</h2>
-<p>You can serialize/deserialize your class to/from various message formant (e.g. Json, MsgPack) quite easily!</p>
+<p>You can serialize and deserialize a dataclass in various message formats quite easily!</p>
 <pre><code class="python"># main.py
 # /usr/bin/env python
-
 from dataclasses import dataclass
 from serde import deserialize, serialize
 from serde.json import from_json, to_json
 
-# Mark the class serializable/deserializable.
 @deserialize
 @serialize
 @dataclass
-class Hoge:
+class Foo:
     i: int
     s: str
     f: float
     b: bool
 
-h = Hoge(i=10, s='hoge', f=100.0, b=True)
-
+h = Foo(i=10, s='foo', f=100.0, b=True)
 print(f&quot;Into Json: {to_json(h)}&quot;)
 
-s = '{&quot;i&quot;: 10, &quot;s&quot;: &quot;hoge&quot;, &quot;f&quot;: 100.0, &quot;b&quot;: true}'
-
-print(f&quot;From Json: {from_json(Hoge, s)}&quot;)
+s = '{&quot;i&quot;: 10, &quot;s&quot;: &quot;foo&quot;, &quot;f&quot;: 100.0, &quot;b&quot;: true}'
+print(f&quot;From Json: {from_json(Foo, s)}&quot;)
 </code></pre>
 <pre><code class="bash">$ python main.py
-Into Json: {&quot;i&quot;: 10, &quot;s&quot;: &quot;hoge&quot;, &quot;f&quot;: 100.0, &quot;b&quot;: true}
-From Json: Hoge(i=10, s='hoge', f=100.0, b=True)
+Into Json: {&quot;i&quot;: 10, &quot;s&quot;: &quot;foo&quot;, &quot;f&quot;: 100.0, &quot;b&quot;: true}
+From Json: Foo(i=10, s='foo', f=100.0, b=True)
 </code></pre>
 <h2 id="benchmark">Benchmark</h2>
-<p>Serialize and Deserialize <a href="https://github.com/yukinarit/pyserde/blob/bench/bench/dataclasses_class.py#L7-L12">a small struct</a> into and from json 10,000 times.</p>
-<h3 id="environment">Environment</h3>
+<p>Serialize and Deserialize a <a href="https://github.com/yukinarit/pyserde/blob/master/bench/dataclasses_class.py#L7-L12">struct</a> in json 10,000 times.</p>
 <ul>
 <li>macOS 10.14 Mojave</li>
 <li>Intel 2.3GHz 8-core Intel Core i9</li>
 <li>DDR4 32GB RAM</li>
 </ul>
-<h3 id="result">Result</h3>
 <table>
 <thead>
 <tr>
@@ -85,99 +79,120 @@ From Json: Hoge(i=10, s='hoge', f=100.0, b=True)
 </tbody>
 </table>
 <ul>
-<li><code>raw</code> Manual serialize and deserialize. Fastest in theory.</li>
-<li><a href="https://github.com/konradhalas/dacite"><code>dacite</code></a></li>
-<li><a href="https://github.com/Fatal1ty/mashumaro"><code>mashumaro</code></a></li>
+<li><code>raw</code>: Manual serialize and deserialize. Fastest in theory.</li>
+<li><a href="https://github.com/konradhalas/dacite"><code>dacite</code></a>: Library to crate data class from dictionary.</li>
+<li><a href="https://github.com/Fatal1ty/mashumaro"><code>mashumaro</code></a>: Another seralization library based on dataclass.</li>
 </ul>
-<p>You can check <a href="bench/bench.py">the code</a> for more information.</p>
+<p>You can check <a href="bench/bench.py">the benchmark code</a> for more information.</p>
 <h2 id="features">Features</h2>
-<ul>
-<li>Data format<ul>
-<li><a href="./examples/jsonfile.py">Json</a></li>
-<li><a href="./examples/tomlfile.py">Toml</a></li>
-<li><a href="./examples/yamlfile.py">Yaml</a></li>
-<li><a href="./examples/msgpack.py">MsgPack</a></li>
-</ul>
-</li>
-<li>Class attributes<ul>
-<li><a href="#case-conversion">Case conversion</a> e.g. camelCase, kebab-case</li>
-</ul>
-</li>
-<li>Field attributes<ul>
-<li><a href="#rename-field">Rename</a></li>
-<li><a href="#skip">Skip</a></li>
-<li><a href="#skip-if">Skip-if</a></li>
-<li><a href="#skip-if-value-is-evaluated-as-false">Skip if value is evaluated as False</a></li>
-</ul>
-</li>
-</ul>
-<h3 id="case-conversion">Case conversion</h3>
-<pre><code class="python">&gt;&gt;&gt; @serialize(rename_all = 'camelcase')
-... @dataclass
-... class Hoge:
-...     int_field: int
-...     str_field: str
-&gt;&gt;&gt;
-&gt;&gt;&gt; to_json(Hoge(int_field=10, str_field='hoge'))
-'{&quot;intField&quot;: 10, &quot;strField&quot;: &quot;hoge&quot;}'
-</code></pre>
-<h3 id="rename-field">Rename field</h3>
-<pre><code class="python">&gt;&gt;&gt; @serialize
-... @dataclass
-... class Hoge:
-...     # Use 'class_name' because 'class' is a keyword.
-...     class_name: str = field(metadata={'serde_rename': 'class'})
-&gt;&gt;&gt; to_json(Hoge(class_name='Hoge'))
-'{&quot;class&quot;: &quot;Hoge&quot;}'
-</code></pre>
-<p>For complete example, please see <a href="./examples/rename.py">./examples/rename.py</a></p>
-<h3 id="skip">Skip</h3>
-<pre><code class="python">&gt;&gt;&gt; @serialize
-... @dataclass
-... class Resource:
-...     name: str
-...     hash: str
-...     metadata: Dict[str, str] = field(default_factory=dict, metadata={'serde_skip': True})
+<details open><summary><b><code>Supported data formats</code></b></summary><br />
+<pre><code class="python">from dataclasses import dataclass
+from serde import deserialize, serialize
 
-&gt;&gt;&gt; resources = [
-...     Resource(&quot;Stack Overflow&quot;, &quot;b6469c3f31653d281bbbfa6f94d60fea130abe38&quot;),
-...     Resource(&quot;GitHub&quot;, &quot;5cb7a0c47e53854cd00e1a968de5abce1c124601&quot;, metadata={&quot;headquarters&quot;: &quot;San Francisco&quot;}) ]
-&gt;&gt;&gt; to_json(resources)
-'[{&quot;name&quot;: &quot;Stack Overflow&quot;, &quot;hash&quot;: &quot;b6469c3f31653d281bbbfa6f94d60fea130abe38&quot;}, {&quot;name&quot;: &quot;GitHub&quot;, &quot;hash&quot;: &quot;5cb7a0c47e53854cd00e1a968de5abce1c124601&quot;}]'
+@deserialize
+@serialize
+@dataclass
+class Foo:
+    i: int
+    s: str
+    f: float
+    b: bool
+
+h = Foo(i=10, s='foo', f=100.0, b=True)
 </code></pre>
-<p>For complete example, please see <a href="./examples/skip.py">./examples/skip.py</a></p>
-<h3 id="skip-if">Skip if</h3>
-<pre><code class="python">&gt;&gt;&gt; @serialize
-... @dataclass
-... class World:
-...     player: str
-...     buddy: str = field(default='', metadata={'serde_skip_if': lambda v: v == 'Pikachu'})
+* JSON
+```python
+from serde.json import from_json, to_json
+print(f"Into Json: {to_json(h)}")
+print(f"From Json: {from_json(Foo, s)}")
+```
+* Yaml
+```python
+from serde.yaml import from_yaml, to_yaml
+print(f"Into Yaml: {to_yaml(h)}")
+print(f"From Yaml: {from_yaml(Foo, s)}")
+```
+* Toml
+```python
+from serde.toml import from_toml, to_toml
+print(f"Into Toml: {to_toml(h)}")
+print(f"From Toml: {from_toml(Foo, s)}")
+```
+* MsgPack
+```python
+from serde.msgpack import from_msgpack, to_msgpack
+print(f"Into MsgPack: {to_msgpack(h)}")
+print(f"From MsgPack: {from_msgpack(Foo, s)}")
+```
+</details>
+<details open><summary><b><code>Case Conversion</code></b></summary><br />
+Converting `snake_case` fields into supported case styles e.g. `camelCase` and `kebab-case`.
+<pre><code class="python">@serialize(rename_all = 'camelcase')
+@dataclass
+class Foo:
+    int_field: int
+    str_field: str
 
-&gt;&gt;&gt; world = World('satoshi', 'Pikachu')
-&gt;&gt;&gt; to_json(world)
-'{&quot;player&quot;: &quot;satoshi&quot;}'
-
-&gt;&gt;&gt; world = World('green', 'Charmander')
-&gt;&gt;&gt; print(to_json(world))
-'{&quot;player&quot;: &quot;green&quot;, &quot;buddy&quot;: &quot;Charmander&quot;}'
+f = Foo(int_field=10, str_field='foo')
+print(to_json(f))
 </code></pre>
-<p>For complete example, please see <a href="./examples/skip.py">./examples/skip.py</a></p>
-<h3 id="skip-if-value-is-evaluated-as-false">Skip if value is evaluated as False</h3>
-<pre><code class="python">&gt;&gt;&gt; @serialize
-... @dataclass
-... class World:
-...     player: str
-...     enemies: List[str] = field(default_factory=list, metadata={'serde_skip_if_false': True})
-
-&gt;&gt;&gt; world = World('satoshi', ['Rattata', 'Pidgey'])
-&gt;&gt;&gt; to_json(world)
-'{&quot;player&quot;: &quot;satoshi&quot;, &quot;enemies&quot;: [&quot;Rattata&quot;, &quot;Pidgey&quot;]}'
-
-&gt;&gt;&gt; world = World('green', [])
-&gt;&gt;&gt; print(to_json(world))
-'{&quot;player&quot;: &quot;green&quot;}'
+Here, the output is all `camelCase`.
+<pre><code class="json">'{&quot;intField&quot;: 10, &quot;strField&quot;: &quot;foo&quot;}'
 </code></pre>
-<p>For complete example, please see <a href="./examples/skip.py">./examples/skip.py</a></p>
+</details>
+<details open><summary><b><code>Rename Field</code></b></summary><br />
+In case you want to use a keyword as field such as `class`, you can use `serde_rename` field attribute.
+<pre><code class="python">@serialize
+@dataclass
+class Foo:
+    class_name: str = field(metadata={'serde_rename': 'class'})
+
+print(to_json(Foo(class_name='Foo')))
+</code></pre>
+Output json is having `class` instead of `class_name`.
+<pre><code class="json">{&quot;class&quot;: &quot;Foo&quot;}
+</code></pre>
+For complete example, please see [./examples/rename.py](./examples/rename.py)
+</details>
+<details><summary><b><code>Skip</code></b></summary><br />
+You can skip serialization for a certain field, you can use `serde_skip`.
+<pre><code class="python">@serialize
+@dataclass
+class Resource:
+    name: str
+    hash: str
+    metadata: Dict[str, str] = field(default_factory=dict, metadata={'serde_skip': True})
+
+resources = [
+    Resource(&quot;Stack Overflow&quot;, &quot;hash1&quot;),
+    Resource(&quot;GitHub&quot;, &quot;hash2&quot;, metadata={&quot;headquarters&quot;: &quot;San Francisco&quot;}) ]
+print(to_json(resources))
+</code></pre>
+Here, `metadata` is not present in output json.
+<pre><code class="json">[{&quot;name&quot;: &quot;Stack Overflow&quot;, &quot;hash&quot;: &quot;hash1&quot;}, {&quot;name&quot;: &quot;GitHub&quot;, &quot;hash&quot;: &quot;hash2&quot;}]
+</code></pre>
+For complete example, please see [./examples/skip.py](./examples/skip.py)
+</details>
+<details><summary><b><code>Conditional Skip</code></b></summary><br />
+If you conditionally skip some fields, you can pass function or lambda in `serde_skip_if`.
+<pre><code class="python">@serialize
+@dataclass
+class World:
+    player: str
+    buddy: str = field(default='', metadata={'serde_skip_if': lambda v: v == 'Pikachu'})
+
+world = World('satoshi', 'Pikachu')
+print(to_json(world))
+
+world = World('green', 'Charmander')
+print(to_json(world))
+</code></pre>
+As you can see below, field is skipped in serialization if `buddy` is "Pikachu".
+<pre><code class="json">{&quot;player&quot;: &quot;satoshi&quot;}
+{&quot;player&quot;: &quot;green&quot;, &quot;buddy&quot;: &quot;Charmander&quot;}
+</code></pre>
+For complete example, please see [./examples/skip.py](./examples/skip.py)
+</details>
 <h2 id="documentation">Documentation</h2>
 <p><a href="https://yukinarit.github.io/pyserde/">https://yukinarit.github.io/pyserde/</a></p>
 <details class="source">
@@ -190,7 +205,7 @@ from .de import deserialize, from_dict, from_obj, from_tuple, is_deserializable 
 from .se import asdict, astuple, is_serializable, serialize  # noqa
 
 &#34;&#34;&#34; Version of pyserde. &#34;&#34;&#34;
-__version__ = &#39;0.0.7&#39;</code></pre>
+__version__ = &#39;0.0.8&#39;</code></pre>
 </details>
 </section>
 <section>
@@ -246,21 +261,9 @@ __version__ = &#39;0.0.7&#39;</code></pre>
 <div class="toc">
 <ul>
 <li><a href="#pyserde">pyserde</a><ul>
-<li><a href="#installation">Installation</a></li>
 <li><a href="#quickstart">QuickStart</a></li>
-<li><a href="#benchmark">Benchmark</a><ul>
-<li><a href="#environment">Environment</a></li>
-<li><a href="#result">Result</a></li>
-</ul>
-</li>
-<li><a href="#features">Features</a><ul>
-<li><a href="#case-conversion">Case conversion</a></li>
-<li><a href="#rename-field">Rename field</a></li>
-<li><a href="#skip">Skip</a></li>
-<li><a href="#skip-if">Skip if</a></li>
-<li><a href="#skip-if-value-is-evaluated-as-false">Skip if value is evaluated as False</a></li>
-</ul>
-</li>
+<li><a href="#benchmark">Benchmark</a></li>
+<li><a href="#features">Features</a></li>
 <li><a href="#documentation">Documentation</a></li>
 </ul>
 </li>

@@ -910,7 +910,7 @@ def {{func}}(data):
 <span>(</span><span>type, name, case=None, rename=None, skip=None, skip_if=None, skip_if_false=None, datavar=None)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>DeField(type:Type, name:str, case:Union[str, NoneType]=None, rename:Union[str, NoneType]=None, skip:Union[bool, NoneType]=None, skip_if:Union[Callable[[Any], bool], NoneType]=None, skip_if_false:Union[bool, NoneType]=None, datavar:Union[str, NoneType]=None)</p></section>
+<section class="desc"><p>DeField(type: Type, name: str, case: Union[str, NoneType] = None, rename: Union[str, NoneType] = None, skip: Union[bool, NoneType] = None, skip_if: Union[Callable[[Any], bool], NoneType] = None, skip_if_false: Union[bool, NoneType] = None, datavar: Union[str, NoneType] = None)</p></section>
 <details class="source">
 <summary>Source code</summary>
 <pre><code class="python">class DeField(Field):
@@ -1015,10 +1015,10 @@ def data(self) -&gt; str:
 </details>
 <h3>Subclasses</h3>
 <ul class="hlist">
+<li><a title="serde.toml.TomlDeserializer" href="toml.html#serde.toml.TomlDeserializer">TomlDeserializer</a></li>
 <li><a title="serde.msgpack.MsgPackDeserializer" href="msgpack.html#serde.msgpack.MsgPackDeserializer">MsgPackDeserializer</a></li>
 <li><a title="serde.yaml.YamlDeserializer" href="yaml.html#serde.yaml.YamlDeserializer">YamlDeserializer</a></li>
 <li><a title="serde.json.JsonDeserializer" href="json.html#serde.json.JsonDeserializer">JsonDeserializer</a></li>
-<li><a title="serde.toml.TomlDeserializer" href="toml.html#serde.toml.TomlDeserializer">TomlDeserializer</a></li>
 </ul>
 <h3>Static methods</h3>
 <dl>

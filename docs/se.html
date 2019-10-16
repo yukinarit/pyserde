@@ -1008,7 +1008,7 @@ into an object in various data format such as JSON and MsgPack.</p>
 <span>(</span><span>type, name, case=None, rename=None, skip=None, skip_if=None, skip_if_false=None, parent=None)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>SeField(type:Type, name:str, case:Union[str, NoneType]=None, rename:Union[str, NoneType]=None, skip:Union[bool, NoneType]=None, skip_if:Union[Callable[[Any], bool], NoneType]=None, skip_if_false:Union[bool, NoneType]=None, parent:Union[_ForwardRef('Field'), NoneType]=None)</p></section>
+<section class="desc"><p>SeField(type: Type, name: str, case: Union[str, NoneType] = None, rename: Union[str, NoneType] = None, skip: Union[bool, NoneType] = None, skip_if: Union[Callable[[Any], bool], NoneType] = None, skip_if_false: Union[bool, NoneType] = None, parent: Union[ForwardRef('Field'), NoneType] = None)</p></section>
 <details class="source">
 <summary>Source code</summary>
 <pre><code class="python">class SeField(Field):
@@ -1096,10 +1096,10 @@ def varname(self) -&gt; str:
 </details>
 <h3>Subclasses</h3>
 <ul class="hlist">
+<li><a title="serde.toml.TomlSerializer" href="toml.html#serde.toml.TomlSerializer">TomlSerializer</a></li>
 <li><a title="serde.msgpack.MsgPackSerializer" href="msgpack.html#serde.msgpack.MsgPackSerializer">MsgPackSerializer</a></li>
 <li><a title="serde.yaml.YamlSerializer" href="yaml.html#serde.yaml.YamlSerializer">YamlSerializer</a></li>
 <li><a title="serde.json.JsonSerializer" href="json.html#serde.json.JsonSerializer">JsonSerializer</a></li>
-<li><a title="serde.toml.TomlSerializer" href="toml.html#serde.toml.TomlSerializer">TomlSerializer</a></li>
 </ul>
 <h3>Static methods</h3>
 <dl>
