@@ -61,6 +61,35 @@ print(f&quot;From Json: {from_json(Hoge, s)}&quot;)
 Into Json: {&quot;i&quot;: 10, &quot;s&quot;: &quot;hoge&quot;, &quot;f&quot;: 100.0, &quot;b&quot;: true}
 From Json: Hoge(i=10, s='hoge', f=100.0, b=True)
 </code></pre>
+<h2 id="benchmark">Benchmark</h2>
+<p>Serialize and Deserialize <a href="https://github.com/yukinarit/pyserde/blob/bench/bench/dataclasses_class.py#L7-L12">a small struct</a> into and from json 10,000 times.</p>
+<h3 id="environment">Environment</h3>
+<ul>
+<li>macOS 10.14 Mojave</li>
+<li>Intel 2.3GHz 8-core Intel Core i9</li>
+<li>DDR4 32GB RAM</li>
+</ul>
+<h3 id="result">Result</h3>
+<table>
+<thead>
+<tr>
+<th>Serialize</th>
+<th>Deserialize</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><img src="./bench/charts/serialize_small.png"></td>
+<td><img src="./bench/charts/deserialize_small.png"></td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><code>raw</code> Manual serialize and deserialize. Fastest in theory.</li>
+<li><a href="https://github.com/konradhalas/dacite"><code>dacite</code></a></li>
+<li><a href="https://github.com/Fatal1ty/mashumaro"><code>mashumaro</code></a></li>
+</ul>
+<p>You can check <a href="bench/bench.py">the code</a> for more information.</p>
 <h2 id="features">Features</h2>
 <ul>
 <li>Data format<ul>
@@ -219,6 +248,11 @@ __version__ = &#39;0.0.7&#39;</code></pre>
 <li><a href="#pyserde">pyserde</a><ul>
 <li><a href="#installation">Installation</a></li>
 <li><a href="#quickstart">QuickStart</a></li>
+<li><a href="#benchmark">Benchmark</a><ul>
+<li><a href="#environment">Environment</a></li>
+<li><a href="#result">Result</a></li>
+</ul>
+</li>
 <li><a href="#features">Features</a><ul>
 <li><a href="#case-conversion">Case conversion</a></li>
 <li><a href="#rename-field">Rename field</a></li>

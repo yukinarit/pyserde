@@ -13,22 +13,22 @@ import functools
 import json
 import sys
 import timeit
-from pathlib import Path
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import List, Tuple
 
 import click
-import seaborn as sns
-import matplotlib.pyplot as plt
-import numpy as np
 
 import dacite_class as da
 import data
 import dataclasses_class as dc
 import dataclasses_json_class as dj
 import mashumaro_class as mc
+import matplotlib.pyplot as plt
+import numpy as np
 import pyserde_class as ps
 import raw
+import seaborn as sns
 
 
 @dataclass
@@ -82,7 +82,14 @@ class Bencher:
             chart = sns.barplot(x=x, y=y, palette="rocket")
             chart.set(ylabel=f'Elapsed time for {self.number} requests [sec]')
             for p in chart.patches:
-                chart.annotate(format(p.get_height(), '.4f'), (p.get_x() + p.get_width() / 2., p.get_height()), ha = 'center', va = 'center', xytext = (0, 10), textcoords = 'offset points')
+                chart.annotate(
+                    format(p.get_height(), '.4f'),
+                    (p.get_x() + p.get_width() / 2.0, p.get_height()),
+                    ha='center',
+                    va='center',
+                    xytext=(0, 10),
+                    textcoords='offset points',
+                )
             plt.savefig(str(self.opt.output / f'{self.name}.png'))
             plt.close()
 
@@ -150,8 +157,9 @@ def asdict(opt: Opt):
 @click.option('-f', '--full', type=bool, is_flag=True, default=False, help='Run full benchmark tests.')
 @click.option('-t', '--test', default='', help='Run specified test case only.')
 @click.option('-c', '--chart', type=bool, is_flag=True, default=False, help='Draw barcharts of benchmark results.')
-@click.option('-o', '--output', default='charts', callback=lambda _, __, p: Path(p),
-              help='Output directory for charts.')
+@click.option(
+    '-o', '--output', default='charts', callback=lambda _, __, p: Path(p), help='Output directory for charts.'
+)
 def main(full: bool, test: str, chart: bool, output: Path):
     """
     bench.py - Benchmarking pyserde.
