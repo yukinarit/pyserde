@@ -26,7 +26,7 @@
 from typing import Any, Type
 
 from .core import T
-from .de import Deserializer, from_obj
+from .de import Deserializer, from_dict
 from .se import Serializer, asdict
 
 
@@ -47,7 +47,7 @@ def to_json(obj: Any, cls: Type[JsonSerializer] = JsonSerializer) -&gt; str:
 
 
 def from_json(c: Type[T], s: str, de: Type[Deserializer] = JsonDeserializer, **opts) -&gt; T:
-    return from_obj(c, s, de, **opts)</code></pre>
+    return from_dict(c, de.deserialize(s, **opts))</code></pre>
 </details>
 </section>
 <section>
@@ -65,7 +65,7 @@ def from_json(c: Type[T], s: str, de: Type[Deserializer] = JsonDeserializer, **o
 <details class="source">
 <summary>Source code</summary>
 <pre><code class="python">def from_json(c: Type[T], s: str, de: Type[Deserializer] = JsonDeserializer, **opts) -&gt; T:
-    return from_obj(c, s, de, **opts)</code></pre>
+    return from_dict(c, de.deserialize(s, **opts))</code></pre>
 </details>
 </dd>
 <dt id="serde.json.to_json"><code class="name flex">

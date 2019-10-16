@@ -22,20 +22,20 @@
 <section id="section-intro">
 <details class="source">
 <summary>Source code</summary>
-<pre><code class="python">from dataclasses import astuple
+<pre><code class="python">from dataclasses import asdict
 from typing import Any, Type
 
 import msgpack
 
 from .core import T, logger
-from .de import Deserializer, from_obj
+from .de import Deserializer, from_dict
 from .se import Serializer
 
 
 class MsgPackSerializer(Serializer):
     @classmethod
     def serialize(cls, obj: Any, **opts) -&gt; str:
-        return msgpack.packb(astuple(obj), **opts)
+        return msgpack.packb(asdict(obj), use_bin_type=True, **opts)
 
 
 class MsgPackDeserializer(Deserializer):
@@ -51,7 +51,7 @@ def to_msgpack(obj: Any, serializer=MsgPackSerializer, **opts) -&gt; bytes:
 
 
 def from_msgpack(c: Type[T], s: str, de: Type[Deserializer] = MsgPackDeserializer, **opts) -&gt; Type[T]:
-    return from_obj(c, s, de)</code></pre>
+    return from_dict(c, de.deserialize(s, **opts))</code></pre>
 </details>
 </section>
 <section>
@@ -69,7 +69,7 @@ def from_msgpack(c: Type[T], s: str, de: Type[Deserializer] = MsgPackDeserialize
 <details class="source">
 <summary>Source code</summary>
 <pre><code class="python">def from_msgpack(c: Type[T], s: str, de: Type[Deserializer] = MsgPackDeserializer, **opts) -&gt; Type[T]:
-    return from_obj(c, s, de)</code></pre>
+    return from_dict(c, de.deserialize(s, **opts))</code></pre>
 </details>
 </dd>
 <dt id="serde.msgpack.to_msgpack"><code class="name flex">
@@ -129,7 +129,7 @@ def from_msgpack(c: Type[T], s: str, de: Type[Deserializer] = MsgPackDeserialize
 <pre><code class="python">class MsgPackSerializer(Serializer):
     @classmethod
     def serialize(cls, obj: Any, **opts) -&gt; str:
-        return msgpack.packb(astuple(obj), **opts)</code></pre>
+        return msgpack.packb(asdict(obj), use_bin_type=True, **opts)</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -146,7 +146,7 @@ def from_msgpack(c: Type[T], s: str, de: Type[Deserializer] = MsgPackDeserialize
 <summary>Source code</summary>
 <pre><code class="python">@classmethod
 def serialize(cls, obj: Any, **opts) -&gt; str:
-    return msgpack.packb(astuple(obj), **opts)</code></pre>
+    return msgpack.packb(asdict(obj), use_bin_type=True, **opts)</code></pre>
 </details>
 </dd>
 </dl>

@@ -1,4 +1,5 @@
-from serde import astuple, asdict
+from serde import asdict, astuple
+
 from . import data
 from .data import (Bool, Float, Int, NestedInt, NestedPri, NestedPriDict, NestedPriList, NestedPriTuple, Pri, PriDict,
                    PriList, PriOpt, PriTuple, Str)
