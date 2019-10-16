@@ -13,10 +13,13 @@ jobs:
   include:
     - stage: test
       python: 3.6
-      script: make examples bench
+      script: make examples
     - stage: test
       python: 3.7
-      script: make examples bench
+      script: make examples setup-bench bench
+    - stage: test
+      python: 3.8
+      script: make examples
     - stage: coverage
       python: 3.7
       script:

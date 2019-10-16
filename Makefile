@@ -8,6 +8,8 @@ setup:
 	pipenv install --dev
 	pipenv run pip list
 	pushd examples && pipenv install --dev && popd
+
+setup-bench:
 	pushd bench && pipenv install --dev && popd
 
 build:
