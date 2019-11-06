@@ -406,6 +406,8 @@ def to_arg(f: Field, rename_all: Optional[str] = None) -> DeField:
 def render_from_iter(cls: Type) -> str:
     template = """
 def {{func}}(data):
+  if data is None:
+    return None
   return cls(
   {% for f in cls|fields %}
   {{f|arg|rvalue}},
@@ -424,6 +426,8 @@ def {{func}}(data):
 def render_from_dict(cls: Type, rename_all: Optional[str] = None) -> str:
     template = """
 def {{func}}(data):
+  if data is None:
+    return None
   return cls(
   {% for f in cls|fields %}
   {{f|arg|rvalue}},

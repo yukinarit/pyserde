@@ -16,7 +16,7 @@ from typing import Any, Dict, List, Optional, Tuple, Type
 import jinja2
 import stringcase
 
-from .compat import is_dict, is_list, is_tuple, type_args
+from .compat import is_dict, is_list, is_tuple, is_opt, type_args
 from .core import HIDDEN_NAME, SE_NAME, SETTINGS, TO_DICT, TO_ITER, Field, Hidden, T, fields, gen
 
 
@@ -320,6 +320,8 @@ class Renderer:
         """
         if is_dataclass(arg.type):
             return self.dataclass(arg)
+        elif is_opt(arg.type):
+            return self.opt(arg)
         elif is_list(arg.type):
             return self.list(arg)
         elif is_dict(arg.type):
@@ -330,14 +332,31 @@ class Renderer:
             return self.primitive(arg)
 
     def dataclass(self, arg: SeField) -> str:
+        """
+        Render rvalue for dataclass.
+        """
         return f'{arg.varname}.{self.func}()'
 
+    def opt(self, arg: SeField) -> str:
+        """
+        Render rvalue for optional.
+        """
+        inner = arg[0]
+        inner.name = arg.varname
+        return f'{self.render(inner)} if {arg.varname} is not None else None'
+
     def list(self, arg: SeField) -> str:
+        """
+        Render rvalue for list.
+        """
         earg = arg[0]
         earg.name = 'v'
         return f'[{self.render(earg)} for v in {arg.varname}]'
 
     def tuple(self, arg: SeField) -> str:
+        """
+        Render rvalue for tuple.
+        """
         rvalues = []
         for i, _ in enumerate(type_args(arg.type)):
             r = arg[i]
@@ -346,6 +365,9 @@ class Renderer:
         return f"({', '.join(rvalues)})"
 
     def dict(self, arg: SeField) -> str:
+        """
+        Render rvalue for dict.
+        """
         karg = arg[0]
         karg.name = 'k'
         varg = arg[1]
@@ -353,6 +375,9 @@ class Renderer:
         return f'{{{self.render(karg)}: {self.render(varg)} for k, v in {arg.varname}.items()}}'
 
     def primitive(self, arg: SeField) -> str:
+        """
+        Render rvalue for primitives.
+        """
         return f'{arg.varname}'
 
 

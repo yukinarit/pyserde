@@ -6,7 +6,7 @@ from typing import Dict, List
 
 import pytest
 
-from serde import asdict, astuple, deserialize, from_dict
+from serde import asdict, deserialize, from_dict
 from serde import init as serde_init
 from serde import logger, serialize
 from serde.json import from_json, to_json
@@ -144,13 +144,16 @@ def test_optional(se, de):
     assert p == de(PriOpt, se(p))
 
 
-def test_optional_dataclass():
-    pass
-    # p = NestedPriOpt(Int(20), Str(None), Float(100.0), Bool(True))
-    # s = '{"i": 20, "s": null, "f": 100.0, "b": true}'
-    # TODO
-    # assert s == asdict(p)
-    # assert p == from_json(PriOpt, s)
+@pytest.mark.parametrize('se,de', all_formats)
+def test_optional_nested(se, de):
+    p = NestedPriOpt(Int(20), Str('foo'), Float(100.0), Bool(True))
+    assert p == de(NestedPriOpt, se(p))
+
+    p = NestedPriOpt(Int(20), None, Float(100.0), None)
+    assert p == de(NestedPriOpt, se(p))
+
+    p = NestedPriOpt(None, None, None, None)
+    assert p == de(NestedPriOpt, se(p))
 
 
 def test_complex():

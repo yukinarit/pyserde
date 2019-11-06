@@ -67,6 +67,15 @@ You can check [the benchmark code](bench/bench.py) for more information.
 
 ## Features
 
+<details open><summary><b><code>Supported types</code></b></summary><br />
+
+* primitives (int, float, str, bool)
+* containers (List, Tuple, Dict)
+* [`Optional`](https://docs.python.org/3/library/typing.html#typing.Optional)
+* [`Dataclass`](https://docs.python.org/3/library/dataclasses.html)
+
+</details>
+
 <details open><summary><b><code>Supported data formats</code></b></summary><br />
 
 ```python
