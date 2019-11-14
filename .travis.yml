@@ -8,18 +8,20 @@ cache:
     $HOME/.cache/pipenv
 before_script:
   - pip install pipenv
-  - make setup
 jobs:
   include:
     - stage: test
       python: 3.6
-      script: make examples
+      script: make setup examples
     - stage: test
       python: 3.7
-      script: make examples setup-bench bench
+      script: make setup examples setup-bench bench
     - stage: test
       python: 3.8
-      script: make examples
+      script: make setup examples
+    - stage: test
+      python: pypy3
+      script: make setup-bench bench
     - stage: coverage
       python: 3.7
       script:

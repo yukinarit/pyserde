@@ -9,6 +9,8 @@ python_version = "3.6"
 [packages]
 click = "*"
 pyserde = {path = "../", editable = true}
+
+[dev-packages]
 dacite = "*"
 dataclasses-json = "*"
 mashumaro = "*"

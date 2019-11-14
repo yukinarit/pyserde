@@ -10,7 +10,7 @@ setup:
 	pushd examples && pipenv install --dev && popd
 
 setup-bench:
-	pushd bench && pipenv install --dev && popd
+	pushd bench && pipenv install && popd
 
 build:
 	pipenv run python setup.py sdist
