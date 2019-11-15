@@ -19,8 +19,8 @@ pytest-cov = "*"
 pytest-watch = "*"
 python-coveralls = "*"
 coverage = "==4.5.4"
-mypy = "*"
 pdoc3 = { git = "https://github.com/yukinarit/pdoc.git" }
+mypy = {version = "*",markers = "platform_python_implementation!='PyPy'"}
 twine = "*"
 black = "==19.3b0"
 isort = "==4.3.21"
