@@ -57,7 +57,7 @@ Serialize and Deserialize a [struct](https://github.com/yukinarit/pyserde/blob/m
 
 | Serialize | Deserialize |
 |-----------|-------------|
-| <img src="./bench/charts/serialize_small.png"> | <img src="./bench/charts/deserialize_small.png"> |
+| <img src="https://raw.githubusercontent.com/yukinarit/pyserde/master/bench/charts/serialize_small.png"> | <img src="https://raw.githubusercontent.com/yukinarit/pyserde/master/bench/charts/deserialize_small.png"> |
 
 * `raw`: Manual serialize and deserialize. Fastest in theory.
 * [`dacite`](https://github.com/konradhalas/dacite): Library to crate data class from dictionary.

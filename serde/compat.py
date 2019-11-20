@@ -144,6 +144,28 @@ def is_none(typ: Type) -> bool:
     return typ is type(None)
 
 
+PRIMITIVES = [int, float, bool, str]
+
+
+def is_primitive(typ: Type) -> bool:
+    """
+    Test if the type is primitive.
+
+    >>> is_primitive(int)
+    True
+    >>> is_primitive(float)
+    True
+    >>> class CustomInt(int):
+    ...     pass
+    >>> is_primitive(CustomInt)
+    True
+    """
+    try:
+        return any(issubclass(typ, ty) for ty in PRIMITIVES)
+    except TypeError:
+        return any(isinstance(typ, ty) for ty in PRIMITIVES)
+
+
 def assert_type(typ: Type, obj, throw=False) -> None:
     if not isinstance(obj, typ):
         if throw:

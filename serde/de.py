@@ -13,14 +13,19 @@ parts of pyserde.
 """
 import abc
 import functools
-from dataclasses import dataclass, is_dataclass
-from typing import Any, Dict, List, Optional, Tuple, Type
+from dataclasses import dataclass
+from dataclasses import fields as dataclass_fields
+from dataclasses import is_dataclass
+from typing import Any, Callable, Dict, List, Optional, Tuple, Type
 
 import jinja2
 import stringcase
 
-from .compat import assert_type, is_dict, is_list, is_opt, is_tuple, is_union, iter_types, type_args
+from .compat import assert_type, is_dict, is_list, is_opt, is_primitive, is_tuple, is_union, iter_types, type_args
 from .core import FROM_DICT, FROM_ITER, HIDDEN_NAME, SETTINGS, Field, Hidden, SerdeError, T, fields, gen
+from .more_types import deserialize as custom
+
+Custom = Optional[Callable[['DeField', Any], Any]]
 
 
 def deserialize(_cls=None, rename_all: Optional[str] = None) -> Type:
@@ -60,10 +65,12 @@ def deserialize(_cls=None, rename_all: Optional[str] = None) -> Type:
     """
 
     def wrap(cls):
+        g: Dict[str, Any] = globals().copy()
         if not hasattr(cls, HIDDEN_NAME):
             setattr(cls, HIDDEN_NAME, Hidden())
-        cls = de_func(cls, FROM_ITER, render_from_iter(cls))
-        cls = de_func(cls, FROM_DICT, render_from_dict(cls, rename_all))
+        g['__custom_deserializer__'] = custom
+        cls = de_func(cls, FROM_ITER, render_from_iter(cls, custom), g)
+        cls = de_func(cls, FROM_DICT, render_from_dict(cls, rename_all, custom), g)
         return cls
 
     if _cls is None:
@@ -269,6 +276,7 @@ class Renderer:
     """
 
     func: str
+    custom: Custom = None
 
     def render(self, arg: DeField) -> str:
         """
@@ -284,8 +292,10 @@ class Renderer:
             return self.dict(arg)
         elif is_tuple(arg.type):
             return self.tuple(arg)
-        else:
+        elif any(f(arg.type) for f in (is_primitive, is_union, is_opt)):
             return self.primitive(arg)
+        else:
+            return f'__custom_deserializer__(fs[{arg.index}], {arg.data})'
 
     def dataclass(self, arg: DeField) -> str:
         """ Render rvalue for dataclass. """
@@ -396,21 +406,22 @@ class DictRenderer(Renderer):
         return arg.data
 
 
-def to_arg(f: Field, rename_all: Optional[str] = None) -> DeField:
+def to_arg(f: Field, index, rename_all: Optional[str] = None) -> DeField:
+    f.index = index
     f.data = 'data'
     f.parent = DeField(None, 'data', datavar='data', case=f.case or rename_all)
     f.case = f.case or rename_all
     return f
 
 
-def render_from_iter(cls: Type) -> str:
+def render_from_iter(cls: Type, custom: Custom = None) -> str:
     template = """
 def {{func}}(data):
   if data is None:
     return None
   return cls(
   {% for f in cls|fields %}
-  {{f|arg|rvalue}},
+  {{f|arg(loop.index-1)|rvalue}},
   {% endfor %}
   )
     """
@@ -423,19 +434,20 @@ def {{func}}(data):
     return env.get_template('iter').render(func=FROM_ITER, cls=cls)
 
 
-def render_from_dict(cls: Type, rename_all: Optional[str] = None) -> str:
+def render_from_dict(cls: Type, rename_all: Optional[str] = None, custom: Custom = None) -> str:
     template = """
 def {{func}}(data):
   if data is None:
     return None
+  fs = fields(cls)
   return cls(
   {% for f in cls|fields %}
-  {{f|arg|rvalue}},
+  {{f|arg(loop.index-1)|rvalue}},
   {% endfor %}
   )
     """
 
-    renderer = DictRenderer(FROM_DICT)
+    renderer = DictRenderer(FROM_DICT, custom)
     env = jinja2.Environment(loader=jinja2.DictLoader({'dict': template}))
     env.filters.update({'rvalue': renderer.render})
     env.filters.update({'fields': defields})
@@ -443,12 +455,16 @@ def {{func}}(data):
     return env.get_template('dict').render(func=FROM_DICT, cls=cls)
 
 
-def de_func(cls: Type[T], func: str, code: str) -> Type[T]:
+def de_func(cls: Type[T], func: str, code: str, g: Dict = None, local: Dict = None) -> Type[T]:
     """
     Generate function to deserialize into an instance of `deserialize` class.
     """
+    if not g:
+        g = globals().copy()
+    if not local:
+        local = locals().copy()
+
     # Collect types to be used in the `exec` scope.
-    g: Dict[str, Any] = globals().copy()
     for typ in iter_types(cls):
         if is_dataclass(typ):
             g[typ.__name__] = typ
@@ -457,6 +473,7 @@ def de_func(cls: Type[T], func: str, code: str) -> Type[T]:
 
     g['typing'] = typing
     g['NoneType'] = type(None)
+    g['fields'] = dataclass_fields
 
     # Generate deserialize function.
     code = gen(code, g, cls=cls)
