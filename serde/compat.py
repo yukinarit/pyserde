@@ -50,9 +50,9 @@ def type_args(cls: Type):
     return cls.__args__  # type: ignore
 
 
-def union_args(typ: Union[T]) -> Tuple[T]:
+def union_args(typ: Union) -> Tuple:
     if not is_union(typ):
-        return TypeError(f'{typ} is not Union')
+        raise TypeError(f'{typ} is not Union')
     args = type_args(typ)
     if len(args) == 1:
         return args[0]
@@ -61,7 +61,7 @@ def union_args(typ: Union[T]) -> Tuple[T]:
     for (i1, i2) in zip_longest(it, it):
         if not i2:
             types.append(i1)
-        elif i2 is type(None):
+        elif is_none(i2):
             types.append(Optional[i1])
         else:
             types.extend((i1, i2))
@@ -107,7 +107,7 @@ def is_opt(typ: Type) -> bool:
     Test if the type is `typing.Optional`.
     """
     args = get_args(typ)
-    return is_optional_type(typ) and len(args) == 2 and args[0] is not type(None) and args[1] is type(None)
+    return is_optional_type(typ) and len(args) == 2 and not is_none(args[0]) and is_none(args[1])
 
 
 def is_list(typ: Type) -> bool:
@@ -141,7 +141,15 @@ def is_dict(typ: Type) -> bool:
 
 
 def is_none(typ: Type) -> bool:
-    return typ is type(None)
+    """
+    >>> is_none(int)
+    False
+    >>> is_none(type(None))
+    True
+    >>> is_none(None)
+    False
+    """
+    return typ is type(None)  # noqa
 
 
 PRIMITIVES = [int, float, bool, str]

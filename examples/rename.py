@@ -6,7 +6,6 @@ Usage:
     $ pipenv install
     $ pipenv run rename.py
 """
-from typing import List, Optional
 from dataclasses import dataclass, field
 from serde import serialize
 from serde.json import to_json

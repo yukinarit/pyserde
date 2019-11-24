@@ -90,7 +90,7 @@ def typecheck(cls: Type[T], obj: T) -> None:
         success = False
         for typ in type_args(cls):
             try:
-                v = typecheck(typ, obj)
+                typecheck(typ, obj)
                 success = True
                 break
             except (SerdeError, ValueError):
@@ -99,20 +99,23 @@ def typecheck(cls: Type[T], obj: T) -> None:
             raise ValueError(f'{obj} is not instance of {cls}')
     elif is_list(cls):
         assert_type(list, obj)
-        typ = type_args(cls)[0]
-        for e in obj:
-            typecheck(typ, e)
+        if isinstance(obj, list):
+            typ = type_args(cls)[0]
+            for e in obj:
+                typecheck(typ, e)
     elif is_tuple(cls):
         assert_type(tuple, obj)
-        for i, typ in enumerate(type_args(cls)):
-            typecheck(typ, obj[i])
+        if isinstance(obj, tuple):
+            for i, typ in enumerate(type_args(cls)):
+                typecheck(typ, obj[i])
     elif is_dict(cls):
         assert_type(dict, obj)
-        ktyp = type_args(cls)[0]
-        vtyp = type_args(cls)[1]
-        for k, v in obj.items():
-            typecheck(ktyp, k)
-            typecheck(vtyp, v)
+        if isinstance(obj, dict):
+            ktyp = type_args(cls)[0]
+            vtyp = type_args(cls)[1]
+            for k, v in obj.items():
+                typecheck(ktyp, k)
+                typecheck(vtyp, v)
     else:
         if not isinstance(obj, cls):
             raise ValueError(f'{obj} is not instance of {cls}')
@@ -135,7 +138,8 @@ class Field:
     @classmethod
     def from_dataclass(cls, f: DataclassField) -> 'Field':
         if f.metadata.get('serde_skip_if_false'):
-            skip_if_false = lambda v: not bool(v)
+            def skip_if_false(v):
+                return not bool(v)
             skip_if_false.mangled = cls.mangle(f, 'skip_if')
         else:
             skip_if_false = None

@@ -25,5 +25,5 @@ def run(module):
 if __name__ == '__main__':
     try:
         run_all()
-    except:
+    except Exception:
         sys.exit(1)

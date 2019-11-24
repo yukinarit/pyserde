@@ -8,7 +8,7 @@ Usage:
     $ pipenv run yamlfile.py
 """
 from typing import List, Dict, Optional, Union
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from serde import deserialize
 from serde.yaml import from_yaml
 

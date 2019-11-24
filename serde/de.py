@@ -259,7 +259,7 @@ class ElementField(DeField):
 
     @property
     def data(self) -> str:
-        return self.datavar
+        return self.datavar or ''
 
     @data.setter
     def data(self, d):

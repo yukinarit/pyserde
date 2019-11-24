@@ -22,7 +22,7 @@ import click
 import dacite_class as da
 import data
 import dataclasses_class as dc
-import dataclasses_json_class as dj
+# import dataclasses_json_class as dj
 import mashumaro_class as mc
 import matplotlib.pyplot as plt
 import numpy as np
