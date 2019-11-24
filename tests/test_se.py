@@ -47,32 +47,34 @@ def test_se_func_iter():
     ).__serde_to_iter__()
 
     # Tuple
-    assert \
+    assert (
         (
             (10, 10, 10),
             ('10', '10', '10', '10'),
             (10.0, 10.0, 10.0, 10.0, 10.0),
             (False, False, False, False, False, False),
-        ) \
+        )
         == PriTuple(
             (10, 10, 10),
             ("10", "10", "10", "10"),
             (10.0, 10.0, 10.0, 10.0, 10.0),
             (False, False, False, False, False, False),
         ).__serde_to_iter__()
-    assert \
+    )
+    assert (
         (
             ((10,), (10,), (10,)),
             (('10',), ('10',), ('10',), ('10',)),
             ((10.0,), (10.0,), (10.0,), (10.0,), (10.0,)),
             ((False,), (False,), (False,), (False,), (False,), (False,)),
-        ) \
+        )
         == NestedPriTuple(
             (Int(10), Int(10), Int(10)),
             (Str("10"), Str("10"), Str("10"), Str("10")),
             (Float(10.0), Float(10.0), Float(10.0), Float(10.0), Float(10.0)),
             (Bool(False), Bool(False), Bool(False), Bool(False), Bool(False), Bool(False)),
         ).__serde_to_iter__()
+    )
 
     # Optional
     assert (10, '10', 10.0, False) == PriOpt(10, "10", 10.0, False).__serde_to_iter__()

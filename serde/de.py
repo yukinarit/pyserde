@@ -13,6 +13,7 @@ parts of pyserde.
 """
 import abc
 import functools
+from dataclasses import _MISSING_TYPE as DEFAULT_MISSING_TYPE
 from dataclasses import dataclass
 from dataclasses import fields as dataclass_fields
 from dataclasses import is_dataclass
@@ -403,7 +404,13 @@ class DictRenderer(Renderer):
         >>> DictRenderer('hoge').render(DeField(int, 'int_field', datavar='data', case='camelcase'))
         'data["intField"]'
         """
-        return arg.data
+        if not isinstance(arg.default, DEFAULT_MISSING_TYPE):
+            default = arg.default
+            if isinstance(default, str):
+                default = f'"{default}"'
+            return f'{arg.datavar}.get("{arg.name}", {default})'
+        else:
+            return arg.data
 
 
 def to_arg(f: Field, index, rename_all: Optional[str] = None) -> DeField:

@@ -1,5 +1,7 @@
 import sys
 
+import basics
+import default
 import env
 import jsonfile
 import rename
@@ -9,10 +11,12 @@ import yamlfile
 
 
 def run_all():
+    run(basics)
+    run(default)
     run(env)
-    run(jsonfile)
     run(rename)
     run(skip)
+    run(jsonfile)
     run(tomlfile)
     run(yamlfile)
 

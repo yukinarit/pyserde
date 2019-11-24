@@ -199,6 +199,20 @@ class NestedPriTuple:
     b: Tuple[Bool, Bool, Bool, Bool, Bool, Bool]
 
 
+@deserialize
+@serialize
+@dataclass(unsafe_hash=True)
+class PriDefault:
+    """
+    Primitives.
+    """
+
+    i: int = 10
+    s: str = 'foo'
+    f: float = 100.0
+    b: bool = True
+
+
 INT = Int(10)
 
 STR = Str('foo')

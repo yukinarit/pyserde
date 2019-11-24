@@ -1,4 +1,5 @@
 import logging
+from dataclasses import _MISSING_TYPE as DEFAULT_MISSING_TYPE
 from dataclasses import Field as DataclassField
 from dataclasses import dataclass, field
 from dataclasses import fields as dataclass_fields
@@ -129,6 +130,7 @@ class Field:
 
     type: Type
     name: str
+    default: Any = field(default_factory=DEFAULT_MISSING_TYPE)
     case: Optional[str] = None
     rename: Optional[str] = None
     skip: Optional[bool] = None
@@ -138,8 +140,10 @@ class Field:
     @classmethod
     def from_dataclass(cls, f: DataclassField) -> 'Field':
         if f.metadata.get('serde_skip_if_false'):
+
             def skip_if_false(v):
                 return not bool(v)
+
             skip_if_false.mangled = cls.mangle(f, 'skip_if')
         else:
             skip_if_false = None
@@ -151,6 +155,7 @@ class Field:
         return cls(
             f.type,
             f.name,
+            default=f.default,
             rename=f.metadata.get('serde_rename'),
             skip=f.metadata.get('serde_skip'),
             skip_if=skip_if or skip_if_false,
