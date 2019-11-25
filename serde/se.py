@@ -11,13 +11,16 @@ from dataclasses import astuple as _astuple
 from dataclasses import dataclass
 from dataclasses import fields as dataclass_fields  # noqa
 from dataclasses import is_dataclass
-from typing import Any, Dict, List, Optional, Tuple, Type
+from typing import Any, Callable, Dict, List, Optional, Tuple, Type
 
 import jinja2
 import stringcase
 
-from .compat import is_dict, is_list, is_tuple, is_opt, type_args
+from .compat import is_dict, is_list, is_opt, is_primitive, is_tuple, is_union, type_args
 from .core import HIDDEN_NAME, SE_NAME, SETTINGS, TO_DICT, TO_ITER, Field, Hidden, T, fields, gen
+from .more_types import serialize as custom
+
+Custom = Optional[Callable[[Any], Any]]
 
 
 class Serializer(metaclass=abc.ABCMeta):
@@ -81,8 +84,9 @@ def serialize(_cls=None, rename_all: Optional[str] = None) -> Type:
         for f in sefields(cls):
             if f.skip_if:
                 g[f.skip_if.mangled] = f.skip_if
-        cls = se_func(cls, TO_ITER, render_astuple(cls), g)
-        cls = se_func(cls, TO_DICT, render_asdict(cls, rename_all), g)
+        g['__custom_serializer__'] = custom
+        cls = se_func(cls, TO_ITER, render_astuple(cls, custom), g)
+        cls = se_func(cls, TO_DICT, render_asdict(cls, rename_all, custom), g)
         return cls
 
     if _cls is None:
@@ -208,7 +212,7 @@ def to_arg(f: SeField) -> SeField:
     return f
 
 
-def render_astuple(cls: Type) -> str:
+def render_astuple(cls: Type, custom: Custom = None) -> str:
     template = """
 def {{func}}(obj):
   if not is_dataclass(obj):
@@ -225,7 +229,7 @@ def {{func}}(obj):
   {% endif %}
     """
 
-    renderer = Renderer(TO_ITER)
+    renderer = Renderer(TO_ITER, custom)
     env = jinja2.Environment(loader=jinja2.DictLoader({'iter': template}))
     env.filters.update({'fields': sefields})
     env.filters.update({'is_dataclass': is_dataclass})
@@ -234,7 +238,7 @@ def {{func}}(obj):
     return env.get_template('iter').render(func=TO_ITER, cls=cls)
 
 
-def render_asdict(cls: Type, case: Optional[str] = None) -> str:
+def render_asdict(cls: Type, case: Optional[str] = None, custom: Custom = None) -> str:
     template = """
 def {{func}}(obj):
   if not is_dataclass(obj):
@@ -270,7 +274,7 @@ def {{func}}(obj):
             name = f.rename
         return name
 
-    renderer = Renderer(TO_DICT)
+    renderer = Renderer(TO_DICT, custom)
     env = jinja2.Environment(loader=jinja2.DictLoader({'dict': template}))
     env.filters.update({'fields': sefields})
     env.filters.update({'is_dataclass': is_dataclass})
@@ -287,6 +291,7 @@ class Renderer:
     """
 
     func: str
+    custom: Custom = None
 
     def render(self, arg: SeField) -> str:
         """
@@ -328,8 +333,10 @@ class Renderer:
             return self.dict(arg)
         elif is_tuple(arg.type):
             return self.tuple(arg)
-        else:
+        elif any(f(arg.type) for f in (is_primitive, is_union)):
             return self.primitive(arg)
+        else:
+            return f'__custom_serializer__({arg.varname})'
 
     def dataclass(self, arg: SeField) -> str:
         """

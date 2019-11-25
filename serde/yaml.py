@@ -1,11 +1,10 @@
-from dataclasses import asdict
 from typing import List, Type  # noqa
 
 import yaml
 
 from .core import T
 from .de import Deserializer, from_obj
-from .se import Serializer, is_serializable
+from .se import Serializer, asdict, is_serializable
 
 
 class YamlSerializer(Serializer):

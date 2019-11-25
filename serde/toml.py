@@ -1,11 +1,10 @@
-from dataclasses import asdict
 from typing import List, Type  # noqa
 
 import toml
 
 from .core import T
 from .de import Deserializer, from_obj
-from .se import Serializer, is_serializable
+from .se import Serializer, asdict, is_serializable
 
 
 class TomlSerializer(Serializer):
@@ -30,15 +29,15 @@ def to_toml(obj, se: Type[TomlSerializer] = TomlSerializer) -> str:
     >>>
     >>> @serialize
     ... @dataclass
-    ... class Settings:
-    ...     general: 'General'
-    >>>
-    >>> @serialize
-    ... @dataclass
     ... class General:
     ...     host: str
     ...     port: int
     ...     upstream: List[str]
+    >>>
+    >>> @serialize
+    ... @dataclass
+    ... class Settings:
+    ...     general: General
     >>>
     >>> to_toml(Settings(General(host='localhost', port=8080, upstream=['localhost:8081', 'localhost:8082'])))
     '[general]\\nhost = \"localhost\"\\nport = 8080\\nupstream = [ \"localhost:8081\", \"localhost:8082\",]\\n'

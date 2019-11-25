@@ -53,7 +53,7 @@ def gen(code: str, globals: Dict = None, locals: Dict = None, cls: Type = None) 
         from black import format_str, FileMode
 
         code = format_str(code, mode=FileMode(line_length=100))
-    except:
+    except Exception:
         pass
     for_class = 'for ' + cls.__name__ if cls else ''
     logger.debug(f'Generating {for_class} ...\n{code}')

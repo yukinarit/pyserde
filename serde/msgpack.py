@@ -1,11 +1,10 @@
-from dataclasses import asdict
 from typing import Any, Type
 
 import msgpack
 
 from .core import T, logger
 from .de import Deserializer, from_dict
-from .se import Serializer
+from .se import Serializer, asdict
 
 
 class MsgPackSerializer(Serializer):
