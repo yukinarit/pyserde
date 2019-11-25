@@ -333,7 +333,7 @@ class Renderer:
             return self.dict(arg)
         elif is_tuple(arg.type):
             return self.tuple(arg)
-        elif any(f(arg.type) for f in (is_primitive, is_union, is_opt)):
+        elif any(f(arg.type) for f in (is_primitive, is_union)):
             return self.primitive(arg)
         else:
             return f'__custom_serializer__({arg.varname})'
