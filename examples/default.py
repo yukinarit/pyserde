@@ -1,24 +1,24 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from serde import deserialize, serialize
 from serde.json import from_json, to_json
 
-# Mark the class serializable/deserializable.
+
 @deserialize
 @serialize
 @dataclass
-class Hoge:
-    i: int
-    s: str
-    f: float
-    b: bool
+class Foo:
+    i: int = 10
+    s: str = 'foo'
+    f: float = field(default=100.0)  # Use dataclass field.
+    b: bool = field(default=True)
 
 
 def main():
-    h = Hoge(i=10, s='hoge', f=100.0, b=True)
+    h = Foo()
     print(f"Into Json: {to_json(h)}")
 
     s = '{"i": 10, "s": "hoge", "f": 100.0, "b": true}'
-    print(f"From Json: {from_json(Hoge, s)}")
+    print(f"From Json: {from_json(Foo, s)}")
 
 
 if __name__ == '__main__':

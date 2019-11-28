@@ -1,7 +1,7 @@
 import enum
 import json
 import logging
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, fields
 from typing import Dict, List
 
 import pytest
@@ -14,7 +14,7 @@ from serde.msgpack import from_msgpack, to_msgpack
 from serde.toml import from_toml, to_toml
 from serde.yaml import from_yaml, to_yaml
 
-from .data import Bool, Float, Int, NestedPri, NestedPriOpt, NestedPriTuple, Pri, PriOpt, PriTuple, Str
+from .data import Bool, Float, Int, NestedPri, NestedPriOpt, NestedPriTuple, Pri, PriDefault, PriOpt, PriTuple, Str
 
 logging.basicConfig(level=logging.WARNING)
 
@@ -154,6 +154,25 @@ def test_optional_nested(se, de):
 
     p = NestedPriOpt(None, None, None, None)
     assert p == de(NestedPriOpt, se(p))
+
+
+def test_field_default():
+    @dataclass
+    class Foo:
+        i: int = 10
+
+    @dataclass
+    class Bar:
+        i: int = field(default=10)
+
+    assert 10 == fields(Foo)[0].default
+    assert 10 == fields(Bar())[0].default
+
+
+@pytest.mark.parametrize('se,de', all_formats)
+def test_default(se, de):
+    p = PriDefault()
+    assert p == de(PriDefault, se(p))
 
 
 def test_complex():
