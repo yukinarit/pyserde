@@ -3,13 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
-<meta name="generator" content="pdoc 0.6.3" />
+<meta name="generator" content="pdoc 0.7.2.dev1+gaf23904" />
 <title>serde.de API documentation</title>
 <meta name="description" content="Defines classess and functions for `deserialize` decorator …" />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
-<style>.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{font-weight:bold}#index h4 + ul{margin-bottom:.6em}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase;cursor:pointer}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style>.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{font-weight:bold}#index h4 + ul{margin-bottom:.6em}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
 <style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
 <style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
 </head>
@@ -30,7 +30,9 @@
 <p><code>args_from_iter</code> and <code>args_from_dict</code> are private functions but they are the core
 parts of pyserde.</p>
 <details class="source">
-<summary>Source code</summary>
+<summary>
+<span>Expand source code</span>
+</summary>
 <pre><code class="python">&#34;&#34;&#34;
 Defines classess and functions for `deserialize` decorator.
 
@@ -46,14 +48,20 @@ parts of pyserde.
 &#34;&#34;&#34;
 import abc
 import functools
-from dataclasses import dataclass, is_dataclass
-from typing import Any, Dict, List, Optional, Tuple, Type
+from dataclasses import _MISSING_TYPE as DEFAULT_MISSING_TYPE
+from dataclasses import dataclass
+from dataclasses import fields as dataclass_fields
+from dataclasses import is_dataclass
+from typing import Any, Callable, Dict, List, Optional, Tuple, Type
 
 import jinja2
 import stringcase
 
-from .compat import assert_type, is_dict, is_list, is_opt, is_tuple, is_union, iter_types, type_args
+from .compat import assert_type, is_dict, is_list, is_opt, is_primitive, is_tuple, is_union, iter_types, type_args
 from .core import FROM_DICT, FROM_ITER, HIDDEN_NAME, SETTINGS, Field, Hidden, SerdeError, T, fields, gen
+from .more_types import deserialize as custom
+
+Custom = Optional[Callable[[&#39;DeField&#39;, Any], Any]]
 
 
 def deserialize(_cls=None, rename_all: Optional[str] = None) -&gt; Type:
@@ -93,10 +101,12 @@ def deserialize(_cls=None, rename_all: Optional[str] = None) -&gt; Type:
     &#34;&#34;&#34;
 
     def wrap(cls):
+        g: Dict[str, Any] = globals().copy()
         if not hasattr(cls, HIDDEN_NAME):
             setattr(cls, HIDDEN_NAME, Hidden())
-        cls = de_func(cls, FROM_ITER, render_from_iter(cls))
-        cls = de_func(cls, FROM_DICT, render_from_dict(cls, rename_all))
+        g[&#39;__custom_deserializer__&#39;] = custom
+        cls = de_func(cls, FROM_ITER, render_from_iter(cls, custom), g)
+        cls = de_func(cls, FROM_DICT, render_from_dict(cls, rename_all, custom), g)
         return cls
 
     if _cls is None:
@@ -285,7 +295,7 @@ class ElementField(DeField):
 
     @property
     def data(self) -&gt; str:
-        return self.datavar
+        return self.datavar or &#39;&#39;
 
     @data.setter
     def data(self, d):
@@ -302,6 +312,7 @@ class Renderer:
     &#34;&#34;&#34;
 
     func: str
+    custom: Custom = None
 
     def render(self, arg: DeField) -&gt; str:
         &#34;&#34;&#34;
@@ -317,8 +328,10 @@ class Renderer:
             return self.dict(arg)
         elif is_tuple(arg.type):
             return self.tuple(arg)
-        else:
+        elif any(f(arg.type) for f in (is_primitive, is_union)):
             return self.primitive(arg)
+        else:
+            return f&#39;__custom_deserializer__(fs[{arg.index}], {arg.data})&#39;
 
     def dataclass(self, arg: DeField) -&gt; str:
         &#34;&#34;&#34; Render rvalue for dataclass. &#34;&#34;&#34;
@@ -426,22 +439,31 @@ class DictRenderer(Renderer):
         &gt;&gt;&gt; DictRenderer(&#39;hoge&#39;).render(DeField(int, &#39;int_field&#39;, datavar=&#39;data&#39;, case=&#39;camelcase&#39;))
         &#39;data[&#34;intField&#34;]&#39;
         &#34;&#34;&#34;
-        return arg.data
+        if not isinstance(arg.default, DEFAULT_MISSING_TYPE):
+            default = arg.default
+            if isinstance(default, str):
+                default = f&#39;&#34;{default}&#34;&#39;
+            return f&#39;{arg.datavar}.get(&#34;{arg.name}&#34;, {default})&#39;
+        else:
+            return arg.data
 
 
-def to_arg(f: Field, rename_all: Optional[str] = None) -&gt; DeField:
+def to_arg(f: Field, index, rename_all: Optional[str] = None) -&gt; DeField:
+    f.index = index
     f.data = &#39;data&#39;
     f.parent = DeField(None, &#39;data&#39;, datavar=&#39;data&#39;, case=f.case or rename_all)
     f.case = f.case or rename_all
     return f
 
 
-def render_from_iter(cls: Type) -&gt; str:
+def render_from_iter(cls: Type, custom: Custom = None) -&gt; str:
     template = &#34;&#34;&#34;
 def {{func}}(data):
+  if data is None:
+    return None
   return cls(
   {% for f in cls|fields %}
-  {{f|arg|rvalue}},
+  {{f|arg(loop.index-1)|rvalue}},
   {% endfor %}
   )
     &#34;&#34;&#34;
@@ -454,17 +476,20 @@ def {{func}}(data):
     return env.get_template(&#39;iter&#39;).render(func=FROM_ITER, cls=cls)
 
 
-def render_from_dict(cls: Type, rename_all: Optional[str] = None) -&gt; str:
+def render_from_dict(cls: Type, rename_all: Optional[str] = None, custom: Custom = None) -&gt; str:
     template = &#34;&#34;&#34;
 def {{func}}(data):
+  if data is None:
+    return None
+  fs = fields(cls)
   return cls(
   {% for f in cls|fields %}
-  {{f|arg|rvalue}},
+  {{f|arg(loop.index-1)|rvalue}},
   {% endfor %}
   )
     &#34;&#34;&#34;
 
-    renderer = DictRenderer(FROM_DICT)
+    renderer = DictRenderer(FROM_DICT, custom)
     env = jinja2.Environment(loader=jinja2.DictLoader({&#39;dict&#39;: template}))
     env.filters.update({&#39;rvalue&#39;: renderer.render})
     env.filters.update({&#39;fields&#39;: defields})
@@ -472,12 +497,16 @@ def {{func}}(data):
     return env.get_template(&#39;dict&#39;).render(func=FROM_DICT, cls=cls)
 
 
-def de_func(cls: Type[T], func: str, code: str) -&gt; Type[T]:
+def de_func(cls: Type[T], func: str, code: str, g: Dict = None, local: Dict = None) -&gt; Type[T]:
     &#34;&#34;&#34;
     Generate function to deserialize into an instance of `deserialize` class.
     &#34;&#34;&#34;
+    if not g:
+        g = globals().copy()
+    if not local:
+        local = locals().copy()
+
     # Collect types to be used in the `exec` scope.
-    g: Dict[str, Any] = globals().copy()
     for typ in iter_types(cls):
         if is_dataclass(typ):
             g[typ.__name__] = typ
@@ -486,6 +515,7 @@ def de_func(cls: Type[T], func: str, code: str) -&gt; Type[T]:
 
     g[&#39;typing&#39;] = typing
     g[&#39;NoneType&#39;] = type(None)
+    g[&#39;fields&#39;] = dataclass_fields
 
     # Generate deserialize function.
     code = gen(code, g, cls=cls)
@@ -510,7 +540,9 @@ def de_func(cls: Type[T], func: str, code: str) -&gt; Type[T]:
 <dd>
 <section class="desc"></section>
 <details class="source">
-<summary>Source code</summary>
+<summary>
+<span>Expand source code</span>
+</summary>
 <pre><code class="python">def case(s: str, case: Optional[str]) -&gt; str:
     if case:
         f = getattr(stringcase, case, None)
@@ -522,18 +554,24 @@ def de_func(cls: Type[T], func: str, code: str) -&gt; Type[T]:
 </details>
 </dd>
 <dt id="serde.de.de_func"><code class="name flex">
-<span>def <span class="ident">de_func</span></span>(<span>cls, func, code)</span>
+<span>def <span class="ident">de_func</span></span>(<span>cls, func, code, g=None, local=None)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Generate function to deserialize into an instance of <a title="serde.de.deserialize" href="#serde.de.deserialize"><code>deserialize()</code></a> class.</p></section>
 <details class="source">
-<summary>Source code</summary>
-<pre><code class="python">def de_func(cls: Type[T], func: str, code: str) -&gt; Type[T]:
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def de_func(cls: Type[T], func: str, code: str, g: Dict = None, local: Dict = None) -&gt; Type[T]:
     &#34;&#34;&#34;
     Generate function to deserialize into an instance of `deserialize` class.
     &#34;&#34;&#34;
+    if not g:
+        g = globals().copy()
+    if not local:
+        local = locals().copy()
+
     # Collect types to be used in the `exec` scope.
-    g: Dict[str, Any] = globals().copy()
     for typ in iter_types(cls):
         if is_dataclass(typ):
             g[typ.__name__] = typ
@@ -542,6 +580,7 @@ def de_func(cls: Type[T], func: str, code: str) -&gt; Type[T]:
 
     g[&#39;typing&#39;] = typing
     g[&#39;NoneType&#39;] = type(None)
+    g[&#39;fields&#39;] = dataclass_fields
 
     # Generate deserialize function.
     code = gen(code, g, cls=cls)
@@ -589,7 +628,9 @@ RenameAll(int_field=10, str_field='hoge')
 &gt;&gt;&gt;
 </code></pre></section>
 <details class="source">
-<summary>Source code</summary>
+<summary>
+<span>Expand source code</span>
+</summary>
 <pre><code class="python">def deserialize(_cls=None, rename_all: Optional[str] = None) -&gt; Type:
     &#34;&#34;&#34;
     `deserialize` decorator. A dataclass with this decorator can be deserialized
@@ -627,10 +668,12 @@ RenameAll(int_field=10, str_field='hoge')
     &#34;&#34;&#34;
 
     def wrap(cls):
+        g: Dict[str, Any] = globals().copy()
         if not hasattr(cls, HIDDEN_NAME):
             setattr(cls, HIDDEN_NAME, Hidden())
-        cls = de_func(cls, FROM_ITER, render_from_iter(cls))
-        cls = de_func(cls, FROM_DICT, render_from_dict(cls, rename_all))
+        g[&#39;__custom_deserializer__&#39;] = custom
+        cls = de_func(cls, FROM_ITER, render_from_iter(cls, custom), g)
+        cls = de_func(cls, FROM_DICT, render_from_dict(cls, rename_all, custom), g)
         return cls
 
     if _cls is None:
@@ -645,7 +688,9 @@ RenameAll(int_field=10, str_field='hoge')
 <dd>
 <section class="desc"></section>
 <details class="source">
-<summary>Source code</summary>
+<summary>
+<span>Expand source code</span>
+</summary>
 <pre><code class="python">def from_dict(cls, o):
     return cls.__serde_from_dict__(o)</code></pre>
 </details>
@@ -656,7 +701,9 @@ RenameAll(int_field=10, str_field='hoge')
 <dd>
 <section class="desc"><p>Deserialize into an instance of <a title="serde.de.deserialize" href="#serde.de.deserialize"><code>deserialize()</code></a> class from either <code>dict</code> or <code>iterable</code>.</p></section>
 <details class="source">
-<summary>Source code</summary>
+<summary>
+<span>Expand source code</span>
+</summary>
 <pre><code class="python">def from_dict_or_iter(cls, o):
     &#34;&#34;&#34;
     Deserialize into an instance of `deserialize` class from either `dict` or `iterable`.
@@ -716,7 +763,9 @@ i: int</h1>
 <h1 id="hoge-hogeshoge-i10-foo-hogesfoo-i20">{'hoge': Hoge(s='hoge', i=10), 'foo': Hoge(s='foo', i=20)}</h1>
 <h1 id="_6">&gt;&gt;&gt;</h1></section>
 <details class="source">
-<summary>Source code</summary>
+<summary>
+<span>Expand source code</span>
+</summary>
 <pre><code class="python">def from_obj(c: Type[T], o: Any, de: Type[Deserializer] = None, strict=True, **opts):
     &#34;&#34;&#34;
     Deserialize from an object into an instance of the type specified as arg `c`.
@@ -795,7 +844,9 @@ i: int</h1>
 <dd>
 <section class="desc"></section>
 <details class="source">
-<summary>Source code</summary>
+<summary>
+<span>Expand source code</span>
+</summary>
 <pre><code class="python">def from_tuple(cls, o):
     return cls.__serde_from_tuple__(o)</code></pre>
 </details>
@@ -817,7 +868,9 @@ True
 &gt;&gt;&gt;
 </code></pre></section>
 <details class="source">
-<summary>Source code</summary>
+<summary>
+<span>Expand source code</span>
+</summary>
 <pre><code class="python">def is_deserializable(instance_or_class: Any) -&gt; bool:
     &#34;&#34;&#34;
     Test if arg can `deserialize`. Arg must be either an instance of class.
@@ -837,23 +890,28 @@ True
 </details>
 </dd>
 <dt id="serde.de.render_from_dict"><code class="name flex">
-<span>def <span class="ident">render_from_dict</span></span>(<span>cls, rename_all=None)</span>
+<span>def <span class="ident">render_from_dict</span></span>(<span>cls, rename_all=None, custom=None)</span>
 </code></dt>
 <dd>
 <section class="desc"></section>
 <details class="source">
-<summary>Source code</summary>
-<pre><code class="python">def render_from_dict(cls: Type, rename_all: Optional[str] = None) -&gt; str:
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def render_from_dict(cls: Type, rename_all: Optional[str] = None, custom: Custom = None) -&gt; str:
     template = &#34;&#34;&#34;
 def {{func}}(data):
+  if data is None:
+    return None
+  fs = fields(cls)
   return cls(
   {% for f in cls|fields %}
-  {{f|arg|rvalue}},
+  {{f|arg(loop.index-1)|rvalue}},
   {% endfor %}
   )
     &#34;&#34;&#34;
 
-    renderer = DictRenderer(FROM_DICT)
+    renderer = DictRenderer(FROM_DICT, custom)
     env = jinja2.Environment(loader=jinja2.DictLoader({&#39;dict&#39;: template}))
     env.filters.update({&#39;rvalue&#39;: renderer.render})
     env.filters.update({&#39;fields&#39;: defields})
@@ -862,18 +920,22 @@ def {{func}}(data):
 </details>
 </dd>
 <dt id="serde.de.render_from_iter"><code class="name flex">
-<span>def <span class="ident">render_from_iter</span></span>(<span>cls)</span>
+<span>def <span class="ident">render_from_iter</span></span>(<span>cls, custom=None)</span>
 </code></dt>
 <dd>
 <section class="desc"></section>
 <details class="source">
-<summary>Source code</summary>
-<pre><code class="python">def render_from_iter(cls: Type) -&gt; str:
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def render_from_iter(cls: Type, custom: Custom = None) -&gt; str:
     template = &#34;&#34;&#34;
 def {{func}}(data):
+  if data is None:
+    return None
   return cls(
   {% for f in cls|fields %}
-  {{f|arg|rvalue}},
+  {{f|arg(loop.index-1)|rvalue}},
   {% endfor %}
   )
     &#34;&#34;&#34;
@@ -887,13 +949,16 @@ def {{func}}(data):
 </details>
 </dd>
 <dt id="serde.de.to_arg"><code class="name flex">
-<span>def <span class="ident">to_arg</span></span>(<span>f, rename_all=None)</span>
+<span>def <span class="ident">to_arg</span></span>(<span>f, index, rename_all=None)</span>
 </code></dt>
 <dd>
 <section class="desc"></section>
 <details class="source">
-<summary>Source code</summary>
-<pre><code class="python">def to_arg(f: Field, rename_all: Optional[str] = None) -&gt; DeField:
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def to_arg(f: Field, index, rename_all: Optional[str] = None) -&gt; DeField:
+    f.index = index
     f.data = &#39;data&#39;
     f.parent = DeField(None, &#39;data&#39;, datavar=&#39;data&#39;, case=f.case or rename_all)
     f.case = f.case or rename_all
@@ -907,12 +972,14 @@ def {{func}}(data):
 <dl>
 <dt id="serde.de.DeField"><code class="flex name class">
 <span>class <span class="ident">DeField</span></span>
-<span>(</span><span>type, name, case=None, rename=None, skip=None, skip_if=None, skip_if_false=None, datavar=None)</span>
+<span>(</span><span>type, name, default=&lt;factory&gt;, case=None, rename=None, skip=None, skip_if=None, skip_if_false=None, datavar=None)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>DeField(type: Type, name: str, case: Union[str, NoneType] = None, rename: Union[str, NoneType] = None, skip: Union[bool, NoneType] = None, skip_if: Union[Callable[[Any], bool], NoneType] = None, skip_if_false: Union[bool, NoneType] = None, datavar: Union[str, NoneType] = None)</p></section>
+<section class="desc"><p>DeField(type:Type, name:str, default:Any=<factory>, case:Union[str, NoneType]=None, rename:Union[str, NoneType]=None, skip:Union[bool, NoneType]=None, skip_if:Union[Callable[[Any], bool], NoneType]=None, skip_if_false:Union[bool, NoneType]=None, datavar:Union[str, NoneType]=None)</p></section>
 <details class="source">
-<summary>Source code</summary>
+<summary>
+<span>Expand source code</span>
+</summary>
 <pre><code class="python">class DeField(Field):
     datavar: Optional[str] = None  # name of variable to deserialize from.
 
@@ -961,7 +1028,9 @@ def {{func}}(data):
 <dd>
 <section class="desc"></section>
 <details class="source">
-<summary>Source code</summary>
+<summary>
+<span>Expand source code</span>
+</summary>
 <pre><code class="python">@property
 def data(self) -&gt; str:
     return f&#39;{self.datavar}[&#34;{case(self.name, self.case)}&#34;]&#39;</code></pre>
@@ -976,7 +1045,9 @@ def data(self) -&gt; str:
 <dd>
 <section class="desc"></section>
 <details class="source">
-<summary>Source code</summary>
+<summary>
+<span>Expand source code</span>
+</summary>
 <pre><code class="python">def get_kv(self) -&gt; Tuple[&#39;ElementField&#39;, &#39;ElementField&#39;]:
     k = self[0]
     k.name = &#39;k&#39;
@@ -995,7 +1066,9 @@ def data(self) -&gt; str:
 <section class="desc"><p><a title="serde.de.Deserializer" href="#serde.de.Deserializer"><code>Deserializer</code></a> base class. Subclass this to custonize deserialize bahaviour.</p>
 <p>See <a title="serde.json.JsonDeserializer" href="json.html#serde.json.JsonDeserializer"><code>JsonDeserializer</code></a> and <a title="serde.msgpack.MsgPackDeserializer" href="msgpack.html#serde.msgpack.MsgPackDeserializer"><code>MsgPackDeserializer</code></a> for example usage.</p></section>
 <details class="source">
-<summary>Source code</summary>
+<summary>
+<span>Expand source code</span>
+</summary>
 <pre><code class="python">class Deserializer(metaclass=abc.ABCMeta):
     &#34;&#34;&#34;
     `Deserializer` base class. Subclass this to custonize deserialize bahaviour.
@@ -1015,10 +1088,10 @@ def data(self) -&gt; str:
 </details>
 <h3>Subclasses</h3>
 <ul class="hlist">
-<li><a title="serde.toml.TomlDeserializer" href="toml.html#serde.toml.TomlDeserializer">TomlDeserializer</a></li>
 <li><a title="serde.msgpack.MsgPackDeserializer" href="msgpack.html#serde.msgpack.MsgPackDeserializer">MsgPackDeserializer</a></li>
 <li><a title="serde.yaml.YamlDeserializer" href="yaml.html#serde.yaml.YamlDeserializer">YamlDeserializer</a></li>
 <li><a title="serde.json.JsonDeserializer" href="json.html#serde.json.JsonDeserializer">JsonDeserializer</a></li>
+<li><a title="serde.toml.TomlDeserializer" href="toml.html#serde.toml.TomlDeserializer">TomlDeserializer</a></li>
 </ul>
 <h3>Static methods</h3>
 <dl>
@@ -1031,7 +1104,9 @@ def data(self) -&gt; str:
 into an object. <a title="serde.msgpack.MsgPackDeserializer" href="msgpack.html#serde.msgpack.MsgPackDeserializer"><code>MsgPackDeserializer</code></a> takes msgpack bytes and
 deserialize into an object.</p></section>
 <details class="source">
-<summary>Source code</summary>
+<summary>
+<span>Expand source code</span>
+</summary>
 <pre><code class="python">@abc.abstractclassmethod
 def deserialize(cls, data, **opts):
     &#34;&#34;&#34;
@@ -1047,12 +1122,14 @@ def deserialize(cls, data, **opts):
 </dd>
 <dt id="serde.de.DictRenderer"><code class="flex name class">
 <span>class <span class="ident">DictRenderer</span></span>
-<span>(</span><span>func)</span>
+<span>(</span><span>func, custom=None)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Render rvalue for various types.</p></section>
 <details class="source">
-<summary>Source code</summary>
+<summary>
+<span>Expand source code</span>
+</summary>
 <pre><code class="python">class DictRenderer(Renderer):
     &#34;&#34;&#34;
     Render rvalue for various types.
@@ -1139,7 +1216,13 @@ def deserialize(cls, data, **opts):
         &gt;&gt;&gt; DictRenderer(&#39;hoge&#39;).render(DeField(int, &#39;int_field&#39;, datavar=&#39;data&#39;, case=&#39;camelcase&#39;))
         &#39;data[&#34;intField&#34;]&#39;
         &#34;&#34;&#34;
-        return arg.data</code></pre>
+        if not isinstance(arg.default, DEFAULT_MISSING_TYPE):
+            default = arg.default
+            if isinstance(default, str):
+                default = f&#39;&#34;{default}&#34;&#39;
+            return f&#39;{arg.datavar}.get(&#34;{arg.name}&#34;, {default})&#39;
+        else:
+            return arg.data</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -1162,7 +1245,9 @@ def deserialize(cls, data, **opts):
 '{Foo.hoge(k): [Foo.hoge(v) for v in v] for k, v in data["f"].items()}'
 </code></pre></section>
 <details class="source">
-<summary>Source code</summary>
+<summary>
+<span>Expand source code</span>
+</summary>
 <pre><code class="python">def dict(self, arg: DeField) -&gt; str:
     &#34;&#34;&#34;
     Render rvalue for dict.
@@ -1192,7 +1277,9 @@ def deserialize(cls, data, **opts):
 '[[v for v in v] for v in data["l"]]'
 </code></pre></section>
 <details class="source">
-<summary>Source code</summary>
+<summary>
+<span>Expand source code</span>
+</summary>
 <pre><code class="python">def list(self, arg: DeField) -&gt; str:
     &#34;&#34;&#34;
     Render rvalue for list.
@@ -1228,7 +1315,9 @@ def deserialize(cls, data, **opts):
 'Foo.hoge(data["f"]) if "f" in data else None'
 </code></pre></section>
 <details class="source">
-<summary>Source code</summary>
+<summary>
+<span>Expand source code</span>
+</summary>
 <pre><code class="python">def opt(self, arg: DeField) -&gt; str:
     &#34;&#34;&#34;
     Render rvalue for Optional.
@@ -1266,7 +1355,9 @@ def deserialize(cls, data, **opts):
 'data["intField"]'
 </code></pre></section>
 <details class="source">
-<summary>Source code</summary>
+<summary>
+<span>Expand source code</span>
+</summary>
 <pre><code class="python">def primitive(self, arg: DeField) -&gt; str:
     &#34;&#34;&#34;
     Render rvalue for primitives.
@@ -1277,7 +1368,13 @@ def deserialize(cls, data, **opts):
     &gt;&gt;&gt; DictRenderer(&#39;hoge&#39;).render(DeField(int, &#39;int_field&#39;, datavar=&#39;data&#39;, case=&#39;camelcase&#39;))
     &#39;data[&#34;intField&#34;]&#39;
     &#34;&#34;&#34;
-    return arg.data</code></pre>
+    if not isinstance(arg.default, DEFAULT_MISSING_TYPE):
+        default = arg.default
+        if isinstance(default, str):
+            default = f&#39;&#34;{default}&#34;&#39;
+        return f&#39;{arg.datavar}.get(&#34;{arg.name}&#34;, {default})&#39;
+    else:
+        return arg.data</code></pre>
 </details>
 </dd>
 <dt id="serde.de.DictRenderer.tuple"><code class="name flex">
@@ -1292,7 +1389,9 @@ def deserialize(cls, data, **opts):
 '(data["d"][0], data["d"][1], [v for v in data["d"][2]], Foo.hoge(data["d"][3]))'
 </code></pre></section>
 <details class="source">
-<summary>Source code</summary>
+<summary>
+<span>Expand source code</span>
+</summary>
 <pre><code class="python">def tuple(self, arg: DeField) -&gt; str:
     &#34;&#34;&#34;
     Render rvalue for tuple.
@@ -1323,12 +1422,14 @@ def deserialize(cls, data, **opts):
 </dd>
 <dt id="serde.de.ElementField"><code class="flex name class">
 <span>class <span class="ident">ElementField</span></span>
-<span>(</span><span>type, name, case=None, rename=None, skip=None, skip_if=None, skip_if_false=None, datavar=None)</span>
+<span>(</span><span>type, name, default=&lt;factory&gt;, case=None, rename=None, skip=None, skip_if=None, skip_if_false=None, datavar=None)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Field for element type such as List[T].</p></section>
 <details class="source">
-<summary>Source code</summary>
+<summary>
+<span>Expand source code</span>
+</summary>
 <pre><code class="python">class ElementField(DeField):
     &#34;&#34;&#34;
     Field for element type such as List[T].
@@ -1336,7 +1437,7 @@ def deserialize(cls, data, **opts):
 
     @property
     def data(self) -&gt; str:
-        return self.datavar
+        return self.datavar or &#39;&#39;
 
     @data.setter
     def data(self, d):
@@ -1353,28 +1454,33 @@ def deserialize(cls, data, **opts):
 <dd>
 <section class="desc"></section>
 <details class="source">
-<summary>Source code</summary>
+<summary>
+<span>Expand source code</span>
+</summary>
 <pre><code class="python">@property
 def data(self) -&gt; str:
-    return self.datavar</code></pre>
+    return self.datavar or &#39;&#39;</code></pre>
 </details>
 </dd>
 </dl>
 </dd>
 <dt id="serde.de.Renderer"><code class="flex name class">
 <span>class <span class="ident">Renderer</span></span>
-<span>(</span><span>func)</span>
+<span>(</span><span>func, custom=None)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Base Renderer class.</p></section>
 <details class="source">
-<summary>Source code</summary>
+<summary>
+<span>Expand source code</span>
+</summary>
 <pre><code class="python">class Renderer:
     &#34;&#34;&#34;
     Base Renderer class.
     &#34;&#34;&#34;
 
     func: str
+    custom: Custom = None
 
     def render(self, arg: DeField) -&gt; str:
         &#34;&#34;&#34;
@@ -1390,8 +1496,10 @@ def data(self) -&gt; str:
             return self.dict(arg)
         elif is_tuple(arg.type):
             return self.tuple(arg)
-        else:
+        elif any(f(arg.type) for f in (is_primitive, is_union)):
             return self.primitive(arg)
+        else:
+            return f&#39;__custom_deserializer__(fs[{arg.index}], {arg.data})&#39;
 
     def dataclass(self, arg: DeField) -&gt; str:
         &#34;&#34;&#34; Render rvalue for dataclass. &#34;&#34;&#34;
@@ -1415,6 +1523,13 @@ def data(self) -&gt; str:
 <ul class="hlist">
 <li><a title="serde.de.DictRenderer" href="#serde.de.DictRenderer">DictRenderer</a></li>
 </ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="serde.de.Renderer.custom"><code class="name">var <span class="ident">custom</span></code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+</dl>
 <h3>Methods</h3>
 <dl>
 <dt id="serde.de.Renderer.dataclass"><code class="name flex">
@@ -1423,7 +1538,9 @@ def data(self) -&gt; str:
 <dd>
 <section class="desc"><p>Render rvalue for dataclass.</p></section>
 <details class="source">
-<summary>Source code</summary>
+<summary>
+<span>Expand source code</span>
+</summary>
 <pre><code class="python">def dataclass(self, arg: DeField) -&gt; str:
     &#34;&#34;&#34; Render rvalue for dataclass. &#34;&#34;&#34;</code></pre>
 </details>
@@ -1434,7 +1551,9 @@ def data(self) -&gt; str:
 <dd>
 <section class="desc"><p>Render rvalue for dict.</p></section>
 <details class="source">
-<summary>Source code</summary>
+<summary>
+<span>Expand source code</span>
+</summary>
 <pre><code class="python">def dict(self, arg: DeField) -&gt; str:
     &#34;&#34;&#34; Render rvalue for dict. &#34;&#34;&#34;</code></pre>
 </details>
@@ -1445,7 +1564,9 @@ def data(self) -&gt; str:
 <dd>
 <section class="desc"><p>Render rvalue for list.</p></section>
 <details class="source">
-<summary>Source code</summary>
+<summary>
+<span>Expand source code</span>
+</summary>
 <pre><code class="python">def list(self, arg: DeField) -&gt; str:
     &#34;&#34;&#34; Render rvalue for list. &#34;&#34;&#34;</code></pre>
 </details>
@@ -1456,7 +1577,9 @@ def data(self) -&gt; str:
 <dd>
 <section class="desc"><p>Render rvalue for optional.</p></section>
 <details class="source">
-<summary>Source code</summary>
+<summary>
+<span>Expand source code</span>
+</summary>
 <pre><code class="python">def opt(self, arg: DeField) -&gt; str:
     &#34;&#34;&#34; Render rvalue for optional. &#34;&#34;&#34;</code></pre>
 </details>
@@ -1467,7 +1590,9 @@ def data(self) -&gt; str:
 <dd>
 <section class="desc"><p>Render rvalue for primitives.</p></section>
 <details class="source">
-<summary>Source code</summary>
+<summary>
+<span>Expand source code</span>
+</summary>
 <pre><code class="python">def primitive(self, arg: DeField) -&gt; str:
     &#34;&#34;&#34; Render rvalue for primitives. &#34;&#34;&#34;</code></pre>
 </details>
@@ -1478,7 +1603,9 @@ def data(self) -&gt; str:
 <dd>
 <section class="desc"><p>Render rvalue</p></section>
 <details class="source">
-<summary>Source code</summary>
+<summary>
+<span>Expand source code</span>
+</summary>
 <pre><code class="python">def render(self, arg: DeField) -&gt; str:
     &#34;&#34;&#34;
     Render rvalue
@@ -1493,8 +1620,10 @@ def data(self) -&gt; str:
         return self.dict(arg)
     elif is_tuple(arg.type):
         return self.tuple(arg)
+    elif any(f(arg.type) for f in (is_primitive, is_union)):
+        return self.primitive(arg)
     else:
-        return self.primitive(arg)</code></pre>
+        return f&#39;__custom_deserializer__(fs[{arg.index}], {arg.data})&#39;</code></pre>
 </details>
 </dd>
 <dt id="serde.de.Renderer.tuple"><code class="name flex">
@@ -1503,7 +1632,9 @@ def data(self) -&gt; str:
 <dd>
 <section class="desc"><p>Render rvalue for tuple.</p></section>
 <details class="source">
-<summary>Source code</summary>
+<summary>
+<span>Expand source code</span>
+</summary>
 <pre><code class="python">def tuple(self, arg: DeField) -&gt; str:
     &#34;&#34;&#34; Render rvalue for tuple. &#34;&#34;&#34;</code></pre>
 </details>
@@ -1574,6 +1705,7 @@ def data(self) -&gt; str:
 <li>
 <h4><code><a title="serde.de.Renderer" href="#serde.de.Renderer">Renderer</a></code></h4>
 <ul class="two-column">
+<li><code><a title="serde.de.Renderer.custom" href="#serde.de.Renderer.custom">custom</a></code></li>
 <li><code><a title="serde.de.Renderer.dataclass" href="#serde.de.Renderer.dataclass">dataclass</a></code></li>
 <li><code><a title="serde.de.Renderer.dict" href="#serde.de.Renderer.dict">dict</a></code></li>
 <li><code><a title="serde.de.Renderer.list" href="#serde.de.Renderer.list">list</a></code></li>
@@ -1589,7 +1721,7 @@ def data(self) -&gt; str:
 </nav>
 </main>
 <footer id="footer">
-<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.6.3</a>.</p>
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.7.2.dev1+gaf23904</a>.</p>
 </footer>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
 <script>hljs.initHighlightingOnLoad()</script>
