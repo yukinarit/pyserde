@@ -13,22 +13,27 @@ import functools
 import json
 import sys
 import timeit
+from platform import python_implementation
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import List, Tuple
 
 import click
 
-import dacite_class as da
 import data
 import dataclasses_class as dc
-# import dataclasses_json_class as dj
-import mashumaro_class as mc
-import matplotlib.pyplot as plt
-import numpy as np
 import pyserde_class as ps
 import raw
-import seaborn as sns
+
+try:
+    if python_implementation() != 'PyPy':
+        import dacite_class as da
+        import mashumaro_class as mc
+        import seaborn as sns
+        import matplotlib.pyplot as plt
+        import numpy as np
+except ImportError:
+    pass
 
 
 @dataclass
