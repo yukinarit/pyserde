@@ -17,7 +17,7 @@ import jinja2
 import stringcase
 
 from .compat import is_dict, is_list, is_opt, is_primitive, is_tuple, is_union, type_args
-from .core import HIDDEN_NAME, SE_NAME, SETTINGS, TO_DICT, TO_ITER, Field, Hidden, T, fields, gen
+from .core import HIDDEN_NAME, SE_NAME, SETTINGS, TO_DICT, TO_ITER, Field, Hidden, T, fields, gen, conv
 from .more_types import serialize as custom
 
 Custom = Optional[Callable[[Any], Any]]
@@ -262,25 +262,13 @@ def {{func}}(obj):
   {% endif %}
     """
 
-    def conv(f: SeField) -> str:
-        """
-        Convert dict key name.
-        """
-        name = f.name
-        casef = getattr(stringcase, case or '', None)
-        if casef:
-            name = casef(name)
-        if f.rename:
-            name = f.rename
-        return name
-
     renderer = Renderer(TO_DICT, custom)
     env = jinja2.Environment(loader=jinja2.DictLoader({'dict': template}))
     env.filters.update({'fields': sefields})
     env.filters.update({'is_dataclass': is_dataclass})
     env.filters.update({'rvalue': renderer.render})
     env.filters.update({'arg': to_arg})
-    env.filters.update({'case': conv})
+    env.filters.update({'case': functools.partial(conv, case=case)})
     return env.get_template('dict').render(func=TO_DICT, cls=cls)
 
 

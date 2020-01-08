@@ -243,3 +243,15 @@ def test_msgpack():
     d = b'\x84\xa1i\n\xa1s\xa3foo\xa1f\xcb@Y\x00\x00\x00\x00\x00\x00\xa1b\xc3'
     assert d == to_msgpack(p)
     assert p == from_msgpack(Pri, d)
+
+
+@pytest.mark.parametrize('se,de', all_formats)
+def test_rename(se, de):
+    @deserialize
+    @serialize
+    @dataclass
+    class Foo:
+        class_name: str = field(metadata={'serde_rename': 'class'})
+
+    f = Foo(class_name='foo')
+    assert f == de(Foo, se(f))

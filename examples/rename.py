@@ -13,13 +13,13 @@ from serde.json import to_json
 
 @serialize
 @dataclass
-class Hoge:
+class Foo:
     # Use 'class_name' because 'class' is a keyword.
     class_name: str = field(metadata={'serde_rename': 'class'})
 
 
 def main():
-    print(to_json(Hoge(class_name='Hoge')))
+    print(to_json(Foo(class_name='Foge')))
 
 
 if __name__ == '__main__':

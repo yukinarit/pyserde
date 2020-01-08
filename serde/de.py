@@ -23,7 +23,7 @@ import jinja2
 import stringcase
 
 from .compat import assert_type, is_dict, is_list, is_opt, is_primitive, is_tuple, is_union, iter_types, type_args
-from .core import FROM_DICT, FROM_ITER, HIDDEN_NAME, SETTINGS, Field, Hidden, SerdeError, T, fields, gen
+from .core import FROM_DICT, FROM_ITER, HIDDEN_NAME, SETTINGS, Field, Hidden, SerdeError, T, fields, gen, conv
 from .more_types import deserialize as custom
 
 Custom = Optional[Callable[['DeField', Any], Any]]
@@ -213,16 +213,6 @@ def from_tuple(cls, o):
     return cls.__serde_from_tuple__(o)
 
 
-def case(s: str, case: Optional[str]) -> str:
-    if case:
-        f = getattr(stringcase, case, None)
-        if not f:
-            raise SerdeError((f"Unkown case type: {case}. Pass the name of case supported by 'stringcase' package."))
-        return f(s)
-    else:
-        return s
-
-
 @dataclass
 class DeField(Field):
     datavar: Optional[str] = None  # name of variable to deserialize from.
@@ -245,7 +235,7 @@ class DeField(Field):
 
     @property
     def data(self) -> str:
-        return f'{self.datavar}["{case(self.name, self.case)}"]'
+        return f'{self.datavar}["{conv(self, self.case)}"]'
 
     @data.setter
     def data(self, d):

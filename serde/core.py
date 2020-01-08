@@ -1,4 +1,5 @@
 import logging
+import stringcase
 from dataclasses import _MISSING_TYPE as DEFAULT_MISSING_TYPE
 from dataclasses import Field as DataclassField
 from dataclasses import dataclass, field
@@ -164,3 +165,19 @@ class Field:
 
 def fields(FieldCls: Type, cls: Type) -> Iterator[Field]:
     return iter(FieldCls.from_dataclass(f) for f in dataclass_fields(cls))
+
+
+def conv(f: Field, case: Optional[str] = None) -> str:
+    """
+    Convert field name.
+    """
+    name = f.name
+    if case:
+        casef = getattr(stringcase, case or '', None)
+        if not casef:
+            raise SerdeError((f"Unkown case type: {f.case}."
+                              f"Pass the name of case supported by 'stringcase' package."))
+        name = casef(f.name)
+    if f.rename:
+        name = f.rename
+    return name
