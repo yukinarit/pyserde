@@ -261,7 +261,6 @@ def {{func}}(obj):
   return res
   {% endif %}
     """
-
     renderer = Renderer(TO_DICT, custom)
     env = jinja2.Environment(loader=jinja2.DictLoader({'dict': template}))
     env.filters.update({'fields': sefields})

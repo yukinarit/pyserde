@@ -123,36 +123,35 @@ def from_obj(c: Type[T], o: Any, de: Type[Deserializer] = None, strict=True, **o
 
     ### Dataclass
 
-    # >>> from serde import deserialize
-    # >>>
-    # >>> @deserialize
-    # ... @dataclass
-    # ... class Hoge:
-    # ...     i: int
-    # ...     f: float
-    # ...     s: str
-    # ...     b: bool
-    # >>>
-    # >>> obj = {'i': 10, 'f': 0.1, 's': 'hoge', 'b': False}
-    # >>> from_obj(Hoge, obj)
-    # Hoge(i=10, f=0.1, s='hoge', b=False)
+    >>> from serde import deserialize
+    >>>
+    >>> @deserialize
+    ... @dataclass
+    ... class Foo:
+    ...     i: int
+    ...     f: float
+    ...     s: str
+    ...     b: bool
+    >>>
+    >>> obj = {'i': 10, 'f': 0.1, 's': 'foo', 'b': False}
+    >>> from_obj(Foo, obj)
+    Foo(i=10, f=0.1, s='foo', b=False)
 
-    # ### Containers
+    ### Containers
 
-    # >>> from serde import deserialize
-    # >>>
-    # >>> @deserialize
-    # ... @dataclass
-    # ... class Hoge:
-    # ...     s: str
-    # ...     i: int
-    # >>>
-    # >>> from_obj(List[Hoge], [('hoge', 10), ('foo', 20)])
-    # [Hoge(s='hoge', i=10), Hoge(s='foo', i=20)]
-    # >>>
-    # >>> from_obj(Dict[str ,Hoge], {'hoge': ('hoge', 10), 'foo': ('foo', 20)})
-    # {'hoge': Hoge(s='hoge', i=10), 'foo': Hoge(s='foo', i=20)}
-    # >>>
+    >>> from serde import deserialize
+    >>>
+    >>> @deserialize
+    ... @dataclass
+    ... class Foo:
+    ...     i: int
+    >>>
+    >>> from_obj(List[Foo], [{'i': 10}, {'i': 20}])
+    [Foo(i=10), Foo(i=20)]
+    >>>
+    >>> from_obj(Dict[str, Foo], {'foo1': {'i': 10}, 'foo2': {'i': 20}})
+    {'foo1': Foo(i=10), 'foo2': Foo(i=20)}
+    >>>
     """
     if de:
         o = de.deserialize(o, **opts)
@@ -210,7 +209,7 @@ def from_dict(cls, o):
 
 
 def from_tuple(cls, o):
-    return cls.__serde_from_tuple__(o)
+    return cls.__serde_from_iter__(o)
 
 
 @dataclass

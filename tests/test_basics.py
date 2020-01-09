@@ -22,14 +22,17 @@ logger.setLevel(logging.DEBUG)
 
 serde_init(True)
 
+format_dict: List = [(asdict, from_dict)]
 
-all_formats = [
-    (asdict, from_dict),
-    (to_json, from_json),
-    (to_msgpack, from_msgpack),
-    (to_yaml, from_yaml),
-    (to_toml, from_toml),
-]
+format_json: List = [(to_json, from_json)]
+
+format_msgpack: List = [(to_msgpack, from_msgpack)]
+
+format_yaml: List = [(to_yaml, from_yaml)]
+
+format_toml: List = [(to_toml, from_toml)]
+
+all_formats: List = (format_dict + format_json + format_msgpack + format_yaml + format_toml)
 
 
 @pytest.mark.parametrize('se,de', all_formats)
@@ -257,7 +260,7 @@ def test_rename(se, de):
     assert f == de(Foo, se(f))
 
 
-@pytest.mark.parametrize('se,de', all_formats)
+@pytest.mark.parametrize('se,de', format_json + format_yaml + format_toml + format_msgpack)
 def test_rename_all(se, de):
     @deserialize(rename_all='camelcase')
     @serialize(rename_all='camelcase')
@@ -266,4 +269,4 @@ def test_rename_all(se, de):
         class_name: str
 
     f = Foo(class_name='foo')
-    assert f == de(Foo, se(f))
+    assert f == de(Foo, se(f, named=True), named=True)

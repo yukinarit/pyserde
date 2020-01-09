@@ -8,17 +8,17 @@ from .se import Serializer, asdict
 
 class JsonSerializer(Serializer):
     @classmethod
-    def serialize(cls, obj: Any, **opts) -> str:
+    def serialize(cls, obj: Any, named=True, **opts) -> str:
         return json.dumps(asdict(obj), **opts)
 
 
 class JsonDeserializer(Deserializer):
     @classmethod
-    def deserialize(cls, s, **opts):
+    def deserialize(cls, s, named=True, **opts):
         return json.loads(s, **opts)
 
 
-def to_json(obj: Any, cls: Type[JsonSerializer] = JsonSerializer) -> str:
+def to_json(obj: Any, cls: Type[JsonSerializer] = JsonSerializer, **opts) -> str:
     return cls.serialize(obj)
 
 
