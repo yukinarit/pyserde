@@ -255,3 +255,15 @@ def test_rename(se, de):
 
     f = Foo(class_name='foo')
     assert f == de(Foo, se(f))
+
+
+@pytest.mark.parametrize('se,de', all_formats)
+def test_rename_all(se, de):
+    @deserialize(rename_all='camelcase')
+    @serialize(rename_all='camelcase')
+    @dataclass
+    class Foo:
+        class_name: str
+
+    f = Foo(class_name='foo')
+    assert f == de(Foo, se(f))
