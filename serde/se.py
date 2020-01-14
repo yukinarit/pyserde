@@ -17,7 +17,7 @@ import jinja2
 import stringcase
 
 from .compat import is_dict, is_list, is_opt, is_primitive, is_tuple, is_union, type_args
-from .core import HIDDEN_NAME, SE_NAME, SETTINGS, TO_DICT, TO_ITER, Field, Hidden, T, fields, gen, conv
+from .core import HIDDEN_NAME, SE_NAME, SETTINGS, TO_DICT, TO_ITER, Field, Hidden, T, conv, fields, gen
 from .more_types import serialize as custom
 
 Custom = Optional[Callable[[Any], Any]]

@@ -1,11 +1,12 @@
 import logging
-import stringcase
 from dataclasses import _MISSING_TYPE as DEFAULT_MISSING_TYPE
 from dataclasses import Field as DataclassField
 from dataclasses import dataclass, field
 from dataclasses import fields as dataclass_fields
 from dataclasses import is_dataclass
 from typing import Any, Callable, Dict, Iterator, List, Optional, Type, TypeVar
+
+import stringcase
 
 from .compat import T, assert_type, is_dict, is_list, is_opt, is_tuple, is_union, type_args
 
@@ -175,8 +176,9 @@ def conv(f: Field, case: Optional[str] = None) -> str:
     if case:
         casef = getattr(stringcase, case or '', None)
         if not casef:
-            raise SerdeError((f"Unkown case type: {f.case}."
-                              f"Pass the name of case supported by 'stringcase' package."))
+            raise SerdeError(
+                (f"Unkown case type: {f.case}." f"Pass the name of case supported by 'stringcase' package.")
+            )
         name = casef(f.name)
     if f.rename:
         name = f.rename

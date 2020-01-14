@@ -13,9 +13,9 @@ import functools
 import json
 import sys
 import timeit
-from platform import python_implementation
 from dataclasses import dataclass, field
 from pathlib import Path
+from platform import python_implementation
 from typing import List, Tuple
 
 import click
