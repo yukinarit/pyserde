@@ -50,7 +50,7 @@ def test_union():
     v = PriUnion(10)
     s = '{"v": 10}'
     assert s == to_json(v)
-    print(f'hoge {v.__serde_hidden__.code}')
+    print(f'foo {v.__serde_hidden__.code}')
     assert v == from_json(PriUnion, s, strict=False)
 
     v = PriUnion(10.0)
@@ -58,8 +58,8 @@ def test_union():
     assert s == to_json(v)
     assert v == from_json(PriUnion, s)
 
-    v = PriUnion('hoge')
-    s = '{"v": "hoge"}'
+    v = PriUnion('foo')
+    s = '{"v": "foo"}'
     assert s == to_json(v)
     assert v == from_json(PriUnion, s)
 
@@ -80,8 +80,8 @@ def test_union_optional():
     assert s == to_json(v)
     assert v == from_json(PriOptUnion, s)
 
-    v = PriOptUnion("hoge")
-    s = '{"v": "hoge"}'
+    v = PriOptUnion("foo")
+    s = '{"v": "foo"}'
     assert s == to_json(v)
     assert v == from_json(PriOptUnion, s)
 

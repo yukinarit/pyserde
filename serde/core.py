@@ -69,14 +69,14 @@ def typecheck(cls: Type[T], obj: T) -> None:
     type check type-annotated classes.
 
     >>> @dataclass
-    ... class Hoge:
+    ... class Foo:
     ...     s: str
     >>>
-    >>> typecheck(Hoge, Hoge('hoge'))
+    >>> typecheck(Foo, Foo('foo'))
     >>>
     >>> # Type mismatch raises `ValueError`.
     >>> try:
-    ...     typecheck(Hoge, Hoge(10))
+    ...     typecheck(Foo, Foo(10))
     ... except:
     ...     pass
     >>>

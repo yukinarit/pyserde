@@ -56,7 +56,7 @@ def test_typecheck():
         typecheck(int, 10.0)
 
     # Dataclass
-    p = Pri(i=10, s='hoge', f=100.0, b=True)
+    p = Pri(i=10, s='foo', f=100.0, b=True)
     typecheck(Pri, p)
 
     with pytest.raises(ValueError):
@@ -65,15 +65,15 @@ def test_typecheck():
 
     # Dataclass (Nested)
     @dataclass
-    class Hoge:
+    class Foo:
         p: Pri
 
-    h = Hoge(Pri(i=10, s='hoge', f=100.0, b=True))
-    typecheck(Hoge, h)
+    h = Foo(Pri(i=10, s='foo', f=100.0, b=True))
+    typecheck(Foo, h)
 
     with pytest.raises(ValueError):
         h.p.i = 10.0
-        typecheck(Hoge, h)
+        typecheck(Foo, h)
 
     # List
     typecheck(List[int], [10])
@@ -83,27 +83,27 @@ def test_typecheck():
     # List of dataclasses
     typecheck(List[Int], [Int(n) for n in range(1, 10)])
     with pytest.raises(ValueError):
-        typecheck(List[Pri], [Pri(i=10.0, s='hoge', f=100.0, b=True)])
+        typecheck(List[Pri], [Pri(i=10.0, s='foo', f=100.0, b=True)])
 
     # Tuple
-    typecheck(Tuple[int, str, float, bool], (10, 'hoge', 100.0, True))
+    typecheck(Tuple[int, str, float, bool], (10, 'foo', 100.0, True))
     with pytest.raises(ValueError):
-        typecheck(Tuple[int, str, float, bool], (10.0, 'hoge', 100.0, True))
+        typecheck(Tuple[int, str, float, bool], (10.0, 'foo', 100.0, True))
 
     # Tuple of dataclasses
-    typecheck(Tuple[Int, Str, Float, Bool], (Int(10), Str('hoge'), Float(100.0), Bool(True)))
+    typecheck(Tuple[Int, Str, Float, Bool], (Int(10), Str('foo'), Float(100.0), Bool(True)))
     with pytest.raises(ValueError):
-        typecheck(Tuple[Int, Str, Float, Bool], (Int(10.0), Str('hoge'), Float(100.0), Bool(True)))
+        typecheck(Tuple[Int, Str, Float, Bool], (Int(10.0), Str('foo'), Float(100.0), Bool(True)))
 
     # Dict
-    typecheck(Dict[str, int], dict(hoge=10, foo=20))
+    typecheck(Dict[str, int], dict(foo=10, bar=20))
     with pytest.raises(ValueError):
-        typecheck(Dict[str, int], dict(hoge=10.0, foo=20))
+        typecheck(Dict[str, int], dict(foo=10.0, bar=20))
 
     # Dict of dataclasses
-    typecheck(Dict[Str, Int], {Str('hoge'): Int(10), Str('foo'): Int(20)})
+    typecheck(Dict[Str, Int], {Str('foo'): Int(10), Str('bar'): Int(20)})
     with pytest.raises(ValueError):
-        typecheck(Dict[Str, Int], {Str('hoge'): Int(10.0), Str('foo'): Int(20)})
+        typecheck(Dict[Str, Int], {Str('foo'): Int(10.0), Str('bar'): Int(20)})
 
     # Optional
     typecheck(Optional[int], 10)

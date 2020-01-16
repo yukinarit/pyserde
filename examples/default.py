@@ -17,7 +17,7 @@ def main():
     h = Foo()
     print(f"Into Json: {to_json(h)}")
 
-    s = '{"i": 10, "s": "hoge", "f": 100.0, "b": true}'
+    s = '{"i": 10, "s": "foo", "f": 100.0, "b": true}'
     print(f"From Json: {from_json(Foo, s)}")
 
 

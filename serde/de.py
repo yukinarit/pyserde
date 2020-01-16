@@ -40,14 +40,14 @@ def deserialize(_cls=None, rename_all: Optional[str] = None) -> Type:
     >>> # Mark the class deserializable.
     >>> @deserialize
     ... @dataclass
-    ... class Hoge:
+    ... class Foo:
     ...     i: int
     ...     s: str
     ...     f: float
     ...     b: bool
     >>>
-    >>> from_json(Hoge, '{"i": 10, "s": "hoge", "f": 100.0, "b": true}')
-    Hoge(i=10, s='hoge', f=100.0, b=True)
+    >>> from_json(Foo, '{"i": 10, "s": "foo", "f": 100.0, "b": true}')
+    Foo(i=10, s='foo', f=100.0, b=True)
 
     Additionally, `deserialize` supports case conversion. Pass case name in
     `deserialize` decorator as shown below.
@@ -60,8 +60,8 @@ def deserialize(_cls=None, rename_all: Optional[str] = None) -> Type:
     ...     int_field: int
     ...     str_field: str
     >>>
-    >>> from_json(RenameAll, '{"intField": 10, "strField": "hoge"}')
-    RenameAll(int_field=10, str_field='hoge')
+    >>> from_json(RenameAll, '{"intField": 10, "strField": "foo"}')
+    RenameAll(int_field=10, str_field='foo')
     >>>
     """
 
@@ -88,10 +88,10 @@ def is_deserializable(instance_or_class: Any) -> bool:
     >>>
     >>> @deserialize
     ... @dataclass
-    ... class Hoge:
+    ... class Foo:
     ...     pass
     >>>
-    >>> is_deserializable(Hoge)
+    >>> is_deserializable(Foo)
     True
     >>>
     """
@@ -319,21 +319,21 @@ class DictRenderer(Renderer):
         """
         Render rvalue for Optional.
 
-        >>> DictRenderer('hoge').render(DeField(Optional[int], 'o', datavar='data'))
+        >>> DictRenderer('foo').render(DeField(Optional[int], 'o', datavar='data'))
         'data["o"] if "o" in data else None'
 
-        >>> DictRenderer('hoge').render(DeField(Optional[List[int]], 'o', datavar='data'))
+        >>> DictRenderer('foo').render(DeField(Optional[List[int]], 'o', datavar='data'))
         '[v for v in data["o"]] if "o" in data else None'
 
-        >>> DictRenderer('hoge').render(DeField(Optional[List[int]], 'o', datavar='data'))
+        >>> DictRenderer('foo').render(DeField(Optional[List[int]], 'o', datavar='data'))
         '[v for v in data["o"]] if "o" in data else None'
 
         >>> @deserialize
         ... @dataclass
         ... class Foo:
         ...     o: Optional[List[int]]
-        >>> DictRenderer('hoge').render(DeField(Optional[Foo], 'f', datavar='data'))
-        'Foo.hoge(data["f"]) if "f" in data else None'
+        >>> DictRenderer('foo').render(DeField(Optional[Foo], 'f', datavar='data'))
+        'Foo.foo(data["f"]) if "f" in data else None'
         """
         value = arg[0]
         exists = f'"{value.name}" in {value.datavar}'
@@ -343,10 +343,10 @@ class DictRenderer(Renderer):
         """
         Render rvalue for list.
 
-        >>> DictRenderer('hoge').render(DeField(List[int], 'l', datavar='data'))
+        >>> DictRenderer('foo').render(DeField(List[int], 'l', datavar='data'))
         '[v for v in data["l"]]'
 
-        >>> DictRenderer('hoge').render(DeField(List[List[int]], 'l', datavar='data'))
+        >>> DictRenderer('foo').render(DeField(List[List[int]], 'l', datavar='data'))
         '[[v for v in v] for v in data["l"]]'
         """
         return f'[{self.render(arg[0])} for v in {arg.data}]'
@@ -358,8 +358,8 @@ class DictRenderer(Renderer):
         >>> @deserialize
         ... @dataclass
         ... class Foo: pass
-        >>> DictRenderer('hoge').render(DeField(Tuple[str, int, List[int], Foo], 'd', datavar='data'))
-        '(data["d"][0], data["d"][1], [v for v in data["d"][2]], Foo.hoge(data["d"][3]))'
+        >>> DictRenderer('foo').render(DeField(Tuple[str, int, List[int], Foo], 'd', datavar='data'))
+        '(data["d"][0], data["d"][1], [v for v in data["d"][2]], Foo.foo(data["d"][3]))'
         """
         values = []
         for i, typ in enumerate(type_args(arg.type)):
@@ -371,14 +371,14 @@ class DictRenderer(Renderer):
         """
         Render rvalue for dict.
 
-        >>> DictRenderer('hoge').render(DeField(Dict[str, int], 'd', datavar='data'))
+        >>> DictRenderer('foo').render(DeField(Dict[str, int], 'd', datavar='data'))
         '{k: v for k, v in data["d"].items()}'
 
         >>> @deserialize
         ... @dataclass
         ... class Foo: pass
-        >>> DictRenderer('hoge').render(DeField(Dict[Foo, List[Foo]], 'f', datavar='data'))
-        '{Foo.hoge(k): [Foo.hoge(v) for v in v] for k, v in data["f"].items()}'
+        >>> DictRenderer('foo').render(DeField(Dict[Foo, List[Foo]], 'f', datavar='data'))
+        '{Foo.foo(k): [Foo.foo(v) for v in v] for k, v in data["f"].items()}'
         """
         k, v = arg.get_kv()
         return f'{{{self.render(k)}: {self.render(v)} for k, v in {arg.data}.items()}}'
@@ -387,10 +387,10 @@ class DictRenderer(Renderer):
         """
         Render rvalue for primitives.
 
-        >>> DictRenderer('hoge').render(DeField(int, 'i', datavar='data'))
+        >>> DictRenderer('foo').render(DeField(int, 'i', datavar='data'))
         'data["i"]'
 
-        >>> DictRenderer('hoge').render(DeField(int, 'int_field', datavar='data', case='camelcase'))
+        >>> DictRenderer('foo').render(DeField(int, 'int_field', datavar='data', case='camelcase'))
         'data["intField"]'
         """
         if not isinstance(arg.default, DEFAULT_MISSING_TYPE):

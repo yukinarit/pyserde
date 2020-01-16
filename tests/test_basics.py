@@ -52,7 +52,7 @@ def test_non_dataclass():
 
         @deserialize
         @serialize
-        class Hoge:
+        class Foo:
             i: int
 
 
@@ -88,7 +88,7 @@ def test_enum():
     @deserialize
     @serialize
     @dataclass
-    class Hoge:
+    class Foo:
         ie0: IEnum
         ie1: IEnum
         ie2: IEnum
@@ -182,7 +182,7 @@ def test_complex():
     @deserialize
     @serialize
     @dataclass
-    class Foo:
+    class Baz:
         v: List[int] = field(default_factory=list)
         d: Dict[str, int] = field(default_factory=dict)
 
@@ -195,37 +195,37 @@ def test_complex():
     @deserialize
     @serialize
     @dataclass
-    class Hoge:
+    class Foo:
         i: int
         s: str
         f: float
         b: bool
-        foo: Foo
+        foo: Baz
         lst: List[Bar] = field(default_factory=list)
         lst2: List[Dict[str, Bar]] = field(default_factory=list)
         dct: Dict[str, List[List[Bar]]] = field(default_factory=dict)
 
-    f = Foo(v=[1, 2, 3, 4, 5], d={'hoge': 10, 'fuga': 20})
+    f = Baz(v=[1, 2, 3, 4, 5], d={'foo': 10, 'fuga': 20})
     lst = [Bar(10), Bar(20)]
     lst2 = [{'bar1': Bar(10)}, {'bar2': Bar(10), 'bar3': Bar(20)}]
-    dct = {'hoge': [[Bar(10), Bar(20)], [Bar(20), Bar(30)]]}
-    h = Hoge(i=10, s='hoge', f=100.0, b=True, foo=f, lst=lst, lst2=lst2, dct=dct)
+    dct = {'foo': [[Bar(10), Bar(20)], [Bar(20), Bar(30)]]}
+    h = Foo(i=10, s='foo', f=100.0, b=True, foo=f, lst=lst, lst2=lst2, dct=dct)
     s = """
                {"i": 10,
-                "s": "hoge",
+                "s": "foo",
                 "f": 100.0,
                 "b": true,
                 "foo" : {
                     "v": [1, 2, 3, 4, 5],
-                    "d": {"hoge": 10, "fuga": 20}
+                    "d": {"foo": 10, "fuga": 20}
                 },
                 "lst": [{"i": 10}, {"i": 20}],
                 "lst2": [{"bar1": {"i": 10}}, {"bar2": {"i": 10}, "bar3": {"i": 20}}],
-                "dct": {"hoge": [[{"i": 10}, {"i": 20}], [{"i": 20}, {"i": 30}]]}
+                "dct": {"foo": [[{"i": 10}, {"i": 20}], [{"i": 20}, {"i": 30}]]}
                 }
                 """
     assert json.loads(s) == json.loads(to_json(h))
-    hh = from_json(Hoge, s)
+    hh = from_json(Foo, s)
     assert h.foo == hh.foo
     assert h.lst == hh.lst
     assert h.dct == hh.dct
@@ -238,7 +238,7 @@ def test_json():
 
     assert '10' == to_json(10)
     assert '[10, 20, 30]' == to_json([10, 20, 30])
-    assert '{"hoge": 10, "fuga": 10}' == to_json({'hoge': 10, 'fuga': 10})
+    assert '{"foo": 10, "fuga": 10}' == to_json({'foo': 10, 'fuga': 10})
 
 
 def test_msgpack():
