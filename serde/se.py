@@ -17,7 +17,7 @@ import jinja2
 import stringcase
 
 from .compat import is_dict, is_list, is_opt, is_primitive, is_tuple, is_union, type_args
-from .core import HIDDEN_NAME, SE_NAME, SETTINGS, TO_DICT, TO_ITER, Field, Hidden, T, fields, gen
+from .core import HIDDEN_NAME, SE_NAME, SETTINGS, TO_DICT, TO_ITER, Field, Hidden, T, conv, fields, gen
 from .more_types import serialize as custom
 
 Custom = Optional[Callable[[Any], Any]]
@@ -46,14 +46,14 @@ def serialize(_cls=None, rename_all: Optional[str] = None) -> Type:
     >>> # Mark the class serializable.
     >>> @serialize
     ... @dataclass
-    ... class Hoge:
+    ... class Foo:
     ...     i: int
     ...     s: str
     ...     f: float
     ...     b: bool
     >>>
-    >>> to_json(Hoge(i=10, s='hoge', f=100.0, b=True))
-    '{"i": 10, "s": "hoge", "f": 100.0, "b": true}'
+    >>> to_json(Foo(i=10, s='foo', f=100.0, b=True))
+    '{"i": 10, "s": "foo", "f": 100.0, "b": true}'
     >>>
 
     Additionally, `serialize` supports case conversion. Pass case name in
@@ -61,12 +61,12 @@ def serialize(_cls=None, rename_all: Optional[str] = None) -> Type:
 
     >>> @serialize(rename_all = 'camelcase')
     ... @dataclass
-    ... class Hoge:
+    ... class Foo:
     ...     int_field: int
     ...     str_field: str
     >>>
-    >>> to_json(Hoge(int_field=10, str_field='hoge'))
-    '{"intField": 10, "strField": "hoge"}'
+    >>> to_json(Foo(int_field=10, str_field='foo'))
+    '{"intField": 10, "strField": "foo"}'
     >>>
     """
 
@@ -104,10 +104,10 @@ def is_serializable(instance_or_class: Any) -> bool:
     >>>
     >>> @serialize
     ... @dataclass
-    ... class Hoge:
+    ... class Foo:
     ...     pass
     >>>
-    >>> is_serializable(Hoge)
+    >>> is_serializable(Foo)
     True
     >>>
     """
@@ -120,19 +120,19 @@ def to_dict(o) -> Dict:
 
     >>> @serialize
     ... @dataclass
-    ... class Hoge:
+    ... class Foo:
     ...     i: int
     >>>
-    >>> to_dict(Hoge(10))
+    >>> to_dict(Foo(10))
     {'i': 10}
     >>>
-    >>> to_dict([Hoge(10), Hoge(20)])
+    >>> to_dict([Foo(10), Foo(20)])
     [{'i': 10}, {'i': 20}]
     >>>
-    >>> to_dict({'a': Hoge(10), 'b': Hoge(20)})
+    >>> to_dict({'a': Foo(10), 'b': Foo(20)})
     {'a': {'i': 10}, 'b': {'i': 20}}
     >>>
-    >>> to_dict((Hoge(10), Hoge(20)))
+    >>> to_dict((Foo(10), Foo(20)))
     ({'i': 10}, {'i': 20})
     """
     if o is None:
@@ -261,26 +261,13 @@ def {{func}}(obj):
   return res
   {% endif %}
     """
-
-    def conv(f: SeField) -> str:
-        """
-        Convert dict key name.
-        """
-        name = f.name
-        casef = getattr(stringcase, case or '', None)
-        if casef:
-            name = casef(name)
-        if f.rename:
-            name = f.rename
-        return name
-
     renderer = Renderer(TO_DICT, custom)
     env = jinja2.Environment(loader=jinja2.DictLoader({'dict': template}))
     env.filters.update({'fields': sefields})
     env.filters.update({'is_dataclass': is_dataclass})
     env.filters.update({'rvalue': renderer.render})
     env.filters.update({'arg': to_arg})
-    env.filters.update({'case': conv})
+    env.filters.update({'case': functools.partial(conv, case=case)})
     return env.get_template('dict').render(func=TO_DICT, cls=cls)
 
 
@@ -305,22 +292,22 @@ class Renderer:
 
         >>> @serialize
         ... @dataclass(unsafe_hash=True)
-        ... class Hoge:
+        ... class Foo:
         ...    val: int
-        >>> Renderer(TO_ITER).render(SeField(Hoge, 'hoge'))
-        'hoge.__serde_to_iter__()'
+        >>> Renderer(TO_ITER).render(SeField(Foo, 'foo'))
+        'foo.__serde_to_iter__()'
 
-        >>> Renderer(TO_ITER).render(SeField(List[Hoge], 'hoge'))
-        '[v.__serde_to_iter__() for v in hoge]'
+        >>> Renderer(TO_ITER).render(SeField(List[Foo], 'foo'))
+        '[v.__serde_to_iter__() for v in foo]'
 
-        >>> Renderer(TO_ITER).render(SeField(Dict[str, Hoge], 'hoge'))
-        '{k: v.__serde_to_iter__() for k, v in hoge.items()}'
+        >>> Renderer(TO_ITER).render(SeField(Dict[str, Foo], 'foo'))
+        '{k: v.__serde_to_iter__() for k, v in foo.items()}'
 
-        >>> Renderer(TO_ITER).render(SeField(Dict[Hoge, Hoge], 'hoge'))
-        '{k.__serde_to_iter__(): v.__serde_to_iter__() for k, v in hoge.items()}'
+        >>> Renderer(TO_ITER).render(SeField(Dict[Foo, Foo], 'foo'))
+        '{k.__serde_to_iter__(): v.__serde_to_iter__() for k, v in foo.items()}'
 
-        >>> Renderer(TO_ITER).render(SeField(Tuple[str, Hoge, int], 'hoge'))
-        '(hoge[0], hoge[1].__serde_to_iter__(), hoge[2])'
+        >>> Renderer(TO_ITER).render(SeField(Tuple[str, Foo, int], 'foo'))
+        '(foo[0], foo[1].__serde_to_iter__(), foo[2])'
         >>>
         """
         if is_dataclass(arg.type):

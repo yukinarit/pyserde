@@ -26,4 +26,3 @@ jobs:
       python: 3.7
       script:
         - make setup coverage setup-bench bench
-        - coveralls

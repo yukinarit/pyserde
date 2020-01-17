@@ -23,7 +23,7 @@ import jinja2
 import stringcase
 
 from .compat import assert_type, is_dict, is_list, is_opt, is_primitive, is_tuple, is_union, iter_types, type_args
-from .core import FROM_DICT, FROM_ITER, HIDDEN_NAME, SETTINGS, Field, Hidden, SerdeError, T, fields, gen
+from .core import FROM_DICT, FROM_ITER, HIDDEN_NAME, SETTINGS, Field, Hidden, SerdeError, T, conv, fields, gen
 from .more_types import deserialize as custom
 
 Custom = Optional[Callable[['DeField', Any], Any]]
@@ -40,14 +40,14 @@ def deserialize(_cls=None, rename_all: Optional[str] = None) -> Type:
     >>> # Mark the class deserializable.
     >>> @deserialize
     ... @dataclass
-    ... class Hoge:
+    ... class Foo:
     ...     i: int
     ...     s: str
     ...     f: float
     ...     b: bool
     >>>
-    >>> from_json(Hoge, '{"i": 10, "s": "hoge", "f": 100.0, "b": true}')
-    Hoge(i=10, s='hoge', f=100.0, b=True)
+    >>> from_json(Foo, '{"i": 10, "s": "foo", "f": 100.0, "b": true}')
+    Foo(i=10, s='foo', f=100.0, b=True)
 
     Additionally, `deserialize` supports case conversion. Pass case name in
     `deserialize` decorator as shown below.
@@ -60,8 +60,8 @@ def deserialize(_cls=None, rename_all: Optional[str] = None) -> Type:
     ...     int_field: int
     ...     str_field: str
     >>>
-    >>> from_json(RenameAll, '{"intField": 10, "strField": "hoge"}')
-    RenameAll(int_field=10, str_field='hoge')
+    >>> from_json(RenameAll, '{"intField": 10, "strField": "foo"}')
+    RenameAll(int_field=10, str_field='foo')
     >>>
     """
 
@@ -88,10 +88,10 @@ def is_deserializable(instance_or_class: Any) -> bool:
     >>>
     >>> @deserialize
     ... @dataclass
-    ... class Hoge:
+    ... class Foo:
     ...     pass
     >>>
-    >>> is_deserializable(Hoge)
+    >>> is_deserializable(Foo)
     True
     >>>
     """
@@ -123,36 +123,35 @@ def from_obj(c: Type[T], o: Any, de: Type[Deserializer] = None, strict=True, **o
 
     ### Dataclass
 
-    # >>> from serde import deserialize
-    # >>>
-    # >>> @deserialize
-    # ... @dataclass
-    # ... class Hoge:
-    # ...     i: int
-    # ...     f: float
-    # ...     s: str
-    # ...     b: bool
-    # >>>
-    # >>> obj = {'i': 10, 'f': 0.1, 's': 'hoge', 'b': False}
-    # >>> from_obj(Hoge, obj)
-    # Hoge(i=10, f=0.1, s='hoge', b=False)
+    >>> from serde import deserialize
+    >>>
+    >>> @deserialize
+    ... @dataclass
+    ... class Foo:
+    ...     i: int
+    ...     f: float
+    ...     s: str
+    ...     b: bool
+    >>>
+    >>> obj = {'i': 10, 'f': 0.1, 's': 'foo', 'b': False}
+    >>> from_obj(Foo, obj)
+    Foo(i=10, f=0.1, s='foo', b=False)
 
-    # ### Containers
+    ### Containers
 
-    # >>> from serde import deserialize
-    # >>>
-    # >>> @deserialize
-    # ... @dataclass
-    # ... class Hoge:
-    # ...     s: str
-    # ...     i: int
-    # >>>
-    # >>> from_obj(List[Hoge], [('hoge', 10), ('foo', 20)])
-    # [Hoge(s='hoge', i=10), Hoge(s='foo', i=20)]
-    # >>>
-    # >>> from_obj(Dict[str ,Hoge], {'hoge': ('hoge', 10), 'foo': ('foo', 20)})
-    # {'hoge': Hoge(s='hoge', i=10), 'foo': Hoge(s='foo', i=20)}
-    # >>>
+    >>> from serde import deserialize
+    >>>
+    >>> @deserialize
+    ... @dataclass
+    ... class Foo:
+    ...     i: int
+    >>>
+    >>> from_obj(List[Foo], [{'i': 10}, {'i': 20}])
+    [Foo(i=10), Foo(i=20)]
+    >>>
+    >>> from_obj(Dict[str, Foo], {'foo1': {'i': 10}, 'foo2': {'i': 20}})
+    {'foo1': Foo(i=10), 'foo2': Foo(i=20)}
+    >>>
     """
     if de:
         o = de.deserialize(o, **opts)
@@ -210,17 +209,7 @@ def from_dict(cls, o):
 
 
 def from_tuple(cls, o):
-    return cls.__serde_from_tuple__(o)
-
-
-def case(s: str, case: Optional[str]) -> str:
-    if case:
-        f = getattr(stringcase, case, None)
-        if not f:
-            raise SerdeError((f"Unkown case type: {case}. Pass the name of case supported by 'stringcase' package."))
-        return f(s)
-    else:
-        return s
+    return cls.__serde_from_iter__(o)
 
 
 @dataclass
@@ -245,7 +234,7 @@ class DeField(Field):
 
     @property
     def data(self) -> str:
-        return f'{self.datavar}["{case(self.name, self.case)}"]'
+        return f'{self.datavar}["{conv(self, self.case)}"]'
 
     @data.setter
     def data(self, d):
@@ -330,21 +319,21 @@ class DictRenderer(Renderer):
         """
         Render rvalue for Optional.
 
-        >>> DictRenderer('hoge').render(DeField(Optional[int], 'o', datavar='data'))
+        >>> DictRenderer('foo').render(DeField(Optional[int], 'o', datavar='data'))
         'data["o"] if "o" in data else None'
 
-        >>> DictRenderer('hoge').render(DeField(Optional[List[int]], 'o', datavar='data'))
+        >>> DictRenderer('foo').render(DeField(Optional[List[int]], 'o', datavar='data'))
         '[v for v in data["o"]] if "o" in data else None'
 
-        >>> DictRenderer('hoge').render(DeField(Optional[List[int]], 'o', datavar='data'))
+        >>> DictRenderer('foo').render(DeField(Optional[List[int]], 'o', datavar='data'))
         '[v for v in data["o"]] if "o" in data else None'
 
         >>> @deserialize
         ... @dataclass
         ... class Foo:
         ...     o: Optional[List[int]]
-        >>> DictRenderer('hoge').render(DeField(Optional[Foo], 'f', datavar='data'))
-        'Foo.hoge(data["f"]) if "f" in data else None'
+        >>> DictRenderer('foo').render(DeField(Optional[Foo], 'f', datavar='data'))
+        'Foo.foo(data["f"]) if "f" in data else None'
         """
         value = arg[0]
         exists = f'"{value.name}" in {value.datavar}'
@@ -354,10 +343,10 @@ class DictRenderer(Renderer):
         """
         Render rvalue for list.
 
-        >>> DictRenderer('hoge').render(DeField(List[int], 'l', datavar='data'))
+        >>> DictRenderer('foo').render(DeField(List[int], 'l', datavar='data'))
         '[v for v in data["l"]]'
 
-        >>> DictRenderer('hoge').render(DeField(List[List[int]], 'l', datavar='data'))
+        >>> DictRenderer('foo').render(DeField(List[List[int]], 'l', datavar='data'))
         '[[v for v in v] for v in data["l"]]'
         """
         return f'[{self.render(arg[0])} for v in {arg.data}]'
@@ -369,8 +358,8 @@ class DictRenderer(Renderer):
         >>> @deserialize
         ... @dataclass
         ... class Foo: pass
-        >>> DictRenderer('hoge').render(DeField(Tuple[str, int, List[int], Foo], 'd', datavar='data'))
-        '(data["d"][0], data["d"][1], [v for v in data["d"][2]], Foo.hoge(data["d"][3]))'
+        >>> DictRenderer('foo').render(DeField(Tuple[str, int, List[int], Foo], 'd', datavar='data'))
+        '(data["d"][0], data["d"][1], [v for v in data["d"][2]], Foo.foo(data["d"][3]))'
         """
         values = []
         for i, typ in enumerate(type_args(arg.type)):
@@ -382,14 +371,14 @@ class DictRenderer(Renderer):
         """
         Render rvalue for dict.
 
-        >>> DictRenderer('hoge').render(DeField(Dict[str, int], 'd', datavar='data'))
+        >>> DictRenderer('foo').render(DeField(Dict[str, int], 'd', datavar='data'))
         '{k: v for k, v in data["d"].items()}'
 
         >>> @deserialize
         ... @dataclass
         ... class Foo: pass
-        >>> DictRenderer('hoge').render(DeField(Dict[Foo, List[Foo]], 'f', datavar='data'))
-        '{Foo.hoge(k): [Foo.hoge(v) for v in v] for k, v in data["f"].items()}'
+        >>> DictRenderer('foo').render(DeField(Dict[Foo, List[Foo]], 'f', datavar='data'))
+        '{Foo.foo(k): [Foo.foo(v) for v in v] for k, v in data["f"].items()}'
         """
         k, v = arg.get_kv()
         return f'{{{self.render(k)}: {self.render(v)} for k, v in {arg.data}.items()}}'
@@ -398,10 +387,10 @@ class DictRenderer(Renderer):
         """
         Render rvalue for primitives.
 
-        >>> DictRenderer('hoge').render(DeField(int, 'i', datavar='data'))
+        >>> DictRenderer('foo').render(DeField(int, 'i', datavar='data'))
         'data["i"]'
 
-        >>> DictRenderer('hoge').render(DeField(int, 'int_field', datavar='data', case='camelcase'))
+        >>> DictRenderer('foo').render(DeField(int, 'int_field', datavar='data', case='camelcase'))
         'data["intField"]'
         """
         if not isinstance(arg.default, DEFAULT_MISSING_TYPE):

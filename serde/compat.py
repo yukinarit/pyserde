@@ -12,19 +12,19 @@ def typename(typ) -> str:
     >>> from typing import List, Dict
     >>> typename(int)
     'int'
-    >>> class Hoge: pass
-    >>> typename(Hoge)
-    'Hoge'
-    >>> typename(List[Hoge])
-    'List[Hoge]'
-    >>> typename(Dict[str, Hoge])
-    'Dict[str, Hoge]'
-    >>> typename(Tuple[int, str, Hoge, List[int], Dict[str, Hoge]])
-    'Tuple[int, str, Hoge, List[int], Dict[str, Hoge]]'
-    >>> typename(Optional[List[Hoge]])
-    'Optional[List[Hoge]]'
-    >>> typename(Union[Optional[Hoge], List[Hoge], Union[str, int]])
-    'Union[Optional[Hoge], List[Hoge], str, int]'
+    >>> class Foo: pass
+    >>> typename(Foo)
+    'Foo'
+    >>> typename(List[Foo])
+    'List[Foo]'
+    >>> typename(Dict[str, Foo])
+    'Dict[str, Foo]'
+    >>> typename(Tuple[int, str, Foo, List[int], Dict[str, Foo]])
+    'Tuple[int, str, Foo, List[int], Dict[str, Foo]]'
+    >>> typename(Optional[List[Foo]])
+    'Optional[List[Foo]]'
+    >>> typename(Union[Optional[Foo], List[Foo], Union[str, int]])
+    'Union[Optional[Foo], List[Foo], str, int]'
     """
     if is_opt(typ):
         return f'Optional[{typename(type_args(typ)[0])}]'

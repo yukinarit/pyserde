@@ -6,6 +6,8 @@ from dataclasses import fields as dataclass_fields
 from dataclasses import is_dataclass
 from typing import Any, Callable, Dict, Iterator, List, Optional, Type, TypeVar
 
+import stringcase
+
 from .compat import T, assert_type, is_dict, is_list, is_opt, is_tuple, is_union, type_args
 
 logger = logging.getLogger('serde')
@@ -67,14 +69,14 @@ def typecheck(cls: Type[T], obj: T) -> None:
     type check type-annotated classes.
 
     >>> @dataclass
-    ... class Hoge:
+    ... class Foo:
     ...     s: str
     >>>
-    >>> typecheck(Hoge, Hoge('hoge'))
+    >>> typecheck(Foo, Foo('foo'))
     >>>
     >>> # Type mismatch raises `ValueError`.
     >>> try:
-    ...     typecheck(Hoge, Hoge(10))
+    ...     typecheck(Foo, Foo(10))
     ... except:
     ...     pass
     >>>
@@ -164,3 +166,20 @@ class Field:
 
 def fields(FieldCls: Type, cls: Type) -> Iterator[Field]:
     return iter(FieldCls.from_dataclass(f) for f in dataclass_fields(cls))
+
+
+def conv(f: Field, case: Optional[str] = None) -> str:
+    """
+    Convert field name.
+    """
+    name = f.name
+    if case:
+        casef = getattr(stringcase, case or '', None)
+        if not casef:
+            raise SerdeError(
+                (f"Unkown case type: {f.case}." f"Pass the name of case supported by 'stringcase' package.")
+            )
+        name = casef(f.name)
+    if f.rename:
+        name = f.rename
+    return name

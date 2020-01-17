@@ -6,7 +6,7 @@ from serde.json import from_json, to_json
 @deserialize
 @serialize
 @dataclass
-class Hoge:
+class Foo:
     i: int
     s: str
     f: float
@@ -14,11 +14,11 @@ class Hoge:
 
 
 def main():
-    h = Hoge(i=10, s='hoge', f=100.0, b=True)
+    h = Foo(i=10, s='foo', f=100.0, b=True)
     print(f"Into Json: {to_json(h)}")
 
-    s = '{"i": 10, "s": "hoge", "f": 100.0, "b": true}'
-    print(f"From Json: {from_json(Hoge, s)}")
+    s = '{"i": 10, "s": "foo", "f": 100.0, "b": true}'
+    print(f"From Json: {from_json(Foo, s)}")
 
 
 if __name__ == '__main__':

@@ -22,14 +22,17 @@ logger.setLevel(logging.DEBUG)
 
 serde_init(True)
 
+format_dict: List = [(asdict, from_dict)]
 
-all_formats = [
-    (asdict, from_dict),
-    (to_json, from_json),
-    (to_msgpack, from_msgpack),
-    (to_yaml, from_yaml),
-    (to_toml, from_toml),
-]
+format_json: List = [(to_json, from_json)]
+
+format_msgpack: List = [(to_msgpack, from_msgpack)]
+
+format_yaml: List = [(to_yaml, from_yaml)]
+
+format_toml: List = [(to_toml, from_toml)]
+
+all_formats: List = (format_dict + format_json + format_msgpack + format_yaml + format_toml)
 
 
 @pytest.mark.parametrize('se,de', all_formats)
@@ -49,7 +52,7 @@ def test_non_dataclass():
 
         @deserialize
         @serialize
-        class Hoge:
+        class Foo:
             i: int
 
 
@@ -85,7 +88,7 @@ def test_enum():
     @deserialize
     @serialize
     @dataclass
-    class Hoge:
+    class Foo:
         ie0: IEnum
         ie1: IEnum
         ie2: IEnum
@@ -179,7 +182,7 @@ def test_complex():
     @deserialize
     @serialize
     @dataclass
-    class Foo:
+    class Baz:
         v: List[int] = field(default_factory=list)
         d: Dict[str, int] = field(default_factory=dict)
 
@@ -192,37 +195,37 @@ def test_complex():
     @deserialize
     @serialize
     @dataclass
-    class Hoge:
+    class Foo:
         i: int
         s: str
         f: float
         b: bool
-        foo: Foo
+        foo: Baz
         lst: List[Bar] = field(default_factory=list)
         lst2: List[Dict[str, Bar]] = field(default_factory=list)
         dct: Dict[str, List[List[Bar]]] = field(default_factory=dict)
 
-    f = Foo(v=[1, 2, 3, 4, 5], d={'hoge': 10, 'fuga': 20})
+    f = Baz(v=[1, 2, 3, 4, 5], d={'foo': 10, 'fuga': 20})
     lst = [Bar(10), Bar(20)]
     lst2 = [{'bar1': Bar(10)}, {'bar2': Bar(10), 'bar3': Bar(20)}]
-    dct = {'hoge': [[Bar(10), Bar(20)], [Bar(20), Bar(30)]]}
-    h = Hoge(i=10, s='hoge', f=100.0, b=True, foo=f, lst=lst, lst2=lst2, dct=dct)
+    dct = {'foo': [[Bar(10), Bar(20)], [Bar(20), Bar(30)]]}
+    h = Foo(i=10, s='foo', f=100.0, b=True, foo=f, lst=lst, lst2=lst2, dct=dct)
     s = """
                {"i": 10,
-                "s": "hoge",
+                "s": "foo",
                 "f": 100.0,
                 "b": true,
                 "foo" : {
                     "v": [1, 2, 3, 4, 5],
-                    "d": {"hoge": 10, "fuga": 20}
+                    "d": {"foo": 10, "fuga": 20}
                 },
                 "lst": [{"i": 10}, {"i": 20}],
                 "lst2": [{"bar1": {"i": 10}}, {"bar2": {"i": 10}, "bar3": {"i": 20}}],
-                "dct": {"hoge": [[{"i": 10}, {"i": 20}], [{"i": 20}, {"i": 30}]]}
+                "dct": {"foo": [[{"i": 10}, {"i": 20}], [{"i": 20}, {"i": 30}]]}
                 }
                 """
     assert json.loads(s) == json.loads(to_json(h))
-    hh = from_json(Hoge, s)
+    hh = from_json(Foo, s)
     assert h.foo == hh.foo
     assert h.lst == hh.lst
     assert h.dct == hh.dct
@@ -235,7 +238,7 @@ def test_json():
 
     assert '10' == to_json(10)
     assert '[10, 20, 30]' == to_json([10, 20, 30])
-    assert '{"hoge": 10, "fuga": 10}' == to_json({'hoge': 10, 'fuga': 10})
+    assert '{"foo": 10, "fuga": 10}' == to_json({'foo': 10, 'fuga': 10})
 
 
 def test_msgpack():
@@ -243,3 +246,27 @@ def test_msgpack():
     d = b'\x84\xa1i\n\xa1s\xa3foo\xa1f\xcb@Y\x00\x00\x00\x00\x00\x00\xa1b\xc3'
     assert d == to_msgpack(p)
     assert p == from_msgpack(Pri, d)
+
+
+@pytest.mark.parametrize('se,de', all_formats)
+def test_rename(se, de):
+    @deserialize
+    @serialize
+    @dataclass
+    class Foo:
+        class_name: str = field(metadata={'serde_rename': 'class'})
+
+    f = Foo(class_name='foo')
+    assert f == de(Foo, se(f))
+
+
+@pytest.mark.parametrize('se,de', format_json + format_yaml + format_toml + format_msgpack)
+def test_rename_all(se, de):
+    @deserialize(rename_all='camelcase')
+    @serialize(rename_all='camelcase')
+    @dataclass
+    class Foo:
+        class_name: str
+
+    f = Foo(class_name='foo')
+    assert f == de(Foo, se(f, named=True), named=True)
