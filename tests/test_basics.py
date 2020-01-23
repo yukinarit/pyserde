@@ -6,7 +6,7 @@ from typing import Dict, List
 
 import pytest
 
-from serde import asdict, deserialize, from_dict
+from serde import asdict, astuple, deserialize, from_dict, from_tuple
 from serde import init as serde_init
 from serde import logger, serialize
 from serde.json import from_json, to_json
@@ -24,6 +24,8 @@ serde_init(True)
 
 format_dict: List = [(asdict, from_dict)]
 
+format_tuple: List = [(astuple, from_tuple)]
+
 format_json: List = [(to_json, from_json)]
 
 format_msgpack: List = [(to_msgpack, from_msgpack)]
@@ -32,7 +34,7 @@ format_yaml: List = [(to_yaml, from_yaml)]
 
 format_toml: List = [(to_toml, from_toml)]
 
-all_formats: List = (format_dict + format_json + format_msgpack + format_yaml + format_toml)
+all_formats: List = (format_dict + format_tuple + format_json + format_msgpack + format_yaml + format_toml)
 
 
 @pytest.mark.parametrize('se,de', all_formats)
@@ -246,6 +248,20 @@ def test_msgpack():
     d = b'\x84\xa1i\n\xa1s\xa3foo\xa1f\xcb@Y\x00\x00\x00\x00\x00\x00\xa1b\xc3'
     assert d == to_msgpack(p)
     assert p == from_msgpack(Pri, d)
+
+
+def test_msgpack_named():
+    p = Pri(10, 'foo', 100.0, True)
+    d = b'\x94\n\xa3foo\xcb@Y\x00\x00\x00\x00\x00\x00\xc3'
+    assert d == to_msgpack(p, named=False)
+    assert p == from_msgpack(Pri, d, named=False)
+
+
+def test_from_tuple():
+    p = Pri(10, 'foo', 100.0, True)
+    d = (10, 'foo', 100.0, True)
+    assert d == astuple(p)
+    assert p == from_tuple(Pri, d)
 
 
 @pytest.mark.parametrize('se,de', all_formats)

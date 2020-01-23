@@ -20,7 +20,6 @@ from dataclasses import is_dataclass
 from typing import Any, Callable, Dict, List, Optional, Tuple, Type
 
 import jinja2
-import stringcase
 
 from .compat import assert_type, is_dict, is_list, is_opt, is_primitive, is_tuple, is_union, iter_types, type_args
 from .core import FROM_DICT, FROM_ITER, HIDDEN_NAME, SETTINGS, Field, Hidden, SerdeError, T, conv, fields, gen
@@ -215,6 +214,9 @@ def from_tuple(cls, o):
 @dataclass
 class DeField(Field):
     datavar: Optional[str] = None  # name of variable to deserialize from.
+    index: int = 0  # Field number inside dataclass.
+    parent: Optional['DeField'] = None  # Parent of this field.
+    iterbased: bool = False  # Iterater based deserializer or not.
 
     def __getitem__(self, n) -> 'DeField':
         typ = type_args(self.type)[n]
@@ -223,7 +225,7 @@ class DeField(Field):
         elif is_tuple(self.type):
             return ElementField(typ, f'{self.data}[{n}]', datavar=f'{self.data}[{n}]')
         else:
-            return DeField(typ, self.name, datavar=self.datavar)
+            return DeField(typ, self.name, datavar=self.datavar, index=self.index, iterbased=self.iterbased)
 
     def get_kv(self) -> Tuple['ElementField', 'ElementField']:
         k = self[0]
@@ -234,7 +236,10 @@ class DeField(Field):
 
     @property
     def data(self) -> str:
-        return f'{self.datavar}["{conv(self, self.case)}"]'
+        if self.iterbased:
+            return f'{self.datavar}[{self.index}]'
+        else:
+            return f'{self.datavar}["{conv(self, self.case)}"]'
 
     @data.setter
     def data(self, d):
@@ -262,7 +267,7 @@ defields = functools.partial(fields, DeField)
 @dataclass
 class Renderer:
     """
-    Base Renderer class.
+    Render rvalue for various types.
     """
 
     func: str
@@ -288,65 +293,44 @@ class Renderer:
             return f'__custom_deserializer__(fs[{arg.index}], {arg.data})'
 
     def dataclass(self, arg: DeField) -> str:
-        """ Render rvalue for dataclass. """
-
-    def opt(self, arg: DeField) -> str:
-        """ Render rvalue for optional. """
-
-    def list(self, arg: DeField) -> str:
-        """ Render rvalue for list. """
-
-    def tuple(self, arg: DeField) -> str:
-        """ Render rvalue for tuple. """
-
-    def dict(self, arg: DeField) -> str:
-        """ Render rvalue for dict. """
-
-    def primitive(self, arg: DeField) -> str:
-        """ Render rvalue for primitives. """
-
-
-@dataclass
-class DictRenderer(Renderer):
-    """
-    Render rvalue for various types.
-    """
-
-    def dataclass(self, arg: DeField) -> str:
         return f'{arg.type.__name__}.{self.func}({arg.data})'
 
     def opt(self, arg: DeField) -> str:
         """
         Render rvalue for Optional.
 
-        >>> DictRenderer('foo').render(DeField(Optional[int], 'o', datavar='data'))
+        >>> Renderer('foo').render(DeField(Optional[int], 'o', datavar='data'))
         'data["o"] if "o" in data else None'
 
-        >>> DictRenderer('foo').render(DeField(Optional[List[int]], 'o', datavar='data'))
+        >>> Renderer('foo').render(DeField(Optional[List[int]], 'o', datavar='data'))
         '[v for v in data["o"]] if "o" in data else None'
 
-        >>> DictRenderer('foo').render(DeField(Optional[List[int]], 'o', datavar='data'))
+        >>> Renderer('foo').render(DeField(Optional[List[int]], 'o', datavar='data'))
         '[v for v in data["o"]] if "o" in data else None'
 
         >>> @deserialize
         ... @dataclass
         ... class Foo:
         ...     o: Optional[List[int]]
-        >>> DictRenderer('foo').render(DeField(Optional[Foo], 'f', datavar='data'))
+        >>> Renderer('foo').render(DeField(Optional[Foo], 'f', datavar='data'))
         'Foo.foo(data["f"]) if "f" in data else None'
         """
         value = arg[0]
-        exists = f'"{value.name}" in {value.datavar}'
-        return f'{self.render(value)} if {exists} else None'
+        if arg.iterbased:
+            exists = f'{value.data} is not None'
+            return f'{self.render(value)} if {exists} else None'
+        else:
+            exists = f'"{value.name}" in {value.datavar}'
+            return f'{self.render(value)} if {exists} else None'
 
     def list(self, arg: DeField) -> str:
         """
         Render rvalue for list.
 
-        >>> DictRenderer('foo').render(DeField(List[int], 'l', datavar='data'))
+        >>> Renderer('foo').render(DeField(List[int], 'l', datavar='data'))
         '[v for v in data["l"]]'
 
-        >>> DictRenderer('foo').render(DeField(List[List[int]], 'l', datavar='data'))
+        >>> Renderer('foo').render(DeField(List[List[int]], 'l', datavar='data'))
         '[[v for v in v] for v in data["l"]]'
         """
         return f'[{self.render(arg[0])} for v in {arg.data}]'
@@ -358,8 +342,11 @@ class DictRenderer(Renderer):
         >>> @deserialize
         ... @dataclass
         ... class Foo: pass
-        >>> DictRenderer('foo').render(DeField(Tuple[str, int, List[int], Foo], 'd', datavar='data'))
+        >>> Renderer('foo').render(DeField(Tuple[str, int, List[int], Foo], 'd', datavar='data'))
         '(data["d"][0], data["d"][1], [v for v in data["d"][2]], Foo.foo(data["d"][3]))'
+
+        >>> Renderer('foo').render(DeField(Tuple[str, int, List[int], Foo], 'd', datavar='data', index=0, iterbased=True))
+        '(data[0][0], data[0][1], [v for v in data[0][2]], Foo.foo(data[0][3]))'
         """
         values = []
         for i, typ in enumerate(type_args(arg.type)):
@@ -371,13 +358,13 @@ class DictRenderer(Renderer):
         """
         Render rvalue for dict.
 
-        >>> DictRenderer('foo').render(DeField(Dict[str, int], 'd', datavar='data'))
+        >>> Renderer('foo').render(DeField(Dict[str, int], 'd', datavar='data'))
         '{k: v for k, v in data["d"].items()}'
 
         >>> @deserialize
         ... @dataclass
         ... class Foo: pass
-        >>> DictRenderer('foo').render(DeField(Dict[Foo, List[Foo]], 'f', datavar='data'))
+        >>> Renderer('foo').render(DeField(Dict[Foo, List[Foo]], 'f', datavar='data'))
         '{Foo.foo(k): [Foo.foo(v) for v in v] for k, v in data["f"].items()}'
         """
         k, v = arg.get_kv()
@@ -387,13 +374,16 @@ class DictRenderer(Renderer):
         """
         Render rvalue for primitives.
 
-        >>> DictRenderer('foo').render(DeField(int, 'i', datavar='data'))
+        >>> Renderer('foo').render(DeField(int, 'i', datavar='data'))
         'data["i"]'
 
-        >>> DictRenderer('foo').render(DeField(int, 'int_field', datavar='data', case='camelcase'))
+        >>> Renderer('foo').render(DeField(int, 'int_field', datavar='data', case='camelcase'))
         'data["intField"]'
+
+        >>> Renderer('foo').render(DeField(int, 'i', datavar='data', index=1, iterbased=True))
+        'data[1]'
         """
-        if not isinstance(arg.default, DEFAULT_MISSING_TYPE):
+        if not arg.iterbased and not isinstance(arg.default, DEFAULT_MISSING_TYPE):
             default = arg.default
             if isinstance(default, str):
                 default = f'"{default}"'
@@ -402,11 +392,17 @@ class DictRenderer(Renderer):
             return arg.data
 
 
-def to_arg(f: Field, index, rename_all: Optional[str] = None) -> DeField:
+def to_arg(f: DeField, index, rename_all: Optional[str] = None) -> DeField:
     f.index = index
     f.data = 'data'
-    f.parent = DeField(None, 'data', datavar='data', case=f.case or rename_all)
+    f.parent = DeField(type(None), 'data', datavar='data', case=f.case or rename_all)
     f.case = f.case or rename_all
+    return f
+
+
+def to_iter_arg(f: DeField, *args, **kwargs):
+    f = to_arg(f, *args, **kwargs)
+    f.iterbased = True
     return f
 
 
@@ -422,11 +418,11 @@ def {{func}}(data):
   )
     """
 
-    renderer = DictRenderer(FROM_ITER)
+    renderer = Renderer(FROM_ITER)
     env = jinja2.Environment(loader=jinja2.DictLoader({'iter': template}))
     env.filters.update({'rvalue': renderer.render})
     env.filters.update({'fields': defields})
-    env.filters.update({'arg': to_arg})
+    env.filters.update({'arg': to_iter_arg})
     return env.get_template('iter').render(func=FROM_ITER, cls=cls)
 
 
@@ -443,7 +439,7 @@ def {{func}}(data):
   )
     """
 
-    renderer = DictRenderer(FROM_DICT, custom)
+    renderer = Renderer(FROM_DICT, custom)
     env = jinja2.Environment(loader=jinja2.DictLoader({'dict': template}))
     env.filters.update({'rvalue': renderer.render})
     env.filters.update({'fields': defields})
