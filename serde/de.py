@@ -20,7 +20,6 @@ from dataclasses import is_dataclass
 from typing import Any, Callable, Dict, List, Optional, Tuple, Type
 
 import jinja2
-import stringcase
 
 from .compat import assert_type, is_dict, is_list, is_opt, is_primitive, is_tuple, is_union, iter_types, type_args
 from .core import FROM_DICT, FROM_ITER, HIDDEN_NAME, SETTINGS, Field, Hidden, SerdeError, T, conv, fields, gen
@@ -268,7 +267,7 @@ defields = functools.partial(fields, DeField)
 @dataclass
 class Renderer:
     """
-    Base Renderer class.
+    Render rvalue for various types.
     """
 
     func: str
@@ -294,51 +293,26 @@ class Renderer:
             return f'__custom_deserializer__(fs[{arg.index}], {arg.data})'
 
     def dataclass(self, arg: DeField) -> str:
-        """ Render rvalue for dataclass. """
-
-    def opt(self, arg: DeField) -> str:
-        """ Render rvalue for optional. """
-
-    def list(self, arg: DeField) -> str:
-        """ Render rvalue for list. """
-
-    def tuple(self, arg: DeField) -> str:
-        """ Render rvalue for tuple. """
-
-    def dict(self, arg: DeField) -> str:
-        """ Render rvalue for dict. """
-
-    def primitive(self, arg: DeField) -> str:
-        """ Render rvalue for primitives. """
-
-
-@dataclass
-class DictRenderer(Renderer):
-    """
-    Render rvalue for various types.
-    """
-
-    def dataclass(self, arg: DeField) -> str:
         return f'{arg.type.__name__}.{self.func}({arg.data})'
 
     def opt(self, arg: DeField) -> str:
         """
         Render rvalue for Optional.
 
-        >>> DictRenderer('foo').render(DeField(Optional[int], 'o', datavar='data'))
+        >>> Renderer('foo').render(DeField(Optional[int], 'o', datavar='data'))
         'data["o"] if "o" in data else None'
 
-        >>> DictRenderer('foo').render(DeField(Optional[List[int]], 'o', datavar='data'))
+        >>> Renderer('foo').render(DeField(Optional[List[int]], 'o', datavar='data'))
         '[v for v in data["o"]] if "o" in data else None'
 
-        >>> DictRenderer('foo').render(DeField(Optional[List[int]], 'o', datavar='data'))
+        >>> Renderer('foo').render(DeField(Optional[List[int]], 'o', datavar='data'))
         '[v for v in data["o"]] if "o" in data else None'
 
         >>> @deserialize
         ... @dataclass
         ... class Foo:
         ...     o: Optional[List[int]]
-        >>> DictRenderer('foo').render(DeField(Optional[Foo], 'f', datavar='data'))
+        >>> Renderer('foo').render(DeField(Optional[Foo], 'f', datavar='data'))
         'Foo.foo(data["f"]) if "f" in data else None'
         """
         value = arg[0]
@@ -353,10 +327,10 @@ class DictRenderer(Renderer):
         """
         Render rvalue for list.
 
-        >>> DictRenderer('foo').render(DeField(List[int], 'l', datavar='data'))
+        >>> Renderer('foo').render(DeField(List[int], 'l', datavar='data'))
         '[v for v in data["l"]]'
 
-        >>> DictRenderer('foo').render(DeField(List[List[int]], 'l', datavar='data'))
+        >>> Renderer('foo').render(DeField(List[List[int]], 'l', datavar='data'))
         '[[v for v in v] for v in data["l"]]'
         """
         return f'[{self.render(arg[0])} for v in {arg.data}]'
@@ -368,10 +342,10 @@ class DictRenderer(Renderer):
         >>> @deserialize
         ... @dataclass
         ... class Foo: pass
-        >>> DictRenderer('foo').render(DeField(Tuple[str, int, List[int], Foo], 'd', datavar='data'))
+        >>> Renderer('foo').render(DeField(Tuple[str, int, List[int], Foo], 'd', datavar='data'))
         '(data["d"][0], data["d"][1], [v for v in data["d"][2]], Foo.foo(data["d"][3]))'
 
-        >>> DictRenderer('foo').render(DeField(Tuple[str, int, List[int], Foo], 'd', datavar='data', index=0, iterbased=True))
+        >>> Renderer('foo').render(DeField(Tuple[str, int, List[int], Foo], 'd', datavar='data', index=0, iterbased=True))
         '(data[0][0], data[0][1], [v for v in data[0][2]], Foo.foo(data[0][3]))'
         """
         values = []
@@ -384,13 +358,13 @@ class DictRenderer(Renderer):
         """
         Render rvalue for dict.
 
-        >>> DictRenderer('foo').render(DeField(Dict[str, int], 'd', datavar='data'))
+        >>> Renderer('foo').render(DeField(Dict[str, int], 'd', datavar='data'))
         '{k: v for k, v in data["d"].items()}'
 
         >>> @deserialize
         ... @dataclass
         ... class Foo: pass
-        >>> DictRenderer('foo').render(DeField(Dict[Foo, List[Foo]], 'f', datavar='data'))
+        >>> Renderer('foo').render(DeField(Dict[Foo, List[Foo]], 'f', datavar='data'))
         '{Foo.foo(k): [Foo.foo(v) for v in v] for k, v in data["f"].items()}'
         """
         k, v = arg.get_kv()
@@ -400,13 +374,13 @@ class DictRenderer(Renderer):
         """
         Render rvalue for primitives.
 
-        >>> DictRenderer('foo').render(DeField(int, 'i', datavar='data'))
+        >>> Renderer('foo').render(DeField(int, 'i', datavar='data'))
         'data["i"]'
 
-        >>> DictRenderer('foo').render(DeField(int, 'int_field', datavar='data', case='camelcase'))
+        >>> Renderer('foo').render(DeField(int, 'int_field', datavar='data', case='camelcase'))
         'data["intField"]'
 
-        >>> DictRenderer('foo').render(DeField(int, 'i', datavar='data', index=1, iterbased=True))
+        >>> Renderer('foo').render(DeField(int, 'i', datavar='data', index=1, iterbased=True))
         'data[1]'
         """
         if not arg.iterbased and not isinstance(arg.default, DEFAULT_MISSING_TYPE):
@@ -444,7 +418,7 @@ def {{func}}(data):
   )
     """
 
-    renderer = DictRenderer(FROM_ITER)
+    renderer = Renderer(FROM_ITER)
     env = jinja2.Environment(loader=jinja2.DictLoader({'iter': template}))
     env.filters.update({'rvalue': renderer.render})
     env.filters.update({'fields': defields})
@@ -465,7 +439,7 @@ def {{func}}(data):
   )
     """
 
-    renderer = DictRenderer(FROM_DICT, custom)
+    renderer = Renderer(FROM_DICT, custom)
     env = jinja2.Environment(loader=jinja2.DictLoader({'dict': template}))
     env.filters.update({'rvalue': renderer.render})
     env.filters.update({'fields': defields})
