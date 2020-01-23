@@ -215,6 +215,9 @@ def from_tuple(cls, o):
 @dataclass
 class DeField(Field):
     datavar: Optional[str] = None  # name of variable to deserialize from.
+    index: int = 0  # Field number inside dataclass.
+    parent: Optional['DeField'] = None  # Parent of this field.
+    iterbased: bool = False  # Iterater based deserializer or not.
 
     def __getitem__(self, n) -> 'DeField':
         typ = type_args(self.type)[n]
@@ -223,7 +226,7 @@ class DeField(Field):
         elif is_tuple(self.type):
             return ElementField(typ, f'{self.data}[{n}]', datavar=f'{self.data}[{n}]')
         else:
-            return DeField(typ, self.name, datavar=self.datavar)
+            return DeField(typ, self.name, datavar=self.datavar, index=self.index, iterbased=self.iterbased)
 
     def get_kv(self) -> Tuple['ElementField', 'ElementField']:
         k = self[0]
@@ -234,7 +237,10 @@ class DeField(Field):
 
     @property
     def data(self) -> str:
-        return f'{self.datavar}["{conv(self, self.case)}"]'
+        if self.iterbased:
+            return f'{self.datavar}[{self.index}]'
+        else:
+            return f'{self.datavar}["{conv(self, self.case)}"]'
 
     @data.setter
     def data(self, d):
@@ -336,8 +342,12 @@ class DictRenderer(Renderer):
         'Foo.foo(data["f"]) if "f" in data else None'
         """
         value = arg[0]
-        exists = f'"{value.name}" in {value.datavar}'
-        return f'{self.render(value)} if {exists} else None'
+        if arg.iterbased:
+            exists = f'{value.data} is not None'
+            return f'{self.render(value)} if {exists} else None'
+        else:
+            exists = f'"{value.name}" in {value.datavar}'
+            return f'{self.render(value)} if {exists} else None'
 
     def list(self, arg: DeField) -> str:
         """
@@ -360,6 +370,9 @@ class DictRenderer(Renderer):
         ... class Foo: pass
         >>> DictRenderer('foo').render(DeField(Tuple[str, int, List[int], Foo], 'd', datavar='data'))
         '(data["d"][0], data["d"][1], [v for v in data["d"][2]], Foo.foo(data["d"][3]))'
+
+        >>> DictRenderer('foo').render(DeField(Tuple[str, int, List[int], Foo], 'd', datavar='data', index=0, iterbased=True))
+        '(data[0][0], data[0][1], [v for v in data[0][2]], Foo.foo(data[0][3]))'
         """
         values = []
         for i, typ in enumerate(type_args(arg.type)):
@@ -392,8 +405,11 @@ class DictRenderer(Renderer):
 
         >>> DictRenderer('foo').render(DeField(int, 'int_field', datavar='data', case='camelcase'))
         'data["intField"]'
+
+        >>> DictRenderer('foo').render(DeField(int, 'i', datavar='data', index=1, iterbased=True))
+        'data[1]'
         """
-        if not isinstance(arg.default, DEFAULT_MISSING_TYPE):
+        if not arg.iterbased and not isinstance(arg.default, DEFAULT_MISSING_TYPE):
             default = arg.default
             if isinstance(default, str):
                 default = f'"{default}"'
@@ -402,11 +418,17 @@ class DictRenderer(Renderer):
             return arg.data
 
 
-def to_arg(f: Field, index, rename_all: Optional[str] = None) -> DeField:
+def to_arg(f: DeField, index, rename_all: Optional[str] = None) -> DeField:
     f.index = index
     f.data = 'data'
-    f.parent = DeField(None, 'data', datavar='data', case=f.case or rename_all)
+    f.parent = DeField(type(None), 'data', datavar='data', case=f.case or rename_all)
     f.case = f.case or rename_all
+    return f
+
+
+def to_iter_arg(f: DeField, *args, **kwargs):
+    f = to_arg(f, *args, **kwargs)
+    f.iterbased = True
     return f
 
 
@@ -426,7 +448,7 @@ def {{func}}(data):
     env = jinja2.Environment(loader=jinja2.DictLoader({'iter': template}))
     env.filters.update({'rvalue': renderer.render})
     env.filters.update({'fields': defields})
-    env.filters.update({'arg': to_arg})
+    env.filters.update({'arg': to_iter_arg})
     return env.get_template('iter').render(func=FROM_ITER, cls=cls)
 
 

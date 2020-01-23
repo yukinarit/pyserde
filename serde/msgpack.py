@@ -22,7 +22,7 @@ class MsgPackDeserializer(Deserializer):
         return unp
 
 
-def to_msgpack(obj: Any, serializer=MsgPackSerializer, named=True, **opts) -> bytes:
+def to_msgpack(obj: Any, serializer=MsgPackSerializer, **opts) -> bytes:
     return obj.__serde_serialize__(serializer, **opts)
 
 
