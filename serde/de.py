@@ -21,7 +21,7 @@ from typing import Any, Callable, Dict, List, Optional, Tuple, Type
 
 import jinja2
 
-from .compat import assert_type, is_dict, is_list, is_opt, is_primitive, is_tuple, is_union, iter_types, type_args
+from .compat import is_dict, is_list, is_opt, is_primitive, is_tuple, is_union, iter_types, type_args
 from .core import FROM_DICT, FROM_ITER, HIDDEN_NAME, SETTINGS, Field, Hidden, SerdeError, T, conv, fields, gen
 from .more_types import deserialize as custom
 
@@ -172,13 +172,10 @@ def from_obj(c: Type[T], o: Any, de: Type[Deserializer] = None, strict=True, **o
             except (SerdeError, ValueError):
                 pass
     elif is_list(c):
-        assert_type(list, o, strict)
         v = [from_obj(type_args(c)[0], e) for e in o]
     elif is_tuple(c):
-        assert_type(tuple, o, strict)
         v = tuple(from_obj(type_args(c)[i], e) for i, e in enumerate(o))
     elif is_dict(c):
-        assert_type(dict, o, strict)
         v = {from_obj(type_args(c)[0], k): from_obj(type_args(c)[1], v) for k, v in o.items()}
     else:
         v = o
