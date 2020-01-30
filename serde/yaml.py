@@ -4,7 +4,7 @@ import yaml
 
 from .core import T
 from .de import Deserializer, from_dict
-from .se import Serializer, asdict, is_serializable
+from .se import Serializer, asdict
 
 
 class YamlSerializer(Serializer):
