@@ -3,19 +3,19 @@ from typing import List, Type  # noqa
 import yaml
 
 from .core import T
-from .de import Deserializer, from_obj
-from .se import Serializer, asdict, is_serializable
+from .de import Deserializer, from_dict
+from .se import Serializer, asdict
 
 
 class YamlSerializer(Serializer):
     @classmethod
-    def serialize(cls, obj, **opts) -> str:
+    def serialize(cls, obj, named=True, **opts) -> str:
         return yaml.safe_dump(asdict(obj), **opts)
 
 
 class YamlDeserializer(Deserializer):
     @classmethod
-    def deserialize(cls, s, **opts):
+    def deserialize(cls, s, named=True, **opts):
         return yaml.safe_load(s, **opts)
 
 
@@ -37,10 +37,7 @@ def to_yaml(obj, se: Type[Serializer] = YamlSerializer, **opts) -> str:
     'host: localhost\\nport: 8080\\nupstream:\\n- localhost:8081\\n- localhost:8082\\n'
     >>>
     """
-    if is_serializable(obj):
-        return obj.__serde_serialize__(se)
-    else:
-        return se.serialize(obj)
+    return se.serialize(obj, **opts)
 
 
 def from_yaml(c: Type[T], s: str, de: Type[Deserializer] = YamlDeserializer, **opts) -> T:
@@ -61,4 +58,4 @@ def from_yaml(c: Type[T], s: str, de: Type[Deserializer] = YamlDeserializer, **o
     >>> from_yaml(Settings, s)
     Settings(host='localhost', port=8080, upstream=['localhost:8081', 'localhost:8082'])
     """
-    return from_obj(c, s, de)
+    return from_dict(c, de.deserialize(s, **opts))

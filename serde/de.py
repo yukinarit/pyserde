@@ -17,7 +17,7 @@ from dataclasses import _MISSING_TYPE as DEFAULT_MISSING_TYPE
 from dataclasses import dataclass
 from dataclasses import fields as dataclass_fields
 from dataclasses import is_dataclass
-from typing import Any, Callable, Dict, List, Optional, Tuple, Type
+from typing import Any, Callable, Dict, Optional, Tuple, Type
 
 import jinja2
 
@@ -115,7 +115,7 @@ class Deserializer(metaclass=abc.ABCMeta):
         """
 
 
-def from_obj(c: Type[T], o: Any, de: Type[Deserializer] = None, strict=True, **opts):
+def from_obj(c: Type[T], o: Any, de: Type[Deserializer] = None, strict=True, named=True, **opts):
     """
     Deserialize from an object into an instance of the type specified as arg `c`.
     `c` can be either primitive type, `List`, `Tuple`, `Dict` or `deserialize` class.
@@ -139,6 +139,7 @@ def from_obj(c: Type[T], o: Any, de: Type[Deserializer] = None, strict=True, **o
     ### Containers
 
     >>> from serde import deserialize
+    >>> from typing import List
     >>>
     >>> @deserialize
     ... @dataclass
@@ -152,60 +153,59 @@ def from_obj(c: Type[T], o: Any, de: Type[Deserializer] = None, strict=True, **o
     {'foo1': Foo(i=10), 'foo2': Foo(i=20)}
     >>>
     """
+    thisfunc = functools.partial(from_obj, named=named)
     if de:
         o = de.deserialize(o, **opts)
     if o is None:
         v = None
     if is_deserializable(c):
-        v = from_dict_or_iter(c, o)
+        if named:
+            v = from_dict(c, o)
+        else:
+            v = from_tuple(c, o)
     elif is_opt(c):
         if o is None:
             v = None
         else:
-            v = from_obj(type_args(c)[0], o)
+            v = thisfunc(type_args(c)[0], o)
     elif is_union(c):
         v = None
         for typ in type_args(c):
             try:
-                v = from_obj(typ, o)
+                v = thisfunc(typ, o)
                 break
             except (SerdeError, ValueError):
                 pass
     elif is_list(c):
-        v = [from_obj(type_args(c)[0], e) for e in o]
+        v = [thisfunc(type_args(c)[0], e) for e in o]
     elif is_tuple(c):
-        v = tuple(from_obj(type_args(c)[i], e) for i, e in enumerate(o))
+        v = tuple(thisfunc(type_args(c)[i], e) for i, e in enumerate(o))
     elif is_dict(c):
-        v = {from_obj(type_args(c)[0], k): from_obj(type_args(c)[1], v) for k, v in o.items()}
+        v = {thisfunc(type_args(c)[0], k): thisfunc(type_args(c)[1], v) for k, v in o.items()}
     else:
         v = o
 
     return v
 
 
-def from_dict_or_iter(cls, o):
-    """
-    Deserialize into an instance of `deserialize` class from either `dict` or `iterable`.
-    """
-    if not is_deserializable(cls):
-        raise SerdeError('`cls` must be deserializable.')
-
-    if isinstance(o, (List, Tuple)):
-        return cls.__serde_from_iter__(o)
-    elif isinstance(o, Dict):
-        return cls.__serde_from_dict__(o)
-    elif isinstance(o, cls) or o is None:
-        return o
-    else:
-        raise SerdeError(f'Arg must be either List, Tuple, Dict or Type but {type(o)}.')
-
-
 def from_dict(cls, o):
-    return cls.__serde_from_dict__(o)
+    """
+    Deserialize from dictionary.
+    """
+    if is_deserializable(cls):
+        return cls.__serde_from_dict__(o)
+    else:
+        return from_obj(cls, o, named=True)
 
 
 def from_tuple(cls, o):
-    return cls.__serde_from_iter__(o)
+    """
+    Deserialize from tuple.
+    """
+    if is_deserializable(cls):
+        return cls.__serde_from_iter__(o)
+    else:
+        return from_obj(cls, o, named=False)
 
 
 @dataclass
@@ -296,6 +296,7 @@ class Renderer:
         """
         Render rvalue for Optional.
 
+        >>> from typing import List
         >>> Renderer('foo').render(DeField(Optional[int], 'o', datavar='data'))
         'data["o"] if "o" in data else None'
 
@@ -324,6 +325,7 @@ class Renderer:
         """
         Render rvalue for list.
 
+        >>> from typing import List
         >>> Renderer('foo').render(DeField(List[int], 'l', datavar='data'))
         '[v for v in data["l"]]'
 
@@ -336,13 +338,15 @@ class Renderer:
         """
         Render rvalue for tuple.
 
+        >>> from typing import List
         >>> @deserialize
         ... @dataclass
         ... class Foo: pass
         >>> Renderer('foo').render(DeField(Tuple[str, int, List[int], Foo], 'd', datavar='data'))
         '(data["d"][0], data["d"][1], [v for v in data["d"][2]], Foo.foo(data["d"][3]))'
 
-        >>> Renderer('foo').render(DeField(Tuple[str, int, List[int], Foo], 'd', datavar='data', index=0, iterbased=True))
+        >>> field = DeField(Tuple[str, int, List[int], Foo], 'd', datavar='data', index=0, iterbased=True)
+        >>> Renderer('foo').render(field)
         '(data[0][0], data[0][1], [v for v in data[0][2]], Foo.foo(data[0][3]))'
         """
         values = []
@@ -355,6 +359,7 @@ class Renderer:
         """
         Render rvalue for dict.
 
+        >>> from typing import List
         >>> Renderer('foo').render(DeField(Dict[str, int], 'd', datavar='data'))
         '{k: v for k, v in data["d"].items()}'
 

@@ -3,19 +3,19 @@ from typing import List, Type  # noqa
 import toml
 
 from .core import T
-from .de import Deserializer, from_obj
-from .se import Serializer, asdict, is_serializable
+from .de import Deserializer, from_dict
+from .se import Serializer, asdict
 
 
 class TomlSerializer(Serializer):
     @classmethod
-    def serialize(cls, obj, **opts) -> str:
+    def serialize(cls, obj, named=True, **opts) -> str:
         return toml.dumps(asdict(obj))
 
 
 class TomlDeserializer(Deserializer):
     @classmethod
-    def deserialize(cls, s, **opts):
+    def deserialize(cls, s, named=True, **opts):
         return toml.loads(s)
 
 
@@ -43,10 +43,7 @@ def to_toml(obj, se: Type[TomlSerializer] = TomlSerializer, **opts) -> str:
     '[general]\\nhost = \"localhost\"\\nport = 8080\\nupstream = [ \"localhost:8081\", \"localhost:8082\",]\\n'
     >>>
     """
-    if is_serializable(obj):
-        return obj.__serde_serialize__(se)
-    else:
-        return se.serialize(obj)
+    return se.serialize(obj, **opts)
 
 
 def from_toml(c: Type[T], s: str, de: Type[Deserializer] = TomlDeserializer, **opts) -> T:
@@ -69,4 +66,4 @@ def from_toml(c: Type[T], s: str, de: Type[Deserializer] = TomlDeserializer, **o
     Settings(host='localhost', port=8080, upstream=['localhost:8081', 'localhost:8082'])
     >>>
     """
-    return from_obj(c, s, de)
+    return from_dict(c, de.deserialize(s, **opts))

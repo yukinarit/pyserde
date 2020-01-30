@@ -4,7 +4,7 @@ from decimal import Decimal
 import pytest
 
 from serde import deserialize, serialize
-from tests.test_basics import format_dict, format_json, format_toml, format_yaml
+from tests.test_basics import format_json, format_toml, format_yaml
 
 
 @deserialize

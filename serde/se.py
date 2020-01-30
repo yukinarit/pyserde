@@ -14,7 +14,6 @@ from dataclasses import is_dataclass
 from typing import Any, Callable, Dict, List, Optional, Tuple, Type
 
 import jinja2
-import stringcase
 
 from .compat import is_dict, is_list, is_opt, is_primitive, is_tuple, is_union, type_args
 from .core import HIDDEN_NAME, SE_NAME, SETTINGS, TO_DICT, TO_ITER, Field, Hidden, T, conv, fields, gen
