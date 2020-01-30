@@ -9,21 +9,21 @@ from .se import Serializer, asdict, astuple
 
 class MsgPackSerializer(Serializer):
     @classmethod
-    def serialize(cls, obj, named=True, **opts) -> str:
+    def serialize(cls, obj, named=True, use_bin_type=True, **opts) -> str:
         asf = asdict if named else astuple
-        return msgpack.packb(asf(obj), use_bin_type=True, **opts)
+        return msgpack.packb(asf(obj), use_bin_type=use_bin_type, **opts)
 
 
 class MsgPackDeserializer(Deserializer):
     @classmethod
-    def deserialize(cls, s, **opts):
-        unp = msgpack.unpackb(s, raw=False, use_list=False, **opts)
+    def deserialize(cls, s, raw=False, use_list=False, **opts):
+        unp = msgpack.unpackb(s, raw=raw, use_list=use_list, **opts)
         logger.debug('unpack from msgpack: {unp}')
         return unp
 
 
-def to_msgpack(obj: Any, serializer=MsgPackSerializer, **opts) -> bytes:
-    return obj.__serde_serialize__(serializer, **opts)
+def to_msgpack(obj: Any, se: Type[Serializer] = MsgPackSerializer, **opts) -> bytes:
+    return se.serialize(obj, **opts)
 
 
 def from_msgpack(c: Type[T], s: str, de: Type[Deserializer] = MsgPackDeserializer, named=True, **opts) -> Type[T]:

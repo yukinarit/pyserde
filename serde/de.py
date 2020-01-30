@@ -115,7 +115,7 @@ class Deserializer(metaclass=abc.ABCMeta):
         """
 
 
-def from_obj(c: Type[T], o: Any, de: Type[Deserializer] = None, strict=True, **opts):
+def from_obj(c: Type[T], o: Any, de: Type[Deserializer] = None, strict=True, named=True, **opts):
     """
     Deserialize from an object into an instance of the type specified as arg `c`.
     `c` can be either primitive type, `List`, `Tuple`, `Dict` or `deserialize` class.
@@ -157,7 +157,10 @@ def from_obj(c: Type[T], o: Any, de: Type[Deserializer] = None, strict=True, **o
     if o is None:
         v = None
     if is_deserializable(c):
-        v = from_dict_or_iter(c, o)
+        if named:
+            v = from_dict(c, o)
+        else:
+            v = from_tuple(c, o)
     elif is_opt(c):
         if o is None:
             v = None
@@ -183,29 +186,24 @@ def from_obj(c: Type[T], o: Any, de: Type[Deserializer] = None, strict=True, **o
     return v
 
 
-def from_dict_or_iter(cls, o):
-    """
-    Deserialize into an instance of `deserialize` class from either `dict` or `iterable`.
-    """
-    if not is_deserializable(cls):
-        raise SerdeError('`cls` must be deserializable.')
-
-    if isinstance(o, (List, Tuple)):
-        return cls.__serde_from_iter__(o)
-    elif isinstance(o, Dict):
-        return cls.__serde_from_dict__(o)
-    elif isinstance(o, cls) or o is None:
-        return o
-    else:
-        raise SerdeError(f'Arg must be either List, Tuple, Dict or Type but {type(o)}.')
-
-
 def from_dict(cls, o):
-    return cls.__serde_from_dict__(o)
+    """
+    Deserialize from dictionary.
+    """
+    if is_deserializable(cls):
+        return cls.__serde_from_dict__(o)
+    else:
+        return from_obj(cls, o, named=True)
 
 
 def from_tuple(cls, o):
-    return cls.__serde_from_iter__(o)
+    """
+    Deserialize from tuple.
+    """
+    if is_deserializable(cls):
+        return cls.__serde_from_iter__(o)
+    else:
+        return from_obj(cls, o, named=False)
 
 
 @dataclass
