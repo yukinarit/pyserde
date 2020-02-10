@@ -25,4 +25,15 @@ jobs:
     - stage: bench_and_coverage
       python: 3.7
       script:
-        - make setup coverage setup-bench bench
+        - make setup coverage setup-bench bench docs
+    - stage: gh-pages
+      python: 3.7
+      provider: pages
+      local_dir: docs
+      github_token: $TOKEN_FOR_TRAVIS
+      skip_cleanup: true
+      keep_history: true
+      on:
+        branch: master
+      script:
+        make setup docs
