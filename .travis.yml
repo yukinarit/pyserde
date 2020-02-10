@@ -33,7 +33,6 @@ jobs:
       github_token: $TOKEN_FOR_TRAVIS
       skip_cleanup: true
       keep_history: true
+      verbose: true
       on:
         branch: master
-      script:
-        make setup docs
