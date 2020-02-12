@@ -17,13 +17,15 @@ from dataclasses import _MISSING_TYPE as DEFAULT_MISSING_TYPE
 from dataclasses import dataclass
 from dataclasses import fields as dataclass_fields
 from dataclasses import is_dataclass
-from typing import Any, Callable, Dict, Optional, Tuple, Type
+from typing import Any, Callable, Dict, Optional, Tuple, Type, List
 
 import jinja2
 
 from .compat import is_dict, is_list, is_opt, is_primitive, is_tuple, is_union, iter_types, type_args
 from .core import FROM_DICT, FROM_ITER, HIDDEN_NAME, SETTINGS, Field, Hidden, SerdeError, T, conv, fields, gen
 from .more_types import deserialize as custom
+
+__all__: List = []
 
 Custom = Optional[Callable[['DeField', Any], Any]]
 

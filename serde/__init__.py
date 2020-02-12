@@ -7,3 +7,15 @@ from .se import asdict, astuple, is_serializable, serialize  # noqa
 
 """ Version of pyserde. """
 __version__ = '0.1.0'
+
+__all__ = [
+    'serialize',
+    'deserialize',
+    'is_serializable',
+    'is_deserializable',
+    'from_dict',
+    'from_tuple',
+    'asdict',
+    'astuple',
+    'SerdeError',
+]

@@ -10,6 +10,8 @@ import stringcase
 
 from .compat import T, assert_type, is_dict, is_list, is_opt, is_tuple, is_union, type_args
 
+__all__: List = []
+
 logger = logging.getLogger('serde')
 
 JsonValue = TypeVar('JsonValue', str, int, float, bool, Dict, List)
