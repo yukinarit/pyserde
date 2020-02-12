@@ -25,14 +25,19 @@ jobs:
     - stage: bench_and_coverage
       python: 3.7
       script:
-        - make setup coverage setup-bench bench docs
+        - make setup coverage setup-bench bench
     - stage: gh-pages
       python: 3.7
-      provider: pages
-      local_dir: docs
-      github_token: $TOKEN_FOR_TRAVIS
       skip_cleanup: true
-      keep_history: true
-      verbose: true
-      on:
-        branch: master
+      script: |
+        if [ -n "$GITHUB_TOKEN" ]; then
+          cd "$TRAVIS_BUILD_DIR"
+          make setup docs
+          cd docs
+          git init
+          git checkout -b gh-pages
+          git add .
+          git -c user.name='travis' -c user.email='travis' commit -m init
+          git push -f -q https://yukinarit:$GITHUB_TOKEN@github.com/yukinarit/pyserde-gh-pages gh-pages &>/dev/null
+          cd "$TRAVIS_BUILD_DIR"
+        fi
