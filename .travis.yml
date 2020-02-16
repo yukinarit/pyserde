@@ -32,12 +32,19 @@ jobs:
       script: |
         if [ -n "$GITHUB_TOKEN" ]; then
           cd "$TRAVIS_BUILD_DIR"
-          make setup docs
-          cd docs
-          git init
-          git checkout -b gh-pages
+          git clone -b gh-pages "https://yukinarit:$GITHUB_TOKEN@github.com/yukinarit/pyserde.git" docs
+          ls -l docs
+          make setup docs && cd docs
           git add .
-          git -c user.name='travis' -c user.email='travis' commit -m init
-          git push -f -q https://yukinarit:$GITHUB_TOKEN@github.com/yukinarit/pyserde-gh-pages gh-pages &>/dev/null
+          git status
+          git diff --staged --quiet && echo "$0: No changes to commit." && exit 0
+          if [ "$TRAVIS_PULL_REQUEST" -eq "false" ]; then
+            msg="Docs: Update docs"
+          else
+            msg="Docs: Update for #$TRAVIS_PULL_REQUEST"
+          fi
+          git -c user.name='travis' -c user.email='travis' commit -m $msg
+          git log
+          git push -f -q https://yukinarit:$GITHUB_TOKEN@github.com/yukinarit/pyserde gh-pages
           cd "$TRAVIS_BUILD_DIR"
         fi

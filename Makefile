@@ -38,6 +38,7 @@ fmt:
 	$(PIPENV) run isort -rc --atomic serde tests bench/bench.py
 
 docs:
+	mkdir -p docs
 	$(PIPENV) run pdoc serde --html -o html --force
 	cp -f html/serde/* docs/
 
