@@ -1,6 +1,6 @@
 from dataclasses import fields, is_dataclass
 from itertools import zip_longest
-from typing import List, Iterator, Optional, Tuple, Type, TypeVar, Union
+from typing import Iterator, List, Optional, Tuple, Type, TypeVar, Union
 
 from typing_inspect import get_args, get_origin, is_optional_type, is_union_type
 

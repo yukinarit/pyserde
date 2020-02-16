@@ -17,7 +17,7 @@ from dataclasses import _MISSING_TYPE as DEFAULT_MISSING_TYPE
 from dataclasses import dataclass
 from dataclasses import fields as dataclass_fields
 from dataclasses import is_dataclass
-from typing import Any, Callable, Dict, Optional, Tuple, Type, List
+from typing import Any, Callable, Dict, List, Optional, Tuple, Type
 
 import jinja2
 
