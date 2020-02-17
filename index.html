@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
-<meta name="generator" content="pdoc 0.7.2.dev1+gaf23904" />
+<meta name="generator" content="pdoc 0.7.4" />
 <title>serde API documentation</title>
 <meta name="description" content="pyserde …" />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
@@ -213,7 +213,19 @@ from .de import deserialize, from_dict, from_obj, from_tuple, is_deserializable 
 from .se import asdict, astuple, is_serializable, serialize  # noqa
 
 &#34;&#34;&#34; Version of pyserde. &#34;&#34;&#34;
-__version__ = &#39;0.1.0&#39;</code></pre>
+__version__ = &#39;0.1.0&#39;
+
+__all__ = [
+    &#39;serialize&#39;,
+    &#39;deserialize&#39;,
+    &#39;is_serializable&#39;,
+    &#39;is_deserializable&#39;,
+    &#39;from_dict&#39;,
+    &#39;from_tuple&#39;,
+    &#39;asdict&#39;,
+    &#39;astuple&#39;,
+    &#39;SerdeError&#39;,
+]</code></pre>
 </details>
 </section>
 <section>
@@ -227,17 +239,13 @@ __version__ = &#39;0.1.0&#39;</code></pre>
 <dd>
 <section class="desc"></section>
 </dd>
-<dt><code class="name"><a title="serde.csv" href="csv.html">serde.csv</a></code></dt>
-<dd>
-<section class="desc"></section>
-</dd>
 <dt><code class="name"><a title="serde.de" href="de.html">serde.de</a></code></dt>
 <dd>
-<section class="desc"><p>Defines classess and functions for <code>deserialize</code> decorator …</p></section>
+<section class="desc"><p>Defines classess and functions for <a title="serde.deserialize" href="#serde.deserialize"><code>deserialize()</code></a> decorator …</p></section>
 </dd>
 <dt><code class="name"><a title="serde.inspect" href="inspect.html">serde.inspect</a></code></dt>
 <dd>
-<section class="desc"><p>pyserde inspect tool …</p></section>
+<section class="desc"><p>pyserde inspection tool …</p></section>
 </dd>
 <dt><code class="name"><a title="serde.json" href="json.html">serde.json</a></code></dt>
 <dd>
@@ -253,7 +261,7 @@ __version__ = &#39;0.1.0&#39;</code></pre>
 </dd>
 <dt><code class="name"><a title="serde.se" href="se.html">serde.se</a></code></dt>
 <dd>
-<section class="desc"><p>Defines classess and functions for <code>serialize</code> decorator.</p></section>
+<section class="desc"><p>Defines classess and functions for <a title="serde.serialize" href="#serde.serialize"><code>serialize()</code></a> decorator.</p></section>
 </dd>
 <dt><code class="name"><a title="serde.toml" href="toml.html">serde.toml</a></code></dt>
 <dd>
@@ -268,8 +276,390 @@ __version__ = &#39;0.1.0&#39;</code></pre>
 <section>
 </section>
 <section>
+<h2 class="section-title" id="header-functions">Functions</h2>
+<dl>
+<dt id="serde.asdict"><code class="name flex">
+<span>def <span class="ident">asdict</span></span>(<span>v)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Convert <a title="serde.serialize" href="#serde.serialize"><code>serialize()</code></a> class to <code>dict</code>.</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def asdict(v):
+    &#34;&#34;&#34;
+    Convert `serialize` class to `dict`.
+    &#34;&#34;&#34;
+    if is_serializable(v):
+        return getattr(v, TO_DICT)()
+    elif is_dataclass(v):
+        return _asdict(v)
+    elif isinstance(v, Dict):
+        return {asdict(k): asdict(v) for k, v in v.items()}
+    elif isinstance(v, (Tuple, List)):
+        return tuple(asdict(e) for e in v)
+    else:
+        return v</code></pre>
+</details>
+</dd>
+<dt id="serde.astuple"><code class="name flex">
+<span>def <span class="ident">astuple</span></span>(<span>v)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Convert <a title="serde.serialize" href="#serde.serialize"><code>serialize()</code></a> class to <code>tuple</code>.</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def astuple(v):
+    &#34;&#34;&#34;
+    Convert `serialize` class to `tuple`.
+    &#34;&#34;&#34;
+    if is_serializable(v):
+        return getattr(v, TO_ITER)()
+    elif is_dataclass(v):
+        return _astuple(v)
+    elif isinstance(v, Dict):
+        return tuple(astuple(e) for e in v.values())
+    elif isinstance(v, (Tuple, List)):
+        return tuple(astuple(e) for e in v)
+    else:
+        return v</code></pre>
+</details>
+</dd>
+<dt id="serde.deserialize"><code class="name flex">
+<span>def <span class="ident">deserialize</span></span>(<span>rename_all=None)</span>
+</code></dt>
+<dd>
+<section class="desc"><p><a title="serde.deserialize" href="#serde.deserialize"><code>deserialize()</code></a> decorator. A dataclass with this decorator can be deserialized
+into an object from various data format such as JSON and MsgPack.</p>
+<pre><code>&gt;&gt;&gt; from serde import deserialize
+&gt;&gt;&gt; from serde.json import from_json
+&gt;&gt;&gt;
+&gt;&gt;&gt; # Mark the class deserializable.
+&gt;&gt;&gt; @deserialize
+... @dataclass
+... class Foo:
+...     i: int
+...     s: str
+...     f: float
+...     b: bool
+&gt;&gt;&gt;
+&gt;&gt;&gt; from_json(Foo, '{"i": 10, "s": "foo", "f": 100.0, "b": true}')
+Foo(i=10, s='foo', f=100.0, b=True)
+</code></pre>
+<p>Additionally, <a title="serde.deserialize" href="#serde.deserialize"><code>deserialize()</code></a> supports case conversion. Pass case name in
+<a title="serde.deserialize" href="#serde.deserialize"><code>deserialize()</code></a> decorator as shown below.</p>
+<pre><code>&gt;&gt;&gt; from serde import deserialize
+&gt;&gt;&gt;
+&gt;&gt;&gt; @deserialize(rename_all = 'camelcase')
+... @dataclass
+... class RenameAll:
+...     int_field: int
+...     str_field: str
+&gt;&gt;&gt;
+&gt;&gt;&gt; from_json(RenameAll, '{"intField": 10, "strField": "foo"}')
+RenameAll(int_field=10, str_field='foo')
+&gt;&gt;&gt;
+</code></pre></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def deserialize(_cls=None, rename_all: Optional[str] = None) -&gt; Type:
+    &#34;&#34;&#34;
+    `deserialize` decorator. A dataclass with this decorator can be deserialized
+    into an object from various data format such as JSON and MsgPack.
+
+    &gt;&gt;&gt; from serde import deserialize
+    &gt;&gt;&gt; from serde.json import from_json
+    &gt;&gt;&gt;
+    &gt;&gt;&gt; # Mark the class deserializable.
+    &gt;&gt;&gt; @deserialize
+    ... @dataclass
+    ... class Foo:
+    ...     i: int
+    ...     s: str
+    ...     f: float
+    ...     b: bool
+    &gt;&gt;&gt;
+    &gt;&gt;&gt; from_json(Foo, &#39;{&#34;i&#34;: 10, &#34;s&#34;: &#34;foo&#34;, &#34;f&#34;: 100.0, &#34;b&#34;: true}&#39;)
+    Foo(i=10, s=&#39;foo&#39;, f=100.0, b=True)
+
+    Additionally, `deserialize` supports case conversion. Pass case name in
+    `deserialize` decorator as shown below.
+
+    &gt;&gt;&gt; from serde import deserialize
+    &gt;&gt;&gt;
+    &gt;&gt;&gt; @deserialize(rename_all = &#39;camelcase&#39;)
+    ... @dataclass
+    ... class RenameAll:
+    ...     int_field: int
+    ...     str_field: str
+    &gt;&gt;&gt;
+    &gt;&gt;&gt; from_json(RenameAll, &#39;{&#34;intField&#34;: 10, &#34;strField&#34;: &#34;foo&#34;}&#39;)
+    RenameAll(int_field=10, str_field=&#39;foo&#39;)
+    &gt;&gt;&gt;
+    &#34;&#34;&#34;
+
+    def wrap(cls):
+        g: Dict[str, Any] = globals().copy()
+        if not hasattr(cls, HIDDEN_NAME):
+            setattr(cls, HIDDEN_NAME, Hidden())
+        g[&#39;__custom_deserializer__&#39;] = custom
+        cls = de_func(cls, FROM_ITER, render_from_iter(cls, custom), g)
+        cls = de_func(cls, FROM_DICT, render_from_dict(cls, rename_all, custom), g)
+        return cls
+
+    if _cls is None:
+        return wrap
+
+    return wrap(_cls)</code></pre>
+</details>
+</dd>
+<dt id="serde.from_dict"><code class="name flex">
+<span>def <span class="ident">from_dict</span></span>(<span>cls, o)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Deserialize from dictionary.</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def from_dict(cls, o):
+    &#34;&#34;&#34;
+    Deserialize from dictionary.
+    &#34;&#34;&#34;
+    if is_deserializable(cls):
+        return cls.__serde_from_dict__(o)
+    else:
+        return from_obj(cls, o, named=True)</code></pre>
+</details>
+</dd>
+<dt id="serde.from_tuple"><code class="name flex">
+<span>def <span class="ident">from_tuple</span></span>(<span>cls, o)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Deserialize from tuple.</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def from_tuple(cls, o):
+    &#34;&#34;&#34;
+    Deserialize from tuple.
+    &#34;&#34;&#34;
+    if is_deserializable(cls):
+        return cls.__serde_from_iter__(o)
+    else:
+        return from_obj(cls, o, named=False)</code></pre>
+</details>
+</dd>
+<dt id="serde.is_deserializable"><code class="name flex">
+<span>def <span class="ident">is_deserializable</span></span>(<span>instance_or_class)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Test if arg can <a title="serde.deserialize" href="#serde.deserialize"><code>deserialize()</code></a>. Arg must be either an instance of class.</p>
+<pre><code>&gt;&gt;&gt; from serde import deserialize, is_deserializable
+&gt;&gt;&gt;
+&gt;&gt;&gt; @deserialize
+... @dataclass
+... class Foo:
+...     pass
+&gt;&gt;&gt;
+&gt;&gt;&gt; is_deserializable(Foo)
+True
+&gt;&gt;&gt;
+</code></pre></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def is_deserializable(instance_or_class: Any) -&gt; bool:
+    &#34;&#34;&#34;
+    Test if arg can `deserialize`. Arg must be either an instance of class.
+
+    &gt;&gt;&gt; from serde import deserialize, is_deserializable
+    &gt;&gt;&gt;
+    &gt;&gt;&gt; @deserialize
+    ... @dataclass
+    ... class Foo:
+    ...     pass
+    &gt;&gt;&gt;
+    &gt;&gt;&gt; is_deserializable(Foo)
+    True
+    &gt;&gt;&gt;
+    &#34;&#34;&#34;
+    return hasattr(instance_or_class, FROM_ITER) or hasattr(instance_or_class, FROM_DICT)</code></pre>
+</details>
+</dd>
+<dt id="serde.is_serializable"><code class="name flex">
+<span>def <span class="ident">is_serializable</span></span>(<span>instance_or_class)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Test if arg can <a title="serde.serialize" href="#serde.serialize"><code>serialize()</code></a>. Arg must be either an instance of class.</p>
+<pre><code>&gt;&gt;&gt; from dataclasses import dataclass
+&gt;&gt;&gt; from serde import serialize, is_serializable
+&gt;&gt;&gt;
+&gt;&gt;&gt; @serialize
+... @dataclass
+... class Foo:
+...     pass
+&gt;&gt;&gt;
+&gt;&gt;&gt; is_serializable(Foo)
+True
+&gt;&gt;&gt;
+</code></pre></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def is_serializable(instance_or_class: Any) -&gt; bool:
+    &#34;&#34;&#34;
+    Test if arg can `serialize`. Arg must be either an instance of class.
+
+    &gt;&gt;&gt; from dataclasses import dataclass
+    &gt;&gt;&gt; from serde import serialize, is_serializable
+    &gt;&gt;&gt;
+    &gt;&gt;&gt; @serialize
+    ... @dataclass
+    ... class Foo:
+    ...     pass
+    &gt;&gt;&gt;
+    &gt;&gt;&gt; is_serializable(Foo)
+    True
+    &gt;&gt;&gt;
+    &#34;&#34;&#34;
+    return hasattr(instance_or_class, &#39;__serde_serialize__&#39;)</code></pre>
+</details>
+</dd>
+<dt id="serde.serialize"><code class="name flex">
+<span>def <span class="ident">serialize</span></span>(<span>rename_all=None)</span>
+</code></dt>
+<dd>
+<section class="desc"><p><a title="serde.serialize" href="#serde.serialize"><code>serialize()</code></a> decorator. A dataclass with this decorator can be serialized
+into an object in various data format such as JSON and MsgPack.</p>
+<pre><code>&gt;&gt;&gt; from serde import serialize
+&gt;&gt;&gt; from serde.json import to_json
+&gt;&gt;&gt;
+&gt;&gt;&gt; # Mark the class serializable.
+&gt;&gt;&gt; @serialize
+... @dataclass
+... class Foo:
+...     i: int
+...     s: str
+...     f: float
+...     b: bool
+&gt;&gt;&gt;
+&gt;&gt;&gt; to_json(Foo(i=10, s='foo', f=100.0, b=True))
+'{"i": 10, "s": "foo", "f": 100.0, "b": true}'
+&gt;&gt;&gt;
+</code></pre>
+<p>Additionally, <a title="serde.serialize" href="#serde.serialize"><code>serialize()</code></a> supports case conversion. Pass case name in
+<a title="serde.serialize" href="#serde.serialize"><code>serialize()</code></a> decorator as shown below.</p>
+<pre><code>&gt;&gt;&gt; @serialize(rename_all = 'camelcase')
+... @dataclass
+... class Foo:
+...     int_field: int
+...     str_field: str
+&gt;&gt;&gt;
+&gt;&gt;&gt; to_json(Foo(int_field=10, str_field='foo'))
+'{"intField": 10, "strField": "foo"}'
+&gt;&gt;&gt;
+</code></pre></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def serialize(_cls=None, rename_all: Optional[str] = None) -&gt; Type:
+    &#34;&#34;&#34;
+    `serialize` decorator. A dataclass with this decorator can be serialized
+    into an object in various data format such as JSON and MsgPack.
+
+    &gt;&gt;&gt; from serde import serialize
+    &gt;&gt;&gt; from serde.json import to_json
+    &gt;&gt;&gt;
+    &gt;&gt;&gt; # Mark the class serializable.
+    &gt;&gt;&gt; @serialize
+    ... @dataclass
+    ... class Foo:
+    ...     i: int
+    ...     s: str
+    ...     f: float
+    ...     b: bool
+    &gt;&gt;&gt;
+    &gt;&gt;&gt; to_json(Foo(i=10, s=&#39;foo&#39;, f=100.0, b=True))
+    &#39;{&#34;i&#34;: 10, &#34;s&#34;: &#34;foo&#34;, &#34;f&#34;: 100.0, &#34;b&#34;: true}&#39;
+    &gt;&gt;&gt;
+
+    Additionally, `serialize` supports case conversion. Pass case name in
+    `serialize` decorator as shown below.
+
+    &gt;&gt;&gt; @serialize(rename_all = &#39;camelcase&#39;)
+    ... @dataclass
+    ... class Foo:
+    ...     int_field: int
+    ...     str_field: str
+    &gt;&gt;&gt;
+    &gt;&gt;&gt; to_json(Foo(int_field=10, str_field=&#39;foo&#39;))
+    &#39;{&#34;intField&#34;: 10, &#34;strField&#34;: &#34;foo&#34;}&#39;
+    &gt;&gt;&gt;
+    &#34;&#34;&#34;
+
+    @functools.wraps(_cls)
+    def wrap(cls: Type[T]) -&gt; Type[T]:
+        if not hasattr(cls, HIDDEN_NAME):
+            setattr(cls, HIDDEN_NAME, Hidden())
+
+        def serialize(self, ser, **opts) -&gt; None:
+            return ser.serialize(self, **opts)
+
+        setattr(cls, SE_NAME, serialize)
+
+        g: Dict[str, Any] = globals().copy()
+        for f in sefields(cls):
+            if f.skip_if:
+                g[f.skip_if.mangled] = f.skip_if
+        g[&#39;__custom_serializer__&#39;] = custom
+        cls = se_func(cls, TO_ITER, render_astuple(cls, custom), g)
+        cls = se_func(cls, TO_DICT, render_asdict(cls, rename_all, custom), g)
+        return cls
+
+    if _cls is None:
+        return wrap
+
+    return wrap(_cls)</code></pre>
+</details>
+</dd>
+</dl>
 </section>
 <section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="serde.SerdeError"><code class="flex name class">
+<span>class <span class="ident">SerdeError</span></span>
+<span>(</span><span>...)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Serde error class.</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class SerdeError(TypeError):
+    &#34;&#34;&#34;
+    Serde error class.
+    &#34;&#34;&#34;</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>builtins.TypeError</li>
+<li>builtins.Exception</li>
+<li>builtins.BaseException</li>
+</ul>
+</dd>
+</dl>
 </section>
 </article>
 <nav id="sidebar">
@@ -290,7 +680,6 @@ __version__ = &#39;0.1.0&#39;</code></pre>
 <ul>
 <li><code><a title="serde.compat" href="compat.html">serde.compat</a></code></li>
 <li><code><a title="serde.core" href="core.html">serde.core</a></code></li>
-<li><code><a title="serde.csv" href="csv.html">serde.csv</a></code></li>
 <li><code><a title="serde.de" href="de.html">serde.de</a></code></li>
 <li><code><a title="serde.inspect" href="inspect.html">serde.inspect</a></code></li>
 <li><code><a title="serde.json" href="json.html">serde.json</a></code></li>
@@ -301,11 +690,30 @@ __version__ = &#39;0.1.0&#39;</code></pre>
 <li><code><a title="serde.yaml" href="yaml.html">serde.yaml</a></code></li>
 </ul>
 </li>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="two-column">
+<li><code><a title="serde.asdict" href="#serde.asdict">asdict</a></code></li>
+<li><code><a title="serde.astuple" href="#serde.astuple">astuple</a></code></li>
+<li><code><a title="serde.deserialize" href="#serde.deserialize">deserialize</a></code></li>
+<li><code><a title="serde.from_dict" href="#serde.from_dict">from_dict</a></code></li>
+<li><code><a title="serde.from_tuple" href="#serde.from_tuple">from_tuple</a></code></li>
+<li><code><a title="serde.is_deserializable" href="#serde.is_deserializable">is_deserializable</a></code></li>
+<li><code><a title="serde.is_serializable" href="#serde.is_serializable">is_serializable</a></code></li>
+<li><code><a title="serde.serialize" href="#serde.serialize">serialize</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="serde.SerdeError" href="#serde.SerdeError">SerdeError</a></code></h4>
+</li>
+</ul>
+</li>
 </ul>
 </nav>
 </main>
 <footer id="footer">
-<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.7.2.dev1+gaf23904</a>.</p>
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.7.4</a>.</p>
 </footer>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
 <script>hljs.initHighlightingOnLoad()</script>

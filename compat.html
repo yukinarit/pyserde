@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
-<meta name="generator" content="pdoc 0.7.2.dev1+gaf23904" />
+<meta name="generator" content="pdoc 0.7.4" />
 <title>serde.compat API documentation</title>
 <meta name="description" content="" />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
@@ -26,9 +26,11 @@
 </summary>
 <pre><code class="python">from dataclasses import fields, is_dataclass
 from itertools import zip_longest
-from typing import Iterator, Optional, Tuple, Type, TypeVar, Union
+from typing import Iterator, List, Optional, Tuple, Type, TypeVar, Union
 
 from typing_inspect import get_args, get_origin, is_optional_type, is_union_type
+
+__all__: List = []
 
 T = TypeVar(&#39;T&#39;)
 
@@ -211,318 +213,6 @@ def assert_type(typ: Type, obj, throw=False) -&gt; None:
 <section>
 </section>
 <section>
-<h2 class="section-title" id="header-functions">Functions</h2>
-<dl>
-<dt id="serde.compat.assert_type"><code class="name flex">
-<span>def <span class="ident">assert_type</span></span>(<span>typ, obj, throw=False)</span>
-</code></dt>
-<dd>
-<section class="desc"></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def assert_type(typ: Type, obj, throw=False) -&gt; None:
-    if not isinstance(obj, typ):
-        if throw:
-            raise ValueError(f&#39;{obj} is not instance of {typ}&#39;)</code></pre>
-</details>
-</dd>
-<dt id="serde.compat.is_dict"><code class="name flex">
-<span>def <span class="ident">is_dict</span></span>(<span>typ)</span>
-</code></dt>
-<dd>
-<section class="desc"><p>Test if the type is <code>typing.Dict</code>.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def is_dict(typ: Type) -&gt; bool:
-    &#34;&#34;&#34;
-    Test if the type is `typing.Dict`.
-    &#34;&#34;&#34;
-    try:
-        return issubclass(get_origin(typ), dict)
-    except TypeError:
-        return isinstance(typ, dict)</code></pre>
-</details>
-</dd>
-<dt id="serde.compat.is_list"><code class="name flex">
-<span>def <span class="ident">is_list</span></span>(<span>typ)</span>
-</code></dt>
-<dd>
-<section class="desc"><p>Test if the type is <code>typing.List</code>.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def is_list(typ: Type) -&gt; bool:
-    &#34;&#34;&#34;
-    Test if the type is `typing.List`.
-    &#34;&#34;&#34;
-    try:
-        return issubclass(get_origin(typ), list)
-    except TypeError:
-        return isinstance(typ, list)</code></pre>
-</details>
-</dd>
-<dt id="serde.compat.is_none"><code class="name flex">
-<span>def <span class="ident">is_none</span></span>(<span>typ)</span>
-</code></dt>
-<dd>
-<section class="desc"><pre><code>&gt;&gt;&gt; is_none(int)
-False
-&gt;&gt;&gt; is_none(type(None))
-True
-&gt;&gt;&gt; is_none(None)
-False
-</code></pre></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def is_none(typ: Type) -&gt; bool:
-    &#34;&#34;&#34;
-    &gt;&gt;&gt; is_none(int)
-    False
-    &gt;&gt;&gt; is_none(type(None))
-    True
-    &gt;&gt;&gt; is_none(None)
-    False
-    &#34;&#34;&#34;
-    return typ is type(None)  # noqa</code></pre>
-</details>
-</dd>
-<dt id="serde.compat.is_opt"><code class="name flex">
-<span>def <span class="ident">is_opt</span></span>(<span>typ)</span>
-</code></dt>
-<dd>
-<section class="desc"><p>Test if the type is <code>typing.Optional</code>.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def is_opt(typ: Type) -&gt; bool:
-    &#34;&#34;&#34;
-    Test if the type is `typing.Optional`.
-    &#34;&#34;&#34;
-    args = get_args(typ)
-    return is_optional_type(typ) and len(args) == 2 and not is_none(args[0]) and is_none(args[1])</code></pre>
-</details>
-</dd>
-<dt id="serde.compat.is_primitive"><code class="name flex">
-<span>def <span class="ident">is_primitive</span></span>(<span>typ)</span>
-</code></dt>
-<dd>
-<section class="desc"><p>Test if the type is primitive.</p>
-<pre><code>&gt;&gt;&gt; is_primitive(int)
-True
-&gt;&gt;&gt; is_primitive(float)
-True
-&gt;&gt;&gt; class CustomInt(int):
-...     pass
-&gt;&gt;&gt; is_primitive(CustomInt)
-True
-</code></pre></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def is_primitive(typ: Type) -&gt; bool:
-    &#34;&#34;&#34;
-    Test if the type is primitive.
-
-    &gt;&gt;&gt; is_primitive(int)
-    True
-    &gt;&gt;&gt; is_primitive(float)
-    True
-    &gt;&gt;&gt; class CustomInt(int):
-    ...     pass
-    &gt;&gt;&gt; is_primitive(CustomInt)
-    True
-    &#34;&#34;&#34;
-    try:
-        return any(issubclass(typ, ty) for ty in PRIMITIVES)
-    except TypeError:
-        return any(isinstance(typ, ty) for ty in PRIMITIVES)</code></pre>
-</details>
-</dd>
-<dt id="serde.compat.is_tuple"><code class="name flex">
-<span>def <span class="ident">is_tuple</span></span>(<span>typ)</span>
-</code></dt>
-<dd>
-<section class="desc"><p>Test if the type is <code>typing.Tuple</code>.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def is_tuple(typ: Type) -&gt; bool:
-    &#34;&#34;&#34;
-    Test if the type is `typing.Tuple`.
-    &#34;&#34;&#34;
-    try:
-        return issubclass(get_origin(typ), tuple)
-    except TypeError:
-        return isinstance(typ, tuple)</code></pre>
-</details>
-</dd>
-<dt id="serde.compat.is_union"><code class="name flex">
-<span>def <span class="ident">is_union</span></span>(<span>typ)</span>
-</code></dt>
-<dd>
-<section class="desc"><p>Test if the type is <code>typing.Union</code>.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def is_union(typ: Type) -&gt; bool:
-    &#34;&#34;&#34;
-    Test if the type is `typing.Union`.
-    &#34;&#34;&#34;
-    return is_union_type(typ) and not is_opt(typ)</code></pre>
-</details>
-</dd>
-<dt id="serde.compat.iter_types"><code class="name flex">
-<span>def <span class="ident">iter_types</span></span>(<span>cls)</span>
-</code></dt>
-<dd>
-<section class="desc"><p>Iterate field types recursively.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def iter_types(cls: Type) -&gt; Iterator[Type]:
-    &#34;&#34;&#34;
-    Iterate field types recursively.
-    &#34;&#34;&#34;
-    if is_dataclass(cls):
-        yield cls
-        for f in fields(cls):
-            yield from iter_types(f.type)
-    elif isinstance(cls, str):
-        yield cls
-    elif is_opt(cls):
-        yield from iter_types(type_args(cls)[0])
-    elif is_union(cls):
-        for arg in type_args(cls):
-            yield from iter_types(arg)
-    elif is_list(cls):
-        yield from iter_types(type_args(cls)[0])
-    elif is_tuple(cls):
-        for arg in type_args(cls):
-            yield from iter_types(arg)
-    elif is_dict(cls):
-        yield from iter_types(type_args(cls)[0])
-        yield from iter_types(type_args(cls)[1])
-    else:
-        yield cls</code></pre>
-</details>
-</dd>
-<dt id="serde.compat.type_args"><code class="name flex">
-<span>def <span class="ident">type_args</span></span>(<span>cls)</span>
-</code></dt>
-<dd>
-<section class="desc"><p>Wrapepr to suppress type error for accessing private members.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def type_args(cls: Type):
-    &#34;&#34;&#34;
-    Wrapepr to suppress type error for accessing private members.
-    &#34;&#34;&#34;
-    return cls.__args__  # type: ignore</code></pre>
-</details>
-</dd>
-<dt id="serde.compat.typename"><code class="name flex">
-<span>def <span class="ident">typename</span></span>(<span>typ)</span>
-</code></dt>
-<dd>
-<section class="desc"><pre><code>&gt;&gt;&gt; from typing import List, Dict
-&gt;&gt;&gt; typename(int)
-'int'
-&gt;&gt;&gt; class Foo: pass
-&gt;&gt;&gt; typename(Foo)
-'Foo'
-&gt;&gt;&gt; typename(List[Foo])
-'List[Foo]'
-&gt;&gt;&gt; typename(Dict[str, Foo])
-'Dict[str, Foo]'
-&gt;&gt;&gt; typename(Tuple[int, str, Foo, List[int], Dict[str, Foo]])
-'Tuple[int, str, Foo, List[int], Dict[str, Foo]]'
-&gt;&gt;&gt; typename(Optional[List[Foo]])
-'Optional[List[Foo]]'
-&gt;&gt;&gt; typename(Union[Optional[Foo], List[Foo], Union[str, int]])
-'Union[Optional[Foo], List[Foo], str, int]'
-</code></pre></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def typename(typ) -&gt; str:
-    &#34;&#34;&#34;
-    &gt;&gt;&gt; from typing import List, Dict
-    &gt;&gt;&gt; typename(int)
-    &#39;int&#39;
-    &gt;&gt;&gt; class Foo: pass
-    &gt;&gt;&gt; typename(Foo)
-    &#39;Foo&#39;
-    &gt;&gt;&gt; typename(List[Foo])
-    &#39;List[Foo]&#39;
-    &gt;&gt;&gt; typename(Dict[str, Foo])
-    &#39;Dict[str, Foo]&#39;
-    &gt;&gt;&gt; typename(Tuple[int, str, Foo, List[int], Dict[str, Foo]])
-    &#39;Tuple[int, str, Foo, List[int], Dict[str, Foo]]&#39;
-    &gt;&gt;&gt; typename(Optional[List[Foo]])
-    &#39;Optional[List[Foo]]&#39;
-    &gt;&gt;&gt; typename(Union[Optional[Foo], List[Foo], Union[str, int]])
-    &#39;Union[Optional[Foo], List[Foo], str, int]&#39;
-    &#34;&#34;&#34;
-    if is_opt(typ):
-        return f&#39;Optional[{typename(type_args(typ)[0])}]&#39;
-    elif is_union(typ):
-        return f&#39;Union[{&#34;, &#34;.join([typename(e) for e in union_args(typ)])}]&#39;
-    elif is_list(typ):
-        et = typename(type_args(typ)[0])
-        return f&#39;List[{et}]&#39;
-    elif is_dict(typ):
-        kt = typename(type_args(typ)[0])
-        vt = typename(type_args(typ)[1])
-        return f&#39;Dict[{kt}, {vt}]&#39;
-    elif is_tuple(typ):
-        return f&#39;Tuple[{&#34;, &#34;.join([typename(e) for e in type_args(typ)])}]&#39;
-    else:
-        return typ.__name__</code></pre>
-</details>
-</dd>
-<dt id="serde.compat.union_args"><code class="name flex">
-<span>def <span class="ident">union_args</span></span>(<span>typ)</span>
-</code></dt>
-<dd>
-<section class="desc"></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def union_args(typ: Union) -&gt; Tuple:
-    if not is_union(typ):
-        raise TypeError(f&#39;{typ} is not Union&#39;)
-    args = type_args(typ)
-    if len(args) == 1:
-        return args[0]
-    it = iter(args)
-    types = []
-    for (i1, i2) in zip_longest(it, it):
-        if not i2:
-            types.append(i1)
-        elif is_none(i2):
-            types.append(Optional[i1])
-        else:
-            types.extend((i1, i2))
-    return tuple(types)</code></pre>
-</details>
-</dd>
-</dl>
 </section>
 <section>
 </section>
@@ -538,27 +228,11 @@ True
 <li><code><a title="serde" href="index.html">serde</a></code></li>
 </ul>
 </li>
-<li><h3><a href="#header-functions">Functions</a></h3>
-<ul class="two-column">
-<li><code><a title="serde.compat.assert_type" href="#serde.compat.assert_type">assert_type</a></code></li>
-<li><code><a title="serde.compat.is_dict" href="#serde.compat.is_dict">is_dict</a></code></li>
-<li><code><a title="serde.compat.is_list" href="#serde.compat.is_list">is_list</a></code></li>
-<li><code><a title="serde.compat.is_none" href="#serde.compat.is_none">is_none</a></code></li>
-<li><code><a title="serde.compat.is_opt" href="#serde.compat.is_opt">is_opt</a></code></li>
-<li><code><a title="serde.compat.is_primitive" href="#serde.compat.is_primitive">is_primitive</a></code></li>
-<li><code><a title="serde.compat.is_tuple" href="#serde.compat.is_tuple">is_tuple</a></code></li>
-<li><code><a title="serde.compat.is_union" href="#serde.compat.is_union">is_union</a></code></li>
-<li><code><a title="serde.compat.iter_types" href="#serde.compat.iter_types">iter_types</a></code></li>
-<li><code><a title="serde.compat.type_args" href="#serde.compat.type_args">type_args</a></code></li>
-<li><code><a title="serde.compat.typename" href="#serde.compat.typename">typename</a></code></li>
-<li><code><a title="serde.compat.union_args" href="#serde.compat.union_args">union_args</a></code></li>
-</ul>
-</li>
 </ul>
 </nav>
 </main>
 <footer id="footer">
-<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.7.2.dev1+gaf23904</a>.</p>
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.7.4</a>.</p>
 </footer>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
 <script>hljs.initHighlightingOnLoad()</script>
