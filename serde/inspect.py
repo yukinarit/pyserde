@@ -1,5 +1,5 @@
 """
-pyserde inspect tool.
+pyserde inspection tool.
 
 USAGE:
 
