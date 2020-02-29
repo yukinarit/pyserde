@@ -1,14 +1,24 @@
 import json
 import dacite
-from dataclasses import asdict
+import data
 from typing import Type
-from data import args_sm
+from dataclasses_class import SMALL, MEDIUM, Small, Medium
+from functools import partial
+from runner import Size, Runner
 
 
 def de(cls: Type, data: str):
     return dacite.from_dict(data_class=cls, data=json.loads(data))
 
 
-def se(cls: Type, **kwargs):
-    c = cls(**args_sm)
-    return json.dumps(asdict(c))
+def new(size: Size) -> Runner:
+    name = 'attrs'
+    if size == Size.Small:
+        unp = SMALL
+        pac = data.SMALL
+        cls = Small
+    elif size == Size.Medium:
+        unp = MEDIUM
+        pac = data.MEDIUM
+        cls = Medium
+    return Runner(name, unp, None, partial(de, cls, pac), None, None)

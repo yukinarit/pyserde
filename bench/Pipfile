@@ -12,8 +12,10 @@ pyserde = {path = "../", editable = true}
 
 [dev-packages]
 dacite = "*"
-dataclasses-json = "*"
 mashumaro = "*"
+marshmallow = "~=3.2"
+attrs = "*"
+cattrs = "*"
 seaborn = "==0.9.0"
 matplotlib = "==3.1.1"
 numpy = "==1.17.2"

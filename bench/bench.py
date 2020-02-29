@@ -1,34 +1,29 @@
 """
 bench.py - Benchmarking pyserde.
-
-Benchmarking pyserde as well as
-
-1. raw
-Without any dataclass based library, manually serialize and deserialize.
-`raw` should be fastest in theory, However it is too verbose to write in
-production grade codebase at the same time. pyserde's performance goal is
-to run as fast as `raw`.
 """
-import functools
 import json
-import sys
 import timeit
 from dataclasses import dataclass, field
+from functools import partial
 from pathlib import Path
 from platform import python_implementation
-from typing import List, Tuple
+from typing import Any, Callable, Dict, List, Tuple, Union
 
 import click
 
 import data
 import dataclasses_class as dc
-import pyserde_class as ps
-import raw
+import pyserde_class as ps  # noqa: F401
+import raw  # noqa: F401
+from runner import Size
 
 try:
     if python_implementation() != 'PyPy':
-        import dacite_class as da
-        import mashumaro_class as mc
+        import dacite_class as da  # noqa: F401
+        import mashumaro_class as mc  # noqa: F401
+        import marshmallow_class as ms  # noqa: F401
+        import attrs_class as at  # noqa: F401
+        import cattrs_class as ca  # noqa: F401
         import seaborn as sns
         import matplotlib.pyplot as plt
         import numpy as np
@@ -59,28 +54,32 @@ class Bencher:
     repeat: int = 5
     result: List[Tuple[str, float]] = field(default_factory=list)
 
-    def run(self, name, func, *args, expected=None, **kwargs):
+    def run(self, name, func, expected=None, **kwargs):
         """
         Run benchmark.
         """
-        if args or kwargs:
-            f = functools.partial(func, *args, **kwargs)
+        if kwargs:
+            f = partial(func, **kwargs)
         else:
             f = func
+        if not f:
+            return
 
         # Evaluate result only once.
         if expected:
             actual = f()
-            if actual != expected:
-                click.echo((f'AssertionError\n' f'Expected:\n{expected}\n' f'Actual:\n{actual}'))
-                sys.exit(1)
+            if callable(expected):
+                expected(actual)
+            else:
+                assert actual == expected, f'Expected: {expected}, Actual: {actual}'
 
         times = timeit.repeat(f, number=self.number, repeat=self.repeat)
         self.result.append((name, sum(times) / len(times)))
         times = ', '.join([f'{t:.6f}' for t in times])
         click.echo(f'{name:40s}\t{times}')
+        self.draw_chart()
 
-    def __del__(self):
+    def draw_chart(self):
         if self.opt.chart:
             x = np.array([r[0] for r in self.result])
             y = np.array([r[1] for r in self.result])
@@ -95,67 +94,59 @@ class Bencher:
                     xytext=(0, 10),
                     textcoords='offset points',
                 )
+            plt.xticks(rotation=20)
             plt.savefig(str(self.opt.output / f'{self.name}.png'))
             plt.close()
 
 
-def de_small(opt: Opt):
-    bench = Bencher('deserialize_small', opt)
+runners_base = ('raw', 'dc', 'ps')
+
+runners_extra = ('da', 'mc', 'ms', 'at', 'ca')
+
+
+def run(opt: Opt, name: str, tc: 'TestCase'):
+    """
+    Run benchmark.
+    """
+    bench = Bencher(f'{name}-{tc.size.name.lower()}', opt, tc.number)
     click.echo(f'--- {bench.name} ---')
-    bench.run('raw', raw.de_small)
-    bench.run('pyserde', ps.de, ps.Small, data.SMALL)
-    if opt.full:
-        bench.run('dacite', da.de, raw.Small, data.SMALL)
-        # bench.run('dataclasses_json', dj.de, dj.Small, data.SMALL)
-        bench.run('mashumaro', mc.de, mc.Small, data.SMALL)
+    runners = runners_base + runners_extra if opt.full else runners_base
+    for runner_name in runners:
+        runner = globals()[runner_name].new(tc.size)
+        bench.run(runner.name, getattr(runner, name), tc.expected)
 
 
-def de_medium(opt: Opt):
-    bench = Bencher('deserialize_medium', opt, number=1000)
-    click.echo(f'--- {bench.name} ---')
-    bench.run('raw', raw.de_medium)
-    bench.run('pyserde', ps.de, ps.Medium, data.MEDIUM)
-    if opt.full:
-        bench.run('dacite', da.de, ps.Medium, data.MEDIUM)
-        # bench.run('dataclasses_json', dj.de, dj.Medium, data.MEDIUM)
-        bench.run('mashumaro', mc.de, mc.Medium, data.MEDIUM)
+@dataclass
+class TestCase:
+    size: Size
+    expected: Union[Any, Callable[[Any], bool]]
+    number: int
+
+    @classmethod
+    def make(cls, size: Size, expected=None, number=10000) -> Dict[str, 'TestCase']:
+        return {size: TestCase(size, expected, number)}
 
 
-def se_small(opt: Opt):
-    bench = Bencher('serialize_small', opt)
-    click.echo(f'--- {bench.name} ---')
-    bench.run('raw', raw.se_small, raw.Small, **data.args_sm)
-    bench.run('pyserde', ps.se, ps.Small, **data.args_sm)
-    if opt.full:
-        bench.run('dacite', da.se, ps.Small, **data.args_sm)
-        # bench.run('dataclasses_json', dj.se, dj.Small, **data.args_sm)
-        bench.run('mashumaro', mc.se, mc.Small, **data.args_sm)
+def equals_small(x):
+    y = dc.SMALL
+    assert x.i == y.i and x.s == y.s and x.f == y.f and x.b == y.b, f'Expected: {x}, Actual: {y}'
 
 
-def astuple_small(opt: Opt):
-    bench = Bencher('astuple_small', opt)
-    click.echo(f'--- {bench.name} ---')
-    exp = tuple(json.loads(data.SMALL).values())
-    bench.run('raw', raw.astuple_small, raw.Small(*exp), expected=exp)
-    bench.run('dataclass', dc.astuple, dc.Small(*exp), expected=exp)
-    bench.run('pyserde', ps.astuple, ps.Small(*exp), expected=exp)
+def equals_medium(x):
+    y = dc.MEDIUM
+    for (xs, ys) in zip(x.inner, y.inner):
+        assert xs.i == xs.i and xs.s == ys.s and xs.f == ys.f and xs.b == ys.b, f'Expected: {x}, Actual: {y}'
 
 
-def astuple_medium(opt: Opt):
-    bench = Bencher('astuple medium', opt, number=1000)
-    click.echo(f'--- {bench.name} ---')
-    exp = data.MEDIUM_TUPLE
-    bench.run('raw', raw.astuple_medium, raw.Medium([dc.Small(*data.SMALL_TUPLE)] * 50), expected=exp)
-    bench.run('dataclass', dc.astuple, dc.Medium([dc.Small(*data.SMALL_TUPLE)] * 50), expected=exp)
-    bench.run('pyserde', ps.astuple, ps.Medium([ps.Small(*data.SMALL_TUPLE)] * 50), expected=exp)
-
-
-def asdict(opt: Opt):
-    bench = Bencher('asdict_small', opt)
-    click.echo(f'--- {bench.name} ---')
-    exp = {'i': 10, 's': 'foo', 'f': 100.0, 'b': True}
-    bench.run('dataclass', dc.asdict, dc.Small(10, 'foo', 100.0, True), expected=exp)
-    bench.run('pyserde', ps.asdict, ps.Small(10, 'foo', 100.0, True), expected=exp)
+TESTCASES = {
+    'se': {
+        **TestCase.make(Size.Small, lambda x: json.loads(x) == json.loads(data.SMALL)),
+        **TestCase.make(Size.Medium, lambda x: json.loads(x) == json.loads(data.MEDIUM), number=500),
+    },
+    'de': {**TestCase.make(Size.Small, equals_small), **TestCase.make(Size.Medium, equals_medium, number=500)},
+    'astuple': {**TestCase.make(Size.Small, data.SMALL_TUPLE), **TestCase.make(Size.Medium, number=500)},
+    'asdict': {**TestCase.make(Size.Small, data.SMALL_DICT), **TestCase.make(Size.Medium, number=500)},
+}
 
 
 @click.command()
@@ -167,23 +158,17 @@ def asdict(opt: Opt):
 )
 def main(full: bool, test: str, chart: bool, output: Path):
     """
-    bench.py - Benchmarking pyserde.
+    bench.py - Benchmarking pyserde and other libraries.
     """
     opt = Opt(full, chart, output)
-    if test:
-        f = globals().get(test, None)
-        if f:
-            f(opt)
-        else:
-            click.echo(f'Test not found: \'{test}\'')
-            sys.exit(1)
-    else:
-        de_small(opt)
-        de_medium(opt)
-        se_small(opt)
-        astuple_small(opt)
-        astuple_medium(opt)
-        asdict(opt)
+    tests = (test,) if test else TESTCASES
+    for test in tests:
+        for size in Size:
+            try:
+                tc = TESTCASES[test][size]
+                run(opt, test, tc)
+            except KeyError:
+                pass
 
 
 if __name__ == '__main__':
