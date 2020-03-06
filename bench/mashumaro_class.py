@@ -1,7 +1,9 @@
 import mashumaro
+import data
 from dataclasses import dataclass, field
-from typing import List, Type
-from data import args_sm
+from typing import List, Type, Union
+from functools import partial
+from runner import Size, Runner
 
 
 @dataclass
@@ -17,10 +19,27 @@ class Medium(mashumaro.DataClassJSONMixin):
     inner: List[Small] = field(default_factory=list)
 
 
+SMALL = Small(**data.args_sm)
+
+MEDIUM = Medium([Small(**d) for d in data.args_md])
+
+
+def new(size: Size) -> Runner:
+    name = 'mashmaro'
+    if size == Size.Small:
+        unp = SMALL
+        pac = data.SMALL
+        cls = Small
+    elif size == Size.Medium:
+        unp = MEDIUM
+        pac = data.MEDIUM
+        cls = Medium
+    return Runner(name, unp, partial(se, unp), partial(de, cls, pac), None, None)
+
+
+def se(obj: Union[Small, Medium]):
+    return obj.to_json()
+
+
 def de(cls: Type, data: str):
     return cls.from_json(data)
-
-
-def se(cls: Type, **kwargs):
-    c = cls(**args_sm)
-    return c.to_json()

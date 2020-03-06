@@ -1,8 +1,11 @@
 import serde
 import serde.json
+import data
 from dataclasses import dataclass, field
-from typing import List, Dict, Tuple, Type
+from typing import List, Type, Union
 from tests.data import Pri
+from functools import partial
+from runner import Size, Runner
 
 Small = Pri
 
@@ -14,43 +17,26 @@ class Medium:
     inner: List[Small] = field(default_factory=list)
 
 
-@serde.serialize
-@serde.deserialize
-@dataclass
-class SerdeMedium:
-    i: int
-    s: str
-    f: float
-    b: bool
-    i2: int
-    s2: str
-    f2: float
-    b2: bool
-    i3: int
-    s3: str
-    f3: float
-    b3: bool
-    i4: int
-    s4: str
-    f4: float
-    b4: bool
-    i5: int
-    s5: str
-    f5: float
-    b5: bool
+SMALL = Small(**data.args_sm)
+
+MEDIUM = Medium([Small(**d) for d in data.args_md])
 
 
-@serde.serialize
-@serde.deserialize
-@dataclass
-class SerdePriContainer:
-    v: List[int] = field(default_factory=list)
-    d: Dict[str, int] = field(default_factory=dict)
-    t: Tuple[bool] = field(default_factory=tuple)
+def new(size: Size) -> Runner:
+    name = 'pyserde'
+    if size == Size.Small:
+        unp = SMALL
+        pac = data.SMALL
+        cls = Small
+    elif size == Size.Medium:
+        unp = MEDIUM
+        pac = data.MEDIUM
+        cls = Medium
+    return Runner(name, unp, partial(se, unp), partial(de, cls, pac), partial(astuple, unp), partial(asdict, unp))
 
 
-def se(cls: Type, **kwargs):
-    return serde.json.to_json(cls(**kwargs))
+def se(obj: Union[Small, Medium]):
+    return serde.json.to_json(obj)
 
 
 def de(cls: Type, data: str):

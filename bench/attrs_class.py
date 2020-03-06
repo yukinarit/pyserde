@@ -1,13 +1,12 @@
-import json
-import dataclasses
+import attr
 import data
-from dataclasses import dataclass, field
+import json
 from typing import List, Union
 from functools import partial
 from runner import Size, Runner
 
 
-@dataclass
+@attr.s(auto_attribs=True)
 class Small:
     i: int
     s: str
@@ -15,9 +14,9 @@ class Small:
     b: bool
 
 
-@dataclass
+@attr.s(auto_attribs=True)
 class Medium:
-    inner: List[Small] = field(default_factory=list)
+    inner: List[Small] = attr.Factory(list)
 
 
 SMALL = Small(**data.args_sm)
@@ -26,7 +25,7 @@ MEDIUM = Medium([Small(**d) for d in data.args_md])
 
 
 def new(size: Size) -> Runner:
-    name = 'dataclass'
+    name = 'attrs'
     if size == Size.Small:
         unp = SMALL
     elif size == Size.Medium:
@@ -35,12 +34,12 @@ def new(size: Size) -> Runner:
 
 
 def se(obj: Union[Small, Medium]):
-    return json.dumps(asdict(obj))
+    return json.dumps(attr.asdict(obj))
 
 
-def astuple(d):
-    return dataclasses.astuple(d)
+def astuple(obj: Union[Small, Medium]):
+    return attr.astuple(obj)
 
 
-def asdict(d):
-    return dataclasses.asdict(d)
+def asdict(obj: Union[Small, Medium]):
+    return attr.asdict(obj)

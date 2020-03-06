@@ -49,19 +49,37 @@ From Json: Foo(i=10, s='foo', f=100.0, b=True)
 
 ## Benchmark
 
-Serialize and Deserialize a [struct](https://github.com/yukinarit/pyserde/blob/master/bench/dataclasses_class.py#L7-L12) in json 10,000 times.
-
 * macOS 10.14 Mojave
 * Intel 2.3GHz 8-core Intel Core i9
 * DDR4 32GB RAM
 
+Serialize and deserialize a [struct](https://github.com/yukinarit/pyserde/blob/master/bench/dataclasses_class.py#L7-L12) into and from json 10,000 times.
+
 | Serialize | Deserialize |
 |-----------|-------------|
-| <img src="https://raw.githubusercontent.com/yukinarit/pyserde/master/bench/charts/serialize_small.png"> | <img src="https://raw.githubusercontent.com/yukinarit/pyserde/master/bench/charts/deserialize_small.png"> |
+| <img src="https://raw.githubusercontent.com/yukinarit/pyserde/master/bench/charts/se-small.png"> | <img src="https://raw.githubusercontent.com/yukinarit/pyserde/master/bench/charts/de-small.png"> |
 
-* `raw`: Manual serialize and deserialize. Fastest in theory.
-* [`dacite`](https://github.com/konradhalas/dacite): Library to crate data class from dictionary.
-* [`mashumaro`](https://github.com/Fatal1ty/mashumaro): Another seralization library based on dataclass.
+Convert the struct into tuple and dictionary representation.
+
+| astuple | asdict|
+|-----------|-------------|
+| <img src="https://raw.githubusercontent.com/yukinarit/pyserde/master/bench/charts/astuple-small.png"> | <img src="https://raw.githubusercontent.com/yukinarit/pyserde/master/bench/charts/asdict-small.png"> |
+
+* `raw`: Serialize and deserialize manually. Fastest in theory.
+* `dataclass`: Serialize using dataclass's asdict.
+* `pyserde`: This library.
+* [`dacite`](https://github.com/konradhalas/dacite): Simple creation of data classes from dictionaries.
+* [`mashumaro`](https://github.com/Fatal1ty/mashumaro): Fast and well tested serialization framework on top of dataclasses.
+* [`marshallow`](https://github.com/marshmallow-code/marshmallow): A lightweight library for converting complex objects to and from simple datatypes.
+* [`attrs`](https://github.com/python-attrs/attrs): Python Classes Without Boilerplate.
+* [`cattrs`](https://github.com/Tinche/cattrs): Complex custom class converters for attrs.
+
+To run benchmark on your environment:
+
+```sh
+cd bench
+pipenv run python bench.py --full
+```
 
 You can check [the benchmark code](bench/bench.py) for more information.
 
