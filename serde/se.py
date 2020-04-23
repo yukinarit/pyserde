@@ -115,6 +115,38 @@ def is_serializable(instance_or_class: Any) -> bool:
     return hasattr(instance_or_class, '__serde_serialize__')
 
 
+def astuple(v):
+    """
+    Convert `serialize` class to `tuple`.
+    """
+    if is_serializable(v):
+        return getattr(v, TO_ITER)()
+    elif is_dataclass(v):
+        return _astuple(v)
+    elif isinstance(v, Dict):
+        return {astuple(k): astuple(v) for k, v in v.items()}
+    elif isinstance(v, (Tuple, List)):
+        return tuple(astuple(e) for e in v)
+    else:
+        return v
+
+
+def asdict(v):
+    """
+    Convert `serialize` class to `dict`.
+    """
+    if is_serializable(v):
+        return getattr(v, TO_DICT)()
+    elif is_dataclass(v):
+        return _asdict(v)
+    elif isinstance(v, Dict):
+        return {asdict(k): asdict(v) for k, v in v.items()}
+    elif isinstance(v, (Tuple, List)):
+        return tuple(asdict(e) for e in v)
+    else:
+        return v
+
+
 def to_dict(o) -> Dict:
     """
     Convert object into dictionary.
@@ -150,38 +182,6 @@ def to_dict(o) -> Dict:
         v = o
 
     return v
-
-
-def astuple(v):
-    """
-    Convert `serialize` class to `tuple`.
-    """
-    if is_serializable(v):
-        return getattr(v, TO_ITER)()
-    elif is_dataclass(v):
-        return _astuple(v)
-    elif isinstance(v, Dict):
-        return tuple(astuple(e) for e in v.values())
-    elif isinstance(v, (Tuple, List)):
-        return tuple(astuple(e) for e in v)
-    else:
-        return v
-
-
-def asdict(v):
-    """
-    Convert `serialize` class to `dict`.
-    """
-    if is_serializable(v):
-        return getattr(v, TO_DICT)()
-    elif is_dataclass(v):
-        return _asdict(v)
-    elif isinstance(v, Dict):
-        return {asdict(k): asdict(v) for k, v in v.items()}
-    elif isinstance(v, (Tuple, List)):
-        return tuple(asdict(e) for e in v)
-    else:
-        return v
 
 
 @dataclass
