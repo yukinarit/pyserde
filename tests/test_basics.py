@@ -2,7 +2,7 @@ import enum
 import json
 import logging
 from dataclasses import dataclass, field, fields
-from typing import Dict, List
+from typing import Dict, List, Tuple
 
 import pytest
 
@@ -257,11 +257,48 @@ def test_msgpack_named():
     assert p == from_msgpack(Pri, d, named=False)
 
 
+def test_from_dict():
+    p = Pri(10, 'foo', 100.0, True)
+    d = {'i': 10, 's': 'foo', 'f': 100.0, 'b': True}
+    assert d == asdict(p)
+    assert p == from_dict(Pri, d)
+
+    p = {'p': Pri(10, 'foo', 100.0, True)}
+    d = {'p': {'i': 10, 's': 'foo', 'f': 100.0, 'b': True}}
+    assert d == asdict(p)
+    assert p == from_dict(Dict[str, Pri], d)
+
+    p = [Pri(10, 'foo', 100.0, True)]
+    d = ({'i': 10, 's': 'foo', 'f': 100.0, 'b': True},)
+    assert d == asdict(p)
+    assert p == from_dict(List[Pri], d)
+
+    p = (Pri(10, 'foo', 100.0, True),)
+    d = ({'i': 10, 's': 'foo', 'f': 100.0, 'b': True},)
+    assert d == asdict(p)
+    assert p == from_dict(Tuple[Pri], d)
+
+
 def test_from_tuple():
     p = Pri(10, 'foo', 100.0, True)
     d = (10, 'foo', 100.0, True)
     assert d == astuple(p)
     assert p == from_tuple(Pri, d)
+
+    p = {'p': Pri(10, 'foo', 100.0, True)}
+    d = {'p': (10, 'foo', 100.0, True)}
+    assert d == astuple(p)
+    assert p == from_tuple(Dict[str, Pri], d)
+
+    p = [Pri(10, 'foo', 100.0, True)]
+    d = ((10, 'foo', 100.0, True),)
+    assert d == astuple(p)
+    assert p == from_tuple(List[Pri], d)
+
+    p = (Pri(10, 'foo', 100.0, True),)
+    d = ((10, 'foo', 100.0, True),)
+    assert d == astuple(p)
+    assert p == from_tuple(Tuple[Pri], d)
 
 
 @pytest.mark.parametrize('se,de', all_formats)
