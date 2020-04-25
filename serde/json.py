@@ -1,3 +1,6 @@
+"""
+Serialize and Deserialize in JSON format.
+"""
 import json
 from typing import Any, Type
 

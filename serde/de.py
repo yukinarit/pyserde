@@ -25,7 +25,13 @@ from .compat import is_dict, is_list, is_opt, is_primitive, is_tuple, is_union, 
 from .core import FROM_DICT, FROM_ITER, HIDDEN_NAME, SETTINGS, Field, Hidden, SerdeError, T, conv, fields, gen
 from .more_types import deserialize as custom
 
-__all__: List = []
+__all__: List = [
+    'deserialize',
+    'is_deserializable',
+    'Deserializer',
+    'from_dict',
+    'from_tuple',
+]
 
 Custom = Optional[Callable[['DeField', Any], Any]]
 
@@ -46,7 +52,6 @@ def deserialize(_cls=None, rename_all: Optional[str] = None) -> Type:
     ...     s: str
     ...     f: float
     ...     b: bool
-    >>>
     >>> from_json(Foo, '{"i": 10, "s": "foo", "f": 100.0, "b": true}')
     Foo(i=10, s='foo', f=100.0, b=True)
 
@@ -60,10 +65,8 @@ def deserialize(_cls=None, rename_all: Optional[str] = None) -> Type:
     ... class RenameAll:
     ...     int_field: int
     ...     str_field: str
-    >>>
     >>> from_json(RenameAll, '{"intField": 10, "strField": "foo"}')
     RenameAll(int_field=10, str_field='foo')
-    >>>
     """
 
     def wrap(cls):
@@ -94,7 +97,6 @@ def is_deserializable(instance_or_class: Any) -> bool:
     >>>
     >>> is_deserializable(Foo)
     True
-    >>>
     """
     return hasattr(instance_or_class, FROM_ITER) or hasattr(instance_or_class, FROM_DICT)
 
@@ -153,7 +155,6 @@ def from_obj(c: Type[T], o: Any, de: Type[Deserializer] = None, strict=True, nam
     >>>
     >>> from_obj(Dict[str, Foo], {'foo1': {'i': 10}, 'foo2': {'i': 20}})
     {'foo1': Foo(i=10), 'foo2': Foo(i=20)}
-    >>>
     """
     thisfunc = functools.partial(from_obj, named=named)
     if de:

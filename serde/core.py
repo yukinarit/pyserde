@@ -1,3 +1,6 @@
+"""
+pyserde core module.
+"""
 import logging
 from dataclasses import _MISSING_TYPE as DEFAULT_MISSING_TYPE
 from dataclasses import Field as DataclassField

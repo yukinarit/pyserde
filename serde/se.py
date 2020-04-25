@@ -19,7 +19,13 @@ from .compat import is_dict, is_list, is_opt, is_primitive, is_tuple, is_union, 
 from .core import HIDDEN_NAME, SE_NAME, SETTINGS, TO_DICT, TO_ITER, Field, Hidden, T, conv, fields, gen
 from .more_types import serialize as custom
 
-__all__: List = []
+__all__: List = [
+    'serialize',
+    'is_serializable',
+    'Serializer',
+    'astuple',
+    'asdict',
+]
 
 Custom = Optional[Callable[[Any], Any]]
 
@@ -55,7 +61,6 @@ def serialize(_cls=None, rename_all: Optional[str] = None) -> Type:
     >>>
     >>> to_json(Foo(i=10, s='foo', f=100.0, b=True))
     '{"i": 10, "s": "foo", "f": 100.0, "b": true}'
-    >>>
 
     Additionally, `serialize` supports case conversion. Pass case name in
     `serialize` decorator as shown below.
@@ -68,7 +73,6 @@ def serialize(_cls=None, rename_all: Optional[str] = None) -> Type:
     >>>
     >>> to_json(Foo(int_field=10, str_field='foo'))
     '{"intField": 10, "strField": "foo"}'
-    >>>
     """
 
     @functools.wraps(_cls)
@@ -110,14 +114,13 @@ def is_serializable(instance_or_class: Any) -> bool:
     >>>
     >>> is_serializable(Foo)
     True
-    >>>
     """
     return hasattr(instance_or_class, '__serde_serialize__')
 
 
 def astuple(v):
     """
-    Convert `serialize` class to `tuple`.
+    Convert class with `serialize` to `tuple`.
     """
     if is_serializable(v):
         return getattr(v, TO_ITER)()
@@ -133,7 +136,7 @@ def astuple(v):
 
 def asdict(v):
     """
-    Convert `serialize` class to `dict`.
+    Convert class with `serialize` to `dict`.
     """
     if is_serializable(v):
         return getattr(v, TO_DICT)()
@@ -309,7 +312,6 @@ class Renderer:
 
         >>> Renderer(TO_ITER).render(SeField(Tuple[str, Foo, int], 'foo'))
         '(foo[0], foo[1].__serde_to_iter__(), foo[2])'
-        >>>
         """
         if is_dataclass(arg.type):
             return self.dataclass(arg)
