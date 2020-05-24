@@ -3,15 +3,9 @@ url = "https://pypi.python.org/simple"
 verify_ssl = true
 name = "pypi"
 
-[requires]
-python_version = "3.6"
-
 [packages]
-pyserde = {path = "../",editable = true}
+pyserde = { path = "../", editable = true }
 toml = "*"
 pytoml = "*"
 requests = "*"
 envclasses = "==0.2.1"
-
-[pipenv]
-allow_prereleases = true

@@ -39,7 +39,7 @@ class Package:
 @dataclass
 class Pipfile:
     source: List[Source]
-    requires: Requires
+    requires: Optional[Requires]
     packages: Dict[str, Union[str, Package]]
 
 

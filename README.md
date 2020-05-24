@@ -101,7 +101,7 @@ class Foo:
     b: bool
 ```
 
-pyserde generates methods necessary for serialization by `@serialize` and methods necessary for deserialization by `@deserialize` when a class is loaded into python interpreter. Generation occurs exactly only once and there is no overhead when you actually use the generated methods. Now your class is serializable and deserializable in the data formats supported by pyserde.
+pyserde generates methods necessary for serialization by `@serialize` and methods necessary for deserialization by `@deserialize` when a class is loaded into python interpreter. Generation occurs exactly only once (This is more like how decorator work, not pyserde) and there is no overhead when you actually use the generated methods. Now your class is serializable and deserializable in the data formats supported by pyserde.
 
 Next, import pyserde helper methods. For JSON:
 ```python
