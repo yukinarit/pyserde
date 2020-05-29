@@ -43,7 +43,7 @@ jobs:
           else
             msg="Docs: Update for #$TRAVIS_PULL_REQUEST"
           fi
-          git -c user.name='travis' -c user.email='travis' commit -m $msg
+          git -c user.name='travis' -c user.email='travis' commit -m "$msg"
           git log
           git push -f -q https://yukinarit:$GITHUB_TOKEN@github.com/yukinarit/pyserde gh-pages
           cd "$TRAVIS_BUILD_DIR"
