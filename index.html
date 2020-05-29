@@ -3,42 +3,33 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
-<meta name="generator" content="pdoc 0.7.4" />
+<meta name="generator" content="pdoc 0.8.1" />
 <title>serde API documentation</title>
 <meta name="description" content="pyserde …" />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
-<style>.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{font-weight:bold}#index h4 + ul{margin-bottom:.6em}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
-<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style>.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
 <style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
 </head>
 <body>
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>serde</code></h1>
+<h1 class="title">Package <code>serde</code></h1>
 </header>
 <section id="section-intro">
-<h1 id="pyserde">pyserde</h1>
+<h2 id="pyserde">pyserde</h2>
 <p><a href="https://pypi.org/project/pyserde/"><img alt="image" src="https://img.shields.io/pypi/v/pyserde.svg"></a>
 <a href="https://pypi.org/project/pyserde/"><img alt="image" src="https://img.shields.io/pypi/pyversions/pyserde.svg"></a>
 <a href="https://travis-ci.org/yukinarit/pyserde"><img alt="Build Status" src="https://travis-ci.org/yukinarit/pyserde.svg?branch=master"></a>
 <a href="https://ci.appveyor.com/project/yukinarit/pyserde"><img alt="Build status" src="https://ci.appveyor.com/api/projects/status/w4i5x8x9d4sbxhn2?svg=true"></a>
 <a href="https://coveralls.io/github/yukinarit/pyserde?branch=master"><img alt="Coverage Status" src="https://coveralls.io/repos/github/yukinarit/pyserde/badge.svg?branch=master"></a></p>
-<p>Serialization Library on top of <a href="https://docs.python.org/3/library/dataclasses.html">dataclasses</a>.</p>
-<h2 id="quickstart">QuickStart</h2>
-<p>Install pyserde from PyPI.</p>
-<pre><code class="bash">$ pip install pyserde
-</code></pre>
-<p>You can serialize and deserialize a dataclass in various message formats quite easily!</p>
-<pre><code class="python"># main.py
-# /usr/bin/env python
-from dataclasses import dataclass
-from serde import deserialize, serialize
-from serde.json import from_json, to_json
-
-@deserialize
+<p>Yet another serialization library on top of <a href="https://docs.python.org/3/library/dataclasses.html">dataclasses</a>.</p>
+<h2 id="tldr">TL;DR</h2>
+<p>Put additional <code>@serialize</code> and <code>@deserialize</code> decorator in your ordinary dataclass.</p>
+<pre><code class="python">@deserialize
 @serialize
 @dataclass
 class Foo:
@@ -46,24 +37,23 @@ class Foo:
     s: str
     f: float
     b: bool
-
-h = Foo(i=10, s='foo', f=100.0, b=True)
-print(f&quot;Into Json: {to_json(h)}&quot;)
-
-s = '{&quot;i&quot;: 10, &quot;s&quot;: &quot;foo&quot;, &quot;f&quot;: 100.0, &quot;b&quot;: true}'
-print(f&quot;From Json: {from_json(Foo, s)}&quot;)
 </code></pre>
-<pre><code class="bash">$ python main.py
-Into Json: {&quot;i&quot;: 10, &quot;s&quot;: &quot;foo&quot;, &quot;f&quot;: 100.0, &quot;b&quot;: true}
-From Json: Foo(i=10, s='foo', f=100.0, b=True)
+<p>Now you can convert an object to JSON,</p>
+<pre><code class="python">&gt;&gt;&gt; to_json(Foo(i=10, s='foo', f=100.0, b=True))
+{&quot;i&quot;: 10, &quot;s&quot;: &quot;foo&quot;, &quot;f&quot;: 100.0, &quot;b&quot;: true}
 </code></pre>
+<p>Converted back from JSON to the object quite easily!</p>
+<pre><code class="python">&gt;&gt;&gt; from_json(Foo, '{&quot;i&quot;: 10, &quot;s&quot;: &quot;foo&quot;, &quot;f&quot;: 100.0, &quot;b&quot;: true}')
+Foo(i=10, s='foo', f=100.0, b=True)
+</code></pre>
+<p>pyserde supports other data formats (YAML, Toml, MsgPack) and offers many more features!</p>
 <h2 id="benchmark">Benchmark</h2>
-<p>Serialize and Deserialize a <a href="https://github.com/yukinarit/pyserde/blob/master/bench/dataclasses_class.py#L7-L12">struct</a> in json 10,000 times.</p>
 <ul>
 <li>macOS 10.14 Mojave</li>
 <li>Intel 2.3GHz 8-core Intel Core i9</li>
 <li>DDR4 32GB RAM</li>
 </ul>
+<p>Serialize and deserialize a <a href="https://github.com/yukinarit/pyserde/blob/master/bench/dataclasses_class.py#L7-L12">struct</a> into and from json 10,000 times.</p>
 <table>
 <thead>
 <tr>
@@ -73,27 +63,50 @@ From Json: Foo(i=10, s='foo', f=100.0, b=True)
 </thead>
 <tbody>
 <tr>
-<td><img src="https://raw.githubusercontent.com/yukinarit/pyserde/master/bench/charts/serialize_small.png"></td>
-<td><img src="https://raw.githubusercontent.com/yukinarit/pyserde/master/bench/charts/deserialize_small.png"></td>
+<td><img src="https://raw.githubusercontent.com/yukinarit/pyserde/master/bench/charts/se-small.png"></td>
+<td><img src="https://raw.githubusercontent.com/yukinarit/pyserde/master/bench/charts/de-small.png"></td>
+</tr>
+</tbody>
+</table>
+<p>Serialize the struct into tuple and dictionary.</p>
+<table>
+<thead>
+<tr>
+<th>astuple</th>
+<th>asdict</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><img src="https://raw.githubusercontent.com/yukinarit/pyserde/master/bench/charts/astuple-small.png"></td>
+<td><img src="https://raw.githubusercontent.com/yukinarit/pyserde/master/bench/charts/asdict-small.png"></td>
 </tr>
 </tbody>
 </table>
 <ul>
-<li><code>raw</code>: Manual serialize and deserialize. Fastest in theory.</li>
-<li><a href="https://github.com/konradhalas/dacite"><code>dacite</code></a>: Library to crate data class from dictionary.</li>
-<li><a href="https://github.com/Fatal1ty/mashumaro"><code>mashumaro</code></a>: Another seralization library based on dataclass.</li>
+<li><code>raw</code>: Serialize and deserialize manually. Fastest in theory.</li>
+<li><code>dataclass</code>: Serialize using dataclass's asdict.</li>
+<li><code>pyserde</code>: This library.</li>
+<li><a href="https://github.com/konradhalas/dacite"><code>dacite</code></a>: Simple creation of data classes from dictionaries.</li>
+<li><a href="https://github.com/Fatal1ty/mashumaro"><code>mashumaro</code></a>: Fast and well tested serialization framework on top of dataclasses.</li>
+<li><a href="https://github.com/marshmallow-code/marshmallow"><code>marshallow</code></a>: A lightweight library for converting complex objects to and from simple datatypes.</li>
+<li><a href="https://github.com/python-attrs/attrs"><code>attrs</code></a>: Python Classes Without Boilerplate.</li>
+<li><a href="https://github.com/Tinche/cattrs"><code>cattrs</code></a>: Complex custom class converters for attrs.</li>
 </ul>
+<p>To run benchmark in your environment:</p>
+<pre><code class="sh">git clone git@github.com:yukinarit/pyserde.git
+cd pyserde/bench
+pipenv install
+pipenv run python bench.py --full
+</code></pre>
 <p>You can check <a href="bench/bench.py">the benchmark code</a> for more information.</p>
-<h2 id="features">Features</h2>
-<details open><summary><b><code>Supported types</code></b></summary><br />
-* primitives (int, float, str, bool)
-* containers (List, Tuple, Dict)
-* [`Optional`](<https://docs.python.org/3/library/typing.html#typing.Optional>)
-* [`Dataclass`](<https://docs.python.org/3/library/dataclasses.html>)
-</details>
-<details open><summary><b><code>Supported data formats</code></b></summary><br />
-<pre><code class="python">from dataclasses import dataclass
-from serde import deserialize, serialize
+<h2 id="getting-started">Getting started</h2>
+<p>Install pyserde from PyPI. pyserde requires Python&gt;=3.6.</p>
+<pre><code class="sh">pip install pyserde
+</code></pre>
+<p>Put additional <code>@serialize</code> and <code>@deserialize</code> decorator in your ordinary dataclass. Be careful that module name is <code><a title="serde" href="#serde">serde</a></code>, not <code>pyserde</code>. If you are new to dataclass, I would recommend to read <a href="https://docs.python.org/3/library/dataclasses.html">dataclasses documentation</a> first.</p>
+<pre><code class="python">from serde import serialize, deserialize
+from dataclasses import dataclass
 
 @deserialize
 @serialize
@@ -103,36 +116,77 @@ class Foo:
     s: str
     f: float
     b: bool
-
-h = Foo(i=10, s='foo', f=100.0, b=True)
 </code></pre>
-* JSON
-```python
-from serde.json import from_json, to_json
-print(f"Into Json: {to_json(h)}")
-print(f"From Json: {from_json(Foo, s)}")
-```
-* Yaml
-```python
-from serde.yaml import from_yaml, to_yaml
-print(f"Into Yaml: {to_yaml(h)}")
-print(f"From Yaml: {from_yaml(Foo, s)}")
-```
-* Toml
-```python
+<p>pyserde generates methods necessary for serialization by <code>@serialize</code> and methods necessary for deserialization by <code>@deserialize</code> when a class is loaded into python interpreter. Generation occurs exactly only once (This is more like how decorator work, not pyserde) and there is no overhead when you actually use the generated methods. Now your class is serializable and deserializable in the data formats supported by pyserde.</p>
+<p>Next, import pyserde helper methods. For JSON:</p>
+<pre><code class="python">from serde.json import from_json, to_json
+</code></pre>
+<p>Similarly, you can use other data formats.</p>
+<pre><code class="python">from serde.yaml import from_yaml, to_yaml
 from serde.toml import from_toml, to_toml
-print(f"Into Toml: {to_toml(h)}")
-print(f"From Toml: {from_toml(Foo, s)}")
-```
-* MsgPack
-```python
-from serde.msgpack import from_msgpack, to_msgpack
-print(f"Into MsgPack: {to_msgpack(h)}")
-print(f"From MsgPack: {from_msgpack(Foo, s)}")
-```
-</details>
-<details open><summary><b><code>Case Conversion</code></b></summary><br />
-Converting `snake_case` fields into supported case styles e.g. `camelCase` and `kebab-case`.
+from serde.msgpack import from_msgpack to_msgpack
+</code></pre>
+<p>Use <code>to_json</code> to serialize the object into JSON.</p>
+<pre><code>f = Foo(i=10, s='foo', f=100.0, b=True)
+print(to_json(f))
+</code></pre>
+<p>Pass <code>Foo</code> class and JSON string in <code>from_json</code> to deserialize into Object.</p>
+<pre><code class="python">s = '{&quot;i&quot;: 10, &quot;s&quot;: &quot;foo&quot;, &quot;f&quot;: 100.0, &quot;b&quot;: true}'
+print(from_json(Foo, s))
+</code></pre>
+<p>That's it! pyserde offers many more features. If you're interested, please read the rest of the documentation.</p>
+<h2 id="supported-types">Supported types</h2>
+<ul>
+<li>Primitives (int, float, str, bool)</li>
+<li>Containers (List, Tuple, Dict)</li>
+<li><a href="https://docs.python.org/3/library/typing.html#typing.Optional"><code>Optional</code></a></li>
+<li>User defined class with <a href="https://docs.python.org/3/library/dataclasses.html"><code>@dataclass</code></a></li>
+<li>More types<ul>
+<li><a href="https://docs.python.org/3/library/pathlib.html"><code>pathlib.Path</code></a></li>
+<li><a href="https://docs.python.org/3/library/decimal.html"><code>decimal.Decimal</code></a></li>
+</ul>
+</li>
+</ul>
+<p>You can write pretty complex class like this:</p>
+<pre><code class="python">@deserialize
+@serialize
+@dataclass
+class bar:
+    i: int
+
+@deserialize
+@serialize
+class Foo:
+    i: int
+    l: List[str]
+    t: Tuple[int, float, str, bool]
+    d: Dict[str, List[Tuple[str, int]]]
+    o: Optional[str]
+    nested: Bar
+</code></pre>
+<h2 id="supported-data-formats">Supported data formats</h2>
+<h3 id="json">JSON</h3>
+<pre><code class="python">from serde.json import from_json, to_json
+print(to_json(f))
+print(from_json(Foo, s))
+</code></pre>
+<h3 id="yaml">Yaml</h3>
+<pre><code class="python">from serde.yaml import from_yaml, to_yaml
+print(to_yaml(f))
+print(from_yaml(Foo, s))
+</code></pre>
+<h3 id="toml">Toml</h3>
+<pre><code class="python">from serde.toml import from_toml, to_toml
+print(to_toml(f))
+print(from_toml(Foo, s))
+</code></pre>
+<h3 id="msgpack">MsgPack</h3>
+<pre><code class="python">from serde.msgpack import from_msgpack, to_msgpack
+print(to_msgpack(f))
+print(from_msgpack(Foo, s))
+</code></pre>
+<h2 id="case-conversion">Case Conversion</h2>
+<p>Converting <code>snake_case</code> fields into supported case styles e.g. <code>camelCase</code> and <code>kebab-case</code>.</p>
 <pre><code class="python">@serialize(rename_all = 'camelcase')
 @dataclass
 class Foo:
@@ -142,12 +196,11 @@ class Foo:
 f = Foo(int_field=10, str_field='foo')
 print(to_json(f))
 </code></pre>
-Here, the output is all `camelCase`.
+<p>Here, the output is all <code>camelCase</code>.</p>
 <pre><code class="json">'{&quot;intField&quot;: 10, &quot;strField&quot;: &quot;foo&quot;}'
 </code></pre>
-</details>
-<details open><summary><b><code>Rename Field</code></b></summary><br />
-In case you want to use a keyword as field such as `class`, you can use `serde_rename` field attribute.
+<h2 id="rename-field">Rename Field</h2>
+<p>In case you want to use a keyword as field such as <code>class</code>, you can use <code>serde_rename</code> field attribute.</p>
 <pre><code class="python">@serialize
 @dataclass
 class Foo:
@@ -155,13 +208,12 @@ class Foo:
 
 print(to_json(Foo(class_name='Foo')))
 </code></pre>
-Output json is having `class` instead of `class_name`.
+<p>Output json is having <code>class</code> instead of <code>class_name</code>.</p>
 <pre><code class="json">{&quot;class&quot;: &quot;Foo&quot;}
 </code></pre>
-For complete example, please see [./examples/rename.py](./examples/rename.py)
-</details>
-<details><summary><b><code>Skip</code></b></summary><br />
-You can skip serialization for a certain field, you can use `serde_skip`.
+<p>For complete example, please see <a href="./examples/rename.py">./examples/rename.py</a></p>
+<h2 id="skip">Skip</h2>
+<p>You can skip serialization for a certain field, you can use <code>serde_skip</code>.</p>
 <pre><code class="python">@serialize
 @dataclass
 class Resource:
@@ -174,13 +226,12 @@ resources = [
     Resource(&quot;GitHub&quot;, &quot;hash2&quot;, metadata={&quot;headquarters&quot;: &quot;San Francisco&quot;}) ]
 print(to_json(resources))
 </code></pre>
-Here, `metadata` is not present in output json.
+<p>Here, <code>metadata</code> is not present in output json.</p>
 <pre><code class="json">[{&quot;name&quot;: &quot;Stack Overflow&quot;, &quot;hash&quot;: &quot;hash1&quot;}, {&quot;name&quot;: &quot;GitHub&quot;, &quot;hash&quot;: &quot;hash2&quot;}]
 </code></pre>
-For complete example, please see [./examples/skip.py](./examples/skip.py)
-</details>
-<details><summary><b><code>Conditional Skip</code></b></summary><br />
-If you conditionally skip some fields, you can pass function or lambda in `serde_skip_if`.
+<p>For complete example, please see <a href="./examples/skip.py">./examples/skip.py</a></p>
+<h2 id="conditional-skip">Conditional Skip</h2>
+<p>If you conditionally skip some fields, you can pass function or lambda in <code>serde_skip_if</code>.</p>
 <pre><code class="python">@serialize
 @dataclass
 class World:
@@ -193,27 +244,27 @@ print(to_json(world))
 world = World('green', 'Charmander')
 print(to_json(world))
 </code></pre>
-As you can see below, field is skipped in serialization if `buddy` is "Pikachu".
+<p>As you can see below, field is skipped in serialization if <code>buddy</code> is "Pikachu".</p>
 <pre><code class="json">{&quot;player&quot;: &quot;satoshi&quot;}
 {&quot;player&quot;: &quot;green&quot;, &quot;buddy&quot;: &quot;Charmander&quot;}
 </code></pre>
-For complete example, please see [./examples/skip.py](./examples/skip.py)
-</details>
-<h2 id="documentation">Documentation</h2>
-<p><a href="https://yukinarit.github.io/pyserde/">https://yukinarit.github.io/pyserde/</a></p>
+<p>For complete example, please see <a href="./examples/skip.py">./examples/skip.py</a></p>
+<h2 id="license">LICENSE</h2>
+<p>MIT</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">&#34;&#34;&#34;
 .. include:: ../README.md
+
 &#34;&#34;&#34;
 from .core import SerdeError, init, logger, typecheck  # noqa
 from .de import deserialize, from_dict, from_obj, from_tuple, is_deserializable  # noqa
 from .se import asdict, astuple, is_serializable, serialize  # noqa
 
 &#34;&#34;&#34; Version of pyserde. &#34;&#34;&#34;
-__version__ = &#39;0.1.0&#39;
+__version__ = &#39;0.1.1&#39;
 
 __all__ = [
     &#39;serialize&#39;,
@@ -233,43 +284,43 @@ __all__ = [
 <dl>
 <dt><code class="name"><a title="serde.compat" href="compat.html">serde.compat</a></code></dt>
 <dd>
-<section class="desc"></section>
+<div class="desc"><p>Module for compatibility.</p></div>
 </dd>
 <dt><code class="name"><a title="serde.core" href="core.html">serde.core</a></code></dt>
 <dd>
-<section class="desc"></section>
+<div class="desc"><p>pyserde core module.</p></div>
 </dd>
 <dt><code class="name"><a title="serde.de" href="de.html">serde.de</a></code></dt>
 <dd>
-<section class="desc"><p>Defines classess and functions for <a title="serde.deserialize" href="#serde.deserialize"><code>deserialize()</code></a> decorator …</p></section>
+<div class="desc"><p>Defines classess and functions for <code><a title="serde.deserialize" href="#serde.deserialize">deserialize()</a></code> decorator …</p></div>
 </dd>
 <dt><code class="name"><a title="serde.inspect" href="inspect.html">serde.inspect</a></code></dt>
 <dd>
-<section class="desc"><p>pyserde inspection tool …</p></section>
+<div class="desc"><p>pyserde inspection tool …</p></div>
 </dd>
 <dt><code class="name"><a title="serde.json" href="json.html">serde.json</a></code></dt>
 <dd>
-<section class="desc"></section>
+<div class="desc"><p>Serialize and Deserialize in JSON format.</p></div>
 </dd>
 <dt><code class="name"><a title="serde.more_types" href="more_types.html">serde.more_types</a></code></dt>
 <dd>
-<section class="desc"></section>
+<div class="desc"><p>Additional type support such as Decimal.</p></div>
 </dd>
 <dt><code class="name"><a title="serde.msgpack" href="msgpack.html">serde.msgpack</a></code></dt>
 <dd>
-<section class="desc"></section>
+<div class="desc"><p>Serialize and Deserialize in MsgPack format.</p></div>
 </dd>
 <dt><code class="name"><a title="serde.se" href="se.html">serde.se</a></code></dt>
 <dd>
-<section class="desc"><p>Defines classess and functions for <a title="serde.serialize" href="#serde.serialize"><code>serialize()</code></a> decorator.</p></section>
+<div class="desc"><p>Defines classess and functions for <code><a title="serde.serialize" href="#serde.serialize">serialize()</a></code> decorator.</p></div>
 </dd>
 <dt><code class="name"><a title="serde.toml" href="toml.html">serde.toml</a></code></dt>
 <dd>
-<section class="desc"></section>
+<div class="desc"><p>Serialize and Deserialize in TOML format.</p></div>
 </dd>
 <dt><code class="name"><a title="serde.yaml" href="yaml.html">serde.yaml</a></code></dt>
 <dd>
-<section class="desc"></section>
+<div class="desc"><p>Serialize and Deserialize in YAML format.</p></div>
 </dd>
 </dl>
 </section>
@@ -282,14 +333,14 @@ __all__ = [
 <span>def <span class="ident">asdict</span></span>(<span>v)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Convert <a title="serde.serialize" href="#serde.serialize"><code>serialize()</code></a> class to <code>dict</code>.</p></section>
+<div class="desc"><p>Convert class with <code><a title="serde.serialize" href="#serde.serialize">serialize()</a></code> to <code>dict</code>.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def asdict(v):
     &#34;&#34;&#34;
-    Convert `serialize` class to `dict`.
+    Convert class with `serialize` to `dict`.
     &#34;&#34;&#34;
     if is_serializable(v):
         return getattr(v, TO_DICT)()
@@ -307,21 +358,21 @@ __all__ = [
 <span>def <span class="ident">astuple</span></span>(<span>v)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Convert <a title="serde.serialize" href="#serde.serialize"><code>serialize()</code></a> class to <code>tuple</code>.</p></section>
+<div class="desc"><p>Convert class with <code><a title="serde.serialize" href="#serde.serialize">serialize()</a></code> to <code>tuple</code>.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def astuple(v):
     &#34;&#34;&#34;
-    Convert `serialize` class to `tuple`.
+    Convert class with `serialize` to `tuple`.
     &#34;&#34;&#34;
     if is_serializable(v):
         return getattr(v, TO_ITER)()
     elif is_dataclass(v):
         return _astuple(v)
     elif isinstance(v, Dict):
-        return tuple(astuple(e) for e in v.values())
+        return {astuple(k): astuple(v) for k, v in v.items()}
     elif isinstance(v, (Tuple, List)):
         return tuple(astuple(e) for e in v)
     else:
@@ -329,12 +380,12 @@ __all__ = [
 </details>
 </dd>
 <dt id="serde.deserialize"><code class="name flex">
-<span>def <span class="ident">deserialize</span></span>(<span>rename_all=None)</span>
+<span>def <span class="ident">deserialize</span></span>(<span>rename_all: Union[str, NoneType] = None) -> Type</span>
 </code></dt>
 <dd>
-<section class="desc"><p><a title="serde.deserialize" href="#serde.deserialize"><code>deserialize()</code></a> decorator. A dataclass with this decorator can be deserialized
+<div class="desc"><p><code><a title="serde.deserialize" href="#serde.deserialize">deserialize()</a></code> decorator. A dataclass with this decorator can be deserialized
 into an object from various data format such as JSON and MsgPack.</p>
-<pre><code>&gt;&gt;&gt; from serde import deserialize
+<pre><code class="python">&gt;&gt;&gt; from serde import deserialize
 &gt;&gt;&gt; from serde.json import from_json
 &gt;&gt;&gt;
 &gt;&gt;&gt; # Mark the class deserializable.
@@ -345,24 +396,21 @@ into an object from various data format such as JSON and MsgPack.</p>
 ...     s: str
 ...     f: float
 ...     b: bool
-&gt;&gt;&gt;
-&gt;&gt;&gt; from_json(Foo, '{"i": 10, "s": "foo", "f": 100.0, "b": true}')
+&gt;&gt;&gt; from_json(Foo, '{&quot;i&quot;: 10, &quot;s&quot;: &quot;foo&quot;, &quot;f&quot;: 100.0, &quot;b&quot;: true}')
 Foo(i=10, s='foo', f=100.0, b=True)
 </code></pre>
-<p>Additionally, <a title="serde.deserialize" href="#serde.deserialize"><code>deserialize()</code></a> supports case conversion. Pass case name in
-<a title="serde.deserialize" href="#serde.deserialize"><code>deserialize()</code></a> decorator as shown below.</p>
-<pre><code>&gt;&gt;&gt; from serde import deserialize
+<p>Additionally, <code><a title="serde.deserialize" href="#serde.deserialize">deserialize()</a></code> supports case conversion. Pass case name in
+<code><a title="serde.deserialize" href="#serde.deserialize">deserialize()</a></code> decorator as shown below.</p>
+<pre><code class="python">&gt;&gt;&gt; from serde import deserialize
 &gt;&gt;&gt;
 &gt;&gt;&gt; @deserialize(rename_all = 'camelcase')
 ... @dataclass
 ... class RenameAll:
 ...     int_field: int
 ...     str_field: str
-&gt;&gt;&gt;
-&gt;&gt;&gt; from_json(RenameAll, '{"intField": 10, "strField": "foo"}')
+&gt;&gt;&gt; from_json(RenameAll, '{&quot;intField&quot;: 10, &quot;strField&quot;: &quot;foo&quot;}')
 RenameAll(int_field=10, str_field='foo')
-&gt;&gt;&gt;
-</code></pre></section>
+</code></pre></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -383,7 +431,6 @@ RenameAll(int_field=10, str_field='foo')
     ...     s: str
     ...     f: float
     ...     b: bool
-    &gt;&gt;&gt;
     &gt;&gt;&gt; from_json(Foo, &#39;{&#34;i&#34;: 10, &#34;s&#34;: &#34;foo&#34;, &#34;f&#34;: 100.0, &#34;b&#34;: true}&#39;)
     Foo(i=10, s=&#39;foo&#39;, f=100.0, b=True)
 
@@ -397,10 +444,8 @@ RenameAll(int_field=10, str_field='foo')
     ... class RenameAll:
     ...     int_field: int
     ...     str_field: str
-    &gt;&gt;&gt;
     &gt;&gt;&gt; from_json(RenameAll, &#39;{&#34;intField&#34;: 10, &#34;strField&#34;: &#34;foo&#34;}&#39;)
     RenameAll(int_field=10, str_field=&#39;foo&#39;)
-    &gt;&gt;&gt;
     &#34;&#34;&#34;
 
     def wrap(cls):
@@ -422,7 +467,7 @@ RenameAll(int_field=10, str_field='foo')
 <span>def <span class="ident">from_dict</span></span>(<span>cls, o)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Deserialize from dictionary.</p></section>
+<div class="desc"><p>Deserialize from dictionary.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -441,7 +486,7 @@ RenameAll(int_field=10, str_field='foo')
 <span>def <span class="ident">from_tuple</span></span>(<span>cls, o)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Deserialize from tuple.</p></section>
+<div class="desc"><p>Deserialize from tuple.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -457,11 +502,11 @@ RenameAll(int_field=10, str_field='foo')
 </details>
 </dd>
 <dt id="serde.is_deserializable"><code class="name flex">
-<span>def <span class="ident">is_deserializable</span></span>(<span>instance_or_class)</span>
+<span>def <span class="ident">is_deserializable</span></span>(<span>instance_or_class: Any) -> bool</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Test if arg can <a title="serde.deserialize" href="#serde.deserialize"><code>deserialize()</code></a>. Arg must be either an instance of class.</p>
-<pre><code>&gt;&gt;&gt; from serde import deserialize, is_deserializable
+<div class="desc"><p>Test if arg can <code><a title="serde.deserialize" href="#serde.deserialize">deserialize()</a></code>. Arg must be either an instance of class.</p>
+<pre><code class="python">&gt;&gt;&gt; from serde import deserialize, is_deserializable
 &gt;&gt;&gt;
 &gt;&gt;&gt; @deserialize
 ... @dataclass
@@ -470,8 +515,7 @@ RenameAll(int_field=10, str_field='foo')
 &gt;&gt;&gt;
 &gt;&gt;&gt; is_deserializable(Foo)
 True
-&gt;&gt;&gt;
-</code></pre></section>
+</code></pre></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -489,17 +533,16 @@ True
     &gt;&gt;&gt;
     &gt;&gt;&gt; is_deserializable(Foo)
     True
-    &gt;&gt;&gt;
     &#34;&#34;&#34;
     return hasattr(instance_or_class, FROM_ITER) or hasattr(instance_or_class, FROM_DICT)</code></pre>
 </details>
 </dd>
 <dt id="serde.is_serializable"><code class="name flex">
-<span>def <span class="ident">is_serializable</span></span>(<span>instance_or_class)</span>
+<span>def <span class="ident">is_serializable</span></span>(<span>instance_or_class: Any) -> bool</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Test if arg can <a title="serde.serialize" href="#serde.serialize"><code>serialize()</code></a>. Arg must be either an instance of class.</p>
-<pre><code>&gt;&gt;&gt; from dataclasses import dataclass
+<div class="desc"><p>Test if arg can <code><a title="serde.serialize" href="#serde.serialize">serialize()</a></code>. Arg must be either an instance of class.</p>
+<pre><code class="python">&gt;&gt;&gt; from dataclasses import dataclass
 &gt;&gt;&gt; from serde import serialize, is_serializable
 &gt;&gt;&gt;
 &gt;&gt;&gt; @serialize
@@ -509,8 +552,7 @@ True
 &gt;&gt;&gt;
 &gt;&gt;&gt; is_serializable(Foo)
 True
-&gt;&gt;&gt;
-</code></pre></section>
+</code></pre></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -529,18 +571,17 @@ True
     &gt;&gt;&gt;
     &gt;&gt;&gt; is_serializable(Foo)
     True
-    &gt;&gt;&gt;
     &#34;&#34;&#34;
     return hasattr(instance_or_class, &#39;__serde_serialize__&#39;)</code></pre>
 </details>
 </dd>
 <dt id="serde.serialize"><code class="name flex">
-<span>def <span class="ident">serialize</span></span>(<span>rename_all=None)</span>
+<span>def <span class="ident">serialize</span></span>(<span>rename_all: Union[str, NoneType] = None) -> Type</span>
 </code></dt>
 <dd>
-<section class="desc"><p><a title="serde.serialize" href="#serde.serialize"><code>serialize()</code></a> decorator. A dataclass with this decorator can be serialized
+<div class="desc"><p><code><a title="serde.serialize" href="#serde.serialize">serialize()</a></code> decorator. A dataclass with this decorator can be serialized
 into an object in various data format such as JSON and MsgPack.</p>
-<pre><code>&gt;&gt;&gt; from serde import serialize
+<pre><code class="python">&gt;&gt;&gt; from serde import serialize
 &gt;&gt;&gt; from serde.json import to_json
 &gt;&gt;&gt;
 &gt;&gt;&gt; # Mark the class serializable.
@@ -553,21 +594,19 @@ into an object in various data format such as JSON and MsgPack.</p>
 ...     b: bool
 &gt;&gt;&gt;
 &gt;&gt;&gt; to_json(Foo(i=10, s='foo', f=100.0, b=True))
-'{"i": 10, "s": "foo", "f": 100.0, "b": true}'
-&gt;&gt;&gt;
+'{&quot;i&quot;: 10, &quot;s&quot;: &quot;foo&quot;, &quot;f&quot;: 100.0, &quot;b&quot;: true}'
 </code></pre>
-<p>Additionally, <a title="serde.serialize" href="#serde.serialize"><code>serialize()</code></a> supports case conversion. Pass case name in
-<a title="serde.serialize" href="#serde.serialize"><code>serialize()</code></a> decorator as shown below.</p>
-<pre><code>&gt;&gt;&gt; @serialize(rename_all = 'camelcase')
+<p>Additionally, <code><a title="serde.serialize" href="#serde.serialize">serialize()</a></code> supports case conversion. Pass case name in
+<code><a title="serde.serialize" href="#serde.serialize">serialize()</a></code> decorator as shown below.</p>
+<pre><code class="python">&gt;&gt;&gt; @serialize(rename_all = 'camelcase')
 ... @dataclass
 ... class Foo:
 ...     int_field: int
 ...     str_field: str
 &gt;&gt;&gt;
 &gt;&gt;&gt; to_json(Foo(int_field=10, str_field='foo'))
-'{"intField": 10, "strField": "foo"}'
-&gt;&gt;&gt;
-</code></pre></section>
+'{&quot;intField&quot;: 10, &quot;strField&quot;: &quot;foo&quot;}'
+</code></pre></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -591,7 +630,6 @@ into an object in various data format such as JSON and MsgPack.</p>
     &gt;&gt;&gt;
     &gt;&gt;&gt; to_json(Foo(i=10, s=&#39;foo&#39;, f=100.0, b=True))
     &#39;{&#34;i&#34;: 10, &#34;s&#34;: &#34;foo&#34;, &#34;f&#34;: 100.0, &#34;b&#34;: true}&#39;
-    &gt;&gt;&gt;
 
     Additionally, `serialize` supports case conversion. Pass case name in
     `serialize` decorator as shown below.
@@ -604,7 +642,6 @@ into an object in various data format such as JSON and MsgPack.</p>
     &gt;&gt;&gt;
     &gt;&gt;&gt; to_json(Foo(int_field=10, str_field=&#39;foo&#39;))
     &#39;{&#34;intField&#34;: 10, &#34;strField&#34;: &#34;foo&#34;}&#39;
-    &gt;&gt;&gt;
     &#34;&#34;&#34;
 
     @functools.wraps(_cls)
@@ -642,7 +679,7 @@ into an object in various data format such as JSON and MsgPack.</p>
 <span>(</span><span>...)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Serde error class.</p></section>
+<div class="desc"><p>Serde error class.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -666,13 +703,23 @@ into an object in various data format such as JSON and MsgPack.</p>
 <h1>Index</h1>
 <div class="toc">
 <ul>
-<li><a href="#pyserde">pyserde</a><ul>
-<li><a href="#quickstart">QuickStart</a></li>
+<li><a href="#pyserde">pyserde</a></li>
+<li><a href="#tldr">TL;DR</a></li>
 <li><a href="#benchmark">Benchmark</a></li>
-<li><a href="#features">Features</a></li>
-<li><a href="#documentation">Documentation</a></li>
+<li><a href="#getting-started">Getting started</a></li>
+<li><a href="#supported-types">Supported types</a></li>
+<li><a href="#supported-data-formats">Supported data formats</a><ul>
+<li><a href="#json">JSON</a></li>
+<li><a href="#yaml">Yaml</a></li>
+<li><a href="#toml">Toml</a></li>
+<li><a href="#msgpack">MsgPack</a></li>
 </ul>
 </li>
+<li><a href="#case-conversion">Case Conversion</a></li>
+<li><a href="#rename-field">Rename Field</a></li>
+<li><a href="#skip">Skip</a></li>
+<li><a href="#conditional-skip">Conditional Skip</a></li>
+<li><a href="#license">LICENSE</a></li>
 </ul>
 </div>
 <ul id="index">
@@ -713,7 +760,7 @@ into an object in various data format such as JSON and MsgPack.</p>
 </nav>
 </main>
 <footer id="footer">
-<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.7.4</a>.</p>
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.8.1</a>.</p>
 </footer>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
 <script>hljs.initHighlightingOnLoad()</script>
