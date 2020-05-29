@@ -38,7 +38,7 @@ jobs:
           git add .
           git status
           git diff --staged --quiet && echo "$0: No changes to commit." && exit 0
-          if [ "$TRAVIS_PULL_REQUEST" -eq "false" ]; then
+          if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
             msg="Docs: Update docs"
           else
             msg="Docs: Update for #$TRAVIS_PULL_REQUEST"
