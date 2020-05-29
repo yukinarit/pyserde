@@ -1,3 +1,6 @@
+"""
+Module for compatibility.
+"""
 from dataclasses import fields, is_dataclass
 from itertools import zip_longest
 from typing import Iterator, List, Optional, Tuple, Type, TypeVar, Union

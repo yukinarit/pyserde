@@ -14,7 +14,8 @@ from serde.msgpack import from_msgpack, to_msgpack
 from serde.toml import from_toml, to_toml
 from serde.yaml import from_yaml, to_yaml
 
-from .data import Bool, Float, Int, NestedPri, NestedPriOpt, NestedPriTuple, Pri, PriDefault, PriOpt, PriTuple, Str
+from . import data
+from .data import Bool, Float, Int, NestedPri, NestedPriOpt, NestedPriTuple, Pri, PriDefault, PriOpt, PriTuple, Str, ListPri
 
 logging.basicConfig(level=logging.WARNING)
 
@@ -178,6 +179,24 @@ def test_field_default():
 def test_default(se, de):
     p = PriDefault()
     assert p == de(PriDefault, se(p))
+
+
+@pytest.mark.parametrize('se,de', (format_dict + format_tuple + format_json + format_msgpack + format_yaml))
+def test_list_pri(se, de):
+    p = [data.PRI, data.PRI]
+    assert p == de(data.ListPri, se(p))
+
+    p = []
+    assert p == de(data.ListPri, se(p))
+
+
+@pytest.mark.parametrize('se,de', (format_dict + format_tuple + format_json + format_msgpack + format_yaml))
+def test_dict_pri(se, de):
+    p = {'1': data.PRI, '2': data.PRI}
+    assert p == de(data.DictPri, se(p))
+
+    p = {}
+    assert p == de(data.DictPri, se(p))
 
 
 def test_complex():

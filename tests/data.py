@@ -213,6 +213,10 @@ class PriDefault:
     b: bool = True
 
 
+ListPri = List[Pri]
+
+DictPri = Dict[str, Pri]
+
 INT = Int(10)
 
 STR = Str('foo')

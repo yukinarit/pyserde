@@ -1,4 +1,4 @@
-# pyserde
+## pyserde
 
 [![image](https://img.shields.io/pypi/v/pyserde.svg)](https://pypi.org/project/pyserde/)
 [![image](https://img.shields.io/pypi/pyversions/pyserde.svg)](https://pypi.org/project/pyserde/)
@@ -6,25 +6,13 @@
 [![Build status](https://ci.appveyor.com/api/projects/status/w4i5x8x9d4sbxhn2?svg=true)](https://ci.appveyor.com/project/yukinarit/pyserde)
 [![Coverage Status](https://coveralls.io/repos/github/yukinarit/pyserde/badge.svg?branch=master)](https://coveralls.io/github/yukinarit/pyserde?branch=master)
 
-Serialization Library on top of [dataclasses](https://docs.python.org/3/library/dataclasses.html).
+Yet another serialization library on top of [dataclasses](https://docs.python.org/3/library/dataclasses.html).
 
-## QuickStart
+## TL;DR
 
-Install pyserde from PyPI.
-
-```bash
-$ pip install pyserde
-```
-
-You can serialize and deserialize a dataclass in various message formats quite easily!
+Put additional `@serialize` and `@deserialize` decorator in your ordinary dataclass.
 
 ```python
-# main.py
-# /usr/bin/env python
-from dataclasses import dataclass
-from serde import deserialize, serialize
-from serde.json import from_json, to_json
-
 @deserialize
 @serialize
 @dataclass
@@ -33,19 +21,23 @@ class Foo:
     s: str
     f: float
     b: bool
-
-h = Foo(i=10, s='foo', f=100.0, b=True)
-print(f"Into Json: {to_json(h)}")
-
-s = '{"i": 10, "s": "foo", "f": 100.0, "b": true}'
-print(f"From Json: {from_json(Foo, s)}")
 ```
 
-```bash
-$ python main.py
-Into Json: {"i": 10, "s": "foo", "f": 100.0, "b": true}
-From Json: Foo(i=10, s='foo', f=100.0, b=True)
+Now you can convert an object to JSON,
+
+```python
+>>> to_json(Foo(i=10, s='foo', f=100.0, b=True))
+{"i": 10, "s": "foo", "f": 100.0, "b": true}
 ```
+
+Converted back from JSON to the object quite easily!
+
+```python
+>>> from_json(Foo, '{"i": 10, "s": "foo", "f": 100.0, "b": true}')
+Foo(i=10, s='foo', f=100.0, b=True)
+```
+
+pyserde supports other data formats (YAML, Toml, MsgPack) and offers many more features!
 
 ## Benchmark
 
@@ -59,7 +51,7 @@ Serialize and deserialize a [struct](https://github.com/yukinarit/pyserde/blob/m
 |-----------|-------------|
 | <img src="https://raw.githubusercontent.com/yukinarit/pyserde/master/bench/charts/se-small.png"> | <img src="https://raw.githubusercontent.com/yukinarit/pyserde/master/bench/charts/de-small.png"> |
 
-Convert the struct into tuple and dictionary representation.
+Serialize the struct into tuple and dictionary.
 
 | astuple | asdict|
 |-----------|-------------|
@@ -74,31 +66,30 @@ Convert the struct into tuple and dictionary representation.
 * [`attrs`](https://github.com/python-attrs/attrs): Python Classes Without Boilerplate.
 * [`cattrs`](https://github.com/Tinche/cattrs): Complex custom class converters for attrs.
 
-To run benchmark on your environment:
+To run benchmark in your environment:
 
 ```sh
-cd bench
+git clone git@github.com:yukinarit/pyserde.git
+cd pyserde/bench
+pipenv install
 pipenv run python bench.py --full
 ```
 
 You can check [the benchmark code](bench/bench.py) for more information.
 
-## Features
+## Getting started
 
-<details open><summary><b><code>Supported types</code></b></summary><br />
+Install pyserde from PyPI. pyserde requires Python>=3.6.
 
-* primitives (int, float, str, bool)
-* containers (List, Tuple, Dict)
-* [`Optional`](https://docs.python.org/3/library/typing.html#typing.Optional)
-* [`Dataclass`](https://docs.python.org/3/library/dataclasses.html)
+```sh
+pip install pyserde
+```
 
-</details>
-
-<details open><summary><b><code>Supported data formats</code></b></summary><br />
+Put additional `@serialize` and `@deserialize` decorator in your ordinary dataclass. Be careful that module name is `serde`, not `pyserde`. If you are new to dataclass, I would recommend to read [dataclasses documentation](https://docs.python.org/3/library/dataclasses.html) first.
 
 ```python
+from serde import serialize, deserialize
 from dataclasses import dataclass
-from serde import deserialize, serialize
 
 @deserialize
 @serialize
@@ -108,41 +99,100 @@ class Foo:
     s: str
     f: float
     b: bool
-
-h = Foo(i=10, s='foo', f=100.0, b=True)
 ```
 
-* JSON
-    ```python
-    from serde.json import from_json, to_json
-    print(f"Into Json: {to_json(h)}")
-    print(f"From Json: {from_json(Foo, s)}")
-    ```
+pyserde generates methods necessary for serialization by `@serialize` and methods necessary for deserialization by `@deserialize` when a class is loaded into python interpreter. Generation occurs exactly only once (This is more like how decorator work, not pyserde) and there is no overhead when you actually use the generated methods. Now your class is serializable and deserializable in the data formats supported by pyserde.
 
-* Yaml
-    ```python
-    from serde.yaml import from_yaml, to_yaml
-    print(f"Into Yaml: {to_yaml(h)}")
-    print(f"From Yaml: {from_yaml(Foo, s)}")
-    ```
+Next, import pyserde helper methods. For JSON:
+```python
+from serde.json import from_json, to_json
+```
 
-* Toml
-    ```python
-    from serde.toml import from_toml, to_toml
-    print(f"Into Toml: {to_toml(h)}")
-    print(f"From Toml: {from_toml(Foo, s)}")
-    ```
+Similarly, you can use other data formats.
+```python
+from serde.yaml import from_yaml, to_yaml
+from serde.toml import from_toml, to_toml
+from serde.msgpack import from_msgpack to_msgpack
+```
 
-* MsgPack
-    ```python
-    from serde.msgpack import from_msgpack, to_msgpack
-    print(f"Into MsgPack: {to_msgpack(h)}")
-    print(f"From MsgPack: {from_msgpack(Foo, s)}")
-    ```
+Use `to_json` to serialize the object into JSON.
+```
+f = Foo(i=10, s='foo', f=100.0, b=True)
+print(to_json(f))
+```
 
-</details>
+Pass `Foo` class and JSON string in `from_json` to deserialize into Object.
+```python
+s = '{"i": 10, "s": "foo", "f": 100.0, "b": true}'
+print(from_json(Foo, s))
+```
 
-<details open><summary><b><code>Case Conversion</code></b></summary><br />
+That's it! pyserde offers many more features. If you're interested, please read the rest of the documentation.
+
+## Supported types
+
+* Primitives (int, float, str, bool)
+* Containers (List, Tuple, Dict)
+* [`Optional`](https://docs.python.org/3/library/typing.html#typing.Optional)
+* User defined class with [`@dataclass`](https://docs.python.org/3/library/dataclasses.html)
+* More types
+    * [`pathlib.Path`](https://docs.python.org/3/library/pathlib.html)
+    * [`decimal.Decimal`](https://docs.python.org/3/library/decimal.html)
+
+You can write pretty complex class like this:
+```python
+@deserialize
+@serialize
+@dataclass
+class bar:
+    i: int
+
+@deserialize
+@serialize
+class Foo:
+    i: int
+    l: List[str]
+    t: Tuple[int, float, str, bool]
+    d: Dict[str, List[Tuple[str, int]]]
+    o: Optional[str]
+    nested: Bar
+```
+
+## Supported data formats
+
+### JSON
+
+```python
+from serde.json import from_json, to_json
+print(to_json(f))
+print(from_json(Foo, s))
+```
+
+### Yaml
+
+```python
+from serde.yaml import from_yaml, to_yaml
+print(to_yaml(f))
+print(from_yaml(Foo, s))
+```
+
+### Toml
+
+```python
+from serde.toml import from_toml, to_toml
+print(to_toml(f))
+print(from_toml(Foo, s))
+```
+
+### MsgPack
+
+```python
+from serde.msgpack import from_msgpack, to_msgpack
+print(to_msgpack(f))
+print(from_msgpack(Foo, s))
+```
+
+## Case Conversion
 
 Converting `snake_case` fields into supported case styles e.g. `camelCase` and `kebab-case`.
 
@@ -162,9 +212,8 @@ Here, the output is all `camelCase`.
 ```json
 '{"intField": 10, "strField": "foo"}'
 ```
-</details>
 
-<details open><summary><b><code>Rename Field</code></b></summary><br />
+## Rename Field
 
 In case you want to use a keyword as field such as `class`, you can use `serde_rename` field attribute.
 
@@ -185,9 +234,8 @@ Output json is having `class` instead of `class_name`.
 
 For complete example, please see [./examples/rename.py](./examples/rename.py)
 
-</details>
 
-<details><summary><b><code>Skip</code></b></summary><br />
+## Skip
 
 You can skip serialization for a certain field, you can use `serde_skip`.
 
@@ -213,9 +261,7 @@ Here, `metadata` is not present in output json.
 
 For complete example, please see [./examples/skip.py](./examples/skip.py)
 
-</details>
-
-<details><summary><b><code>Conditional Skip</code></b></summary><br />
+## Conditional Skip
 
 If you conditionally skip some fields, you can pass function or lambda in `serde_skip_if`.
 
@@ -242,8 +288,6 @@ As you can see below, field is skipped in serialization if `buddy` is "Pikachu".
 
 For complete example, please see [./examples/skip.py](./examples/skip.py)
 
-</details>
+## LICENSE
 
-## Documentation
-
-https://yukinarit.github.io/pyserde/
+MIT

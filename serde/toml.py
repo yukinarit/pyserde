@@ -1,3 +1,6 @@
+"""
+Serialize and Deserialize in TOML format.
+"""
 from typing import List, Type  # noqa
 
 import toml

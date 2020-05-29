@@ -1,3 +1,6 @@
+"""
+Serialize and Deserialize in MsgPack format.
+"""
 from typing import Any, Type
 
 import msgpack
