@@ -36,7 +36,7 @@ format_yaml: List = [(to_yaml, from_yaml)]
 
 format_toml: List = [(to_toml, from_toml)]
 
-all_formats: List = (format_dict + format_tuple + format_json + format_msgpack + format_yaml + format_toml)
+all_formats: List = format_dict + format_tuple + format_json + format_msgpack + format_yaml + format_toml
 
 
 @pytest.mark.parametrize('se,de', all_formats)
@@ -242,10 +242,10 @@ def test_default(se, de):
 @pytest.mark.parametrize('se,de', (format_dict + format_tuple + format_json + format_msgpack + format_yaml))
 def test_list_pri(se, de):
     p = [data.PRI, data.PRI]
-    assert p == de(data.ListPri, se(p))
+    assert p == de(ListPri, se(p))
 
     p = []
-    assert p == de(data.ListPri, se(p))
+    assert p == de(ListPri, se(p))
 
 
 @pytest.mark.parametrize('se,de', (format_dict + format_tuple + format_json + format_msgpack + format_yaml))

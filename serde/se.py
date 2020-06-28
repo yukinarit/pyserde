@@ -4,9 +4,7 @@ Defines classess and functions for `serialize` decorator.
 """
 import abc
 import copy  # noqa
-import enum
 import functools
-from dataclasses import Field as DataclassField
 from dataclasses import asdict as _asdict
 from dataclasses import astuple as _astuple
 from dataclasses import dataclass
@@ -17,7 +15,7 @@ from typing import Any, Callable, Dict, List, Optional, Tuple, Type
 import jinja2
 
 from .compat import is_dict, is_enum, is_list, is_opt, is_primitive, is_tuple, is_union, type_args
-from .core import HIDDEN_NAME, SE_NAME, SETTINGS, TO_DICT, TO_ITER, Field, Hidden, T, conv, fields, gen
+from .core import HIDDEN_NAME, SE_NAME, SETTINGS, TO_DICT, TO_ITER, Field, Hidden, SerdeError, T, conv, fields, gen
 from .more_types import serialize as custom
 
 __all__: List = ['serialize', 'is_serializable', 'Serializer', 'astuple', 'asdict']
@@ -37,7 +35,7 @@ class Serializer(metaclass=abc.ABCMeta):
         pass
 
 
-def serialize(_cls=None, rename_all: Optional[str] = None) -> Type:
+def serialize(_cls=None, rename_all: Optional[str] = None):
     """
     `serialize` decorator. A dataclass with this decorator can be serialized
     into an object in various data format such as JSON and MsgPack.
@@ -184,7 +182,7 @@ def to_dict(o) -> Dict:
 
 @dataclass
 class SeField(Field):
-    parent: Optional['Field'] = None
+    parent: Optional['SeField'] = None
 
     @property
     def varname(self) -> str:
@@ -192,18 +190,20 @@ class SeField(Field):
         if var:
             return f'{var}.{self.name}'
         else:
+            if self.name is None:
+                raise SerdeError('Field name is None.')
             return self.name
 
     def __getitem__(self, n) -> 'SeField':
         typ = type_args(self.type)[n]
-        return SeField(typ, None)
+        return SeField(typ, name=None)
 
 
 sefields = functools.partial(fields, SeField)
 
 
 def to_arg(f: SeField) -> SeField:
-    f.parent = SeField(None, 'obj')
+    f.parent = SeField(None, 'obj')  # type: ignore
     return f
 
 

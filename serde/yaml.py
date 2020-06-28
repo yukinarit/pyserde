@@ -22,7 +22,7 @@ class YamlDeserializer(Deserializer):
         return yaml.safe_load(s, **opts)
 
 
-def to_yaml(obj, se: Type[Serializer] = YamlSerializer, **opts) -> str:
+def to_yaml(obj, se=YamlSerializer, **opts) -> str:
     """
     Take an object and return yaml string.
 
@@ -43,7 +43,7 @@ def to_yaml(obj, se: Type[Serializer] = YamlSerializer, **opts) -> str:
     return se.serialize(obj, **opts)
 
 
-def from_yaml(c: Type[T], s: str, de: Type[Deserializer] = YamlDeserializer, **opts) -> T:
+def from_yaml(c: Type[T], s: str, de=YamlDeserializer, **opts) -> T:
     """
     Take yaml string and return deserialized object..
 
