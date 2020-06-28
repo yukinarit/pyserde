@@ -15,7 +15,7 @@ from serde.toml import from_toml, to_toml
 from serde.yaml import from_yaml, to_yaml
 
 from . import data
-from .data import Bool, Float, Int, NestedPri, NestedPriOpt, NestedPriTuple, Pri, PriDefault, PriOpt, PriTuple, Str, ListPri
+from .data import Bool, Float, Int, NestedPri, NestedPriOpt, NestedPriTuple, Pri, PriDefault, PriOpt, PriTuple, Str
 
 logging.basicConfig(level=logging.WARNING)
 
@@ -35,7 +35,7 @@ format_yaml: List = [(to_yaml, from_yaml)]
 
 format_toml: List = [(to_toml, from_toml)]
 
-all_formats: List = (format_dict + format_tuple + format_json + format_msgpack + format_yaml + format_toml)
+all_formats: List = format_dict + format_tuple + format_json + format_msgpack + format_yaml + format_toml
 
 
 @pytest.mark.parametrize('se,de', all_formats)

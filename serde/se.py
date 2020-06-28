@@ -19,13 +19,7 @@ from .compat import is_dict, is_list, is_opt, is_primitive, is_tuple, is_union, 
 from .core import HIDDEN_NAME, SE_NAME, SETTINGS, TO_DICT, TO_ITER, Field, Hidden, T, conv, fields, gen
 from .more_types import serialize as custom
 
-__all__: List = [
-    'serialize',
-    'is_serializable',
-    'Serializer',
-    'astuple',
-    'asdict',
-]
+__all__: List = ['serialize', 'is_serializable', 'Serializer', 'astuple', 'asdict']
 
 Custom = Optional[Callable[[Any], Any]]
 
