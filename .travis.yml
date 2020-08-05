@@ -20,6 +20,9 @@ jobs:
       python: 3.8
       script: make setup test examples
     - stage: test
+      python: 3.9-dev
+      script: make setup test examples
+    - stage: test
       python: pypy3
       script: pypy -m pip install pipenv && make PIPENV='pypy -m pipenv' setup test examples
     - stage: bench_and_coverage
