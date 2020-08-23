@@ -30,6 +30,7 @@ def test_decimal(se, de):
     f = Foo(d=Decimal(0.1))
     assert f == de(Foo, se(f))
 
+
 @pytest.mark.parametrize('se,de', format_json + format_yaml + format_toml)  # type: ignore
 def test_path(se, de):
     f = Bar(p=Path('/tmp'))

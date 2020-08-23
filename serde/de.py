@@ -30,7 +30,7 @@ __all__: List = ['deserialize', 'is_deserializable', 'Deserializer', 'from_dict'
 Custom = Optional[Callable[['DeField', Any], Any]]
 
 
-def deserialize(_cls=None, rename_all: Optional[str] = None) -> Type:
+def deserialize(_cls=None, rename_all: Optional[str] = None, cast: bool=False) -> Type:
     """
     `deserialize` decorator. A dataclass with this decorator can be deserialized
     into an object from various data format such as JSON and MsgPack.
@@ -68,8 +68,8 @@ def deserialize(_cls=None, rename_all: Optional[str] = None) -> Type:
         if not hasattr(cls, HIDDEN_NAME):
             setattr(cls, HIDDEN_NAME, Hidden())
         g['__custom_deserializer__'] = custom
-        cls = de_func(cls, FROM_ITER, render_from_iter(cls, custom), g)
-        cls = de_func(cls, FROM_DICT, render_from_dict(cls, rename_all, custom), g)
+        cls = de_func(cls, FROM_ITER, render_from_iter(cls, custom, cast), g)
+        cls = de_func(cls, FROM_DICT, render_from_dict(cls, rename_all, custom, cast), g)
         return cls
 
     if _cls is None:
@@ -97,7 +97,7 @@ def is_deserializable(instance_or_class: Any) -> bool:
 
 class Deserializer(metaclass=abc.ABCMeta):
     """
-    `Deserializer` base class. Subclass this to custonize deserialize bahaviour.
+    `Deserializer` base class. Subclass this to customize deserialize bahaviour.
 
     See `serde.json.JsonDeserializer` and `serde.msgpack.MsgPackDeserializer` for example usage.
     """
@@ -266,6 +266,7 @@ class Renderer:
 
     func: str
     custom: Custom = None
+    cast: bool = False
 
     def render(self, arg: DeField) -> str:
         """
@@ -282,7 +283,10 @@ class Renderer:
         elif is_tuple(arg.type):
             return self.tuple(arg)
         elif any(f(arg.type) for f in (is_primitive, is_union)):
-            return self.primitive(arg)
+            if self.cast:
+                return f'{arg.type.__name__}({self.primitive(arg)})'
+            else:
+                return self.primitive(arg)
         else:
             return f'__custom_deserializer__(fs[{arg.index}], {arg.data})'
 
@@ -405,7 +409,7 @@ def to_iter_arg(f: DeField, *args, **kwargs):
     return f
 
 
-def render_from_iter(cls: Type, custom: Custom = None) -> str:
+def render_from_iter(cls: Type, custom: Custom = None, cast: bool=False) -> str:
     template = """
 def {{func}}(data):
   if data is None:
@@ -416,8 +420,7 @@ def {{func}}(data):
   {% endfor %}
   )
     """
-
-    renderer = Renderer(FROM_ITER)
+    renderer = Renderer(FROM_ITER, cast=cast)
     env = jinja2.Environment(loader=jinja2.DictLoader({'iter': template}))
     env.filters.update({'rvalue': renderer.render})
     env.filters.update({'fields': defields})
@@ -425,7 +428,7 @@ def {{func}}(data):
     return env.get_template('iter').render(func=FROM_ITER, cls=cls)
 
 
-def render_from_dict(cls: Type, rename_all: Optional[str] = None, custom: Custom = None) -> str:
+def render_from_dict(cls: Type, rename_all: Optional[str] = None, custom: Custom = None, cast: bool=False) -> str:
     template = """
 def {{func}}(data):
   if data is None:
@@ -437,8 +440,7 @@ def {{func}}(data):
   {% endfor %}
   )
     """
-
-    renderer = Renderer(FROM_DICT, custom)
+    renderer = Renderer(FROM_DICT, custom, cast)
     env = jinja2.Environment(loader=jinja2.DictLoader({'dict': template}))
     env.filters.update({'rvalue': renderer.render})
     env.filters.update({'fields': defields})

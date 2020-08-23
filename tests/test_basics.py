@@ -342,3 +342,36 @@ def test_rename_all(se, de):
 
     f = Foo(class_name='foo')
     assert f == de(Foo, se(f, named=True), named=True)
+
+
+@pytest.mark.parametrize('se,de', all_formats)
+def test_cast(se, de):
+    @deserialize(cast=True)
+    @dataclass
+    class Foo:
+        i: int
+        s: str
+        f: float
+        b: bool
+
+    f = Foo('10', 10, '10.0', 'True')
+    ff = de(Foo, se(f))
+    assert 10 == ff.i
+    assert '10' == ff.s
+    assert 10.0 == ff.f
+    assert ff.b
+
+
+def test_cast_json():
+    @deserialize(cast=True)
+    @dataclass
+    class Foo:
+        i: int
+        s: str
+        f: float
+        b: bool
+
+    f = Foo('10', 10, '10.0', 'True')
+    s = '{"i": "10", "s": 10, "f": "10.0", "b": "True"}'
+    assert s == to_json(f)
+    assert Foo(10, '10', 10.0, True) == from_json(Foo, s)
