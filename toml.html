@@ -51,7 +51,7 @@ class TomlDeserializer(Deserializer):
         return toml.loads(s)
 
 
-def to_toml(obj, se: Type[TomlSerializer] = TomlSerializer, **opts) -&gt; str:
+def to_toml(obj, se=TomlSerializer, **opts) -&gt; str:
     &#34;&#34;&#34;
     Take an object and return toml string.
 
@@ -78,7 +78,7 @@ def to_toml(obj, se: Type[TomlSerializer] = TomlSerializer, **opts) -&gt; str:
     return se.serialize(obj, **opts)
 
 
-def from_toml(c: Type[T], s: str, de: Type[Deserializer] = TomlDeserializer, **opts) -&gt; T:
+def from_toml(c: Type[T], s: str, de=TomlDeserializer, **opts) -&gt; T:
     &#34;&#34;&#34;
     Take toml string and return deserialized object..
 
@@ -109,7 +109,7 @@ def from_toml(c: Type[T], s: str, de: Type[Deserializer] = TomlDeserializer, **o
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
 <dt id="serde.toml.from_toml"><code class="name flex">
-<span>def <span class="ident">from_toml</span></span>(<span>c: Type[~T], s: str, de: Type[<a title="serde.de.Deserializer" href="de.html#serde.de.Deserializer">Deserializer</a>] = serde.toml.TomlDeserializer, **opts) ‑> ~T</span>
+<span>def <span class="ident">from_toml</span></span>(<span>c: Type[~T], s: str, de=serde.toml.TomlDeserializer, **opts) ‑> ~T</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Take toml string and return deserialized object..</p>
@@ -133,7 +133,7 @@ Settings(host='localhost', port=8080, upstream=['localhost:8081', 'localhost:808
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def from_toml(c: Type[T], s: str, de: Type[Deserializer] = TomlDeserializer, **opts) -&gt; T:
+<pre><code class="python">def from_toml(c: Type[T], s: str, de=TomlDeserializer, **opts) -&gt; T:
     &#34;&#34;&#34;
     Take toml string and return deserialized object..
 
@@ -157,7 +157,7 @@ Settings(host='localhost', port=8080, upstream=['localhost:8081', 'localhost:808
 </details>
 </dd>
 <dt id="serde.toml.to_toml"><code class="name flex">
-<span>def <span class="ident">to_toml</span></span>(<span>obj, se: Type[<a title="serde.toml.TomlSerializer" href="#serde.toml.TomlSerializer">TomlSerializer</a>] = serde.toml.TomlSerializer, **opts) ‑> str</span>
+<span>def <span class="ident">to_toml</span></span>(<span>obj, se=serde.toml.TomlSerializer, **opts) ‑> str</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Take an object and return toml string.</p>
@@ -185,7 +185,7 @@ Settings(host='localhost', port=8080, upstream=['localhost:8081', 'localhost:808
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def to_toml(obj, se: Type[TomlSerializer] = TomlSerializer, **opts) -&gt; str:
+<pre><code class="python">def to_toml(obj, se=TomlSerializer, **opts) -&gt; str:
     &#34;&#34;&#34;
     Take an object and return toml string.
 
@@ -221,7 +221,7 @@ Settings(host='localhost', port=8080, upstream=['localhost:8081', 'localhost:808
 <span>class <span class="ident">TomlDeserializer</span></span>
 </code></dt>
 <dd>
-<div class="desc"><p><code>Deserializer</code> base class. Subclass this to custonize deserialize bahaviour.</p>
+<div class="desc"><p><code>Deserializer</code> base class. Subclass this to customize deserialize bahaviour.</p>
 <p>See <code><a title="serde.json.JsonDeserializer" href="json.html#serde.json.JsonDeserializer">JsonDeserializer</a></code> and <code><a title="serde.msgpack.MsgPackDeserializer" href="msgpack.html#serde.msgpack.MsgPackDeserializer">MsgPackDeserializer</a></code> for example usage.</p></div>
 <details class="source">
 <summary>
