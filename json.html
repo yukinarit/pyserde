@@ -50,11 +50,11 @@ class JsonDeserializer(Deserializer):
         return json.loads(s, **opts)
 
 
-def to_json(obj: Any, se=JsonSerializer, **opts) -&gt; str:
+def to_json(obj: Any, se: Type[JsonSerializer] = JsonSerializer, **opts) -&gt; str:
     return se.serialize(obj, **opts)
 
 
-def from_json(c: Type[T], s: str, de=JsonDeserializer, **opts) -&gt; T:
+def from_json(c: Type[T], s: str, de: Type[Deserializer] = JsonDeserializer, **opts) -&gt; T:
     return from_dict(c, de.deserialize(s, **opts))</code></pre>
 </details>
 </section>
@@ -66,7 +66,7 @@ def from_json(c: Type[T], s: str, de=JsonDeserializer, **opts) -&gt; T:
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
 <dt id="serde.json.from_json"><code class="name flex">
-<span>def <span class="ident">from_json</span></span>(<span>c: Type[~T], s: str, de=serde.json.JsonDeserializer, **opts) ‑> ~T</span>
+<span>def <span class="ident">from_json</span></span>(<span>c: Type[~T], s: str, de: Type[<a title="serde.de.Deserializer" href="de.html#serde.de.Deserializer">Deserializer</a>] = serde.json.JsonDeserializer, **opts) ‑> ~T</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -74,12 +74,12 @@ def from_json(c: Type[T], s: str, de=JsonDeserializer, **opts) -&gt; T:
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def from_json(c: Type[T], s: str, de=JsonDeserializer, **opts) -&gt; T:
+<pre><code class="python">def from_json(c: Type[T], s: str, de: Type[Deserializer] = JsonDeserializer, **opts) -&gt; T:
     return from_dict(c, de.deserialize(s, **opts))</code></pre>
 </details>
 </dd>
 <dt id="serde.json.to_json"><code class="name flex">
-<span>def <span class="ident">to_json</span></span>(<span>obj: Any, se=serde.json.JsonSerializer, **opts) ‑> str</span>
+<span>def <span class="ident">to_json</span></span>(<span>obj: Any, se: Type[<a title="serde.json.JsonSerializer" href="#serde.json.JsonSerializer">JsonSerializer</a>] = serde.json.JsonSerializer, **opts) ‑> str</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -87,7 +87,7 @@ def from_json(c: Type[T], s: str, de=JsonDeserializer, **opts) -&gt; T:
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def to_json(obj: Any, se=JsonSerializer, **opts) -&gt; str:
+<pre><code class="python">def to_json(obj: Any, se: Type[JsonSerializer] = JsonSerializer, **opts) -&gt; str:
     return se.serialize(obj, **opts)</code></pre>
 </details>
 </dd>
@@ -100,7 +100,7 @@ def from_json(c: Type[T], s: str, de=JsonDeserializer, **opts) -&gt; T:
 <span>class <span class="ident">JsonDeserializer</span></span>
 </code></dt>
 <dd>
-<div class="desc"><p><code>Deserializer</code> base class. Subclass this to customize deserialize bahaviour.</p>
+<div class="desc"><p><code>Deserializer</code> base class. Subclass this to custonize deserialize bahaviour.</p>
 <p>See <code><a title="serde.json.JsonDeserializer" href="#serde.json.JsonDeserializer">JsonDeserializer</a></code> and <code><a title="serde.msgpack.MsgPackDeserializer" href="msgpack.html#serde.msgpack.MsgPackDeserializer">MsgPackDeserializer</a></code> for example usage.</p></div>
 <details class="source">
 <summary>

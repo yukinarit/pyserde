@@ -266,7 +266,7 @@ from .de import deserialize, from_dict, from_obj, from_tuple, is_deserializable 
 from .se import asdict, astuple, is_serializable, serialize  # noqa
 
 &#34;&#34;&#34; Version of pyserde. &#34;&#34;&#34;
-__version__ = &#39;0.1.2&#39;
+__version__ = &#39;0.1.1&#39;
 
 __all__ = [
     &#39;serialize&#39;,
@@ -382,7 +382,7 @@ __all__ = [
 </details>
 </dd>
 <dt id="serde.deserialize"><code class="name flex">
-<span>def <span class="ident">deserialize</span></span>(<span>rename_all: Union[str, NoneType] = None, cast: bool = False) ‑> Type</span>
+<span>def <span class="ident">deserialize</span></span>(<span>rename_all: Union[str, NoneType] = None) ‑> Type</span>
 </code></dt>
 <dd>
 <div class="desc"><p><code><a title="serde.deserialize" href="#serde.deserialize">deserialize()</a></code> decorator. A dataclass with this decorator can be deserialized
@@ -417,7 +417,7 @@ RenameAll(int_field=10, str_field='foo')
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def deserialize(_cls=None, rename_all: Optional[str] = None, cast: bool=False) -&gt; Type:
+<pre><code class="python">def deserialize(_cls=None, rename_all: Optional[str] = None) -&gt; Type:
     &#34;&#34;&#34;
     `deserialize` decorator. A dataclass with this decorator can be deserialized
     into an object from various data format such as JSON and MsgPack.
@@ -456,7 +456,7 @@ RenameAll(int_field=10, str_field='foo')
             setattr(cls, HIDDEN_NAME, Hidden())
         g[&#39;__custom_deserializer__&#39;] = custom
         cls = de_func(cls, FROM_ITER, render_from_iter(cls, custom), g)
-        cls = de_func(cls, FROM_DICT, render_from_dict(cls, rename_all, custom, cast), g)
+        cls = de_func(cls, FROM_DICT, render_from_dict(cls, rename_all, custom), g)
         return cls
 
     if _cls is None:
