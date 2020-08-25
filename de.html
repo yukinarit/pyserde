@@ -62,18 +62,12 @@ from .compat import is_dict, is_list, is_opt, is_primitive, is_tuple, is_union, 
 from .core import FROM_DICT, FROM_ITER, HIDDEN_NAME, SETTINGS, Field, Hidden, SerdeError, T, conv, fields, gen
 from .more_types import deserialize as custom
 
-__all__: List = [
-    &#39;deserialize&#39;,
-    &#39;is_deserializable&#39;,
-    &#39;Deserializer&#39;,
-    &#39;from_dict&#39;,
-    &#39;from_tuple&#39;,
-]
+__all__: List = [&#39;deserialize&#39;, &#39;is_deserializable&#39;, &#39;Deserializer&#39;, &#39;from_dict&#39;, &#39;from_tuple&#39;]
 
 Custom = Optional[Callable[[&#39;DeField&#39;, Any], Any]]
 
 
-def deserialize(_cls=None, rename_all: Optional[str] = None) -&gt; Type:
+def deserialize(_cls=None, rename_all: Optional[str] = None, cast: bool=False) -&gt; Type:
     &#34;&#34;&#34;
     `deserialize` decorator. A dataclass with this decorator can be deserialized
     into an object from various data format such as JSON and MsgPack.
@@ -111,8 +105,8 @@ def deserialize(_cls=None, rename_all: Optional[str] = None) -&gt; Type:
         if not hasattr(cls, HIDDEN_NAME):
             setattr(cls, HIDDEN_NAME, Hidden())
         g[&#39;__custom_deserializer__&#39;] = custom
-        cls = de_func(cls, FROM_ITER, render_from_iter(cls, custom), g)
-        cls = de_func(cls, FROM_DICT, render_from_dict(cls, rename_all, custom), g)
+        cls = de_func(cls, FROM_ITER, render_from_iter(cls, custom, cast), g)
+        cls = de_func(cls, FROM_DICT, render_from_dict(cls, rename_all, custom, cast), g)
         return cls
 
     if _cls is None:
@@ -140,7 +134,7 @@ def is_deserializable(instance_or_class: Any) -&gt; bool:
 
 class Deserializer(metaclass=abc.ABCMeta):
     &#34;&#34;&#34;
-    `Deserializer` base class. Subclass this to custonize deserialize bahaviour.
+    `Deserializer` base class. Subclass this to customize deserialize bahaviour.
 
     See `serde.json.JsonDeserializer` and `serde.msgpack.MsgPackDeserializer` for example usage.
     &#34;&#34;&#34;
@@ -309,6 +303,7 @@ class Renderer:
 
     func: str
     custom: Custom = None
+    cast: bool = False
 
     def render(self, arg: DeField) -&gt; str:
         &#34;&#34;&#34;
@@ -325,7 +320,10 @@ class Renderer:
         elif is_tuple(arg.type):
             return self.tuple(arg)
         elif any(f(arg.type) for f in (is_primitive, is_union)):
-            return self.primitive(arg)
+            if self.cast:
+                return f&#39;{arg.type.__name__}({self.primitive(arg)})&#39;
+            else:
+                return self.primitive(arg)
         else:
             return f&#39;__custom_deserializer__(fs[{arg.index}], {arg.data})&#39;
 
@@ -448,7 +446,7 @@ def to_iter_arg(f: DeField, *args, **kwargs):
     return f
 
 
-def render_from_iter(cls: Type, custom: Custom = None) -&gt; str:
+def render_from_iter(cls: Type, custom: Custom = None, cast: bool=False) -&gt; str:
     template = &#34;&#34;&#34;
 def {{func}}(data):
   if data is None:
@@ -459,8 +457,7 @@ def {{func}}(data):
   {% endfor %}
   )
     &#34;&#34;&#34;
-
-    renderer = Renderer(FROM_ITER)
+    renderer = Renderer(FROM_ITER, cast=cast)
     env = jinja2.Environment(loader=jinja2.DictLoader({&#39;iter&#39;: template}))
     env.filters.update({&#39;rvalue&#39;: renderer.render})
     env.filters.update({&#39;fields&#39;: defields})
@@ -468,7 +465,7 @@ def {{func}}(data):
     return env.get_template(&#39;iter&#39;).render(func=FROM_ITER, cls=cls)
 
 
-def render_from_dict(cls: Type, rename_all: Optional[str] = None, custom: Custom = None) -&gt; str:
+def render_from_dict(cls: Type, rename_all: Optional[str] = None, custom: Custom = None, cast: bool=False) -&gt; str:
     template = &#34;&#34;&#34;
 def {{func}}(data):
   if data is None:
@@ -480,8 +477,7 @@ def {{func}}(data):
   {% endfor %}
   )
     &#34;&#34;&#34;
-
-    renderer = Renderer(FROM_DICT, custom)
+    renderer = Renderer(FROM_DICT, custom, cast)
     env = jinja2.Environment(loader=jinja2.DictLoader({&#39;dict&#39;: template}))
     env.filters.update({&#39;rvalue&#39;: renderer.render})
     env.filters.update({&#39;fields&#39;: defields})
@@ -527,7 +523,7 @@ def de_func(cls: Type[T], func: str, code: str, g: Dict = None, local: Dict = No
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
 <dt id="serde.de.deserialize"><code class="name flex">
-<span>def <span class="ident">deserialize</span></span>(<span>rename_all: Union[str, NoneType] = None) ‑> Type</span>
+<span>def <span class="ident">deserialize</span></span>(<span>rename_all: Union[str, NoneType] = None, cast: bool = False) ‑> Type</span>
 </code></dt>
 <dd>
 <div class="desc"><p><code><a title="serde.de.deserialize" href="#serde.de.deserialize">deserialize()</a></code> decorator. A dataclass with this decorator can be deserialized
@@ -562,7 +558,7 @@ RenameAll(int_field=10, str_field='foo')
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def deserialize(_cls=None, rename_all: Optional[str] = None) -&gt; Type:
+<pre><code class="python">def deserialize(_cls=None, rename_all: Optional[str] = None, cast: bool=False) -&gt; Type:
     &#34;&#34;&#34;
     `deserialize` decorator. A dataclass with this decorator can be deserialized
     into an object from various data format such as JSON and MsgPack.
@@ -600,8 +596,8 @@ RenameAll(int_field=10, str_field='foo')
         if not hasattr(cls, HIDDEN_NAME):
             setattr(cls, HIDDEN_NAME, Hidden())
         g[&#39;__custom_deserializer__&#39;] = custom
-        cls = de_func(cls, FROM_ITER, render_from_iter(cls, custom), g)
-        cls = de_func(cls, FROM_DICT, render_from_dict(cls, rename_all, custom), g)
+        cls = de_func(cls, FROM_ITER, render_from_iter(cls, custom, cast), g)
+        cls = de_func(cls, FROM_DICT, render_from_dict(cls, rename_all, custom, cast), g)
         return cls
 
     if _cls is None:
@@ -693,7 +689,7 @@ True
 <span>class <span class="ident">Deserializer</span></span>
 </code></dt>
 <dd>
-<div class="desc"><p><code><a title="serde.de.Deserializer" href="#serde.de.Deserializer">Deserializer</a></code> base class. Subclass this to custonize deserialize bahaviour.</p>
+<div class="desc"><p><code><a title="serde.de.Deserializer" href="#serde.de.Deserializer">Deserializer</a></code> base class. Subclass this to customize deserialize bahaviour.</p>
 <p>See <code><a title="serde.json.JsonDeserializer" href="json.html#serde.json.JsonDeserializer">JsonDeserializer</a></code> and <code><a title="serde.msgpack.MsgPackDeserializer" href="msgpack.html#serde.msgpack.MsgPackDeserializer">MsgPackDeserializer</a></code> for example usage.</p></div>
 <details class="source">
 <summary>
@@ -701,7 +697,7 @@ True
 </summary>
 <pre><code class="python">class Deserializer(metaclass=abc.ABCMeta):
     &#34;&#34;&#34;
-    `Deserializer` base class. Subclass this to custonize deserialize bahaviour.
+    `Deserializer` base class. Subclass this to customize deserialize bahaviour.
 
     See `serde.json.JsonDeserializer` and `serde.msgpack.MsgPackDeserializer` for example usage.
     &#34;&#34;&#34;
