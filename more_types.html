@@ -32,6 +32,7 @@ Additional type support such as Decimal.
 &#34;&#34;&#34;
 from dataclasses import Field
 from decimal import Decimal
+from pathlib import Path
 from typing import Any
 
 from .core import SerdeError
@@ -46,6 +47,8 @@ def serialize(data: Any) -&gt; Any:
     &#34;&#34;&#34;
     if isinstance(data, Decimal):
         return str(data)
+    elif isinstance(data, Path):
+        return str(data)
     else:
         raise SerdeError(f&#39;Unsupported type: {type(data)}&#39;)
 
@@ -59,6 +62,8 @@ def deserialize(field: Field, data: Any) -&gt; Any:
     &#34;&#34;&#34;
     if issubclass(field.type, Decimal):
         return Decimal(data)
+    elif issubclass(field.type, Path):
+        return Path(data)
     else:
         raise SerdeError(f&#39;Unsupported type: {type(data)}&#39;)</code></pre>
 </details>
@@ -90,6 +95,8 @@ Union, dataclass or primitives.</p></div>
     &#34;&#34;&#34;
     if issubclass(field.type, Decimal):
         return Decimal(data)
+    elif issubclass(field.type, Path):
+        return Path(data)
     else:
         raise SerdeError(f&#39;Unsupported type: {type(data)}&#39;)</code></pre>
 </details>
@@ -113,6 +120,8 @@ Union, dataclass or primitives.</p></div>
     Union, dataclass or primitives.
     &#34;&#34;&#34;
     if isinstance(data, Decimal):
+        return str(data)
+    elif isinstance(data, Path):
         return str(data)
     else:
         raise SerdeError(f&#39;Unsupported type: {type(data)}&#39;)</code></pre>
