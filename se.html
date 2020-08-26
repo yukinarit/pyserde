@@ -111,7 +111,7 @@ def serialize(_cls=None, rename_all: Optional[str] = None) -&gt; Type:
         g: Dict[str, Any] = globals().copy()
         for f in sefields(cls):
             if f.skip_if:
-                g[f.skip_if.mangled] = f.skip_if
+                g[f.skip_if.name] = f.skip_if
         g[&#39;__custom_serializer__&#39;] = custom
         cls = se_func(cls, TO_ITER, render_astuple(cls, custom), g)
         cls = se_func(cls, TO_DICT, render_asdict(cls, rename_all, custom), g)
@@ -226,10 +226,6 @@ class SeField(Field):
         typ = type_args(self.type)[n]
         return SeField(typ, None)
 
-    @staticmethod
-    def mangle(field: DataclassField, name: str) -&gt; str:
-        return f&#39;{field.name}_{name}&#39;
-
 
 sefields = functools.partial(fields, SeField)
 
@@ -277,7 +273,7 @@ def {{func}}(obj):
 
   {% if not f.skip %}
     {% if f.skip_if %}
-  if not {{f.skip_if.mangled}}({{f|arg|rvalue()}}):
+  if not {{f.skip_if.name}}({{f|arg|rvalue()}}):
     res[&#34;{{f|case}}&#34;] = {{f|arg|rvalue()}}
     {% else %}
   res[&#34;{{f|case}}&#34;] = {{f|arg|rvalue()}}
@@ -597,7 +593,7 @@ into an object in various data format such as JSON and MsgPack.</p>
         g: Dict[str, Any] = globals().copy()
         for f in sefields(cls):
             if f.skip_if:
-                g[f.skip_if.mangled] = f.skip_if
+                g[f.skip_if.name] = f.skip_if
         g[&#39;__custom_serializer__&#39;] = custom
         cls = se_func(cls, TO_ITER, render_astuple(cls, custom), g)
         cls = se_func(cls, TO_DICT, render_asdict(cls, rename_all, custom), g)

@@ -159,6 +159,32 @@ def typecheck(cls: Type[T], obj: T) -&gt; None:
 
 
 @dataclass
+class Func:
+    &#34;&#34;&#34;
+    Function wrapper that has `mangled` optional field.
+
+    pyserde copies every function reference into global scope
+    for code generation. Mangling function names is needed in
+    order to avoid name conflict in the global scope when
+    multiple fields receives `skip_if` attribute.
+    &#34;&#34;&#34;
+
+    inner: Callable[[Any], bool]
+    mangeld: str = &#34;&#34;
+
+    def __call__(self, v) -&gt; bool:
+        return self.inner(v)
+
+    @property
+    def name(self) -&gt; str:
+        return self.mangeld
+
+
+def skip_if_false(v):
+    return not bool(v)
+
+
+@dataclass
 class Field:
     &#34;&#34;&#34;
     Field in pyserde class.
@@ -170,23 +196,18 @@ class Field:
     case: Optional[str] = None
     rename: Optional[str] = None
     skip: Optional[bool] = None
-    skip_if: Optional[Callable[[Any], bool]] = None
+    skip_if: Optional[Func] = None
     skip_if_false: Optional[bool] = None
 
     @classmethod
     def from_dataclass(cls, f: DataclassField) -&gt; &#39;Field&#39;:
+        skip_if_false_func: Optional[Func] = None
         if f.metadata.get(&#39;serde_skip_if_false&#39;):
+            skip_if_false_func = Func(skip_if_false, cls.mangle(f, &#39;skip_if&#39;))
 
-            def skip_if_false(v):
-                return not bool(v)
-
-            skip_if_false.mangled = cls.mangle(f, &#39;skip_if&#39;)
-        else:
-            skip_if_false = None
-
-        skip_if = f.metadata.get(&#39;serde_skip_if&#39;)
-        if skip_if:
-            skip_if.mangled = cls.mangle(f, &#39;skip_if&#39;)
+        skip_if: Optional[Func] = None
+        if f.metadata.get(&#39;serde_skip_if&#39;):
+            skip_if = Func(f.metadata.get(&#39;serde_skip_if&#39;), cls.mangle(f, &#39;skip_if&#39;))
 
         return cls(
             f.type,
@@ -194,8 +215,15 @@ class Field:
             default=f.default,
             rename=f.metadata.get(&#39;serde_rename&#39;),
             skip=f.metadata.get(&#39;serde_skip&#39;),
-            skip_if=skip_if or skip_if_false,
+            skip_if=skip_if or skip_if_false_func,
         )
+
+    @staticmethod
+    def mangle(field: DataclassField, name: str) -&gt; str:
+        &#34;&#34;&#34;
+        Get mangled name based on field name.
+        &#34;&#34;&#34;
+        return f&#39;{field.name}_{name}&#39;
 
 
 def fields(FieldCls: Type, cls: Type) -&gt; Iterator[Field]:
