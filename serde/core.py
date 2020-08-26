@@ -130,6 +130,32 @@ def typecheck(cls: Type[T], obj: T) -> None:
 
 
 @dataclass
+class Func:
+    """
+    Function wrapper that has `mangled` optional field.
+
+    pyserde copies every function reference into global scope
+    for code generation. Mangling function names is needed in
+    order to avoid name conflict in the global scope when
+    multiple fields receives `skip_if` attribute.
+    """
+
+    inner: Callable[[Any], bool]
+    mangeld: str = ""
+
+    def __call__(self, v) -> bool:
+        return self.inner(v)
+
+    @property
+    def name(self) -> str:
+        return self.mangeld
+
+
+def skip_if_false(v):
+    return not bool(v)
+
+
+@dataclass
 class Field:
     """
     Field in pyserde class.
@@ -141,23 +167,18 @@ class Field:
     case: Optional[str] = None
     rename: Optional[str] = None
     skip: Optional[bool] = None
-    skip_if: Optional[Callable[[Any], bool]] = None
+    skip_if: Optional[Func] = None
     skip_if_false: Optional[bool] = None
 
     @classmethod
     def from_dataclass(cls, f: DataclassField) -> 'Field':
+        skip_if_false_func: Optional[Func] = None
         if f.metadata.get('serde_skip_if_false'):
+            skip_if_false_func = Func(skip_if_false, cls.mangle(f, 'skip_if'))
 
-            def skip_if_false(v):
-                return not bool(v)
-
-            skip_if_false.mangled = cls.mangle(f, 'skip_if')
-        else:
-            skip_if_false = None
-
-        skip_if = f.metadata.get('serde_skip_if')
-        if skip_if:
-            skip_if.mangled = cls.mangle(f, 'skip_if')
+        skip_if: Optional[Func] = None
+        if f.metadata.get('serde_skip_if'):
+            skip_if = Func(f.metadata.get('serde_skip_if'), cls.mangle(f, 'skip_if'))
 
         return cls(
             f.type,
@@ -165,8 +186,15 @@ class Field:
             default=f.default,
             rename=f.metadata.get('serde_rename'),
             skip=f.metadata.get('serde_skip'),
-            skip_if=skip_if or skip_if_false,
+            skip_if=skip_if or skip_if_false_func,
         )
+
+    @staticmethod
+    def mangle(field: DataclassField, name: str) -> str:
+        """
+        Get mangled name based on field name.
+        """
+        return f'{field.name}_{name}'
 
 
 def fields(FieldCls: Type, cls: Type) -> Iterator[Field]:
