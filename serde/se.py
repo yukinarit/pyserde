@@ -19,13 +19,7 @@ from .compat import is_dict, is_list, is_opt, is_primitive, is_tuple, is_union, 
 from .core import HIDDEN_NAME, SE_NAME, SETTINGS, TO_DICT, TO_ITER, Field, Hidden, T, conv, fields, gen
 from .more_types import serialize as custom
 
-__all__: List = [
-    'serialize',
-    'is_serializable',
-    'Serializer',
-    'astuple',
-    'asdict',
-]
+__all__: List = ['serialize', 'is_serializable', 'Serializer', 'astuple', 'asdict']
 
 Custom = Optional[Callable[[Any], Any]]
 
@@ -88,7 +82,7 @@ def serialize(_cls=None, rename_all: Optional[str] = None) -> Type:
         g: Dict[str, Any] = globals().copy()
         for f in sefields(cls):
             if f.skip_if:
-                g[f.skip_if.mangled] = f.skip_if
+                g[f.skip_if.name] = f.skip_if
         g['__custom_serializer__'] = custom
         cls = se_func(cls, TO_ITER, render_astuple(cls, custom), g)
         cls = se_func(cls, TO_DICT, render_asdict(cls, rename_all, custom), g)
@@ -203,10 +197,6 @@ class SeField(Field):
         typ = type_args(self.type)[n]
         return SeField(typ, None)
 
-    @staticmethod
-    def mangle(field: DataclassField, name: str) -> str:
-        return f'{field.name}_{name}'
-
 
 sefields = functools.partial(fields, SeField)
 
@@ -254,7 +244,7 @@ def {{func}}(obj):
 
   {% if not f.skip %}
     {% if f.skip_if %}
-  if not {{f.skip_if.mangled}}({{f|arg|rvalue()}}):
+  if not {{f.skip_if.name}}({{f|arg|rvalue()}}):
     res["{{f|case}}"] = {{f|arg|rvalue()}}
     {% else %}
   res["{{f|case}}"] = {{f|arg|rvalue()}}

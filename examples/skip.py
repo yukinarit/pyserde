@@ -10,7 +10,7 @@ Usage:
 
 from typing import List, Dict
 from dataclasses import dataclass, field
-from serde import serialize
+from serde import serialize, deserialize
 from serde.json import to_json
 
 
@@ -22,6 +22,7 @@ class Resource:
     metadata: Dict[str, str] = field(default_factory=dict, metadata={'serde_skip': True})
 
 
+@deserialize
 @serialize
 @dataclass
 class World:

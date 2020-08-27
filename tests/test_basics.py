@@ -2,7 +2,7 @@ import enum
 import json
 import logging
 from dataclasses import dataclass, field, fields
-from typing import Dict, List, Tuple
+from typing import Dict, List, Optional, Tuple
 
 import pytest
 
@@ -15,7 +15,8 @@ from serde.toml import from_toml, to_toml
 from serde.yaml import from_yaml, to_yaml
 
 from . import data
-from .data import Bool, Float, Int, NestedPri, NestedPriOpt, NestedPriTuple, Pri, PriDefault, PriOpt, PriTuple, Str, ListPri
+from .data import (Bool, Float, Int, ListPri, NestedPri, NestedPriOpt, NestedPriTuple, Pri, PriDefault, PriOpt,
+                   PriTuple, Str)
 
 logging.basicConfig(level=logging.WARNING)
 
@@ -342,3 +343,50 @@ def test_rename_all(se, de):
 
     f = Foo(class_name='foo')
     assert f == de(Foo, se(f, named=True), named=True)
+
+
+@pytest.mark.parametrize('se,de', (format_dict + format_json + format_msgpack + format_yaml + format_toml))
+def test_skip_if(se, de):
+    @deserialize
+    @serialize
+    @dataclass
+    class Foo:
+        comments: Optional[List[str]] = field(default_factory=list, metadata={'serde_skip_if': lambda v: len(v) == 0})
+        attrs: Optional[Dict[str, str]] = field(
+            default_factory=dict, metadata={'serde_skip_if': lambda v: v is None or len(v) == 0}
+        )
+
+    f = Foo(['foo'], {"bar": "baz"})
+    assert f == de(Foo, se(f))
+
+    f = Foo([])
+    ff = de(Foo, se(f))
+    assert ff.comments is None  # TODO format_tuple gets [] instaed of None
+    assert ff.attrs is None  # TODO format_tuple gets {} instaed of None
+
+
+@pytest.mark.parametrize('se,de', all_formats)
+def test_skip_if_false(se, de):
+    @deserialize
+    @serialize
+    @dataclass
+    class Foo:
+        comments: Optional[List[str]] = field(default_factory=list, metadata={'serde_skip_if_false': True})
+
+    f = Foo(['foo'])
+    assert f == de(Foo, se(f))
+
+
+@pytest.mark.parametrize('se,de', (format_dict + format_json + format_msgpack + format_yaml + format_toml))
+def test_skip_if_overrides_skip_if_false(se, de):
+    @deserialize
+    @serialize
+    @dataclass
+    class Foo:
+        comments: Optional[List[str]] = field(
+            default_factory=list, metadata={'serde_skip_if_false': True, 'serde_skip_if': lambda v: len(v) == 1}
+        )
+
+    f = Foo(['foo'])
+    ff = de(Foo, se(f))
+    assert ff.comments is None
