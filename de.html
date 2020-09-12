@@ -62,7 +62,13 @@ from .compat import is_dict, is_list, is_opt, is_primitive, is_tuple, is_union, 
 from .core import FROM_DICT, FROM_ITER, HIDDEN_NAME, SETTINGS, Field, Hidden, SerdeError, T, conv, fields, gen
 from .more_types import deserialize as custom
 
-__all__: List = [&#39;deserialize&#39;, &#39;is_deserializable&#39;, &#39;Deserializer&#39;, &#39;from_dict&#39;, &#39;from_tuple&#39;]
+__all__: List = [
+    &#39;deserialize&#39;,
+    &#39;is_deserializable&#39;,
+    &#39;Deserializer&#39;,
+    &#39;from_dict&#39;,
+    &#39;from_tuple&#39;,
+]
 
 Custom = Optional[Callable[[&#39;DeField&#39;, Any], Any]]
 
