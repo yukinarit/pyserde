@@ -266,7 +266,7 @@ from .de import deserialize, from_dict, from_obj, from_tuple, is_deserializable 
 from .se import asdict, astuple, is_serializable, serialize  # noqa
 
 &#34;&#34;&#34; Version of pyserde. &#34;&#34;&#34;
-__version__ = &#39;0.1.2&#39;
+__version__ = &#39;0.1.3&#39;
 
 __all__ = [
     &#39;serialize&#39;,
@@ -659,7 +659,7 @@ into an object in various data format such as JSON and MsgPack.</p>
         g: Dict[str, Any] = globals().copy()
         for f in sefields(cls):
             if f.skip_if:
-                g[f.skip_if.mangled] = f.skip_if
+                g[f.skip_if.name] = f.skip_if
         g[&#39;__custom_serializer__&#39;] = custom
         cls = se_func(cls, TO_ITER, render_astuple(cls, custom), g)
         cls = se_func(cls, TO_DICT, render_asdict(cls, rename_all, custom), g)
