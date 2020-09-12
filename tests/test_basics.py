@@ -77,28 +77,92 @@ def test_forward_declaration():
     assert h.bar.i == 10
 
 
-def test_enum():
-    class IEnum(enum.IntEnum):
+@pytest.mark.parametrize('se,de', (format_dict + format_tuple + format_json + format_msgpack))
+def test_intenum(se, de):
+    class IE(enum.IntEnum):
         V0 = enum.auto()
         V1 = enum.auto()
         V2 = enum.auto()
 
-    class SEnum(enum.Enum):
-        V0 = 'v0'
-        V1 = 'v1'
-        V2 = 'v2'
-
-    # NOTE: Only IntEnum is supported now.
     @deserialize
     @serialize
     @dataclass
     class Foo:
-        ie0: IEnum
-        ie1: IEnum
-        ie2: IEnum
-        se0: SEnum
-        se1: SEnum
-        se2: SEnum
+        ie0: IE
+        ie1: IE
+        ie2: IE
+
+    f = Foo(1, 2, 3)
+    assert f == de(Foo, se(f))
+
+    f = Foo(IE.V0, IE.V1, IE.V2)
+    assert f == de(Foo, se(f))
+
+
+@pytest.mark.parametrize('se,de', format_yaml)
+def test_intenum_yaml(se, de):
+    class IE(enum.IntEnum):
+        V0 = enum.auto()
+        V1 = enum.auto()
+        V2 = enum.auto()
+
+    @deserialize
+    @serialize
+    @dataclass
+    class Foo:
+        ie0: IE
+        ie1: IE
+        ie2: IE
+
+    f = Foo(1, 2, 3)
+    assert f == de(Foo, se(f))
+
+    # yaml library doesn't serialize IntEnum.
+    f = Foo(IE.V0, IE.V1, IE.V2)
+    pytest.raises(Exception, lambda: de(Foo, se(f)))
+
+
+@pytest.mark.parametrize('se,de', format_toml)
+def test_intenum_toml(se, de):
+    class IE(enum.IntEnum):
+        V0 = enum.auto()
+        V1 = enum.auto()
+        V2 = enum.auto()
+
+    @deserialize
+    @serialize
+    @dataclass
+    class Foo:
+        ie0: IE
+        ie1: IE
+        ie2: IE
+
+    f = Foo(1, 2, 3)
+    assert f == de(Foo, se(f))
+
+    # yaml library doesn't serialize IntEnum as integer but str.
+    f = Foo(IE.V0, IE.V1, IE.V2)
+    assert f != de(Foo, se(f))
+
+
+@pytest.mark.parametrize('se,de', all_formats)
+def test_enum(se, de):
+    class E(enum.Enum):
+        V0 = 'v0'
+        V1 = 'v1'
+        V2 = 'v2'
+
+    @deserialize
+    @serialize
+    @dataclass
+    class Foo:
+        ie0: E
+        ie1: E
+        ie2: E
+
+    # NOTE: Only IntEnum is supported now.
+    f = Foo(E.V0, E.V1, E.V2)
+    pytest.raises(Exception, lambda: de(Foo, se(f)))
 
 
 @pytest.mark.parametrize('se,de', all_formats)
