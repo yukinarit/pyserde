@@ -21,7 +21,7 @@ from typing import Any, Callable, Dict, List, Optional, Tuple, Type
 
 import jinja2
 
-from .compat import is_dict, is_list, is_opt, is_primitive, is_tuple, is_union, iter_types, type_args
+from .compat import is_dict, is_enum, is_list, is_opt, is_primitive, is_tuple, is_union, iter_types, type_args
 from .core import FROM_DICT, FROM_ITER, HIDDEN_NAME, SETTINGS, Field, Hidden, SerdeError, T, conv, fields, gen
 from .more_types import deserialize as custom
 
@@ -30,7 +30,7 @@ __all__: List = ['deserialize', 'is_deserializable', 'Deserializer', 'from_dict'
 Custom = Optional[Callable[['DeField', Any], Any]]
 
 
-def deserialize(_cls=None, rename_all: Optional[str] = None) -> Type:
+def deserialize(_cls=None, rename_all: Optional[str] = None):
     """
     `deserialize` decorator. A dataclass with this decorator can be deserialized
     into an object from various data format such as JSON and MsgPack.
@@ -68,6 +68,12 @@ def deserialize(_cls=None, rename_all: Optional[str] = None) -> Type:
         if not hasattr(cls, HIDDEN_NAME):
             setattr(cls, HIDDEN_NAME, Hidden())
         g['__custom_deserializer__'] = custom
+
+        # If there is a field of Enum, imports the class of Enum into the generation scope.
+        for f in dataclass_fields(cls):
+            if is_enum(f.type):
+                g[f.type.__name__] = f.type
+
         cls = de_func(cls, FROM_ITER, render_from_iter(cls, custom), g)
         cls = de_func(cls, FROM_DICT, render_from_dict(cls, rename_all, custom), g)
         return cls
@@ -281,6 +287,8 @@ class Renderer:
             return self.dict(arg)
         elif is_tuple(arg.type):
             return self.tuple(arg)
+        elif is_enum(arg.type):
+            return self.enum(arg)
         elif any(f(arg.type) for f in (is_primitive, is_union)):
             return self.primitive(arg)
         else:
@@ -368,6 +376,9 @@ class Renderer:
         """
         k, v = arg.get_kv()
         return f'{{{self.render(k)}: {self.render(v)} for k, v in {arg.data}.items()}}'
+
+    def enum(self, arg: DeField) -> str:
+        return f'{arg.type.__name__}({self.primitive(arg)})'
 
     def primitive(self, arg: DeField) -> str:
         """

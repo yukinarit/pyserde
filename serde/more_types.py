@@ -1,6 +1,7 @@
 """
 Additional type support such as Decimal.
 """
+import enum
 from dataclasses import Field
 from decimal import Decimal
 from pathlib import Path
@@ -20,6 +21,8 @@ def serialize(data: Any) -> Any:
         return str(data)
     elif isinstance(data, Path):
         return str(data)
+    elif isinstance(data, enum.IntEnum):
+        return data.value
     else:
         raise SerdeError(f'Unsupported type: {type(data)}')
 
