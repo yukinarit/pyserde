@@ -58,8 +58,8 @@ from typing import Any, Callable, Dict, List, Optional, Tuple, Type
 
 import jinja2
 
-from .compat import is_dict, is_list, is_opt, is_primitive, is_tuple, is_union, iter_types, type_args
-from .core import FROM_DICT, FROM_ITER, HIDDEN_NAME, SETTINGS, Field, Hidden, SerdeError, T, conv, fields, gen
+from .compat import is_dict, is_list, is_opt, is_primitive, is_tuple, is_union, iter_types, type_args, is_enum
+from .core import FROM_DICT, FROM_ITER, HIDDEN_NAME, SETTINGS, Field, Hidden, SerdeError, T, conv, fields, gen, logger
 from .more_types import deserialize as custom
 
 __all__: List = [&#39;deserialize&#39;, &#39;is_deserializable&#39;, &#39;Deserializer&#39;, &#39;from_dict&#39;, &#39;from_tuple&#39;]
@@ -67,7 +67,7 @@ __all__: List = [&#39;deserialize&#39;, &#39;is_deserializable&#39;, &#39;Deseri
 Custom = Optional[Callable[[&#39;DeField&#39;, Any], Any]]
 
 
-def deserialize(_cls=None, rename_all: Optional[str] = None) -&gt; Type:
+def deserialize(_cls=None, rename_all: Optional[str] = None):
     &#34;&#34;&#34;
     `deserialize` decorator. A dataclass with this decorator can be deserialized
     into an object from various data format such as JSON and MsgPack.
@@ -105,6 +105,9 @@ def deserialize(_cls=None, rename_all: Optional[str] = None) -&gt; Type:
         if not hasattr(cls, HIDDEN_NAME):
             setattr(cls, HIDDEN_NAME, Hidden())
         g[&#39;__custom_deserializer__&#39;] = custom
+        for f in dataclass_fields(cls):
+            if is_enum(f.type):
+                g[f.type.__name__] = f.type
         cls = de_func(cls, FROM_ITER, render_from_iter(cls, custom), g)
         cls = de_func(cls, FROM_DICT, render_from_dict(cls, rename_all, custom), g)
         return cls
@@ -318,6 +321,8 @@ class Renderer:
             return self.dict(arg)
         elif is_tuple(arg.type):
             return self.tuple(arg)
+        elif is_enum(arg.type):
+            return self.enum(arg)
         elif any(f(arg.type) for f in (is_primitive, is_union)):
             return self.primitive(arg)
         else:
@@ -405,6 +410,9 @@ class Renderer:
         &#34;&#34;&#34;
         k, v = arg.get_kv()
         return f&#39;{{{self.render(k)}: {self.render(v)} for k, v in {arg.data}.items()}}&#39;
+
+    def enum(self, arg: DeField) -&gt; str:
+        return f&#39;{arg.type.__name__}({self.primitive(arg)})&#39;
 
     def primitive(self, arg: DeField) -&gt; str:
         &#34;&#34;&#34;
@@ -521,7 +529,7 @@ def de_func(cls: Type[T], func: str, code: str, g: Dict = None, local: Dict = No
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
 <dt id="serde.de.deserialize"><code class="name flex">
-<span>def <span class="ident">deserialize</span></span>(<span>rename_all: Union[str, NoneType] = None) ‑> Type</span>
+<span>def <span class="ident">deserialize</span></span>(<span>rename_all: Union[str, NoneType] = None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p><code><a title="serde.de.deserialize" href="#serde.de.deserialize">deserialize()</a></code> decorator. A dataclass with this decorator can be deserialized
@@ -556,7 +564,7 @@ RenameAll(int_field=10, str_field='foo')
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def deserialize(_cls=None, rename_all: Optional[str] = None) -&gt; Type:
+<pre><code class="python">def deserialize(_cls=None, rename_all: Optional[str] = None):
     &#34;&#34;&#34;
     `deserialize` decorator. A dataclass with this decorator can be deserialized
     into an object from various data format such as JSON and MsgPack.
@@ -594,6 +602,9 @@ RenameAll(int_field=10, str_field='foo')
         if not hasattr(cls, HIDDEN_NAME):
             setattr(cls, HIDDEN_NAME, Hidden())
         g[&#39;__custom_deserializer__&#39;] = custom
+        for f in dataclass_fields(cls):
+            if is_enum(f.type):
+                g[f.type.__name__] = f.type
         cls = de_func(cls, FROM_ITER, render_from_iter(cls, custom), g)
         cls = de_func(cls, FROM_DICT, render_from_dict(cls, rename_all, custom), g)
         return cls

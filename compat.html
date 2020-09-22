@@ -30,6 +30,7 @@
 <pre><code class="python">&#34;&#34;&#34;
 Module for compatibility.
 &#34;&#34;&#34;
+import enum
 from dataclasses import fields, is_dataclass
 from itertools import zip_longest
 from typing import Iterator, List, Optional, Tuple, Type, TypeVar, Union
@@ -187,6 +188,16 @@ def is_none(typ: Type) -&gt; bool:
 
 
 PRIMITIVES = [int, float, bool, str]
+
+
+def is_enum(typ: Type) -&gt; bool:
+    &#34;&#34;&#34;
+    Test if the type is `enum.Enum`.
+    &#34;&#34;&#34;
+    try:
+        return issubclass(typ, enum.Enum)
+    except TypeError:
+        return isinstance(typ, enum.Enum)
 
 
 def is_primitive(typ: Type) -&gt; bool:

@@ -30,6 +30,7 @@
 <pre><code class="python">&#34;&#34;&#34;
 Additional type support such as Decimal.
 &#34;&#34;&#34;
+import enum
 from dataclasses import Field
 from decimal import Decimal
 from pathlib import Path
@@ -49,6 +50,8 @@ def serialize(data: Any) -&gt; Any:
         return str(data)
     elif isinstance(data, Path):
         return str(data)
+    elif isinstance(data, enum.IntEnum):
+        return data.value
     else:
         raise SerdeError(f&#39;Unsupported type: {type(data)}&#39;)
 
@@ -123,6 +126,8 @@ Union, dataclass or primitives.</p></div>
         return str(data)
     elif isinstance(data, Path):
         return str(data)
+    elif isinstance(data, enum.IntEnum):
+        return data.value
     else:
         raise SerdeError(f&#39;Unsupported type: {type(data)}&#39;)</code></pre>
 </details>

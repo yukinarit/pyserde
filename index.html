@@ -382,7 +382,7 @@ __all__ = [
 </details>
 </dd>
 <dt id="serde.deserialize"><code class="name flex">
-<span>def <span class="ident">deserialize</span></span>(<span>rename_all: Union[str, NoneType] = None) ‑> Type</span>
+<span>def <span class="ident">deserialize</span></span>(<span>rename_all: Union[str, NoneType] = None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p><code><a title="serde.deserialize" href="#serde.deserialize">deserialize()</a></code> decorator. A dataclass with this decorator can be deserialized
@@ -417,7 +417,7 @@ RenameAll(int_field=10, str_field='foo')
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def deserialize(_cls=None, rename_all: Optional[str] = None) -&gt; Type:
+<pre><code class="python">def deserialize(_cls=None, rename_all: Optional[str] = None):
     &#34;&#34;&#34;
     `deserialize` decorator. A dataclass with this decorator can be deserialized
     into an object from various data format such as JSON and MsgPack.
@@ -455,6 +455,9 @@ RenameAll(int_field=10, str_field='foo')
         if not hasattr(cls, HIDDEN_NAME):
             setattr(cls, HIDDEN_NAME, Hidden())
         g[&#39;__custom_deserializer__&#39;] = custom
+        for f in dataclass_fields(cls):
+            if is_enum(f.type):
+                g[f.type.__name__] = f.type
         cls = de_func(cls, FROM_ITER, render_from_iter(cls, custom), g)
         cls = de_func(cls, FROM_DICT, render_from_dict(cls, rename_all, custom), g)
         return cls
@@ -647,7 +650,7 @@ into an object in various data format such as JSON and MsgPack.</p>
     &#34;&#34;&#34;
 
     @functools.wraps(_cls)
-    def wrap(cls: Type[T]) -&gt; Type[T]:
+    def wrap(cls: Type[T]):
         if not hasattr(cls, HIDDEN_NAME):
             setattr(cls, HIDDEN_NAME, Hidden())
 
