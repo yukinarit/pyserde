@@ -4,6 +4,7 @@ Defines classess and functions for `serialize` decorator.
 """
 import abc
 import copy  # noqa
+import enum
 import functools
 from dataclasses import Field as DataclassField
 from dataclasses import asdict as _asdict
@@ -15,7 +16,7 @@ from typing import Any, Callable, Dict, List, Optional, Tuple, Type
 
 import jinja2
 
-from .compat import is_dict, is_list, is_opt, is_primitive, is_tuple, is_union, type_args
+from .compat import is_dict, is_enum, is_list, is_opt, is_primitive, is_tuple, is_union, type_args
 from .core import HIDDEN_NAME, SE_NAME, SETTINGS, TO_DICT, TO_ITER, Field, Hidden, T, conv, fields, gen
 from .more_types import serialize as custom
 
@@ -70,7 +71,7 @@ def serialize(_cls=None, rename_all: Optional[str] = None) -> Type:
     """
 
     @functools.wraps(_cls)
-    def wrap(cls: Type[T]) -> Type[T]:
+    def wrap(cls: Type[T]):
         if not hasattr(cls, HIDDEN_NAME):
             setattr(cls, HIDDEN_NAME, Hidden())
 
@@ -313,6 +314,8 @@ class Renderer:
             return self.dict(arg)
         elif is_tuple(arg.type):
             return self.tuple(arg)
+        elif is_enum(arg.type):
+            return self.enum(arg)
         elif any(f(arg.type) for f in (is_primitive, is_union)):
             return self.primitive(arg)
         else:
@@ -360,6 +363,9 @@ class Renderer:
         varg = arg[1]
         varg.name = 'v'
         return f'{{{self.render(karg)}: {self.render(varg)} for k, v in {arg.varname}.items()}}'
+
+    def enum(self, arg: SeField) -> str:
+        return f'{arg.varname}.value'
 
     def primitive(self, arg: SeField) -> str:
         """

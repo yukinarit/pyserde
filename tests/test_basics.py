@@ -77,92 +77,85 @@ def test_forward_declaration():
     assert h.bar.i == 10
 
 
-@pytest.mark.parametrize('se,de', (format_dict + format_tuple + format_json + format_msgpack))
+@pytest.mark.parametrize('se,de', all_formats)
 def test_intenum(se, de):
     class IE(enum.IntEnum):
         V0 = enum.auto()
         V1 = enum.auto()
-        V2 = enum.auto()
+        V2 = 10
 
     @deserialize
     @serialize
     @dataclass
     class Foo:
-        ie0: IE
-        ie1: IE
-        ie2: IE
+        v0: IE
+        v1: IE
+        v2: IE = IE.V2
 
+    f = Foo(IE.V0, IE.V1)
+    ff = de(Foo, se(f))
+    assert f == ff
+    assert isinstance(ff.v0, enum.Enum)
+    assert isinstance(ff.v1, enum.Enum)
+    assert isinstance(ff.v2, enum.Enum)
+
+    # int literal doesn't work because of type mismatch.
     f = Foo(1, 2, 3)
-    assert f == de(Foo, se(f))
-
-    f = Foo(IE.V0, IE.V1, IE.V2)
-    assert f == de(Foo, se(f))
-
-
-@pytest.mark.parametrize('se,de', format_yaml)
-def test_intenum_yaml(se, de):
-    class IE(enum.IntEnum):
-        V0 = enum.auto()
-        V1 = enum.auto()
-        V2 = enum.auto()
-
-    @deserialize
-    @serialize
-    @dataclass
-    class Foo:
-        ie0: IE
-        ie1: IE
-        ie2: IE
-
-    f = Foo(1, 2, 3)
-    assert f == de(Foo, se(f))
-
-    # yaml library doesn't serialize IntEnum.
-    f = Foo(IE.V0, IE.V1, IE.V2)
     pytest.raises(Exception, lambda: de(Foo, se(f)))
-
-
-@pytest.mark.parametrize('se,de', format_toml)
-def test_intenum_toml(se, de):
-    class IE(enum.IntEnum):
-        V0 = enum.auto()
-        V1 = enum.auto()
-        V2 = enum.auto()
-
-    @deserialize
-    @serialize
-    @dataclass
-    class Foo:
-        ie0: IE
-        ie1: IE
-        ie2: IE
-
-    f = Foo(1, 2, 3)
-    assert f == de(Foo, se(f))
-
-    # yaml library doesn't serialize IntEnum as integer but str.
-    f = Foo(IE.V0, IE.V1, IE.V2)
-    assert f != de(Foo, se(f))
 
 
 @pytest.mark.parametrize('se,de', all_formats)
 def test_enum(se, de):
     class E(enum.Enum):
-        V0 = 'v0'
-        V1 = 'v1'
-        V2 = 'v2'
+        V0 = 1
+        V1 = 'foo'
+        V2 = 10.0
+        V3 = True
 
     @deserialize
     @serialize
     @dataclass
     class Foo:
-        ie0: E
-        ie1: E
-        ie2: E
+        v0: E
+        v1: E
+        v2: E
+        v3: E = E.V3
 
-    # NOTE: Only IntEnum is supported now.
     f = Foo(E.V0, E.V1, E.V2)
+    ff = de(Foo, se(f))
+    assert isinstance(ff.v0, enum.Enum)
+    assert isinstance(ff.v1, enum.Enum)
+    assert isinstance(ff.v2, enum.Enum)
+    assert isinstance(ff.v3, enum.Enum)
+
+    # literal values don't work because of type mismatch.
+    f = Foo(1, 'foo', 10.0, True)
     pytest.raises(Exception, lambda: de(Foo, se(f)))
+
+
+@pytest.mark.parametrize('se,de', all_formats)
+def test_enum_nested(se, de):
+    class Nested(enum.IntEnum):
+        V0 = enum.auto()
+        V1 = enum.auto()
+        V2 = enum.auto()
+
+    class E(enum.Enum):
+        V0 = Nested.V0
+        V1 = Nested.V1
+        V2 = Nested.V2
+
+    @deserialize
+    @serialize
+    @dataclass
+    class Foo:
+        v0: E
+        v1: E
+        v2: Nested = Nested.V0
+
+    # Nested enum don't work for yaml.
+    Foo(E.V0, E.V1)
+    # ff = de(Foo, se(f))
 
 
 @pytest.mark.parametrize('se,de', all_formats)
