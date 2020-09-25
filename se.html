@@ -32,8 +32,8 @@ Defines classess and functions for `serialize` decorator.
 
 &#34;&#34;&#34;
 import abc
-import enum
 import copy  # noqa
+import enum
 import functools
 from dataclasses import Field as DataclassField
 from dataclasses import asdict as _asdict
@@ -45,8 +45,8 @@ from typing import Any, Callable, Dict, List, Optional, Tuple, Type
 
 import jinja2
 
-from .compat import is_dict, is_list, is_opt, is_primitive, is_tuple, is_union, type_args, is_enum
-from .core import HIDDEN_NAME, SE_NAME, SETTINGS, TO_DICT, TO_ITER, Field, Hidden, T, conv, fields, gen, logger
+from .compat import is_dict, is_enum, is_list, is_opt, is_primitive, is_tuple, is_union, type_args
+from .core import HIDDEN_NAME, SE_NAME, SETTINGS, TO_DICT, TO_ITER, Field, Hidden, T, conv, fields, gen
 from .more_types import serialize as custom
 
 __all__: List = [&#39;serialize&#39;, &#39;is_serializable&#39;, &#39;Serializer&#39;, &#39;astuple&#39;, &#39;asdict&#39;]

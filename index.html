@@ -455,9 +455,12 @@ RenameAll(int_field=10, str_field='foo')
         if not hasattr(cls, HIDDEN_NAME):
             setattr(cls, HIDDEN_NAME, Hidden())
         g[&#39;__custom_deserializer__&#39;] = custom
+
+        # If there is a field of Enum, imports the class of Enum into the generation scope.
         for f in dataclass_fields(cls):
             if is_enum(f.type):
                 g[f.type.__name__] = f.type
+
         cls = de_func(cls, FROM_ITER, render_from_iter(cls, custom), g)
         cls = de_func(cls, FROM_DICT, render_from_dict(cls, rename_all, custom), g)
         return cls

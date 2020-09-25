@@ -58,8 +58,8 @@ from typing import Any, Callable, Dict, List, Optional, Tuple, Type
 
 import jinja2
 
-from .compat import is_dict, is_list, is_opt, is_primitive, is_tuple, is_union, iter_types, type_args, is_enum
-from .core import FROM_DICT, FROM_ITER, HIDDEN_NAME, SETTINGS, Field, Hidden, SerdeError, T, conv, fields, gen, logger
+from .compat import is_dict, is_enum, is_list, is_opt, is_primitive, is_tuple, is_union, iter_types, type_args
+from .core import FROM_DICT, FROM_ITER, HIDDEN_NAME, SETTINGS, Field, Hidden, SerdeError, T, conv, fields, gen
 from .more_types import deserialize as custom
 
 __all__: List = [&#39;deserialize&#39;, &#39;is_deserializable&#39;, &#39;Deserializer&#39;, &#39;from_dict&#39;, &#39;from_tuple&#39;]
@@ -105,9 +105,12 @@ def deserialize(_cls=None, rename_all: Optional[str] = None):
         if not hasattr(cls, HIDDEN_NAME):
             setattr(cls, HIDDEN_NAME, Hidden())
         g[&#39;__custom_deserializer__&#39;] = custom
+
+        # If there is a field of Enum, imports the class of Enum into the generation scope.
         for f in dataclass_fields(cls):
             if is_enum(f.type):
                 g[f.type.__name__] = f.type
+
         cls = de_func(cls, FROM_ITER, render_from_iter(cls, custom), g)
         cls = de_func(cls, FROM_DICT, render_from_dict(cls, rename_all, custom), g)
         return cls
@@ -602,9 +605,12 @@ RenameAll(int_field=10, str_field='foo')
         if not hasattr(cls, HIDDEN_NAME):
             setattr(cls, HIDDEN_NAME, Hidden())
         g[&#39;__custom_deserializer__&#39;] = custom
+
+        # If there is a field of Enum, imports the class of Enum into the generation scope.
         for f in dataclass_fields(cls):
             if is_enum(f.type):
                 g[f.type.__name__] = f.type
+
         cls = de_func(cls, FROM_ITER, render_from_iter(cls, custom), g)
         cls = de_func(cls, FROM_DICT, render_from_dict(cls, rename_all, custom), g)
         return cls
