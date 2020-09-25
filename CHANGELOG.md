@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 0.1.4 (2020-09-25)
+
+### Features
+* Enum support ([6dca279](https://github.com/yukinarit/pyserde/commit/6dca2792c32ceadbfdbd6e8aa50c0ac511661e7d))
+
 ## 0.1.3 (2020-09-12)
 
 ### Bug Fixes
