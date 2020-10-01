@@ -585,7 +585,7 @@ True
 </details>
 </dd>
 <dt id="serde.serialize"><code class="name flex">
-<span>def <span class="ident">serialize</span></span>(<span>rename_all: Union[str, NoneType] = None) ‑> Type</span>
+<span>def <span class="ident">serialize</span></span>(<span>rename_all: Union[str, NoneType] = None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p><code><a title="serde.serialize" href="#serde.serialize">serialize()</a></code> decorator. A dataclass with this decorator can be serialized
@@ -620,7 +620,7 @@ into an object in various data format such as JSON and MsgPack.</p>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def serialize(_cls=None, rename_all: Optional[str] = None) -&gt; Type:
+<pre><code class="python">def serialize(_cls=None, rename_all: Optional[str] = None):
     &#34;&#34;&#34;
     `serialize` decorator. A dataclass with this decorator can be serialized
     into an object in various data format such as JSON and MsgPack.

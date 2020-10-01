@@ -173,7 +173,7 @@ class Func:
     mangeld: str = &#34;&#34;
 
     def __call__(self, v) -&gt; bool:
-        return self.inner(v)
+        return self.inner(v)  # type: ignore
 
     @property
     def name(self) -&gt; str:
@@ -191,7 +191,7 @@ class Field:
     &#34;&#34;&#34;
 
     type: Type
-    name: str
+    name: Optional[str]
     default: Any = field(default_factory=DEFAULT_MISSING_TYPE)
     case: Optional[str] = None
     rename: Optional[str] = None
@@ -207,7 +207,9 @@ class Field:
 
         skip_if: Optional[Func] = None
         if f.metadata.get(&#39;serde_skip_if&#39;):
-            skip_if = Func(f.metadata.get(&#39;serde_skip_if&#39;), cls.mangle(f, &#39;skip_if&#39;))
+            func = f.metadata.get(&#39;serde_skip_if&#39;)
+            if callable(func):
+                skip_if = Func(func, cls.mangle(f, &#39;skip_if&#39;))
 
         return cls(
             f.type,
@@ -244,6 +246,8 @@ def conv(f: Field, case: Optional[str] = None) -&gt; str:
         name = casef(f.name)
     if f.rename:
         name = f.rename
+    if name is None:
+        raise SerdeError(&#39;Field name is None.&#39;)
     return name</code></pre>
 </details>
 </section>

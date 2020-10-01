@@ -54,11 +54,11 @@ class MsgPackDeserializer(Deserializer):
         return unp
 
 
-def to_msgpack(obj: Any, se: Type[Serializer] = MsgPackSerializer, **opts) -&gt; bytes:
+def to_msgpack(obj: Any, se=MsgPackSerializer, **opts) -&gt; bytes:
     return se.serialize(obj, **opts)
 
 
-def from_msgpack(c: Type[T], s: str, de: Type[Deserializer] = MsgPackDeserializer, named=True, **opts) -&gt; Type[T]:
+def from_msgpack(c: Type[T], s: str, de=MsgPackDeserializer, named=True, **opts) -&gt; Type[T]:
     fromf = from_dict if named else from_tuple
     return fromf(c, de.deserialize(s, **opts))</code></pre>
 </details>
@@ -71,7 +71,7 @@ def from_msgpack(c: Type[T], s: str, de: Type[Deserializer] = MsgPackDeserialize
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
 <dt id="serde.msgpack.from_msgpack"><code class="name flex">
-<span>def <span class="ident">from_msgpack</span></span>(<span>c: Type[~T], s: str, de: Type[<a title="serde.de.Deserializer" href="de.html#serde.de.Deserializer">Deserializer</a>] = serde.msgpack.MsgPackDeserializer, named=True, **opts) ‑> Type[~T]</span>
+<span>def <span class="ident">from_msgpack</span></span>(<span>c: Type[~T], s: str, de=serde.msgpack.MsgPackDeserializer, named=True, **opts) ‑> Type[~T]</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -79,13 +79,13 @@ def from_msgpack(c: Type[T], s: str, de: Type[Deserializer] = MsgPackDeserialize
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def from_msgpack(c: Type[T], s: str, de: Type[Deserializer] = MsgPackDeserializer, named=True, **opts) -&gt; Type[T]:
+<pre><code class="python">def from_msgpack(c: Type[T], s: str, de=MsgPackDeserializer, named=True, **opts) -&gt; Type[T]:
     fromf = from_dict if named else from_tuple
     return fromf(c, de.deserialize(s, **opts))</code></pre>
 </details>
 </dd>
 <dt id="serde.msgpack.to_msgpack"><code class="name flex">
-<span>def <span class="ident">to_msgpack</span></span>(<span>obj: Any, se: Type[<a title="serde.se.Serializer" href="se.html#serde.se.Serializer">Serializer</a>] = serde.msgpack.MsgPackSerializer, **opts) ‑> bytes</span>
+<span>def <span class="ident">to_msgpack</span></span>(<span>obj: Any, se=serde.msgpack.MsgPackSerializer, **opts) ‑> bytes</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -93,7 +93,7 @@ def from_msgpack(c: Type[T], s: str, de: Type[Deserializer] = MsgPackDeserialize
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def to_msgpack(obj: Any, se: Type[Serializer] = MsgPackSerializer, **opts) -&gt; bytes:
+<pre><code class="python">def to_msgpack(obj: Any, se=MsgPackSerializer, **opts) -&gt; bytes:
     return se.serialize(obj, **opts)</code></pre>
 </details>
 </dd>

@@ -51,7 +51,7 @@ class YamlDeserializer(Deserializer):
         return yaml.safe_load(s, **opts)
 
 
-def to_yaml(obj, se: Type[Serializer] = YamlSerializer, **opts) -&gt; str:
+def to_yaml(obj, se=YamlSerializer, **opts) -&gt; str:
     &#34;&#34;&#34;
     Take an object and return yaml string.
 
@@ -72,7 +72,7 @@ def to_yaml(obj, se: Type[Serializer] = YamlSerializer, **opts) -&gt; str:
     return se.serialize(obj, **opts)
 
 
-def from_yaml(c: Type[T], s: str, de: Type[Deserializer] = YamlDeserializer, **opts) -&gt; T:
+def from_yaml(c: Type[T], s: str, de=YamlDeserializer, **opts) -&gt; T:
     &#34;&#34;&#34;
     Take yaml string and return deserialized object..
 
@@ -101,7 +101,7 @@ def from_yaml(c: Type[T], s: str, de: Type[Deserializer] = YamlDeserializer, **o
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
 <dt id="serde.yaml.from_yaml"><code class="name flex">
-<span>def <span class="ident">from_yaml</span></span>(<span>c: Type[~T], s: str, de: Type[<a title="serde.de.Deserializer" href="de.html#serde.de.Deserializer">Deserializer</a>] = serde.yaml.YamlDeserializer, **opts) ‑> ~T</span>
+<span>def <span class="ident">from_yaml</span></span>(<span>c: Type[~T], s: str, de=serde.yaml.YamlDeserializer, **opts) ‑> ~T</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Take yaml string and return deserialized object..</p>
@@ -123,7 +123,7 @@ Settings(host='localhost', port=8080, upstream=['localhost:8081', 'localhost:808
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def from_yaml(c: Type[T], s: str, de: Type[Deserializer] = YamlDeserializer, **opts) -&gt; T:
+<pre><code class="python">def from_yaml(c: Type[T], s: str, de=YamlDeserializer, **opts) -&gt; T:
     &#34;&#34;&#34;
     Take yaml string and return deserialized object..
 
@@ -145,7 +145,7 @@ Settings(host='localhost', port=8080, upstream=['localhost:8081', 'localhost:808
 </details>
 </dd>
 <dt id="serde.yaml.to_yaml"><code class="name flex">
-<span>def <span class="ident">to_yaml</span></span>(<span>obj, se: Type[<a title="serde.se.Serializer" href="se.html#serde.se.Serializer">Serializer</a>] = serde.yaml.YamlSerializer, **opts) ‑> str</span>
+<span>def <span class="ident">to_yaml</span></span>(<span>obj, se=serde.yaml.YamlSerializer, **opts) ‑> str</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Take an object and return yaml string.</p>
@@ -167,7 +167,7 @@ Settings(host='localhost', port=8080, upstream=['localhost:8081', 'localhost:808
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def to_yaml(obj, se: Type[Serializer] = YamlSerializer, **opts) -&gt; str:
+<pre><code class="python">def to_yaml(obj, se=YamlSerializer, **opts) -&gt; str:
     &#34;&#34;&#34;
     Take an object and return yaml string.
 

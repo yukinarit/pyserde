@@ -130,14 +130,14 @@ def iter_types(cls: Type) -&gt; Iterator[Type]:
         yield cls
 
 
-def is_union(typ: Type) -&gt; bool:
+def is_union(typ) -&gt; bool:
     &#34;&#34;&#34;
     Test if the type is `typing.Union`.
     &#34;&#34;&#34;
     return is_union_type(typ) and not is_opt(typ)
 
 
-def is_opt(typ: Type) -&gt; bool:
+def is_opt(typ) -&gt; bool:
     &#34;&#34;&#34;
     Test if the type is `typing.Optional`.
     &#34;&#34;&#34;
@@ -145,7 +145,7 @@ def is_opt(typ: Type) -&gt; bool:
     return is_optional_type(typ) and len(args) == 2 and not is_none(args[0]) and is_none(args[1])
 
 
-def is_list(typ: Type) -&gt; bool:
+def is_list(typ) -&gt; bool:
     &#34;&#34;&#34;
     Test if the type is `typing.List`.
     &#34;&#34;&#34;
@@ -155,7 +155,7 @@ def is_list(typ: Type) -&gt; bool:
         return isinstance(typ, list)
 
 
-def is_tuple(typ: Type) -&gt; bool:
+def is_tuple(typ) -&gt; bool:
     &#34;&#34;&#34;
     Test if the type is `typing.Tuple`.
     &#34;&#34;&#34;
@@ -165,7 +165,7 @@ def is_tuple(typ: Type) -&gt; bool:
         return isinstance(typ, tuple)
 
 
-def is_dict(typ: Type) -&gt; bool:
+def is_dict(typ) -&gt; bool:
     &#34;&#34;&#34;
     Test if the type is `typing.Dict`.
     &#34;&#34;&#34;
@@ -175,7 +175,7 @@ def is_dict(typ: Type) -&gt; bool:
         return isinstance(typ, dict)
 
 
-def is_none(typ: Type) -&gt; bool:
+def is_none(typ) -&gt; bool:
     &#34;&#34;&#34;
     &gt;&gt;&gt; is_none(int)
     False
@@ -190,7 +190,7 @@ def is_none(typ: Type) -&gt; bool:
 PRIMITIVES = [int, float, bool, str]
 
 
-def is_enum(typ: Type) -&gt; bool:
+def is_enum(typ) -&gt; bool:
     &#34;&#34;&#34;
     Test if the type is `enum.Enum`.
     &#34;&#34;&#34;
@@ -200,7 +200,7 @@ def is_enum(typ: Type) -&gt; bool:
         return isinstance(typ, enum.Enum)
 
 
-def is_primitive(typ: Type) -&gt; bool:
+def is_primitive(typ) -&gt; bool:
     &#34;&#34;&#34;
     Test if the type is primitive.
 
