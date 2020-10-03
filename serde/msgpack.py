@@ -25,10 +25,10 @@ class MsgPackDeserializer(Deserializer):
         return unp
 
 
-def to_msgpack(obj: Any, se: Type[Serializer] = MsgPackSerializer, **opts) -> bytes:
+def to_msgpack(obj: Any, se=MsgPackSerializer, **opts) -> bytes:
     return se.serialize(obj, **opts)
 
 
-def from_msgpack(c: Type[T], s: str, de: Type[Deserializer] = MsgPackDeserializer, named=True, **opts) -> Type[T]:
+def from_msgpack(c: Type[T], s: str, de=MsgPackDeserializer, named=True, **opts) -> Type[T]:
     fromf = from_dict if named else from_tuple
     return fromf(c, de.deserialize(s, **opts))

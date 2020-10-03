@@ -21,9 +21,9 @@ class JsonDeserializer(Deserializer):
         return json.loads(s, **opts)
 
 
-def to_json(obj: Any, se: Type[JsonSerializer] = JsonSerializer, **opts) -> str:
+def to_json(obj: Any, se=JsonSerializer, **opts) -> str:
     return se.serialize(obj, **opts)
 
 
-def from_json(c: Type[T], s: str, de: Type[Deserializer] = JsonDeserializer, **opts) -> T:
+def from_json(c: Type[T], s: str, de=JsonDeserializer, **opts) -> T:
     return from_dict(c, de.deserialize(s, **opts))

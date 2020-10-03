@@ -22,7 +22,7 @@ class TomlDeserializer(Deserializer):
         return toml.loads(s)
 
 
-def to_toml(obj, se: Type[TomlSerializer] = TomlSerializer, **opts) -> str:
+def to_toml(obj, se=TomlSerializer, **opts) -> str:
     """
     Take an object and return toml string.
 
@@ -49,7 +49,7 @@ def to_toml(obj, se: Type[TomlSerializer] = TomlSerializer, **opts) -> str:
     return se.serialize(obj, **opts)
 
 
-def from_toml(c: Type[T], s: str, de: Type[Deserializer] = TomlDeserializer, **opts) -> T:
+def from_toml(c: Type[T], s: str, de=TomlDeserializer, **opts) -> T:
     """
     Take toml string and return deserialized object..
 

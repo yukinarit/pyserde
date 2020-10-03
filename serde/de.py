@@ -227,7 +227,7 @@ class DeField(Field):
         else:
             return DeField(typ, self.name, datavar=self.datavar, index=self.index, iterbased=self.iterbased)
 
-    def get_kv(self) -> Tuple['ElementField', 'ElementField']:
+    def get_kv(self) -> Tuple['DeField', 'DeField']:
         k = self[0]
         k.name = 'k'
         k.datavar = 'k'
