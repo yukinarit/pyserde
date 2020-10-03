@@ -1,6 +1,8 @@
+import enum
 from dataclasses import dataclass
 from typing import Dict, List, Optional, Tuple
 
+from . import imported
 from serde import deserialize, serialize
 
 
@@ -211,6 +213,31 @@ class PriDefault:
     s: str = 'foo'
     f: float = 100.0
     b: bool = True
+
+
+class E(enum.Enum):
+    V0 = 1
+    V1 = 'foo'
+    V2 = 10.0
+    V3 = True
+
+
+class IE(enum.IntEnum):
+    V0 = enum.auto()
+    V1 = enum.auto()
+    V2 = 10
+
+
+@deserialize
+@serialize
+@dataclass
+class EnumInClass:
+    """
+    Class having enum fields.
+    """
+    e: E = E.V0
+    o: Optional[E] = E.V1
+    i: imported.IE = imported.IE.V2
 
 
 ListPri = List[Pri]

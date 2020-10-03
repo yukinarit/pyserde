@@ -79,10 +79,7 @@ def test_forward_declaration():
 
 @pytest.mark.parametrize('se,de', all_formats)
 def test_intenum(se, de):
-    class IE(enum.IntEnum):
-        V0 = enum.auto()
-        V1 = enum.auto()
-        V2 = 10
+    from .data import IE
 
     @deserialize
     @serialize
@@ -106,11 +103,7 @@ def test_intenum(se, de):
 
 @pytest.mark.parametrize('se,de', all_formats)
 def test_enum(se, de):
-    class E(enum.Enum):
-        V0 = 1
-        V1 = 'foo'
-        V2 = 10.0
-        V3 = True
+    from .data import E
 
     @deserialize
     @serialize
@@ -156,6 +149,15 @@ def test_enum_nested(se, de):
     # Nested enum don't work for yaml.
     Foo(E.V0, E.V1)
     # ff = de(Foo, se(f))
+
+
+@pytest.mark.parametrize('se,de', all_formats)
+def test_enum_imported(se, de):
+    from .data import EnumInClass
+
+    c = EnumInClass()
+    cc = de(EnumInClass, se(c))
+    assert c == cc
 
 
 @pytest.mark.parametrize('se,de', all_formats)
