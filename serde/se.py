@@ -374,18 +374,16 @@ class Renderer:
         return f'{arg.varname}'
 
 
-def se_func(cls: Type[T], func: str, code: str, g: Dict = None, local: Dict = None) -> Type[T]:
+def se_func(cls: Type[T], func: str, code: str, g: Dict = None) -> Type[T]:
     """
     Generate function to serialize into an object.
     """
     # Generate serialize function.
     if not g:
         g = globals().copy()
-    if not local:
-        local = locals().copy()
-    code = gen(code, g, local, cls=cls)
+    code = gen(code, g, cls=cls)
 
-    setattr(cls, func, local[func])
+    setattr(cls, func, g[func])
     if SETTINGS['debug']:
         hidden = getattr(cls, HIDDEN_NAME)
         hidden.code[func] = code

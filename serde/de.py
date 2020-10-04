@@ -457,14 +457,12 @@ def {{func}}(data):
     return env.get_template('dict').render(func=FROM_DICT, cls=cls)
 
 
-def de_func(cls: Type[T], func: str, code: str, g: Dict = None, local: Dict = None) -> Type[T]:
+def de_func(cls: Type[T], func: str, code: str, g: Dict = None) -> Type[T]:
     """
     Generate function to deserialize into an instance of `deserialize` class.
     """
     if not g:
         g = globals().copy()
-    if not local:
-        local = locals().copy()
 
     # Collect types to be used in the `exec` scope.
     for typ in iter_types(cls):
