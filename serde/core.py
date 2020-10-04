@@ -2,8 +2,8 @@
 pyserde core module.
 """
 import logging
+import dataclasses
 from dataclasses import _MISSING_TYPE as DEFAULT_MISSING_TYPE
-from dataclasses import Field as DataclassField
 from dataclasses import dataclass, field
 from dataclasses import fields as dataclass_fields
 from dataclasses import is_dataclass
@@ -171,7 +171,7 @@ class Field:
     skip_if_false: Optional[bool] = None
 
     @classmethod
-    def from_dataclass(cls, f: DataclassField) -> 'Field':
+    def from_dataclass(cls, f: dataclasses.Field) -> 'Field':
         skip_if_false_func: Optional[Func] = None
         if f.metadata.get('serde_skip_if_false'):
             skip_if_false_func = Func(skip_if_false, cls.mangle(f, 'skip_if'))
@@ -192,7 +192,7 @@ class Field:
         )
 
     @staticmethod
-    def mangle(field: DataclassField, name: str) -> str:
+    def mangle(field: dataclasses.Field, name: str) -> str:
         """
         Get mangled name based on field name.
         """

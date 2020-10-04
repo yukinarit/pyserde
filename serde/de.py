@@ -213,12 +213,17 @@ def from_tuple(cls, o):
 
 @dataclass
 class DeField(Field):
+    """
+    Feild class for deserialization.
+    """
     datavar: Optional[str] = None  # name of variable to deserialize from.
     index: int = 0  # Field number inside dataclass.
-    parent: Optional['DeField'] = None  # Parent of this field.
     iterbased: bool = False  # Iterater based deserializer or not.
 
     def __getitem__(self, n) -> 'DeField':
+        """
+        Access inner `Field` e.g. T of List[T].
+        """
         typ = type_args(self.type)[n]
         if is_list(self.type) or is_dict(self.type):
             return ElementField(typ, 'v', datavar='v')
@@ -405,7 +410,6 @@ class Renderer:
 def to_arg(f: DeField, index, rename_all: Optional[str] = None) -> DeField:
     f.index = index
     f.data = 'data'
-    f.parent = DeField(type(None), 'data', datavar='data', case=f.case or rename_all)
     f.case = f.case or rename_all
     return f
 
