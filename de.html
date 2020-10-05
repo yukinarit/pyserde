@@ -49,12 +49,10 @@ Defines classess and functions for `deserialize` decorator.
 parts of pyserde.
 &#34;&#34;&#34;
 import abc
+import dataclasses
 import functools
-from dataclasses import _MISSING_TYPE as DEFAULT_MISSING_TYPE
-from dataclasses import dataclass
-from dataclasses import fields as dataclass_fields
-from dataclasses import is_dataclass
-from typing import Any, Callable, Dict, List, Optional, Tuple, Type
+from dataclasses import dataclass, is_dataclass
+from typing import Any, Callable, Dict, List, Optional, Type
 
 import jinja2
 
@@ -107,7 +105,7 @@ def deserialize(_cls=None, rename_all: Optional[str] = None):
         g[&#39;__custom_deserializer__&#39;] = custom
 
         # If there is a field of Enum, imports the class of Enum into the generation scope.
-        for f in dataclass_fields(cls):
+        for f in dataclasses.fields(cls):
             if is_enum(f.type):
                 g[f.type.__name__] = f.type
 
@@ -250,26 +248,40 @@ def from_tuple(cls, o):
 
 @dataclass
 class DeField(Field):
+    &#34;&#34;&#34;
+    Feild class for deserialization.
+    &#34;&#34;&#34;
+
     datavar: Optional[str] = None  # name of variable to deserialize from.
-    index: int = 0  # Field number inside dataclass.
-    parent: Optional[&#39;DeField&#39;] = None  # Parent of this field.
+    index: int = 0  # Field index.
     iterbased: bool = False  # Iterater based deserializer or not.
 
     def __getitem__(self, n) -&gt; &#39;DeField&#39;:
+        &#34;&#34;&#34;
+        Access inner `Field` e.g. T of List[T].
+        &#34;&#34;&#34;
         typ = type_args(self.type)[n]
         if is_list(self.type) or is_dict(self.type):
-            return ElementField(typ, &#39;v&#39;, datavar=&#39;v&#39;)
+            return InnerField(typ, &#39;v&#39;, datavar=&#39;v&#39;)
         elif is_tuple(self.type):
-            return ElementField(typ, f&#39;{self.data}[{n}]&#39;, datavar=f&#39;{self.data}[{n}]&#39;)
+            return InnerField(typ, f&#39;{self.data}[{n}]&#39;, datavar=f&#39;{self.data}[{n}]&#39;)
         else:
             return DeField(typ, self.name, datavar=self.datavar, index=self.index, iterbased=self.iterbased)
 
-    def get_kv(self) -&gt; Tuple[&#39;DeField&#39;, &#39;DeField&#39;]:
+    def key_field(self) -&gt; &#39;DeField&#39;:
+        &#34;&#34;&#34;
+        Get inner key field for Dict like class.
+        &#34;&#34;&#34;
         k = self[0]
         k.name = &#39;k&#39;
         k.datavar = &#39;k&#39;
-        v = self[1]
-        return (k, v)
+        return k
+
+    def value_field(self) -&gt; &#39;DeField&#39;:
+        &#34;&#34;&#34;
+        Get inner value field for Dict like class.
+        &#34;&#34;&#34;
+        return self[1]
 
     @property
     def data(self) -&gt; str:
@@ -284,9 +296,9 @@ class DeField(Field):
 
 
 @dataclass
-class ElementField(DeField):
+class InnerField(DeField):
     &#34;&#34;&#34;
-    Field for element type such as List[T].
+    Field for inner type e.g. T of List[T].
     &#34;&#34;&#34;
 
     @property
@@ -380,7 +392,7 @@ class Renderer:
         &#34;&#34;&#34;
         Render rvalue for tuple.
 
-        &gt;&gt;&gt; from typing import List
+        &gt;&gt;&gt; from typing import List, Tuple
         &gt;&gt;&gt; @deserialize
         ... @dataclass
         ... class Foo: pass
@@ -411,7 +423,8 @@ class Renderer:
         &gt;&gt;&gt; Renderer(&#39;foo&#39;).render(DeField(Dict[Foo, List[Foo]], &#39;f&#39;, datavar=&#39;data&#39;))
         &#39;{Foo.foo(k): [Foo.foo(v) for v in v] for k, v in data[&#34;f&#34;].items()}&#39;
         &#34;&#34;&#34;
-        k, v = arg.get_kv()
+        k = arg.key_field()
+        v = arg.value_field()
         return f&#39;{{{self.render(k)}: {self.render(v)} for k, v in {arg.data}.items()}}&#39;
 
     def enum(self, arg: DeField) -&gt; str:
@@ -430,7 +443,7 @@ class Renderer:
         &gt;&gt;&gt; Renderer(&#39;foo&#39;).render(DeField(int, &#39;i&#39;, datavar=&#39;data&#39;, index=1, iterbased=True))
         &#39;data[1]&#39;
         &#34;&#34;&#34;
-        if not arg.iterbased and not isinstance(arg.default, DEFAULT_MISSING_TYPE):
+        if not arg.iterbased and not isinstance(arg.default, dataclasses._MISSING_TYPE):
             default = arg.default
             if isinstance(default, str):
                 default = f&#39;&#34;{default}&#34;&#39;
@@ -442,7 +455,6 @@ class Renderer:
 def to_arg(f: DeField, index, rename_all: Optional[str] = None) -&gt; DeField:
     f.index = index
     f.data = &#39;data&#39;
-    f.parent = DeField(type(None), &#39;data&#39;, datavar=&#39;data&#39;, case=f.case or rename_all)
     f.case = f.case or rename_all
     return f
 
@@ -494,14 +506,12 @@ def {{func}}(data):
     return env.get_template(&#39;dict&#39;).render(func=FROM_DICT, cls=cls)
 
 
-def de_func(cls: Type[T], func: str, code: str, g: Dict = None, local: Dict = None) -&gt; Type[T]:
+def de_func(cls: Type[T], func: str, code: str, g: Dict = None) -&gt; Type[T]:
     &#34;&#34;&#34;
     Generate function to deserialize into an instance of `deserialize` class.
     &#34;&#34;&#34;
     if not g:
         g = globals().copy()
-    if not local:
-        local = locals().copy()
 
     # Collect types to be used in the `exec` scope.
     for typ in iter_types(cls):
@@ -512,7 +522,7 @@ def de_func(cls: Type[T], func: str, code: str, g: Dict = None, local: Dict = No
 
     g[&#39;typing&#39;] = typing
     g[&#39;NoneType&#39;] = type(None)
-    g[&#39;fields&#39;] = dataclass_fields
+    g[&#39;fields&#39;] = dataclasses.fields
 
     # Generate deserialize function.
     code = gen(code, g, cls=cls)
@@ -607,7 +617,7 @@ RenameAll(int_field=10, str_field='foo')
         g[&#39;__custom_deserializer__&#39;] = custom
 
         # If there is a field of Enum, imports the class of Enum into the generation scope.
-        for f in dataclass_fields(cls):
+        for f in dataclasses.fields(cls):
             if is_enum(f.type):
                 g[f.type.__name__] = f.type
 

@@ -348,7 +348,7 @@ __all__ = [
     if is_serializable(v):
         return getattr(v, TO_DICT)()
     elif is_dataclass(v):
-        return _asdict(v)
+        return dataclasses.asdict(v)
     elif isinstance(v, Dict):
         return {asdict(k): asdict(v) for k, v in v.items()}
     elif isinstance(v, (Tuple, List)):
@@ -373,7 +373,7 @@ __all__ = [
     if is_serializable(v):
         return getattr(v, TO_ITER)()
     elif is_dataclass(v):
-        return _astuple(v)
+        return dataclasses.astuple(v)
     elif isinstance(v, Dict):
         return {astuple(k): astuple(v) for k, v in v.items()}
     elif isinstance(v, (Tuple, List)):
@@ -458,7 +458,7 @@ RenameAll(int_field=10, str_field='foo')
         g[&#39;__custom_deserializer__&#39;] = custom
 
         # If there is a field of Enum, imports the class of Enum into the generation scope.
-        for f in dataclass_fields(cls):
+        for f in dataclasses.fields(cls):
             if is_enum(f.type):
                 g[f.type.__name__] = f.type
 
