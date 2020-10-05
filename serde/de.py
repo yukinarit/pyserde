@@ -15,7 +15,7 @@ import abc
 import dataclasses
 import functools
 from dataclasses import dataclass, is_dataclass
-from typing import Any, Callable, Dict, List, Optional, Type, Tuple
+from typing import Any, Callable, Dict, List, Optional, Type
 
 import jinja2
 
@@ -216,7 +216,7 @@ class DeField(Field):
     """
 
     datavar: Optional[str] = None  # name of variable to deserialize from.
-    index: int = 0  # Field number inside dataclass.
+    index: int = 0  # Field index.
     iterbased: bool = False  # Iterater based deserializer or not.
 
     def __getitem__(self, n) -> 'DeField':
@@ -225,18 +225,26 @@ class DeField(Field):
         """
         typ = type_args(self.type)[n]
         if is_list(self.type) or is_dict(self.type):
-            return ElementField(typ, 'v', datavar='v')
+            return InnerField(typ, 'v', datavar='v')
         elif is_tuple(self.type):
-            return ElementField(typ, f'{self.data}[{n}]', datavar=f'{self.data}[{n}]')
+            return InnerField(typ, f'{self.data}[{n}]', datavar=f'{self.data}[{n}]')
         else:
             return DeField(typ, self.name, datavar=self.datavar, index=self.index, iterbased=self.iterbased)
 
-    def get_kv(self) -> Tuple['DeField', 'DeField']:
+    def key_field(self) -> 'DeField':
+        """
+        Get inner key field for Dict like class.
+        """
         k = self[0]
         k.name = 'k'
         k.datavar = 'k'
-        v = self[1]
-        return (k, v)
+        return k
+
+    def value_field(self) -> 'DeField':
+        """
+        Get inner value field for Dict like class.
+        """
+        return self[1]
 
     @property
     def data(self) -> str:
@@ -251,9 +259,9 @@ class DeField(Field):
 
 
 @dataclass
-class ElementField(DeField):
+class InnerField(DeField):
     """
-    Field for element type such as List[T].
+    Field for inner type e.g. T of List[T].
     """
 
     @property
@@ -347,7 +355,7 @@ class Renderer:
         """
         Render rvalue for tuple.
 
-        >>> from typing import List
+        >>> from typing import List, Tuple
         >>> @deserialize
         ... @dataclass
         ... class Foo: pass
@@ -378,7 +386,8 @@ class Renderer:
         >>> Renderer('foo').render(DeField(Dict[Foo, List[Foo]], 'f', datavar='data'))
         '{Foo.foo(k): [Foo.foo(v) for v in v] for k, v in data["f"].items()}'
         """
-        k, v = arg.get_kv()
+        k = arg.key_field()
+        v = arg.value_field()
         return f'{{{self.render(k)}: {self.render(v)} for k, v in {arg.data}.items()}}'
 
     def enum(self, arg: DeField) -> str:
