@@ -267,7 +267,7 @@ from .de import deserialize, from_dict, from_obj, from_tuple, is_deserializable 
 from .se import asdict, astuple, is_serializable, serialize  # noqa
 
 &#34;&#34;&#34; Version of pyserde. &#34;&#34;&#34;
-__version__ = &#39;0.1.4&#39;
+__version__ = &#39;0.1.5&#39;
 
 __all__ = [
     &#39;serialize&#39;,
@@ -453,14 +453,23 @@ RenameAll(int_field=10, str_field='foo')
 
     def wrap(cls):
         g: Dict[str, Any] = globals().copy()
+
+        # Create hidden object used by serde.
         if not hasattr(cls, HIDDEN_NAME):
             setattr(cls, HIDDEN_NAME, Hidden())
+
+        # Create a scope storage used by serde.
+        scope = {}
+        setattr(cls, &#39;__serde_scope__&#39;, scope)
+
+        # Set custom deserializer.
         g[&#39;__custom_deserializer__&#39;] = custom
 
-        # If there is a field of Enum, imports the class of Enum into the generation scope.
-        for f in dataclasses.fields(cls):
-            if is_enum(f.type):
-                g[f.type.__name__] = f.type
+        # Collect types used in the gernerated code.
+        for typ in iter_types(cls):
+            if is_dataclass(typ) or is_enum(typ):
+                getattr(cls, &#39;__serde_scope__&#39;)[typ.__name__] = typ
+        logger.debug(f&#39;{cls.__name__}: __serde_scope__ {scope}&#39;)
 
         cls = de_func(cls, FROM_ITER, render_from_iter(cls, custom), g)
         cls = de_func(cls, FROM_DICT, render_from_dict(cls, rename_all, custom), g)

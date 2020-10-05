@@ -46,11 +46,12 @@ $ python -m serde.inspect &lt;PATH&gt; &lt;NAME&gt;
 &#34;&#34;&#34;
 import argparse
 import importlib
+import logging
 import os
 import sys
 from typing import Type
 
-from .core import HIDDEN_NAME, init
+from .core import HIDDEN_NAME, init, logger
 
 init(True)
 
@@ -64,6 +65,8 @@ def inspect(cls: Type) -&gt; str:
 
 
 def main(arg):
+    if arg.verbose:
+        logging.basicConfig(level=logging.DEBUG)
     dir = os.path.dirname(arg.path)
     mod = os.path.basename(arg.path)[:-3]
     print(f&#39;Loading {mod}.{arg.name} from {dir}.&#39;)
@@ -71,11 +74,14 @@ def main(arg):
     pkg = importlib.import_module(mod)
     cls = getattr(pkg, arg.name)
     print(inspect(cls))
+    print(&#39;----------------------------------&#39;)
+    print(f&#34;serde_scope: {getattr(cls, &#39;__serde_scope__&#39;)}&#34;)
 
 
 parser = argparse.ArgumentParser(description=&#39;pyserde-inspect&#39;)
 parser.add_argument(&#39;path&#39;, type=str, help=&#39;Python script path.&#39;)
 parser.add_argument(&#39;name&#39;, type=str, help=&#39;Pyserde class name.&#39;)
+parser.add_argument(&#39;-v&#39;, dest=&#39;verbose&#39;, action=&#39;store_true&#39;, help=&#39;Enable debug logging.&#39;)
 
 
 if __name__ == &#39;__main__&#39;:
@@ -117,13 +123,17 @@ if __name__ == &#39;__main__&#39;:
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def main(arg):
+    if arg.verbose:
+        logging.basicConfig(level=logging.DEBUG)
     dir = os.path.dirname(arg.path)
     mod = os.path.basename(arg.path)[:-3]
     print(f&#39;Loading {mod}.{arg.name} from {dir}.&#39;)
     sys.path.append(dir)
     pkg = importlib.import_module(mod)
     cls = getattr(pkg, arg.name)
-    print(inspect(cls))</code></pre>
+    print(inspect(cls))
+    print(&#39;----------------------------------&#39;)
+    print(f&#34;serde_scope: {getattr(cls, &#39;__serde_scope__&#39;)}&#34;)</code></pre>
 </details>
 </dd>
 </dl>
