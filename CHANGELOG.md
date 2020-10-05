@@ -1,5 +1,15 @@
 # CHANGELOG
 
+# 0.1.5 (2020-10-05)
+
+### Bug Fixes
+
+* Type error ([2a271ac](https://github.com/yukinarit/pyserde/commit/2a271acf32bb7b37546d0037ac5b62f39cdc5bb3))
+
+### Features
+
+* Now supports Optional of Enum/IntEnum class ([e3618e5](https://github.com/yukinarit/pyserde/commit/e3618e5daea30cb787e80a0f3df23438c8bffcef))
+
 ## 0.1.4 (2020-09-25)
 
 ### Features
