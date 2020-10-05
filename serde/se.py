@@ -4,12 +4,9 @@ Defines classess and functions for `serialize` decorator.
 """
 import abc
 import copy  # noqa
+import dataclasses
 import functools
-from dataclasses import asdict as _asdict
-from dataclasses import astuple as _astuple
-from dataclasses import dataclass
-from dataclasses import fields as dataclass_fields  # noqa
-from dataclasses import is_dataclass
+from dataclasses import dataclass, is_dataclass
 from typing import Any, Callable, Dict, List, Optional, Tuple, Type
 
 import jinja2
@@ -118,7 +115,7 @@ def astuple(v):
     if is_serializable(v):
         return getattr(v, TO_ITER)()
     elif is_dataclass(v):
-        return _astuple(v)
+        return dataclasses.astuple(v)
     elif isinstance(v, Dict):
         return {astuple(k): astuple(v) for k, v in v.items()}
     elif isinstance(v, (Tuple, List)):
@@ -134,7 +131,7 @@ def asdict(v):
     if is_serializable(v):
         return getattr(v, TO_DICT)()
     elif is_dataclass(v):
-        return _asdict(v)
+        return dataclasses.asdict(v)
     elif isinstance(v, Dict):
         return {asdict(k): asdict(v) for k, v in v.items()}
     elif isinstance(v, (Tuple, List)):

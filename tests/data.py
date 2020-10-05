@@ -2,8 +2,9 @@ import enum
 from dataclasses import dataclass
 from typing import Dict, List, Optional, Tuple
 
-from . import imported
 from serde import deserialize, serialize
+
+from . import imported
 
 
 @deserialize
@@ -235,6 +236,7 @@ class EnumInClass:
     """
     Class having enum fields.
     """
+
     e: E = E.V0
     o: Optional[E] = E.V1
     i: imported.IE = imported.IE.V2

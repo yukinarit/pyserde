@@ -12,12 +12,10 @@ Defines classess and functions for `deserialize` decorator.
 parts of pyserde.
 """
 import abc
+import dataclasses
 import functools
-from dataclasses import _MISSING_TYPE as DEFAULT_MISSING_TYPE
-from dataclasses import dataclass
-from dataclasses import fields as dataclass_fields
-from dataclasses import is_dataclass
-from typing import Any, Callable, Dict, List, Optional, Tuple, Type
+from dataclasses import dataclass, is_dataclass
+from typing import Any, Callable, Dict, List, Optional, Type, Tuple
 
 import jinja2
 
@@ -70,7 +68,7 @@ def deserialize(_cls=None, rename_all: Optional[str] = None):
         g['__custom_deserializer__'] = custom
 
         # If there is a field of Enum, imports the class of Enum into the generation scope.
-        for f in dataclass_fields(cls):
+        for f in dataclasses.fields(cls):
             if is_enum(f.type):
                 g[f.type.__name__] = f.type
 
@@ -216,6 +214,7 @@ class DeField(Field):
     """
     Feild class for deserialization.
     """
+
     datavar: Optional[str] = None  # name of variable to deserialize from.
     index: int = 0  # Field number inside dataclass.
     iterbased: bool = False  # Iterater based deserializer or not.
@@ -398,7 +397,7 @@ class Renderer:
         >>> Renderer('foo').render(DeField(int, 'i', datavar='data', index=1, iterbased=True))
         'data[1]'
         """
-        if not arg.iterbased and not isinstance(arg.default, DEFAULT_MISSING_TYPE):
+        if not arg.iterbased and not isinstance(arg.default, dataclasses._MISSING_TYPE):
             default = arg.default
             if isinstance(default, str):
                 default = f'"{default}"'
@@ -477,7 +476,7 @@ def de_func(cls: Type[T], func: str, code: str, g: Dict = None) -> Type[T]:
 
     g['typing'] = typing
     g['NoneType'] = type(None)
-    g['fields'] = dataclass_fields
+    g['fields'] = dataclasses.fields
 
     # Generate deserialize function.
     code = gen(code, g, cls=cls)
