@@ -227,6 +227,7 @@ class IE(enum.IntEnum):
     V0 = enum.auto()
     V1 = enum.auto()
     V2 = 10
+    V3 = 100
 
 
 @deserialize
@@ -237,9 +238,9 @@ class EnumInClass:
     Class having enum fields.
     """
 
-    e: E = E.V0
+    e: IE = IE.V2
     o: Optional[E] = E.V1
-    i: imported.IE = imported.IE.V2
+    i: imported.IE = imported.IE.V1
 
 
 ListPri = List[Pri]

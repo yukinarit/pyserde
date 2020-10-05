@@ -213,9 +213,9 @@ def {{func}}(obj):
   {% if cls|is_dataclass %}
   res = []
   {% for f in cls|fields -%}
-  {% if not f.skip|default(False) %}
+  {% if not f.skip|default(False) -%}
   res.append({{f|arg|rvalue()}})
-  {% endif %}
+  {% endif -%}
   {% endfor -%}
   return tuple(res)
   {% endif %}
@@ -236,22 +236,22 @@ def {{func}}(obj):
   if not is_dataclass(obj):
     return copy.deepcopy(obj)
 
-  {% if cls|is_dataclass %}
+  {% if cls|is_dataclass -%}
   res = {}
   {% for f in cls|fields -%}
 
-  {% if not f.skip %}
-    {% if f.skip_if %}
+  {% if not f.skip -%}
+    {% if f.skip_if -%}
   if not {{f.skip_if.name}}({{f|arg|rvalue()}}):
     res["{{f|case}}"] = {{f|arg|rvalue()}}
-    {% else %}
+    {% else -%}
   res["{{f|case}}"] = {{f|arg|rvalue()}}
-    {% endif %}
+    {% endif -%}
   {% endif %}
 
   {% endfor -%}
   return res
-  {% endif %}
+  {% endif -%}
     """
     renderer = Renderer(TO_DICT, custom)
     env = jinja2.Environment(loader=jinja2.DictLoader({'dict': template}))

@@ -20,7 +20,7 @@ from typing import Any, Callable, Dict, List, Optional, Type
 import jinja2
 
 from .compat import is_dict, is_enum, is_list, is_opt, is_primitive, is_tuple, is_union, iter_types, type_args
-from .core import FROM_DICT, FROM_ITER, HIDDEN_NAME, SETTINGS, Field, Hidden, SerdeError, T, conv, fields, gen
+from .core import FROM_DICT, FROM_ITER, HIDDEN_NAME, SETTINGS, Field, Hidden, SerdeError, T, conv, fields, gen, logger
 from .more_types import deserialize as custom
 
 __all__: List = ['deserialize', 'is_deserializable', 'Deserializer', 'from_dict', 'from_tuple']
@@ -63,14 +63,23 @@ def deserialize(_cls=None, rename_all: Optional[str] = None):
 
     def wrap(cls):
         g: Dict[str, Any] = globals().copy()
+
+        # Create hidden object used by serde.
         if not hasattr(cls, HIDDEN_NAME):
             setattr(cls, HIDDEN_NAME, Hidden())
+
+        # Create a scope storage used by serde.
+        scope = {}
+        setattr(cls, '__serde_scope__', scope)
+
+        # Set custom deserializer.
         g['__custom_deserializer__'] = custom
 
-        # If there is a field of Enum, imports the class of Enum into the generation scope.
-        for f in dataclasses.fields(cls):
-            if is_enum(f.type):
-                g[f.type.__name__] = f.type
+        # Collect types used in the gernerated code.
+        for typ in iter_types(cls):
+            if is_dataclass(typ) or is_enum(typ):
+                getattr(cls, '__serde_scope__')[typ.__name__] = typ
+        logger.debug(f'{cls.__name__}: __serde_scope__ {scope}')
 
         cls = de_func(cls, FROM_ITER, render_from_iter(cls, custom), g)
         cls = de_func(cls, FROM_DICT, render_from_dict(cls, rename_all, custom), g)
@@ -431,12 +440,17 @@ def to_iter_arg(f: DeField, *args, **kwargs):
 def render_from_iter(cls: Type, custom: Custom = None) -> str:
     template = """
 def {{func}}(data):
+  {# List up all classes used by this class. -#}
+  {% for name in cls.__serde_scope__ -%}
+  {{name}} = getattr(cls, '__serde_scope__')['{{name}}']
+  {% endfor -%}
+
   if data is None:
     return None
   return cls(
-  {% for f in cls|fields %}
+  {% for f in cls|fields -%}
   {{f|arg(loop.index-1)|rvalue}},
-  {% endfor %}
+  {% endfor -%}
   )
     """
 
@@ -451,13 +465,18 @@ def {{func}}(data):
 def render_from_dict(cls: Type, rename_all: Optional[str] = None, custom: Custom = None) -> str:
     template = """
 def {{func}}(data):
+  {# List up all classes used by this class. -#}
+  {% for name in cls.__serde_scope__ -%}
+  {{name}} = getattr(cls, '__serde_scope__')['{{name}}']
+  {% endfor -%}
+
   if data is None:
     return None
   fs = fields(cls)
   return cls(
-  {% for f in cls|fields %}
+  {% for f in cls|fields -%}
   {{f|arg(loop.index-1)|rvalue}},
-  {% endfor %}
+  {% endfor -%}
   )
     """
 
@@ -469,17 +488,10 @@ def {{func}}(data):
     return env.get_template('dict').render(func=FROM_DICT, cls=cls)
 
 
-def de_func(cls: Type[T], func: str, code: str, g: Dict = None) -> Type[T]:
+def de_func(cls: Type[T], func: str, code: str, g: Dict) -> Type[T]:
     """
     Generate function to deserialize into an instance of `deserialize` class.
     """
-    if not g:
-        g = globals().copy()
-
-    # Collect types to be used in the `exec` scope.
-    for typ in iter_types(cls):
-        if is_dataclass(typ):
-            g[typ.__name__] = typ
     g['cls'] = cls
     import typing
 
