@@ -1,12 +1,9 @@
 """
 pyserde core module.
 """
+import dataclasses
 import logging
-from dataclasses import _MISSING_TYPE as DEFAULT_MISSING_TYPE
-from dataclasses import Field as DataclassField
-from dataclasses import dataclass, field
-from dataclasses import fields as dataclass_fields
-from dataclasses import is_dataclass
+from dataclasses import dataclass, field, is_dataclass
 from typing import Any, Callable, Dict, Iterator, List, Optional, Type, TypeVar
 
 import stringcase
@@ -88,7 +85,7 @@ def typecheck(cls: Type[T], obj: T) -> None:
     """
     if is_dataclass(obj):
         # If dataclass, type check recursively.
-        for f in dataclass_fields(obj):
+        for f in dataclasses.fields(obj):
             typecheck(f.type, getattr(obj, f.name, None))
     elif is_opt(cls):
         if obj is not None:
@@ -163,7 +160,7 @@ class Field:
 
     type: Type
     name: Optional[str]
-    default: Any = field(default_factory=DEFAULT_MISSING_TYPE)
+    default: Any = field(default_factory=dataclasses._MISSING_TYPE)
     case: Optional[str] = None
     rename: Optional[str] = None
     skip: Optional[bool] = None
@@ -171,7 +168,7 @@ class Field:
     skip_if_false: Optional[bool] = None
 
     @classmethod
-    def from_dataclass(cls, f: DataclassField) -> 'Field':
+    def from_dataclass(cls, f: dataclasses.Field) -> 'Field':
         skip_if_false_func: Optional[Func] = None
         if f.metadata.get('serde_skip_if_false'):
             skip_if_false_func = Func(skip_if_false, cls.mangle(f, 'skip_if'))
@@ -192,7 +189,7 @@ class Field:
         )
 
     @staticmethod
-    def mangle(field: DataclassField, name: str) -> str:
+    def mangle(field: dataclasses.Field, name: str) -> str:
         """
         Get mangled name based on field name.
         """
@@ -200,7 +197,7 @@ class Field:
 
 
 def fields(FieldCls: Type, cls: Type) -> Iterator[Field]:
-    return iter(FieldCls.from_dataclass(f) for f in dataclass_fields(cls))
+    return iter(FieldCls.from_dataclass(f) for f in dataclasses.fields(cls))
 
 
 def conv(f: Field, case: Optional[str] = None) -> str:

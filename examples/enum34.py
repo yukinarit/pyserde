@@ -3,6 +3,8 @@ from dataclasses import dataclass
 from serde import serialize, deserialize
 from serde.json import to_json, from_json
 
+import imported
+
 
 class Nested(enum.Enum):
     S = 'foo'
@@ -28,6 +30,7 @@ class Foo:
     v0: IE
     v1: IE = IE.V1  # Default enum value.
     v2: E = E.S
+    v3: imported.ImportedEnum = imported.ImportedEnum.V3  # Use enum imported from other module.
     # v3: E = E.N  # Sorry nested is not yet supported.
 
 

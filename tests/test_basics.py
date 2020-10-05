@@ -1,14 +1,14 @@
+import dataclasses
 import enum
 import json
 import logging
-from dataclasses import dataclass, field, fields
+from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Tuple
 
 import pytest
 
-from serde import asdict, astuple, deserialize, from_dict, from_tuple
-from serde import init as serde_init
-from serde import logger, serialize
+import serde
+from serde import asdict, astuple, deserialize, from_dict, from_tuple, logger, serialize
 from serde.json import from_json, to_json
 from serde.msgpack import from_msgpack, to_msgpack
 from serde.toml import from_toml, to_toml
@@ -22,7 +22,7 @@ logging.basicConfig(level=logging.WARNING)
 
 logger.setLevel(logging.DEBUG)
 
-serde_init(True)
+serde.init(True)
 
 format_dict: List = [(asdict, from_dict)]
 
@@ -79,10 +79,7 @@ def test_forward_declaration():
 
 @pytest.mark.parametrize('se,de', all_formats)
 def test_intenum(se, de):
-    class IE(enum.IntEnum):
-        V0 = enum.auto()
-        V1 = enum.auto()
-        V2 = 10
+    from .data import IE
 
     @deserialize
     @serialize
@@ -106,11 +103,7 @@ def test_intenum(se, de):
 
 @pytest.mark.parametrize('se,de', all_formats)
 def test_enum(se, de):
-    class E(enum.Enum):
-        V0 = 1
-        V1 = 'foo'
-        V2 = 10.0
-        V3 = True
+    from .data import E
 
     @deserialize
     @serialize
@@ -156,6 +149,15 @@ def test_enum_nested(se, de):
     # Nested enum don't work for yaml.
     Foo(E.V0, E.V1)
     # ff = de(Foo, se(f))
+
+
+@pytest.mark.parametrize('se,de', all_formats)
+def test_enum_imported(se, de):
+    from .data import EnumInClass
+
+    c = EnumInClass()
+    cc = de(EnumInClass, se(c))
+    assert c == cc
 
 
 @pytest.mark.parametrize('se,de', all_formats)
@@ -229,8 +231,8 @@ def test_field_default():
     class Bar:
         i: int = field(default=10)
 
-    assert 10 == fields(Foo)[0].default
-    assert 10 == fields(Bar())[0].default
+    assert 10 == dataclasses.fields(Foo)[0].default
+    assert 10 == dataclasses.fields(Bar())[0].default
 
 
 @pytest.mark.parametrize('se,de', all_formats)

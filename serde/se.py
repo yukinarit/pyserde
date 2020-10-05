@@ -4,12 +4,9 @@ Defines classess and functions for `serialize` decorator.
 """
 import abc
 import copy  # noqa
+import dataclasses
 import functools
-from dataclasses import asdict as _asdict
-from dataclasses import astuple as _astuple
-from dataclasses import dataclass
-from dataclasses import fields as dataclass_fields  # noqa
-from dataclasses import is_dataclass
+from dataclasses import dataclass, is_dataclass
 from typing import Any, Callable, Dict, List, Optional, Tuple, Type
 
 import jinja2
@@ -118,7 +115,7 @@ def astuple(v):
     if is_serializable(v):
         return getattr(v, TO_ITER)()
     elif is_dataclass(v):
-        return _astuple(v)
+        return dataclasses.astuple(v)
     elif isinstance(v, Dict):
         return {astuple(k): astuple(v) for k, v in v.items()}
     elif isinstance(v, (Tuple, List)):
@@ -134,7 +131,7 @@ def asdict(v):
     if is_serializable(v):
         return getattr(v, TO_DICT)()
     elif is_dataclass(v):
-        return _asdict(v)
+        return dataclasses.asdict(v)
     elif isinstance(v, Dict):
         return {asdict(k): asdict(v) for k, v in v.items()}
     elif isinstance(v, (Tuple, List)):
@@ -374,18 +371,16 @@ class Renderer:
         return f'{arg.varname}'
 
 
-def se_func(cls: Type[T], func: str, code: str, g: Dict = None, local: Dict = None) -> Type[T]:
+def se_func(cls: Type[T], func: str, code: str, g: Dict = None) -> Type[T]:
     """
     Generate function to serialize into an object.
     """
     # Generate serialize function.
     if not g:
         g = globals().copy()
-    if not local:
-        local = locals().copy()
-    code = gen(code, g, local, cls=cls)
+    code = gen(code, g, cls=cls)
 
-    setattr(cls, func, local[func])
+    setattr(cls, func, g[func])
     if SETTINGS['debug']:
         hidden = getattr(cls, HIDDEN_NAME)
         hidden.code[func] = code
