@@ -559,7 +559,7 @@ def de_func(cls: Type[T], func: str, code: str, g: Dict) -&gt; Type[T]:
 <dd>
 <div class="desc"><p><code><a title="serde.de.deserialize" href="#serde.de.deserialize">deserialize()</a></code> decorator. A dataclass with this decorator can be deserialized
 into an object from various data format such as JSON and MsgPack.</p>
-<pre><code class="python-repl">&gt;&gt;&gt; from serde import deserialize
+<pre><code class="language-python-repl">&gt;&gt;&gt; from serde import deserialize
 &gt;&gt;&gt; from serde.json import from_json
 &gt;&gt;&gt;
 &gt;&gt;&gt; # Mark the class deserializable.
@@ -575,7 +575,7 @@ Foo(i=10, s='foo', f=100.0, b=True)
 </code></pre>
 <p>Additionally, <code><a title="serde.de.deserialize" href="#serde.de.deserialize">deserialize()</a></code> supports case conversion. Pass case name in
 <code><a title="serde.de.deserialize" href="#serde.de.deserialize">deserialize()</a></code> decorator as shown below.</p>
-<pre><code class="python-repl">&gt;&gt;&gt; from serde import deserialize
+<pre><code class="language-python-repl">&gt;&gt;&gt; from serde import deserialize
 &gt;&gt;&gt;
 &gt;&gt;&gt; @deserialize(rename_all = 'camelcase')
 ... @dataclass
@@ -695,7 +695,7 @@ RenameAll(int_field=10, str_field='foo')
 </code></dt>
 <dd>
 <div class="desc"><p>Test if arg can <code><a title="serde.de.deserialize" href="#serde.de.deserialize">deserialize()</a></code>. Arg must be either an instance of class.</p>
-<pre><code class="python-repl">&gt;&gt;&gt; from serde import deserialize, is_deserializable
+<pre><code class="language-python-repl">&gt;&gt;&gt; from serde import deserialize, is_deserializable
 &gt;&gt;&gt;
 &gt;&gt;&gt; @deserialize
 ... @dataclass

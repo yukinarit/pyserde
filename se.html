@@ -479,7 +479,7 @@ def se_func(cls: Type[T], func: str, code: str, g: Dict = None) -&gt; Type[T]:
 </code></dt>
 <dd>
 <div class="desc"><p>Test if arg can <code><a title="serde.se.serialize" href="#serde.se.serialize">serialize()</a></code>. Arg must be either an instance of class.</p>
-<pre><code class="python-repl">&gt;&gt;&gt; from dataclasses import dataclass
+<pre><code class="language-python-repl">&gt;&gt;&gt; from dataclasses import dataclass
 &gt;&gt;&gt; from serde import serialize, is_serializable
 &gt;&gt;&gt;
 &gt;&gt;&gt; @serialize
@@ -518,7 +518,7 @@ True
 <dd>
 <div class="desc"><p><code><a title="serde.se.serialize" href="#serde.se.serialize">serialize()</a></code> decorator. A dataclass with this decorator can be serialized
 into an object in various data format such as JSON and MsgPack.</p>
-<pre><code class="python-repl">&gt;&gt;&gt; from serde import serialize
+<pre><code class="language-python-repl">&gt;&gt;&gt; from serde import serialize
 &gt;&gt;&gt; from serde.json import to_json
 &gt;&gt;&gt;
 &gt;&gt;&gt; # Mark the class serializable.
@@ -535,7 +535,7 @@ into an object in various data format such as JSON and MsgPack.</p>
 </code></pre>
 <p>Additionally, <code><a title="serde.se.serialize" href="#serde.se.serialize">serialize()</a></code> supports case conversion. Pass case name in
 <code><a title="serde.se.serialize" href="#serde.se.serialize">serialize()</a></code> decorator as shown below.</p>
-<pre><code class="python-repl">&gt;&gt;&gt; @serialize(rename_all = 'camelcase')
+<pre><code class="language-python-repl">&gt;&gt;&gt; @serialize(rename_all = 'camelcase')
 ... @dataclass
 ... class Foo:
 ...     int_field: int

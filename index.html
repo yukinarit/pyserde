@@ -31,7 +31,7 @@
 <p>Yet another serialization library on top of <a href="https://docs.python.org/3/library/dataclasses.html">dataclasses</a>.</p>
 <h2 id="tldr">TL;DR</h2>
 <p>Put additional <code>@serialize</code> and <code>@deserialize</code> decorator in your ordinary dataclass.</p>
-<pre><code class="python">@deserialize
+<pre><code class="language-python">@deserialize
 @serialize
 @dataclass
 class Foo:
@@ -41,11 +41,11 @@ class Foo:
     b: bool
 </code></pre>
 <p>Now you can convert an object to JSON,</p>
-<pre><code class="python">&gt;&gt;&gt; to_json(Foo(i=10, s='foo', f=100.0, b=True))
+<pre><code class="language-python">&gt;&gt;&gt; to_json(Foo(i=10, s='foo', f=100.0, b=True))
 {&quot;i&quot;: 10, &quot;s&quot;: &quot;foo&quot;, &quot;f&quot;: 100.0, &quot;b&quot;: true}
 </code></pre>
 <p>Converted back from JSON to the object quite easily!</p>
-<pre><code class="python">&gt;&gt;&gt; from_json(Foo, '{&quot;i&quot;: 10, &quot;s&quot;: &quot;foo&quot;, &quot;f&quot;: 100.0, &quot;b&quot;: true}')
+<pre><code class="language-python">&gt;&gt;&gt; from_json(Foo, '{&quot;i&quot;: 10, &quot;s&quot;: &quot;foo&quot;, &quot;f&quot;: 100.0, &quot;b&quot;: true}')
 Foo(i=10, s='foo', f=100.0, b=True)
 </code></pre>
 <p>pyserde supports other data formats (YAML, Toml, MsgPack) and offers many more features!</p>
@@ -96,7 +96,7 @@ Foo(i=10, s='foo', f=100.0, b=True)
 <li><a href="https://github.com/Tinche/cattrs"><code>cattrs</code></a>: Complex custom class converters for attrs.</li>
 </ul>
 <p>To run benchmark in your environment:</p>
-<pre><code class="sh">git clone git@github.com:yukinarit/pyserde.git
+<pre><code class="language-sh">git clone git@github.com:yukinarit/pyserde.git
 cd pyserde/bench
 pipenv install
 pipenv run python bench.py --full
@@ -104,10 +104,10 @@ pipenv run python bench.py --full
 <p>You can check <a href="bench/bench.py">the benchmark code</a> for more information.</p>
 <h2 id="getting-started">Getting started</h2>
 <p>Install pyserde from PyPI. pyserde requires Python&gt;=3.6.</p>
-<pre><code class="sh">pip install pyserde
+<pre><code class="language-sh">pip install pyserde
 </code></pre>
 <p>Put additional <code>@serialize</code> and <code>@deserialize</code> decorator in your ordinary dataclass. Be careful that module name is <code><a title="serde" href="#serde">serde</a></code>, not <code>pyserde</code>. If you are new to dataclass, I would recommend to read <a href="https://docs.python.org/3/library/dataclasses.html">dataclasses documentation</a> first.</p>
-<pre><code class="python">from serde import serialize, deserialize
+<pre><code class="language-python">from serde import serialize, deserialize
 from dataclasses import dataclass
 
 @deserialize
@@ -121,10 +121,10 @@ class Foo:
 </code></pre>
 <p>pyserde generates methods necessary for serialization by <code>@serialize</code> and methods necessary for deserialization by <code>@deserialize</code> when a class is loaded into python interpreter. Generation occurs exactly only once (This is more like how decorator work, not pyserde) and there is no overhead when you actually use the generated methods. Now your class is serializable and deserializable in the data formats supported by pyserde.</p>
 <p>Next, import pyserde helper methods. For JSON:</p>
-<pre><code class="python">from serde.json import from_json, to_json
+<pre><code class="language-python">from serde.json import from_json, to_json
 </code></pre>
 <p>Similarly, you can use other data formats.</p>
-<pre><code class="python">from serde.yaml import from_yaml, to_yaml
+<pre><code class="language-python">from serde.yaml import from_yaml, to_yaml
 from serde.toml import from_toml, to_toml
 from serde.msgpack import from_msgpack to_msgpack
 </code></pre>
@@ -133,7 +133,7 @@ from serde.msgpack import from_msgpack to_msgpack
 print(to_json(f))
 </code></pre>
 <p>Pass <code>Foo</code> class and JSON string in <code>from_json</code> to deserialize into Object.</p>
-<pre><code class="python">s = '{&quot;i&quot;: 10, &quot;s&quot;: &quot;foo&quot;, &quot;f&quot;: 100.0, &quot;b&quot;: true}'
+<pre><code class="language-python">s = '{&quot;i&quot;: 10, &quot;s&quot;: &quot;foo&quot;, &quot;f&quot;: 100.0, &quot;b&quot;: true}'
 print(from_json(Foo, s))
 </code></pre>
 <p>That's it! pyserde offers many more features. If you're interested, please read the rest of the documentation.</p>
@@ -151,7 +151,7 @@ print(from_json(Foo, s))
 </li>
 </ul>
 <p>You can write pretty complex class like this:</p>
-<pre><code class="python">@deserialize
+<pre><code class="language-python">@deserialize
 @serialize
 @dataclass
 class bar:
@@ -169,28 +169,28 @@ class Foo:
 </code></pre>
 <h2 id="supported-data-formats">Supported data formats</h2>
 <h3 id="json">JSON</h3>
-<pre><code class="python">from serde.json import from_json, to_json
+<pre><code class="language-python">from serde.json import from_json, to_json
 print(to_json(f))
 print(from_json(Foo, s))
 </code></pre>
 <h3 id="yaml">Yaml</h3>
-<pre><code class="python">from serde.yaml import from_yaml, to_yaml
+<pre><code class="language-python">from serde.yaml import from_yaml, to_yaml
 print(to_yaml(f))
 print(from_yaml(Foo, s))
 </code></pre>
 <h3 id="toml">Toml</h3>
-<pre><code class="python">from serde.toml import from_toml, to_toml
+<pre><code class="language-python">from serde.toml import from_toml, to_toml
 print(to_toml(f))
 print(from_toml(Foo, s))
 </code></pre>
 <h3 id="msgpack">MsgPack</h3>
-<pre><code class="python">from serde.msgpack import from_msgpack, to_msgpack
+<pre><code class="language-python">from serde.msgpack import from_msgpack, to_msgpack
 print(to_msgpack(f))
 print(from_msgpack(Foo, s))
 </code></pre>
 <h2 id="case-conversion">Case Conversion</h2>
 <p>Converting <code>snake_case</code> fields into supported case styles e.g. <code>camelCase</code> and <code>kebab-case</code>.</p>
-<pre><code class="python">@serialize(rename_all = 'camelcase')
+<pre><code class="language-python">@serialize(rename_all = 'camelcase')
 @dataclass
 class Foo:
     int_field: int
@@ -200,11 +200,11 @@ f = Foo(int_field=10, str_field='foo')
 print(to_json(f))
 </code></pre>
 <p>Here, the output is all <code>camelCase</code>.</p>
-<pre><code class="json">'{&quot;intField&quot;: 10, &quot;strField&quot;: &quot;foo&quot;}'
+<pre><code class="language-json">'{&quot;intField&quot;: 10, &quot;strField&quot;: &quot;foo&quot;}'
 </code></pre>
 <h2 id="rename-field">Rename Field</h2>
 <p>In case you want to use a keyword as field such as <code>class</code>, you can use <code>serde_rename</code> field attribute.</p>
-<pre><code class="python">@serialize
+<pre><code class="language-python">@serialize
 @dataclass
 class Foo:
     class_name: str = field(metadata={'serde_rename': 'class'})
@@ -212,12 +212,12 @@ class Foo:
 print(to_json(Foo(class_name='Foo')))
 </code></pre>
 <p>Output json is having <code>class</code> instead of <code>class_name</code>.</p>
-<pre><code class="json">{&quot;class&quot;: &quot;Foo&quot;}
+<pre><code class="language-json">{&quot;class&quot;: &quot;Foo&quot;}
 </code></pre>
 <p>For complete example, please see <a href="./examples/rename.py">./examples/rename.py</a></p>
 <h2 id="skip">Skip</h2>
 <p>You can skip serialization for a certain field, you can use <code>serde_skip</code>.</p>
-<pre><code class="python">@serialize
+<pre><code class="language-python">@serialize
 @dataclass
 class Resource:
     name: str
@@ -230,12 +230,12 @@ resources = [
 print(to_json(resources))
 </code></pre>
 <p>Here, <code>metadata</code> is not present in output json.</p>
-<pre><code class="json">[{&quot;name&quot;: &quot;Stack Overflow&quot;, &quot;hash&quot;: &quot;hash1&quot;}, {&quot;name&quot;: &quot;GitHub&quot;, &quot;hash&quot;: &quot;hash2&quot;}]
+<pre><code class="language-json">[{&quot;name&quot;: &quot;Stack Overflow&quot;, &quot;hash&quot;: &quot;hash1&quot;}, {&quot;name&quot;: &quot;GitHub&quot;, &quot;hash&quot;: &quot;hash2&quot;}]
 </code></pre>
 <p>For complete example, please see <a href="./examples/skip.py">./examples/skip.py</a></p>
 <h2 id="conditional-skip">Conditional Skip</h2>
 <p>If you conditionally skip some fields, you can pass function or lambda in <code>serde_skip_if</code>.</p>
-<pre><code class="python">@serialize
+<pre><code class="language-python">@serialize
 @dataclass
 class World:
     player: str
@@ -248,7 +248,7 @@ world = World('green', 'Charmander')
 print(to_json(world))
 </code></pre>
 <p>As you can see below, field is skipped in serialization if <code>buddy</code> is "Pikachu".</p>
-<pre><code class="json">{&quot;player&quot;: &quot;satoshi&quot;}
+<pre><code class="language-json">{&quot;player&quot;: &quot;satoshi&quot;}
 {&quot;player&quot;: &quot;green&quot;, &quot;buddy&quot;: &quot;Charmander&quot;}
 </code></pre>
 <p>For complete example, please see <a href="./examples/skip.py">./examples/skip.py</a></p>
@@ -388,7 +388,7 @@ __all__ = [
 <dd>
 <div class="desc"><p><code><a title="serde.deserialize" href="#serde.deserialize">deserialize()</a></code> decorator. A dataclass with this decorator can be deserialized
 into an object from various data format such as JSON and MsgPack.</p>
-<pre><code class="python-repl">&gt;&gt;&gt; from serde import deserialize
+<pre><code class="language-python-repl">&gt;&gt;&gt; from serde import deserialize
 &gt;&gt;&gt; from serde.json import from_json
 &gt;&gt;&gt;
 &gt;&gt;&gt; # Mark the class deserializable.
@@ -404,7 +404,7 @@ Foo(i=10, s='foo', f=100.0, b=True)
 </code></pre>
 <p>Additionally, <code><a title="serde.deserialize" href="#serde.deserialize">deserialize()</a></code> supports case conversion. Pass case name in
 <code><a title="serde.deserialize" href="#serde.deserialize">deserialize()</a></code> decorator as shown below.</p>
-<pre><code class="python-repl">&gt;&gt;&gt; from serde import deserialize
+<pre><code class="language-python-repl">&gt;&gt;&gt; from serde import deserialize
 &gt;&gt;&gt;
 &gt;&gt;&gt; @deserialize(rename_all = 'camelcase')
 ... @dataclass
@@ -524,7 +524,7 @@ RenameAll(int_field=10, str_field='foo')
 </code></dt>
 <dd>
 <div class="desc"><p>Test if arg can <code><a title="serde.deserialize" href="#serde.deserialize">deserialize()</a></code>. Arg must be either an instance of class.</p>
-<pre><code class="python-repl">&gt;&gt;&gt; from serde import deserialize, is_deserializable
+<pre><code class="language-python-repl">&gt;&gt;&gt; from serde import deserialize, is_deserializable
 &gt;&gt;&gt;
 &gt;&gt;&gt; @deserialize
 ... @dataclass
@@ -560,7 +560,7 @@ True
 </code></dt>
 <dd>
 <div class="desc"><p>Test if arg can <code><a title="serde.serialize" href="#serde.serialize">serialize()</a></code>. Arg must be either an instance of class.</p>
-<pre><code class="python-repl">&gt;&gt;&gt; from dataclasses import dataclass
+<pre><code class="language-python-repl">&gt;&gt;&gt; from dataclasses import dataclass
 &gt;&gt;&gt; from serde import serialize, is_serializable
 &gt;&gt;&gt;
 &gt;&gt;&gt; @serialize
@@ -599,7 +599,7 @@ True
 <dd>
 <div class="desc"><p><code><a title="serde.serialize" href="#serde.serialize">serialize()</a></code> decorator. A dataclass with this decorator can be serialized
 into an object in various data format such as JSON and MsgPack.</p>
-<pre><code class="python-repl">&gt;&gt;&gt; from serde import serialize
+<pre><code class="language-python-repl">&gt;&gt;&gt; from serde import serialize
 &gt;&gt;&gt; from serde.json import to_json
 &gt;&gt;&gt;
 &gt;&gt;&gt; # Mark the class serializable.
@@ -616,7 +616,7 @@ into an object in various data format such as JSON and MsgPack.</p>
 </code></pre>
 <p>Additionally, <code><a title="serde.serialize" href="#serde.serialize">serialize()</a></code> supports case conversion. Pass case name in
 <code><a title="serde.serialize" href="#serde.serialize">serialize()</a></code> decorator as shown below.</p>
-<pre><code class="python-repl">&gt;&gt;&gt; @serialize(rename_all = 'camelcase')
+<pre><code class="language-python-repl">&gt;&gt;&gt; @serialize(rename_all = 'camelcase')
 ... @dataclass
 ... class Foo:
 ...     int_field: int

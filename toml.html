@@ -113,7 +113,7 @@ def from_toml(c: Type[T], s: str, de=TomlDeserializer, **opts) -&gt; T:
 </code></dt>
 <dd>
 <div class="desc"><p>Take toml string and return deserialized object..</p>
-<pre><code class="python-repl">&gt;&gt;&gt; from dataclasses import dataclass
+<pre><code class="language-python-repl">&gt;&gt;&gt; from dataclasses import dataclass
 &gt;&gt;&gt; from serde import deserialize
 &gt;&gt;&gt; from serde.toml import to_toml
 &gt;&gt;&gt;
@@ -161,7 +161,7 @@ Settings(host='localhost', port=8080, upstream=['localhost:8081', 'localhost:808
 </code></dt>
 <dd>
 <div class="desc"><p>Take an object and return toml string.</p>
-<pre><code class="python-repl">&gt;&gt;&gt; from dataclasses import dataclass
+<pre><code class="language-python-repl">&gt;&gt;&gt; from dataclasses import dataclass
 &gt;&gt;&gt; from serde import serialize
 &gt;&gt;&gt; from serde.toml import to_toml
 &gt;&gt;&gt;
