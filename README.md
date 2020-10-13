@@ -85,6 +85,18 @@ Install pyserde from PyPI. pyserde requires Python>=3.6.
 pip install pyserde
 ```
 
+Additional data formats besides JSON need additional dependencies installed. Install `msgpack`, `toml`, or `yaml` extras to work with the appropriate data formats; you can skip formats that you don't plan to use. For example, if you want to use Toml and YAML:
+
+```sh
+pip install pyserde[toml,yaml]
+```
+
+Or all at once:
+
+```sh
+pip install pyserde[all]
+```
+
 Put additional `@serialize` and `@deserialize` decorator in your ordinary dataclass. Be careful that module name is `serde`, not `pyserde`. If you are new to dataclass, I would recommend to read [dataclasses documentation](https://docs.python.org/3/library/dataclasses.html) first.
 
 ```python
