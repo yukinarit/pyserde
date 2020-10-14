@@ -8,7 +8,7 @@ from typing import Dict, List, Optional, Tuple
 import pytest
 
 import serde
-from serde import asdict, astuple, deserialize, from_dict, from_tuple, logger, serialize
+from serde import asdict, astuple, deserialize, from_dict, from_tuple, serialize
 from serde.json import from_json, to_json
 from serde.msgpack import from_msgpack, to_msgpack
 from serde.toml import from_toml, to_toml
@@ -18,9 +18,7 @@ from . import data
 from .data import (Bool, Float, Int, ListPri, NestedPri, NestedPriOpt, NestedPriTuple, Pri, PriDefault, PriOpt,
                    PriTuple, Str)
 
-logging.basicConfig(level=logging.WARNING)
-
-logger.setLevel(logging.DEBUG)
+log = logging.getLogger('test')
 
 serde.init(True)
 
@@ -38,9 +36,34 @@ format_toml: List = [(to_toml, from_toml)]
 
 all_formats: List = format_dict + format_tuple + format_json + format_msgpack + format_yaml + format_toml
 
+opt_case: List = [{'rename_all': 'camelcase'}, {'rename_all': 'snakecase'}]
 
+
+def make_id(d: Dict) -> str:
+    key = list(d)[0]
+    return f'{key}-{d[key]}'
+
+
+opt_case_ids = map(make_id, opt_case)
+
+
+@pytest.mark.parametrize('opt', opt_case, ids=opt_case_ids)
 @pytest.mark.parametrize('se,de', all_formats)
-def test_primitive(se, de):
+def test_primitive(se, de, opt):
+    log.info(f'Running test with se={se.__name__} de={de.__name__} opts={opt}')
+
+    @deserialize(**opt)
+    @serialize(**opt)
+    @dataclass(unsafe_hash=True)
+    class Pri:
+        """
+        Primitives.
+        """
+        i: int
+        s: str
+        f: float
+        b: bool
+
     p = Pri(10, 'foo', 100.0, True)
     assert p == de(Pri, se(p))
 
@@ -75,6 +98,8 @@ def test_forward_declaration():
 
     h = Foo(bar=Bar(i=10))
     assert h.bar.i == 10
+
+    assert 'Bar' == dataclasses.fields(Foo)[0].type
 
 
 @pytest.mark.parametrize('se,de', all_formats)
