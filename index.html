@@ -106,6 +106,12 @@ pipenv run python bench.py --full
 <p>Install pyserde from PyPI. pyserde requires Python&gt;=3.6.</p>
 <pre><code class="language-sh">pip install pyserde
 </code></pre>
+<p>Additional data formats besides JSON need additional dependencies installed. Install <code><a title="serde.msgpack" href="msgpack.html">serde.msgpack</a></code>, <code><a title="serde.toml" href="toml.html">serde.toml</a></code>, or <code><a title="serde.yaml" href="yaml.html">serde.yaml</a></code> extras to work with the appropriate data formats; you can skip formats that you don't plan to use. For example, if you want to use Toml and YAML:</p>
+<pre><code class="language-sh">pip install pyserde[toml,yaml]
+</code></pre>
+<p>Or all at once:</p>
+<pre><code class="language-sh">pip install pyserde[all]
+</code></pre>
 <p>Put additional <code>@serialize</code> and <code>@deserialize</code> decorator in your ordinary dataclass. Be careful that module name is <code><a title="serde" href="#serde">serde</a></code>, not <code>pyserde</code>. If you are new to dataclass, I would recommend to read <a href="https://docs.python.org/3/library/dataclasses.html">dataclasses documentation</a> first.</p>
 <pre><code class="language-python">from serde import serialize, deserialize
 from dataclasses import dataclass
