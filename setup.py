@@ -17,13 +17,13 @@ setup_requires = [
 ]
 
 requires = [
-    'msgpack',
-    'toml',
-    'pyyaml',
     'stringcase',
     'typing_inspect>=0.4.0',
     'jinja2',
 ]
+msgpack_requires = ['msgpack']
+toml_requires = ['toml']
+yaml_requires = ['pyyaml']
 
 # Installs dataclasses from PyPI for python < 3.7
 if sys.version_info < (3, 7):
@@ -53,6 +53,10 @@ setup(
     install_requires=requires,
     tests_require=tests_require,
     extras_require={
+        'msgpack': msgpack_requires,
+        'toml': toml_requires,
+        'yaml': yaml_requires,
+        'all': msgpack_requires + toml_requires + yaml_requires,
         'test': tests_require,
     },
     license='MIT',
