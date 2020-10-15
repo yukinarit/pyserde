@@ -266,6 +266,15 @@ def test_default(se, de):
     assert p == de(PriDefault, se(p))
 
 
+def test_default_from_empty():
+    p = PriDefault()
+    assert p == from_dict(PriDefault, {})
+    assert p == from_dict(PriDefault, {'i': 10})
+    assert p == from_dict(PriDefault, {'i': 10, 's': 'foo'})
+    assert p == from_dict(PriDefault, {'i': 10, 's': 'foo', 'f': 100.0})
+    assert p == from_dict(PriDefault, {'i': 10, 's': 'foo', 'f': 100.0, 'b': True})
+
+
 @pytest.mark.parametrize('se,de', (format_dict + format_tuple + format_json + format_msgpack + format_yaml))
 def test_list_pri(se, de):
     p = [data.PRI, data.PRI]
