@@ -62,7 +62,7 @@ def deserialize(_cls=None, rename_all: Optional[str] = None):
     """
 
     def wrap(cls):
-        g: Dict[str, Any] = globals().copy()
+        g: Dict[str, Any] = {}
 
         # Create hidden object used by serde.
         if not hasattr(cls, HIDDEN_NAME):
