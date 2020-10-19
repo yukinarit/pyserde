@@ -1,6 +1,7 @@
 """
 Module for compatibility.
 """
+import dataclasses
 import enum
 from dataclasses import fields, is_dataclass
 from itertools import zip_longest
@@ -188,6 +189,39 @@ def is_primitive(typ) -> bool:
         return any(issubclass(typ, ty) for ty in PRIMITIVES)
     except TypeError:
         return any(isinstance(typ, ty) for ty in PRIMITIVES)
+
+
+def has_default(field) -> bool:
+    """
+    Test if the field has default value.
+
+    >>> @dataclasses.dataclass
+    ... class C:
+    ...     a: int
+    ...     d: int = 10
+    >>> has_default(fields(C)[0])
+    False
+    >>> has_default(fields(C)[1])
+    True
+    """
+    return not isinstance(field.default, dataclasses._MISSING_TYPE)
+
+
+def has_default_factory(field) -> bool:
+    """
+    Test if the field has default factory.
+
+    >>> from typing import Dict
+    >>> @dataclasses.dataclass
+    ... class C:
+    ...     a: int
+    ...     d: Dict = dataclasses.field(default_factory=dict)
+    >>> has_default_factory(fields(C)[0])
+    False
+    >>> has_default_factory(fields(C)[1])
+    True
+    """
+    return not isinstance(field.default_factory, dataclasses._MISSING_TYPE)
 
 
 def assert_type(typ: Type, obj, throw=False) -> None:

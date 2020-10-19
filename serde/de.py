@@ -19,7 +19,8 @@ from typing import Any, Callable, Dict, List, Optional, Type
 
 import jinja2
 
-from .compat import is_dict, is_enum, is_list, is_opt, is_primitive, is_tuple, is_union, iter_types, type_args
+from .compat import (has_default, has_default_factory, is_dict, is_enum, is_list, is_opt, is_primitive, is_tuple,
+                     is_union, iter_types, type_args)
 from .core import FROM_DICT, FROM_ITER, HIDDEN_NAME, SETTINGS, Field, Hidden, SerdeError, T, conv, fields, gen, logger
 from .more_types import deserialize as custom
 
@@ -79,6 +80,15 @@ def deserialize(_cls=None, rename_all: Optional[str] = None):
         for typ in iter_types(cls):
             if is_dataclass(typ) or is_enum(typ):
                 getattr(cls, '__serde_scope__')[typ.__name__] = typ
+
+        # Collect default values and default factories used in the generated code.
+        # To avoid name conflicts, name the variables like "__default_<NAME>__".
+        for f in dataclasses.fields(cls):
+            if has_default(f):
+                g[f'__default_{f.name}__'] = f.default
+            elif has_default_factory(f):
+                g[f'__default_{f.name}__'] = f.default_factory
+
         logger.debug(f'{cls.__name__}: __serde_scope__ {scope}')
 
         cls = de_func(cls, FROM_ITER, render_from_iter(cls, custom), g)
@@ -299,21 +309,33 @@ class Renderer:
         Render rvalue
         """
         if is_dataclass(arg.type):
-            return self.dataclass(arg)
+            res = self.dataclass(arg)
         elif is_opt(arg.type):
-            return self.opt(arg)
+            res = self.opt(arg)
         elif is_list(arg.type):
-            return self.list(arg)
+            res = self.list(arg)
         elif is_dict(arg.type):
-            return self.dict(arg)
+            res = self.dict(arg)
         elif is_tuple(arg.type):
-            return self.tuple(arg)
+            res = self.tuple(arg)
         elif is_enum(arg.type):
-            return self.enum(arg)
+            res = self.enum(arg)
         elif any(f(arg.type) for f in (is_primitive, is_union)):
-            return self.primitive(arg)
+            res = self.primitive(arg)
         else:
             return f'__custom_deserializer__(fs[{arg.index}], {arg.data})'
+
+        if has_default(arg) or has_default_factory(arg):
+            if arg.iterbased:
+                exists = f'{arg.data} is not None'
+            else:
+                exists = f'"{arg.name}" in {arg.datavar}'
+            if has_default(arg):
+                return f'{res} if {exists} else __default_{arg.name}__'
+            elif has_default_factory(arg):
+                return f'{res} if {exists} else __default_{arg.name}__()'
+
+        return res
 
     def dataclass(self, arg: DeField) -> str:
         return f'{arg.type.__name__}.{self.func}({arg.data})'
@@ -415,11 +437,8 @@ class Renderer:
         >>> Renderer('foo').render(DeField(int, 'i', datavar='data', index=1, iterbased=True))
         'data[1]'
         """
-        if not arg.iterbased and not isinstance(arg.default, dataclasses._MISSING_TYPE):
-            default = arg.default
-            if isinstance(default, str):
-                default = f'"{default}"'
-            return f'{arg.datavar}.get("{arg.name}", {default})'
+        if not arg.iterbased and has_default(arg):
+            return f'{arg.datavar}.get("{arg.name}", __default_{arg.name}__)'
         else:
             return arg.data
 
