@@ -476,7 +476,7 @@ RenameAll(int_field=10, str_field='foo')
             if is_dataclass(typ) or is_enum(typ):
                 getattr(cls, &#39;__serde_scope__&#39;)[typ.__name__] = typ
         for f in dataclasses.fields(cls):
-            if not isinstance(f.default, dataclasses._MISSING_TYPE):
+            if has_default(f):
                 g[f&#39;__default_{f.name}__&#39;] = f.default
         logger.debug(f&#39;{cls.__name__}: __serde_scope__ {scope}&#39;)
 

@@ -31,6 +31,7 @@
 Module for compatibility.
 &#34;&#34;&#34;
 import enum
+import dataclasses
 from dataclasses import fields, is_dataclass
 from itertools import zip_longest
 from typing import Iterator, List, Optional, Tuple, Type, TypeVar, Union
@@ -217,6 +218,22 @@ def is_primitive(typ) -&gt; bool:
         return any(issubclass(typ, ty) for ty in PRIMITIVES)
     except TypeError:
         return any(isinstance(typ, ty) for ty in PRIMITIVES)
+
+
+def has_default(field) -&gt; bool:
+    &#34;&#34;&#34;
+    Test if the field has default value.
+
+    &gt;&gt;&gt; @dataclasses.dataclass
+    ... class C:
+    ...     a: int
+    ...     d: int = 10
+    &gt;&gt;&gt; has_default(fields(C)[0])
+    False
+    &gt;&gt;&gt; has_default(fields(C)[1])
+    True
+    &#34;&#34;&#34;
+    return not isinstance(field.default, dataclasses._MISSING_TYPE)
 
 
 def assert_type(typ: Type, obj, throw=False) -&gt; None:
