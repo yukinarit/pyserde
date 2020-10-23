@@ -478,8 +478,6 @@ RenameAll(int_field=10, str_field='foo')
         for f in dataclasses.fields(cls):
             if has_default(f):
                 g[f&#39;__default_{f.name}__&#39;] = f.default
-            elif has_default_factory(f):
-                g[f&#39;__default_{f.name}__&#39;] = f.default_factory
         logger.debug(f&#39;{cls.__name__}: __serde_scope__ {scope}&#39;)
 
         cls = de_func(cls, FROM_ITER, render_from_iter(cls, custom), g)

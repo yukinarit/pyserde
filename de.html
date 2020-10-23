@@ -51,13 +51,11 @@ parts of pyserde.
 import abc
 import dataclasses
 import functools
+import jinja2
 from dataclasses import dataclass, is_dataclass
 from typing import Any, Callable, Dict, List, Optional, Type
 
-import jinja2
-
-from .compat import (has_default, has_default_factory, is_dict, is_enum, is_list, is_opt, is_primitive, is_tuple,
-                     is_union, iter_types, type_args)
+from .compat import is_dict, is_enum, is_list, is_opt, is_primitive, is_tuple, is_union, iter_types, type_args, has_default
 from .core import FROM_DICT, FROM_ITER, HIDDEN_NAME, SETTINGS, Field, Hidden, SerdeError, T, conv, fields, gen, logger
 from .more_types import deserialize as custom
 
@@ -120,8 +118,6 @@ def deserialize(_cls=None, rename_all: Optional[str] = None):
         for f in dataclasses.fields(cls):
             if has_default(f):
                 g[f&#39;__default_{f.name}__&#39;] = f.default
-            elif has_default_factory(f):
-                g[f&#39;__default_{f.name}__&#39;] = f.default_factory
         logger.debug(f&#39;{cls.__name__}: __serde_scope__ {scope}&#39;)
 
         cls = de_func(cls, FROM_ITER, render_from_iter(cls, custom), g)
@@ -358,17 +354,15 @@ class Renderer:
         else:
             return f&#39;__custom_deserializer__(fs[{arg.index}], {arg.data})&#39;
 
-        if has_default(arg) or has_default_factory(arg):
+        if has_default(arg):
             if arg.iterbased:
                 exists = f&#39;{arg.data} is not None&#39;
             else:
                 exists = f&#39;&#34;{arg.name}&#34; in {arg.datavar}&#39;
-            if has_default(arg):
-                return f&#39;{res} if {exists} else __default_{arg.name}__&#39;
-            elif has_default_factory(arg):
-                return f&#39;{res} if {exists} else __default_{arg.name}__()&#39;
+            return f&#39;{res} if {exists} else __default_{arg.name}__&#39;
         else:
             return res
+
 
     def dataclass(self, arg: DeField) -&gt; str:
         return f&#39;{arg.type.__name__}.{self.func}({arg.data})&#39;
@@ -658,8 +652,6 @@ RenameAll(int_field=10, str_field='foo')
         for f in dataclasses.fields(cls):
             if has_default(f):
                 g[f&#39;__default_{f.name}__&#39;] = f.default
-            elif has_default_factory(f):
-                g[f&#39;__default_{f.name}__&#39;] = f.default_factory
         logger.debug(f&#39;{cls.__name__}: __serde_scope__ {scope}&#39;)
 
         cls = de_func(cls, FROM_ITER, render_from_iter(cls, custom), g)
