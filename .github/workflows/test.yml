@@ -1,0 +1,69 @@
+name: Test / benchmark / coverage
+
+on:
+  push:
+    branches:
+      - '**'
+      - '!master'
+  pull_request:
+    branches:
+      - '**'
+      - '!master'
+
+jobs:
+
+  test:
+    name: Run tests with Python [${{ matrix.python-version }}]
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [3.6, 3.7, 3.8, 3.9-dev, pypy3]
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install dependencies
+      run: |
+        pip install pipenv
+        make setup
+    - name: Run tests
+      run: make test examples
+
+  check_coverage:
+    name: Check coverage
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+    - name: Set up Python 3.7
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.7
+    - name: Install dependencies
+      run: |
+        pip install pipenv
+        make setup
+    - name: Check coverage
+      run: make coverage
+
+  run_benchmark:
+    name: Run benchmark
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+    - name: Set up Python 3.7
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.7
+    - name: Install dependencies
+      run: |
+        pip install pipenv
+        make setup setup-bench
+    - name: Run benchmark
+      run: make bench
