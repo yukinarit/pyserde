@@ -1,5 +1,5 @@
 """
-Defines classess and functions for `serialize` decorator.
+Defines classes and functions for `serialize` decorator.
 
 """
 import abc
@@ -22,7 +22,7 @@ Custom = Optional[Callable[[Any], Any]]
 
 class Serializer(metaclass=abc.ABCMeta):
     """
-    `Serializer` base class. Subclass this to custonize serialize bahaviour.
+    `Serializer` base class. Subclass this to customize serialize behaviour.
 
     See `serde.json.JsonSerializer` and `serde.msgpack.MsgPackSerializer` for example usage.
     """
@@ -92,7 +92,7 @@ def serialize(_cls=None, rename_all: Optional[str] = None):
 
 def is_serializable(instance_or_class: Any) -> bool:
     """
-    Test if arg can `serialize`. Arg must be either an instance of class.
+    Test if arg can `serialize`. Arg must be also an instance of class.
 
     >>> from dataclasses import dataclass
     >>> from serde import serialize, is_serializable
@@ -266,7 +266,7 @@ def {{func}}(obj):
 @dataclass
 class Renderer:
     """
-    Render rvalue for variouls types.
+    Render rvalue for various types.
     """
 
     func: str
