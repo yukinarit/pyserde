@@ -34,7 +34,7 @@ SETTINGS = dict(debug=False)
 @dataclass
 class Hidden:
     """
-    Hidden infomation encoded in serde classes.
+    Hidden information encoded in serde classes.
     """
 
     code: Dict[str, str] = field(default_factory=dict)
