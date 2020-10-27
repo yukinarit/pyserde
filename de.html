@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.9.1" />
 <title>serde.de API documentation</title>
-<meta name="description" content="Defines classess and functions for `deserialize` decorator …" />
+<meta name="description" content="Defines classes and functions for `deserialize` decorator …" />
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
 <link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
@@ -22,7 +22,7 @@
 <h1 class="title">Module <code>serde.de</code></h1>
 </header>
 <section id="section-intro">
-<p>Defines classess and functions for <code><a title="serde.de.deserialize" href="#serde.de.deserialize">deserialize()</a></code> decorator.</p>
+<p>Defines classes and functions for <code><a title="serde.de.deserialize" href="#serde.de.deserialize">deserialize()</a></code> decorator.</p>
 <p><code><a title="serde.de.deserialize" href="#serde.de.deserialize">deserialize()</a></code> is a decorator to make a <code>dataclasses.dataclass</code> class deserializable.
 <code><a title="serde.de.is_deserializable" href="#serde.de.is_deserializable">is_deserializable()</a></code> is used to test a class is with <code><a title="serde.de.deserialize" href="#serde.de.deserialize">deserialize()</a></code>.
 <code><a title="serde.de.Deserializer" href="#serde.de.Deserializer">Deserializer</a></code> is a deserializer base class used in <code>from_obj</code>,
@@ -36,7 +36,7 @@ parts of pyserde.</p>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">&#34;&#34;&#34;
-Defines classess and functions for `deserialize` decorator.
+Defines classes and functions for `deserialize` decorator.
 
 `deserialize` is a decorator to make a `dataclasses.dataclass` class deserializable.
 `is_deserializable` is used to test a class is with `deserialize`.
@@ -51,11 +51,12 @@ parts of pyserde.
 import abc
 import dataclasses
 import functools
-import jinja2
 from dataclasses import dataclass, is_dataclass
 from typing import Any, Callable, Dict, List, Optional, Type
 
-from .compat import is_dict, is_enum, is_list, is_opt, is_primitive, is_tuple, is_union, iter_types, type_args, has_default
+import jinja2
+
+from .compat import is_dict, is_enum, is_list, is_opt, is_primitive, is_tuple, is_union, iter_types, type_args
 from .core import FROM_DICT, FROM_ITER, HIDDEN_NAME, SETTINGS, Field, Hidden, SerdeError, T, conv, fields, gen, logger
 from .more_types import deserialize as custom
 
@@ -98,7 +99,7 @@ def deserialize(_cls=None, rename_all: Optional[str] = None):
     &#34;&#34;&#34;
 
     def wrap(cls):
-        g: Dict[str, Any] = {}
+        g: Dict[str, Any] = globals().copy()
 
         # Create hidden object used by serde.
         if not hasattr(cls, HIDDEN_NAME):
@@ -115,9 +116,6 @@ def deserialize(_cls=None, rename_all: Optional[str] = None):
         for typ in iter_types(cls):
             if is_dataclass(typ) or is_enum(typ):
                 getattr(cls, &#39;__serde_scope__&#39;)[typ.__name__] = typ
-        for f in dataclasses.fields(cls):
-            if has_default(f):
-                g[f&#39;__default_{f.name}__&#39;] = f.default
         logger.debug(f&#39;{cls.__name__}: __serde_scope__ {scope}&#39;)
 
         cls = de_func(cls, FROM_ITER, render_from_iter(cls, custom), g)
@@ -132,7 +130,7 @@ def deserialize(_cls=None, rename_all: Optional[str] = None):
 
 def is_deserializable(instance_or_class: Any) -&gt; bool:
     &#34;&#34;&#34;
-    Test if arg can `deserialize`. Arg must be either an instance of class.
+    Test if arg can `deserialize`. Arg must be also an instance of class.
 
     &gt;&gt;&gt; from serde import deserialize, is_deserializable
     &gt;&gt;&gt;
@@ -149,7 +147,7 @@ def is_deserializable(instance_or_class: Any) -&gt; bool:
 
 class Deserializer(metaclass=abc.ABCMeta):
     &#34;&#34;&#34;
-    `Deserializer` base class. Subclass this to custonize deserialize bahaviour.
+    `Deserializer` base class. Subclass this to customize deserialize behaviour.
 
     See `serde.json.JsonDeserializer` and `serde.msgpack.MsgPackDeserializer` for example usage.
     &#34;&#34;&#34;
@@ -338,31 +336,21 @@ class Renderer:
         Render rvalue
         &#34;&#34;&#34;
         if is_dataclass(arg.type):
-            res = self.dataclass(arg)
+            return self.dataclass(arg)
         elif is_opt(arg.type):
-            res = self.opt(arg)
+            return self.opt(arg)
         elif is_list(arg.type):
-            res = self.list(arg)
+            return self.list(arg)
         elif is_dict(arg.type):
-            res = self.dict(arg)
+            return self.dict(arg)
         elif is_tuple(arg.type):
-            res = self.tuple(arg)
+            return self.tuple(arg)
         elif is_enum(arg.type):
-            res = self.enum(arg)
+            return self.enum(arg)
         elif any(f(arg.type) for f in (is_primitive, is_union)):
-            res = self.primitive(arg)
+            return self.primitive(arg)
         else:
             return f&#39;__custom_deserializer__(fs[{arg.index}], {arg.data})&#39;
-
-        if has_default(arg):
-            if arg.iterbased:
-                exists = f&#39;{arg.data} is not None&#39;
-            else:
-                exists = f&#39;&#34;{arg.name}&#34; in {arg.datavar}&#39;
-            return f&#39;{res} if {exists} else __default_{arg.name}__&#39;
-        else:
-            return res
-
 
     def dataclass(self, arg: DeField) -&gt; str:
         return f&#39;{arg.type.__name__}.{self.func}({arg.data})&#39;
@@ -464,8 +452,11 @@ class Renderer:
         &gt;&gt;&gt; Renderer(&#39;foo&#39;).render(DeField(int, &#39;i&#39;, datavar=&#39;data&#39;, index=1, iterbased=True))
         &#39;data[1]&#39;
         &#34;&#34;&#34;
-        if not arg.iterbased and has_default(arg):
-            return f&#39;{arg.datavar}.get(&#34;{arg.name}&#34;, __default_{arg.name}__)&#39;
+        if not arg.iterbased and not isinstance(arg.default, dataclasses._MISSING_TYPE):
+            default = arg.default
+            if isinstance(default, str):
+                default = f&#39;&#34;{default}&#34;&#39;
+            return f&#39;{arg.datavar}.get(&#34;{arg.name}&#34;, {default})&#39;
         else:
             return arg.data
 
@@ -632,7 +623,7 @@ RenameAll(int_field=10, str_field='foo')
     &#34;&#34;&#34;
 
     def wrap(cls):
-        g: Dict[str, Any] = {}
+        g: Dict[str, Any] = globals().copy()
 
         # Create hidden object used by serde.
         if not hasattr(cls, HIDDEN_NAME):
@@ -649,9 +640,6 @@ RenameAll(int_field=10, str_field='foo')
         for typ in iter_types(cls):
             if is_dataclass(typ) or is_enum(typ):
                 getattr(cls, &#39;__serde_scope__&#39;)[typ.__name__] = typ
-        for f in dataclasses.fields(cls):
-            if has_default(f):
-                g[f&#39;__default_{f.name}__&#39;] = f.default
         logger.debug(f&#39;{cls.__name__}: __serde_scope__ {scope}&#39;)
 
         cls = de_func(cls, FROM_ITER, render_from_iter(cls, custom), g)
@@ -706,7 +694,7 @@ RenameAll(int_field=10, str_field='foo')
 <span>def <span class="ident">is_deserializable</span></span>(<span>instance_or_class: Any) ‑> bool</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Test if arg can <code><a title="serde.de.deserialize" href="#serde.de.deserialize">deserialize()</a></code>. Arg must be either an instance of class.</p>
+<div class="desc"><p>Test if arg can <code><a title="serde.de.deserialize" href="#serde.de.deserialize">deserialize()</a></code>. Arg must be also an instance of class.</p>
 <pre><code class="language-python-repl">&gt;&gt;&gt; from serde import deserialize, is_deserializable
 &gt;&gt;&gt;
 &gt;&gt;&gt; @deserialize
@@ -723,7 +711,7 @@ True
 </summary>
 <pre><code class="python">def is_deserializable(instance_or_class: Any) -&gt; bool:
     &#34;&#34;&#34;
-    Test if arg can `deserialize`. Arg must be either an instance of class.
+    Test if arg can `deserialize`. Arg must be also an instance of class.
 
     &gt;&gt;&gt; from serde import deserialize, is_deserializable
     &gt;&gt;&gt;
@@ -747,7 +735,7 @@ True
 <span>class <span class="ident">Deserializer</span></span>
 </code></dt>
 <dd>
-<div class="desc"><p><code><a title="serde.de.Deserializer" href="#serde.de.Deserializer">Deserializer</a></code> base class. Subclass this to custonize deserialize bahaviour.</p>
+<div class="desc"><p><code><a title="serde.de.Deserializer" href="#serde.de.Deserializer">Deserializer</a></code> base class. Subclass this to customize deserialize behaviour.</p>
 <p>See <code><a title="serde.json.JsonDeserializer" href="json.html#serde.json.JsonDeserializer">JsonDeserializer</a></code> and <code><a title="serde.msgpack.MsgPackDeserializer" href="msgpack.html#serde.msgpack.MsgPackDeserializer">MsgPackDeserializer</a></code> for example usage.</p></div>
 <details class="source">
 <summary>
@@ -755,7 +743,7 @@ True
 </summary>
 <pre><code class="python">class Deserializer(metaclass=abc.ABCMeta):
     &#34;&#34;&#34;
-    `Deserializer` base class. Subclass this to custonize deserialize bahaviour.
+    `Deserializer` base class. Subclass this to customize deserialize behaviour.
 
     See `serde.json.JsonDeserializer` and `serde.msgpack.MsgPackDeserializer` for example usage.
     &#34;&#34;&#34;

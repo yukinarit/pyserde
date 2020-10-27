@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.9.1" />
 <title>serde.se API documentation</title>
-<meta name="description" content="Defines classess and functions for `serialize` decorator." />
+<meta name="description" content="Defines classes and functions for `serialize` decorator." />
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
 <link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
@@ -22,13 +22,13 @@
 <h1 class="title">Module <code>serde.se</code></h1>
 </header>
 <section id="section-intro">
-<p>Defines classess and functions for <code><a title="serde.se.serialize" href="#serde.se.serialize">serialize()</a></code> decorator.</p>
+<p>Defines classes and functions for <code><a title="serde.se.serialize" href="#serde.se.serialize">serialize()</a></code> decorator.</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">&#34;&#34;&#34;
-Defines classess and functions for `serialize` decorator.
+Defines classes and functions for `serialize` decorator.
 
 &#34;&#34;&#34;
 import abc
@@ -51,7 +51,7 @@ Custom = Optional[Callable[[Any], Any]]
 
 class Serializer(metaclass=abc.ABCMeta):
     &#34;&#34;&#34;
-    `Serializer` base class. Subclass this to custonize serialize bahaviour.
+    `Serializer` base class. Subclass this to customize serialize behaviour.
 
     See `serde.json.JsonSerializer` and `serde.msgpack.MsgPackSerializer` for example usage.
     &#34;&#34;&#34;
@@ -121,7 +121,7 @@ def serialize(_cls=None, rename_all: Optional[str] = None):
 
 def is_serializable(instance_or_class: Any) -&gt; bool:
     &#34;&#34;&#34;
-    Test if arg can `serialize`. Arg must be either an instance of class.
+    Test if arg can `serialize`. Arg must be also an instance of class.
 
     &gt;&gt;&gt; from dataclasses import dataclass
     &gt;&gt;&gt; from serde import serialize, is_serializable
@@ -295,7 +295,7 @@ def {{func}}(obj):
 @dataclass
 class Renderer:
     &#34;&#34;&#34;
-    Render rvalue for variouls types.
+    Render rvalue for various types.
     &#34;&#34;&#34;
 
     func: str
@@ -478,7 +478,7 @@ def se_func(cls: Type[T], func: str, code: str, g: Dict = None) -&gt; Type[T]:
 <span>def <span class="ident">is_serializable</span></span>(<span>instance_or_class: Any) ‑> bool</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Test if arg can <code><a title="serde.se.serialize" href="#serde.se.serialize">serialize()</a></code>. Arg must be either an instance of class.</p>
+<div class="desc"><p>Test if arg can <code><a title="serde.se.serialize" href="#serde.se.serialize">serialize()</a></code>. Arg must be also an instance of class.</p>
 <pre><code class="language-python-repl">&gt;&gt;&gt; from dataclasses import dataclass
 &gt;&gt;&gt; from serde import serialize, is_serializable
 &gt;&gt;&gt;
@@ -496,7 +496,7 @@ True
 </summary>
 <pre><code class="python">def is_serializable(instance_or_class: Any) -&gt; bool:
     &#34;&#34;&#34;
-    Test if arg can `serialize`. Arg must be either an instance of class.
+    Test if arg can `serialize`. Arg must be also an instance of class.
 
     &gt;&gt;&gt; from dataclasses import dataclass
     &gt;&gt;&gt; from serde import serialize, is_serializable
@@ -615,7 +615,7 @@ into an object in various data format such as JSON and MsgPack.</p>
 <span>class <span class="ident">Serializer</span></span>
 </code></dt>
 <dd>
-<div class="desc"><p><code><a title="serde.se.Serializer" href="#serde.se.Serializer">Serializer</a></code> base class. Subclass this to custonize serialize bahaviour.</p>
+<div class="desc"><p><code><a title="serde.se.Serializer" href="#serde.se.Serializer">Serializer</a></code> base class. Subclass this to customize serialize behaviour.</p>
 <p>See <code><a title="serde.json.JsonSerializer" href="json.html#serde.json.JsonSerializer">JsonSerializer</a></code> and <code><a title="serde.msgpack.MsgPackSerializer" href="msgpack.html#serde.msgpack.MsgPackSerializer">MsgPackSerializer</a></code> for example usage.</p></div>
 <details class="source">
 <summary>
@@ -623,7 +623,7 @@ into an object in various data format such as JSON and MsgPack.</p>
 </summary>
 <pre><code class="python">class Serializer(metaclass=abc.ABCMeta):
     &#34;&#34;&#34;
-    `Serializer` base class. Subclass this to custonize serialize bahaviour.
+    `Serializer` base class. Subclass this to customize serialize behaviour.
 
     See `serde.json.JsonSerializer` and `serde.msgpack.MsgPackSerializer` for example usage.
     &#34;&#34;&#34;

@@ -301,7 +301,7 @@ __all__ = [
 </dd>
 <dt><code class="name"><a title="serde.de" href="de.html">serde.de</a></code></dt>
 <dd>
-<div class="desc"><p>Defines classess and functions for <code><a title="serde.deserialize" href="#serde.deserialize">deserialize()</a></code> decorator …</p></div>
+<div class="desc"><p>Defines classes and functions for <code><a title="serde.deserialize" href="#serde.deserialize">deserialize()</a></code> decorator …</p></div>
 </dd>
 <dt><code class="name"><a title="serde.inspect" href="inspect.html">serde.inspect</a></code></dt>
 <dd>
@@ -321,7 +321,7 @@ __all__ = [
 </dd>
 <dt><code class="name"><a title="serde.se" href="se.html">serde.se</a></code></dt>
 <dd>
-<div class="desc"><p>Defines classess and functions for <code><a title="serde.serialize" href="#serde.serialize">serialize()</a></code> decorator.</p></div>
+<div class="desc"><p>Defines classes and functions for <code><a title="serde.serialize" href="#serde.serialize">serialize()</a></code> decorator.</p></div>
 </dd>
 <dt><code class="name"><a title="serde.toml" href="toml.html">serde.toml</a></code></dt>
 <dd>
@@ -458,7 +458,7 @@ RenameAll(int_field=10, str_field='foo')
     &#34;&#34;&#34;
 
     def wrap(cls):
-        g: Dict[str, Any] = {}
+        g: Dict[str, Any] = globals().copy()
 
         # Create hidden object used by serde.
         if not hasattr(cls, HIDDEN_NAME):
@@ -475,9 +475,6 @@ RenameAll(int_field=10, str_field='foo')
         for typ in iter_types(cls):
             if is_dataclass(typ) or is_enum(typ):
                 getattr(cls, &#39;__serde_scope__&#39;)[typ.__name__] = typ
-        for f in dataclasses.fields(cls):
-            if has_default(f):
-                g[f&#39;__default_{f.name}__&#39;] = f.default
         logger.debug(f&#39;{cls.__name__}: __serde_scope__ {scope}&#39;)
 
         cls = de_func(cls, FROM_ITER, render_from_iter(cls, custom), g)
@@ -532,7 +529,7 @@ RenameAll(int_field=10, str_field='foo')
 <span>def <span class="ident">is_deserializable</span></span>(<span>instance_or_class: Any) ‑> bool</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Test if arg can <code><a title="serde.deserialize" href="#serde.deserialize">deserialize()</a></code>. Arg must be either an instance of class.</p>
+<div class="desc"><p>Test if arg can <code><a title="serde.deserialize" href="#serde.deserialize">deserialize()</a></code>. Arg must be also an instance of class.</p>
 <pre><code class="language-python-repl">&gt;&gt;&gt; from serde import deserialize, is_deserializable
 &gt;&gt;&gt;
 &gt;&gt;&gt; @deserialize
@@ -549,7 +546,7 @@ True
 </summary>
 <pre><code class="python">def is_deserializable(instance_or_class: Any) -&gt; bool:
     &#34;&#34;&#34;
-    Test if arg can `deserialize`. Arg must be either an instance of class.
+    Test if arg can `deserialize`. Arg must be also an instance of class.
 
     &gt;&gt;&gt; from serde import deserialize, is_deserializable
     &gt;&gt;&gt;
@@ -568,7 +565,7 @@ True
 <span>def <span class="ident">is_serializable</span></span>(<span>instance_or_class: Any) ‑> bool</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Test if arg can <code><a title="serde.serialize" href="#serde.serialize">serialize()</a></code>. Arg must be either an instance of class.</p>
+<div class="desc"><p>Test if arg can <code><a title="serde.serialize" href="#serde.serialize">serialize()</a></code>. Arg must be also an instance of class.</p>
 <pre><code class="language-python-repl">&gt;&gt;&gt; from dataclasses import dataclass
 &gt;&gt;&gt; from serde import serialize, is_serializable
 &gt;&gt;&gt;
@@ -586,7 +583,7 @@ True
 </summary>
 <pre><code class="python">def is_serializable(instance_or_class: Any) -&gt; bool:
     &#34;&#34;&#34;
-    Test if arg can `serialize`. Arg must be either an instance of class.
+    Test if arg can `serialize`. Arg must be also an instance of class.
 
     &gt;&gt;&gt; from dataclasses import dataclass
     &gt;&gt;&gt; from serde import serialize, is_serializable

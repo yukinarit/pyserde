@@ -80,7 +80,7 @@ def to_toml(obj, se=TomlSerializer, **opts) -&gt; str:
 
 def from_toml(c: Type[T], s: str, de=TomlDeserializer, **opts) -&gt; T:
     &#34;&#34;&#34;
-    Take toml string and return deserialized object..
+    Take toml string and return deserialized object.
 
     &gt;&gt;&gt; from dataclasses import dataclass
     &gt;&gt;&gt; from serde import deserialize
@@ -112,7 +112,7 @@ def from_toml(c: Type[T], s: str, de=TomlDeserializer, **opts) -&gt; T:
 <span>def <span class="ident">from_toml</span></span>(<span>c: Type[~T], s: str, de=serde.toml.TomlDeserializer, **opts) ‑> ~T</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Take toml string and return deserialized object..</p>
+<div class="desc"><p>Take toml string and return deserialized object.</p>
 <pre><code class="language-python-repl">&gt;&gt;&gt; from dataclasses import dataclass
 &gt;&gt;&gt; from serde import deserialize
 &gt;&gt;&gt; from serde.toml import to_toml
@@ -135,7 +135,7 @@ Settings(host='localhost', port=8080, upstream=['localhost:8081', 'localhost:808
 </summary>
 <pre><code class="python">def from_toml(c: Type[T], s: str, de=TomlDeserializer, **opts) -&gt; T:
     &#34;&#34;&#34;
-    Take toml string and return deserialized object..
+    Take toml string and return deserialized object.
 
     &gt;&gt;&gt; from dataclasses import dataclass
     &gt;&gt;&gt; from serde import deserialize
@@ -221,7 +221,7 @@ Settings(host='localhost', port=8080, upstream=['localhost:8081', 'localhost:808
 <span>class <span class="ident">TomlDeserializer</span></span>
 </code></dt>
 <dd>
-<div class="desc"><p><code>Deserializer</code> base class. Subclass this to custonize deserialize bahaviour.</p>
+<div class="desc"><p><code>Deserializer</code> base class. Subclass this to customize deserialize behaviour.</p>
 <p>See <code><a title="serde.json.JsonDeserializer" href="json.html#serde.json.JsonDeserializer">JsonDeserializer</a></code> and <code><a title="serde.msgpack.MsgPackDeserializer" href="msgpack.html#serde.msgpack.MsgPackDeserializer">MsgPackDeserializer</a></code> for example usage.</p></div>
 <details class="source">
 <summary>
@@ -249,7 +249,7 @@ Settings(host='localhost', port=8080, upstream=['localhost:8081', 'localhost:808
 <span>class <span class="ident">TomlSerializer</span></span>
 </code></dt>
 <dd>
-<div class="desc"><p><code>Serializer</code> base class. Subclass this to custonize serialize bahaviour.</p>
+<div class="desc"><p><code>Serializer</code> base class. Subclass this to customize serialize behaviour.</p>
 <p>See <code><a title="serde.json.JsonSerializer" href="json.html#serde.json.JsonSerializer">JsonSerializer</a></code> and <code><a title="serde.msgpack.MsgPackSerializer" href="msgpack.html#serde.msgpack.MsgPackSerializer">MsgPackSerializer</a></code> for example usage.</p></div>
 <details class="source">
 <summary>
