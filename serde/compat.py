@@ -51,7 +51,7 @@ def typename(typ) -> str:
 
 def type_args(cls: Type):
     """
-    Wrapepr to suppress type error for accessing private members.
+    Wrapper to suppress type error for accessing private members.
     """
     return cls.__args__  # type: ignore
 
