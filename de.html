@@ -56,7 +56,8 @@ from typing import Any, Callable, Dict, List, Optional, Type
 
 import jinja2
 
-from .compat import is_dict, is_enum, is_list, is_opt, is_primitive, is_tuple, is_union, iter_types, type_args
+from .compat import (has_default, has_default_factory, is_dict, is_enum, is_list, is_opt, is_primitive, is_tuple,
+                     is_union, iter_types, type_args)
 from .core import FROM_DICT, FROM_ITER, HIDDEN_NAME, SETTINGS, Field, Hidden, SerdeError, T, conv, fields, gen, logger
 from .more_types import deserialize as custom
 
@@ -99,7 +100,7 @@ def deserialize(_cls=None, rename_all: Optional[str] = None):
     &#34;&#34;&#34;
 
     def wrap(cls):
-        g: Dict[str, Any] = globals().copy()
+        g: Dict[str, Any] = {}
 
         # Create hidden object used by serde.
         if not hasattr(cls, HIDDEN_NAME):
@@ -116,6 +117,15 @@ def deserialize(_cls=None, rename_all: Optional[str] = None):
         for typ in iter_types(cls):
             if is_dataclass(typ) or is_enum(typ):
                 getattr(cls, &#39;__serde_scope__&#39;)[typ.__name__] = typ
+
+        # Collect default values and default factories used in the generated code.
+        # To avoid name conflicts, name the variables like &#34;__default_&lt;NAME&gt;__&#34;.
+        for f in dataclasses.fields(cls):
+            if has_default(f):
+                g[f&#39;__default_{f.name}__&#39;] = f.default
+            elif has_default_factory(f):
+                g[f&#39;__default_{f.name}__&#39;] = f.default_factory
+
         logger.debug(f&#39;{cls.__name__}: __serde_scope__ {scope}&#39;)
 
         cls = de_func(cls, FROM_ITER, render_from_iter(cls, custom), g)
@@ -336,21 +346,33 @@ class Renderer:
         Render rvalue
         &#34;&#34;&#34;
         if is_dataclass(arg.type):
-            return self.dataclass(arg)
+            res = self.dataclass(arg)
         elif is_opt(arg.type):
-            return self.opt(arg)
+            res = self.opt(arg)
         elif is_list(arg.type):
-            return self.list(arg)
+            res = self.list(arg)
         elif is_dict(arg.type):
-            return self.dict(arg)
+            res = self.dict(arg)
         elif is_tuple(arg.type):
-            return self.tuple(arg)
+            res = self.tuple(arg)
         elif is_enum(arg.type):
-            return self.enum(arg)
+            res = self.enum(arg)
         elif any(f(arg.type) for f in (is_primitive, is_union)):
-            return self.primitive(arg)
+            res = self.primitive(arg)
         else:
             return f&#39;__custom_deserializer__(fs[{arg.index}], {arg.data})&#39;
+
+        if has_default(arg) or has_default_factory(arg):
+            if arg.iterbased:
+                exists = f&#39;{arg.data} is not None&#39;
+            else:
+                exists = f&#39;&#34;{arg.name}&#34; in {arg.datavar}&#39;
+            if has_default(arg):
+                return f&#39;{res} if {exists} else __default_{arg.name}__&#39;
+            elif has_default_factory(arg):
+                return f&#39;{res} if {exists} else __default_{arg.name}__()&#39;
+
+        return res
 
     def dataclass(self, arg: DeField) -&gt; str:
         return f&#39;{arg.type.__name__}.{self.func}({arg.data})&#39;
@@ -452,11 +474,8 @@ class Renderer:
         &gt;&gt;&gt; Renderer(&#39;foo&#39;).render(DeField(int, &#39;i&#39;, datavar=&#39;data&#39;, index=1, iterbased=True))
         &#39;data[1]&#39;
         &#34;&#34;&#34;
-        if not arg.iterbased and not isinstance(arg.default, dataclasses._MISSING_TYPE):
-            default = arg.default
-            if isinstance(default, str):
-                default = f&#39;&#34;{default}&#34;&#39;
-            return f&#39;{arg.datavar}.get(&#34;{arg.name}&#34;, {default})&#39;
+        if not arg.iterbased and has_default(arg):
+            return f&#39;{arg.datavar}.get(&#34;{arg.name}&#34;, __default_{arg.name}__)&#39;
         else:
             return arg.data
 
@@ -623,7 +642,7 @@ RenameAll(int_field=10, str_field='foo')
     &#34;&#34;&#34;
 
     def wrap(cls):
-        g: Dict[str, Any] = globals().copy()
+        g: Dict[str, Any] = {}
 
         # Create hidden object used by serde.
         if not hasattr(cls, HIDDEN_NAME):
@@ -640,6 +659,15 @@ RenameAll(int_field=10, str_field='foo')
         for typ in iter_types(cls):
             if is_dataclass(typ) or is_enum(typ):
                 getattr(cls, &#39;__serde_scope__&#39;)[typ.__name__] = typ
+
+        # Collect default values and default factories used in the generated code.
+        # To avoid name conflicts, name the variables like &#34;__default_&lt;NAME&gt;__&#34;.
+        for f in dataclasses.fields(cls):
+            if has_default(f):
+                g[f&#39;__default_{f.name}__&#39;] = f.default
+            elif has_default_factory(f):
+                g[f&#39;__default_{f.name}__&#39;] = f.default_factory
+
         logger.debug(f&#39;{cls.__name__}: __serde_scope__ {scope}&#39;)
 
         cls = de_func(cls, FROM_ITER, render_from_iter(cls, custom), g)

@@ -458,7 +458,7 @@ RenameAll(int_field=10, str_field='foo')
     &#34;&#34;&#34;
 
     def wrap(cls):
-        g: Dict[str, Any] = globals().copy()
+        g: Dict[str, Any] = {}
 
         # Create hidden object used by serde.
         if not hasattr(cls, HIDDEN_NAME):
@@ -475,6 +475,15 @@ RenameAll(int_field=10, str_field='foo')
         for typ in iter_types(cls):
             if is_dataclass(typ) or is_enum(typ):
                 getattr(cls, &#39;__serde_scope__&#39;)[typ.__name__] = typ
+
+        # Collect default values and default factories used in the generated code.
+        # To avoid name conflicts, name the variables like &#34;__default_&lt;NAME&gt;__&#34;.
+        for f in dataclasses.fields(cls):
+            if has_default(f):
+                g[f&#39;__default_{f.name}__&#39;] = f.default
+            elif has_default_factory(f):
+                g[f&#39;__default_{f.name}__&#39;] = f.default_factory
+
         logger.debug(f&#39;{cls.__name__}: __serde_scope__ {scope}&#39;)
 
         cls = de_func(cls, FROM_ITER, render_from_iter(cls, custom), g)
