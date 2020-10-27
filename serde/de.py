@@ -1,5 +1,5 @@
 """
-Defines classess and functions for `deserialize` decorator.
+Defines classes and functions for `deserialize` decorator.
 
 `deserialize` is a decorator to make a `dataclasses.dataclass` class deserializable.
 `is_deserializable` is used to test a class is with `deserialize`.
@@ -93,7 +93,7 @@ def deserialize(_cls=None, rename_all: Optional[str] = None):
 
 def is_deserializable(instance_or_class: Any) -> bool:
     """
-    Test if arg can `deserialize`. Arg must be either an instance of class.
+    Test if arg can `deserialize`. Arg must be also an instance of class.
 
     >>> from serde import deserialize, is_deserializable
     >>>
@@ -110,7 +110,7 @@ def is_deserializable(instance_or_class: Any) -> bool:
 
 class Deserializer(metaclass=abc.ABCMeta):
     """
-    `Deserializer` base class. Subclass this to custonize deserialize bahaviour.
+    `Deserializer` base class. Subclass this to customize deserialize behaviour.
 
     See `serde.json.JsonDeserializer` and `serde.msgpack.MsgPackDeserializer` for example usage.
     """
