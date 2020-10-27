@@ -51,7 +51,7 @@ def to_toml(obj, se=TomlSerializer, **opts) -> str:
 
 def from_toml(c: Type[T], s: str, de=TomlDeserializer, **opts) -> T:
     """
-    Take toml string and return deserialized object..
+    Take toml string and return deserialized object.
 
     >>> from dataclasses import dataclass
     >>> from serde import deserialize
