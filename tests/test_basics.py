@@ -59,6 +59,7 @@ def test_primitive(se, de, opt):
         """
         Primitives.
         """
+
         i: int
         s: str
         f: float
@@ -247,23 +248,38 @@ def test_optional_nested(se, de):
     assert p == de(NestedPriOpt, se(p))
 
 
-def test_field_default():
+@pytest.mark.parametrize('se,de', all_formats)
+def test_dataclass_default_factory(se, de):
+    @deserialize
+    @serialize
     @dataclass
     class Foo:
-        i: int = 10
+        foo: str
+        items: Dict[str, int] = field(default_factory=dict)
 
-    @dataclass
-    class Bar:
-        i: int = field(default=10)
+    f = Foo('bar')
+    assert f == de(Foo, se(f))
 
-    assert 10 == dataclasses.fields(Foo)[0].default
-    assert 10 == dataclasses.fields(Bar())[0].default
+    assert {'foo': 'bar', 'items': {}} == asdict(f)
+    assert f == from_dict(Foo, {'foo': 'bar'})
 
 
 @pytest.mark.parametrize('se,de', all_formats)
 def test_default(se, de):
     p = PriDefault()
     assert p == de(PriDefault, se(p))
+
+    p = PriDefault()
+    assert p == from_dict(PriDefault, {})
+    assert p == from_dict(PriDefault, {'i': 10})
+    assert p == from_dict(PriDefault, {'i': 10, 's': 'foo'})
+    assert p == from_dict(PriDefault, {'i': 10, 's': 'foo', 'f': 100.0})
+    assert p == from_dict(PriDefault, {'i': 10, 's': 'foo', 'f': 100.0, 'b': True})
+
+    assert 10 == dataclasses.fields(PriDefault)[0].default
+    assert 'foo' == dataclasses.fields(PriDefault)[1].default
+    assert 100.0 == dataclasses.fields(PriDefault)[2].default
+    assert True is dataclasses.fields(PriDefault)[3].default
 
 
 @pytest.mark.parametrize('se,de', (format_dict + format_tuple + format_json + format_msgpack + format_yaml))
@@ -282,59 +298,6 @@ def test_dict_pri(se, de):
 
     p = {}
     assert p == de(data.DictPri, se(p))
-
-
-def test_complex():
-    @deserialize
-    @serialize
-    @dataclass
-    class Baz:
-        v: List[int] = field(default_factory=list)
-        d: Dict[str, int] = field(default_factory=dict)
-
-    @deserialize
-    @serialize
-    @dataclass
-    class Bar:
-        i: int
-
-    @deserialize
-    @serialize
-    @dataclass
-    class Foo:
-        i: int
-        s: str
-        f: float
-        b: bool
-        foo: Baz
-        lst: List[Bar] = field(default_factory=list)
-        lst2: List[Dict[str, Bar]] = field(default_factory=list)
-        dct: Dict[str, List[List[Bar]]] = field(default_factory=dict)
-
-    f = Baz(v=[1, 2, 3, 4, 5], d={'foo': 10, 'fuga': 20})
-    lst = [Bar(10), Bar(20)]
-    lst2 = [{'bar1': Bar(10)}, {'bar2': Bar(10), 'bar3': Bar(20)}]
-    dct = {'foo': [[Bar(10), Bar(20)], [Bar(20), Bar(30)]]}
-    h = Foo(i=10, s='foo', f=100.0, b=True, foo=f, lst=lst, lst2=lst2, dct=dct)
-    s = """
-               {"i": 10,
-                "s": "foo",
-                "f": 100.0,
-                "b": true,
-                "foo" : {
-                    "v": [1, 2, 3, 4, 5],
-                    "d": {"foo": 10, "fuga": 20}
-                },
-                "lst": [{"i": 10}, {"i": 20}],
-                "lst2": [{"bar1": {"i": 10}}, {"bar2": {"i": 10}, "bar3": {"i": 20}}],
-                "dct": {"foo": [[{"i": 10}, {"i": 20}], [{"i": 20}, {"i": 30}]]}
-                }
-                """
-    assert json.loads(s) == json.loads(to_json(h))
-    hh = from_json(Foo, s)
-    assert h.foo == hh.foo
-    assert h.lst == hh.lst
-    assert h.dct == hh.dct
 
 
 def test_json():
@@ -445,8 +408,8 @@ def test_skip_if(se, de):
 
     f = Foo([])
     ff = de(Foo, se(f))
-    assert ff.comments is None  # TODO format_tuple gets [] instaed of None
-    assert ff.attrs is None  # TODO format_tuple gets {} instaed of None
+    assert ff.comments == []
+    assert ff.attrs == {}
 
 
 @pytest.mark.parametrize('se,de', all_formats)
@@ -473,4 +436,4 @@ def test_skip_if_overrides_skip_if_false(se, de):
 
     f = Foo(['foo'])
     ff = de(Foo, se(f))
-    assert ff.comments is None
+    assert ff.comments == []

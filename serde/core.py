@@ -161,6 +161,7 @@ class Field:
     type: Type
     name: Optional[str]
     default: Any = field(default_factory=dataclasses._MISSING_TYPE)
+    default_factory: Any = field(default_factory=dataclasses._MISSING_TYPE)
     case: Optional[str] = None
     rename: Optional[str] = None
     skip: Optional[bool] = None
@@ -183,6 +184,7 @@ class Field:
             f.type,
             f.name,
             default=f.default,
+            default_factory=f.default_factory,  # type: ignore
             rename=f.metadata.get('serde_rename'),
             skip=f.metadata.get('serde_skip'),
             skip_if=skip_if or skip_if_false_func,
