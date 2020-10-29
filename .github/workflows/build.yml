@@ -1,0 +1,51 @@
+name: Build and deploy docs
+
+on:
+  push:
+   branches:
+    - master
+
+jobs:
+
+ build_docs:
+   name: Build docs and deploy to gh-pages
+   runs-on: ubuntu-latest
+   steps:
+     - name: Checkout
+       uses: actions/checkout@v2.3.1
+       with:
+         persist-credentials: false
+     - name: Set up Python 3.7
+       uses: actions/setup-python@v2
+       with:
+         python-version: 3.7
+     - name: Install dependencies
+       run: |
+         pip install pipenv
+         make setup
+     - name: Get PR number
+       uses: jwalton/gh-find-current-pr@v1
+       id: findPr
+       with:
+         github-token: ${{ secrets.GITHUB_TOKEN }}
+     - name: Set commit message
+       run: |
+         if [ -z "$PR" ]
+         then
+           echo "COMMIT_MESSAGE=docs: Update docs" >> $GITHUB_ENV
+         else
+           echo "COMMIT_MESSAGE=docs: Update docs for #$PR" >> $GITHUB_ENV
+         fi
+       env:
+         PR: ${{ steps.findPr.outputs.pr }}
+     - name: Build docs
+       run: make docs
+     - name: Deploy on gh-pages
+       uses: JamesIves/github-pages-deploy-action@3.7.1
+       with:
+         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+         BRANCH: gh-pages
+         FOLDER: docs
+         COMMIT_MESSAGE: ${{ env.COMMIT_MESSAGE }}
+         CLEAN: true
+

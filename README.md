@@ -2,8 +2,7 @@
 
 [![image](https://img.shields.io/pypi/v/pyserde.svg)](https://pypi.org/project/pyserde/)
 [![image](https://img.shields.io/pypi/pyversions/pyserde.svg)](https://pypi.org/project/pyserde/)
-[![Build Status](https://travis-ci.org/yukinarit/pyserde.svg?branch=master)](https://travis-ci.org/yukinarit/pyserde)
-[![Build status](https://ci.appveyor.com/api/projects/status/w4i5x8x9d4sbxhn2?svg=true)](https://ci.appveyor.com/project/yukinarit/pyserde)
+[![Tests](https://github.com/yukinarit/pyserde/workflows/Tests/badge.svg)
 [![Coverage Status](https://coveralls.io/repos/github/yukinarit/pyserde/badge.svg?branch=master)](https://coveralls.io/github/yukinarit/pyserde?branch=master)
 
 Yet another serialization library on top of [dataclasses](https://docs.python.org/3/library/dataclasses.html).
