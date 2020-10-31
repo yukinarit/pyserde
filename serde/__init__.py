@@ -7,7 +7,7 @@ from .de import deserialize, from_dict, from_obj, from_tuple, is_deserializable 
 from .se import asdict, astuple, is_serializable, serialize  # noqa
 
 """ Version of pyserde. """
-__version__ = '0.1.5'
+__version__ = '0.2.0'
 
 __all__ = [
     'serialize',
