@@ -42,6 +42,8 @@ jobs:
         make setup
     - name: Check coverage
       run: make coverage
+    - name: Upload coverage report to codecov.io
+      uses: codecov/codecov-action@v1
 
   run_benchmark:
     name: Run benchmark
