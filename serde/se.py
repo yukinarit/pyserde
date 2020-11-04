@@ -75,10 +75,11 @@ def serialize(_cls=None, rename_all: Optional[str] = None):
 
         setattr(cls, SE_NAME, serialize)
 
-        g: Dict[str, Any] = globals().copy()
+        g: Dict[str, Any] = {}
         for f in sefields(cls):
             if f.skip_if:
                 g[f.skip_if.name] = f.skip_if
+        g['is_dataclass'] = is_dataclass
         g['__custom_serializer__'] = custom
         cls = se_func(cls, TO_ITER, render_astuple(cls, custom), g)
         cls = se_func(cls, TO_DICT, render_asdict(cls, rename_all, custom), g)
@@ -371,13 +372,11 @@ class Renderer:
         return f'{arg.varname}'
 
 
-def se_func(cls: Type[T], func: str, code: str, g: Dict = None) -> Type[T]:
+def se_func(cls: Type[T], func: str, code: str, g: Dict) -> Type[T]:
     """
     Generate function to serialize into an object.
     """
     # Generate serialize function.
-    if not g:
-        g = globals().copy()
     code = gen(code, g, cls=cls)
 
     setattr(cls, func, g[func])
