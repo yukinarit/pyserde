@@ -70,8 +70,11 @@ def deserialize(_cls=None, rename_all: Optional[str] = None):
             setattr(cls, HIDDEN_NAME, Hidden())
 
         # Create a scope storage used by serde.
-        scope = {}
-        setattr(cls, '__serde_scope__', scope)
+
+        scope = getattr(cls, '__serde_scope__', None)
+        if scope is None:
+            scope = {}
+            setattr(cls, '__serde_scope__', scope)
 
         # Set custom deserializer.
         g['__custom_deserializer__'] = custom
