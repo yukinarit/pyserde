@@ -12,7 +12,7 @@ class Foo:
     s: str = 'foo'
     f: float = field(default=100.0)  # Use dataclass field.
     b: bool = field(default=True)
-    d: Dict[str,int] =field(default_factory=dict)
+    d: Dict[str, int] = field(default_factory=dict)
 
 
 def main():
