@@ -107,8 +107,11 @@ def deserialize(_cls=None, rename_all: Optional[str] = None):
             setattr(cls, HIDDEN_NAME, Hidden())
 
         # Create a scope storage used by serde.
-        scope = {}
-        setattr(cls, &#39;__serde_scope__&#39;, scope)
+
+        scope = getattr(cls, &#39;__serde_scope__&#39;, None)
+        if scope is None:
+            scope = {}
+            setattr(cls, &#39;__serde_scope__&#39;, scope)
 
         # Set custom deserializer.
         g[&#39;__custom_deserializer__&#39;] = custom
@@ -649,8 +652,11 @@ RenameAll(int_field=10, str_field='foo')
             setattr(cls, HIDDEN_NAME, Hidden())
 
         # Create a scope storage used by serde.
-        scope = {}
-        setattr(cls, &#39;__serde_scope__&#39;, scope)
+
+        scope = getattr(cls, &#39;__serde_scope__&#39;, None)
+        if scope is None:
+            scope = {}
+            setattr(cls, &#39;__serde_scope__&#39;, scope)
 
         # Set custom deserializer.
         g[&#39;__custom_deserializer__&#39;] = custom

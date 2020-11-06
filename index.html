@@ -464,8 +464,11 @@ RenameAll(int_field=10, str_field='foo')
             setattr(cls, HIDDEN_NAME, Hidden())
 
         # Create a scope storage used by serde.
-        scope = {}
-        setattr(cls, &#39;__serde_scope__&#39;, scope)
+
+        scope = getattr(cls, &#39;__serde_scope__&#39;, None)
+        if scope is None:
+            scope = {}
+            setattr(cls, &#39;__serde_scope__&#39;, scope)
 
         # Set custom deserializer.
         g[&#39;__custom_deserializer__&#39;] = custom
@@ -681,16 +684,32 @@ into an object in various data format such as JSON and MsgPack.</p>
         if not hasattr(cls, HIDDEN_NAME):
             setattr(cls, HIDDEN_NAME, Hidden())
 
+        # Create a scope storage used by serde.
+        scope = getattr(cls, &#39;__serde_scope__&#39;, None)
+        if scope is None:
+            scope = {}
+            setattr(cls, &#39;__serde_scope__&#39;, scope)
+
         def serialize(self, ser, **opts) -&gt; None:
             return ser.serialize(self, **opts)
 
         setattr(cls, SE_NAME, serialize)
 
-        g: Dict[str, Any] = globals().copy()
+        g: Dict[str, Any] = {}
         for f in sefields(cls):
             if f.skip_if:
                 g[f.skip_if.name] = f.skip_if
+
+        # Collect types used in the gernerated code.
+        for typ in iter_types(cls):
+            if is_dataclass(typ) or is_enum(typ):
+                getattr(cls, &#39;__serde_scope__&#39;)[typ.__name__] = typ
+
+        logger.debug(f&#39;{cls.__name__}: __serde_scope__ {scope}&#39;)
+
+        g[&#39;is_dataclass&#39;] = is_dataclass
         g[&#39;__custom_serializer__&#39;] = custom
+        g[&#39;__serde_enum_value__&#39;] = enum_value
         cls = se_func(cls, TO_ITER, render_astuple(cls, custom), g)
         cls = se_func(cls, TO_DICT, render_asdict(cls, rename_all, custom), g)
         return cls
