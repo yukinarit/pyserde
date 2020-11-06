@@ -104,77 +104,48 @@ def test_forward_declaration():
 
 
 @pytest.mark.parametrize('se,de', all_formats)
-def test_intenum(se, de):
-    from .data import IE
-
-    @deserialize
-    @serialize
-    @dataclass
-    class Foo:
-        v0: IE
-        v1: IE
-        v2: IE = IE.V2
-
-    f = Foo(IE.V0, IE.V1)
-    ff = de(Foo, se(f))
-    assert f == ff
-    assert isinstance(ff.v0, enum.Enum)
-    assert isinstance(ff.v1, enum.Enum)
-    assert isinstance(ff.v2, enum.Enum)
-
-    # int literal doesn't work because of type mismatch.
-    f = Foo(1, 2, 3)
-    pytest.raises(Exception, lambda: de(Foo, se(f)))
-
-
-@pytest.mark.parametrize('se,de', all_formats)
 def test_enum(se, de):
-    from .data import E
+    from .data import E, IE
+    from serde.compat import is_enum
 
-    @deserialize
-    @serialize
-    @dataclass
-    class Foo:
-        v0: E
-        v1: E
-        v2: E
-        v3: E = E.V3
-
-    f = Foo(E.V0, E.V1, E.V2)
-    ff = de(Foo, se(f))
-    assert isinstance(ff.v0, enum.Enum)
-    assert isinstance(ff.v1, enum.Enum)
-    assert isinstance(ff.v2, enum.Enum)
-    assert isinstance(ff.v3, enum.Enum)
-
-    # literal values don't work because of type mismatch.
-    f = Foo(1, 'foo', 10.0, True)
-    pytest.raises(Exception, lambda: de(Foo, se(f)))
-
-
-@pytest.mark.parametrize('se,de', all_formats)
-def test_enum_nested(se, de):
-    class Nested(enum.IntEnum):
+    class Inner(enum.IntEnum):
         V0 = enum.auto()
         V1 = enum.auto()
         V2 = enum.auto()
 
-    class E(enum.Enum):
-        V0 = Nested.V0
-        V1 = Nested.V1
-        V2 = Nested.V2
+    class NestedEnum(enum.Enum):
+        V = Inner.V0
 
     @deserialize
     @serialize
     @dataclass
     class Foo:
-        v0: E
-        v1: E
-        v2: Nested = Nested.V0
+        e: E
+        ie: IE
+        ne: NestedEnum
+        e2: E = E.S
+        ie2: IE = IE.V1
+        ne2: NestedEnum = NestedEnum.V
 
-    # Nested enum don't work for yaml.
-    Foo(E.V0, E.V1)
-    # ff = de(Foo, se(f))
+    f = Foo(E.I, IE.V0, NestedEnum.V)
+    ff = de(Foo, se(f))
+    assert f == ff
+    assert is_enum(ff.e) and isinstance(ff.e, E)
+    assert is_enum(ff.ie) and isinstance(ff.ie, IE)
+    assert is_enum(ff.ne) and isinstance(ff.ne, NestedEnum)
+    assert is_enum(ff.e2) and isinstance(ff.e2, E)
+    assert is_enum(ff.ie2) and isinstance(ff.ie2, IE)
+    assert is_enum(ff.ne2) and isinstance(ff.ne2, NestedEnum)
+
+    # pyserde automatically convert enum compatible value.
+    f = Foo('foo', 2, Inner.V0, True, 10, Inner.V0)
+    ff = de(Foo, se(f))
+    assert is_enum(ff.e) and isinstance(ff.e, E) and ff.e == E.S
+    assert is_enum(ff.ie) and isinstance(ff.ie, IE) and ff.ie == IE.V1
+    assert is_enum(ff.ne) and isinstance(ff.ne, NestedEnum) and ff.ne == NestedEnum.V
+    assert is_enum(ff.e2) and isinstance(ff.e2, E) and ff.e2 == E.B
+    assert is_enum(ff.ie2) and isinstance(ff.ie2, IE) and ff.ie2 == IE.V2
+    assert is_enum(ff.ne2) and isinstance(ff.ne2, NestedEnum) and ff.ne2 == NestedEnum.V
 
 
 @pytest.mark.parametrize('se,de', all_formats)

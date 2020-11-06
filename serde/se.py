@@ -11,8 +11,9 @@ from typing import Any, Callable, Dict, List, Optional, Tuple, Type
 
 import jinja2
 
-from .compat import is_dict, is_enum, is_list, is_opt, is_primitive, is_tuple, is_union, type_args
-from .core import HIDDEN_NAME, SE_NAME, SETTINGS, TO_DICT, TO_ITER, Field, Hidden, SerdeError, T, conv, fields, gen
+from .compat import is_dict, is_enum, is_list, is_opt, is_primitive, is_tuple, is_union, iter_types, type_args
+from .core import (HIDDEN_NAME, SE_NAME, SETTINGS, TO_DICT, TO_ITER, Field, Hidden, SerdeError, T, conv, fields, gen,
+                   logger)
 from .more_types import serialize as custom
 
 __all__: List = ['serialize', 'is_serializable', 'Serializer', 'astuple', 'asdict']
@@ -70,16 +71,32 @@ def serialize(_cls=None, rename_all: Optional[str] = None):
         if not hasattr(cls, HIDDEN_NAME):
             setattr(cls, HIDDEN_NAME, Hidden())
 
+        # Create a scope storage used by serde.
+        scope = getattr(cls, '__serde_scope__', None)
+        if scope is None:
+            scope = {}
+            setattr(cls, '__serde_scope__', scope)
+
         def serialize(self, ser, **opts) -> None:
             return ser.serialize(self, **opts)
 
         setattr(cls, SE_NAME, serialize)
 
-        g: Dict[str, Any] = globals().copy()
+        g: Dict[str, Any] = {}
         for f in sefields(cls):
             if f.skip_if:
                 g[f.skip_if.name] = f.skip_if
+
+        # Collect types used in the gernerated code.
+        for typ in iter_types(cls):
+            if is_dataclass(typ) or is_enum(typ):
+                getattr(cls, '__serde_scope__')[typ.__name__] = typ
+
+        logger.debug(f'{cls.__name__}: __serde_scope__ {scope}')
+
+        g['is_dataclass'] = is_dataclass
         g['__custom_serializer__'] = custom
+        g['__serde_enum_value__'] = enum_value
         cls = se_func(cls, TO_ITER, render_astuple(cls, custom), g)
         cls = se_func(cls, TO_DICT, render_asdict(cls, rename_all, custom), g)
         return cls
@@ -210,6 +227,11 @@ def {{func}}(obj):
   if not is_dataclass(obj):
     return copy.deepcopy(obj)
 
+  {# List up all classes used by this class. -#}
+  {% for name in cls.__serde_scope__ -%}
+  {{name}} = getattr(obj, '__serde_scope__')['{{name}}']
+  {% endfor -%}
+
   {% if cls|is_dataclass %}
   res = []
   {% for f in cls|fields -%}
@@ -235,6 +257,11 @@ def render_asdict(cls: Type, case: Optional[str] = None, custom: Custom = None) 
 def {{func}}(obj):
   if not is_dataclass(obj):
     return copy.deepcopy(obj)
+
+  {# List up all classes used by this class. -#}
+  {% for name in cls.__serde_scope__ -%}
+  {{name}} = getattr(obj, '__serde_scope__')['{{name}}']
+  {% endfor -%}
 
   {% if cls|is_dataclass -%}
   res = {}
@@ -362,7 +389,7 @@ class Renderer:
         return f'{{{self.render(karg)}: {self.render(varg)} for k, v in {arg.varname}.items()}}'
 
     def enum(self, arg: SeField) -> str:
-        return f'{arg.varname}.value'
+        return f'__serde_enum_value__({arg.type.__name__}, {arg.varname})'
 
     def primitive(self, arg: SeField) -> str:
         """
@@ -371,13 +398,11 @@ class Renderer:
         return f'{arg.varname}'
 
 
-def se_func(cls: Type[T], func: str, code: str, g: Dict = None) -> Type[T]:
+def se_func(cls: Type[T], func: str, code: str, g: Dict) -> Type[T]:
     """
     Generate function to serialize into an object.
     """
     # Generate serialize function.
-    if not g:
-        g = globals().copy()
     code = gen(code, g, cls=cls)
 
     setattr(cls, func, g[func])
@@ -386,3 +411,18 @@ def se_func(cls: Type[T], func: str, code: str, g: Dict = None) -> Type[T]:
         hidden.code[func] = code
 
     return cls
+
+
+def enum_value(cls, e):
+    """
+    Helper function to get value from enum or enum compatible value.
+    """
+    if is_enum(e):
+        v = e.value
+        # Recursively get value of Nested enum.
+        if is_enum(v):
+            return enum_value(v.__class__, v)
+        else:
+            return v
+    else:
+        return cls(e).value

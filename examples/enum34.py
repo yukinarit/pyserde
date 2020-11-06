@@ -31,7 +31,7 @@ class Foo:
     v1: IE = IE.V1  # Default enum value.
     v2: E = E.S
     v3: imported.ImportedEnum = imported.ImportedEnum.V3  # Use enum imported from other module.
-    # v3: E = E.N  # Sorry nested is not yet supported.
+    v4: E = E.N  # Use nested enum.
 
 
 if __name__ == "__main__":
@@ -43,5 +43,7 @@ if __name__ == "__main__":
     print(f)
     s = to_json(f)
 
-    # Non Enum values cause type mismatch error.
-    # s = to_json(Foo(0))
+    # You can also pass an enum-compabitle value (in this case True for E.B).
+    # Caveat: Foo takes any value IE accepts. e.g., Foo(True) is also valid.
+    s = to_json(Foo(3))
+    print(s)

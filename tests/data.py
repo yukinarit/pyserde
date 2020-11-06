@@ -217,10 +217,10 @@ class PriDefault:
 
 
 class E(enum.Enum):
-    V0 = 1
-    V1 = 'foo'
-    V2 = 10.0
-    V3 = True
+    I = 1
+    S = 'foo'
+    F = 10.0
+    B = True
 
 
 class IE(enum.IntEnum):
@@ -239,7 +239,7 @@ class EnumInClass:
     """
 
     e: IE = IE.V2
-    o: Optional[E] = E.V1
+    o: Optional[E] = E.S
     i: imported.IE = imported.IE.V1
 
 
