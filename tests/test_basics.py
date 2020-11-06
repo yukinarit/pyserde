@@ -36,18 +36,22 @@ format_toml: List = [(to_toml, from_toml)]
 
 all_formats: List = format_dict + format_tuple + format_json + format_msgpack + format_yaml + format_toml
 
-opt_case: List = [{'rename_all': 'camelcase'}, {'rename_all': 'snakecase'}]
+opt_case: List = [{}, {'rename_all': 'camelcase'}, {'rename_all': 'snakecase'}]
 
 
 def make_id(d: Dict) -> str:
-    key = list(d)[0]
-    return f'{key}-{d[key]}'
+    if not d:
+        return 'none'
+    else:
+        key = list(d)[0]
+        return f'{key}-{d[key]}'
 
 
-opt_case_ids = map(make_id, opt_case)
+def opt_case_ids():
+    return map(make_id, opt_case)
 
 
-@pytest.mark.parametrize('opt', opt_case, ids=opt_case_ids)
+@pytest.mark.parametrize('opt', opt_case, ids=opt_case_ids())
 @pytest.mark.parametrize('se,de', all_formats)
 def test_primitive(se, de, opt):
     log.info(f'Running test with se={se.__name__} de={de.__name__} opts={opt}')
@@ -103,8 +107,9 @@ def test_forward_declaration():
     assert 'Bar' == dataclasses.fields(Foo)[0].type
 
 
+@pytest.mark.parametrize('opt', opt_case, ids=opt_case_ids())
 @pytest.mark.parametrize('se,de', all_formats)
-def test_enum(se, de):
+def test_enum(se, de, opt):
     from .data import E, IE
     from serde.compat import is_enum
 
@@ -116,8 +121,8 @@ def test_enum(se, de):
     class NestedEnum(enum.Enum):
         V = Inner.V0
 
-    @deserialize
-    @serialize
+    @deserialize(**opt)
+    @serialize(**opt)
     @dataclass
     class Foo:
         e: E
