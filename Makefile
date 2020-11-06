@@ -34,7 +34,7 @@ mypy:
 	$(PIPENV) run mypy serde
 
 fmt:
-	$(PIPENV) run black serde tests bench/bench.py
+	$(PIPENV) run black serde tests examples bench/bench.py
 	$(PIPENV) run isort -rc --atomic serde tests bench/bench.py
 
 docs:

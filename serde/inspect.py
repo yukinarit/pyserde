@@ -16,7 +16,7 @@ import os
 import sys
 from typing import Type
 
-from .core import HIDDEN_NAME, init, logger
+from .core import HIDDEN_NAME, init
 
 init(True)
 
