@@ -17,7 +17,6 @@ flake8 = "*"
 pytest = "*"
 pytest-cov = "*"
 pytest-watch = "*"
-python-coveralls = "*"
 coverage = "==4.5.4"
 pdoc3 = "~=0.8"
 mypy = {version = "==0.782",markers = "platform_python_implementation!='PyPy'"}
