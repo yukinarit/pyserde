@@ -3,15 +3,25 @@ Module for compatibility.
 """
 import dataclasses
 import enum
+import typing_inspect
+import typing
 from dataclasses import fields, is_dataclass
 from itertools import zip_longest
-from typing import Iterator, List, Optional, Tuple, Type, TypeVar, Union
-
-from typing_inspect import get_args, get_origin, is_optional_type, is_union_type
+from typing import Iterator, List, Optional, Tuple, Type, TypeVar, Union, Dict
 
 __all__: List = []
 
 T = TypeVar('T')
+
+
+def get_origin(typ):
+    """
+    Provide `get_origin` that works in python >= 3.6.
+    """
+    try:
+        return typing.get_origin(typ)
+    except AttributeError:
+        return typing_inspect.get_origin(typ)
 
 
 def typename(typ) -> str:
@@ -50,11 +60,18 @@ def typename(typ) -> str:
         return typ.__name__
 
 
-def type_args(cls: Type):
+def type_args(typ):
     """
     Wrapper to suppress type error for accessing private members.
     """
-    return cls.__args__  # type: ignore
+    try:
+        args = typ.__args__  # type: ignore
+        if args is None:
+            return []
+        else:
+            return args
+    except AttributeError:
+        return typing.get_args(typ)
 
 
 def union_args(typ: Union) -> Tuple:
@@ -86,18 +103,24 @@ def iter_types(cls: Type) -> Iterator[Type]:
     elif isinstance(cls, str):
         yield cls
     elif is_opt(cls):
-        yield from iter_types(type_args(cls)[0])
+        arg = type_args(cls)
+        if arg:
+            yield from iter_types(arg[0])
     elif is_union(cls):
         for arg in type_args(cls):
             yield from iter_types(arg)
     elif is_list(cls):
-        yield from iter_types(type_args(cls)[0])
+        arg = type_args(cls)
+        if arg:
+            yield from iter_types(arg[0])
     elif is_tuple(cls):
         for arg in type_args(cls):
             yield from iter_types(arg)
     elif is_dict(cls):
-        yield from iter_types(type_args(cls)[0])
-        yield from iter_types(type_args(cls)[1])
+        arg = type_args(cls)
+        if arg and len(arg) >= 2:
+            yield from iter_types(arg[0])
+            yield from iter_types(arg[1])
     else:
         yield cls
 
@@ -106,15 +129,15 @@ def is_union(typ) -> bool:
     """
     Test if the type is `typing.Union`.
     """
-    return is_union_type(typ) and not is_opt(typ)
+    return typing_inspect.is_union_type(typ) and not is_opt(typ)
 
 
 def is_opt(typ) -> bool:
     """
     Test if the type is `typing.Optional`.
     """
-    args = get_args(typ)
-    return is_optional_type(typ) and len(args) == 2 and not is_none(args[0]) and is_none(args[1])
+    args = typing_inspect.get_args(typ)
+    return typing_inspect.is_optional_type(typ) and len(args) == 2 and not is_none(args[0]) and is_none(args[1])
 
 
 def is_list(typ) -> bool:
@@ -140,11 +163,30 @@ def is_tuple(typ) -> bool:
 def is_dict(typ) -> bool:
     """
     Test if the type is `typing.Dict`.
+
+    >>> from typing import Dict
+    >>> is_dict(Dict[int, int])
+    True
+    >>> is_dict(Dict)
+    True
     """
     try:
         return issubclass(get_origin(typ), dict)
     except TypeError:
         return isinstance(typ, dict)
+
+
+def is_bare_dict(typ) -> bool:
+    """
+    Test if the type is bare `typing.Dict`.
+
+    >>> from typing import Dict
+    >>> is_bare_dict(Dict[int, str])
+    False
+    >>> is_bare_dict(Dict)
+    True
+    """
+    return is_dict(typ) and typ is Dict
 
 
 def is_none(typ) -> bool:

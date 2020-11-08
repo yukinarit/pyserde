@@ -20,7 +20,7 @@ from typing import Any, Callable, Dict, List, Optional, Type
 import jinja2
 
 from .compat import (has_default, has_default_factory, is_dict, is_enum, is_list, is_opt, is_primitive, is_tuple,
-                     is_union, iter_types, type_args)
+                     is_union, iter_types, type_args, is_bare_dict)
 from .core import FROM_DICT, FROM_ITER, HIDDEN_NAME, SETTINGS, Field, Hidden, SerdeError, T, conv, fields, gen, logger
 from .more_types import deserialize as custom
 
@@ -420,9 +420,12 @@ class Renderer:
         >>> Renderer('foo').render(DeField(Dict[Foo, List[Foo]], 'f', datavar='data'))
         '{Foo.foo(k): [Foo.foo(v) for v in v] for k, v in data["f"].items()}'
         """
-        k = arg.key_field()
-        v = arg.value_field()
-        return f'{{{self.render(k)}: {self.render(v)} for k, v in {arg.data}.items()}}'
+        if is_bare_dict(arg.type):
+            return arg.data
+        else:
+            k = arg.key_field()
+            v = arg.value_field()
+            return f'{{{self.render(k)}: {self.render(v)} for k, v in {arg.data}.items()}}'
 
     def enum(self, arg: DeField) -> str:
         return f'{arg.type.__name__}({self.primitive(arg)})'

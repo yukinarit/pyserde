@@ -109,6 +109,40 @@ def test_forward_declaration():
 
 @pytest.mark.parametrize('opt', opt_case, ids=opt_case_ids())
 @pytest.mark.parametrize('se,de', all_formats)
+def test_dict(se, de, opt):
+
+    @deserialize(**opt)
+    @serialize(**opt)
+    @dataclass
+    class PriDict:
+        i: Dict[int, int]
+        s: Dict[str, str]
+        f: Dict[float, float]
+        b: Dict[bool, bool]
+
+    if se in (to_json, to_msgpack, to_toml):
+        # JSON, Msgpack, Toml don't allow non string key.
+        p = PriDict({'10': 10}, {'foo': 'bar'}, {'100.0': 100.0}, {'True': False})
+        assert p == de(PriDict, se(p))
+    else:
+        p = PriDict({10: 10}, {'foo': 'bar'}, {100.0: 100.0}, {True: False})
+        assert p == de(PriDict, se(p))
+
+    @deserialize(**opt)
+    @serialize(**opt)
+    @dataclass
+    class BareDict:
+        d: Dict
+
+    p = BareDict({'10': 10})
+    assert p == de(BareDict, se(p))
+
+    p = BareDict({'10': 10, 'foo': 'bar', '100.0': 100.0, 'True': False})
+    assert p == de(BareDict, se(p))
+
+
+@pytest.mark.parametrize('opt', opt_case, ids=opt_case_ids())
+@pytest.mark.parametrize('se,de', all_formats)
 def test_enum(se, de, opt):
     from .data import E, IE
     from serde.compat import is_enum
