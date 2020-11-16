@@ -21,7 +21,9 @@ jobs:
     - name: Install dependencies
       run: |
         pip install pipenv
-        make setup
+        pipenv install --dev --skip-lock --python ${{ matrix.python-version }}
+        pipenv run pip list
+        pushd examples && pipenv install --dev --python ${{ matrix.python-version }} && popd
     - name: Run tests
       run: make test examples
 
