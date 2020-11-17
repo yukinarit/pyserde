@@ -109,6 +109,37 @@ def test_forward_declaration():
 
 @pytest.mark.parametrize('opt', opt_case, ids=opt_case_ids())
 @pytest.mark.parametrize('se,de', all_formats)
+def test_list(se, de, opt):
+
+    @deserialize(**opt)
+    @serialize(**opt)
+    @dataclass
+    class PriList:
+        i: List[int]
+        s: List[str]
+        f: List[float]
+        b: List[bool]
+
+    p = PriList([10, 10], ['foo', 'bar'], [10.0, 10.0], [True, False])
+    assert p == de(PriList, se(p))
+
+    @deserialize(**opt)
+    @serialize(**opt)
+    @dataclass
+    class BareList:
+        i: List
+
+    p = BareList([10])
+    assert p == de(BareList, se(p))
+
+    # List can contain different types (except Toml).
+    if se is not to_toml:
+        p = BareList([10, 'foo', 10.0, True])
+        assert p == de(BareList, se(p))
+
+
+@pytest.mark.parametrize('opt', opt_case, ids=opt_case_ids())
+@pytest.mark.parametrize('se,de', all_formats)
 def test_dict(se, de, opt):
 
     @deserialize(**opt)

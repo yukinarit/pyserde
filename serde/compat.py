@@ -19,7 +19,7 @@ def get_origin(typ):
     Provide `get_origin` that works in python >= 3.6.
     """
     try:
-        return typing.get_origin(typ)
+        return typing.get_origin(typ)  # python>=3.8 typing module has get_args.
     except AttributeError:
         return typing_inspect.get_origin(typ)
 
@@ -71,7 +71,7 @@ def type_args(typ):
         else:
             return args
     except AttributeError:
-        return typing.get_args(typ)
+        return typing.get_args(typ)  # python>=3.8 typing module has get_args.
 
 
 def union_args(typ: Union) -> Tuple:
@@ -143,11 +143,30 @@ def is_opt(typ) -> bool:
 def is_list(typ) -> bool:
     """
     Test if the type is `typing.List`.
+
+    >>> from typing import List
+    >>> is_list(List[int])
+    True
+    >>> is_list(List)
+    True
     """
     try:
         return issubclass(get_origin(typ), list)
     except TypeError:
         return isinstance(typ, list)
+
+
+def is_bare_list(typ) -> bool:
+    """
+    Test if the type is `typing.List` without type args.
+
+    >>> from typing import List
+    >>> is_bare_list(List[int])
+    False
+    >>> is_bare_list(List)
+    True
+    """
+    return is_list(typ) and typ is List
 
 
 def is_tuple(typ) -> bool:
@@ -178,7 +197,7 @@ def is_dict(typ) -> bool:
 
 def is_bare_dict(typ) -> bool:
     """
-    Test if the type is bare `typing.Dict`.
+    Test if the type is `typing.Dict` without type args.
 
     >>> from typing import Dict
     >>> is_bare_dict(Dict[int, str])
