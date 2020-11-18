@@ -19,10 +19,15 @@ jobs:
        uses: actions/setup-python@v2
        with:
          python-version: 3.7
+     - name: Restore pip cache
+       uses: actions/cache@v2
+       with:
+         path: ${{ env.pythonLocation }}
+         key: ubuntu-latest-${{ env.pythonLocation }}-${{ hashFiles('**/Pipfile') }}
      - name: Install dependencies
        run: |
          pip install pipenv
-         make setup
+         pipenv install --skip-lock --system --dev
      - name: Get PR number
        uses: jwalton/gh-find-current-pr@v1
        id: findPr
@@ -39,7 +44,10 @@ jobs:
        env:
          PR: ${{ steps.findPr.outputs.pr }}
      - name: Build docs
-       run: make docs
+       run: |
+         mkdir -p docs
+         pdoc serde --html -o html --force
+         cp -f html/serde/* docs/
      - name: Deploy on gh-pages
        uses: JamesIves/github-pages-deploy-action@3.7.1
        with:
@@ -48,4 +56,3 @@ jobs:
          FOLDER: docs
          COMMIT_MESSAGE: ${{ env.COMMIT_MESSAGE }}
          CLEAN: true
-
