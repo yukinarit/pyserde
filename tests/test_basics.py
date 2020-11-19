@@ -227,48 +227,65 @@ def test_enum_imported(se, de):
     assert c == cc
 
 
+@pytest.mark.parametrize('opt', opt_case, ids=opt_case_ids())
 @pytest.mark.parametrize('se,de', all_formats)
-def test_tuple(se, de):
-    p = PriTuple(
-        (10, 20, 30), ('a', 'b', 'c', 'd'), (10.0, 20.0, 30.0, 40.0, 50.0), (True, False, True, False, True, False)
+def test_tuple(se, de, opt):
+
+    @deserialize(**opt)
+    @serialize(**opt)
+    @dataclass
+    class Homogeneous:
+        i: Tuple[int, int]
+        s: Tuple[str, str]
+        f: Tuple[float, float]
+        b: Tuple[bool, bool]
+
+    p = Homogeneous(
+        (10, 20), ('a', 'b'), (10.0, 20.0), (True, False)
     )
-    tpl: PriTuple = de(PriTuple, se(p))
-    assert tpl.i == (10, 20, 30)
-    assert tpl.s == ('a', 'b', 'c', 'd')
-    assert tpl.f == (10.0, 20.0, 30.0, 40.0, 50.0)
-    assert tpl.b == (True, False, True, False, True, False)
+    assert p == de(Homogeneous, se(p))
 
     # List can also be used.
-    p = PriTuple(
-        [10, 20, 30], ['a', 'b', 'c', 'd'], [10.0, 20.0, 30.0, 40.0, 50.0], [True, False, True, False, True, False]
+    p = Homogeneous(
+        [10, 20], ['a', 'b'], [10.0, 20.0], [True, False]
     )
-    tpl: PriTuple = de(PriTuple, se(p))
-    assert tpl.i == (10, 20, 30)
-    assert tpl.s == ('a', 'b', 'c', 'd')
-    assert tpl.f == (10.0, 20.0, 30.0, 40.0, 50.0)
-    assert tpl.b == (True, False, True, False, True, False)
+    assert p != de(Homogeneous, se(p))
 
+    @deserialize(**opt)
+    @serialize(**opt)
+    @dataclass
+    class Variant:
+        t: Tuple[int, str, float, bool]
 
-@pytest.mark.parametrize('se,de', all_formats)
-def test_dataclass_in_tuple(se, de):
-    src = NestedPriTuple(
-        (Int(10), Int(10), Int(10)),
-        (Str("10"), Str("10"), Str("10"), Str("10")),
-        (Float(10.0), Float(10.0), Float(10.0), Float(10.0), Float(10.0)),
-        (Bool(False), Bool(False), Bool(False), Bool(False), Bool(False), Bool(False)),
-    )
-    assert src == from_json(NestedPriTuple, to_json(src))
-
-    with pytest.raises(IndexError):
-        j = json.dumps(
-            {
-                'i': (10, 20),
-                's': ('a', 'b', 'c', 'd'),
-                'f': (10.0, 20.0, 30.0, 40.0, 50.0),
-                'b': (True, False, True, False, True, False),
-            }
+    # Toml doesn't support variant type of array.
+    if se is not to_toml:
+        p = Variant(
+            (10, 'a', 10.0, True)
         )
-        _: PriTuple = from_json(PriTuple, j)
+        assert p == de(Variant, se(p))
+
+    @deserialize(**opt)
+    @serialize(**opt)
+    @dataclass
+    class BareTuple:
+        t: Tuple
+
+    p = BareTuple((10, 20))
+    assert p == de(BareTuple, se(p))
+
+    @deserialize(**opt)
+    @serialize(**opt)
+    @dataclass
+    class Nested:
+        i: Tuple[Int, Int]
+        s: Tuple[Str, Str]
+        f: Tuple[Float, Float]
+        b: Tuple[Bool, Bool]
+
+    # wmmm.. Nested tuple doesn't work ..
+    if se is not to_toml:
+        p = Nested((Int(10), Int(20)), (Str("a"), Str("b")), (Float(10.0), Float(20.0)), (Bool(True), Bool(False)))
+        assert p == de(Nested, se(p))
 
 
 @pytest.mark.parametrize('se,de', all_formats)

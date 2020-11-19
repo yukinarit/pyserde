@@ -11,7 +11,7 @@ from typing import Any, Callable, Dict, List, Optional, Tuple, Type
 
 import jinja2
 
-from .compat import is_dict, is_enum, is_list, is_opt, is_primitive, is_tuple, is_union, iter_types, type_args, is_bare_dict, is_bare_list
+from .compat import is_dict, is_enum, is_list, is_opt, is_primitive, is_tuple, is_union, iter_types, type_args, is_bare_dict, is_bare_list, is_bare_tuple
 from .core import (HIDDEN_NAME, SE_NAME, SETTINGS, TO_DICT, TO_ITER, Field, Hidden, SerdeError, T, conv, fields, gen,
                    logger)
 from .more_types import serialize as custom
@@ -374,12 +374,15 @@ class Renderer:
         """
         Render rvalue for tuple.
         """
-        rvalues = []
-        for i, _ in enumerate(type_args(arg.type)):
-            r = arg[i]
-            r.name = f'{arg.varname}[{i}]'
-            rvalues.append(self.render(r))
-        return f"({', '.join(rvalues)})"
+        if is_bare_tuple(arg.type):
+            return arg.varname
+        else:
+            rvalues = []
+            for i, _ in enumerate(type_args(arg.type)):
+                r = arg[i]
+                r.name = f'{arg.varname}[{i}]'
+                rvalues.append(self.render(r))
+            return f"({', '.join(rvalues)})"
 
     def dict(self, arg: SeField) -> str:
         """

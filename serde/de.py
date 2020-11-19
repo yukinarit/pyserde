@@ -20,7 +20,7 @@ from typing import Any, Callable, Dict, List, Optional, Type
 import jinja2
 
 from .compat import (has_default, has_default_factory, is_dict, is_enum, is_list, is_opt, is_primitive, is_tuple,
-                     is_union, iter_types, type_args, is_bare_dict, is_bare_list)
+                     is_union, iter_types, type_args, is_bare_dict, is_bare_list, is_bare_tuple)
 from .core import FROM_DICT, FROM_ITER, HIDDEN_NAME, SETTINGS, Field, Hidden, SerdeError, T, conv, fields, gen, logger
 from .more_types import deserialize as custom
 
@@ -403,11 +403,14 @@ class Renderer:
         >>> Renderer('foo').render(field)
         '(data[0][0], data[0][1], [v for v in data[0][2]], Foo.foo(data[0][3]))'
         """
-        values = []
-        for i, typ in enumerate(type_args(arg.type)):
-            inner = arg[i]
-            values.append(self.render(inner))
-        return f'({", ".join(values)})'
+        if is_bare_tuple(arg.type):
+            return f'tuple({arg.data})'
+        else:
+            values = []
+            for i, typ in enumerate(type_args(arg.type)):
+                inner = arg[i]
+                values.append(self.render(inner))
+            return f'({", ".join(values)})'
 
     def dict(self, arg: DeField) -> str:
         """

@@ -179,6 +179,19 @@ def is_tuple(typ) -> bool:
         return isinstance(typ, tuple)
 
 
+def is_bare_tuple(typ) -> bool:
+    """
+    Test if the type is `typing.Tuple` without type args.
+
+    >>> from typing import Tuple
+    >>> is_bare_tuple(Tuple[int, str])
+    False
+    >>> is_bare_tuple(Tuple)
+    True
+    """
+    return is_tuple(typ) and typ is Tuple
+
+
 def is_dict(typ) -> bool:
     """
     Test if the type is `typing.Dict`.
