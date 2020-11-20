@@ -19,8 +19,8 @@ from typing import Any, Callable, Dict, List, Optional, Type
 
 import jinja2
 
-from .compat import (has_default, has_default_factory, is_dict, is_enum, is_list, is_opt, is_primitive, is_tuple,
-                     is_union, iter_types, type_args, is_bare_dict, is_bare_list, is_bare_tuple)
+from .compat import (has_default, has_default_factory, is_bare_dict, is_bare_list, is_bare_tuple, is_dict, is_enum,
+                     is_list, is_opt, is_primitive, is_tuple, is_union, iter_types, type_args)
 from .core import FROM_DICT, FROM_ITER, HIDDEN_NAME, SETTINGS, Field, Hidden, SerdeError, T, conv, fields, gen, logger
 from .more_types import deserialize as custom
 

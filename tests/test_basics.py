@@ -1,6 +1,5 @@
 import dataclasses
 import enum
-import json
 import logging
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Tuple
@@ -15,8 +14,7 @@ from serde.toml import from_toml, to_toml
 from serde.yaml import from_yaml, to_yaml
 
 from . import data
-from .data import (Bool, Float, Int, ListPri, NestedPri, NestedPriOpt, NestedPriTuple, Pri, PriDefault, PriOpt,
-                   PriTuple, Str)
+from .data import Bool, Float, Int, ListPri, NestedPri, NestedPriOpt, Pri, PriDefault, PriOpt, Str
 
 log = logging.getLogger('test')
 
@@ -110,7 +108,6 @@ def test_forward_declaration():
 @pytest.mark.parametrize('opt', opt_case, ids=opt_case_ids())
 @pytest.mark.parametrize('se,de', all_formats)
 def test_list(se, de, opt):
-
     @deserialize(**opt)
     @serialize(**opt)
     @dataclass
@@ -141,7 +138,6 @@ def test_list(se, de, opt):
 @pytest.mark.parametrize('opt', opt_case, ids=opt_case_ids())
 @pytest.mark.parametrize('se,de', all_formats)
 def test_dict(se, de, opt):
-
     @deserialize(**opt)
     @serialize(**opt)
     @dataclass
@@ -230,7 +226,6 @@ def test_enum_imported(se, de):
 @pytest.mark.parametrize('opt', opt_case, ids=opt_case_ids())
 @pytest.mark.parametrize('se,de', all_formats)
 def test_tuple(se, de, opt):
-
     @deserialize(**opt)
     @serialize(**opt)
     @dataclass
@@ -240,15 +235,11 @@ def test_tuple(se, de, opt):
         f: Tuple[float, float]
         b: Tuple[bool, bool]
 
-    p = Homogeneous(
-        (10, 20), ('a', 'b'), (10.0, 20.0), (True, False)
-    )
+    p = Homogeneous((10, 20), ('a', 'b'), (10.0, 20.0), (True, False))
     assert p == de(Homogeneous, se(p))
 
     # List can also be used.
-    p = Homogeneous(
-        [10, 20], ['a', 'b'], [10.0, 20.0], [True, False]
-    )
+    p = Homogeneous([10, 20], ['a', 'b'], [10.0, 20.0], [True, False])
     assert p != de(Homogeneous, se(p))
 
     @deserialize(**opt)
@@ -259,9 +250,7 @@ def test_tuple(se, de, opt):
 
     # Toml doesn't support variant type of array.
     if se is not to_toml:
-        p = Variant(
-            (10, 'a', 10.0, True)
-        )
+        p = Variant((10, 'a', 10.0, True))
         assert p == de(Variant, se(p))
 
     @deserialize(**opt)
