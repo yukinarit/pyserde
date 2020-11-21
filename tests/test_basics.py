@@ -1,6 +1,5 @@
 import dataclasses
 import enum
-import json
 import logging
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Tuple
@@ -15,8 +14,7 @@ from serde.toml import from_toml, to_toml
 from serde.yaml import from_yaml, to_yaml
 
 from . import data
-from .data import (Bool, Float, Int, ListPri, NestedPri, NestedPriOpt, NestedPriTuple, Pri, PriDefault, PriOpt,
-                   PriTuple, Str)
+from .data import Bool, Float, Int, ListPri, NestedPri, NestedPriOpt, Pri, PriDefault, PriOpt, Str
 
 log = logging.getLogger('test')
 
@@ -109,6 +107,69 @@ def test_forward_declaration():
 
 @pytest.mark.parametrize('opt', opt_case, ids=opt_case_ids())
 @pytest.mark.parametrize('se,de', all_formats)
+def test_list(se, de, opt):
+    @deserialize(**opt)
+    @serialize(**opt)
+    @dataclass
+    class PriList:
+        i: List[int]
+        s: List[str]
+        f: List[float]
+        b: List[bool]
+
+    p = PriList([10, 10], ['foo', 'bar'], [10.0, 10.0], [True, False])
+    assert p == de(PriList, se(p))
+
+    @deserialize(**opt)
+    @serialize(**opt)
+    @dataclass
+    class BareList:
+        i: List
+
+    p = BareList([10])
+    assert p == de(BareList, se(p))
+
+    # List can contain different types (except Toml).
+    if se is not to_toml:
+        p = BareList([10, 'foo', 10.0, True])
+        assert p == de(BareList, se(p))
+
+
+@pytest.mark.parametrize('opt', opt_case, ids=opt_case_ids())
+@pytest.mark.parametrize('se,de', all_formats)
+def test_dict(se, de, opt):
+    @deserialize(**opt)
+    @serialize(**opt)
+    @dataclass
+    class PriDict:
+        i: Dict[int, int]
+        s: Dict[str, str]
+        f: Dict[float, float]
+        b: Dict[bool, bool]
+
+    if se in (to_json, to_msgpack, to_toml):
+        # JSON, Msgpack, Toml don't allow non string key.
+        p = PriDict({'10': 10}, {'foo': 'bar'}, {'100.0': 100.0}, {'True': False})
+        assert p == de(PriDict, se(p))
+    else:
+        p = PriDict({10: 10}, {'foo': 'bar'}, {100.0: 100.0}, {True: False})
+        assert p == de(PriDict, se(p))
+
+    @deserialize(**opt)
+    @serialize(**opt)
+    @dataclass
+    class BareDict:
+        d: Dict
+
+    p = BareDict({'10': 10})
+    assert p == de(BareDict, se(p))
+
+    p = BareDict({'10': 10, 'foo': 'bar', '100.0': 100.0, 'True': False})
+    assert p == de(BareDict, se(p))
+
+
+@pytest.mark.parametrize('opt', opt_case, ids=opt_case_ids())
+@pytest.mark.parametrize('se,de', all_formats)
 def test_enum(se, de, opt):
     from .data import E, IE
     from serde.compat import is_enum
@@ -162,48 +223,58 @@ def test_enum_imported(se, de):
     assert c == cc
 
 
+@pytest.mark.parametrize('opt', opt_case, ids=opt_case_ids())
 @pytest.mark.parametrize('se,de', all_formats)
-def test_tuple(se, de):
-    p = PriTuple(
-        (10, 20, 30), ('a', 'b', 'c', 'd'), (10.0, 20.0, 30.0, 40.0, 50.0), (True, False, True, False, True, False)
-    )
-    tpl: PriTuple = de(PriTuple, se(p))
-    assert tpl.i == (10, 20, 30)
-    assert tpl.s == ('a', 'b', 'c', 'd')
-    assert tpl.f == (10.0, 20.0, 30.0, 40.0, 50.0)
-    assert tpl.b == (True, False, True, False, True, False)
+def test_tuple(se, de, opt):
+    @deserialize(**opt)
+    @serialize(**opt)
+    @dataclass
+    class Homogeneous:
+        i: Tuple[int, int]
+        s: Tuple[str, str]
+        f: Tuple[float, float]
+        b: Tuple[bool, bool]
+
+    p = Homogeneous((10, 20), ('a', 'b'), (10.0, 20.0), (True, False))
+    assert p == de(Homogeneous, se(p))
 
     # List can also be used.
-    p = PriTuple(
-        [10, 20, 30], ['a', 'b', 'c', 'd'], [10.0, 20.0, 30.0, 40.0, 50.0], [True, False, True, False, True, False]
-    )
-    tpl: PriTuple = de(PriTuple, se(p))
-    assert tpl.i == (10, 20, 30)
-    assert tpl.s == ('a', 'b', 'c', 'd')
-    assert tpl.f == (10.0, 20.0, 30.0, 40.0, 50.0)
-    assert tpl.b == (True, False, True, False, True, False)
+    p = Homogeneous([10, 20], ['a', 'b'], [10.0, 20.0], [True, False])
+    assert p != de(Homogeneous, se(p))
 
+    @deserialize(**opt)
+    @serialize(**opt)
+    @dataclass
+    class Variant:
+        t: Tuple[int, str, float, bool]
 
-@pytest.mark.parametrize('se,de', all_formats)
-def test_dataclass_in_tuple(se, de):
-    src = NestedPriTuple(
-        (Int(10), Int(10), Int(10)),
-        (Str("10"), Str("10"), Str("10"), Str("10")),
-        (Float(10.0), Float(10.0), Float(10.0), Float(10.0), Float(10.0)),
-        (Bool(False), Bool(False), Bool(False), Bool(False), Bool(False), Bool(False)),
-    )
-    assert src == from_json(NestedPriTuple, to_json(src))
+    # Toml doesn't support variant type of array.
+    if se is not to_toml:
+        p = Variant((10, 'a', 10.0, True))
+        assert p == de(Variant, se(p))
 
-    with pytest.raises(IndexError):
-        j = json.dumps(
-            {
-                'i': (10, 20),
-                's': ('a', 'b', 'c', 'd'),
-                'f': (10.0, 20.0, 30.0, 40.0, 50.0),
-                'b': (True, False, True, False, True, False),
-            }
-        )
-        _: PriTuple = from_json(PriTuple, j)
+    @deserialize(**opt)
+    @serialize(**opt)
+    @dataclass
+    class BareTuple:
+        t: Tuple
+
+    p = BareTuple((10, 20))
+    assert p == de(BareTuple, se(p))
+
+    @deserialize(**opt)
+    @serialize(**opt)
+    @dataclass
+    class Nested:
+        i: Tuple[Int, Int]
+        s: Tuple[Str, Str]
+        f: Tuple[Float, Float]
+        b: Tuple[Bool, Bool]
+
+    # wmmm.. Nested tuple doesn't work ..
+    if se is not to_toml:
+        p = Nested((Int(10), Int(20)), (Str("a"), Str("b")), (Float(10.0), Float(20.0)), (Bool(True), Bool(False)))
+        assert p == de(Nested, se(p))
 
 
 @pytest.mark.parametrize('se,de', all_formats)
