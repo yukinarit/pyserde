@@ -56,8 +56,8 @@ from typing import Any, Callable, Dict, List, Optional, Type
 
 import jinja2
 
-from .compat import (has_default, has_default_factory, is_dict, is_enum, is_list, is_opt, is_primitive, is_tuple,
-                     is_union, iter_types, type_args)
+from .compat import (has_default, has_default_factory, is_bare_dict, is_bare_list, is_bare_tuple, is_dict, is_enum,
+                     is_list, is_opt, is_primitive, is_tuple, is_union, iter_types, type_args)
 from .core import FROM_DICT, FROM_ITER, HIDDEN_NAME, SETTINGS, Field, Hidden, SerdeError, T, conv, fields, gen, logger
 from .more_types import deserialize as custom
 
@@ -420,7 +420,10 @@ class Renderer:
         &gt;&gt;&gt; Renderer(&#39;foo&#39;).render(DeField(List[List[int]], &#39;l&#39;, datavar=&#39;data&#39;))
         &#39;[[v for v in v] for v in data[&#34;l&#34;]]&#39;
         &#34;&#34;&#34;
-        return f&#39;[{self.render(arg[0])} for v in {arg.data}]&#39;
+        if is_bare_list(arg.type):
+            return f&#39;list({arg.data})&#39;
+        else:
+            return f&#39;[{self.render(arg[0])} for v in {arg.data}]&#39;
 
     def tuple(self, arg: DeField) -&gt; str:
         &#34;&#34;&#34;
@@ -437,11 +440,14 @@ class Renderer:
         &gt;&gt;&gt; Renderer(&#39;foo&#39;).render(field)
         &#39;(data[0][0], data[0][1], [v for v in data[0][2]], Foo.foo(data[0][3]))&#39;
         &#34;&#34;&#34;
-        values = []
-        for i, typ in enumerate(type_args(arg.type)):
-            inner = arg[i]
-            values.append(self.render(inner))
-        return f&#39;({&#34;, &#34;.join(values)})&#39;
+        if is_bare_tuple(arg.type):
+            return f&#39;tuple({arg.data})&#39;
+        else:
+            values = []
+            for i, typ in enumerate(type_args(arg.type)):
+                inner = arg[i]
+                values.append(self.render(inner))
+            return f&#39;({&#34;, &#34;.join(values)})&#39;
 
     def dict(self, arg: DeField) -&gt; str:
         &#34;&#34;&#34;
@@ -457,9 +463,12 @@ class Renderer:
         &gt;&gt;&gt; Renderer(&#39;foo&#39;).render(DeField(Dict[Foo, List[Foo]], &#39;f&#39;, datavar=&#39;data&#39;))
         &#39;{Foo.foo(k): [Foo.foo(v) for v in v] for k, v in data[&#34;f&#34;].items()}&#39;
         &#34;&#34;&#34;
-        k = arg.key_field()
-        v = arg.value_field()
-        return f&#39;{{{self.render(k)}: {self.render(v)} for k, v in {arg.data}.items()}}&#39;
+        if is_bare_dict(arg.type):
+            return arg.data
+        else:
+            k = arg.key_field()
+            v = arg.value_field()
+            return f&#39;{{{self.render(k)}: {self.render(v)} for k, v in {arg.data}.items()}}&#39;
 
     def enum(self, arg: DeField) -&gt; str:
         return f&#39;{arg.type.__name__}({self.primitive(arg)})&#39;

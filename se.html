@@ -40,7 +40,8 @@ from typing import Any, Callable, Dict, List, Optional, Tuple, Type
 
 import jinja2
 
-from .compat import is_dict, is_enum, is_list, is_opt, is_primitive, is_tuple, is_union, iter_types, type_args
+from .compat import (is_bare_dict, is_bare_list, is_bare_tuple, is_dict, is_enum, is_list, is_opt, is_primitive,
+                     is_tuple, is_union, iter_types, type_args)
 from .core import (HIDDEN_NAME, SE_NAME, SETTINGS, TO_DICT, TO_ITER, Field, Hidden, SerdeError, T, conv, fields, gen,
                    logger)
 from .more_types import serialize as custom
@@ -392,30 +393,39 @@ class Renderer:
         &#34;&#34;&#34;
         Render rvalue for list.
         &#34;&#34;&#34;
-        earg = arg[0]
-        earg.name = &#39;v&#39;
-        return f&#39;[{self.render(earg)} for v in {arg.varname}]&#39;
+        if is_bare_list(arg.type):
+            return arg.varname
+        else:
+            earg = arg[0]
+            earg.name = &#39;v&#39;
+            return f&#39;[{self.render(earg)} for v in {arg.varname}]&#39;
 
     def tuple(self, arg: SeField) -&gt; str:
         &#34;&#34;&#34;
         Render rvalue for tuple.
         &#34;&#34;&#34;
-        rvalues = []
-        for i, _ in enumerate(type_args(arg.type)):
-            r = arg[i]
-            r.name = f&#39;{arg.varname}[{i}]&#39;
-            rvalues.append(self.render(r))
-        return f&#34;({&#39;, &#39;.join(rvalues)})&#34;
+        if is_bare_tuple(arg.type):
+            return arg.varname
+        else:
+            rvalues = []
+            for i, _ in enumerate(type_args(arg.type)):
+                r = arg[i]
+                r.name = f&#39;{arg.varname}[{i}]&#39;
+                rvalues.append(self.render(r))
+            return f&#34;({&#39;, &#39;.join(rvalues)})&#34;
 
     def dict(self, arg: SeField) -&gt; str:
         &#34;&#34;&#34;
         Render rvalue for dict.
         &#34;&#34;&#34;
-        karg = arg[0]
-        karg.name = &#39;k&#39;
-        varg = arg[1]
-        varg.name = &#39;v&#39;
-        return f&#39;{{{self.render(karg)}: {self.render(varg)} for k, v in {arg.varname}.items()}}&#39;
+        if is_bare_dict(arg.type):
+            return arg.varname
+        else:
+            karg = arg[0]
+            karg.name = &#39;k&#39;
+            varg = arg[1]
+            varg.name = &#39;v&#39;
+            return f&#39;{{{self.render(karg)}: {self.render(varg)} for k, v in {arg.varname}.items()}}&#39;
 
     def enum(self, arg: SeField) -&gt; str:
         return f&#39;__serde_enum_value__({arg.type.__name__}, {arg.varname})&#39;
