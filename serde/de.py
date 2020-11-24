@@ -81,7 +81,7 @@ def deserialize(_cls=None, rename_all: Optional[str] = None):
 
         # Collect types used in the gernerated code.
         for typ in iter_types(cls):
-            if is_dataclass(typ) or is_enum(typ):
+            if is_dataclass(typ) or is_enum(typ) or not is_primitive(typ):
                 getattr(cls, '__serde_scope__')[typ.__name__] = typ
 
         # Collect default values and default factories used in the generated code.
@@ -326,13 +326,13 @@ class Renderer:
         elif any(f(arg.type) for f in (is_primitive, is_union)):
             res = self.primitive(arg)
         else:
-            return f'__custom_deserializer__(fs[{arg.index}], {arg.data})'
+            return f'__custom_deserializer__({arg.type.__name__}, {arg.data})'
 
         if has_default(arg) or has_default_factory(arg):
             if arg.iterbased:
                 exists = f'{arg.data} is not None'
             else:
-                exists = f'"{arg.name}" in {arg.datavar}'
+                exists = f'{arg.datavar}.get("{arg.name}") is not None'
             if has_default(arg):
                 return f'{res} if {exists} else __default_{arg.name}__'
             elif has_default_factory(arg):
@@ -349,27 +349,29 @@ class Renderer:
 
         >>> from typing import List
         >>> Renderer('foo').render(DeField(Optional[int], 'o', datavar='data'))
-        'data["o"] if "o" in data else None'
+        'data["o"] if data.get("o") is not None else None'
 
         >>> Renderer('foo').render(DeField(Optional[List[int]], 'o', datavar='data'))
-        '[v for v in data["o"]] if "o" in data else None'
+        '[v for v in data["o"]] if data.get("o") is not None else None'
 
         >>> Renderer('foo').render(DeField(Optional[List[int]], 'o', datavar='data'))
-        '[v for v in data["o"]] if "o" in data else None'
+        '[v for v in data["o"]] if data.get("o") is not None else None'
 
         >>> @deserialize
         ... @dataclass
         ... class Foo:
         ...     o: Optional[List[int]]
         >>> Renderer('foo').render(DeField(Optional[Foo], 'f', datavar='data'))
-        'Foo.foo(data["f"]) if "f" in data else None'
+        'Foo.foo(data["f"]) if data.get("f") is not None else None'
         """
         value = arg[0]
-        if arg.iterbased:
-            exists = f'{value.data} is not None'
-            return f'{self.render(value)} if {exists} else None'
+        if has_default(arg):
+            return self.render(value)
         else:
-            exists = f'"{value.name}" in {value.datavar}'
+            if arg.iterbased:
+                exists = f'{arg.data} is not None'
+            else:
+                exists = f'{arg.datavar}.get("{arg.name}") is not None'
             return f'{self.render(value)} if {exists} else None'
 
     def list(self, arg: DeField) -> str:

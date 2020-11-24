@@ -27,16 +27,16 @@ def serialize(data: Any) -> Any:
         raise SerdeError(f'Unsupported type: {type(data)}')
 
 
-def deserialize(field: Field, data: Any) -> Any:
+def deserialize(typ: Any, data: Any) -> Any:
     """
     Custom deserializer for extended types such as Decimal.
 
     `data` shall be other than List, Dict, Tuple, Optional
     Union, dataclass or primitives.
     """
-    if issubclass(field.type, Decimal):
+    if issubclass(typ, Decimal):
         return Decimal(data)
-    elif issubclass(field.type, Path):
+    elif issubclass(typ, Path):
         return Path(data)
     else:
         raise SerdeError(f'Unsupported type: {type(data)}')
