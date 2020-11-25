@@ -18,7 +18,7 @@ pytest = "*"
 pytest-cov = "*"
 pytest-watch = "*"
 coverage = "==4.5.4"
-pdoc3 = "~=0.8"
+pdoc3 = "~=0.9"
 mypy = {version = "==0.782",markers = "platform_python_implementation!='PyPy'"}
 twine = "*"
 black = "==19.3b0"
