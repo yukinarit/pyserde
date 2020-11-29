@@ -1,3 +1,16 @@
+## 0.2.1 (2020-11-29)
+
+* feat: Allow enum compatible value for enum field ([14006ee](https://github.com/yukinarit/pyserde/commit/14006ee))
+* fix: Support optional extended types ([d0418fc](https://github.com/yukinarit/pyserde/commit/d0418fc))
+* Added example of a field with default_factory property ([6740aaa](https://github.com/yukinarit/pyserde/commit/6740aaa))
+* Add Codecov.io integration ([#56](https://github.com/yukinarit/pyserde/pull/56))
+* CI improvements ([#68](https://github.com/yukinarit/pyserde/pull/68))
+    * Explicitly pass Python version to pipenv
+    * Rename testing step for better readability
+    * Change Python 3.9-dev to 3.9 in test matrix
+
+This release had contibutions from 2 people: [@alexmisk](https://github.com/alexmisk), [@pranavvp10](https://github.com/pranavvp10). Thank you so much! :turkey: :joy:
+
 ## 0.2.0 (2020-10-31)
 
 Please note this release has a breaking change, where `pip install pyserde` no longer installs `msgpack`, `pyyaml` and `toml`. If you want the same behavior as in 0.1.5, use `pip install pyserde[all]`.
