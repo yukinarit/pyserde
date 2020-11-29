@@ -1,12 +1,17 @@
 import dataclasses
+import decimal
 import enum
+import itertools
 import logging
+import pathlib
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Tuple
 
 import pytest
 
+import more_itertools
 import serde
+import serde.compat
 from serde import asdict, astuple, deserialize, from_dict, from_tuple, serialize
 from serde.json import from_json, to_json
 from serde.msgpack import from_msgpack, to_msgpack
@@ -36,8 +41,32 @@ all_formats: List = format_dict + format_tuple + format_json + format_msgpack + 
 
 opt_case: List = [{}, {'rename_all': 'camelcase'}, {'rename_all': 'snakecase'}]
 
+types: List = [
+    (10, int),  # Primitive
+    ('foo', str),
+    (100.0, float),
+    (True, bool),
+    (10, Optional[int]),  # Optional
+    ('foo', Optional[str]),
+    (100.0, Optional[float]),
+    (True, Optional[bool]),
+    (None, Optional[int]),
+    (None, Optional[str]),
+    (None, Optional[float]),
+    (None, Optional[bool]),
+    (Pri(10, 'foo', 100.0, True), Pri),  # dataclass
+    (Pri(10, 'foo', 100.0, True), Optional[Pri]),
+    (None, Optional[Pri]),
+    (pathlib.Path('/tmp/foo'), pathlib.Path),  # Extended types
+    (pathlib.Path('/tmp/foo'), Optional[pathlib.Path]),
+    (None, Optional[pathlib.Path]),
+    (decimal.Decimal(10), decimal.Decimal),
+]
 
-def make_id(d: Dict) -> str:
+types_combinations: List = list(map(lambda c: list(more_itertools.flatten(c)), itertools.combinations(types, 2)))
+
+
+def make_id_from_dict(d: Dict) -> str:
     if not d:
         return 'none'
     else:
@@ -46,35 +75,44 @@ def make_id(d: Dict) -> str:
 
 
 def opt_case_ids():
-    return map(make_id, opt_case)
+    return map(make_id_from_dict, opt_case)
 
 
+def type_ids():
+    from serde.compat import typename
+
+    def make_id(pair: Tuple):
+        t, T = pair
+        return f'{typename(T)}({t})'
+
+    return map(make_id, types)
+
+
+def type_combinations_ids():
+    from serde.compat import typename
+
+    def make_id(quad: Tuple):
+        t, T, u, U = quad
+        return f'{typename(T)}({t})-{typename(U)}({u})'
+
+    return map(make_id, types_combinations)
+
+
+@pytest.mark.parametrize('t,T', types, ids=type_ids())
 @pytest.mark.parametrize('opt', opt_case, ids=opt_case_ids())
 @pytest.mark.parametrize('se,de', all_formats)
-def test_primitive(se, de, opt):
+def test_simple(se, de, opt, t, T):
     log.info(f'Running test with se={se.__name__} de={de.__name__} opts={opt}')
 
     @deserialize(**opt)
     @serialize(**opt)
-    @dataclass(unsafe_hash=True)
-    class Pri:
-        """
-        Primitives.
-        """
-
+    @dataclass
+    class C:
         i: int
-        s: str
-        f: float
-        b: bool
+        t: T
 
-    p = Pri(10, 'foo', 100.0, True)
-    assert p == de(Pri, se(p))
-
-
-@pytest.mark.parametrize('se,de', all_formats)
-def test_nested_primitive(se, de):
-    p = NestedPri(Int(10), Str('foo'), Float(100.0), Bool(True))
-    assert p == from_dict(NestedPri, asdict(p))
+    c = C(10, t)
+    assert c == de(C, se(c))
 
 
 def test_non_dataclass():
@@ -271,28 +309,10 @@ def test_tuple(se, de, opt):
         f: Tuple[Float, Float]
         b: Tuple[Bool, Bool]
 
-    # wmmm.. Nested tuple doesn't work ..
+    # hmmm.. Nested tuple doesn't work ..
     if se is not to_toml:
         p = Nested((Int(10), Int(20)), (Str("a"), Str("b")), (Float(10.0), Float(20.0)), (Bool(True), Bool(False)))
         assert p == de(Nested, se(p))
-
-
-@pytest.mark.parametrize('se,de', all_formats)
-def test_optional(se, de):
-    p = PriOpt(20, None, 100.0, True)
-    assert p == de(PriOpt, se(p))
-
-
-@pytest.mark.parametrize('se,de', all_formats)
-def test_optional_nested(se, de):
-    p = NestedPriOpt(Int(20), Str('foo'), Float(100.0), Bool(True))
-    assert p == de(NestedPriOpt, se(p))
-
-    p = NestedPriOpt(Int(20), None, Float(100.0), None)
-    assert p == de(NestedPriOpt, se(p))
-
-    p = NestedPriOpt(None, None, None, None)
-    assert p == de(NestedPriOpt, se(p))
 
 
 @pytest.mark.parametrize('se,de', all_formats)
