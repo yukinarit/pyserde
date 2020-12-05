@@ -2,6 +2,7 @@
 Serialize and Deserialize in JSON format.
 """
 import json
+# import orjson
 from typing import Any, Type
 
 from .core import T
@@ -13,12 +14,14 @@ class JsonSerializer(Serializer):
     @classmethod
     def serialize(cls, obj: Any, named=True, **opts) -> str:
         return json.dumps(asdict(obj), **opts)
+        # return orjson.dumps(asdict(obj), **opts)
 
 
 class JsonDeserializer(Deserializer):
     @classmethod
     def deserialize(cls, s, named=True, **opts):
         return json.loads(s, **opts)
+        #return orjson.loads(s, **opts)
 
 
 def to_json(obj: Any, se=JsonSerializer, **opts) -> str:

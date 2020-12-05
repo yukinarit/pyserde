@@ -24,6 +24,8 @@ try:
         import marshmallow_class as ms  # noqa: F401
         import attrs_class as at  # noqa: F401
         import cattrs_class as ca  # noqa: F401
+        import dataclasses_json_class as dj  # noqa: F401
+        import pydantic_class as pd  # noqa: F401
         import seaborn as sns
         import matplotlib.pyplot as plt
         import numpy as np
@@ -101,7 +103,7 @@ class Bencher:
 
 runners_base = ('raw', 'dc', 'ps')
 
-runners_extra = ('da', 'mc', 'ms', 'at', 'ca')
+runners_extra = ('da', 'mc', 'ms', 'at', 'ca', 'dj', 'pd')
 
 
 def run(opt: Opt, name: str, tc: 'TestCase'):

@@ -1,31 +1,30 @@
-import mashumaro
+from pydantic import BaseModel
+
 import data
-from dataclasses import dataclass, field
+import json
 from typing import List, Type, Union
 from functools import partial
 from runner import Size, Runner
 
 
-@dataclass
-class Small(mashumaro.DataClassJSONMixin):
+class Small(BaseModel):
     i: int
     s: str
     f: float
     b: bool
 
 
-@dataclass
-class Medium(mashumaro.DataClassJSONMixin):
-    inner: List[Small] = field(default_factory=list)
+class Medium(BaseModel):
+    inner: List[Small]
 
 
 SMALL = Small(**data.args_sm)
 
-MEDIUM = Medium([Small(**d) for d in data.args_md])
+MEDIUM = Medium(inner=[Small(**d) for d in data.args_md])
 
 
 def new(size: Size) -> Runner:
-    name = 'mashmaro'
+    name = 'pydantic'
     if size == Size.Small:
         unp = SMALL
         pac = data.SMALL
@@ -38,12 +37,12 @@ def new(size: Size) -> Runner:
 
 
 def se(obj: Union[Small, Medium]):
-    return obj.to_json()
+    return obj.json()
 
 
 def de(cls: Type, data: str):
-    return cls.from_json(data)
+    return cls.parse_obj(json.loads(data))
 
 
 def asdict(obj: Union[Small, Medium]):
-    return obj.to_dict()
+    return obj.dict()
