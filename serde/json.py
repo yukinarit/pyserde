@@ -9,19 +9,24 @@ from .core import T
 from .de import Deserializer, from_dict
 from .se import Serializer, asdict
 
+try:
+    import orjson as _default_json_lib
+except ImportError:
+    import json as _default_json_lib
+
 
 class JsonSerializer(Serializer):
     @classmethod
-    def serialize(cls, obj: Any, named=True, **opts) -> str:
-        return json.dumps(asdict(obj), **opts)
-        # return orjson.dumps(asdict(obj), **opts)
+    def serialize(cls, obj: Any, jsonlib=None, named=True, **opts) -> str:
+        _jsonlib = jsonlib or _default_json_lib
+        return _jsonlib.dumps(asdict(obj), **opts)
 
 
 class JsonDeserializer(Deserializer):
     @classmethod
-    def deserialize(cls, s, named=True, **opts):
-        return json.loads(s, **opts)
-        #return orjson.loads(s, **opts)
+    def deserialize(cls, s, jsonlib=None, named=True, **opts):
+        _jsonlib = jsonlib or _default_json_lib
+        return _jsonlib.loads(s, **opts)
 
 
 def to_json(obj: Any, se=JsonSerializer, **opts) -> str:
