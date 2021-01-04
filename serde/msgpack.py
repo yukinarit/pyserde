@@ -14,7 +14,13 @@ class MsgPackSerializer(Serializer):
     @classmethod
     def serialize(cls, obj, named=True, use_bin_type=True, **opts) -> str:
         asf = asdict if named else astuple
-        return msgpack.packb(asf(obj), use_bin_type=use_bin_type, **opts)
+        if "ext_dict" in opts:
+            opts.pop("ext_dict")
+            obj_bytes = msgpack.packb(asf(obj), use_bin_type=use_bin_type, **opts)
+            maybe_ext = msgpack.ExtType(int(obj._type), obj_bytes)
+        else:
+            maybe_ext = asf(obj)
+        return msgpack.packb(maybe_ext, use_bin_type=use_bin_type, **opts)
 
 
 class MsgPackDeserializer(Deserializer):
@@ -26,9 +32,21 @@ class MsgPackDeserializer(Deserializer):
 
 
 def to_msgpack(obj: Any, se=MsgPackSerializer, **opts) -> bytes:
+    """
+    If `ext_dict` option is specified, `obj` is encoded as a `msgpack.ExtType`
+    """
     return se.serialize(obj, **opts)
 
 
 def from_msgpack(c: Type[T], s: str, de=MsgPackDeserializer, named=True, **opts) -> Type[T]:
-    fromf = from_dict if named else from_tuple
-    return fromf(c, de.deserialize(s, **opts))
+    """
+    If `ext_dict` option is specified, `c` is ignored and type is inferred from `msgpack.ExtType`
+    """
+    if "ext_dict" in opts:
+        ext_dict = opts.pop("ext_dict")
+        ext = de.deserialize(s, **opts)
+        c = ext_dict[ext.code]
+        return from_msgpack(c, ext.data, de, named, **opts)
+    else:
+        fromf = from_dict if named else from_tuple
+        return fromf(c, de.deserialize(s, **opts))
