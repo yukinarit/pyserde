@@ -75,7 +75,7 @@ def make_id_from_dict(d: Dict) -> str:
 
 
 def opt_case_ids():
-    return map(make_id_from_dict, opt_case)
+    return list(map(make_id_from_dict, opt_case))
 
 
 def type_ids():
@@ -85,7 +85,7 @@ def type_ids():
         t, T = pair
         return f'{typename(T)}({t})'
 
-    return map(make_id, types)
+    return list(map(make_id, types))
 
 
 def type_combinations_ids():
@@ -95,7 +95,7 @@ def type_combinations_ids():
         t, T, u, U = quad
         return f'{typename(T)}({t})-{typename(U)}({u})'
 
-    return map(make_id, types_combinations)
+    return list(map(make_id, types_combinations))
 
 
 @pytest.mark.parametrize('t,T', types, ids=type_ids())
