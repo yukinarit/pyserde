@@ -504,3 +504,51 @@ def test_skip_if_overrides_skip_if_false(se, de):
     f = Foo(['foo'])
     ff = de(Foo, se(f))
     assert ff.comments == []
+
+
+@pytest.mark.parametrize('se,de', (format_msgpack))
+def test_ext(se, de):
+    @deserialize
+    @serialize
+    @dataclass
+    class Base:
+        i: int
+        s: str
+
+        class MessageType(enum.IntEnum):
+            A = 0
+            B = 1
+
+        EXT_DICT = {}
+
+        def __init_subclass__(cls, **kwargs):
+            super().__init_subclass__(**kwargs)
+            cls.EXT_DICT[cls._type] = cls  # type: ignore
+
+    @deserialize
+    @serialize
+    @dataclass
+    class DerivedA(Base):
+        j: int
+
+        _type = Base.MessageType.A
+
+    @deserialize
+    @serialize
+    @dataclass
+    class DerivedB(Base):
+        k: float
+
+        _type = Base.MessageType.B
+
+    a = DerivedA(i=7, s="A", j=13)
+    aa = de(Base, se(a))
+    assert aa != a
+
+    a = DerivedA(i=7, s="A", j=13)
+    aa = de(Base, se(a, ext_dict=Base.EXT_DICT), ext_dict=Base.EXT_DICT)
+    assert aa == a
+
+    b = DerivedB(i=3, s="B", k=11.0)
+    bb = de(Base, se(b, ext_dict=Base.EXT_DICT), ext_dict=Base.EXT_DICT)
+    assert b == bb
