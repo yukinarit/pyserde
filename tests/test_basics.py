@@ -47,13 +47,15 @@ types: List = [
     (100.0, float),
     (True, bool),
     (10, Optional[int]),  # Optional
-    ('foo', Optional[str]),
-    (100.0, Optional[float]),
-    (True, Optional[bool]),
     (None, Optional[int]),
-    (None, Optional[str]),
-    (None, Optional[float]),
-    (None, Optional[bool]),
+    ([1, 2], List[int]),  # Container
+    ([1, 2], List),
+    ([], List[int]),
+    ((1, 1), Tuple[int, int]),
+    ((1, 1), Tuple),
+    ({'a': 1}, Dict[str, int]),
+    ({'a': 1}, Dict),
+    ({}, Dict[str, int]),
     (Pri(10, 'foo', 100.0, True), Pri),  # dataclass
     (Pri(10, 'foo', 100.0, True), Optional[Pri]),
     (None, Optional[Pri]),
@@ -114,6 +116,21 @@ def test_simple(se, de, opt, t, T):
     c = C(10, t)
     assert c == de(C, se(c))
 
+    @deserialize
+    @serialize
+    @dataclass
+    class Nested:
+        t: T
+
+    @deserialize(**opt)
+    @serialize(**opt)
+    @dataclass
+    class C:
+        n: Nested
+
+    c = C(Nested(t))
+    assert c == de(C, se(c))
+
 
 def test_non_dataclass():
     with pytest.raises(TypeError):
@@ -139,7 +156,6 @@ def test_forward_declaration():
 
     h = Foo(bar=Bar(i=10))
     assert h.bar.i == 10
-
     assert 'Bar' == dataclasses.fields(Foo)[0].type
 
 
@@ -149,41 +165,19 @@ def test_list(se, de, opt):
     @deserialize(**opt)
     @serialize(**opt)
     @dataclass
-    class PriList:
-        i: List[int]
-        s: List[str]
-        f: List[float]
-        b: List[bool]
-
-    p = PriList([10, 10], ['foo', 'bar'], [10.0, 10.0], [True, False])
-    assert p == de(PriList, se(p))
-
-    @deserialize(**opt)
-    @serialize(**opt)
-    @dataclass
-    class BareList:
-        i: List
-
-    p = BareList([10])
-    assert p == de(BareList, se(p))
+    class Variant:
+        d: List
 
     # List can contain different types (except Toml).
     if se is not to_toml:
-        p = BareList([10, 'foo', 10.0, True])
-        assert p == de(BareList, se(p))
+        p = Variant([10, 'foo', 10.0, True])
+        assert p == de(Variant, se(p))
 
 
 @pytest.mark.parametrize('opt', opt_case, ids=opt_case_ids())
 @pytest.mark.parametrize('se,de', all_formats)
 def test_dict(se, de, opt):
-    @deserialize(**opt)
-    @serialize(**opt)
-    @dataclass
-    class PriDict:
-        i: Dict[int, int]
-        s: Dict[str, str]
-        f: Dict[float, float]
-        b: Dict[bool, bool]
+    from .data import PriDict
 
     if se in (to_json, to_msgpack, to_toml):
         # JSON, Msgpack, Toml don't allow non string key.
@@ -196,14 +190,11 @@ def test_dict(se, de, opt):
     @deserialize(**opt)
     @serialize(**opt)
     @dataclass
-    class BareDict:
-        d: Dict
+    class Variant:
+        d: Dict[int, str]
 
-    p = BareDict({'10': 10})
-    assert p == de(BareDict, se(p))
-
-    p = BareDict({'10': 10, 'foo': 'bar', '100.0': 100.0, 'True': False})
-    assert p == de(BareDict, se(p))
+    p = Variant({'10': 10, 'foo': 'bar', '100.0': 100.0, 'True': False})
+    assert p == de(Variant, se(p))
 
 
 @pytest.mark.parametrize('opt', opt_case, ids=opt_case_ids())
@@ -384,55 +375,11 @@ def test_msgpack():
     assert p == from_msgpack(Pri, d)
 
 
-def test_msgpack_named():
+def test_msgpack_unnamed():
     p = Pri(10, 'foo', 100.0, True)
     d = b'\x94\n\xa3foo\xcb@Y\x00\x00\x00\x00\x00\x00\xc3'
     assert d == to_msgpack(p, named=False)
     assert p == from_msgpack(Pri, d, named=False)
-
-
-def test_from_dict():
-    p = Pri(10, 'foo', 100.0, True)
-    d = {'i': 10, 's': 'foo', 'f': 100.0, 'b': True}
-    assert d == asdict(p)
-    assert p == from_dict(Pri, d)
-
-    p = {'p': Pri(10, 'foo', 100.0, True)}
-    d = {'p': {'i': 10, 's': 'foo', 'f': 100.0, 'b': True}}
-    assert d == asdict(p)
-    assert p == from_dict(Dict[str, Pri], d)
-
-    p = [Pri(10, 'foo', 100.0, True)]
-    d = ({'i': 10, 's': 'foo', 'f': 100.0, 'b': True},)
-    assert d == asdict(p)
-    assert p == from_dict(List[Pri], d)
-
-    p = (Pri(10, 'foo', 100.0, True),)
-    d = ({'i': 10, 's': 'foo', 'f': 100.0, 'b': True},)
-    assert d == asdict(p)
-    assert p == from_dict(Tuple[Pri], d)
-
-
-def test_from_tuple():
-    p = Pri(10, 'foo', 100.0, True)
-    d = (10, 'foo', 100.0, True)
-    assert d == astuple(p)
-    assert p == from_tuple(Pri, d)
-
-    p = {'p': Pri(10, 'foo', 100.0, True)}
-    d = {'p': (10, 'foo', 100.0, True)}
-    assert d == astuple(p)
-    assert p == from_tuple(Dict[str, Pri], d)
-
-    p = [Pri(10, 'foo', 100.0, True)]
-    d = ((10, 'foo', 100.0, True),)
-    assert d == astuple(p)
-    assert p == from_tuple(List[Pri], d)
-
-    p = (Pri(10, 'foo', 100.0, True),)
-    d = ((10, 'foo', 100.0, True),)
-    assert d == astuple(p)
-    assert p == from_tuple(Tuple[Pri], d)
 
 
 @pytest.mark.parametrize('se,de', all_formats)
