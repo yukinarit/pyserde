@@ -78,12 +78,20 @@ def typename(typ) -&gt; str:
     elif is_union(typ):
         return f&#39;Union[{&#34;, &#34;.join([typename(e) for e in union_args(typ)])}]&#39;
     elif is_list(typ):
-        et = typename(type_args(typ)[0])
-        return f&#39;List[{et}]&#39;
+        args = type_args(typ)
+        if args:
+            et = typename(args[0])
+            return f&#39;List[{et}]&#39;
+        else:
+            return &#39;List&#39;
     elif is_dict(typ):
-        kt = typename(type_args(typ)[0])
-        vt = typename(type_args(typ)[1])
-        return f&#39;Dict[{kt}, {vt}]&#39;
+        args = type_args(typ)
+        if args and len(args) == 2:
+            kt = typename(args[0])
+            vt = typename(args[1])
+            return f&#39;Dict[{kt}, {vt}]&#39;
+        else:
+            return &#39;Dict&#39;
     elif is_tuple(typ):
         return f&#39;Tuple[{&#34;, &#34;.join([typename(e) for e in type_args(typ)])}]&#39;
     else:
