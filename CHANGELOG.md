@@ -1,3 +1,10 @@
+## 0.2.2 (2020-01-19)
+
+* Support inference of types on deserialization ([8c4efb2](https://github.com/yukinarit/pyserde/commit/8c4efb2))
+* Fix pytest error ([09ee66a](https://github.com/yukinarit/pyserde/commit/09ee66a))
+
+This release had contibutions from 1 person: [@adsharma](https://github.com/adsharma). Thank you so much! :tada: :joy:
+
 ## 0.2.1 (2020-11-29)
 
 * feat: Allow enum compatible value for enum field ([14006ee](https://github.com/yukinarit/pyserde/commit/14006ee))
