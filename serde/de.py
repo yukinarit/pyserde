@@ -15,7 +15,12 @@ import abc
 import dataclasses
 import functools
 from dataclasses import dataclass, is_dataclass
+from datetime import datetime, date
+from decimal import Decimal
+from ipaddress import IPv4Address, IPv6Address, IPv4Network, IPv6Network, IPv4Interface, IPv6Interface
+from pathlib import Path, PosixPath, WindowsPath, PurePath, PurePosixPath, PureWindowsPath
 from typing import Any, Callable, Dict, List, Optional, Type
+from uuid import UUID
 
 import jinja2
 
@@ -29,7 +34,7 @@ __all__: List = ['deserialize', 'is_deserializable', 'Deserializer', 'from_dict'
 Custom = Optional[Callable[['DeField', Any], Any]]
 
 
-def deserialize(_cls=None, rename_all: Optional[str] = None):
+def deserialize(_cls=None, rename_all: Optional[str] = None, reuse_instances_default: bool = True):
     """
     `deserialize` decorator. A dataclass with this decorator can be deserialized
     into an object from various data format such as JSON and MsgPack.
@@ -94,8 +99,8 @@ def deserialize(_cls=None, rename_all: Optional[str] = None):
 
         logger.debug(f'{cls.__name__}: __serde_scope__ {scope}')
 
-        cls = de_func(cls, FROM_ITER, render_from_iter(cls, custom), g)
-        cls = de_func(cls, FROM_DICT, render_from_dict(cls, rename_all, custom), g)
+        cls = de_func(cls, FROM_ITER, render_from_iter(cls, reuse_instances_default, custom), g)
+        cls = de_func(cls, FROM_DICT, render_from_dict(cls, rename_all, reuse_instances_default, custom), g)
         return cls
 
     if _cls is None:
@@ -211,22 +216,22 @@ def from_obj(c: Type[T], o: Any, de: Type[Deserializer] = None, strict=True, nam
     return v
 
 
-def from_dict(cls, o):
+def from_dict(cls, o, reuse_instances: bool = ...):
     """
     Deserialize from dictionary.
     """
     if is_deserializable(cls):
-        return cls.__serde_from_dict__(o)
+        return getattr(cls, FROM_DICT)(o, reuse_instances=reuse_instances)
     else:
         return from_obj(cls, o, named=True)
 
 
-def from_tuple(cls, o):
+def from_tuple(cls, o, reuse_instances: bool = ...):
     """
     Deserialize from tuple.
     """
     if is_deserializable(cls):
-        return cls.__serde_from_iter__(o)
+        return getattr(cls, FROM_ITER)(o, reuse_instances=reuse_instances)
     else:
         return from_obj(cls, o, named=False)
 
@@ -325,6 +330,16 @@ class Renderer:
             res = self.enum(arg)
         elif any(f(arg.type) for f in (is_primitive, is_union)):
             res = self.primitive(arg)
+        elif arg.type in [
+            Decimal,
+            Path, PosixPath, WindowsPath, PurePath, PurePosixPath, PureWindowsPath,
+            UUID,
+            IPv4Address, IPv6Address, IPv4Network, IPv6Network, IPv4Interface, IPv6Interface
+        ]:
+            res = f"({self.c_tor_with_check(arg)}) if reuse_instances else {self.c_tor(arg)}"
+        elif arg.type in [date, datetime]:
+            from_iso = f"{arg.type.__name__}.fromisoformat({arg.data})"
+            res = f"({arg.data} if isinstance({arg.data}, {arg.type.__name__} else {from_iso})) if reuse_instances else {from_iso}"
         else:
             return f'__custom_deserializer__({arg.type.__name__}, {arg.data})'
 
@@ -334,9 +349,9 @@ class Renderer:
             else:
                 exists = f'{arg.datavar}.get("{arg.name}") is not None'
             if has_default(arg):
-                return f'{res} if {exists} else __default_{arg.name}__'
+                return f'({res}) if {exists} else __default_{arg.name}__'
             elif has_default_factory(arg):
-                return f'{res} if {exists} else __default_{arg.name}__()'
+                return f'({res}) if {exists} else __default_{arg.name}__()'
 
         return res
 
@@ -456,6 +471,14 @@ class Renderer:
         else:
             return arg.data
 
+    def c_tor(self, arg: DeField) -> str:
+        return f"{arg.type.__name__}({arg.data})"
+
+    def c_tor_with_check(self, arg: DeField, ctor: Optional[str] = None) -> str:
+        if ctor is None:
+            ctor = self.c_tor(arg)
+        return f"{arg.data} if isinstance({arg.data}, {arg.type.__name__}) else {ctor}"
+
 
 def to_arg(f: DeField, index, rename_all: Optional[str] = None) -> DeField:
     f.index = index
@@ -470,9 +493,9 @@ def to_iter_arg(f: DeField, *args, **kwargs):
     return f
 
 
-def render_from_iter(cls: Type, custom: Custom = None) -> str:
+def render_from_iter(cls: Type, reuse_instances_default: bool = True, custom: Custom = None) -> str:
     template = """
-def {{func}}(data):
+def {{func}}(data, reuse_instances = {{reuse_instances_default}}):
   {# List up all classes used by this class. -#}
   {% for name in cls.__serde_scope__ -%}
   {{name}} = getattr(cls, '__serde_scope__')['{{name}}']
@@ -492,12 +515,12 @@ def {{func}}(data):
     env.filters.update({'rvalue': renderer.render})
     env.filters.update({'fields': defields})
     env.filters.update({'arg': to_iter_arg})
-    return env.get_template('iter').render(func=FROM_ITER, cls=cls)
+    return env.get_template('iter').render(func=FROM_ITER, cls=cls, reuse_instances_default=reuse_instances_default)
 
 
-def render_from_dict(cls: Type, rename_all: Optional[str] = None, custom: Custom = None) -> str:
+def render_from_dict(cls: Type, rename_all: Optional[str] = None, reuse_instances_default: bool = True, custom: Custom = None) -> str:
     template = """
-def {{func}}(data):
+def {{func}}(data, reuse_instances = {{reuse_instances_default}}):
   {# List up all classes used by this class. -#}
   {% for name in cls.__serde_scope__ -%}
   {{name}} = getattr(cls, '__serde_scope__')['{{name}}']
@@ -518,7 +541,7 @@ def {{func}}(data):
     env.filters.update({'rvalue': renderer.render})
     env.filters.update({'fields': defields})
     env.filters.update({'arg': functools.partial(to_arg, rename_all=rename_all)})
-    return env.get_template('dict').render(func=FROM_DICT, cls=cls)
+    return env.get_template('dict').render(func=FROM_DICT, cls=cls, reuse_instances_default=reuse_instances_default)
 
 
 def de_func(cls: Type[T], func: str, code: str, g: Dict) -> Type[T]:

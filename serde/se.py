@@ -7,7 +7,12 @@ import copy  # noqa
 import dataclasses
 import functools
 from dataclasses import dataclass, is_dataclass
+from datetime import date, datetime
+from decimal import Decimal
+from ipaddress import IPv4Address, IPv6Address, IPv4Network, IPv6Network, IPv4Interface, IPv6Interface
+from pathlib import Path, PureWindowsPath, PurePosixPath, PurePath, WindowsPath, PosixPath
 from typing import Any, Callable, Dict, List, Optional, Tuple, Type
+from uuid import UUID
 
 import jinja2
 
@@ -34,7 +39,7 @@ class Serializer(metaclass=abc.ABCMeta):
         pass
 
 
-def serialize(_cls=None, rename_all: Optional[str] = None):
+def serialize(_cls=None, rename_all: Optional[str] = None, reuse_instances_default: bool = True):
     """
     `serialize` decorator. A dataclass with this decorator can be serialized
     into an object in various data format such as JSON and MsgPack.
@@ -98,8 +103,8 @@ def serialize(_cls=None, rename_all: Optional[str] = None):
         g['is_dataclass'] = is_dataclass
         g['__custom_serializer__'] = custom
         g['__serde_enum_value__'] = enum_value
-        cls = se_func(cls, TO_ITER, render_astuple(cls, custom), g)
-        cls = se_func(cls, TO_DICT, render_asdict(cls, rename_all, custom), g)
+        cls = se_func(cls, TO_ITER, render_astuple(cls, reuse_instances_default, custom), g)
+        cls = se_func(cls, TO_DICT, render_asdict(cls, rename_all, reuse_instances_default, custom), g)
         return cls
 
     if _cls is None:
@@ -123,7 +128,7 @@ def is_serializable(instance_or_class: Any) -> bool:
     >>> is_serializable(Foo)
     True
     """
-    return hasattr(instance_or_class, '__serde_serialize__')
+    return hasattr(instance_or_class, SE_NAME)
 
 
 def astuple(v):
@@ -158,7 +163,7 @@ def asdict(v):
         return v
 
 
-def to_dict(o) -> Dict:
+def to_dict(o, reuse_instances: bool = ...) -> Dict:
     """
     Convert object into dictionary.
 
@@ -222,9 +227,9 @@ def to_arg(f: SeField) -> SeField:
     return f
 
 
-def render_astuple(cls: Type, custom: Custom = None) -> str:
+def render_astuple(cls: Type, reuse_instances_default: bool = True, custom: Custom = None) -> str:
     template = """
-def {{func}}(obj):
+def {{func}}(obj, reuse_instances = {{reuse_instances_default}}):
   if not is_dataclass(obj):
     return copy.deepcopy(obj)
 
@@ -250,12 +255,12 @@ def {{func}}(obj):
     env.filters.update({'is_dataclass': is_dataclass})
     env.filters.update({'rvalue': renderer.render})
     env.filters.update({'arg': to_arg})
-    return env.get_template('iter').render(func=TO_ITER, cls=cls)
+    return env.get_template('iter').render(func=TO_ITER, cls=cls, reuse_instances_default=reuse_instances_default)
 
 
-def render_asdict(cls: Type, case: Optional[str] = None, custom: Custom = None) -> str:
+def render_asdict(cls: Type, case: Optional[str] = None, reuse_instances_default: bool = True, custom: Custom = None) -> str:
     template = """
-def {{func}}(obj):
+def {{func}}(obj, reuse_instances = {{reuse_instances_default}}):
   if not is_dataclass(obj):
     return copy.deepcopy(obj)
 
@@ -288,7 +293,7 @@ def {{func}}(obj):
     env.filters.update({'rvalue': renderer.render})
     env.filters.update({'arg': to_arg})
     env.filters.update({'case': functools.partial(conv, case=case)})
-    return env.get_template('dict').render(func=TO_DICT, cls=cls)
+    return env.get_template('dict').render(func=TO_DICT, cls=cls, reuse_instances_default=reuse_instances_default)
 
 
 @dataclass
@@ -343,6 +348,15 @@ class Renderer:
             return self.enum(arg)
         elif any(f(arg.type) for f in (is_primitive, is_union)):
             return self.primitive(arg)
+        elif arg.type in [
+            Decimal,
+            Path, PosixPath, WindowsPath, PurePath, PurePosixPath, PureWindowsPath,
+            UUID,
+            IPv4Address, IPv6Address, IPv4Network, IPv6Network, IPv4Interface, IPv6Interface
+        ]:
+            return f"{arg.varname} if reuse_instances else {self.str(arg)}"
+        elif arg.type in [date, datetime]:
+            return f"{arg.varname} if reuse_instances else {arg.varname}.isoformat()"
         else:
             return f'__custom_serializer__({arg.varname})'
 
@@ -406,6 +420,9 @@ class Renderer:
         Render rvalue for primitives.
         """
         return f'{arg.varname}'
+
+    def str(self, arg: SeField) -> str:
+        return f"str({arg.varname})"
 
 
 def se_func(cls: Type[T], func: str, code: str, g: Dict) -> Type[T]:

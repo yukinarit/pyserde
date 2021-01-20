@@ -13,3 +13,5 @@ coverage.xml
 html/
 pip-wheel-metadata
 .DS_Store
+venv/
+.idea/
