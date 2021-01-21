@@ -35,7 +35,7 @@ class Serializer(metaclass=abc.ABCMeta):
     """
 
     @abc.abstractclassmethod
-    def serialize(cls, obj):
+    def serialize(cls, obj, **opts):
         pass
 
 

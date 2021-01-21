@@ -7,22 +7,22 @@ import toml
 
 from .core import T
 from .de import Deserializer, from_dict
-from .se import Serializer, asdict
+from .se import Serializer, to_dict
 
 
 class TomlSerializer(Serializer):
     @classmethod
-    def serialize(cls, obj, named=True, **opts) -> str:
-        return toml.dumps(asdict(obj))
+    def serialize(cls, obj, **opts) -> str:
+        return toml.dumps(obj, **opts)
 
 
 class TomlDeserializer(Deserializer):
     @classmethod
-    def deserialize(cls, s, named=True, **opts):
-        return toml.loads(s)
+    def deserialize(cls, s, **opts):
+        return toml.loads(s, **opts)
 
 
-def to_toml(obj, se=TomlSerializer, **opts) -> str:
+def to_toml(obj, se: Serializer = TomlSerializer, **opts) -> str:
     """
     Take an object and return toml string.
 
@@ -46,10 +46,10 @@ def to_toml(obj, se=TomlSerializer, **opts) -> str:
     '[general]\\nhost = \"localhost\"\\nport = 8080\\nupstream = [ \"localhost:8081\", \"localhost:8082\",]\\n'
     >>>
     """
-    return se.serialize(obj, **opts)
+    return se.serialize(to_dict(obj, reuse_instances=False), **opts)
 
 
-def from_toml(c: Type[T], s: str, de=TomlDeserializer, **opts) -> T:
+def from_toml(c: Type[T], s: str, de: Deserializer = TomlDeserializer, **opts) -> T:
     """
     Take toml string and return deserialized object.
 
@@ -69,4 +69,4 @@ def from_toml(c: Type[T], s: str, de=TomlDeserializer, **opts) -> T:
     Settings(host='localhost', port=8080, upstream=['localhost:8081', 'localhost:8082'])
     >>>
     """
-    return from_dict(c, de.deserialize(s, **opts))
+    return from_dict(c, de.deserialize(s, **opts), reuse_instances=False)
