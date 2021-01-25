@@ -214,6 +214,9 @@ def to_arg(f: SeField) -> SeField:
 def render_astuple(cls: Type, reuse_instances_default: bool = True, custom: Custom = None) -> str:
     template = """
 def {{func}}(obj, reuse_instances = {{reuse_instances_default}}):
+  if reuse_instances is Ellipsis:
+    reuse_instances = {{reuse_instances_default}}
+
   if not is_dataclass(obj):
     return copy.deepcopy(obj)
 
@@ -245,6 +248,9 @@ def {{func}}(obj, reuse_instances = {{reuse_instances_default}}):
 def render_asdict(cls: Type, case: Optional[str] = None, reuse_instances_default: bool = True, custom: Custom = None) -> str:
     template = """
 def {{func}}(obj, reuse_instances = {{reuse_instances_default}}):
+  if reuse_instances is Ellipsis:
+    reuse_instances = {{reuse_instances_default}}
+
   if not is_dataclass(obj):
     return copy.deepcopy(obj)
 

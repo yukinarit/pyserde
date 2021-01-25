@@ -488,6 +488,8 @@ def to_iter_arg(f: DeField, *args, **kwargs):
 def render_from_iter(cls: Type, reuse_instances_default: bool = True, custom: Custom = None) -> str:
     template = """
 def {{func}}(data, reuse_instances = {{reuse_instances_default}}):
+  if reuse_instances is Ellipsis:
+    reuse_instances = {{reuse_instances_default}}
   {# List up all classes used by this class. -#}
   {% for name in cls.__serde_scope__ -%}
   {{name}} = getattr(cls, '__serde_scope__')['{{name}}']
@@ -513,6 +515,8 @@ def {{func}}(data, reuse_instances = {{reuse_instances_default}}):
 def render_from_dict(cls: Type, rename_all: Optional[str] = None, reuse_instances_default: bool = True, custom: Custom = None) -> str:
     template = """
 def {{func}}(data, reuse_instances = {{reuse_instances_default}}):
+  if reuse_instances is Ellipsis:
+    reuse_instances = {{reuse_instances_default}}
   {# List up all classes used by this class. -#}
   {% for name in cls.__serde_scope__ -%}
   {{name}} = getattr(cls, '__serde_scope__')['{{name}}']
