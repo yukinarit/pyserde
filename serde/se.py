@@ -147,6 +147,9 @@ def astuple(v):
         return v
 
 
+def to_tuple(o, reuse_instances: bool = ...) -> Tuple:
+    pass
+
 def asdict(v):
     """
     Convert class with `serialize` to `dict`.
