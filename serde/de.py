@@ -144,7 +144,7 @@ class Deserializer(metaclass=abc.ABCMeta):
         """
 
 
-def from_obj(c: Type[T], o: Any, de: Type[Deserializer] = None, strict=True, named=True, **opts):
+def from_obj(c: Type[T], o: Any, named:bool, reuse_instances:bool):
     """
     Deserialize from an object into an instance of the type specified as arg `c`.
     `c` can be either primitive type, `List`, `Tuple`, `Dict` or `deserialize` class.
@@ -181,21 +181,19 @@ def from_obj(c: Type[T], o: Any, de: Type[Deserializer] = None, strict=True, nam
     >>> from_obj(Dict[str, Foo], {'foo1': {'i': 10}, 'foo2': {'i': 20}})
     {'foo1': Foo(i=10), 'foo2': Foo(i=20)}
     """
-    thisfunc = functools.partial(from_obj, named=named)
-    if de:
-        o = de.deserialize(o, **opts)
+    thisfunc = functools.partial(from_obj, named=named, reuse_instances=reuse_instances)
     if o is None:
-        v = None
+        return None
     if is_deserializable(c):
         if named:
-            v = from_dict(c, o)
+            return getattr(c, FROM_DICT)(o, reuse_instances=reuse_instances)
         else:
-            v = from_tuple(c, o)
+            return getattr(c, FROM_ITER)(o, reuse_instances=reuse_instances)
     elif is_opt(c):
         if o is None:
-            v = None
+            return None
         else:
-            v = thisfunc(type_args(c)[0], o)
+            return thisfunc(type_args(c)[0], o)
     elif is_union(c):
         v = None
         for typ in type_args(c):
@@ -204,36 +202,30 @@ def from_obj(c: Type[T], o: Any, de: Type[Deserializer] = None, strict=True, nam
                 break
             except (SerdeError, ValueError):
                 pass
+        return v
     elif is_list(c):
-        v = [thisfunc(type_args(c)[0], e) for e in o]
+        return [thisfunc(type_args(c)[0], e) for e in o]
     elif is_tuple(c):
-        v = tuple(thisfunc(type_args(c)[i], e) for i, e in enumerate(o))
+        return tuple(thisfunc(type_args(c)[i], e) for i, e in enumerate(o))
+    # TODO set
     elif is_dict(c):
-        v = {thisfunc(type_args(c)[0], k): thisfunc(type_args(c)[1], v) for k, v in o.items()}
-    else:
-        v = o
+        return {thisfunc(type_args(c)[0], k): thisfunc(type_args(c)[1], v) for k, v in o.items()}
 
-    return v
+    return o
 
 
 def from_dict(cls, o, reuse_instances: bool = ...):
     """
     Deserialize from dictionary.
     """
-    if is_deserializable(cls):
-        return getattr(cls, FROM_DICT)(o, reuse_instances=reuse_instances)
-    else:
-        return from_obj(cls, o, named=True)
+    return from_obj(cls, o, named=True, reuse_instances=reuse_instances)
 
 
 def from_tuple(cls, o, reuse_instances: bool = ...):
     """
     Deserialize from tuple.
     """
-    if is_deserializable(cls):
-        return getattr(cls, FROM_ITER)(o, reuse_instances=reuse_instances)
-    else:
-        return from_obj(cls, o, named=False)
+    return from_obj(cls, o, named=False, reuse_instances=reuse_instances)
 
 
 @dataclass

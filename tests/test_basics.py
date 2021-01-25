@@ -12,7 +12,7 @@ import pytest
 import more_itertools
 import serde
 import serde.compat
-from serde import asdict, astuple, deserialize, from_dict, from_tuple, serialize
+from serde import to_dict, to_tuple, deserialize, from_dict, from_tuple, serialize
 from serde.json import from_json, to_json
 from serde.msgpack import from_msgpack, to_msgpack
 from serde.toml import from_toml, to_toml
@@ -25,9 +25,9 @@ log = logging.getLogger('test')
 
 serde.init(True)
 
-format_dict: List = [(asdict, from_dict)]
+format_dict: List = [(to_dict, from_dict)]
 
-format_tuple: List = [(astuple, from_tuple)]
+format_tuple: List = [(to_tuple, from_tuple)]
 
 format_json: List = [(to_json, from_json)]
 
@@ -318,7 +318,7 @@ def test_dataclass_default_factory(se, de):
     f = Foo('bar')
     assert f == de(Foo, se(f))
 
-    assert {'foo': 'bar', 'items': {}} == asdict(f)
+    assert {'foo': 'bar', 'items': {}} == to_dict(f)
     assert f == from_dict(Foo, {'foo': 'bar'})
 
 

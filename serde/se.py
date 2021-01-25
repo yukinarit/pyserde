@@ -22,7 +22,7 @@ from .core import (HIDDEN_NAME, SE_NAME, SETTINGS, TO_DICT, TO_ITER, Field, Hidd
                    logger)
 from .more_types import serialize as custom
 
-__all__: List = ['serialize', 'is_serializable', 'Serializer', 'astuple', 'asdict']
+__all__: List = ['serialize', 'is_serializable', 'Serializer', 'to_tuple', 'to_dict']
 
 Custom = Optional[Callable[[Any], Any]]
 
@@ -131,42 +131,36 @@ def is_serializable(instance_or_class: Any) -> bool:
     return hasattr(instance_or_class, SE_NAME)
 
 
-def astuple(v):
-    """
-    Convert class with `serialize` to `tuple`.
-    """
-    if is_serializable(v):
-        return getattr(v, TO_ITER)()
-    elif is_dataclass(v):
-        return dataclasses.astuple(v)
-    elif isinstance(v, Dict):
-        return {astuple(k): astuple(v) for k, v in v.items()}
-    elif isinstance(v, (Tuple, List)):
-        return tuple(astuple(e) for e in v)
-    else:
-        return v
+def to_obj(o, named: bool, reuse_instances: bool):
+    thisfunc = functools.partial(to_obj, named=named, reuse_instances=reuse_instances)
+    if o is None:
+        return None
+    if is_serializable(o):
+        if named:
+            return getattr(o, TO_DICT)(reuse_instances=reuse_instances)
+        else:
+            return getattr(o, TO_ITER)(reuse_instances=reuse_instances)
+    elif is_dataclass(o):
+        if named:
+            return dataclasses.asdict(o)
+        else:
+            return dataclasses.astuple(o)
+    elif isinstance(o, list):
+        return [thisfunc(e) for e in o]
+    elif isinstance(o, tuple):
+        return tuple(thisfunc(e) for e in o)
+    elif isinstance(o, set):
+        return set(thisfunc(e) for e in o)
+    elif isinstance(o, dict):
+        return {k: thisfunc(v) for k, v in o.items()}
+
+    return o
+
+def to_tuple(o, reuse_instances: bool = ...) -> Any:
+    return to_obj(o, named=False, reuse_instances=reuse_instances)
 
 
-def to_tuple(o, reuse_instances: bool = ...) -> Tuple:
-    pass
-
-def asdict(v):
-    """
-    Convert class with `serialize` to `dict`.
-    """
-    if is_serializable(v):
-        return getattr(v, TO_DICT)()
-    elif is_dataclass(v):
-        return dataclasses.asdict(v)
-    elif isinstance(v, Dict):
-        return {asdict(k): asdict(v) for k, v in v.items()}
-    elif isinstance(v, (Tuple, List)):
-        return tuple(asdict(e) for e in v)
-    else:
-        return v
-
-
-def to_dict(o, reuse_instances: bool = ...) -> Dict:
+def to_dict(o, reuse_instances: bool = ...) -> Any:
     """
     Convert object into dictionary.
 
@@ -187,20 +181,7 @@ def to_dict(o, reuse_instances: bool = ...) -> Dict:
     >>> to_dict((Foo(10), Foo(20)))
     ({'i': 10}, {'i': 20})
     """
-    if o is None:
-        v = None
-    if is_serializable(o):
-        v = asdict(o)
-    elif isinstance(o, list):
-        v = [to_dict(e) for e in o]
-    elif isinstance(o, tuple):
-        v = tuple(to_dict(e) for e in o)
-    elif isinstance(o, dict):
-        v = {k: to_dict(v) for k, v in o.items()}
-    else:
-        v = o
-
-    return v
+    return to_obj(o, named=True, reuse_instances=reuse_instances)
 
 
 @dataclass

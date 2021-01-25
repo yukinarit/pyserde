@@ -44,8 +44,8 @@ def de(cls: Type, data: str):
 
 
 def astuple(data):
-    return serde.astuple(data)
+    return serde.to_tuple(data)
 
 
 def asdict(data):
-    return serde.asdict(data)
+    return serde.to_dict(data)
