@@ -1,25 +1,23 @@
 import dataclasses
 import decimal
 import enum
-import itertools
 import logging
 import pathlib
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Tuple
 
+import itertools
+import more_itertools
 import pytest
 
-import more_itertools
-import serde
 import serde.compat
 from serde import to_dict, to_tuple, deserialize, from_dict, from_tuple, serialize
 from serde.json import from_json, to_json
 from serde.msgpack import from_msgpack, to_msgpack
 from serde.toml import from_toml, to_toml
 from serde.yaml import from_yaml, to_yaml
-
 from . import data
-from .data import Bool, Float, Int, ListPri, NestedPri, NestedPriOpt, Pri, PriDefault, PriOpt, Str
+from .data import Bool, Float, Int, ListPri, Pri, PriDefault, Str
 
 log = logging.getLogger('test')
 
@@ -39,7 +37,11 @@ format_toml: List = [(to_toml, from_toml)]
 
 all_formats: List = format_dict + format_tuple + format_json + format_msgpack + format_yaml + format_toml
 
-opt_case: List = [{}, {'rename_all': 'camelcase'}, {'rename_all': 'snakecase'}]
+opt_case: List = [
+    {'reuse_instances_default':False},
+    {'reuse_instances_default':False, 'rename_all': 'camelcase'},
+    {'reuse_instances_default':False, 'rename_all': 'snakecase'}
+]
 
 types: List = [
     (10, int),  # Primitive
@@ -116,8 +118,8 @@ def test_simple(se, de, opt, t, T):
     c = C(10, t)
     assert c == de(C, se(c))
 
-    @deserialize
-    @serialize
+    @deserialize(**opt)
+    @serialize(**opt)
     @dataclass
     class Nested:
         t: T
@@ -394,8 +396,8 @@ def test_rename(se, de):
     assert f == de(Foo, se(f))
 
 
-@pytest.mark.parametrize('se,de', format_json + format_yaml + format_toml + format_msgpack)
-def test_rename_all(se, de):
+@pytest.mark.parametrize('se,de', format_msgpack)
+def test_rename_msgpack(se, de):
     @deserialize(rename_all='camelcase')
     @serialize(rename_all='camelcase')
     @dataclass
@@ -404,6 +406,19 @@ def test_rename_all(se, de):
 
     f = Foo(class_name='foo')
     assert f == de(Foo, se(f, named=True), named=True)
+    assert f == de(Foo, se(f, named=False), named=False)
+
+
+@pytest.mark.parametrize('se,de', (format_dict + format_json + format_yaml + format_toml))
+def test_rename_formats(se, de):
+    @deserialize(rename_all='camelcase')
+    @serialize(rename_all='camelcase')
+    @dataclass
+    class Foo:
+        class_name: str
+
+    f = Foo(class_name='foo')
+    assert f == de(Foo, se(f))
 
 
 @pytest.mark.parametrize('se,de', (format_dict + format_json + format_msgpack + format_yaml + format_toml))
