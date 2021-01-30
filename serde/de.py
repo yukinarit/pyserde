@@ -348,7 +348,7 @@ class Renderer:
         return res
 
     def dataclass(self, arg: DeField) -> str:
-        return f'{arg.type.__name__}.{self.func}({arg.data})'
+        return f'{arg.type.__name__}.{self.func}({arg.data}, reuse_instances=reuse_instances)'
 
     def opt(self, arg: DeField) -> str:
         """
@@ -379,7 +379,7 @@ class Renderer:
                 exists = f'{arg.data} is not None'
             else:
                 exists = f'{arg.datavar}.get("{arg.name}") is not None'
-            return f'{self.render(value)} if {exists} else None'
+            return f'({self.render(value)}) if {exists} else None'
 
     def list(self, arg: DeField) -> str:
         """

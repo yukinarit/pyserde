@@ -354,7 +354,7 @@ class Renderer:
         """
         Render rvalue for dataclass.
         """
-        return f'{arg.varname}.{self.func}()'
+        return f'{arg.varname}.{self.func}(reuse_instances=reuse_instances)'
 
     def opt(self, arg: SeField) -> str:
         """
@@ -362,7 +362,7 @@ class Renderer:
         """
         inner = arg[0]
         inner.name = arg.varname
-        return f'{self.render(inner)} if {arg.varname} is not None else None'
+        return f'({self.render(inner)}) if {arg.varname} is not None else None'
 
     def list(self, arg: SeField) -> str:
         """
