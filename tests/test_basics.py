@@ -134,6 +134,38 @@ def test_simple(se, de, opt, t, T):
     assert c == de(C, se(c))
 
 
+@pytest.mark.parametrize('t,T', types, ids=type_ids())
+@pytest.mark.parametrize('opt', opt_case, ids=opt_case_ids())
+@pytest.mark.parametrize('se,de', (format_dict + format_tuple))
+def test_simple_with_reuse_instances(se, de, opt, t, T):
+    log.info(f'Running test with se={se.__name__} de={de.__name__} opts={opt} while reusing instances')
+
+    @deserialize(**opt)
+    @serialize(**opt)
+    @dataclass
+    class C:
+        i: int
+        t: T
+
+    c = C(10, t)
+    assert c == de(C, se(c, reuse_instances=True), reuse_instances=True)
+
+    @deserialize(**opt)
+    @serialize(**opt)
+    @dataclass
+    class Nested:
+        t: T
+
+    @deserialize(**opt)
+    @serialize(**opt)
+    @dataclass
+    class C:
+        n: Nested
+
+    c = C(Nested(t))
+    assert c == de(C, se(c, reuse_instances=True), reuse_instances=True)
+
+
 def test_non_dataclass():
     with pytest.raises(TypeError):
 
