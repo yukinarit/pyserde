@@ -7,6 +7,7 @@ import os
 import pathlib
 import uuid
 from dataclasses import dataclass, field
+from datetime import datetime, date
 from typing import Dict, List, Optional, Tuple
 
 import itertools
@@ -78,6 +79,8 @@ types: List = [
     (ipaddress.IPv4Interface("192.168.1.1/24"), ipaddress.IPv4Interface),
     (ipaddress.IPv6Interface("::1/128"), ipaddress.IPv6Interface),
     (decimal.Decimal(10), decimal.Decimal),
+    (datetime.now(), datetime),
+    (date.today(), date),
 ]
 
 # these types can only be instantiated on their corresponding system
