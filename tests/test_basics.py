@@ -1,8 +1,11 @@
 import dataclasses
 import decimal
 import enum
+import ipaddress
 import logging
+import os
 import pathlib
+import uuid
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Tuple
 
@@ -11,7 +14,7 @@ import more_itertools
 import pytest
 
 import serde.compat
-from serde import to_dict, to_tuple, deserialize, from_dict, from_tuple, serialize
+from serde import to_dict, to_tuple, deserialize, from_dict, from_tuple, serialize, SerdeError
 from serde.json import from_json, to_json
 from serde.msgpack import from_msgpack, to_msgpack
 from serde.toml import from_toml, to_toml
@@ -64,8 +67,25 @@ types: List = [
     (pathlib.Path('/tmp/foo'), pathlib.Path),  # Extended types
     (pathlib.Path('/tmp/foo'), Optional[pathlib.Path]),
     (None, Optional[pathlib.Path]),
+    (pathlib.PurePath('/tmp/foo'), pathlib.PurePath),
+    (pathlib.PurePosixPath('/tmp/foo'), pathlib.PurePosixPath),
+    (pathlib.PureWindowsPath('C:\\tmp'), pathlib.PureWindowsPath),
+    (uuid.UUID("8f85b32c-a0be-466c-87eb-b7bbf7a01683"), uuid.UUID),
+    (ipaddress.IPv4Address("127.0.0.1"), ipaddress.IPv4Address),
+    (ipaddress.IPv6Address("::1"), ipaddress.IPv6Address),
+    (ipaddress.IPv4Network("127.0.0.0/8"), ipaddress.IPv4Network),
+    (ipaddress.IPv6Network("::/128"), ipaddress.IPv6Network),
+    (ipaddress.IPv4Interface("192.168.1.1/24"), ipaddress.IPv4Interface),
+    (ipaddress.IPv6Interface("::1/128"), ipaddress.IPv6Interface),
     (decimal.Decimal(10), decimal.Decimal),
 ]
+
+# these types can only be instantiated on their corresponding system
+if os.name == "posix":
+    types.append((pathlib.PosixPath('/tmp/foo'), pathlib.PosixPath))
+if os.name == "nt":
+    types.append((pathlib.WindowsPath('C:\\tmp'), pathlib.WindowsPath))
+
 
 types_combinations: List = list(map(lambda c: list(more_itertools.flatten(c)), itertools.combinations(types, 2)))
 
@@ -546,3 +566,11 @@ def test_ext(se, de):
     b = DerivedB(i=3, s="B", k=11.0)
     bb = de(Base, se(b, ext_dict=Base.EXT_DICT), ext_dict=Base.EXT_DICT)
     assert b == bb
+
+    with pytest.raises(SerdeError) as se_ex:
+        se(a, ext_dict={})
+    assert str(se_ex.value) == "Could not find type code for DerivedA in ext_dict"
+
+    with pytest.raises(SerdeError) as de_ex:
+        de(Base, se(a, ext_dict=Base.EXT_DICT), ext_dict={})
+    assert str(de_ex.value) == "Could not find type for code 0 in ext_dict"

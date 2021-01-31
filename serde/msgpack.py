@@ -36,7 +36,7 @@ def to_msgpack(obj: Any, se: Serializer = MsgPackSerializer, named: bool = True,
         obj_type = type(obj)
         ext_type_code = next((code for code, ext_type in ext_dict.items() if obj_type is ext_type), None)
         if ext_type_code is None:
-            raise SerdeError(f"Could not find type code for {obj_type} in ext_dict")
+            raise SerdeError(f"Could not find type code for {obj_type.__name__} in ext_dict")
 
     to_func = to_dict if named else to_tuple
     return se.serialize(to_func(obj, reuse_instances=False), ext_type_code=ext_type_code, **opts)
