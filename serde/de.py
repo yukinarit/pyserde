@@ -148,38 +148,6 @@ def from_obj(c: Type[T], o: Any, named:bool, reuse_instances:bool):
     """
     Deserialize from an object into an instance of the type specified as arg `c`.
     `c` can be either primitive type, `List`, `Tuple`, `Dict` or `deserialize` class.
-
-    ### Dataclass
-
-    >>> from serde import deserialize
-    >>>
-    >>> @deserialize
-    ... @dataclass
-    ... class Foo:
-    ...     i: int
-    ...     f: float
-    ...     s: str
-    ...     b: bool
-    >>>
-    >>> obj = {'i': 10, 'f': 0.1, 's': 'foo', 'b': False}
-    >>> from_obj(Foo, obj)
-    Foo(i=10, f=0.1, s='foo', b=False)
-
-    ### Containers
-
-    >>> from serde import deserialize
-    >>> from typing import List
-    >>>
-    >>> @deserialize
-    ... @dataclass
-    ... class Foo:
-    ...     i: int
-    >>>
-    >>> from_obj(List[Foo], [{'i': 10}, {'i': 20}])
-    [Foo(i=10), Foo(i=20)]
-    >>>
-    >>> from_obj(Dict[str, Foo], {'foo1': {'i': 10}, 'foo2': {'i': 20}})
-    {'foo1': Foo(i=10), 'foo2': Foo(i=20)}
     """
     thisfunc = functools.partial(from_obj, named=named, reuse_instances=reuse_instances)
     if o is None:
@@ -217,6 +185,38 @@ def from_obj(c: Type[T], o: Any, named:bool, reuse_instances:bool):
 def from_dict(cls, o, reuse_instances: bool = ...):
     """
     Deserialize from dictionary.
+
+    ### Dataclass
+
+    >>> from serde import deserialize
+    >>>
+    >>> @deserialize
+    ... @dataclass
+    ... class Foo:
+    ...     i: int
+    ...     f: float
+    ...     s: str
+    ...     b: bool
+    >>>
+    >>> obj = {'i': 10, 'f': 0.1, 's': 'foo', 'b': False}
+    >>> from_dict(Foo, obj)
+    Foo(i=10, f=0.1, s='foo', b=False)
+
+    ### Containers
+
+    >>> from serde import deserialize
+    >>> from typing import List
+    >>>
+    >>> @deserialize
+    ... @dataclass
+    ... class Foo:
+    ...     i: int
+    >>>
+    >>> from_dict(List[Foo], [{'i': 10}, {'i': 20}])
+    [Foo(i=10), Foo(i=20)]
+    >>>
+    >>> from_dict(Dict[str, Foo], {'foo1': {'i': 10}, 'foo2': {'i': 20}})
+    {'foo1': Foo(i=10), 'foo2': Foo(i=20)}
     """
     return from_obj(cls, o, named=True, reuse_instances=reuse_instances)
 
@@ -356,20 +356,20 @@ class Renderer:
 
         >>> from typing import List
         >>> Renderer('foo').render(DeField(Optional[int], 'o', datavar='data'))
-        'data["o"] if data.get("o") is not None else None'
+        '(data["o"]) if data.get("o") is not None else None'
 
         >>> Renderer('foo').render(DeField(Optional[List[int]], 'o', datavar='data'))
-        '[v for v in data["o"]] if data.get("o") is not None else None'
+        '([v for v in data["o"]]) if data.get("o") is not None else None'
 
         >>> Renderer('foo').render(DeField(Optional[List[int]], 'o', datavar='data'))
-        '[v for v in data["o"]] if data.get("o") is not None else None'
+        '([v for v in data["o"]]) if data.get("o") is not None else None'
 
         >>> @deserialize
         ... @dataclass
         ... class Foo:
         ...     o: Optional[List[int]]
         >>> Renderer('foo').render(DeField(Optional[Foo], 'f', datavar='data'))
-        'Foo.foo(data["f"]) if data.get("f") is not None else None'
+        '(Foo.foo(data["f"], reuse_instances=reuse_instances)) if data.get("f") is not None else None'
         """
         value = arg[0]
         if has_default(arg):
@@ -406,11 +406,11 @@ class Renderer:
         ... @dataclass
         ... class Foo: pass
         >>> Renderer('foo').render(DeField(Tuple[str, int, List[int], Foo], 'd', datavar='data'))
-        '(data["d"][0], data["d"][1], [v for v in data["d"][2]], Foo.foo(data["d"][3]))'
+        '(data["d"][0], data["d"][1], [v for v in data["d"][2]], Foo.foo(data["d"][3], reuse_instances=reuse_instances))'
 
         >>> field = DeField(Tuple[str, int, List[int], Foo], 'd', datavar='data', index=0, iterbased=True)
         >>> Renderer('foo').render(field)
-        '(data[0][0], data[0][1], [v for v in data[0][2]], Foo.foo(data[0][3]))'
+        '(data[0][0], data[0][1], [v for v in data[0][2]], Foo.foo(data[0][3], reuse_instances=reuse_instances))'
         """
         if is_bare_tuple(arg.type):
             return f'tuple({arg.data})'
@@ -433,7 +433,7 @@ class Renderer:
         ... @dataclass
         ... class Foo: pass
         >>> Renderer('foo').render(DeField(Dict[Foo, List[Foo]], 'f', datavar='data'))
-        '{Foo.foo(k): [Foo.foo(v) for v in v] for k, v in data["f"].items()}'
+        '{Foo.foo(k, reuse_instances=reuse_instances): [Foo.foo(v, reuse_instances=reuse_instances) for v in v] for k, v in data["f"].items()}'
         """
         if is_bare_dict(arg.type):
             return arg.data

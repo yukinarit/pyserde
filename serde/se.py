@@ -310,19 +310,19 @@ class Renderer:
         ... class Foo:
         ...    val: int
         >>> Renderer(TO_ITER).render(SeField(Foo, 'foo'))
-        'foo.__serde_to_iter__()'
+        'foo.__serde_to_iter__(reuse_instances=reuse_instances)'
 
         >>> Renderer(TO_ITER).render(SeField(List[Foo], 'foo'))
-        '[v.__serde_to_iter__() for v in foo]'
+        '[v.__serde_to_iter__(reuse_instances=reuse_instances) for v in foo]'
 
         >>> Renderer(TO_ITER).render(SeField(Dict[str, Foo], 'foo'))
-        '{k: v.__serde_to_iter__() for k, v in foo.items()}'
+        '{k: v.__serde_to_iter__(reuse_instances=reuse_instances) for k, v in foo.items()}'
 
         >>> Renderer(TO_ITER).render(SeField(Dict[Foo, Foo], 'foo'))
-        '{k.__serde_to_iter__(): v.__serde_to_iter__() for k, v in foo.items()}'
+        '{k.__serde_to_iter__(reuse_instances=reuse_instances): v.__serde_to_iter__(reuse_instances=reuse_instances) for k, v in foo.items()}'
 
         >>> Renderer(TO_ITER).render(SeField(Tuple[str, Foo, int], 'foo'))
-        '(foo[0], foo[1].__serde_to_iter__(), foo[2])'
+        '(foo[0], foo[1].__serde_to_iter__(reuse_instances=reuse_instances), foo[2])'
         """
         if is_dataclass(arg.type):
             return self.dataclass(arg)
