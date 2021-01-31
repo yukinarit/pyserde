@@ -331,7 +331,7 @@ class Renderer:
             res = f"({self.c_tor_with_check(arg)}) if reuse_instances else {self.c_tor(arg)}"
         elif arg.type in [date, datetime]:
             from_iso = f"{arg.type.__name__}.fromisoformat({arg.data})"
-            res = f"({arg.data} if isinstance({arg.data}, {arg.type.__name__} else {from_iso})) if reuse_instances else {from_iso}"
+            res = f"({arg.data} if isinstance({arg.data}, {arg.type.__name__}) else {from_iso}) if reuse_instances else {from_iso}"
         else:
             return f'__custom_deserializer__({arg.type.__name__}, {arg.data})'
 
