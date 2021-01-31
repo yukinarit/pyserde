@@ -14,6 +14,7 @@ parts of pyserde.
 import abc
 import dataclasses
 import functools
+import sys
 from dataclasses import dataclass, is_dataclass
 from datetime import datetime, date
 from decimal import Decimal
@@ -28,6 +29,7 @@ from .compat import (has_default, has_default_factory, is_bare_dict, is_bare_lis
                      is_list, is_opt, is_primitive, is_tuple, is_union, iter_types, type_args)
 from .core import FROM_DICT, FROM_ITER, HIDDEN_NAME, SETTINGS, Field, Hidden, SerdeError, T, conv, fields, gen, logger
 from .more_types import deserialize as custom
+from .py36_datetime_compat import py36_date_fromisoformat, py36_datetime_fromisoformat
 
 __all__: List = ['deserialize', 'is_deserializable', 'Deserializer', 'from_dict', 'from_tuple']
 
@@ -88,6 +90,14 @@ def deserialize(_cls=None, rename_all: Optional[str] = None, reuse_instances_def
         for typ in iter_types(cls):
             if is_dataclass(typ) or is_enum(typ) or not is_primitive(typ):
                 getattr(cls, '__serde_scope__')[typ.__name__] = typ
+
+            # python 3.6 has no fromisoformat functions for date & datetime, so we have to add our own.
+            # See Renderer.render for usage
+            if sys.version_info[:2] == (3,6):
+                if typ is date:
+                    g['__py36_date_fromisoformat__'] = py36_date_fromisoformat
+                elif typ is datetime:
+                    g['__py36_datetime_fromisoformat__'] = py36_datetime_fromisoformat
 
         # Collect default values and default factories used in the generated code.
         # To avoid name conflicts, name the variables like "__default_<NAME>__".
@@ -331,6 +341,13 @@ class Renderer:
             res = f"({self.c_tor_with_check(arg)}) if reuse_instances else {self.c_tor(arg)}"
         elif arg.type in [date, datetime]:
             from_iso = f"{arg.type.__name__}.fromisoformat({arg.data})"
+
+            if sys.version_info[:2] == (3,6):  # python 3.6 has no fromisoformat functions
+                if arg.type is date:
+                    from_iso = f"__py36_date_fromisoformat__({arg.data})"
+                elif arg.type is datetime:
+                    from_iso = f"__py36_datetime_fromisoformat__({arg.data})"
+
             res = f"({arg.data} if isinstance({arg.data}, {arg.type.__name__}) else {from_iso}) if reuse_instances else {from_iso}"
         else:
             return f'__custom_deserializer__({arg.type.__name__}, {arg.data})'
