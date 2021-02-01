@@ -16,8 +16,6 @@ logger = logging.getLogger('serde')
 
 JsonValue = TypeVar('JsonValue', str, int, float, bool, Dict, List)
 
-SE_NAME = '__serde_serialize__'
-
 FROM_ITER = '__serde_from_iter__'
 
 FROM_DICT = '__serde_from_dict__'

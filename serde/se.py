@@ -18,8 +18,7 @@ import jinja2
 
 from .compat import (is_bare_dict, is_bare_list, is_bare_tuple, is_dict, is_enum, is_list, is_opt, is_primitive,
                      is_tuple, is_union, iter_types, type_args)
-from .core import (HIDDEN_NAME, SE_NAME, SETTINGS, TO_DICT, TO_ITER, Field, Hidden, SerdeError, T, conv, fields, gen,
-                   logger)
+from .core import (HIDDEN_NAME, SETTINGS, TO_DICT, TO_ITER, Field, Hidden, SerdeError, T, conv, fields, gen, logger)
 from .more_types import serialize as custom
 
 __all__: List = ['serialize', 'is_serializable', 'Serializer', 'to_tuple', 'to_dict']
@@ -83,11 +82,6 @@ def serialize(_cls=None, rename_all: Optional[str] = None, reuse_instances_defau
             scope = {}
             setattr(cls, '__serde_scope__', scope)
 
-        def serialize(self, ser, **opts) -> None:
-            return ser.serialize(self, **opts)
-
-        setattr(cls, SE_NAME, serialize)
-
         g: Dict[str, Any] = {}
         for f in sefields(cls):
             if f.skip_if:
@@ -128,7 +122,7 @@ def is_serializable(instance_or_class: Any) -> bool:
     >>> is_serializable(Foo)
     True
     """
-    return hasattr(instance_or_class, SE_NAME)
+    return hasattr(instance_or_class, TO_ITER) or hasattr(instance_or_class, TO_DICT)
 
 
 def to_obj(o, named: bool, reuse_instances: bool):
