@@ -1,6 +1,7 @@
 import sys
 
-import basics
+import simple
+import collection
 import default
 import env
 import jsonfile
@@ -11,7 +12,8 @@ import yamlfile
 
 
 def run_all():
-    run(basics)
+    run(simple)
+    run(collection)
     run(default)
     run(env)
     run(rename)
@@ -22,6 +24,7 @@ def run_all():
 
 
 def run(module):
+    print('-----------------')
     print(f'running {module.__name__}')
     module.main()
 

@@ -1,3 +1,4 @@
+import sys
 from dataclasses import dataclass
 from typing import Dict, List, Optional, Tuple, Union
 
@@ -11,8 +12,11 @@ from .data import Bool, Float, Int, Pri, PriOpt, Str
 
 def test_types():
     assert is_list(List[int])
+    assert is_list(List)
     assert is_tuple(Tuple[int, int, int])
+    assert is_tuple(Tuple)
     assert is_dict(Dict[str, int])
+    assert is_dict(Dict)
     assert is_opt(Optional[int])
     assert is_union(Union[int, str])
     assert is_union(Union[Optional[int], Optional[str]])
@@ -21,6 +25,14 @@ def test_types():
     assert not is_opt(Union[Optional[int], Optional[str]])
     assert is_union(Union[Optional[int], Optional[str]])
 
+    if sys.version_info[:3] >= (3, 9, 0):
+        assert is_list(list[int])
+        assert is_list(list)
+        assert is_tuple(tuple[int, int, int])
+        assert is_tuple(tuple)
+        assert is_dict(dict[str, int])
+        assert is_dict(dict)
+
 
 def test_iter_types():
     assert [Pri, int, str, float, bool] == list(iter_types(Pri))
@@ -28,9 +40,6 @@ def test_iter_types():
     assert [str] == list(iter_types(List[str]))
     assert [int, str, bool, float] == list(iter_types(Tuple[int, str, bool, float]))
     assert [PriOpt, int, str, float, bool] == list(iter_types(PriOpt))
-    assert [Pri, int, str, float, bool, Pri, int, str, float, bool, Pri, int, str, float, bool] == list(
-        iter_types(Tuple[List[Pri], Tuple[Pri, Pri]])
-    )
 
 
 def test_type_args():
@@ -41,6 +50,11 @@ def test_type_args():
     assert (List[int], type(None)) == type_args(Optional[List[int]])
     assert (List[int], Dict[str, int]) == type_args(Union[List[int], Dict[str, int]])
     assert (int, type(None), str) == type_args(Union[Optional[int], str])
+
+    if sys.version_info[:3] >= (3, 9, 0):
+        assert (int,) == type_args(list[int])
+        assert (int, str) == type_args(dict[int, str])
+        assert (int, str) == type_args(tuple[int, str])
 
 
 def test_union_args():

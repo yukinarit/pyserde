@@ -6,6 +6,7 @@ import logging
 import os
 import pathlib
 import uuid
+import sys
 from dataclasses import dataclass, field
 from datetime import datetime, date
 from typing import Dict, List, Optional, Tuple
@@ -14,6 +15,7 @@ import itertools
 import more_itertools
 import pytest
 
+import serde
 import serde.compat
 from serde import to_dict, to_tuple, deserialize, from_dict, from_tuple, serialize, SerdeError
 from serde.json import from_json, to_json
@@ -56,11 +58,13 @@ types: List = [
     (None, Optional[int]),
     ([1, 2], List[int]),  # Container
     ([1, 2], List),
+    ([1, 2], list),
     ([], List[int]),
     ((1, 1), Tuple[int, int]),
     ((1, 1), Tuple),
     ({'a': 1}, Dict[str, int]),
     ({'a': 1}, Dict),
+    ({'a': 1}, dict),
     ({}, Dict[str, int]),
     (Pri(10, 'foo', 100.0, True), Pri),  # dataclass
     (Pri(10, 'foo', 100.0, True), Optional[Pri]),
@@ -89,6 +93,8 @@ if os.name == "posix":
 if os.name == "nt":
     types.append((pathlib.WindowsPath('C:\\tmp'), pathlib.WindowsPath))
 
+if sys.version_info[:3] >= (3, 9, 0):
+    types.extend([([1, 2], list[int]), ({'a': 1}, dict[str, int]), ((1, 1), tuple[int, int])])
 
 types_combinations: List = list(map(lambda c: list(more_itertools.flatten(c)), itertools.combinations(types, 2)))
 

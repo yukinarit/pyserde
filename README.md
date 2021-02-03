@@ -173,6 +173,20 @@ class Foo:
     nested: Bar
 ```
 
+For python >= 3.9, you can use [PEP585](https://www.python.org/dev/peps/pep-0585/) style type annotations for standard collections.
+
+```python
+@deserialize
+@serialize
+class Foo:
+    i: int
+    l: list[str]
+    t: tuple[int, float, str, bool]
+    d: dict[str, list[tuple[str, int]]]
+    o: Optional[str]
+    nested: Bar
+```
+
 ## Supported data formats
 
 ### JSON
