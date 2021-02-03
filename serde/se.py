@@ -150,8 +150,23 @@ def to_obj(o, named: bool, reuse_instances: bool):
 
     return o
 
+
+def astuple(v):
+    """
+    Convert class with `serialize` to `tuple`.
+    """
+    return to_tuple(v, reuse_instances=False)
+
+
 def to_tuple(o, reuse_instances: bool = ...) -> Any:
     return to_obj(o, named=False, reuse_instances=reuse_instances)
+
+
+def asdict(v):
+    """
+    Convert class with `serialize` to `dict`.
+    """
+    return to_dict(v, reuse_instances=False)
 
 
 def to_dict(o, reuse_instances: bool = ...) -> Any:
