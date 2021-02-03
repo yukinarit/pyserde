@@ -159,6 +159,26 @@ def astuple(v):
 
 
 def to_tuple(o, reuse_instances: bool = ...) -> Any:
+    """
+    Convert object into tuple.
+
+    >>> @serialize
+    ... @dataclass
+    ... class Foo:
+    ...     i: int
+    >>>
+    >>> to_tuple(Foo(10))
+    (10,)
+    >>>
+    >>> to_tuple([Foo(10), Foo(20)])
+    [(10,), (20,)]
+    >>>
+    >>> to_tuple({'a': Foo(10), 'b': Foo(20)})
+    {'a': (10,), 'b': (20,)}
+    >>>
+    >>> to_tuple((Foo(10), Foo(20)))
+    ((10,), (20,))
+    """
     return to_obj(o, named=False, reuse_instances=reuse_instances)
 
 

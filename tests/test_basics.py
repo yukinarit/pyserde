@@ -577,3 +577,23 @@ def test_ext(se, de):
     with pytest.raises(SerdeError) as de_ex:
         de(Base, se(a, ext_dict=Base.EXT_DICT), ext_dict={})
     assert str(de_ex.value) == "Could not find type for code 0 in ext_dict"
+
+
+def test_exception_on_not_supported_types():
+    class UnsupportedClass:
+        def __init__(self):
+            pass
+
+    @deserialize
+    @serialize
+    @dataclass
+    class Foo:
+        b: UnsupportedClass
+
+    with pytest.raises(SerdeError) as se_ex:
+        to_dict(Foo(UnsupportedClass()))
+    assert str(se_ex.value).startswith("Unsupported type: <class \'tests.test_basics.test_exception_on_not_supported_types.<locals>.UnsupportedClass\'>")
+
+    with pytest.raises(SerdeError) as de_ex:
+        from_dict(Foo, {"b": UnsupportedClass()})
+    assert str(de_ex.value).startswith("Unsupported type: <class \'tests.test_basics.test_exception_on_not_supported_types.<locals>.UnsupportedClass\'>")
