@@ -27,14 +27,14 @@ class MsgPackDeserializer(Deserializer):
         return msgpack.unpackb(s, raw=raw, use_list=use_list, **opts)
 
 
-def to_msgpack(obj: Any, se: Serializer = MsgPackSerializer, named: bool = True, ext_dict: Dict[int, Type] = None, **opts) -> bytes:
+def to_msgpack(obj: Any, se: Serializer = MsgPackSerializer, named: bool = True, ext_dict: Dict[Type, int] = None, **opts) -> bytes:
     """
     If `ext_dict` option is specified, `obj` is encoded as a `msgpack.ExtType`
     """
     ext_type_code = None
     if ext_dict is not None:
         obj_type = type(obj)
-        ext_type_code = next((code for code, ext_type in ext_dict.items() if obj_type is ext_type), None)
+        ext_type_code = ext_dict.get(obj_type)
         if ext_type_code is None:
             raise SerdeError(f"Could not find type code for {obj_type.__name__} in ext_dict")
 

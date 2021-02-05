@@ -532,23 +532,11 @@ def test_ext(se, de):
         i: int
         s: str
 
-        class MessageType(enum.IntEnum):
-            A = 0
-            B = 1
-
-        EXT_DICT = {}
-
-        def __init_subclass__(cls, **kwargs):
-            super().__init_subclass__(**kwargs)
-            cls.EXT_DICT[cls._type] = cls  # type: ignore
-
     @deserialize
     @serialize
     @dataclass
     class DerivedA(Base):
         j: int
-
-        _type = Base.MessageType.A
 
     @deserialize
     @serialize
@@ -556,18 +544,20 @@ def test_ext(se, de):
     class DerivedB(Base):
         k: float
 
-        _type = Base.MessageType.B
-
     a = DerivedA(i=7, s="A", j=13)
     aa = de(Base, se(a))
     assert aa != a
 
+    EXT_TYPE_DICT = {0: DerivedA, 1:DerivedB}
+    # reverse the external type dict for faster serialization
+    EXT_TYPE_DICT_REVERSED = {v:k for k,v in EXT_TYPE_DICT.items()}
+
     a = DerivedA(i=7, s="A", j=13)
-    aa = de(Base, se(a, ext_dict=Base.EXT_DICT), ext_dict=Base.EXT_DICT)
+    aa = de(None, se(a, ext_dict=EXT_TYPE_DICT_REVERSED), ext_dict=EXT_TYPE_DICT)
     assert aa == a
 
     b = DerivedB(i=3, s="B", k=11.0)
-    bb = de(Base, se(b, ext_dict=Base.EXT_DICT), ext_dict=Base.EXT_DICT)
+    bb = de(None, se(b, ext_dict=EXT_TYPE_DICT_REVERSED), ext_dict=EXT_TYPE_DICT)
     assert b == bb
 
     with pytest.raises(SerdeError) as se_ex:
@@ -575,7 +565,7 @@ def test_ext(se, de):
     assert str(se_ex.value) == "Could not find type code for DerivedA in ext_dict"
 
     with pytest.raises(SerdeError) as de_ex:
-        de(Base, se(a, ext_dict=Base.EXT_DICT), ext_dict={})
+        de(None, se(a, ext_dict=EXT_TYPE_DICT_REVERSED), ext_dict={})
     assert str(de_ex.value) == "Could not find type for code 0 in ext_dict"
 
 
