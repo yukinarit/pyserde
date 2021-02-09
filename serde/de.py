@@ -14,8 +14,14 @@ parts of pyserde.
 import abc
 import dataclasses
 import functools
+import sys
 from dataclasses import dataclass, is_dataclass
+from datetime import datetime, date
+from decimal import Decimal
+from ipaddress import IPv4Address, IPv6Address, IPv4Network, IPv6Network, IPv4Interface, IPv6Interface
+from pathlib import Path, PosixPath, WindowsPath, PurePath, PurePosixPath, PureWindowsPath
 from typing import Any, Callable, Dict, List, Optional, Type
+from uuid import UUID
 
 import jinja2
 
@@ -23,13 +29,14 @@ from .compat import (has_default, has_default_factory, is_bare_dict, is_bare_lis
                      is_list, is_opt, is_primitive, is_tuple, is_union, iter_types, type_args)
 from .core import FROM_DICT, FROM_ITER, HIDDEN_NAME, SETTINGS, Field, Hidden, SerdeError, T, conv, fields, gen, logger
 from .more_types import deserialize as custom
+from .py36_datetime_compat import py36_date_fromisoformat, py36_datetime_fromisoformat
 
 __all__: List = ['deserialize', 'is_deserializable', 'Deserializer', 'from_dict', 'from_tuple']
 
 Custom = Optional[Callable[['DeField', Any], Any]]
 
 
-def deserialize(_cls=None, rename_all: Optional[str] = None):
+def deserialize(_cls=None, rename_all: Optional[str] = None, reuse_instances_default: bool = True):
     """
     `deserialize` decorator. A dataclass with this decorator can be deserialized
     into an object from various data format such as JSON and MsgPack.
@@ -84,6 +91,14 @@ def deserialize(_cls=None, rename_all: Optional[str] = None):
             if is_dataclass(typ) or is_enum(typ) or not is_primitive(typ):
                 getattr(cls, '__serde_scope__')[typ.__name__] = typ
 
+            # python 3.6 has no fromisoformat functions for date & datetime, so we have to add our own.
+            # See Renderer.render for usage
+            if sys.version_info[:2] == (3,6):
+                if typ is date:
+                    g['__py36_date_fromisoformat__'] = py36_date_fromisoformat
+                elif typ is datetime:
+                    g['__py36_datetime_fromisoformat__'] = py36_datetime_fromisoformat
+
         # Collect default values and default factories used in the generated code.
         # To avoid name conflicts, name the variables like "__default_<NAME>__".
         for f in dataclasses.fields(cls):
@@ -94,8 +109,8 @@ def deserialize(_cls=None, rename_all: Optional[str] = None):
 
         logger.debug(f'{cls.__name__}: __serde_scope__ {scope}')
 
-        cls = de_func(cls, FROM_ITER, render_from_iter(cls, custom), g)
-        cls = de_func(cls, FROM_DICT, render_from_dict(cls, rename_all, custom), g)
+        cls = de_func(cls, FROM_ITER, render_from_iter(cls, reuse_instances_default, custom), g)
+        cls = de_func(cls, FROM_DICT, render_from_dict(cls, rename_all, reuse_instances_default, custom), g)
         return cls
 
     if _cls is None:
@@ -139,10 +154,47 @@ class Deserializer(metaclass=abc.ABCMeta):
         """
 
 
-def from_obj(c: Type[T], o: Any, de: Type[Deserializer] = None, strict=True, named=True, **opts):
+def from_obj(c: Type[T], o: Any, named:bool, reuse_instances:bool):
     """
     Deserialize from an object into an instance of the type specified as arg `c`.
     `c` can be either primitive type, `List`, `Tuple`, `Dict` or `deserialize` class.
+    """
+    thisfunc = functools.partial(from_obj, named=named, reuse_instances=reuse_instances)
+    if o is None:
+        return None
+    if is_deserializable(c):
+        if named:
+            return getattr(c, FROM_DICT)(o, reuse_instances=reuse_instances)
+        else:
+            return getattr(c, FROM_ITER)(o, reuse_instances=reuse_instances)
+    elif is_opt(c):
+        if o is None:
+            return None
+        else:
+            return thisfunc(type_args(c)[0], o)
+    elif is_union(c):
+        v = None
+        for typ in type_args(c):
+            try:
+                v = thisfunc(typ, o)
+                break
+            except (SerdeError, ValueError):
+                pass
+        return v
+    elif is_list(c):
+        return [thisfunc(type_args(c)[0], e) for e in o]
+    elif is_tuple(c):
+        return tuple(thisfunc(type_args(c)[i], e) for i, e in enumerate(o))
+    # TODO set
+    elif is_dict(c):
+        return {thisfunc(type_args(c)[0], k): thisfunc(type_args(c)[1], v) for k, v in o.items()}
+
+    return o
+
+
+def from_dict(cls, o, reuse_instances: bool = ...):
+    """
+    Deserialize from dictionary.
 
     ### Dataclass
 
@@ -157,7 +209,7 @@ def from_obj(c: Type[T], o: Any, de: Type[Deserializer] = None, strict=True, nam
     ...     b: bool
     >>>
     >>> obj = {'i': 10, 'f': 0.1, 's': 'foo', 'b': False}
-    >>> from_obj(Foo, obj)
+    >>> from_dict(Foo, obj)
     Foo(i=10, f=0.1, s='foo', b=False)
 
     ### Containers
@@ -170,65 +222,20 @@ def from_obj(c: Type[T], o: Any, de: Type[Deserializer] = None, strict=True, nam
     ... class Foo:
     ...     i: int
     >>>
-    >>> from_obj(List[Foo], [{'i': 10}, {'i': 20}])
+    >>> from_dict(List[Foo], [{'i': 10}, {'i': 20}])
     [Foo(i=10), Foo(i=20)]
     >>>
-    >>> from_obj(Dict[str, Foo], {'foo1': {'i': 10}, 'foo2': {'i': 20}})
+    >>> from_dict(Dict[str, Foo], {'foo1': {'i': 10}, 'foo2': {'i': 20}})
     {'foo1': Foo(i=10), 'foo2': Foo(i=20)}
     """
-    thisfunc = functools.partial(from_obj, named=named)
-    if de:
-        o = de.deserialize(o, **opts)
-    if o is None:
-        v = None
-    if is_deserializable(c):
-        if named:
-            v = from_dict(c, o)
-        else:
-            v = from_tuple(c, o)
-    elif is_opt(c):
-        if o is None:
-            v = None
-        else:
-            v = thisfunc(type_args(c)[0], o)
-    elif is_union(c):
-        v = None
-        for typ in type_args(c):
-            try:
-                v = thisfunc(typ, o)
-                break
-            except (SerdeError, ValueError):
-                pass
-    elif is_list(c):
-        v = [thisfunc(type_args(c)[0], e) for e in o]
-    elif is_tuple(c):
-        v = tuple(thisfunc(type_args(c)[i], e) for i, e in enumerate(o))
-    elif is_dict(c):
-        v = {thisfunc(type_args(c)[0], k): thisfunc(type_args(c)[1], v) for k, v in o.items()}
-    else:
-        v = o
-
-    return v
+    return from_obj(cls, o, named=True, reuse_instances=reuse_instances)
 
 
-def from_dict(cls, o):
-    """
-    Deserialize from dictionary.
-    """
-    if is_deserializable(cls):
-        return cls.__serde_from_dict__(o)
-    else:
-        return from_obj(cls, o, named=True)
-
-
-def from_tuple(cls, o):
+def from_tuple(cls, o, reuse_instances: bool = ...):
     """
     Deserialize from tuple.
     """
-    if is_deserializable(cls):
-        return cls.__serde_from_iter__(o)
-    else:
-        return from_obj(cls, o, named=False)
+    return from_obj(cls, o, named=False, reuse_instances=reuse_instances)
 
 
 @dataclass
@@ -325,6 +332,23 @@ class Renderer:
             res = self.enum(arg)
         elif any(f(arg.type) for f in (is_primitive, is_union)):
             res = self.primitive(arg)
+        elif arg.type in [
+            Decimal,
+            Path, PosixPath, WindowsPath, PurePath, PurePosixPath, PureWindowsPath,
+            UUID,
+            IPv4Address, IPv6Address, IPv4Network, IPv6Network, IPv4Interface, IPv6Interface
+        ]:
+            res = f"({self.c_tor_with_check(arg)}) if reuse_instances else {self.c_tor(arg)}"
+        elif arg.type in [date, datetime]:
+            from_iso = f"{arg.type.__name__}.fromisoformat({arg.data})"
+
+            if sys.version_info[:2] == (3,6):  # python 3.6 has no fromisoformat functions
+                if arg.type is date:
+                    from_iso = f"__py36_date_fromisoformat__({arg.data})"
+                elif arg.type is datetime:
+                    from_iso = f"__py36_datetime_fromisoformat__({arg.data})"
+
+            res = f"({arg.data} if isinstance({arg.data}, {arg.type.__name__}) else {from_iso}) if reuse_instances else {from_iso}"
         else:
             return f'__custom_deserializer__({arg.type.__name__}, {arg.data})'
 
@@ -334,14 +358,14 @@ class Renderer:
             else:
                 exists = f'{arg.datavar}.get("{arg.name}") is not None'
             if has_default(arg):
-                return f'{res} if {exists} else __default_{arg.name}__'
+                return f'({res}) if {exists} else __default_{arg.name}__'
             elif has_default_factory(arg):
-                return f'{res} if {exists} else __default_{arg.name}__()'
+                return f'({res}) if {exists} else __default_{arg.name}__()'
 
         return res
 
     def dataclass(self, arg: DeField) -> str:
-        return f'{arg.type.__name__}.{self.func}({arg.data})'
+        return f'{arg.type.__name__}.{self.func}({arg.data}, reuse_instances=reuse_instances)'
 
     def opt(self, arg: DeField) -> str:
         """
@@ -349,20 +373,20 @@ class Renderer:
 
         >>> from typing import List
         >>> Renderer('foo').render(DeField(Optional[int], 'o', datavar='data'))
-        'data["o"] if data.get("o") is not None else None'
+        '(data["o"]) if data.get("o") is not None else None'
 
         >>> Renderer('foo').render(DeField(Optional[List[int]], 'o', datavar='data'))
-        '[v for v in data["o"]] if data.get("o") is not None else None'
+        '([v for v in data["o"]]) if data.get("o") is not None else None'
 
         >>> Renderer('foo').render(DeField(Optional[List[int]], 'o', datavar='data'))
-        '[v for v in data["o"]] if data.get("o") is not None else None'
+        '([v for v in data["o"]]) if data.get("o") is not None else None'
 
         >>> @deserialize
         ... @dataclass
         ... class Foo:
         ...     o: Optional[List[int]]
         >>> Renderer('foo').render(DeField(Optional[Foo], 'f', datavar='data'))
-        'Foo.foo(data["f"]) if data.get("f") is not None else None'
+        '(Foo.foo(data["f"], reuse_instances=reuse_instances)) if data.get("f") is not None else None'
         """
         value = arg[0]
         if has_default(arg):
@@ -372,7 +396,7 @@ class Renderer:
                 exists = f'{arg.data} is not None'
             else:
                 exists = f'{arg.datavar}.get("{arg.name}") is not None'
-            return f'{self.render(value)} if {exists} else None'
+            return f'({self.render(value)}) if {exists} else None'
 
     def list(self, arg: DeField) -> str:
         """
@@ -399,11 +423,11 @@ class Renderer:
         ... @dataclass
         ... class Foo: pass
         >>> Renderer('foo').render(DeField(Tuple[str, int, List[int], Foo], 'd', datavar='data'))
-        '(data["d"][0], data["d"][1], [v for v in data["d"][2]], Foo.foo(data["d"][3]))'
+        '(data["d"][0], data["d"][1], [v for v in data["d"][2]], Foo.foo(data["d"][3], reuse_instances=reuse_instances))'
 
         >>> field = DeField(Tuple[str, int, List[int], Foo], 'd', datavar='data', index=0, iterbased=True)
         >>> Renderer('foo').render(field)
-        '(data[0][0], data[0][1], [v for v in data[0][2]], Foo.foo(data[0][3]))'
+        '(data[0][0], data[0][1], [v for v in data[0][2]], Foo.foo(data[0][3], reuse_instances=reuse_instances))'
         """
         if is_bare_tuple(arg.type):
             return f'tuple({arg.data})'
@@ -426,7 +450,7 @@ class Renderer:
         ... @dataclass
         ... class Foo: pass
         >>> Renderer('foo').render(DeField(Dict[Foo, List[Foo]], 'f', datavar='data'))
-        '{Foo.foo(k): [Foo.foo(v) for v in v] for k, v in data["f"].items()}'
+        '{Foo.foo(k, reuse_instances=reuse_instances): [Foo.foo(v, reuse_instances=reuse_instances) for v in v] for k, v in data["f"].items()}'
         """
         if is_bare_dict(arg.type):
             return arg.data
@@ -456,6 +480,14 @@ class Renderer:
         else:
             return arg.data
 
+    def c_tor(self, arg: DeField) -> str:
+        return f"{arg.type.__name__}({arg.data})"
+
+    def c_tor_with_check(self, arg: DeField, ctor: Optional[str] = None) -> str:
+        if ctor is None:
+            ctor = self.c_tor(arg)
+        return f"{arg.data} if isinstance({arg.data}, {arg.type.__name__}) else {ctor}"
+
 
 def to_arg(f: DeField, index, rename_all: Optional[str] = None) -> DeField:
     f.index = index
@@ -470,9 +502,11 @@ def to_iter_arg(f: DeField, *args, **kwargs):
     return f
 
 
-def render_from_iter(cls: Type, custom: Custom = None) -> str:
+def render_from_iter(cls: Type, reuse_instances_default: bool = True, custom: Custom = None) -> str:
     template = """
-def {{func}}(data):
+def {{func}}(data, reuse_instances = {{reuse_instances_default}}):
+  if reuse_instances is Ellipsis:
+    reuse_instances = {{reuse_instances_default}}
   {# List up all classes used by this class. -#}
   {% for name in cls.__serde_scope__ -%}
   {{name}} = getattr(cls, '__serde_scope__')['{{name}}']
@@ -492,12 +526,14 @@ def {{func}}(data):
     env.filters.update({'rvalue': renderer.render})
     env.filters.update({'fields': defields})
     env.filters.update({'arg': to_iter_arg})
-    return env.get_template('iter').render(func=FROM_ITER, cls=cls)
+    return env.get_template('iter').render(func=FROM_ITER, cls=cls, reuse_instances_default=reuse_instances_default)
 
 
-def render_from_dict(cls: Type, rename_all: Optional[str] = None, custom: Custom = None) -> str:
+def render_from_dict(cls: Type, rename_all: Optional[str] = None, reuse_instances_default: bool = True, custom: Custom = None) -> str:
     template = """
-def {{func}}(data):
+def {{func}}(data, reuse_instances = {{reuse_instances_default}}):
+  if reuse_instances is Ellipsis:
+    reuse_instances = {{reuse_instances_default}}
   {# List up all classes used by this class. -#}
   {% for name in cls.__serde_scope__ -%}
   {{name}} = getattr(cls, '__serde_scope__')['{{name}}']
@@ -518,7 +554,7 @@ def {{func}}(data):
     env.filters.update({'rvalue': renderer.render})
     env.filters.update({'fields': defields})
     env.filters.update({'arg': functools.partial(to_arg, rename_all=rename_all)})
-    return env.get_template('dict').render(func=FROM_DICT, cls=cls)
+    return env.get_template('dict').render(func=FROM_DICT, cls=cls, reuse_instances_default=reuse_instances_default)
 
 
 def de_func(cls: Type[T], func: str, code: str, g: Dict) -> Type[T]:

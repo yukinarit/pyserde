@@ -1,4 +1,4 @@
-from serde import asdict, astuple
+from serde import to_dict, to_tuple, asdict, astuple
 
 from . import data
 from .data import (Bool, Float, Int, NestedInt, NestedPri, NestedPriDict, NestedPriList, NestedPriTuple, Pri, PriDict,
@@ -7,12 +7,16 @@ from .data import (Bool, Float, Int, NestedInt, NestedPri, NestedPriDict, Nested
 
 def test_asdict():
     p = Pri(10, 'foo', 100.0, True)
+    assert {'b': True, 'f': 100.0, 'i': 10, 's': 'foo'} == to_dict(p)
     assert {'b': True, 'f': 100.0, 'i': 10, 's': 'foo'} == asdict(p)
 
 
 def test_astuple():
+    assert data.PRI_TUPLE == to_tuple(data.PRI)
     assert data.PRI_TUPLE == astuple(data.PRI)
+    assert data.PRILIST == to_tuple(PriList(*data.PRILIST))
     assert data.PRILIST == astuple(PriList(*data.PRILIST))
+    assert data.NESTED_PRILIST_TUPLE == to_tuple(NestedPriList(*data.NESTED_PRILIST))
     assert data.NESTED_PRILIST_TUPLE == astuple(NestedPriList(*data.NESTED_PRILIST))
 
 

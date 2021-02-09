@@ -52,7 +52,7 @@ Serialize and deserialize a [struct](https://github.com/yukinarit/pyserde/blob/m
 
 Serialize the struct into tuple and dictionary.
 
-| astuple | asdict|
+| to_tuple | to_dict |
 |-----------|-------------|
 | <img src="https://raw.githubusercontent.com/yukinarit/pyserde/master/bench/charts/astuple-small.png"> | <img src="https://raw.githubusercontent.com/yukinarit/pyserde/master/bench/charts/asdict-small.png"> |
 
@@ -150,6 +150,9 @@ That's it! pyserde offers many more features. If you're interested, please read 
 * More types
     * [`pathlib.Path`](https://docs.python.org/3/library/pathlib.html)
     * [`decimal.Decimal`](https://docs.python.org/3/library/decimal.html)
+    * [`uuid.UUID`](https://docs.python.org/3/library/uuid.html)
+    * [`datetime.date`](https://docs.python.org/3/library/datetime.html#date-objects) & [`datetime.datetime`](https://docs.python.org/3/library/datetime.html#datetime-objects)
+    * [`ipaddress`](https://docs.python.org/3/library/ipaddress.html)
 
 You can write pretty complex class like this:
 ```python

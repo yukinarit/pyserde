@@ -1,33 +1,35 @@
 import dataclasses
 import decimal
 import enum
-import itertools
+import ipaddress
 import logging
+import os
 import pathlib
+import uuid
 from dataclasses import dataclass, field
+from datetime import datetime, date
 from typing import Dict, List, Optional, Tuple
 
+import itertools
+import more_itertools
 import pytest
 
-import more_itertools
-import serde
 import serde.compat
-from serde import asdict, astuple, deserialize, from_dict, from_tuple, serialize
+from serde import to_dict, to_tuple, deserialize, from_dict, from_tuple, serialize, SerdeError
 from serde.json import from_json, to_json
 from serde.msgpack import from_msgpack, to_msgpack
 from serde.toml import from_toml, to_toml
 from serde.yaml import from_yaml, to_yaml
-
 from . import data
-from .data import Bool, Float, Int, ListPri, NestedPri, NestedPriOpt, Pri, PriDefault, PriOpt, Str
+from .data import Bool, Float, Int, ListPri, Pri, PriDefault, Str
 
 log = logging.getLogger('test')
 
 serde.init(True)
 
-format_dict: List = [(asdict, from_dict)]
+format_dict: List = [(to_dict, from_dict)]
 
-format_tuple: List = [(astuple, from_tuple)]
+format_tuple: List = [(to_tuple, from_tuple)]
 
 format_json: List = [(to_json, from_json)]
 
@@ -39,7 +41,11 @@ format_toml: List = [(to_toml, from_toml)]
 
 all_formats: List = format_dict + format_tuple + format_json + format_msgpack + format_yaml + format_toml
 
-opt_case: List = [{}, {'rename_all': 'camelcase'}, {'rename_all': 'snakecase'}]
+opt_case: List = [
+    {'reuse_instances_default':False},
+    {'reuse_instances_default':False, 'rename_all': 'camelcase'},
+    {'reuse_instances_default':False, 'rename_all': 'snakecase'}
+]
 
 types: List = [
     (10, int),  # Primitive
@@ -62,8 +68,27 @@ types: List = [
     (pathlib.Path('/tmp/foo'), pathlib.Path),  # Extended types
     (pathlib.Path('/tmp/foo'), Optional[pathlib.Path]),
     (None, Optional[pathlib.Path]),
+    (pathlib.PurePath('/tmp/foo'), pathlib.PurePath),
+    (pathlib.PurePosixPath('/tmp/foo'), pathlib.PurePosixPath),
+    (pathlib.PureWindowsPath('C:\\tmp'), pathlib.PureWindowsPath),
+    (uuid.UUID("8f85b32c-a0be-466c-87eb-b7bbf7a01683"), uuid.UUID),
+    (ipaddress.IPv4Address("127.0.0.1"), ipaddress.IPv4Address),
+    (ipaddress.IPv6Address("::1"), ipaddress.IPv6Address),
+    (ipaddress.IPv4Network("127.0.0.0/8"), ipaddress.IPv4Network),
+    (ipaddress.IPv6Network("::/128"), ipaddress.IPv6Network),
+    (ipaddress.IPv4Interface("192.168.1.1/24"), ipaddress.IPv4Interface),
+    (ipaddress.IPv6Interface("::1/128"), ipaddress.IPv6Interface),
     (decimal.Decimal(10), decimal.Decimal),
+    (datetime.now(), datetime),
+    (date.today(), date),
 ]
+
+# these types can only be instantiated on their corresponding system
+if os.name == "posix":
+    types.append((pathlib.PosixPath('/tmp/foo'), pathlib.PosixPath))
+if os.name == "nt":
+    types.append((pathlib.WindowsPath('C:\\tmp'), pathlib.WindowsPath))
+
 
 types_combinations: List = list(map(lambda c: list(more_itertools.flatten(c)), itertools.combinations(types, 2)))
 
@@ -116,8 +141,8 @@ def test_simple(se, de, opt, t, T):
     c = C(10, t)
     assert c == de(C, se(c))
 
-    @deserialize
-    @serialize
+    @deserialize(**opt)
+    @serialize(**opt)
     @dataclass
     class Nested:
         t: T
@@ -130,6 +155,38 @@ def test_simple(se, de, opt, t, T):
 
     c = C(Nested(t))
     assert c == de(C, se(c))
+
+
+@pytest.mark.parametrize('t,T', types, ids=type_ids())
+@pytest.mark.parametrize('opt', opt_case, ids=opt_case_ids())
+@pytest.mark.parametrize('se,de', (format_dict + format_tuple))
+def test_simple_with_reuse_instances(se, de, opt, t, T):
+    log.info(f'Running test with se={se.__name__} de={de.__name__} opts={opt} while reusing instances')
+
+    @deserialize(**opt)
+    @serialize(**opt)
+    @dataclass
+    class C:
+        i: int
+        t: T
+
+    c = C(10, t)
+    assert c == de(C, se(c, reuse_instances=True), reuse_instances=True)
+
+    @deserialize(**opt)
+    @serialize(**opt)
+    @dataclass
+    class Nested:
+        t: T
+
+    @deserialize(**opt)
+    @serialize(**opt)
+    @dataclass
+    class C:
+        n: Nested
+
+    c = C(Nested(t))
+    assert c == de(C, se(c, reuse_instances=True), reuse_instances=True)
 
 
 def test_non_dataclass():
@@ -318,7 +375,7 @@ def test_dataclass_default_factory(se, de):
     f = Foo('bar')
     assert f == de(Foo, se(f))
 
-    assert {'foo': 'bar', 'items': {}} == asdict(f)
+    assert {'foo': 'bar', 'items': {}} == to_dict(f)
     assert f == from_dict(Foo, {'foo': 'bar'})
 
 
@@ -394,8 +451,8 @@ def test_rename(se, de):
     assert f == de(Foo, se(f))
 
 
-@pytest.mark.parametrize('se,de', format_json + format_yaml + format_toml + format_msgpack)
-def test_rename_all(se, de):
+@pytest.mark.parametrize('se,de', format_msgpack)
+def test_rename_msgpack(se, de):
     @deserialize(rename_all='camelcase')
     @serialize(rename_all='camelcase')
     @dataclass
@@ -404,6 +461,19 @@ def test_rename_all(se, de):
 
     f = Foo(class_name='foo')
     assert f == de(Foo, se(f, named=True), named=True)
+    assert f == de(Foo, se(f, named=False), named=False)
+
+
+@pytest.mark.parametrize('se,de', (format_dict + format_json + format_yaml + format_toml))
+def test_rename_formats(se, de):
+    @deserialize(rename_all='camelcase')
+    @serialize(rename_all='camelcase')
+    @dataclass
+    class Foo:
+        class_name: str
+
+    f = Foo(class_name='foo')
+    assert f == de(Foo, se(f))
 
 
 @pytest.mark.parametrize('se,de', (format_dict + format_json + format_msgpack + format_yaml + format_toml))
@@ -462,23 +532,11 @@ def test_ext(se, de):
         i: int
         s: str
 
-        class MessageType(enum.IntEnum):
-            A = 0
-            B = 1
-
-        EXT_DICT = {}
-
-        def __init_subclass__(cls, **kwargs):
-            super().__init_subclass__(**kwargs)
-            cls.EXT_DICT[cls._type] = cls  # type: ignore
-
     @deserialize
     @serialize
     @dataclass
     class DerivedA(Base):
         j: int
-
-        _type = Base.MessageType.A
 
     @deserialize
     @serialize
@@ -486,16 +544,46 @@ def test_ext(se, de):
     class DerivedB(Base):
         k: float
 
-        _type = Base.MessageType.B
-
     a = DerivedA(i=7, s="A", j=13)
     aa = de(Base, se(a))
     assert aa != a
 
+    EXT_TYPE_DICT = {0: DerivedA, 1:DerivedB}
+    # reverse the external type dict for faster serialization
+    EXT_TYPE_DICT_REVERSED = {v:k for k,v in EXT_TYPE_DICT.items()}
+
     a = DerivedA(i=7, s="A", j=13)
-    aa = de(Base, se(a, ext_dict=Base.EXT_DICT), ext_dict=Base.EXT_DICT)
+    aa = de(None, se(a, ext_dict=EXT_TYPE_DICT_REVERSED), ext_dict=EXT_TYPE_DICT)
     assert aa == a
 
     b = DerivedB(i=3, s="B", k=11.0)
-    bb = de(Base, se(b, ext_dict=Base.EXT_DICT), ext_dict=Base.EXT_DICT)
+    bb = de(None, se(b, ext_dict=EXT_TYPE_DICT_REVERSED), ext_dict=EXT_TYPE_DICT)
     assert b == bb
+
+    with pytest.raises(SerdeError) as se_ex:
+        se(a, ext_dict={})
+    assert str(se_ex.value) == "Could not find type code for DerivedA in ext_dict"
+
+    with pytest.raises(SerdeError) as de_ex:
+        de(None, se(a, ext_dict=EXT_TYPE_DICT_REVERSED), ext_dict={})
+    assert str(de_ex.value) == "Could not find type for code 0 in ext_dict"
+
+
+def test_exception_on_not_supported_types():
+    class UnsupportedClass:
+        def __init__(self):
+            pass
+
+    @deserialize
+    @serialize
+    @dataclass
+    class Foo:
+        b: UnsupportedClass
+
+    with pytest.raises(SerdeError) as se_ex:
+        to_dict(Foo(UnsupportedClass()))
+    assert str(se_ex.value).startswith("Unsupported type: <class \'tests.test_basics.test_exception_on_not_supported_types.<locals>.UnsupportedClass\'>")
+
+    with pytest.raises(SerdeError) as de_ex:
+        from_dict(Foo, {"b": UnsupportedClass()})
+    assert str(de_ex.value).startswith("Unsupported type: <class \'tests.test_basics.test_exception_on_not_supported_types.<locals>.UnsupportedClass\'>")

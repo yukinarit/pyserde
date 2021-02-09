@@ -7,17 +7,21 @@ import copy  # noqa
 import dataclasses
 import functools
 from dataclasses import dataclass, is_dataclass
+from datetime import date, datetime
+from decimal import Decimal
+from ipaddress import IPv4Address, IPv6Address, IPv4Network, IPv6Network, IPv4Interface, IPv6Interface
+from pathlib import Path, PureWindowsPath, PurePosixPath, PurePath, WindowsPath, PosixPath
 from typing import Any, Callable, Dict, List, Optional, Tuple, Type
+from uuid import UUID
 
 import jinja2
 
 from .compat import (is_bare_dict, is_bare_list, is_bare_tuple, is_dict, is_enum, is_list, is_opt, is_primitive,
                      is_tuple, is_union, iter_types, type_args)
-from .core import (HIDDEN_NAME, SE_NAME, SETTINGS, TO_DICT, TO_ITER, Field, Hidden, SerdeError, T, conv, fields, gen,
-                   logger)
+from .core import (HIDDEN_NAME, SETTINGS, TO_DICT, TO_ITER, Field, Hidden, SerdeError, T, conv, fields, gen, logger)
 from .more_types import serialize as custom
 
-__all__: List = ['serialize', 'is_serializable', 'Serializer', 'astuple', 'asdict']
+__all__: List = ['serialize', 'is_serializable', 'Serializer', 'to_tuple', 'to_dict']
 
 Custom = Optional[Callable[[Any], Any]]
 
@@ -30,11 +34,11 @@ class Serializer(metaclass=abc.ABCMeta):
     """
 
     @abc.abstractclassmethod
-    def serialize(cls, obj):
+    def serialize(cls, obj, **opts):
         pass
 
 
-def serialize(_cls=None, rename_all: Optional[str] = None):
+def serialize(_cls=None, rename_all: Optional[str] = None, reuse_instances_default: bool = True):
     """
     `serialize` decorator. A dataclass with this decorator can be serialized
     into an object in various data format such as JSON and MsgPack.
@@ -78,11 +82,6 @@ def serialize(_cls=None, rename_all: Optional[str] = None):
             scope = {}
             setattr(cls, '__serde_scope__', scope)
 
-        def serialize(self, ser, **opts) -> None:
-            return ser.serialize(self, **opts)
-
-        setattr(cls, SE_NAME, serialize)
-
         g: Dict[str, Any] = {}
         for f in sefields(cls):
             if f.skip_if:
@@ -98,8 +97,8 @@ def serialize(_cls=None, rename_all: Optional[str] = None):
         g['is_dataclass'] = is_dataclass
         g['__custom_serializer__'] = custom
         g['__serde_enum_value__'] = enum_value
-        cls = se_func(cls, TO_ITER, render_astuple(cls, custom), g)
-        cls = se_func(cls, TO_DICT, render_asdict(cls, rename_all, custom), g)
+        cls = se_func(cls, TO_ITER, render_astuple(cls, reuse_instances_default, custom), g)
+        cls = se_func(cls, TO_DICT, render_asdict(cls, rename_all, reuse_instances_default, custom), g)
         return cls
 
     if _cls is None:
@@ -123,42 +122,74 @@ def is_serializable(instance_or_class: Any) -> bool:
     >>> is_serializable(Foo)
     True
     """
-    return hasattr(instance_or_class, '__serde_serialize__')
+    return hasattr(instance_or_class, TO_ITER) or hasattr(instance_or_class, TO_DICT)
+
+
+def to_obj(o, named: bool, reuse_instances: bool):
+    thisfunc = functools.partial(to_obj, named=named, reuse_instances=reuse_instances)
+    if o is None:
+        return None
+    if is_serializable(o):
+        if named:
+            return getattr(o, TO_DICT)(reuse_instances=reuse_instances)
+        else:
+            return getattr(o, TO_ITER)(reuse_instances=reuse_instances)
+    elif is_dataclass(o):
+        if named:
+            return dataclasses.asdict(o)
+        else:
+            return dataclasses.astuple(o)
+    elif isinstance(o, list):
+        return [thisfunc(e) for e in o]
+    elif isinstance(o, tuple):
+        return tuple(thisfunc(e) for e in o)
+    elif isinstance(o, set):
+        return set(thisfunc(e) for e in o)
+    elif isinstance(o, dict):
+        return {k: thisfunc(v) for k, v in o.items()}
+
+    return o
 
 
 def astuple(v):
     """
     Convert class with `serialize` to `tuple`.
     """
-    if is_serializable(v):
-        return getattr(v, TO_ITER)()
-    elif is_dataclass(v):
-        return dataclasses.astuple(v)
-    elif isinstance(v, Dict):
-        return {astuple(k): astuple(v) for k, v in v.items()}
-    elif isinstance(v, (Tuple, List)):
-        return tuple(astuple(e) for e in v)
-    else:
-        return v
+    return to_tuple(v, reuse_instances=False)
+
+
+def to_tuple(o, reuse_instances: bool = ...) -> Any:
+    """
+    Convert object into tuple.
+
+    >>> @serialize
+    ... @dataclass
+    ... class Foo:
+    ...     i: int
+    >>>
+    >>> to_tuple(Foo(10))
+    (10,)
+    >>>
+    >>> to_tuple([Foo(10), Foo(20)])
+    [(10,), (20,)]
+    >>>
+    >>> to_tuple({'a': Foo(10), 'b': Foo(20)})
+    {'a': (10,), 'b': (20,)}
+    >>>
+    >>> to_tuple((Foo(10), Foo(20)))
+    ((10,), (20,))
+    """
+    return to_obj(o, named=False, reuse_instances=reuse_instances)
 
 
 def asdict(v):
     """
     Convert class with `serialize` to `dict`.
     """
-    if is_serializable(v):
-        return getattr(v, TO_DICT)()
-    elif is_dataclass(v):
-        return dataclasses.asdict(v)
-    elif isinstance(v, Dict):
-        return {asdict(k): asdict(v) for k, v in v.items()}
-    elif isinstance(v, (Tuple, List)):
-        return tuple(asdict(e) for e in v)
-    else:
-        return v
+    return to_dict(v, reuse_instances=False)
 
 
-def to_dict(o) -> Dict:
+def to_dict(o, reuse_instances: bool = ...) -> Any:
     """
     Convert object into dictionary.
 
@@ -179,20 +210,7 @@ def to_dict(o) -> Dict:
     >>> to_dict((Foo(10), Foo(20)))
     ({'i': 10}, {'i': 20})
     """
-    if o is None:
-        v = None
-    if is_serializable(o):
-        v = asdict(o)
-    elif isinstance(o, list):
-        v = [to_dict(e) for e in o]
-    elif isinstance(o, tuple):
-        v = tuple(to_dict(e) for e in o)
-    elif isinstance(o, dict):
-        v = {k: to_dict(v) for k, v in o.items()}
-    else:
-        v = o
-
-    return v
+    return to_obj(o, named=True, reuse_instances=reuse_instances)
 
 
 @dataclass
@@ -222,9 +240,12 @@ def to_arg(f: SeField) -> SeField:
     return f
 
 
-def render_astuple(cls: Type, custom: Custom = None) -> str:
+def render_astuple(cls: Type, reuse_instances_default: bool = True, custom: Custom = None) -> str:
     template = """
-def {{func}}(obj):
+def {{func}}(obj, reuse_instances = {{reuse_instances_default}}):
+  if reuse_instances is Ellipsis:
+    reuse_instances = {{reuse_instances_default}}
+
   if not is_dataclass(obj):
     return copy.deepcopy(obj)
 
@@ -250,12 +271,15 @@ def {{func}}(obj):
     env.filters.update({'is_dataclass': is_dataclass})
     env.filters.update({'rvalue': renderer.render})
     env.filters.update({'arg': to_arg})
-    return env.get_template('iter').render(func=TO_ITER, cls=cls)
+    return env.get_template('iter').render(func=TO_ITER, cls=cls, reuse_instances_default=reuse_instances_default)
 
 
-def render_asdict(cls: Type, case: Optional[str] = None, custom: Custom = None) -> str:
+def render_asdict(cls: Type, case: Optional[str] = None, reuse_instances_default: bool = True, custom: Custom = None) -> str:
     template = """
-def {{func}}(obj):
+def {{func}}(obj, reuse_instances = {{reuse_instances_default}}):
+  if reuse_instances is Ellipsis:
+    reuse_instances = {{reuse_instances_default}}
+
   if not is_dataclass(obj):
     return copy.deepcopy(obj)
 
@@ -288,7 +312,7 @@ def {{func}}(obj):
     env.filters.update({'rvalue': renderer.render})
     env.filters.update({'arg': to_arg})
     env.filters.update({'case': functools.partial(conv, case=case)})
-    return env.get_template('dict').render(func=TO_DICT, cls=cls)
+    return env.get_template('dict').render(func=TO_DICT, cls=cls, reuse_instances_default=reuse_instances_default)
 
 
 @dataclass
@@ -315,19 +339,19 @@ class Renderer:
         ... class Foo:
         ...    val: int
         >>> Renderer(TO_ITER).render(SeField(Foo, 'foo'))
-        'foo.__serde_to_iter__()'
+        'foo.__serde_to_iter__(reuse_instances=reuse_instances)'
 
         >>> Renderer(TO_ITER).render(SeField(List[Foo], 'foo'))
-        '[v.__serde_to_iter__() for v in foo]'
+        '[v.__serde_to_iter__(reuse_instances=reuse_instances) for v in foo]'
 
         >>> Renderer(TO_ITER).render(SeField(Dict[str, Foo], 'foo'))
-        '{k: v.__serde_to_iter__() for k, v in foo.items()}'
+        '{k: v.__serde_to_iter__(reuse_instances=reuse_instances) for k, v in foo.items()}'
 
         >>> Renderer(TO_ITER).render(SeField(Dict[Foo, Foo], 'foo'))
-        '{k.__serde_to_iter__(): v.__serde_to_iter__() for k, v in foo.items()}'
+        '{k.__serde_to_iter__(reuse_instances=reuse_instances): v.__serde_to_iter__(reuse_instances=reuse_instances) for k, v in foo.items()}'
 
         >>> Renderer(TO_ITER).render(SeField(Tuple[str, Foo, int], 'foo'))
-        '(foo[0], foo[1].__serde_to_iter__(), foo[2])'
+        '(foo[0], foo[1].__serde_to_iter__(reuse_instances=reuse_instances), foo[2])'
         """
         if is_dataclass(arg.type):
             return self.dataclass(arg)
@@ -343,6 +367,15 @@ class Renderer:
             return self.enum(arg)
         elif any(f(arg.type) for f in (is_primitive, is_union)):
             return self.primitive(arg)
+        elif arg.type in [
+            Decimal,
+            Path, PosixPath, WindowsPath, PurePath, PurePosixPath, PureWindowsPath,
+            UUID,
+            IPv4Address, IPv6Address, IPv4Network, IPv6Network, IPv4Interface, IPv6Interface
+        ]:
+            return f"{arg.varname} if reuse_instances else {self.str(arg)}"
+        elif arg.type in [date, datetime]:
+            return f"{arg.varname} if reuse_instances else {arg.varname}.isoformat()"
         else:
             return f'__custom_serializer__({arg.varname})'
 
@@ -350,7 +383,7 @@ class Renderer:
         """
         Render rvalue for dataclass.
         """
-        return f'{arg.varname}.{self.func}()'
+        return f'{arg.varname}.{self.func}(reuse_instances=reuse_instances)'
 
     def opt(self, arg: SeField) -> str:
         """
@@ -358,7 +391,7 @@ class Renderer:
         """
         inner = arg[0]
         inner.name = arg.varname
-        return f'{self.render(inner)} if {arg.varname} is not None else None'
+        return f'({self.render(inner)}) if {arg.varname} is not None else None'
 
     def list(self, arg: SeField) -> str:
         """
@@ -406,6 +439,9 @@ class Renderer:
         Render rvalue for primitives.
         """
         return f'{arg.varname}'
+
+    def str(self, arg: SeField) -> str:
+        return f"str({arg.varname})"
 
 
 def se_func(cls: Type[T], func: str, code: str, g: Dict) -> Type[T]:

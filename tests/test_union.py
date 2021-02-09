@@ -51,7 +51,7 @@ def test_union():
     s = '{"v": 10}'
     assert s == to_json(v)
     print(f'foo {v.__serde_hidden__.code}')
-    assert v == from_json(PriUnion, s, strict=False)
+    assert v == from_json(PriUnion, s)
 
     v = PriUnion(10.0)
     s = '{"v": 10.0}'
