@@ -175,6 +175,17 @@ class Foo:
     o: Optional[str]
     nested: Bar
 </code></pre>
+<p>For python &gt;= 3.9, you can use <a href="https://www.python.org/dev/peps/pep-0585/">PEP585</a> style type annotations for standard collections.</p>
+<pre><code class="language-python">@deserialize
+@serialize
+class Foo:
+    i: int
+    l: list[str]
+    t: tuple[int, float, str, bool]
+    d: dict[str, list[tuple[str, int]]]
+    o: Optional[str]
+    nested: Bar
+</code></pre>
 <h2 id="supported-data-formats">Supported data formats</h2>
 <h3 id="json">JSON</h3>
 <pre><code class="language-python">from serde.json import from_json, to_json
