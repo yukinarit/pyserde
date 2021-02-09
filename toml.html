@@ -36,22 +36,22 @@ import toml
 
 from .core import T
 from .de import Deserializer, from_dict
-from .se import Serializer, asdict
+from .se import Serializer, to_dict
 
 
 class TomlSerializer(Serializer):
     @classmethod
-    def serialize(cls, obj, named=True, **opts) -&gt; str:
-        return toml.dumps(asdict(obj))
+    def serialize(cls, obj, **opts) -&gt; str:
+        return toml.dumps(obj, **opts)
 
 
 class TomlDeserializer(Deserializer):
     @classmethod
-    def deserialize(cls, s, named=True, **opts):
-        return toml.loads(s)
+    def deserialize(cls, s, **opts):
+        return toml.loads(s, **opts)
 
 
-def to_toml(obj, se=TomlSerializer, **opts) -&gt; str:
+def to_toml(obj, se: Serializer = TomlSerializer, **opts) -&gt; str:
     &#34;&#34;&#34;
     Take an object and return toml string.
 
@@ -75,10 +75,10 @@ def to_toml(obj, se=TomlSerializer, **opts) -&gt; str:
     &#39;[general]\\nhost = \&#34;localhost\&#34;\\nport = 8080\\nupstream = [ \&#34;localhost:8081\&#34;, \&#34;localhost:8082\&#34;,]\\n&#39;
     &gt;&gt;&gt;
     &#34;&#34;&#34;
-    return se.serialize(obj, **opts)
+    return se.serialize(to_dict(obj, reuse_instances=False), **opts)
 
 
-def from_toml(c: Type[T], s: str, de=TomlDeserializer, **opts) -&gt; T:
+def from_toml(c: Type[T], s: str, de: Deserializer = TomlDeserializer, **opts) -&gt; T:
     &#34;&#34;&#34;
     Take toml string and return deserialized object.
 
@@ -98,7 +98,7 @@ def from_toml(c: Type[T], s: str, de=TomlDeserializer, **opts) -&gt; T:
     Settings(host=&#39;localhost&#39;, port=8080, upstream=[&#39;localhost:8081&#39;, &#39;localhost:8082&#39;])
     &gt;&gt;&gt;
     &#34;&#34;&#34;
-    return from_dict(c, de.deserialize(s, **opts))</code></pre>
+    return from_dict(c, de.deserialize(s, **opts), reuse_instances=False)</code></pre>
 </details>
 </section>
 <section>
@@ -109,7 +109,7 @@ def from_toml(c: Type[T], s: str, de=TomlDeserializer, **opts) -&gt; T:
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
 <dt id="serde.toml.from_toml"><code class="name flex">
-<span>def <span class="ident">from_toml</span></span>(<span>c: Type[~T], s: str, de=serde.toml.TomlDeserializer, **opts) ‑> ~T</span>
+<span>def <span class="ident">from_toml</span></span>(<span>c: Type[~T], s: str, de: <a title="serde.de.Deserializer" href="de.html#serde.de.Deserializer">Deserializer</a> = serde.toml.TomlDeserializer, **opts) ‑> ~T</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Take toml string and return deserialized object.</p>
@@ -133,7 +133,7 @@ Settings(host='localhost', port=8080, upstream=['localhost:8081', 'localhost:808
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def from_toml(c: Type[T], s: str, de=TomlDeserializer, **opts) -&gt; T:
+<pre><code class="python">def from_toml(c: Type[T], s: str, de: Deserializer = TomlDeserializer, **opts) -&gt; T:
     &#34;&#34;&#34;
     Take toml string and return deserialized object.
 
@@ -153,11 +153,11 @@ Settings(host='localhost', port=8080, upstream=['localhost:8081', 'localhost:808
     Settings(host=&#39;localhost&#39;, port=8080, upstream=[&#39;localhost:8081&#39;, &#39;localhost:8082&#39;])
     &gt;&gt;&gt;
     &#34;&#34;&#34;
-    return from_dict(c, de.deserialize(s, **opts))</code></pre>
+    return from_dict(c, de.deserialize(s, **opts), reuse_instances=False)</code></pre>
 </details>
 </dd>
 <dt id="serde.toml.to_toml"><code class="name flex">
-<span>def <span class="ident">to_toml</span></span>(<span>obj, se=serde.toml.TomlSerializer, **opts) ‑> str</span>
+<span>def <span class="ident">to_toml</span></span>(<span>obj, se: <a title="serde.se.Serializer" href="se.html#serde.se.Serializer">Serializer</a> = serde.toml.TomlSerializer, **opts) ‑> str</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Take an object and return toml string.</p>
@@ -185,7 +185,7 @@ Settings(host='localhost', port=8080, upstream=['localhost:8081', 'localhost:808
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def to_toml(obj, se=TomlSerializer, **opts) -&gt; str:
+<pre><code class="python">def to_toml(obj, se: Serializer = TomlSerializer, **opts) -&gt; str:
     &#34;&#34;&#34;
     Take an object and return toml string.
 
@@ -209,7 +209,7 @@ Settings(host='localhost', port=8080, upstream=['localhost:8081', 'localhost:808
     &#39;[general]\\nhost = \&#34;localhost\&#34;\\nport = 8080\\nupstream = [ \&#34;localhost:8081\&#34;, \&#34;localhost:8082\&#34;,]\\n&#39;
     &gt;&gt;&gt;
     &#34;&#34;&#34;
-    return se.serialize(obj, **opts)</code></pre>
+    return se.serialize(to_dict(obj, reuse_instances=False), **opts)</code></pre>
 </details>
 </dd>
 </dl>
@@ -229,8 +229,8 @@ Settings(host='localhost', port=8080, upstream=['localhost:8081', 'localhost:808
 </summary>
 <pre><code class="python">class TomlDeserializer(Deserializer):
     @classmethod
-    def deserialize(cls, s, named=True, **opts):
-        return toml.loads(s)</code></pre>
+    def deserialize(cls, s, **opts):
+        return toml.loads(s, **opts)</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -257,8 +257,8 @@ Settings(host='localhost', port=8080, upstream=['localhost:8081', 'localhost:808
 </summary>
 <pre><code class="python">class TomlSerializer(Serializer):
     @classmethod
-    def serialize(cls, obj, named=True, **opts) -&gt; str:
-        return toml.dumps(asdict(obj))</code></pre>
+    def serialize(cls, obj, **opts) -&gt; str:
+        return toml.dumps(obj, **opts)</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -267,7 +267,7 @@ Settings(host='localhost', port=8080, upstream=['localhost:8081', 'localhost:808
 <h3>Static methods</h3>
 <dl>
 <dt id="serde.toml.TomlSerializer.serialize"><code class="name flex">
-<span>def <span class="ident">serialize</span></span>(<span>obj, named=True, **opts) ‑> str</span>
+<span>def <span class="ident">serialize</span></span>(<span>obj, **opts) ‑> str</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -276,8 +276,8 @@ Settings(host='localhost', port=8080, upstream=['localhost:8081', 'localhost:808
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@classmethod
-def serialize(cls, obj, named=True, **opts) -&gt; str:
-    return toml.dumps(asdict(obj))</code></pre>
+def serialize(cls, obj, **opts) -&gt; str:
+    return toml.dumps(obj, **opts)</code></pre>
 </details>
 </dd>
 </dl>

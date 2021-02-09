@@ -30,55 +30,60 @@
 <pre><code class="python">&#34;&#34;&#34;
 Serialize and Deserialize in MsgPack format.
 &#34;&#34;&#34;
-from typing import Any, Type
+from typing import Any, Type, Dict
 
 import msgpack
 
-from .core import T, logger
+from .core import T, SerdeError
 from .de import Deserializer, from_dict, from_tuple
-from .se import Serializer, asdict, astuple
+from .se import Serializer, to_dict, to_tuple
 
 
 class MsgPackSerializer(Serializer):
     @classmethod
-    def serialize(cls, obj, named=True, use_bin_type=True, **opts) -&gt; str:
-        asf = asdict if named else astuple
-        if &#34;ext_dict&#34; in opts:
-            opts.pop(&#34;ext_dict&#34;)
-            obj_bytes = msgpack.packb(asf(obj), use_bin_type=use_bin_type, **opts)
-            maybe_ext = msgpack.ExtType(int(obj._type), obj_bytes)
+    def serialize(cls, obj, use_bin_type: bool = True, ext_type_code: int = None, **opts) -&gt; bytes:
+        if ext_type_code is not None:
+            obj_bytes = msgpack.packb(obj, use_bin_type=use_bin_type, **opts)
+            obj_or_ext = msgpack.ExtType(ext_type_code, obj_bytes)
         else:
-            maybe_ext = asf(obj)
-        return msgpack.packb(maybe_ext, use_bin_type=use_bin_type, **opts)
+            obj_or_ext = obj
+        return msgpack.packb(obj_or_ext, use_bin_type=use_bin_type, **opts)
 
 
 class MsgPackDeserializer(Deserializer):
     @classmethod
-    def deserialize(cls, s, raw=False, use_list=False, **opts):
-        unp = msgpack.unpackb(s, raw=raw, use_list=use_list, **opts)
-        logger.debug(&#39;unpack from msgpack: {unp}&#39;)
-        return unp
+    def deserialize(cls, s, raw: bool = False, use_list: bool = False, **opts):
+        return msgpack.unpackb(s, raw=raw, use_list=use_list, **opts)
 
 
-def to_msgpack(obj: Any, se=MsgPackSerializer, **opts) -&gt; bytes:
+def to_msgpack(obj: Any, se: Serializer = MsgPackSerializer, named: bool = True, ext_dict: Dict[Type, int] = None, **opts) -&gt; bytes:
     &#34;&#34;&#34;
     If `ext_dict` option is specified, `obj` is encoded as a `msgpack.ExtType`
     &#34;&#34;&#34;
-    return se.serialize(obj, **opts)
+    ext_type_code = None
+    if ext_dict is not None:
+        obj_type = type(obj)
+        ext_type_code = ext_dict.get(obj_type)
+        if ext_type_code is None:
+            raise SerdeError(f&#34;Could not find type code for {obj_type.__name__} in ext_dict&#34;)
+
+    to_func = to_dict if named else to_tuple
+    return se.serialize(to_func(obj, reuse_instances=False), ext_type_code=ext_type_code, **opts)
 
 
-def from_msgpack(c: Type[T], s: str, de=MsgPackDeserializer, named=True, **opts) -&gt; Type[T]:
+def from_msgpack(c: Type[T], s: str, de: Deserializer = MsgPackDeserializer, named: bool = True, ext_dict: Dict[int, Type] = None, **opts) -&gt; Type[T]:
     &#34;&#34;&#34;
     If `ext_dict` option is specified, `c` is ignored and type is inferred from `msgpack.ExtType`
     &#34;&#34;&#34;
-    if &#34;ext_dict&#34; in opts:
-        ext_dict = opts.pop(&#34;ext_dict&#34;)
+    if ext_dict is not None:
         ext = de.deserialize(s, **opts)
-        c = ext_dict[ext.code]
-        return from_msgpack(c, ext.data, de, named, **opts)
+        ext_type = ext_dict.get(ext.code)
+        if ext_type is None:
+            raise SerdeError(f&#34;Could not find type for code {ext.code} in ext_dict&#34;)
+        return from_msgpack(ext_type, ext.data, de, named, **opts)
     else:
-        fromf = from_dict if named else from_tuple
-        return fromf(c, de.deserialize(s, **opts))</code></pre>
+        from_func = from_dict if named else from_tuple
+        return from_func(c, de.deserialize(s, **opts), reuse_instances=False)</code></pre>
 </details>
 </section>
 <section>
@@ -89,7 +94,7 @@ def from_msgpack(c: Type[T], s: str, de=MsgPackDeserializer, named=True, **opts)
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
 <dt id="serde.msgpack.from_msgpack"><code class="name flex">
-<span>def <span class="ident">from_msgpack</span></span>(<span>c: Type[~T], s: str, de=serde.msgpack.MsgPackDeserializer, named=True, **opts) ‑> Type[~T]</span>
+<span>def <span class="ident">from_msgpack</span></span>(<span>c: Type[~T], s: str, de: <a title="serde.de.Deserializer" href="de.html#serde.de.Deserializer">Deserializer</a> = serde.msgpack.MsgPackDeserializer, named: bool = True, ext_dict: Dict[int, Type] = None, **opts) ‑> Type[~T]</span>
 </code></dt>
 <dd>
 <div class="desc"><p>If <code>ext_dict</code> option is specified, <code>c</code> is ignored and type is inferred from <code>msgpack.ExtType</code></p></div>
@@ -97,22 +102,23 @@ def from_msgpack(c: Type[T], s: str, de=MsgPackDeserializer, named=True, **opts)
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def from_msgpack(c: Type[T], s: str, de=MsgPackDeserializer, named=True, **opts) -&gt; Type[T]:
+<pre><code class="python">def from_msgpack(c: Type[T], s: str, de: Deserializer = MsgPackDeserializer, named: bool = True, ext_dict: Dict[int, Type] = None, **opts) -&gt; Type[T]:
     &#34;&#34;&#34;
     If `ext_dict` option is specified, `c` is ignored and type is inferred from `msgpack.ExtType`
     &#34;&#34;&#34;
-    if &#34;ext_dict&#34; in opts:
-        ext_dict = opts.pop(&#34;ext_dict&#34;)
+    if ext_dict is not None:
         ext = de.deserialize(s, **opts)
-        c = ext_dict[ext.code]
-        return from_msgpack(c, ext.data, de, named, **opts)
+        ext_type = ext_dict.get(ext.code)
+        if ext_type is None:
+            raise SerdeError(f&#34;Could not find type for code {ext.code} in ext_dict&#34;)
+        return from_msgpack(ext_type, ext.data, de, named, **opts)
     else:
-        fromf = from_dict if named else from_tuple
-        return fromf(c, de.deserialize(s, **opts))</code></pre>
+        from_func = from_dict if named else from_tuple
+        return from_func(c, de.deserialize(s, **opts), reuse_instances=False)</code></pre>
 </details>
 </dd>
 <dt id="serde.msgpack.to_msgpack"><code class="name flex">
-<span>def <span class="ident">to_msgpack</span></span>(<span>obj: Any, se=serde.msgpack.MsgPackSerializer, **opts) ‑> bytes</span>
+<span>def <span class="ident">to_msgpack</span></span>(<span>obj: Any, se: <a title="serde.se.Serializer" href="se.html#serde.se.Serializer">Serializer</a> = serde.msgpack.MsgPackSerializer, named: bool = True, ext_dict: Dict[Type, int] = None, **opts) ‑> bytes</span>
 </code></dt>
 <dd>
 <div class="desc"><p>If <code>ext_dict</code> option is specified, <code>obj</code> is encoded as a <code>msgpack.ExtType</code></p></div>
@@ -120,11 +126,19 @@ def from_msgpack(c: Type[T], s: str, de=MsgPackDeserializer, named=True, **opts)
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def to_msgpack(obj: Any, se=MsgPackSerializer, **opts) -&gt; bytes:
+<pre><code class="python">def to_msgpack(obj: Any, se: Serializer = MsgPackSerializer, named: bool = True, ext_dict: Dict[Type, int] = None, **opts) -&gt; bytes:
     &#34;&#34;&#34;
     If `ext_dict` option is specified, `obj` is encoded as a `msgpack.ExtType`
     &#34;&#34;&#34;
-    return se.serialize(obj, **opts)</code></pre>
+    ext_type_code = None
+    if ext_dict is not None:
+        obj_type = type(obj)
+        ext_type_code = ext_dict.get(obj_type)
+        if ext_type_code is None:
+            raise SerdeError(f&#34;Could not find type code for {obj_type.__name__} in ext_dict&#34;)
+
+    to_func = to_dict if named else to_tuple
+    return se.serialize(to_func(obj, reuse_instances=False), ext_type_code=ext_type_code, **opts)</code></pre>
 </details>
 </dd>
 </dl>
@@ -144,10 +158,8 @@ def from_msgpack(c: Type[T], s: str, de=MsgPackDeserializer, named=True, **opts)
 </summary>
 <pre><code class="python">class MsgPackDeserializer(Deserializer):
     @classmethod
-    def deserialize(cls, s, raw=False, use_list=False, **opts):
-        unp = msgpack.unpackb(s, raw=raw, use_list=use_list, **opts)
-        logger.debug(&#39;unpack from msgpack: {unp}&#39;)
-        return unp</code></pre>
+    def deserialize(cls, s, raw: bool = False, use_list: bool = False, **opts):
+        return msgpack.unpackb(s, raw=raw, use_list=use_list, **opts)</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -174,15 +186,13 @@ def from_msgpack(c: Type[T], s: str, de=MsgPackDeserializer, named=True, **opts)
 </summary>
 <pre><code class="python">class MsgPackSerializer(Serializer):
     @classmethod
-    def serialize(cls, obj, named=True, use_bin_type=True, **opts) -&gt; str:
-        asf = asdict if named else astuple
-        if &#34;ext_dict&#34; in opts:
-            opts.pop(&#34;ext_dict&#34;)
-            obj_bytes = msgpack.packb(asf(obj), use_bin_type=use_bin_type, **opts)
-            maybe_ext = msgpack.ExtType(int(obj._type), obj_bytes)
+    def serialize(cls, obj, use_bin_type: bool = True, ext_type_code: int = None, **opts) -&gt; bytes:
+        if ext_type_code is not None:
+            obj_bytes = msgpack.packb(obj, use_bin_type=use_bin_type, **opts)
+            obj_or_ext = msgpack.ExtType(ext_type_code, obj_bytes)
         else:
-            maybe_ext = asf(obj)
-        return msgpack.packb(maybe_ext, use_bin_type=use_bin_type, **opts)</code></pre>
+            obj_or_ext = obj
+        return msgpack.packb(obj_or_ext, use_bin_type=use_bin_type, **opts)</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -191,7 +201,7 @@ def from_msgpack(c: Type[T], s: str, de=MsgPackDeserializer, named=True, **opts)
 <h3>Static methods</h3>
 <dl>
 <dt id="serde.msgpack.MsgPackSerializer.serialize"><code class="name flex">
-<span>def <span class="ident">serialize</span></span>(<span>obj, named=True, use_bin_type=True, **opts) ‑> str</span>
+<span>def <span class="ident">serialize</span></span>(<span>obj, use_bin_type: bool = True, ext_type_code: int = None, **opts) ‑> bytes</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -200,15 +210,13 @@ def from_msgpack(c: Type[T], s: str, de=MsgPackDeserializer, named=True, **opts)
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@classmethod
-def serialize(cls, obj, named=True, use_bin_type=True, **opts) -&gt; str:
-    asf = asdict if named else astuple
-    if &#34;ext_dict&#34; in opts:
-        opts.pop(&#34;ext_dict&#34;)
-        obj_bytes = msgpack.packb(asf(obj), use_bin_type=use_bin_type, **opts)
-        maybe_ext = msgpack.ExtType(int(obj._type), obj_bytes)
+def serialize(cls, obj, use_bin_type: bool = True, ext_type_code: int = None, **opts) -&gt; bytes:
+    if ext_type_code is not None:
+        obj_bytes = msgpack.packb(obj, use_bin_type=use_bin_type, **opts)
+        obj_or_ext = msgpack.ExtType(ext_type_code, obj_bytes)
     else:
-        maybe_ext = asf(obj)
-    return msgpack.packb(maybe_ext, use_bin_type=use_bin_type, **opts)</code></pre>
+        obj_or_ext = obj
+    return msgpack.packb(obj_or_ext, use_bin_type=use_bin_type, **opts)</code></pre>
 </details>
 </dd>
 </dl>

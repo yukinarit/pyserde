@@ -30,10 +30,6 @@
 <pre><code class="python">&#34;&#34;&#34;
 Additional type support such as Decimal.
 &#34;&#34;&#34;
-import enum
-from dataclasses import Field
-from decimal import Decimal
-from pathlib import Path
 from typing import Any
 
 from .core import SerdeError
@@ -46,14 +42,8 @@ def serialize(data: Any) -&gt; Any:
     `data` shall be other than List, Dict, Tuple, Optional
     Union, dataclass or primitives.
     &#34;&#34;&#34;
-    if isinstance(data, Decimal):
-        return str(data)
-    elif isinstance(data, Path):
-        return str(data)
-    elif isinstance(data, enum.IntEnum):
-        return data.value
-    else:
-        raise SerdeError(f&#39;Unsupported type: {type(data)}&#39;)
+
+    raise SerdeError(f&#39;Unsupported type: {type(data)}&#39;)
 
 
 def deserialize(typ: Any, data: Any) -&gt; Any:
@@ -63,12 +53,8 @@ def deserialize(typ: Any, data: Any) -&gt; Any:
     `data` shall be other than List, Dict, Tuple, Optional
     Union, dataclass or primitives.
     &#34;&#34;&#34;
-    if issubclass(typ, Decimal):
-        return Decimal(data)
-    elif issubclass(typ, Path):
-        return Path(data)
-    else:
-        raise SerdeError(f&#39;Unsupported type: {type(data)}&#39;)</code></pre>
+
+    raise SerdeError(f&#39;Unsupported type: {type(data)}&#39;)</code></pre>
 </details>
 </section>
 <section>
@@ -96,12 +82,8 @@ Union, dataclass or primitives.</p></div>
     `data` shall be other than List, Dict, Tuple, Optional
     Union, dataclass or primitives.
     &#34;&#34;&#34;
-    if issubclass(typ, Decimal):
-        return Decimal(data)
-    elif issubclass(typ, Path):
-        return Path(data)
-    else:
-        raise SerdeError(f&#39;Unsupported type: {type(data)}&#39;)</code></pre>
+
+    raise SerdeError(f&#39;Unsupported type: {type(data)}&#39;)</code></pre>
 </details>
 </dd>
 <dt id="serde.more_types.serialize"><code class="name flex">
@@ -122,14 +104,8 @@ Union, dataclass or primitives.</p></div>
     `data` shall be other than List, Dict, Tuple, Optional
     Union, dataclass or primitives.
     &#34;&#34;&#34;
-    if isinstance(data, Decimal):
-        return str(data)
-    elif isinstance(data, Path):
-        return str(data)
-    elif isinstance(data, enum.IntEnum):
-        return data.value
-    else:
-        raise SerdeError(f&#39;Unsupported type: {type(data)}&#39;)</code></pre>
+
+    raise SerdeError(f&#39;Unsupported type: {type(data)}&#39;)</code></pre>
 </details>
 </dd>
 </dl>

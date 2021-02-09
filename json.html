@@ -35,27 +35,27 @@ from typing import Any, Type
 
 from .core import T
 from .de import Deserializer, from_dict
-from .se import Serializer, asdict
+from .se import Serializer, to_dict
 
 
 class JsonSerializer(Serializer):
     @classmethod
-    def serialize(cls, obj: Any, named=True, **opts) -&gt; str:
-        return json.dumps(asdict(obj), **opts)
+    def serialize(cls, obj: Any, **opts) -&gt; str:
+        return json.dumps(obj, **opts)
 
 
 class JsonDeserializer(Deserializer):
     @classmethod
-    def deserialize(cls, s, named=True, **opts):
+    def deserialize(cls, s, **opts):
         return json.loads(s, **opts)
 
 
-def to_json(obj: Any, se=JsonSerializer, **opts) -&gt; str:
-    return se.serialize(obj, **opts)
+def to_json(obj: Any, se: Serializer = JsonSerializer, **opts) -&gt; str:
+    return se.serialize(to_dict(obj, reuse_instances=False), **opts)
 
 
-def from_json(c: Type[T], s: str, de=JsonDeserializer, **opts) -&gt; T:
-    return from_dict(c, de.deserialize(s, **opts))</code></pre>
+def from_json(c: Type[T], s: str, de: Deserializer = JsonDeserializer, **opts) -&gt; T:
+    return from_dict(c, de.deserialize(s, **opts), reuse_instances=False)</code></pre>
 </details>
 </section>
 <section>
@@ -66,7 +66,7 @@ def from_json(c: Type[T], s: str, de=JsonDeserializer, **opts) -&gt; T:
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
 <dt id="serde.json.from_json"><code class="name flex">
-<span>def <span class="ident">from_json</span></span>(<span>c: Type[~T], s: str, de=serde.json.JsonDeserializer, **opts) ‑> ~T</span>
+<span>def <span class="ident">from_json</span></span>(<span>c: Type[~T], s: str, de: <a title="serde.de.Deserializer" href="de.html#serde.de.Deserializer">Deserializer</a> = serde.json.JsonDeserializer, **opts) ‑> ~T</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -74,12 +74,12 @@ def from_json(c: Type[T], s: str, de=JsonDeserializer, **opts) -&gt; T:
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def from_json(c: Type[T], s: str, de=JsonDeserializer, **opts) -&gt; T:
-    return from_dict(c, de.deserialize(s, **opts))</code></pre>
+<pre><code class="python">def from_json(c: Type[T], s: str, de: Deserializer = JsonDeserializer, **opts) -&gt; T:
+    return from_dict(c, de.deserialize(s, **opts), reuse_instances=False)</code></pre>
 </details>
 </dd>
 <dt id="serde.json.to_json"><code class="name flex">
-<span>def <span class="ident">to_json</span></span>(<span>obj: Any, se=serde.json.JsonSerializer, **opts) ‑> str</span>
+<span>def <span class="ident">to_json</span></span>(<span>obj: Any, se: <a title="serde.se.Serializer" href="se.html#serde.se.Serializer">Serializer</a> = serde.json.JsonSerializer, **opts) ‑> str</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -87,8 +87,8 @@ def from_json(c: Type[T], s: str, de=JsonDeserializer, **opts) -&gt; T:
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def to_json(obj: Any, se=JsonSerializer, **opts) -&gt; str:
-    return se.serialize(obj, **opts)</code></pre>
+<pre><code class="python">def to_json(obj: Any, se: Serializer = JsonSerializer, **opts) -&gt; str:
+    return se.serialize(to_dict(obj, reuse_instances=False), **opts)</code></pre>
 </details>
 </dd>
 </dl>
@@ -108,7 +108,7 @@ def from_json(c: Type[T], s: str, de=JsonDeserializer, **opts) -&gt; T:
 </summary>
 <pre><code class="python">class JsonDeserializer(Deserializer):
     @classmethod
-    def deserialize(cls, s, named=True, **opts):
+    def deserialize(cls, s, **opts):
         return json.loads(s, **opts)</code></pre>
 </details>
 <h3>Ancestors</h3>
@@ -136,8 +136,8 @@ def from_json(c: Type[T], s: str, de=JsonDeserializer, **opts) -&gt; T:
 </summary>
 <pre><code class="python">class JsonSerializer(Serializer):
     @classmethod
-    def serialize(cls, obj: Any, named=True, **opts) -&gt; str:
-        return json.dumps(asdict(obj), **opts)</code></pre>
+    def serialize(cls, obj: Any, **opts) -&gt; str:
+        return json.dumps(obj, **opts)</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -146,7 +146,7 @@ def from_json(c: Type[T], s: str, de=JsonDeserializer, **opts) -&gt; T:
 <h3>Static methods</h3>
 <dl>
 <dt id="serde.json.JsonSerializer.serialize"><code class="name flex">
-<span>def <span class="ident">serialize</span></span>(<span>obj: Any, named=True, **opts) ‑> str</span>
+<span>def <span class="ident">serialize</span></span>(<span>obj: Any, **opts) ‑> str</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -155,8 +155,8 @@ def from_json(c: Type[T], s: str, de=JsonDeserializer, **opts) -&gt; T:
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@classmethod
-def serialize(cls, obj: Any, named=True, **opts) -&gt; str:
-    return json.dumps(asdict(obj), **opts)</code></pre>
+def serialize(cls, obj: Any, **opts) -&gt; str:
+    return json.dumps(obj, **opts)</code></pre>
 </details>
 </dd>
 </dl>

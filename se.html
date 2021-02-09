@@ -36,17 +36,21 @@ import copy  # noqa
 import dataclasses
 import functools
 from dataclasses import dataclass, is_dataclass
+from datetime import date, datetime
+from decimal import Decimal
+from ipaddress import IPv4Address, IPv6Address, IPv4Network, IPv6Network, IPv4Interface, IPv6Interface
+from pathlib import Path, PureWindowsPath, PurePosixPath, PurePath, WindowsPath, PosixPath
 from typing import Any, Callable, Dict, List, Optional, Tuple, Type
+from uuid import UUID
 
 import jinja2
 
 from .compat import (is_bare_dict, is_bare_list, is_bare_tuple, is_dict, is_enum, is_list, is_opt, is_primitive,
                      is_tuple, is_union, iter_types, type_args)
-from .core import (HIDDEN_NAME, SE_NAME, SETTINGS, TO_DICT, TO_ITER, Field, Hidden, SerdeError, T, conv, fields, gen,
-                   logger)
+from .core import (HIDDEN_NAME, SETTINGS, TO_DICT, TO_ITER, Field, Hidden, SerdeError, T, conv, fields, gen, logger)
 from .more_types import serialize as custom
 
-__all__: List = [&#39;serialize&#39;, &#39;is_serializable&#39;, &#39;Serializer&#39;, &#39;astuple&#39;, &#39;asdict&#39;]
+__all__: List = [&#39;serialize&#39;, &#39;is_serializable&#39;, &#39;Serializer&#39;, &#39;to_tuple&#39;, &#39;to_dict&#39;]
 
 Custom = Optional[Callable[[Any], Any]]
 
@@ -59,11 +63,11 @@ class Serializer(metaclass=abc.ABCMeta):
     &#34;&#34;&#34;
 
     @abc.abstractclassmethod
-    def serialize(cls, obj):
+    def serialize(cls, obj, **opts):
         pass
 
 
-def serialize(_cls=None, rename_all: Optional[str] = None):
+def serialize(_cls=None, rename_all: Optional[str] = None, reuse_instances_default: bool = True):
     &#34;&#34;&#34;
     `serialize` decorator. A dataclass with this decorator can be serialized
     into an object in various data format such as JSON and MsgPack.
@@ -107,11 +111,6 @@ def serialize(_cls=None, rename_all: Optional[str] = None):
             scope = {}
             setattr(cls, &#39;__serde_scope__&#39;, scope)
 
-        def serialize(self, ser, **opts) -&gt; None:
-            return ser.serialize(self, **opts)
-
-        setattr(cls, SE_NAME, serialize)
-
         g: Dict[str, Any] = {}
         for f in sefields(cls):
             if f.skip_if:
@@ -127,8 +126,8 @@ def serialize(_cls=None, rename_all: Optional[str] = None):
         g[&#39;is_dataclass&#39;] = is_dataclass
         g[&#39;__custom_serializer__&#39;] = custom
         g[&#39;__serde_enum_value__&#39;] = enum_value
-        cls = se_func(cls, TO_ITER, render_astuple(cls, custom), g)
-        cls = se_func(cls, TO_DICT, render_asdict(cls, rename_all, custom), g)
+        cls = se_func(cls, TO_ITER, render_astuple(cls, reuse_instances_default, custom), g)
+        cls = se_func(cls, TO_DICT, render_asdict(cls, rename_all, reuse_instances_default, custom), g)
         return cls
 
     if _cls is None:
@@ -152,42 +151,74 @@ def is_serializable(instance_or_class: Any) -&gt; bool:
     &gt;&gt;&gt; is_serializable(Foo)
     True
     &#34;&#34;&#34;
-    return hasattr(instance_or_class, &#39;__serde_serialize__&#39;)
+    return hasattr(instance_or_class, TO_ITER) or hasattr(instance_or_class, TO_DICT)
+
+
+def to_obj(o, named: bool, reuse_instances: bool):
+    thisfunc = functools.partial(to_obj, named=named, reuse_instances=reuse_instances)
+    if o is None:
+        return None
+    if is_serializable(o):
+        if named:
+            return getattr(o, TO_DICT)(reuse_instances=reuse_instances)
+        else:
+            return getattr(o, TO_ITER)(reuse_instances=reuse_instances)
+    elif is_dataclass(o):
+        if named:
+            return dataclasses.asdict(o)
+        else:
+            return dataclasses.astuple(o)
+    elif isinstance(o, list):
+        return [thisfunc(e) for e in o]
+    elif isinstance(o, tuple):
+        return tuple(thisfunc(e) for e in o)
+    elif isinstance(o, set):
+        return set(thisfunc(e) for e in o)
+    elif isinstance(o, dict):
+        return {k: thisfunc(v) for k, v in o.items()}
+
+    return o
 
 
 def astuple(v):
     &#34;&#34;&#34;
     Convert class with `serialize` to `tuple`.
     &#34;&#34;&#34;
-    if is_serializable(v):
-        return getattr(v, TO_ITER)()
-    elif is_dataclass(v):
-        return dataclasses.astuple(v)
-    elif isinstance(v, Dict):
-        return {astuple(k): astuple(v) for k, v in v.items()}
-    elif isinstance(v, (Tuple, List)):
-        return tuple(astuple(e) for e in v)
-    else:
-        return v
+    return to_tuple(v, reuse_instances=False)
+
+
+def to_tuple(o, reuse_instances: bool = ...) -&gt; Any:
+    &#34;&#34;&#34;
+    Convert object into tuple.
+
+    &gt;&gt;&gt; @serialize
+    ... @dataclass
+    ... class Foo:
+    ...     i: int
+    &gt;&gt;&gt;
+    &gt;&gt;&gt; to_tuple(Foo(10))
+    (10,)
+    &gt;&gt;&gt;
+    &gt;&gt;&gt; to_tuple([Foo(10), Foo(20)])
+    [(10,), (20,)]
+    &gt;&gt;&gt;
+    &gt;&gt;&gt; to_tuple({&#39;a&#39;: Foo(10), &#39;b&#39;: Foo(20)})
+    {&#39;a&#39;: (10,), &#39;b&#39;: (20,)}
+    &gt;&gt;&gt;
+    &gt;&gt;&gt; to_tuple((Foo(10), Foo(20)))
+    ((10,), (20,))
+    &#34;&#34;&#34;
+    return to_obj(o, named=False, reuse_instances=reuse_instances)
 
 
 def asdict(v):
     &#34;&#34;&#34;
     Convert class with `serialize` to `dict`.
     &#34;&#34;&#34;
-    if is_serializable(v):
-        return getattr(v, TO_DICT)()
-    elif is_dataclass(v):
-        return dataclasses.asdict(v)
-    elif isinstance(v, Dict):
-        return {asdict(k): asdict(v) for k, v in v.items()}
-    elif isinstance(v, (Tuple, List)):
-        return tuple(asdict(e) for e in v)
-    else:
-        return v
+    return to_dict(v, reuse_instances=False)
 
 
-def to_dict(o) -&gt; Dict:
+def to_dict(o, reuse_instances: bool = ...) -&gt; Any:
     &#34;&#34;&#34;
     Convert object into dictionary.
 
@@ -208,20 +239,7 @@ def to_dict(o) -&gt; Dict:
     &gt;&gt;&gt; to_dict((Foo(10), Foo(20)))
     ({&#39;i&#39;: 10}, {&#39;i&#39;: 20})
     &#34;&#34;&#34;
-    if o is None:
-        v = None
-    if is_serializable(o):
-        v = asdict(o)
-    elif isinstance(o, list):
-        v = [to_dict(e) for e in o]
-    elif isinstance(o, tuple):
-        v = tuple(to_dict(e) for e in o)
-    elif isinstance(o, dict):
-        v = {k: to_dict(v) for k, v in o.items()}
-    else:
-        v = o
-
-    return v
+    return to_obj(o, named=True, reuse_instances=reuse_instances)
 
 
 @dataclass
@@ -251,9 +269,12 @@ def to_arg(f: SeField) -&gt; SeField:
     return f
 
 
-def render_astuple(cls: Type, custom: Custom = None) -&gt; str:
+def render_astuple(cls: Type, reuse_instances_default: bool = True, custom: Custom = None) -&gt; str:
     template = &#34;&#34;&#34;
-def {{func}}(obj):
+def {{func}}(obj, reuse_instances = {{reuse_instances_default}}):
+  if reuse_instances is Ellipsis:
+    reuse_instances = {{reuse_instances_default}}
+
   if not is_dataclass(obj):
     return copy.deepcopy(obj)
 
@@ -279,12 +300,15 @@ def {{func}}(obj):
     env.filters.update({&#39;is_dataclass&#39;: is_dataclass})
     env.filters.update({&#39;rvalue&#39;: renderer.render})
     env.filters.update({&#39;arg&#39;: to_arg})
-    return env.get_template(&#39;iter&#39;).render(func=TO_ITER, cls=cls)
+    return env.get_template(&#39;iter&#39;).render(func=TO_ITER, cls=cls, reuse_instances_default=reuse_instances_default)
 
 
-def render_asdict(cls: Type, case: Optional[str] = None, custom: Custom = None) -&gt; str:
+def render_asdict(cls: Type, case: Optional[str] = None, reuse_instances_default: bool = True, custom: Custom = None) -&gt; str:
     template = &#34;&#34;&#34;
-def {{func}}(obj):
+def {{func}}(obj, reuse_instances = {{reuse_instances_default}}):
+  if reuse_instances is Ellipsis:
+    reuse_instances = {{reuse_instances_default}}
+
   if not is_dataclass(obj):
     return copy.deepcopy(obj)
 
@@ -317,7 +341,7 @@ def {{func}}(obj):
     env.filters.update({&#39;rvalue&#39;: renderer.render})
     env.filters.update({&#39;arg&#39;: to_arg})
     env.filters.update({&#39;case&#39;: functools.partial(conv, case=case)})
-    return env.get_template(&#39;dict&#39;).render(func=TO_DICT, cls=cls)
+    return env.get_template(&#39;dict&#39;).render(func=TO_DICT, cls=cls, reuse_instances_default=reuse_instances_default)
 
 
 @dataclass
@@ -344,19 +368,19 @@ class Renderer:
         ... class Foo:
         ...    val: int
         &gt;&gt;&gt; Renderer(TO_ITER).render(SeField(Foo, &#39;foo&#39;))
-        &#39;foo.__serde_to_iter__()&#39;
+        &#39;foo.__serde_to_iter__(reuse_instances=reuse_instances)&#39;
 
         &gt;&gt;&gt; Renderer(TO_ITER).render(SeField(List[Foo], &#39;foo&#39;))
-        &#39;[v.__serde_to_iter__() for v in foo]&#39;
+        &#39;[v.__serde_to_iter__(reuse_instances=reuse_instances) for v in foo]&#39;
 
         &gt;&gt;&gt; Renderer(TO_ITER).render(SeField(Dict[str, Foo], &#39;foo&#39;))
-        &#39;{k: v.__serde_to_iter__() for k, v in foo.items()}&#39;
+        &#39;{k: v.__serde_to_iter__(reuse_instances=reuse_instances) for k, v in foo.items()}&#39;
 
         &gt;&gt;&gt; Renderer(TO_ITER).render(SeField(Dict[Foo, Foo], &#39;foo&#39;))
-        &#39;{k.__serde_to_iter__(): v.__serde_to_iter__() for k, v in foo.items()}&#39;
+        &#39;{k.__serde_to_iter__(reuse_instances=reuse_instances): v.__serde_to_iter__(reuse_instances=reuse_instances) for k, v in foo.items()}&#39;
 
         &gt;&gt;&gt; Renderer(TO_ITER).render(SeField(Tuple[str, Foo, int], &#39;foo&#39;))
-        &#39;(foo[0], foo[1].__serde_to_iter__(), foo[2])&#39;
+        &#39;(foo[0], foo[1].__serde_to_iter__(reuse_instances=reuse_instances), foo[2])&#39;
         &#34;&#34;&#34;
         if is_dataclass(arg.type):
             return self.dataclass(arg)
@@ -372,6 +396,15 @@ class Renderer:
             return self.enum(arg)
         elif any(f(arg.type) for f in (is_primitive, is_union)):
             return self.primitive(arg)
+        elif arg.type in [
+            Decimal,
+            Path, PosixPath, WindowsPath, PurePath, PurePosixPath, PureWindowsPath,
+            UUID,
+            IPv4Address, IPv6Address, IPv4Network, IPv6Network, IPv4Interface, IPv6Interface
+        ]:
+            return f&#34;{arg.varname} if reuse_instances else {self.str(arg)}&#34;
+        elif arg.type in [date, datetime]:
+            return f&#34;{arg.varname} if reuse_instances else {arg.varname}.isoformat()&#34;
         else:
             return f&#39;__custom_serializer__({arg.varname})&#39;
 
@@ -379,7 +412,7 @@ class Renderer:
         &#34;&#34;&#34;
         Render rvalue for dataclass.
         &#34;&#34;&#34;
-        return f&#39;{arg.varname}.{self.func}()&#39;
+        return f&#39;{arg.varname}.{self.func}(reuse_instances=reuse_instances)&#39;
 
     def opt(self, arg: SeField) -&gt; str:
         &#34;&#34;&#34;
@@ -387,7 +420,7 @@ class Renderer:
         &#34;&#34;&#34;
         inner = arg[0]
         inner.name = arg.varname
-        return f&#39;{self.render(inner)} if {arg.varname} is not None else None&#39;
+        return f&#39;({self.render(inner)}) if {arg.varname} is not None else None&#39;
 
     def list(self, arg: SeField) -&gt; str:
         &#34;&#34;&#34;
@@ -436,6 +469,9 @@ class Renderer:
         &#34;&#34;&#34;
         return f&#39;{arg.varname}&#39;
 
+    def str(self, arg: SeField) -&gt; str:
+        return f&#34;str({arg.varname})&#34;
+
 
 def se_func(cls: Type[T], func: str, code: str, g: Dict) -&gt; Type[T]:
     &#34;&#34;&#34;
@@ -474,56 +510,6 @@ def enum_value(cls, e):
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
-<dt id="serde.se.asdict"><code class="name flex">
-<span>def <span class="ident">asdict</span></span>(<span>v)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Convert class with <code><a title="serde.se.serialize" href="#serde.se.serialize">serialize()</a></code> to <code>dict</code>.</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def asdict(v):
-    &#34;&#34;&#34;
-    Convert class with `serialize` to `dict`.
-    &#34;&#34;&#34;
-    if is_serializable(v):
-        return getattr(v, TO_DICT)()
-    elif is_dataclass(v):
-        return dataclasses.asdict(v)
-    elif isinstance(v, Dict):
-        return {asdict(k): asdict(v) for k, v in v.items()}
-    elif isinstance(v, (Tuple, List)):
-        return tuple(asdict(e) for e in v)
-    else:
-        return v</code></pre>
-</details>
-</dd>
-<dt id="serde.se.astuple"><code class="name flex">
-<span>def <span class="ident">astuple</span></span>(<span>v)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Convert class with <code><a title="serde.se.serialize" href="#serde.se.serialize">serialize()</a></code> to <code>tuple</code>.</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def astuple(v):
-    &#34;&#34;&#34;
-    Convert class with `serialize` to `tuple`.
-    &#34;&#34;&#34;
-    if is_serializable(v):
-        return getattr(v, TO_ITER)()
-    elif is_dataclass(v):
-        return dataclasses.astuple(v)
-    elif isinstance(v, Dict):
-        return {astuple(k): astuple(v) for k, v in v.items()}
-    elif isinstance(v, (Tuple, List)):
-        return tuple(astuple(e) for e in v)
-    else:
-        return v</code></pre>
-</details>
-</dd>
 <dt id="serde.se.is_serializable"><code class="name flex">
 <span>def <span class="ident">is_serializable</span></span>(<span>instance_or_class: Any) ‑> bool</span>
 </code></dt>
@@ -559,11 +545,11 @@ True
     &gt;&gt;&gt; is_serializable(Foo)
     True
     &#34;&#34;&#34;
-    return hasattr(instance_or_class, &#39;__serde_serialize__&#39;)</code></pre>
+    return hasattr(instance_or_class, TO_ITER) or hasattr(instance_or_class, TO_DICT)</code></pre>
 </details>
 </dd>
 <dt id="serde.se.serialize"><code class="name flex">
-<span>def <span class="ident">serialize</span></span>(<span>rename_all: Union[str, NoneType] = None)</span>
+<span>def <span class="ident">serialize</span></span>(<span>rename_all: Union[str, NoneType] = None, reuse_instances_default: bool = True)</span>
 </code></dt>
 <dd>
 <div class="desc"><p><code><a title="serde.se.serialize" href="#serde.se.serialize">serialize()</a></code> decorator. A dataclass with this decorator can be serialized
@@ -598,7 +584,7 @@ into an object in various data format such as JSON and MsgPack.</p>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def serialize(_cls=None, rename_all: Optional[str] = None):
+<pre><code class="python">def serialize(_cls=None, rename_all: Optional[str] = None, reuse_instances_default: bool = True):
     &#34;&#34;&#34;
     `serialize` decorator. A dataclass with this decorator can be serialized
     into an object in various data format such as JSON and MsgPack.
@@ -642,11 +628,6 @@ into an object in various data format such as JSON and MsgPack.</p>
             scope = {}
             setattr(cls, &#39;__serde_scope__&#39;, scope)
 
-        def serialize(self, ser, **opts) -&gt; None:
-            return ser.serialize(self, **opts)
-
-        setattr(cls, SE_NAME, serialize)
-
         g: Dict[str, Any] = {}
         for f in sefields(cls):
             if f.skip_if:
@@ -662,14 +643,114 @@ into an object in various data format such as JSON and MsgPack.</p>
         g[&#39;is_dataclass&#39;] = is_dataclass
         g[&#39;__custom_serializer__&#39;] = custom
         g[&#39;__serde_enum_value__&#39;] = enum_value
-        cls = se_func(cls, TO_ITER, render_astuple(cls, custom), g)
-        cls = se_func(cls, TO_DICT, render_asdict(cls, rename_all, custom), g)
+        cls = se_func(cls, TO_ITER, render_astuple(cls, reuse_instances_default, custom), g)
+        cls = se_func(cls, TO_DICT, render_asdict(cls, rename_all, reuse_instances_default, custom), g)
         return cls
 
     if _cls is None:
         return wrap
 
     return wrap(_cls)</code></pre>
+</details>
+</dd>
+<dt id="serde.se.to_dict"><code class="name flex">
+<span>def <span class="ident">to_dict</span></span>(<span>o, reuse_instances: bool = Ellipsis) ‑> Any</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Convert object into dictionary.</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; @serialize
+... @dataclass
+... class Foo:
+...     i: int
+&gt;&gt;&gt;
+&gt;&gt;&gt; to_dict(Foo(10))
+{'i': 10}
+&gt;&gt;&gt;
+&gt;&gt;&gt; to_dict([Foo(10), Foo(20)])
+[{'i': 10}, {'i': 20}]
+&gt;&gt;&gt;
+&gt;&gt;&gt; to_dict({'a': Foo(10), 'b': Foo(20)})
+{'a': {'i': 10}, 'b': {'i': 20}}
+&gt;&gt;&gt;
+&gt;&gt;&gt; to_dict((Foo(10), Foo(20)))
+({'i': 10}, {'i': 20})
+</code></pre></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def to_dict(o, reuse_instances: bool = ...) -&gt; Any:
+    &#34;&#34;&#34;
+    Convert object into dictionary.
+
+    &gt;&gt;&gt; @serialize
+    ... @dataclass
+    ... class Foo:
+    ...     i: int
+    &gt;&gt;&gt;
+    &gt;&gt;&gt; to_dict(Foo(10))
+    {&#39;i&#39;: 10}
+    &gt;&gt;&gt;
+    &gt;&gt;&gt; to_dict([Foo(10), Foo(20)])
+    [{&#39;i&#39;: 10}, {&#39;i&#39;: 20}]
+    &gt;&gt;&gt;
+    &gt;&gt;&gt; to_dict({&#39;a&#39;: Foo(10), &#39;b&#39;: Foo(20)})
+    {&#39;a&#39;: {&#39;i&#39;: 10}, &#39;b&#39;: {&#39;i&#39;: 20}}
+    &gt;&gt;&gt;
+    &gt;&gt;&gt; to_dict((Foo(10), Foo(20)))
+    ({&#39;i&#39;: 10}, {&#39;i&#39;: 20})
+    &#34;&#34;&#34;
+    return to_obj(o, named=True, reuse_instances=reuse_instances)</code></pre>
+</details>
+</dd>
+<dt id="serde.se.to_tuple"><code class="name flex">
+<span>def <span class="ident">to_tuple</span></span>(<span>o, reuse_instances: bool = Ellipsis) ‑> Any</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Convert object into tuple.</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; @serialize
+... @dataclass
+... class Foo:
+...     i: int
+&gt;&gt;&gt;
+&gt;&gt;&gt; to_tuple(Foo(10))
+(10,)
+&gt;&gt;&gt;
+&gt;&gt;&gt; to_tuple([Foo(10), Foo(20)])
+[(10,), (20,)]
+&gt;&gt;&gt;
+&gt;&gt;&gt; to_tuple({'a': Foo(10), 'b': Foo(20)})
+{'a': (10,), 'b': (20,)}
+&gt;&gt;&gt;
+&gt;&gt;&gt; to_tuple((Foo(10), Foo(20)))
+((10,), (20,))
+</code></pre></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def to_tuple(o, reuse_instances: bool = ...) -&gt; Any:
+    &#34;&#34;&#34;
+    Convert object into tuple.
+
+    &gt;&gt;&gt; @serialize
+    ... @dataclass
+    ... class Foo:
+    ...     i: int
+    &gt;&gt;&gt;
+    &gt;&gt;&gt; to_tuple(Foo(10))
+    (10,)
+    &gt;&gt;&gt;
+    &gt;&gt;&gt; to_tuple([Foo(10), Foo(20)])
+    [(10,), (20,)]
+    &gt;&gt;&gt;
+    &gt;&gt;&gt; to_tuple({&#39;a&#39;: Foo(10), &#39;b&#39;: Foo(20)})
+    {&#39;a&#39;: (10,), &#39;b&#39;: (20,)}
+    &gt;&gt;&gt;
+    &gt;&gt;&gt; to_tuple((Foo(10), Foo(20)))
+    ((10,), (20,))
+    &#34;&#34;&#34;
+    return to_obj(o, named=False, reuse_instances=reuse_instances)</code></pre>
 </details>
 </dd>
 </dl>
@@ -695,7 +776,7 @@ into an object in various data format such as JSON and MsgPack.</p>
     &#34;&#34;&#34;
 
     @abc.abstractclassmethod
-    def serialize(cls, obj):
+    def serialize(cls, obj, **opts):
         pass</code></pre>
 </details>
 <h3>Subclasses</h3>
@@ -708,7 +789,7 @@ into an object in various data format such as JSON and MsgPack.</p>
 <h3>Static methods</h3>
 <dl>
 <dt id="serde.se.Serializer.serialize"><code class="name flex">
-<span>def <span class="ident">serialize</span></span>(<span>obj)</span>
+<span>def <span class="ident">serialize</span></span>(<span>obj, **opts)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -717,7 +798,7 @@ into an object in various data format such as JSON and MsgPack.</p>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@abc.abstractclassmethod
-def serialize(cls, obj):
+def serialize(cls, obj, **opts):
     pass</code></pre>
 </details>
 </dd>
@@ -739,10 +820,10 @@ def serialize(cls, obj):
 </li>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
-<li><code><a title="serde.se.asdict" href="#serde.se.asdict">asdict</a></code></li>
-<li><code><a title="serde.se.astuple" href="#serde.se.astuple">astuple</a></code></li>
 <li><code><a title="serde.se.is_serializable" href="#serde.se.is_serializable">is_serializable</a></code></li>
 <li><code><a title="serde.se.serialize" href="#serde.se.serialize">serialize</a></code></li>
+<li><code><a title="serde.se.to_dict" href="#serde.se.to_dict">to_dict</a></code></li>
+<li><code><a title="serde.se.to_tuple" href="#serde.se.to_tuple">to_tuple</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-classes">Classes</a></h3>
