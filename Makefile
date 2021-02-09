@@ -39,11 +39,11 @@ fmt:
 
 docs:
 	mkdir -p docs
-	$(PIPENV) run pdoc serde --html -o html --force
+	$(PIPENV) run pdoc serde --html -o html --force --template-dir docs/template
 	cp -f html/serde/* docs/
 
 open-docs:
-	$(PIPENV) run pdoc serde --html -o html --force --http 127.0.0.1:5001
+	$(PIPENV) run pdoc serde --html -o html --force --template-dir docs/template --http 127.0.0.1:5001
 
 bench:
 	pushd bench && $(PIPENV) run $(PYTHON) bench.py && popd
