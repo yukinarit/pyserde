@@ -17,12 +17,22 @@ T = TypeVar('T')
 
 def get_origin(typ):
     """
-    Provide `get_origin` that works in python >= 3.6.
+    Provide `get_origin` that works in all python versions.
     """
     try:
-        return typing.get_origin(typ)  # python>=3.8 typing module has get_args.
+        return typing.get_origin(typ)  # python>=3.8 typing module has get_origin.
     except AttributeError:
         return typing_inspect.get_origin(typ)
+
+
+def get_args(typ):
+    """
+    Provide `get_args` that works in all python versions.
+    """
+    try:
+        return typing.get_args(typ)  # python>=3.8 typing module has get_args.
+    except AttributeError:
+        return typing_inspect.get_args(typ)
 
 
 def typename(typ) -> str:
@@ -80,7 +90,7 @@ def type_args(typ):
         else:
             return args
     except AttributeError:
-        return typing.get_args(typ)  # python>=3.8 typing module has get_args.
+        return get_args(typ)
 
 
 def union_args(typ: Union) -> Tuple:
@@ -145,7 +155,7 @@ def is_opt(typ) -> bool:
     """
     Test if the type is `typing.Optional`.
     """
-    args = typing_inspect.get_args(typ)
+    args = get_args(typ)
     return typing_inspect.is_optional_type(typ) and len(args) == 2 and not is_none(args[0]) and is_none(args[1])
 
 
@@ -162,7 +172,7 @@ def is_list(typ) -> bool:
     try:
         return issubclass(get_origin(typ), list)
     except TypeError:
-        return isinstance(typ, list)
+        return typ in (List, list)
 
 
 def is_bare_list(typ) -> bool:
@@ -175,7 +185,7 @@ def is_bare_list(typ) -> bool:
     >>> is_bare_list(List)
     True
     """
-    return is_list(typ) and typ is List
+    return is_list(typ) and typ in (List, list)
 
 
 def is_tuple(typ) -> bool:
@@ -185,7 +195,7 @@ def is_tuple(typ) -> bool:
     try:
         return issubclass(get_origin(typ), tuple)
     except TypeError:
-        return isinstance(typ, tuple)
+        return typ in (Tuple, tuple)
 
 
 def is_bare_tuple(typ) -> bool:
@@ -198,7 +208,7 @@ def is_bare_tuple(typ) -> bool:
     >>> is_bare_tuple(Tuple)
     True
     """
-    return is_tuple(typ) and typ is Tuple
+    return is_tuple(typ) and typ in (Tuple, tuple)
 
 
 def is_dict(typ) -> bool:
@@ -214,7 +224,7 @@ def is_dict(typ) -> bool:
     try:
         return issubclass(get_origin(typ), dict)
     except TypeError:
-        return isinstance(typ, dict)
+        return typ in (Dict, dict)
 
 
 def is_bare_dict(typ) -> bool:
@@ -227,7 +237,7 @@ def is_bare_dict(typ) -> bool:
     >>> is_bare_dict(Dict)
     True
     """
-    return is_dict(typ) and typ is Dict
+    return is_dict(typ) and typ in (Dict, dict)
 
 
 def is_none(typ) -> bool:
