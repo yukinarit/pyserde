@@ -1,3 +1,25 @@
+## 0.2.3 (2020-02-10)
+
+* feat: Support PEP585 type hint annotation ([81d3f4f](https://github.com/yukinarit/pyserde/commit/81d3f4f))
+    ```python
+    @deserialize
+    @serialize
+    @dataclass
+    class Foo:
+        l: list[str]
+        t: tuple[str, bool]
+        d: dict[str, list[int]]
+    ```
+* feat: add more types & use code generation ([d352d2d](https://github.com/yukinarit/pyserde/commit/d352d2d))
+    * IPv4Address, IPv6Address, IPv4Network, IPv6Network, IPv4Interface, IPv6Interface
+    * PosixPath, WindowsPath, PurePath, PurePosixPath, PureWindowsPath
+    * UUID
+* fix: Ellipsis overwriting configured default for reuse_instances ([b0366e5](https://github.com/yukinarit/pyserde/commit/b0366e5))
+* fix: forward reuse_instances & fix call order for optionals ([c56128c](https://github.com/yukinarit/pyserde/commit/c56128c))
+* fix: compatibility with python 3.6 ([7ae87b4](https://github.com/yukinarit/pyserde/commit/7ae87b4))
+
+This release had contibutions from 1 person: [@ydylla](https://github.com/ydylla). Thank you so much! :tada: :joy:
+
 ## 0.2.2 (2020-01-19)
 
 * Support inference of types on deserialization ([8c4efb2](https://github.com/yukinarit/pyserde/commit/8c4efb2))
