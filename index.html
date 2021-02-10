@@ -283,7 +283,7 @@ print(to_json(world))
 &#34;&#34;&#34;
 from .core import SerdeError, init, logger, typecheck  # noqa
 from .de import deserialize, from_dict, from_tuple, is_deserializable  # noqa
-from .se import is_serializable, serialize, to_dict, to_tuple, asdict, astuple  # noqa
+from .se import asdict, astuple, is_serializable, serialize, to_dict, to_tuple  # noqa
 
 &#34;&#34;&#34; Version of pyserde. &#34;&#34;&#34;
 __version__ = &#39;0.2.2&#39;
@@ -299,7 +299,7 @@ __all__ = [
     &#39;to_tuple&#39;,
     &#39;SerdeError&#39;,
     &#39;asdict&#39;,
-    &#39;astuple&#39;
+    &#39;astuple&#39;,
 ]</code></pre>
 </details>
 </section>
@@ -482,7 +482,7 @@ RenameAll(int_field=10, str_field='foo')
 
             # python 3.6 has no fromisoformat functions for date &amp; datetime, so we have to add our own.
             # See Renderer.render for usage
-            if sys.version_info[:2] == (3,6):
+            if sys.version_info[:2] == (3, 6):
                 if typ is date:
                     g[&#39;__py36_date_fromisoformat__&#39;] = py36_date_fromisoformat
                 elif typ is datetime:

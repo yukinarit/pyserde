@@ -29,7 +29,7 @@
 <pre><code class="python"># Helpers for parsing the result of isoformat() when using Python 3.6
 # which does not provide fromisoformat for date &amp; datetime
 # These helpers are basically copied from python 3.8
-from datetime import date, datetime, timezone, timedelta
+from datetime import date, datetime, timedelta, timezone
 from typing import List
 
 
@@ -43,10 +43,10 @@ def py36_parse_hh_mm_ss_ff(tstr) -&gt; List[int]:
         if (len_str - pos) &lt; 2:
             raise ValueError(&#39;Incomplete time component&#39;)
 
-        time_comps[comp] = int(tstr[pos:pos+2])
+        time_comps[comp] = int(tstr[pos : pos + 2])
 
         pos += 2
-        next_char = tstr[pos:pos+1]
+        next_char = tstr[pos : pos + 1]
 
         if not next_char or comp &gt;= 2:
             break
@@ -133,8 +133,8 @@ def py36_datetime_fromisoformat(date_string: str) -&gt; datetime:
                 raise ValueError(&#39;Isoformat time too short&#39;)
 
             # This is equivalent to re.search(&#39;[+-]&#39;, tstr), but faster
-            tz_pos = (tstr.find(&#39;-&#39;) + 1 or tstr.find(&#39;+&#39;) + 1)
-            timestr = tstr[:tz_pos-1] if tz_pos &gt; 0 else tstr
+            tz_pos = tstr.find(&#39;-&#39;) + 1 or tstr.find(&#39;+&#39;) + 1
+            timestr = tstr[: tz_pos - 1] if tz_pos &gt; 0 else tstr
 
             time_components = py36_parse_hh_mm_ss_ff(timestr)
 
@@ -156,8 +156,9 @@ def py36_datetime_fromisoformat(date_string: str) -&gt; datetime:
                 else:
                     tzsign = -1 if tstr[tz_pos - 1] == &#39;-&#39; else 1
 
-                    td = timedelta(hours=tz_comps[0], minutes=tz_comps[1],
-                                   seconds=tz_comps[2], microseconds=tz_comps[3])
+                    td = timedelta(
+                        hours=tz_comps[0], minutes=tz_comps[1], seconds=tz_comps[2], microseconds=tz_comps[3]
+                    )
 
                     tzi = timezone(tzsign * td)
 
@@ -244,8 +245,8 @@ datetime.datetime(2021, 1, 31, 20, 39, 21, 156182)
                 raise ValueError(&#39;Isoformat time too short&#39;)
 
             # This is equivalent to re.search(&#39;[+-]&#39;, tstr), but faster
-            tz_pos = (tstr.find(&#39;-&#39;) + 1 or tstr.find(&#39;+&#39;) + 1)
-            timestr = tstr[:tz_pos-1] if tz_pos &gt; 0 else tstr
+            tz_pos = tstr.find(&#39;-&#39;) + 1 or tstr.find(&#39;+&#39;) + 1
+            timestr = tstr[: tz_pos - 1] if tz_pos &gt; 0 else tstr
 
             time_components = py36_parse_hh_mm_ss_ff(timestr)
 
@@ -267,8 +268,9 @@ datetime.datetime(2021, 1, 31, 20, 39, 21, 156182)
                 else:
                     tzsign = -1 if tstr[tz_pos - 1] == &#39;-&#39; else 1
 
-                    td = timedelta(hours=tz_comps[0], minutes=tz_comps[1],
-                                   seconds=tz_comps[2], microseconds=tz_comps[3])
+                    td = timedelta(
+                        hours=tz_comps[0], minutes=tz_comps[1], seconds=tz_comps[2], microseconds=tz_comps[3]
+                    )
 
                     tzi = timezone(tzsign * td)
 
@@ -300,10 +302,10 @@ datetime.datetime(2021, 1, 31, 20, 39, 21, 156182)
         if (len_str - pos) &lt; 2:
             raise ValueError(&#39;Incomplete time component&#39;)
 
-        time_comps[comp] = int(tstr[pos:pos+2])
+        time_comps[comp] = int(tstr[pos : pos + 2])
 
         pos += 2
-        next_char = tstr[pos:pos+1]
+        next_char = tstr[pos : pos + 1]
 
         if not next_char or comp &gt;= 2:
             break
