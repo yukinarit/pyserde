@@ -1,11 +1,11 @@
 """
 Serialize and Deserialize in MsgPack format.
 """
-from typing import Any, Type, Dict
+from typing import Any, Dict, Type
 
 import msgpack
 
-from .core import T, SerdeError
+from .core import SerdeError, T
 from .de import Deserializer, from_dict, from_tuple
 from .se import Serializer, to_dict, to_tuple
 
@@ -27,7 +27,9 @@ class MsgPackDeserializer(Deserializer):
         return msgpack.unpackb(s, raw=raw, use_list=use_list, **opts)
 
 
-def to_msgpack(obj: Any, se: Serializer = MsgPackSerializer, named: bool = True, ext_dict: Dict[Type, int] = None, **opts) -> bytes:
+def to_msgpack(
+    obj: Any, se: Serializer = MsgPackSerializer, named: bool = True, ext_dict: Dict[Type, int] = None, **opts
+) -> bytes:
     """
     If `ext_dict` option is specified, `obj` is encoded as a `msgpack.ExtType`
     """
@@ -42,7 +44,14 @@ def to_msgpack(obj: Any, se: Serializer = MsgPackSerializer, named: bool = True,
     return se.serialize(to_func(obj, reuse_instances=False), ext_type_code=ext_type_code, **opts)
 
 
-def from_msgpack(c: Type[T], s: str, de: Deserializer = MsgPackDeserializer, named: bool = True, ext_dict: Dict[int, Type] = None, **opts) -> Type[T]:
+def from_msgpack(
+    c: Type[T],
+    s: str,
+    de: Deserializer = MsgPackDeserializer,
+    named: bool = True,
+    ext_dict: Dict[int, Type] = None,
+    **opts,
+) -> Type[T]:
     """
     If `ext_dict` option is specified, `c` is ignored and type is inferred from `msgpack.ExtType`
     """

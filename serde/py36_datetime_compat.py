@@ -1,7 +1,7 @@
 # Helpers for parsing the result of isoformat() when using Python 3.6
 # which does not provide fromisoformat for date & datetime
 # These helpers are basically copied from python 3.8
-from datetime import date, datetime, timezone, timedelta
+from datetime import date, datetime, timedelta, timezone
 from typing import List
 
 
@@ -15,10 +15,10 @@ def py36_parse_hh_mm_ss_ff(tstr) -> List[int]:
         if (len_str - pos) < 2:
             raise ValueError('Incomplete time component')
 
-        time_comps[comp] = int(tstr[pos:pos+2])
+        time_comps[comp] = int(tstr[pos : pos + 2])
 
         pos += 2
-        next_char = tstr[pos:pos+1]
+        next_char = tstr[pos : pos + 1]
 
         if not next_char or comp >= 2:
             break
@@ -105,8 +105,8 @@ def py36_datetime_fromisoformat(date_string: str) -> datetime:
                 raise ValueError('Isoformat time too short')
 
             # This is equivalent to re.search('[+-]', tstr), but faster
-            tz_pos = (tstr.find('-') + 1 or tstr.find('+') + 1)
-            timestr = tstr[:tz_pos-1] if tz_pos > 0 else tstr
+            tz_pos = tstr.find('-') + 1 or tstr.find('+') + 1
+            timestr = tstr[: tz_pos - 1] if tz_pos > 0 else tstr
 
             time_components = py36_parse_hh_mm_ss_ff(timestr)
 
@@ -128,8 +128,9 @@ def py36_datetime_fromisoformat(date_string: str) -> datetime:
                 else:
                     tzsign = -1 if tstr[tz_pos - 1] == '-' else 1
 
-                    td = timedelta(hours=tz_comps[0], minutes=tz_comps[1],
-                                   seconds=tz_comps[2], microseconds=tz_comps[3])
+                    td = timedelta(
+                        hours=tz_comps[0], minutes=tz_comps[1], seconds=tz_comps[2], microseconds=tz_comps[3]
+                    )
 
                     tzi = timezone(tzsign * td)
 

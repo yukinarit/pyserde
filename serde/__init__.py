@@ -4,7 +4,7 @@
 """
 from .core import SerdeError, init, logger, typecheck  # noqa
 from .de import deserialize, from_dict, from_tuple, is_deserializable  # noqa
-from .se import is_serializable, serialize, to_dict, to_tuple, asdict, astuple  # noqa
+from .se import asdict, astuple, is_serializable, serialize, to_dict, to_tuple  # noqa
 
 """ Version of pyserde. """
 __version__ = '0.2.2'
@@ -20,5 +20,5 @@ __all__ = [
     'to_tuple',
     'SerdeError',
     'asdict',
-    'astuple'
+    'astuple',
 ]
