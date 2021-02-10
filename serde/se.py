@@ -9,8 +9,8 @@ import functools
 from dataclasses import dataclass, is_dataclass
 from datetime import date, datetime
 from decimal import Decimal
-from ipaddress import IPv4Address, IPv6Address, IPv4Network, IPv6Network, IPv4Interface, IPv6Interface
-from pathlib import Path, PureWindowsPath, PurePosixPath, PurePath, WindowsPath, PosixPath
+from ipaddress import IPv4Address, IPv4Interface, IPv4Network, IPv6Address, IPv6Interface, IPv6Network
+from pathlib import Path, PosixPath, PurePath, PurePosixPath, PureWindowsPath, WindowsPath
 from typing import Any, Callable, Dict, List, Optional, Tuple, Type
 from uuid import UUID
 
@@ -18,7 +18,7 @@ import jinja2
 
 from .compat import (is_bare_dict, is_bare_list, is_bare_tuple, is_dict, is_enum, is_list, is_opt, is_primitive,
                      is_tuple, is_union, iter_types, type_args)
-from .core import (HIDDEN_NAME, SETTINGS, TO_DICT, TO_ITER, Field, Hidden, SerdeError, T, conv, fields, gen, logger)
+from .core import HIDDEN_NAME, SETTINGS, TO_DICT, TO_ITER, Field, Hidden, SerdeError, T, conv, fields, gen, logger
 from .more_types import serialize as custom
 
 __all__: List = ['serialize', 'is_serializable', 'Serializer', 'to_tuple', 'to_dict']
@@ -274,7 +274,9 @@ def {{func}}(obj, reuse_instances = {{reuse_instances_default}}):
     return env.get_template('iter').render(func=TO_ITER, cls=cls, reuse_instances_default=reuse_instances_default)
 
 
-def render_asdict(cls: Type, case: Optional[str] = None, reuse_instances_default: bool = True, custom: Custom = None) -> str:
+def render_asdict(
+    cls: Type, case: Optional[str] = None, reuse_instances_default: bool = True, custom: Custom = None
+) -> str:
     template = """
 def {{func}}(obj, reuse_instances = {{reuse_instances_default}}):
   if reuse_instances is Ellipsis:
@@ -369,9 +371,19 @@ class Renderer:
             return self.primitive(arg)
         elif arg.type in [
             Decimal,
-            Path, PosixPath, WindowsPath, PurePath, PurePosixPath, PureWindowsPath,
+            Path,
+            PosixPath,
+            WindowsPath,
+            PurePath,
+            PurePosixPath,
+            PureWindowsPath,
             UUID,
-            IPv4Address, IPv6Address, IPv4Network, IPv6Network, IPv4Interface, IPv6Interface
+            IPv4Address,
+            IPv6Address,
+            IPv4Network,
+            IPv6Network,
+            IPv4Interface,
+            IPv6Interface,
         ]:
             return f"{arg.varname} if reuse_instances else {self.str(arg)}"
         elif arg.type in [date, datetime]:

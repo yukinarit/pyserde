@@ -2,26 +2,27 @@ import dataclasses
 import decimal
 import enum
 import ipaddress
+import itertools
 import logging
 import os
 import pathlib
-import uuid
 import sys
+import uuid
 from dataclasses import dataclass, field
-from datetime import datetime, date
+from datetime import date, datetime
 from typing import Dict, List, Optional, Tuple
 
-import itertools
 import more_itertools
 import pytest
 
 import serde
 import serde.compat
-from serde import to_dict, to_tuple, deserialize, from_dict, from_tuple, serialize, SerdeError
+from serde import SerdeError, deserialize, from_dict, from_tuple, serialize, to_dict, to_tuple
 from serde.json import from_json, to_json
 from serde.msgpack import from_msgpack, to_msgpack
 from serde.toml import from_toml, to_toml
 from serde.yaml import from_yaml, to_yaml
+
 from . import data
 from .data import Bool, Float, Int, ListPri, Pri, PriDefault, Str
 
@@ -44,9 +45,9 @@ format_toml: List = [(to_toml, from_toml)]
 all_formats: List = format_dict + format_tuple + format_json + format_msgpack + format_yaml + format_toml
 
 opt_case: List = [
-    {'reuse_instances_default':False},
-    {'reuse_instances_default':False, 'rename_all': 'camelcase'},
-    {'reuse_instances_default':False, 'rename_all': 'snakecase'}
+    {'reuse_instances_default': False},
+    {'reuse_instances_default': False, 'rename_all': 'camelcase'},
+    {'reuse_instances_default': False, 'rename_all': 'snakecase'},
 ]
 
 types: List = [
@@ -554,9 +555,9 @@ def test_ext(se, de):
     aa = de(Base, se(a))
     assert aa != a
 
-    EXT_TYPE_DICT = {0: DerivedA, 1:DerivedB}
+    EXT_TYPE_DICT = {0: DerivedA, 1: DerivedB}
     # reverse the external type dict for faster serialization
-    EXT_TYPE_DICT_REVERSED = {v:k for k,v in EXT_TYPE_DICT.items()}
+    EXT_TYPE_DICT_REVERSED = {v: k for k, v in EXT_TYPE_DICT.items()}
 
     a = DerivedA(i=7, s="A", j=13)
     aa = de(None, se(a, ext_dict=EXT_TYPE_DICT_REVERSED), ext_dict=EXT_TYPE_DICT)
@@ -588,8 +589,12 @@ def test_exception_on_not_supported_types():
 
     with pytest.raises(SerdeError) as se_ex:
         to_dict(Foo(UnsupportedClass()))
-    assert str(se_ex.value).startswith("Unsupported type: <class \'tests.test_basics.test_exception_on_not_supported_types.<locals>.UnsupportedClass\'>")
+    assert str(se_ex.value).startswith(
+        "Unsupported type: <class \'tests.test_basics.test_exception_on_not_supported_types.<locals>.UnsupportedClass\'>"
+    )
 
     with pytest.raises(SerdeError) as de_ex:
         from_dict(Foo, {"b": UnsupportedClass()})
-    assert str(de_ex.value).startswith("Unsupported type: <class \'tests.test_basics.test_exception_on_not_supported_types.<locals>.UnsupportedClass\'>")
+    assert str(de_ex.value).startswith(
+        "Unsupported type: <class \'tests.test_basics.test_exception_on_not_supported_types.<locals>.UnsupportedClass\'>"
+    )

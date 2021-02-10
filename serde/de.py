@@ -16,10 +16,10 @@ import dataclasses
 import functools
 import sys
 from dataclasses import dataclass, is_dataclass
-from datetime import datetime, date
+from datetime import date, datetime
 from decimal import Decimal
-from ipaddress import IPv4Address, IPv6Address, IPv4Network, IPv6Network, IPv4Interface, IPv6Interface
-from pathlib import Path, PosixPath, WindowsPath, PurePath, PurePosixPath, PureWindowsPath
+from ipaddress import IPv4Address, IPv4Interface, IPv4Network, IPv6Address, IPv6Interface, IPv6Network
+from pathlib import Path, PosixPath, PurePath, PurePosixPath, PureWindowsPath, WindowsPath
 from typing import Any, Callable, Dict, List, Optional, Type
 from uuid import UUID
 
@@ -93,7 +93,7 @@ def deserialize(_cls=None, rename_all: Optional[str] = None, reuse_instances_def
 
             # python 3.6 has no fromisoformat functions for date & datetime, so we have to add our own.
             # See Renderer.render for usage
-            if sys.version_info[:2] == (3,6):
+            if sys.version_info[:2] == (3, 6):
                 if typ is date:
                     g['__py36_date_fromisoformat__'] = py36_date_fromisoformat
                 elif typ is datetime:
@@ -154,7 +154,7 @@ class Deserializer(metaclass=abc.ABCMeta):
         """
 
 
-def from_obj(c: Type[T], o: Any, named:bool, reuse_instances:bool):
+def from_obj(c: Type[T], o: Any, named: bool, reuse_instances: bool):
     """
     Deserialize from an object into an instance of the type specified as arg `c`.
     `c` can be either primitive type, `List`, `Tuple`, `Dict` or `deserialize` class.
@@ -334,15 +334,25 @@ class Renderer:
             res = self.primitive(arg)
         elif arg.type in [
             Decimal,
-            Path, PosixPath, WindowsPath, PurePath, PurePosixPath, PureWindowsPath,
+            Path,
+            PosixPath,
+            WindowsPath,
+            PurePath,
+            PurePosixPath,
+            PureWindowsPath,
             UUID,
-            IPv4Address, IPv6Address, IPv4Network, IPv6Network, IPv4Interface, IPv6Interface
+            IPv4Address,
+            IPv6Address,
+            IPv4Network,
+            IPv6Network,
+            IPv4Interface,
+            IPv6Interface,
         ]:
             res = f"({self.c_tor_with_check(arg)}) if reuse_instances else {self.c_tor(arg)}"
         elif arg.type in [date, datetime]:
             from_iso = f"{arg.type.__name__}.fromisoformat({arg.data})"
 
-            if sys.version_info[:2] == (3,6):  # python 3.6 has no fromisoformat functions
+            if sys.version_info[:2] == (3, 6):  # python 3.6 has no fromisoformat functions
                 if arg.type is date:
                     from_iso = f"__py36_date_fromisoformat__({arg.data})"
                 elif arg.type is datetime:
@@ -529,7 +539,9 @@ def {{func}}(data, reuse_instances = {{reuse_instances_default}}):
     return env.get_template('iter').render(func=FROM_ITER, cls=cls, reuse_instances_default=reuse_instances_default)
 
 
-def render_from_dict(cls: Type, rename_all: Optional[str] = None, reuse_instances_default: bool = True, custom: Custom = None) -> str:
+def render_from_dict(
+    cls: Type, rename_all: Optional[str] = None, reuse_instances_default: bool = True, custom: Custom = None
+) -> str:
     template = """
 def {{func}}(data, reuse_instances = {{reuse_instances_default}}):
   if reuse_instances is Ellipsis:
