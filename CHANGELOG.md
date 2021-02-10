@@ -1,3 +1,43 @@
+## 0.3.0 (2020-03-08)
+
+* feat: Support PEP585 type hint annotation ([81d3f4f](https://github.com/yukinarit/pyserde/commit/81d3f4f))
+    ```python
+    @deserialize
+    @serialize
+    @dataclass
+    class Foo:
+        l: list[str]
+        t: tuple[str, bool]
+        d: dict[str, list[int]]
+    ```
+* feat: add support for typing.Set & set ([20a4cdc](https://github.com/yukinarit/pyserde/commit/20a4cdc))
+* feat: add more types & use code generation ([d352d2d](https://github.com/yukinarit/pyserde/commit/d352d2d))
+    * IPv4Address, IPv6Address, IPv4Network, IPv6Network, IPv4Interface, IPv6Interface
+    * PosixPath, WindowsPath, PurePath, PurePosixPath, PureWindowsPath
+    * UUID
+* feat: add convert_sets option required for to_json & to_msgpack ([f954586](https://github.com/yukinarit/pyserde/commit/f954586))
+* feat: add union support for complex types ([434edf6](https://github.com/yukinarit/pyserde/commit/434edf6))
+    ```python
+    @deserialize
+    @serialize
+    @dataclass
+    class Foo:
+        v: Union[int, str]
+        c: Union[Dict[str, int], List[int]]
+    ```
+* fix: Ellipsis overwriting configured default for reuse_instances ([b0366e5](https://github.com/yukinarit/pyserde/commit/b0366e5))
+* fix: forward reuse_instances & fix call order for optionals ([c56128c](https://github.com/yukinarit/pyserde/commit/c56128c))
+* fix: compatibility with python 3.6 ([7ae87b4](https://github.com/yukinarit/pyserde/commit/7ae87b4))
+* fix: this pytest option does not exist #58 ([c5938da](https://github.com/yukinarit/pyserde/commit/c5938da)), closes [#58](https://github.com/yukinarit/pyserde/issues/58)
+* fix: scope should not be shared between classes ([889ada1](https://github.com/yukinarit/pyserde/commit/889ada1))
+* fix: use iter_unions to recursively collect all unions of dataclass ([577aeb9](https://github.com/yukinarit/pyserde/commit/577aeb9))
+* build: Add PEP561 py.typed marker file ([c0f46b9](https://github.com/yukinarit/pyserde/commit/c0f46b9))
+* build: Don't install dataclasses for python>3.6 ([f47caa9](https://github.com/yukinarit/pyserde/commit/f47caa9))
+* build: setup pre-commit as formatting tool ([2876de4](https://github.com/yukinarit/pyserde/commit/2876de4))
+* ci: add code style check ([c52f7e9](https://github.com/yukinarit/pyserde/commit/c52f7e9))
+
+This release had contibutions from 2 people: [@ydylla](https://github.com/ydylla), [@alexmisk](https://github.com/alexmisk). Thank you so much! :tada: :joy:
+
 ## 0.2.2 (2020-01-19)
 
 * Support inference of types on deserialization ([8c4efb2](https://github.com/yukinarit/pyserde/commit/8c4efb2))
