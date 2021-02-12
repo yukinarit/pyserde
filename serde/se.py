@@ -97,8 +97,8 @@ def serialize(_cls=None, rename_all: Optional[str] = None, reuse_instances_defau
         g['is_dataclass'] = is_dataclass
         g['__custom_serializer__'] = custom
         g['__serde_enum_value__'] = enum_value
-        cls = se_func(cls, TO_ITER, render_astuple(cls, reuse_instances_default, custom), g)
-        cls = se_func(cls, TO_DICT, render_asdict(cls, rename_all, reuse_instances_default, custom), g)
+        cls = se_func(cls, TO_ITER, render_to_tuple(cls, reuse_instances_default, custom), g)
+        cls = se_func(cls, TO_DICT, render_to_dict(cls, rename_all, reuse_instances_default, custom), g)
         return cls
 
     if _cls is None:
@@ -240,7 +240,7 @@ def to_arg(f: SeField) -> SeField:
     return f
 
 
-def render_astuple(cls: Type, reuse_instances_default: bool = True, custom: Custom = None) -> str:
+def render_to_tuple(cls: Type, reuse_instances_default: bool = True, custom: Custom = None) -> str:
     template = """
 def {{func}}(obj, reuse_instances = {{reuse_instances_default}}):
   if reuse_instances is Ellipsis:
@@ -274,7 +274,7 @@ def {{func}}(obj, reuse_instances = {{reuse_instances_default}}):
     return env.get_template('iter').render(func=TO_ITER, cls=cls, reuse_instances_default=reuse_instances_default)
 
 
-def render_asdict(
+def render_to_dict(
     cls: Type, case: Optional[str] = None, reuse_instances_default: bool = True, custom: Custom = None
 ) -> str:
     template = """
