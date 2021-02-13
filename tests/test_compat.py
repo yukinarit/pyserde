@@ -104,6 +104,11 @@ def test_typecheck():
     with pytest.raises(ValueError):
         typecheck(List[Pri], [Pri(i=10.0, s='foo', f=100.0, b=True)])
 
+    # Set
+    typecheck(Set[int], {10})
+    with pytest.raises(ValueError):
+        typecheck(Set[int], {10.0})
+
     # Tuple
     typecheck(Tuple[int, str, float, bool], (10, 'foo', 100.0, True))
     with pytest.raises(ValueError):
