@@ -4,7 +4,7 @@ pyserde core module.
 import dataclasses
 import logging
 from dataclasses import dataclass, field, is_dataclass
-from typing import Any, Callable, Dict, Iterator, List, Optional, Type, TypeVar
+from typing import Any, Callable, Dict, Iterator, List, Optional, Type, TypeVar, _GenericAlias
 
 import stringcase
 
@@ -25,6 +25,10 @@ TO_ITER = '__serde_to_iter__'
 TO_DICT = '__serde_to_dict__'
 
 HIDDEN_NAME = '__serde_hidden__'
+
+UNION_SE_PREFIX = '__serde_union_se_'
+
+UNION_DE_PREFIX = '__serde_union_de_'
 
 SETTINGS = dict(debug=False)
 
@@ -217,3 +221,26 @@ def conv(f: Field, case: Optional[str] = None) -> str:
     if name is None:
         raise SerdeError('Field name is None.')
     return name
+
+
+def union_func_suffix(union_args: List[Type]) -> str:
+    """
+    Generates a function name suffix which contains all types of the union in its name.
+    Use this together with UNION_SE_PREFIX or UNION_DE_PREFIX.
+    :param union_args: type arguments of a Union annotation
+    :return: function name suffix
+
+    >>> from typing import List, Dict
+    >>> from ipaddress import IPv4Network
+    >>> union_func_suffix([str, List[int], Dict[str, IPv4Network]])
+    'str_List_int___Dict_str_IPv4Network____'
+    """
+    name = ""
+    for arg in union_args:
+        # handles container types like List,Tuple & Dict
+        if isinstance(arg, _GenericAlias):
+            name += f"{arg._name}_{union_func_suffix(type_args(arg))}"
+        else:
+            name += arg.__name__
+        name += "_"
+    return name + "_"

@@ -26,8 +26,9 @@ from uuid import UUID
 import jinja2
 
 from .compat import (has_default, has_default_factory, is_bare_dict, is_bare_list, is_bare_tuple, is_dict, is_enum,
-                     is_list, is_opt, is_primitive, is_tuple, is_union, iter_types, type_args)
-from .core import FROM_DICT, FROM_ITER, HIDDEN_NAME, SETTINGS, Field, Hidden, SerdeError, T, conv, fields, gen, logger
+                     is_list, is_opt, is_primitive, is_tuple, is_union, iter_types, type_args, typename, is_none)
+from .core import FROM_DICT, FROM_ITER, HIDDEN_NAME, SETTINGS, Field, Hidden, SerdeError, T, conv, fields, gen, logger, \
+    UNION_DE_PREFIX, union_func_suffix
 from .more_types import deserialize as custom
 from .py36_datetime_compat import py36_date_fromisoformat, py36_datetime_fromisoformat
 
@@ -85,6 +86,8 @@ def deserialize(_cls=None, rename_all: Optional[str] = None, reuse_instances_def
 
         # Set custom deserializer.
         g['__custom_deserializer__'] = custom
+        g['typename'] = typename  # used in union functions
+        g['SerdeError'] = SerdeError  # used in union functions
 
         # Collect types used in the gernerated code.
         for typ in iter_types(cls):
@@ -101,11 +104,16 @@ def deserialize(_cls=None, rename_all: Optional[str] = None, reuse_instances_def
 
         # Collect default values and default factories used in the generated code.
         # To avoid name conflicts, name the variables like "__default_<NAME>__".
-        for f in dataclasses.fields(cls):
+        for f in defields(cls):
             if has_default(f):
                 g[f'__default_{f.name}__'] = f.default
             elif has_default_factory(f):
                 g[f'__default_{f.name}__'] = f.default_factory
+            elif is_union(f.type): # also render all union functions
+                union_args = type_args(f.type)
+                union_func_name = f"{UNION_DE_PREFIX}{union_func_suffix(union_args)}"
+                cls = de_func(cls, union_func_name, render_union_func(cls, union_args), g)
+
 
         logger.debug(f'{cls.__name__}: __serde_scope__ {scope}')
 
@@ -330,8 +338,10 @@ class Renderer:
             res = self.tuple(arg)
         elif is_enum(arg.type):
             res = self.enum(arg)
-        elif any(f(arg.type) for f in (is_primitive, is_union)):
+        elif is_primitive(arg.type):
             res = self.primitive(arg)
+        elif is_union(arg.type):
+            res = self.union_func(arg)
         elif arg.type in [
             Decimal,
             Path,
@@ -359,6 +369,8 @@ class Renderer:
                     from_iso = f"__py36_datetime_fromisoformat__({arg.data})"
 
             res = f"({arg.data} if isinstance({arg.data}, {arg.type.__name__}) else {from_iso}) if reuse_instances else {from_iso}"
+        elif is_none(arg.type):
+            res = "None"
         else:
             return f'__custom_deserializer__({arg.type.__name__}, {arg.data})'
 
@@ -498,6 +510,9 @@ class Renderer:
             ctor = self.c_tor(arg)
         return f"{arg.data} if isinstance({arg.data}, {arg.type.__name__}) else {ctor}"
 
+    def union_func(self, arg: DeField) -> str:
+        return f"{UNION_DE_PREFIX}{union_func_suffix(type_args(arg.type))}(serde_scope, {arg.data}, reuse_instances)"
+
 
 def to_arg(f: DeField, index, rename_all: Optional[str] = None) -> DeField:
     f.index = index
@@ -506,7 +521,7 @@ def to_arg(f: DeField, index, rename_all: Optional[str] = None) -> DeField:
     return f
 
 
-def to_iter_arg(f: DeField, *args, **kwargs):
+def to_iter_arg(f: DeField, *args, **kwargs) -> DeField:
     f = to_arg(f, *args, **kwargs)
     f.iterbased = True
     return f
@@ -517,13 +532,17 @@ def render_from_iter(cls: Type, reuse_instances_default: bool = True, custom: Cu
 def {{func}}(data, reuse_instances = {{reuse_instances_default}}):
   if reuse_instances is Ellipsis:
     reuse_instances = {{reuse_instances_default}}
+
+  serde_scope = getattr(cls, '__serde_scope__')
+    
   {# List up all classes used by this class. -#}
   {% for name in cls.__serde_scope__ -%}
-  {{name}} = getattr(cls, '__serde_scope__')['{{name}}']
+  {{name}} = serde_scope['{{name}}']
   {% endfor -%}
 
   if data is None:
     return None
+
   return cls(
   {% for f in cls|fields -%}
   {{f|arg(loop.index-1)|rvalue}},
@@ -546,13 +565,17 @@ def render_from_dict(
 def {{func}}(data, reuse_instances = {{reuse_instances_default}}):
   if reuse_instances is Ellipsis:
     reuse_instances = {{reuse_instances_default}}
+  
+  serde_scope = getattr(cls, '__serde_scope__')
+    
   {# List up all classes used by this class. -#}
   {% for name in cls.__serde_scope__ -%}
-  {{name}} = getattr(cls, '__serde_scope__')['{{name}}']
+  {{name}} = serde_scope['{{name}}']
   {% endfor -%}
 
   if data is None:
     return None
+
   fs = fields(cls)
   return cls(
   {% for f in cls|fields -%}
@@ -567,6 +590,44 @@ def {{func}}(data, reuse_instances = {{reuse_instances_default}}):
     env.filters.update({'fields': defields})
     env.filters.update({'arg': functools.partial(to_arg, rename_all=rename_all)})
     return env.get_template('dict').render(func=FROM_DICT, cls=cls, reuse_instances_default=reuse_instances_default)
+
+
+def render_union_func(cls: Type, union_args: List[Type]) -> str:
+    template = """
+def {{func}}(serde_scope, obj, reuse_instances):
+  {% for name in cls.__serde_scope__ %}
+  {{name}} = serde_scope['{{name}}']
+  {% endfor %}
+
+  # create fake dict so we can reuse the normal render function
+  fake_dict = {"fake_key":obj}
+  
+  error = "Exhausted all types"
+  {% for t in union_args %}
+  {% if t | is_primitive %}
+  if isinstance(obj, {{t.__name__}}):
+    return {{t|arg|rvalue}}
+  else:
+    error = "input is not of type {{t.__name__}}"
+  {% else %}
+  try:
+    return {{t|arg|rvalue}}
+  except Exception as e:
+    error = str(e)
+  {% endif %}
+  {% endfor %}
+  raise SerdeError("Can not deserialize " + repr(obj) + " of type " + typename(type(obj)) + " into {{union_name}}. Reason: " + error)
+    """
+    # TODO handle containers in template
+    union_func = f"{UNION_DE_PREFIX}{union_func_suffix(union_args)}"
+    union_name = f"Union[{', '.join([typename(a) for a in union_args])}]"
+
+    renderer = Renderer(FROM_DICT, None) # FIXME we only need render
+    env = jinja2.Environment(loader=jinja2.DictLoader({'dict': template}))
+    env.filters.update({'arg': lambda x: DeField(x, datavar="fake_dict", name="fake_key")})  # use custom to_arg for fake field
+    env.filters.update({'rvalue': renderer.render})
+    env.filters.update({'is_primitive': is_primitive})
+    return env.get_template('dict').render(func=union_func, union_args=union_args, cls=cls, union_name=union_name)
 
 
 def de_func(cls: Type[T], func: str, code: str, g: Dict) -> Type[T]:

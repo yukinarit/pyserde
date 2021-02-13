@@ -17,8 +17,9 @@ from uuid import UUID
 import jinja2
 
 from .compat import (is_bare_dict, is_bare_list, is_bare_tuple, is_dict, is_enum, is_list, is_opt, is_primitive,
-                     is_tuple, is_union, iter_types, type_args)
-from .core import HIDDEN_NAME, SETTINGS, TO_DICT, TO_ITER, Field, Hidden, SerdeError, T, conv, fields, gen, logger
+                     is_tuple, is_union, iter_types, type_args, typename, is_none)
+from .core import (HIDDEN_NAME, SETTINGS, TO_DICT, TO_ITER, Field, Hidden, SerdeError, T, conv, fields, gen, logger,
+                   UNION_SE_PREFIX, union_func_suffix)
 from .more_types import serialize as custom
 
 __all__: List = ['serialize', 'is_serializable', 'Serializer', 'to_tuple', 'to_dict']
@@ -82,19 +83,25 @@ def serialize(_cls=None, rename_all: Optional[str] = None, reuse_instances_defau
             scope = {}
             setattr(cls, '__serde_scope__', scope)
 
+        # Collect types used in the gernerated code.
+        for typ in iter_types(cls):
+            if is_dataclass(typ) or is_enum(typ) or not is_primitive(typ):
+                getattr(cls, '__serde_scope__')[typ.__name__] = typ
+
         g: Dict[str, Any] = {}
         for f in sefields(cls):
             if f.skip_if:
                 g[f.skip_if.name] = f.skip_if
-
-        # Collect types used in the gernerated code.
-        for typ in iter_types(cls):
-            if is_dataclass(typ) or is_enum(typ):
-                getattr(cls, '__serde_scope__')[typ.__name__] = typ
+            if is_union(f.type):  # render all union functions
+                union_args = type_args(f.type)
+                union_func_name = f"{UNION_SE_PREFIX}{union_func_suffix(union_args)}"
+                cls = se_func(cls, union_func_name, render_union_func(cls, union_args), g)
 
         logger.debug(f'{cls.__name__}: __serde_scope__ {scope}')
 
         g['is_dataclass'] = is_dataclass
+        g['typename'] = typename  # used in union functions
+        g['SerdeError'] = SerdeError  # used in union functions
         g['__custom_serializer__'] = custom
         g['__serde_enum_value__'] = enum_value
         cls = se_func(cls, TO_ITER, render_astuple(cls, reuse_instances_default, custom), g)
@@ -249,9 +256,11 @@ def {{func}}(obj, reuse_instances = {{reuse_instances_default}}):
   if not is_dataclass(obj):
     return copy.deepcopy(obj)
 
+  serde_scope = getattr(obj, '__serde_scope__')
+
   {# List up all classes used by this class. -#}
   {% for name in cls.__serde_scope__ -%}
-  {{name}} = getattr(obj, '__serde_scope__')['{{name}}']
+  {{name}} = serde_scope['{{name}}']
   {% endfor -%}
 
   {% if cls|is_dataclass %}
@@ -285,9 +294,11 @@ def {{func}}(obj, reuse_instances = {{reuse_instances_default}}):
   if not is_dataclass(obj):
     return copy.deepcopy(obj)
 
+  serde_scope = getattr(obj, '__serde_scope__')
+
   {# List up all classes used by this class. -#}
   {% for name in cls.__serde_scope__ -%}
-  {{name}} = getattr(obj, '__serde_scope__')['{{name}}']
+  {{name}} = serde_scope['{{name}}']
   {% endfor -%}
 
   {% if cls|is_dataclass -%}
@@ -316,6 +327,29 @@ def {{func}}(obj, reuse_instances = {{reuse_instances_default}}):
     env.filters.update({'case': functools.partial(conv, case=case)})
     return env.get_template('dict').render(func=TO_DICT, cls=cls, reuse_instances_default=reuse_instances_default)
 
+
+def render_union_func(cls: Type, union_args: List[Type]) -> str:
+    template = """
+def {{func}}(serde_scope, obj, reuse_instances):
+  {% for name in cls.__serde_scope__ %}
+  {{name}} = serde_scope['{{name}}']
+  {% endfor %}
+  
+  {% for t in union_args %}
+  if isinstance(obj, {{t.__name__}}):
+    return {{t|arg|rvalue()}}
+  {% endfor %}
+  raise SerdeError("Can not serialize " + repr(obj) + " of type " + typename(type(obj)) + " for {{union_name}}")
+    """
+    # TODO handle containers in template
+    union_func = f"{UNION_SE_PREFIX}{union_func_suffix(union_args)}"
+    union_name = f"Union[{', '.join([typename(a) for a in union_args])}]"
+
+    renderer = Renderer(TO_DICT, None) # FIXME we only need render function
+    env = jinja2.Environment(loader=jinja2.DictLoader({'dict': template}))
+    env.filters.update({'arg': lambda x: SeField(x, "obj")})
+    env.filters.update({'rvalue': renderer.render})
+    return env.get_template('dict').render(func=union_func, union_args=union_args, cls=cls, union_name=union_name)
 
 @dataclass
 class Renderer:
@@ -367,8 +401,10 @@ class Renderer:
             return self.tuple(arg)
         elif is_enum(arg.type):
             return self.enum(arg)
-        elif any(f(arg.type) for f in (is_primitive, is_union)):
+        elif is_primitive(arg.type):
             return self.primitive(arg)
+        elif is_union(arg.type):
+            return self.union_func(arg)
         elif arg.type in [
             Decimal,
             Path,
@@ -388,6 +424,8 @@ class Renderer:
             return f"{arg.varname} if reuse_instances else {self.str(arg)}"
         elif arg.type in [date, datetime]:
             return f"{arg.varname} if reuse_instances else {arg.varname}.isoformat()"
+        elif is_none(arg.type):
+            return "None"
         else:
             return f'__custom_serializer__({arg.varname})'
 
@@ -454,6 +492,9 @@ class Renderer:
 
     def str(self, arg: SeField) -> str:
         return f"str({arg.varname})"
+
+    def union_func(self, arg: SeField) -> str:
+        return f"{UNION_SE_PREFIX}{union_func_suffix(type_args(arg.type))}(serde_scope, {arg.varname}, reuse_instances)"
 
 
 def se_func(cls: Type[T], func: str, code: str, g: Dict) -> Type[T]:
