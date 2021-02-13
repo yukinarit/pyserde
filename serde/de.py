@@ -604,7 +604,7 @@ def {{func}}(serde_scope, obj, reuse_instances):
   
   error = "Exhausted all types"
   {% for t in union_args %}
-  {% if t | is_primitive %}
+  {% if t | is_primitive or t | is_none %}
   if isinstance(obj, {{t.__name__}}):
     return {{t|arg|rvalue}}
   else:
@@ -627,6 +627,7 @@ def {{func}}(serde_scope, obj, reuse_instances):
     env.filters.update({'arg': lambda x: DeField(x, datavar="fake_dict", name="fake_key")})  # use custom to_arg for fake field
     env.filters.update({'rvalue': renderer.render})
     env.filters.update({'is_primitive': is_primitive})
+    env.filters.update({'is_none': is_none})
     return env.get_template('dict').render(func=union_func, union_args=union_args, cls=cls, union_name=union_name)
 
 
