@@ -1,11 +1,11 @@
 import sys
 from dataclasses import dataclass
-from typing import Dict, List, Optional, Tuple, Union, Set
+from typing import Dict, List, Optional, Set, Tuple, Union
 
 import pytest
 
 from serde import typecheck
-from serde.compat import is_dict, is_list, is_opt, is_tuple, is_union, iter_types, type_args, union_args, is_set
+from serde.compat import is_dict, is_list, is_opt, is_set, is_tuple, is_union, iter_types, type_args, union_args
 
 from .data import Bool, Float, Int, Pri, PriOpt, Str
 

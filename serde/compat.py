@@ -6,7 +6,7 @@ import enum
 import typing
 from dataclasses import fields, is_dataclass
 from itertools import zip_longest
-from typing import Dict, Iterator, List, Optional, Tuple, Type, TypeVar, Union, Set
+from typing import Dict, Iterator, List, Optional, Set, Tuple, Type, TypeVar, Union
 
 import typing_inspect
 

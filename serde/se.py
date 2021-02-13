@@ -16,9 +16,9 @@ from uuid import UUID
 
 import jinja2
 
-from .compat import (is_bare_dict, is_bare_list, is_bare_tuple, is_dict, is_enum, is_list, is_opt, is_primitive,
-                     is_tuple, is_union, iter_types, type_args, is_set, is_bare_set)
-from .core import (HIDDEN_NAME, SETTINGS, TO_DICT, TO_ITER, Field, Hidden, SerdeError, T, conv, fields, gen, logger)
+from .compat import (is_bare_dict, is_bare_list, is_bare_set, is_bare_tuple, is_dict, is_enum, is_list, is_opt,
+                     is_primitive, is_set, is_tuple, is_union, iter_types, type_args)
+from .core import HIDDEN_NAME, SETTINGS, TO_DICT, TO_ITER, Field, Hidden, SerdeError, T, conv, fields, gen, logger
 from .more_types import serialize as custom
 
 __all__: List = ['serialize', 'is_serializable', 'Serializer', 'to_tuple', 'to_dict']
@@ -38,7 +38,12 @@ class Serializer(metaclass=abc.ABCMeta):
         pass
 
 
-def serialize(_cls=None, rename_all: Optional[str] = None, reuse_instances_default: bool = True, convert_sets_default: bool = False):
+def serialize(
+    _cls=None,
+    rename_all: Optional[str] = None,
+    reuse_instances_default: bool = True,
+    convert_sets_default: bool = False,
+):
     """
     `serialize` decorator. A dataclass with this decorator can be serialized
     into an object in various data format such as JSON and MsgPack.
@@ -243,10 +248,9 @@ def to_arg(f: SeField) -> SeField:
     return f
 
 
-def render_to_tuple(cls: Type,
-                   reuse_instances_default: bool = True,
-                   convert_sets_default: bool = False,
-                   custom: Custom = None) -> str:
+def render_to_tuple(
+    cls: Type, reuse_instances_default: bool = True, convert_sets_default: bool = False, custom: Custom = None
+) -> str:
     template = """
 def {{func}}(obj, reuse_instances = {{reuse_instances_default}}, convert_sets = {{convert_sets_default}}):
   if reuse_instances is Ellipsis:
@@ -279,16 +283,21 @@ def {{func}}(obj, reuse_instances = {{reuse_instances_default}}, convert_sets = 
     env.filters.update({'is_dataclass': is_dataclass})
     env.filters.update({'rvalue': renderer.render})
     env.filters.update({'arg': to_arg})
-    return env.get_template('iter').render(func=TO_ITER, cls=cls,
-                                           reuse_instances_default=reuse_instances_default,
-                                           convert_sets_default=convert_sets_default)
+    return env.get_template('iter').render(
+        func=TO_ITER,
+        cls=cls,
+        reuse_instances_default=reuse_instances_default,
+        convert_sets_default=convert_sets_default,
+    )
 
 
 def render_to_dict(
-        cls: Type, case: Optional[str] = None,
-        reuse_instances_default: bool = True,
-        convert_sets_default: bool = False,
-        custom: Custom = None) -> str:
+    cls: Type,
+    case: Optional[str] = None,
+    reuse_instances_default: bool = True,
+    convert_sets_default: bool = False,
+    custom: Custom = None,
+) -> str:
     template = """
 def {{func}}(obj, reuse_instances = {{reuse_instances_default}}, convert_sets = {{convert_sets_default}}):
   if reuse_instances is Ellipsis:
@@ -328,9 +337,12 @@ def {{func}}(obj, reuse_instances = {{reuse_instances_default}}, convert_sets = 
     env.filters.update({'rvalue': renderer.render})
     env.filters.update({'arg': to_arg})
     env.filters.update({'case': functools.partial(conv, case=case)})
-    return env.get_template('dict').render(func=TO_DICT, cls=cls,
-                                           reuse_instances_default=reuse_instances_default,
-                                           convert_sets_default=convert_sets_default)
+    return env.get_template('dict').render(
+        func=TO_DICT,
+        cls=cls,
+        reuse_instances_default=reuse_instances_default,
+        convert_sets_default=convert_sets_default,
+    )
 
 
 @dataclass

@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import Set
 
-from serde import asdict, astuple, to_dict, to_tuple, serialize
+from serde import asdict, astuple, serialize, to_dict, to_tuple
 from serde.json import to_json
 from serde.msgpack import to_msgpack
 
@@ -94,7 +94,7 @@ def test_convert_sets_option():
     class A:
         v: Set[str]
 
-    a = A({"a","b"})
+    a = A({"a", "b"})
 
     a_json = to_json(a)
     # sets are unordered so the list order is not stable
@@ -106,6 +106,6 @@ def test_convert_sets_option():
 
     a_dict = to_dict(a, convert_sets=True)
     # sets are unordered so the list order is not stable
-    assert a_dict == {"v": ["a","b"]} or a_dict == {"v": ["b","a"]}
+    assert a_dict == {"v": ["a", "b"]} or a_dict == {"v": ["b", "a"]}
 
-    assert {"v": {"a","b"}} == to_dict(a, convert_sets=False)
+    assert {"v": {"a", "b"}} == to_dict(a, convert_sets=False)
