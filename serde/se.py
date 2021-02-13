@@ -19,7 +19,7 @@ import jinja2
 from .compat import (is_bare_dict, is_bare_list, is_bare_tuple, is_dict, is_enum, is_list, is_opt, is_primitive,
                      is_tuple, is_union, iter_types, type_args, typename, is_none)
 from .core import (HIDDEN_NAME, SETTINGS, TO_DICT, TO_ITER, Field, Hidden, SerdeError, T, conv, fields, gen, logger,
-                   UNION_SE_PREFIX, union_func_suffix)
+                   UNION_SE_PREFIX, union_func_suffix, UNION_ARGS, is_instance)
 from .more_types import serialize as custom
 
 __all__: List = ['serialize', 'is_serializable', 'Serializer', 'to_tuple', 'to_dict']
@@ -96,12 +96,14 @@ def serialize(_cls=None, rename_all: Optional[str] = None, reuse_instances_defau
                 union_args = type_args(f.type)
                 union_func_name = f"{UNION_SE_PREFIX}{union_func_suffix(union_args)}"
                 cls = se_func(cls, union_func_name, render_union_func(cls, union_args), g)
+                scope[f"{union_func_name}{UNION_ARGS}"] = union_args
 
         logger.debug(f'{cls.__name__}: __serde_scope__ {scope}')
 
         g['is_dataclass'] = is_dataclass
         g['typename'] = typename  # used in union functions
         g['SerdeError'] = SerdeError  # used in union functions
+        g['is_instance'] = is_instance  # used in union functions
         g['__custom_serializer__'] = custom
         g['__serde_enum_value__'] = enum_value
         cls = se_func(cls, TO_ITER, render_astuple(cls, reuse_instances_default, custom), g)
@@ -335,8 +337,10 @@ def {{func}}(serde_scope, obj, reuse_instances):
   {{name}} = serde_scope['{{name}}']
   {% endfor %}
   
+  union_args = serde_scope['{{func}}{{UNION_ARGS}}']
+  
   {% for t in union_args %}
-  if isinstance(obj, {{t.__name__}}):
+  if is_instance(obj, union_args[{{loop.index0}}]):
     return {{t|arg|rvalue()}}
   {% endfor %}
   raise SerdeError("Can not serialize " + repr(obj) + " of type " + typename(type(obj)) + " for {{union_name}}")
@@ -349,7 +353,7 @@ def {{func}}(serde_scope, obj, reuse_instances):
     env = jinja2.Environment(loader=jinja2.DictLoader({'dict': template}))
     env.filters.update({'arg': lambda x: SeField(x, "obj")})
     env.filters.update({'rvalue': renderer.render})
-    return env.get_template('dict').render(func=union_func, union_args=union_args, cls=cls, union_name=union_name)
+    return env.get_template('dict').render(func=union_func, union_args=union_args, cls=cls, union_name=union_name, UNION_ARGS=UNION_ARGS)
 
 @dataclass
 class Renderer:

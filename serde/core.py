@@ -30,6 +30,8 @@ UNION_SE_PREFIX = '__serde_union_se_'
 
 UNION_DE_PREFIX = '__serde_union_de_'
 
+UNION_ARGS = '__union_args__'
+
 SETTINGS = dict(debug=False)
 
 
@@ -126,6 +128,51 @@ def typecheck(cls: Type[T], obj: T) -> None:
     else:
         if not isinstance(obj, cls):
             raise ValueError(f'{obj} is not instance of {cls}')
+
+
+def is_instance(obj: Any, typ: Type) -> bool:
+    if is_dataclass(typ):
+        for f in dataclasses.fields(obj):
+            if not is_instance(getattr(obj, f.name, None), f.type):
+                return False
+        return True
+    elif is_opt(typ):
+        if obj is None:
+            return True
+        opt_arg = type_args(typ)[0]
+        return is_instance(obj, opt_arg)
+    elif is_union(typ):
+        successes = []
+        for arg in type_args(typ):
+            successes.append(is_instance(obj, arg))
+        return any(successes)
+    elif is_list(typ):
+        if not isinstance(obj, list):
+            return False
+        successes = []
+        list_arg = type_args(typ)[0]
+        for e in obj:
+            successes.append(is_instance(e, list_arg))
+        return all(successes)
+    elif is_tuple(typ):
+        if not isinstance(obj, tuple):
+            return False
+        successes = []
+        for i, arg in enumerate(type_args(typ)):
+            successes.append(is_instance(obj[i], arg))
+        return all(successes)
+    elif is_dict(typ):
+        if not isinstance(obj, dict):
+            return False
+        ktyp = type_args(typ)[0]
+        vtyp = type_args(typ)[1]
+        successes = []
+        for k, v in obj.items():
+            successes.append(is_instance(k, ktyp))
+            successes.append(is_instance(v, vtyp))
+        return all(successes)
+    else:
+        return isinstance(obj, typ)
 
 
 @dataclass
