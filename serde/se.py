@@ -17,8 +17,8 @@ from uuid import UUID
 import jinja2
 
 from .compat import (is_bare_dict, is_bare_list, is_bare_tuple, is_dict, is_enum, is_list, is_opt, is_primitive,
-                     is_tuple, is_union, iter_types, type_args)
-from .core import HIDDEN_NAME, SETTINGS, TO_DICT, TO_ITER, Field, Hidden, SerdeError, T, conv, fields, gen, logger
+                     is_tuple, is_union, iter_types, type_args, is_set, is_bare_set)
+from .core import (HIDDEN_NAME, SETTINGS, TO_DICT, TO_ITER, Field, Hidden, SerdeError, T, conv, fields, gen, logger)
 from .more_types import serialize as custom
 
 __all__: List = ['serialize', 'is_serializable', 'Serializer', 'to_tuple', 'to_dict']
@@ -361,6 +361,8 @@ class Renderer:
             return self.opt(arg)
         elif is_list(arg.type):
             return self.list(arg)
+        elif is_set(arg.type):
+            return self.set(arg)
         elif is_dict(arg.type):
             return self.dict(arg)
         elif is_tuple(arg.type):
@@ -415,6 +417,17 @@ class Renderer:
             earg = arg[0]
             earg.name = 'v'
             return f'[{self.render(earg)} for v in {arg.varname}]'
+
+    def set(self, arg: SeField) -> str:
+        """
+        Render rvalue for set.
+        """
+        if is_bare_set(arg.type):
+            return arg.varname
+        else:
+            earg = arg[0]
+            earg.name = 'v'
+            return f'set({self.render(earg)} for v in {arg.varname})'
 
     def tuple(self, arg: SeField) -> str:
         """

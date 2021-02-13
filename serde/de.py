@@ -26,7 +26,7 @@ from uuid import UUID
 import jinja2
 
 from .compat import (has_default, has_default_factory, is_bare_dict, is_bare_list, is_bare_tuple, is_dict, is_enum,
-                     is_list, is_opt, is_primitive, is_tuple, is_union, iter_types, type_args)
+                     is_list, is_opt, is_primitive, is_tuple, is_union, iter_types, type_args, is_set, is_bare_set)
 from .core import FROM_DICT, FROM_ITER, HIDDEN_NAME, SETTINGS, Field, Hidden, SerdeError, T, conv, fields, gen, logger
 from .more_types import deserialize as custom
 from .py36_datetime_compat import py36_date_fromisoformat, py36_datetime_fromisoformat
@@ -181,11 +181,10 @@ def from_obj(c: Type[T], o: Any, named: bool, reuse_instances: bool):
             except (SerdeError, ValueError):
                 pass
         return v
-    elif is_list(c):
+    elif is_list(c) or is_set(c):
         return [thisfunc(type_args(c)[0], e) for e in o]
     elif is_tuple(c):
         return tuple(thisfunc(type_args(c)[i], e) for i, e in enumerate(o))
-    # TODO set
     elif is_dict(c):
         return {thisfunc(type_args(c)[0], k): thisfunc(type_args(c)[1], v) for k, v in o.items()}
 
@@ -253,7 +252,7 @@ class DeField(Field):
         Access inner `Field` e.g. T of List[T].
         """
         typ = type_args(self.type)[n]
-        if is_list(self.type) or is_dict(self.type):
+        if is_list(self.type) or is_dict(self.type) or is_set(self.type):
             return InnerField(typ, 'v', datavar='v')
         elif is_tuple(self.type):
             return InnerField(typ, f'{self.data}[{n}]', datavar=f'{self.data}[{n}]')
@@ -324,6 +323,8 @@ class Renderer:
             res = self.opt(arg)
         elif is_list(arg.type):
             res = self.list(arg)
+        elif is_set(arg.type):
+            res = self.set(arg)
         elif is_dict(arg.type):
             res = self.dict(arg)
         elif is_tuple(arg.type):
@@ -423,6 +424,22 @@ class Renderer:
             return f'list({arg.data})'
         else:
             return f'[{self.render(arg[0])} for v in {arg.data}]'
+
+    def set(self, arg: DeField) -> str:
+        """
+        Render rvalue for set.
+
+        >>> from typing import Set
+        >>> Renderer('foo').render(DeField(Set[int], 'l', datavar='data'))
+        'set(v for v in data["l"])'
+
+        >>> Renderer('foo').render(DeField(Set[Set[int]], 'l', datavar='data'))
+        'set(set(v for v in v) for v in data["l"])'
+        """
+        if is_bare_set(arg.type):
+            return f'set({arg.data})'
+        else:
+            return f'set({self.render(arg[0])} for v in {arg.data})'
 
     def tuple(self, arg: DeField) -> str:
         """

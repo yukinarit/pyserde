@@ -10,7 +10,7 @@ import sys
 import uuid
 from dataclasses import dataclass, field
 from datetime import date, datetime
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple, Set
 
 import more_itertools
 import pytest
@@ -61,6 +61,10 @@ types: List = [
     ([1, 2], List),
     ([1, 2], list),
     ([], List[int]),
+    ({1, 2}, Set[int]),
+    ({1, 2}, Set),
+    ({1, 2}, set),
+    (set(), Set[int]),
     ((1, 1), Tuple[int, int]),
     ((1, 1), Tuple),
     ({'a': 1}, Dict[str, int]),

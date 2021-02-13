@@ -1,11 +1,11 @@
 import sys
 from dataclasses import dataclass
-from typing import Dict, List, Optional, Tuple, Union
+from typing import Dict, List, Optional, Tuple, Union, Set
 
 import pytest
 
 from serde import typecheck
-from serde.compat import is_dict, is_list, is_opt, is_tuple, is_union, iter_types, type_args, union_args
+from serde.compat import is_dict, is_list, is_opt, is_tuple, is_union, iter_types, type_args, union_args, is_set
 
 from .data import Bool, Float, Int, Pri, PriOpt, Str
 
@@ -13,6 +13,8 @@ from .data import Bool, Float, Int, Pri, PriOpt, Str
 def test_types():
     assert is_list(List[int])
     assert is_list(List)
+    assert is_set(Set[int])
+    assert is_set(Set)
     assert is_tuple(Tuple[int, int, int])
     assert is_tuple(Tuple)
     assert is_dict(Dict[str, int])
@@ -25,13 +27,16 @@ def test_types():
     assert not is_opt(Union[Optional[int], Optional[str]])
     assert is_union(Union[Optional[int], Optional[str]])
 
+    assert is_list(list)
+    assert is_set(set)
+    assert is_tuple(tuple)
+    assert is_dict(dict)
+
     if sys.version_info[:3] >= (3, 9, 0):
         assert is_list(list[int])
-        assert is_list(list)
+        assert is_set(set[int])
         assert is_tuple(tuple[int, int, int])
-        assert is_tuple(tuple)
         assert is_dict(dict[str, int])
-        assert is_dict(dict)
 
 
 def test_iter_types():
