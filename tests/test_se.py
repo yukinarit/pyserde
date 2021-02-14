@@ -1,4 +1,9 @@
-from serde import asdict, astuple, to_dict, to_tuple
+from dataclasses import dataclass
+from typing import Set
+
+from serde import asdict, astuple, serialize, to_dict, to_tuple
+from serde.json import to_json
+from serde.msgpack import to_msgpack
 
 from . import data
 from .data import (Bool, Float, Int, NestedInt, NestedPri, NestedPriDict, NestedPriList, NestedPriTuple, Pri, PriDict,
@@ -81,3 +86,26 @@ def test_se_func_iter():
 
     # Optional
     assert (10, '10', 10.0, False) == PriOpt(10, "10", 10.0, False).__serde_to_iter__()
+
+
+def test_convert_sets_option():
+    @serialize
+    @dataclass
+    class A:
+        v: Set[str]
+
+    a = A({"a", "b"})
+
+    a_json = to_json(a)
+    # sets are unordered so the list order is not stable
+    assert a_json == '{"v": ["a", "b"]}' or a_json == '{"v": ["b", "a"]}'
+
+    a_msgpack = to_msgpack(a)
+    # sets are unordered so the list order is not stable
+    assert a_msgpack == b'\x81\xa1v\x92\xa1a\xa1b' or a_msgpack == b'\x81\xa1v\x92\xa1b\xa1a'
+
+    a_dict = to_dict(a, convert_sets=True)
+    # sets are unordered so the list order is not stable
+    assert a_dict == {"v": ["a", "b"]} or a_dict == {"v": ["b", "a"]}
+
+    assert {"v": {"a", "b"}} == to_dict(a, convert_sets=False)

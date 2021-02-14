@@ -8,7 +8,7 @@ from typing import Any, Callable, Dict, Iterator, List, Optional, Type, TypeVar
 
 import stringcase
 
-from .compat import T, assert_type, is_dict, is_list, is_opt, is_tuple, is_union, type_args
+from .compat import T, assert_type, is_dict, is_list, is_opt, is_set, is_tuple, is_union, type_args
 
 __all__: List = []
 
@@ -103,6 +103,12 @@ def typecheck(cls: Type[T], obj: T) -> None:
     elif is_list(cls):
         assert_type(list, obj)
         if isinstance(obj, list):
+            typ = type_args(cls)[0]
+            for e in obj:
+                typecheck(typ, e)
+    elif is_set(cls):
+        assert_type(set, obj)
+        if isinstance(obj, set):
             typ = type_args(cls)[0]
             for e in obj:
                 typecheck(typ, e)

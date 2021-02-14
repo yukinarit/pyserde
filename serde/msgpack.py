@@ -41,7 +41,7 @@ def to_msgpack(
             raise SerdeError(f"Could not find type code for {obj_type.__name__} in ext_dict")
 
     to_func = to_dict if named else to_tuple
-    return se.serialize(to_func(obj, reuse_instances=False), ext_type_code=ext_type_code, **opts)
+    return se.serialize(to_func(obj, reuse_instances=False, convert_sets=True), ext_type_code=ext_type_code, **opts)
 
 
 def from_msgpack(

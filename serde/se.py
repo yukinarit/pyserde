@@ -16,8 +16,8 @@ from uuid import UUID
 
 import jinja2
 
-from .compat import (is_bare_dict, is_bare_list, is_bare_tuple, is_dict, is_enum, is_list, is_opt, is_primitive,
-                     is_tuple, is_union, iter_types, type_args)
+from .compat import (is_bare_dict, is_bare_list, is_bare_set, is_bare_tuple, is_dict, is_enum, is_list, is_opt,
+                     is_primitive, is_set, is_tuple, is_union, iter_types, type_args)
 from .core import HIDDEN_NAME, SETTINGS, TO_DICT, TO_ITER, Field, Hidden, SerdeError, T, conv, fields, gen, logger
 from .more_types import serialize as custom
 
@@ -38,7 +38,12 @@ class Serializer(metaclass=abc.ABCMeta):
         pass
 
 
-def serialize(_cls=None, rename_all: Optional[str] = None, reuse_instances_default: bool = True):
+def serialize(
+    _cls=None,
+    rename_all: Optional[str] = None,
+    reuse_instances_default: bool = True,
+    convert_sets_default: bool = False,
+):
     """
     `serialize` decorator. A dataclass with this decorator can be serialized
     into an object in various data format such as JSON and MsgPack.
@@ -97,8 +102,11 @@ def serialize(_cls=None, rename_all: Optional[str] = None, reuse_instances_defau
         g['is_dataclass'] = is_dataclass
         g['__custom_serializer__'] = custom
         g['__serde_enum_value__'] = enum_value
-        cls = se_func(cls, TO_ITER, render_astuple(cls, reuse_instances_default, custom), g)
-        cls = se_func(cls, TO_DICT, render_asdict(cls, rename_all, reuse_instances_default, custom), g)
+
+        to_tuple_code = render_to_tuple(cls, reuse_instances_default, convert_sets_default, custom)
+        cls = se_func(cls, TO_ITER, to_tuple_code, g)
+        to_dict_code = render_to_dict(cls, rename_all, reuse_instances_default, convert_sets_default, custom)
+        cls = se_func(cls, TO_DICT, to_dict_code, g)
         return cls
 
     if _cls is None:
@@ -125,15 +133,15 @@ def is_serializable(instance_or_class: Any) -> bool:
     return hasattr(instance_or_class, TO_ITER) or hasattr(instance_or_class, TO_DICT)
 
 
-def to_obj(o, named: bool, reuse_instances: bool):
-    thisfunc = functools.partial(to_obj, named=named, reuse_instances=reuse_instances)
+def to_obj(o, named: bool, reuse_instances: bool, convert_sets: bool):
+    thisfunc = functools.partial(to_obj, named=named, reuse_instances=reuse_instances, convert_sets=convert_sets)
     if o is None:
         return None
     if is_serializable(o):
         if named:
-            return getattr(o, TO_DICT)(reuse_instances=reuse_instances)
+            return getattr(o, TO_DICT)(reuse_instances=reuse_instances, convert_sets=convert_sets)
         else:
-            return getattr(o, TO_ITER)(reuse_instances=reuse_instances)
+            return getattr(o, TO_ITER)(reuse_instances=reuse_instances, convert_sets=convert_sets)
     elif is_dataclass(o):
         if named:
             return dataclasses.asdict(o)
@@ -155,10 +163,10 @@ def astuple(v):
     """
     Convert class with `serialize` to `tuple`.
     """
-    return to_tuple(v, reuse_instances=False)
+    return to_tuple(v, reuse_instances=False, convert_sets=False)
 
 
-def to_tuple(o, reuse_instances: bool = ...) -> Any:
+def to_tuple(o, reuse_instances: bool = ..., convert_sets: bool = ...) -> Any:
     """
     Convert object into tuple.
 
@@ -179,17 +187,17 @@ def to_tuple(o, reuse_instances: bool = ...) -> Any:
     >>> to_tuple((Foo(10), Foo(20)))
     ((10,), (20,))
     """
-    return to_obj(o, named=False, reuse_instances=reuse_instances)
+    return to_obj(o, named=False, reuse_instances=reuse_instances, convert_sets=convert_sets)
 
 
 def asdict(v):
     """
     Convert class with `serialize` to `dict`.
     """
-    return to_dict(v, reuse_instances=False)
+    return to_dict(v, reuse_instances=False, convert_sets=False)
 
 
-def to_dict(o, reuse_instances: bool = ...) -> Any:
+def to_dict(o, reuse_instances: bool = ..., convert_sets: bool = ...) -> Any:
     """
     Convert object into dictionary.
 
@@ -210,7 +218,7 @@ def to_dict(o, reuse_instances: bool = ...) -> Any:
     >>> to_dict((Foo(10), Foo(20)))
     ({'i': 10}, {'i': 20})
     """
-    return to_obj(o, named=True, reuse_instances=reuse_instances)
+    return to_obj(o, named=True, reuse_instances=reuse_instances, convert_sets=convert_sets)
 
 
 @dataclass
@@ -240,11 +248,15 @@ def to_arg(f: SeField) -> SeField:
     return f
 
 
-def render_astuple(cls: Type, reuse_instances_default: bool = True, custom: Custom = None) -> str:
+def render_to_tuple(
+    cls: Type, reuse_instances_default: bool = True, convert_sets_default: bool = False, custom: Custom = None
+) -> str:
     template = """
-def {{func}}(obj, reuse_instances = {{reuse_instances_default}}):
+def {{func}}(obj, reuse_instances = {{reuse_instances_default}}, convert_sets = {{convert_sets_default}}):
   if reuse_instances is Ellipsis:
     reuse_instances = {{reuse_instances_default}}
+  if convert_sets is Ellipsis:
+    convert_sets = {{convert_sets_default}}
 
   if not is_dataclass(obj):
     return copy.deepcopy(obj)
@@ -271,16 +283,27 @@ def {{func}}(obj, reuse_instances = {{reuse_instances_default}}):
     env.filters.update({'is_dataclass': is_dataclass})
     env.filters.update({'rvalue': renderer.render})
     env.filters.update({'arg': to_arg})
-    return env.get_template('iter').render(func=TO_ITER, cls=cls, reuse_instances_default=reuse_instances_default)
+    return env.get_template('iter').render(
+        func=TO_ITER,
+        cls=cls,
+        reuse_instances_default=reuse_instances_default,
+        convert_sets_default=convert_sets_default,
+    )
 
 
-def render_asdict(
-    cls: Type, case: Optional[str] = None, reuse_instances_default: bool = True, custom: Custom = None
+def render_to_dict(
+    cls: Type,
+    case: Optional[str] = None,
+    reuse_instances_default: bool = True,
+    convert_sets_default: bool = False,
+    custom: Custom = None,
 ) -> str:
     template = """
-def {{func}}(obj, reuse_instances = {{reuse_instances_default}}):
+def {{func}}(obj, reuse_instances = {{reuse_instances_default}}, convert_sets = {{convert_sets_default}}):
   if reuse_instances is Ellipsis:
     reuse_instances = {{reuse_instances_default}}
+  if convert_sets is Ellipsis:
+    convert_sets = {{convert_sets_default}}
 
   if not is_dataclass(obj):
     return copy.deepcopy(obj)
@@ -314,7 +337,12 @@ def {{func}}(obj, reuse_instances = {{reuse_instances_default}}):
     env.filters.update({'rvalue': renderer.render})
     env.filters.update({'arg': to_arg})
     env.filters.update({'case': functools.partial(conv, case=case)})
-    return env.get_template('dict').render(func=TO_DICT, cls=cls, reuse_instances_default=reuse_instances_default)
+    return env.get_template('dict').render(
+        func=TO_DICT,
+        cls=cls,
+        reuse_instances_default=reuse_instances_default,
+        convert_sets_default=convert_sets_default,
+    )
 
 
 @dataclass
@@ -341,19 +369,19 @@ class Renderer:
         ... class Foo:
         ...    val: int
         >>> Renderer(TO_ITER).render(SeField(Foo, 'foo'))
-        'foo.__serde_to_iter__(reuse_instances=reuse_instances)'
+        'foo.__serde_to_iter__(reuse_instances=reuse_instances, convert_sets=convert_sets)'
 
         >>> Renderer(TO_ITER).render(SeField(List[Foo], 'foo'))
-        '[v.__serde_to_iter__(reuse_instances=reuse_instances) for v in foo]'
+        '[v.__serde_to_iter__(reuse_instances=reuse_instances, convert_sets=convert_sets) for v in foo]'
 
         >>> Renderer(TO_ITER).render(SeField(Dict[str, Foo], 'foo'))
-        '{k: v.__serde_to_iter__(reuse_instances=reuse_instances) for k, v in foo.items()}'
+        '{k: v.__serde_to_iter__(reuse_instances=reuse_instances, convert_sets=convert_sets) for k, v in foo.items()}'
 
         >>> Renderer(TO_ITER).render(SeField(Dict[Foo, Foo], 'foo'))
-        '{k.__serde_to_iter__(reuse_instances=reuse_instances): v.__serde_to_iter__(reuse_instances=reuse_instances) for k, v in foo.items()}'
+        '{k.__serde_to_iter__(reuse_instances=reuse_instances, convert_sets=convert_sets): v.__serde_to_iter__(reuse_instances=reuse_instances, convert_sets=convert_sets) for k, v in foo.items()}'
 
         >>> Renderer(TO_ITER).render(SeField(Tuple[str, Foo, int], 'foo'))
-        '(foo[0], foo[1].__serde_to_iter__(reuse_instances=reuse_instances), foo[2])'
+        '(foo[0], foo[1].__serde_to_iter__(reuse_instances=reuse_instances, convert_sets=convert_sets), foo[2])'
         """
         if is_dataclass(arg.type):
             return self.dataclass(arg)
@@ -361,6 +389,8 @@ class Renderer:
             return self.opt(arg)
         elif is_list(arg.type):
             return self.list(arg)
+        elif is_set(arg.type):
+            return self.set(arg)
         elif is_dict(arg.type):
             return self.dict(arg)
         elif is_tuple(arg.type):
@@ -395,7 +425,7 @@ class Renderer:
         """
         Render rvalue for dataclass.
         """
-        return f'{arg.varname}.{self.func}(reuse_instances=reuse_instances)'
+        return f'{arg.varname}.{self.func}(reuse_instances=reuse_instances, convert_sets=convert_sets)'
 
     def opt(self, arg: SeField) -> str:
         """
@@ -415,6 +445,17 @@ class Renderer:
             earg = arg[0]
             earg.name = 'v'
             return f'[{self.render(earg)} for v in {arg.varname}]'
+
+    def set(self, arg: SeField) -> str:
+        """
+        Render rvalue for set.
+        """
+        if is_bare_set(arg.type):
+            return f'list({arg.varname}) if convert_sets else {arg.varname}'
+        else:
+            earg = arg[0]
+            earg.name = 'v'
+            return f'[{self.render(earg)} for v in {arg.varname}] if convert_sets else set({self.render(earg)} for v in {arg.varname})'
 
     def tuple(self, arg: SeField) -> str:
         """
