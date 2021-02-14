@@ -74,7 +74,7 @@ pipenv install
 pipenv run python bench.py --full
 ```
 
-You can check [the benchmark code](bench/bench.py) for more information.
+You can check [the benchmarking code](https://github.com/yukinarit/pyserde/blob/master/bench/bench.py) for more information.
 
 ## Getting started
 
