@@ -145,7 +145,7 @@ print(from_json(Foo, s))
 <h2 id="supported-types">Supported types</h2>
 <ul>
 <li>Primitives (int, float, str, bool)</li>
-<li>Containers (List, Tuple, Dict)</li>
+<li>Containers (List, Set, Tuple, Dict)</li>
 <li><a href="https://docs.python.org/3/library/typing.html#typing.Optional"><code>Optional</code></a></li>
 <li>User defined class with <a href="https://docs.python.org/3/library/dataclasses.html"><code>@dataclass</code></a></li>
 <li><a href="https://docs.python.org/3/library/enum.html#enum.Enum">Enum</a> and <a href="https://docs.python.org/3/library/enum.html#enum.IntEnum">IntEnum</a></li>
@@ -370,7 +370,7 @@ __all__ = [
     &#34;&#34;&#34;
     Convert class with `serialize` to `dict`.
     &#34;&#34;&#34;
-    return to_dict(v, reuse_instances=False)</code></pre>
+    return to_dict(v, reuse_instances=False, convert_sets=False)</code></pre>
 </details>
 </dd>
 <dt id="serde.astuple"><code class="name flex">
@@ -386,7 +386,7 @@ __all__ = [
     &#34;&#34;&#34;
     Convert class with `serialize` to `tuple`.
     &#34;&#34;&#34;
-    return to_tuple(v, reuse_instances=False)</code></pre>
+    return to_tuple(v, reuse_instances=False, convert_sets=False)</code></pre>
 </details>
 </dd>
 <dt id="serde.deserialize"><code class="name flex">
@@ -677,7 +677,7 @@ True
 </details>
 </dd>
 <dt id="serde.serialize"><code class="name flex">
-<span>def <span class="ident">serialize</span></span>(<span>rename_all: Union[str, NoneType] = None, reuse_instances_default: bool = True)</span>
+<span>def <span class="ident">serialize</span></span>(<span>rename_all: Union[str, NoneType] = None, reuse_instances_default: bool = True, convert_sets_default: bool = False)</span>
 </code></dt>
 <dd>
 <div class="desc"><p><code><a title="serde.serialize" href="#serde.serialize">serialize()</a></code> decorator. A dataclass with this decorator can be serialized
@@ -712,7 +712,12 @@ into an object in various data format such as JSON and MsgPack.</p>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def serialize(_cls=None, rename_all: Optional[str] = None, reuse_instances_default: bool = True):
+<pre><code class="python">def serialize(
+    _cls=None,
+    rename_all: Optional[str] = None,
+    reuse_instances_default: bool = True,
+    convert_sets_default: bool = False,
+):
     &#34;&#34;&#34;
     `serialize` decorator. A dataclass with this decorator can be serialized
     into an object in various data format such as JSON and MsgPack.
@@ -771,8 +776,11 @@ into an object in various data format such as JSON and MsgPack.</p>
         g[&#39;is_dataclass&#39;] = is_dataclass
         g[&#39;__custom_serializer__&#39;] = custom
         g[&#39;__serde_enum_value__&#39;] = enum_value
-        cls = se_func(cls, TO_ITER, render_astuple(cls, reuse_instances_default, custom), g)
-        cls = se_func(cls, TO_DICT, render_asdict(cls, rename_all, reuse_instances_default, custom), g)
+
+        to_tuple_code = render_to_tuple(cls, reuse_instances_default, convert_sets_default, custom)
+        cls = se_func(cls, TO_ITER, to_tuple_code, g)
+        to_dict_code = render_to_dict(cls, rename_all, reuse_instances_default, convert_sets_default, custom)
+        cls = se_func(cls, TO_DICT, to_dict_code, g)
         return cls
 
     if _cls is None:
@@ -782,7 +790,7 @@ into an object in various data format such as JSON and MsgPack.</p>
 </details>
 </dd>
 <dt id="serde.to_dict"><code class="name flex">
-<span>def <span class="ident">to_dict</span></span>(<span>o, reuse_instances: bool = Ellipsis) ‑> Any</span>
+<span>def <span class="ident">to_dict</span></span>(<span>o, reuse_instances: bool = Ellipsis, convert_sets: bool = Ellipsis) ‑> Any</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Convert object into dictionary.</p>
@@ -807,7 +815,7 @@ into an object in various data format such as JSON and MsgPack.</p>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def to_dict(o, reuse_instances: bool = ...) -&gt; Any:
+<pre><code class="python">def to_dict(o, reuse_instances: bool = ..., convert_sets: bool = ...) -&gt; Any:
     &#34;&#34;&#34;
     Convert object into dictionary.
 
@@ -828,11 +836,11 @@ into an object in various data format such as JSON and MsgPack.</p>
     &gt;&gt;&gt; to_dict((Foo(10), Foo(20)))
     ({&#39;i&#39;: 10}, {&#39;i&#39;: 20})
     &#34;&#34;&#34;
-    return to_obj(o, named=True, reuse_instances=reuse_instances)</code></pre>
+    return to_obj(o, named=True, reuse_instances=reuse_instances, convert_sets=convert_sets)</code></pre>
 </details>
 </dd>
 <dt id="serde.to_tuple"><code class="name flex">
-<span>def <span class="ident">to_tuple</span></span>(<span>o, reuse_instances: bool = Ellipsis) ‑> Any</span>
+<span>def <span class="ident">to_tuple</span></span>(<span>o, reuse_instances: bool = Ellipsis, convert_sets: bool = Ellipsis) ‑> Any</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Convert object into tuple.</p>
@@ -857,7 +865,7 @@ into an object in various data format such as JSON and MsgPack.</p>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def to_tuple(o, reuse_instances: bool = ...) -&gt; Any:
+<pre><code class="python">def to_tuple(o, reuse_instances: bool = ..., convert_sets: bool = ...) -&gt; Any:
     &#34;&#34;&#34;
     Convert object into tuple.
 
@@ -878,7 +886,7 @@ into an object in various data format such as JSON and MsgPack.</p>
     &gt;&gt;&gt; to_tuple((Foo(10), Foo(20)))
     ((10,), (20,))
     &#34;&#34;&#34;
-    return to_obj(o, named=False, reuse_instances=reuse_instances)</code></pre>
+    return to_obj(o, named=False, reuse_instances=reuse_instances, convert_sets=convert_sets)</code></pre>
 </details>
 </dd>
 </dl>

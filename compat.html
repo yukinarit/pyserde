@@ -35,7 +35,7 @@ import enum
 import typing
 from dataclasses import fields, is_dataclass
 from itertools import zip_longest
-from typing import Dict, Iterator, List, Optional, Tuple, Type, TypeVar, Union
+from typing import Dict, Iterator, List, Optional, Set, Tuple, Type, TypeVar, Union
 
 import typing_inspect
 
@@ -66,7 +66,7 @@ def get_args(typ):
 
 def typename(typ) -&gt; str:
     &#34;&#34;&#34;
-    &gt;&gt;&gt; from typing import List, Dict
+    &gt;&gt;&gt; from typing import List, Dict, Set
     &gt;&gt;&gt; typename(int)
     &#39;int&#39;
     &gt;&gt;&gt; class Foo: pass
@@ -82,6 +82,8 @@ def typename(typ) -&gt; str:
     &#39;Optional[List[Foo]]&#39;
     &gt;&gt;&gt; typename(Union[Optional[Foo], List[Foo], Union[str, int]])
     &#39;Union[Optional[Foo], List[Foo], str, int]&#39;
+    &gt;&gt;&gt; typename(Set[Foo])
+    &#39;Set[Foo]&#39;
     &#34;&#34;&#34;
     if is_opt(typ):
         return f&#39;Optional[{typename(type_args(typ)[0])}]&#39;
@@ -94,6 +96,13 @@ def typename(typ) -&gt; str:
             return f&#39;List[{et}]&#39;
         else:
             return &#39;List&#39;
+    elif is_set(typ):
+        args = type_args(typ)
+        if args:
+            et = typename(args[0])
+            return f&#39;Set[{et}]&#39;
+        else:
+            return &#39;Set&#39;
     elif is_dict(typ):
         args = type_args(typ)
         if args and len(args) == 2:
@@ -157,7 +166,7 @@ def iter_types(cls: Type) -&gt; Iterator[Type]:
     elif is_union(cls):
         for arg in type_args(cls):
             yield from iter_types(arg)
-    elif is_list(cls):
+    elif is_list(cls) or is_set(cls):
         arg = type_args(cls)
         if arg:
             yield from iter_types(arg[0])
@@ -238,6 +247,35 @@ def is_bare_tuple(typ) -&gt; bool:
     True
     &#34;&#34;&#34;
     return is_tuple(typ) and typ in (Tuple, tuple)
+
+
+def is_set(typ) -&gt; bool:
+    &#34;&#34;&#34;
+    Test if the type is `typing.Set`.
+
+    &gt;&gt;&gt; from typing import Set
+    &gt;&gt;&gt; is_set(Set[int])
+    True
+    &gt;&gt;&gt; is_set(Set)
+    True
+    &#34;&#34;&#34;
+    try:
+        return issubclass(get_origin(typ), set)
+    except TypeError:
+        return typ in (Set, set)
+
+
+def is_bare_set(typ) -&gt; bool:
+    &#34;&#34;&#34;
+    Test if the type is `typing.Set` without type args.
+
+    &gt;&gt;&gt; from typing import Set
+    &gt;&gt;&gt; is_bare_set(Set[int])
+    False
+    &gt;&gt;&gt; is_bare_set(Set)
+    True
+    &#34;&#34;&#34;
+    return is_set(typ) and typ in (Set, set)
 
 
 def is_dict(typ) -&gt; bool:

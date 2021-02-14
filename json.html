@@ -51,7 +51,7 @@ class JsonDeserializer(Deserializer):
 
 
 def to_json(obj: Any, se: Serializer = JsonSerializer, **opts) -&gt; str:
-    return se.serialize(to_dict(obj, reuse_instances=False), **opts)
+    return se.serialize(to_dict(obj, reuse_instances=False, convert_sets=True), **opts)
 
 
 def from_json(c: Type[T], s: str, de: Deserializer = JsonDeserializer, **opts) -&gt; T:
@@ -88,7 +88,7 @@ def from_json(c: Type[T], s: str, de: Deserializer = JsonDeserializer, **opts) -
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def to_json(obj: Any, se: Serializer = JsonSerializer, **opts) -&gt; str:
-    return se.serialize(to_dict(obj, reuse_instances=False), **opts)</code></pre>
+    return se.serialize(to_dict(obj, reuse_instances=False, convert_sets=True), **opts)</code></pre>
 </details>
 </dd>
 </dl>
