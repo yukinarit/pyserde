@@ -315,9 +315,3 @@ def has_default_factory(field) -> bool:
     True
     """
     return not isinstance(field.default_factory, dataclasses._MISSING_TYPE)
-
-
-def assert_type(typ: Type, obj, throw=False) -> None:
-    if not isinstance(obj, typ):
-        if throw:
-            raise ValueError(f'{obj} is not instance of {typ}')

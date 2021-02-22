@@ -8,7 +8,8 @@ from typing import Any, Callable, Dict, Iterator, List, Optional, Type, TypeVar,
 
 import stringcase
 
-from .compat import T, assert_type, is_dict, is_list, is_opt, is_tuple, is_union, type_args
+from .compat import T, is_dict, is_list, is_opt, is_tuple, is_union, type_args, is_bare_list, is_bare_dict, \
+    is_bare_tuple
 
 __all__: List = []
 
@@ -70,107 +71,45 @@ def gen(code: str, globals: Dict = None, locals: Dict = None, cls: Type = None) 
     return code
 
 
-def typecheck(cls: Type[T], obj: T) -> None:
-    """
-    type check type-annotated classes.
-
-    >>> @dataclass
-    ... class Foo:
-    ...     s: str
-    >>>
-    >>> typecheck(Foo, Foo('foo'))
-    >>>
-    >>> # Type mismatch raises `ValueError`.
-    >>> try:
-    ...     typecheck(Foo, Foo(10))
-    ... except:
-    ...     pass
-    >>>
-    """
-    if is_dataclass(obj):
-        # If dataclass, type check recursively.
-        for f in dataclasses.fields(obj):
-            typecheck(f.type, getattr(obj, f.name, None))
-    elif is_opt(cls):
-        if obj is not None:
-            typ = type_args(cls)[0]
-            typecheck(typ, obj)
-    elif is_union(cls):
-        success = False
-        for typ in type_args(cls):
-            try:
-                typecheck(typ, obj)
-                success = True
-                break
-            except (SerdeError, ValueError):
-                pass
-        if not success:
-            raise ValueError(f'{obj} is not instance of {cls}')
-    elif is_list(cls):
-        assert_type(list, obj)
-        if isinstance(obj, list):
-            typ = type_args(cls)[0]
-            for e in obj:
-                typecheck(typ, e)
-    elif is_tuple(cls):
-        assert_type(tuple, obj)
-        if isinstance(obj, tuple):
-            for i, typ in enumerate(type_args(cls)):
-                typecheck(typ, obj[i])
-    elif is_dict(cls):
-        assert_type(dict, obj)
-        if isinstance(obj, dict):
-            ktyp = type_args(cls)[0]
-            vtyp = type_args(cls)[1]
-            for k, v in obj.items():
-                typecheck(ktyp, k)
-                typecheck(vtyp, v)
-    else:
-        if not isinstance(obj, cls):
-            raise ValueError(f'{obj} is not instance of {cls}')
-
-
 def is_instance(obj: Any, typ: Type) -> bool:
-    if is_dataclass(typ):
-        for f in dataclasses.fields(obj):
-            if not is_instance(getattr(obj, f.name, None), f.type):
-                return False
-        return True
-    elif is_opt(typ):
+    if is_opt(typ):
         if obj is None:
             return True
         opt_arg = type_args(typ)[0]
         return is_instance(obj, opt_arg)
     elif is_union(typ):
-        successes = []
         for arg in type_args(typ):
-            successes.append(is_instance(obj, arg))
-        return any(successes)
+            if is_instance(obj, arg):
+                return True
+        return False
     elif is_list(typ):
         if not isinstance(obj, list):
             return False
-        successes = []
+        if len(obj) == 0 or is_bare_list(typ):
+            return True
         list_arg = type_args(typ)[0]
-        for e in obj:
-            successes.append(is_instance(e, list_arg))
-        return all(successes)
+        # for speed reasons we just check the type of the 1st element
+        return is_instance(obj[0], list_arg)
     elif is_tuple(typ):
         if not isinstance(obj, tuple):
             return False
-        successes = []
+        if len(obj) == 0 or is_bare_tuple(typ):
+            return True
         for i, arg in enumerate(type_args(typ)):
-            successes.append(is_instance(obj[i], arg))
-        return all(successes)
+            if not is_instance(obj[i], arg):
+                return False
+        return True
     elif is_dict(typ):
         if not isinstance(obj, dict):
             return False
+        if len(obj) == 0 or is_bare_dict(typ):
+            return True
         ktyp = type_args(typ)[0]
         vtyp = type_args(typ)[1]
-        successes = []
         for k, v in obj.items():
-            successes.append(is_instance(k, ktyp))
-            successes.append(is_instance(v, vtyp))
-        return all(successes)
+            # for speed reasons we just check the type of the 1st element
+            return is_instance(k, ktyp) and is_instance(v, vtyp)
+        return False
     else:
         return isinstance(obj, typ)
 
