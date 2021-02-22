@@ -47,7 +47,7 @@ class ContUnion:
     Union Containers.
     """
 
-    v: Union[List[int], List[str], Dict[str, int]]
+    v: Union[Dict[str, int], List[int], List[str]]
 
 
 def test_union():
@@ -114,6 +114,7 @@ def test_union_containers():
     v = ContUnion({'a': 1, 'b': 2, 'c': 3})
     s = '{"v": {"a": 1, "b": 2, "c": 3}}'
     assert s == to_json(v)
+    # Note: this only works because Dict[str, int] comes first in Union otherwise a List would win
     assert v == from_json(ContUnion, s)
 
 
