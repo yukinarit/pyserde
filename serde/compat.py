@@ -185,7 +185,7 @@ def is_bare_list(typ) -> bool:
     >>> is_bare_list(List)
     True
     """
-    return is_list(typ) and typ in (List, list)
+    return typ in (List, list)
 
 
 def is_tuple(typ) -> bool:
@@ -208,7 +208,7 @@ def is_bare_tuple(typ) -> bool:
     >>> is_bare_tuple(Tuple)
     True
     """
-    return is_tuple(typ) and typ in (Tuple, tuple)
+    return typ in (Tuple, tuple)
 
 
 def is_dict(typ) -> bool:
@@ -237,7 +237,7 @@ def is_bare_dict(typ) -> bool:
     >>> is_bare_dict(Dict)
     True
     """
-    return is_dict(typ) and typ in (Dict, dict)
+    return typ in (Dict, dict)
 
 
 def is_none(typ) -> bool:
