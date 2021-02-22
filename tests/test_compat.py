@@ -4,7 +4,7 @@ from typing import Dict, List, Optional, Set, Tuple, Union
 
 import pytest
 
-from serde.compat import is_dict, is_list, is_opt, is_tuple, is_union, iter_types, type_args, union_args
+from serde.compat import is_dict, is_list, is_opt, is_tuple, is_union, iter_types, type_args, union_args, is_set
 from serde.core import is_instance
 
 from .data import Bool, Float, Int, Pri, PriOpt, Str
@@ -108,9 +108,15 @@ def test_is_instance():
     assert not is_instance([Str("foo")], List[Int])
 
     # Set
-    typecheck(Set[int], {10})
-    with pytest.raises(ValueError):
-        typecheck(Set[int], {10.0})
+    assert is_instance(set(), Set[int])
+    assert is_instance({10}, Set)
+    assert is_instance({10}, set)
+    assert is_instance({10}, Set[int])
+    assert not is_instance({10.0}, Set[int])
+
+    # Set of dataclasses
+    assert is_instance({Int(n) for n in range(1, 10)}, Set[Int])
+    assert not is_instance({Str("foo")}, Set[Int])
 
     # Tuple
     assert is_instance(tuple(), Tuple[int, str, float, bool])

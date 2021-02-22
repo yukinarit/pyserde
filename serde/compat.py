@@ -246,7 +246,7 @@ def is_bare_set(typ) -> bool:
     >>> is_bare_set(Set)
     True
     """
-    return is_set(typ) and typ in (Set, set)
+    return typ in (Set, set)
 
 
 def is_dict(typ) -> bool:

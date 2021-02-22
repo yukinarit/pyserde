@@ -9,7 +9,7 @@ from typing import Any, Callable, Dict, Iterator, List, Optional, Type, TypeVar,
 import stringcase
 
 from .compat import T, is_dict, is_list, is_opt, is_tuple, is_union, type_args, is_bare_list, is_bare_dict, \
-    is_bare_tuple
+    is_bare_tuple, is_set, is_bare_set
 
 __all__: List = []
 
@@ -90,6 +90,14 @@ def is_instance(obj: Any, typ: Type) -> bool:
         list_arg = type_args(typ)[0]
         # for speed reasons we just check the type of the 1st element
         return is_instance(obj[0], list_arg)
+    elif is_set(typ):
+        if not isinstance(obj, set):
+            return False
+        if len(obj) == 0 or is_bare_set(typ):
+            return True
+        set_arg = type_args(typ)[0]
+        # for speed reasons we just check the type of the 1st element
+        return is_instance(next(iter(obj)), set_arg)
     elif is_tuple(typ):
         if not isinstance(obj, tuple):
             return False
@@ -110,12 +118,6 @@ def is_instance(obj: Any, typ: Type) -> bool:
             # for speed reasons we just check the type of the 1st element
             return is_instance(k, ktyp) and is_instance(v, vtyp)
         return False
-    elif is_set(cls):
-        assert_type(set, obj)
-        if isinstance(obj, set):
-            typ = type_args(cls)[0]
-            for e in obj:
-                typecheck(typ, e)
     else:
         return isinstance(obj, typ)
 

@@ -26,7 +26,8 @@ from uuid import UUID
 import jinja2
 
 from .compat import (has_default, has_default_factory, is_bare_dict, is_bare_list, is_bare_tuple, is_dict, is_enum,
-                     is_list, is_opt, is_primitive, is_tuple, is_union, iter_types, type_args, typename, is_none)
+                     is_list, is_opt, is_primitive, is_tuple, is_union, iter_types, type_args, typename, is_none,
+                     is_set, is_bare_set)
 from .core import FROM_DICT, FROM_ITER, HIDDEN_NAME, SETTINGS, Field, Hidden, SerdeError, T, conv, fields, gen, logger, \
     UNION_DE_PREFIX, union_func_suffix
 from .more_types import deserialize as custom
