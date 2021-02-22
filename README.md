@@ -74,7 +74,7 @@ pipenv install
 pipenv run python bench.py --full
 ```
 
-You can check [the benchmark code](bench/bench.py) for more information.
+You can check [the benchmarking code](https://github.com/yukinarit/pyserde/blob/master/bench/bench.py) for more information.
 
 ## Getting started
 
@@ -143,7 +143,7 @@ That's it! pyserde offers many more features. If you're interested, please read 
 ## Supported types
 
 * Primitives (int, float, str, bool)
-* Containers (List, Tuple, Dict)
+* Containers (List, Set, Tuple, Dict)
 * [`Optional`](https://docs.python.org/3/library/typing.html#typing.Optional)
 * User defined class with [`@dataclass`](https://docs.python.org/3/library/dataclasses.html)
 * [Enum](https://docs.python.org/3/library/enum.html#enum.Enum) and [IntEnum](https://docs.python.org/3/library/enum.html#enum.IntEnum)

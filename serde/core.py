@@ -110,6 +110,12 @@ def is_instance(obj: Any, typ: Type) -> bool:
             # for speed reasons we just check the type of the 1st element
             return is_instance(k, ktyp) and is_instance(v, vtyp)
         return False
+    elif is_set(cls):
+        assert_type(set, obj)
+        if isinstance(obj, set):
+            typ = type_args(cls)[0]
+            for e in obj:
+                typecheck(typ, e)
     else:
         return isinstance(obj, typ)
 

@@ -1,6 +1,6 @@
 import sys
 from dataclasses import dataclass
-from typing import Dict, List, Optional, Tuple, Union
+from typing import Dict, List, Optional, Set, Tuple, Union
 
 import pytest
 
@@ -13,6 +13,8 @@ from .data import Bool, Float, Int, Pri, PriOpt, Str
 def test_types():
     assert is_list(List[int])
     assert is_list(List)
+    assert is_set(Set[int])
+    assert is_set(Set)
     assert is_tuple(Tuple[int, int, int])
     assert is_tuple(Tuple)
     assert is_dict(Dict[str, int])
@@ -25,13 +27,16 @@ def test_types():
     assert not is_opt(Union[Optional[int], Optional[str]])
     assert is_union(Union[Optional[int], Optional[str]])
 
+    assert is_list(list)
+    assert is_set(set)
+    assert is_tuple(tuple)
+    assert is_dict(dict)
+
     if sys.version_info[:3] >= (3, 9, 0):
         assert is_list(list[int])
-        assert is_list(list)
+        assert is_set(set[int])
         assert is_tuple(tuple[int, int, int])
-        assert is_tuple(tuple)
         assert is_dict(dict[str, int])
-        assert is_dict(dict)
 
 
 def test_iter_types():
@@ -101,6 +106,11 @@ def test_is_instance():
     # List of dataclasses
     assert is_instance([Int(n) for n in range(1, 10)], List[Int])
     assert not is_instance([Str("foo")], List[Int])
+
+    # Set
+    typecheck(Set[int], {10})
+    with pytest.raises(ValueError):
+        typecheck(Set[int], {10.0})
 
     # Tuple
     assert is_instance(tuple(), Tuple[int, str, float, bool])

@@ -6,7 +6,7 @@ import enum
 import typing
 from dataclasses import fields, is_dataclass
 from itertools import zip_longest
-from typing import Dict, Iterator, List, Optional, Tuple, Type, TypeVar, Union
+from typing import Dict, Iterator, List, Optional, Set, Tuple, Type, TypeVar, Union
 
 import typing_inspect
 
@@ -37,7 +37,7 @@ def get_args(typ):
 
 def typename(typ) -> str:
     """
-    >>> from typing import List, Dict
+    >>> from typing import List, Dict, Set
     >>> typename(int)
     'int'
     >>> class Foo: pass
@@ -53,6 +53,8 @@ def typename(typ) -> str:
     'Optional[List[Foo]]'
     >>> typename(Union[Optional[Foo], List[Foo], Union[str, int]])
     'Union[Optional[Foo], List[Foo], str, int]'
+    >>> typename(Set[Foo])
+    'Set[Foo]'
     """
     if is_opt(typ):
         return f'Optional[{typename(type_args(typ)[0])}]'
@@ -65,6 +67,13 @@ def typename(typ) -> str:
             return f'List[{et}]'
         else:
             return 'List'
+    elif is_set(typ):
+        args = type_args(typ)
+        if args:
+            et = typename(args[0])
+            return f'Set[{et}]'
+        else:
+            return 'Set'
     elif is_dict(typ):
         args = type_args(typ)
         if args and len(args) == 2:
@@ -128,7 +137,7 @@ def iter_types(cls: Type) -> Iterator[Type]:
     elif is_union(cls):
         for arg in type_args(cls):
             yield from iter_types(arg)
-    elif is_list(cls):
+    elif is_list(cls) or is_set(cls):
         arg = type_args(cls)
         if arg:
             yield from iter_types(arg[0])
@@ -209,6 +218,35 @@ def is_bare_tuple(typ) -> bool:
     True
     """
     return typ in (Tuple, tuple)
+
+
+def is_set(typ) -> bool:
+    """
+    Test if the type is `typing.Set`.
+
+    >>> from typing import Set
+    >>> is_set(Set[int])
+    True
+    >>> is_set(Set)
+    True
+    """
+    try:
+        return issubclass(get_origin(typ), set)
+    except TypeError:
+        return typ in (Set, set)
+
+
+def is_bare_set(typ) -> bool:
+    """
+    Test if the type is `typing.Set` without type args.
+
+    >>> from typing import Set
+    >>> is_bare_set(Set[int])
+    False
+    >>> is_bare_set(Set)
+    True
+    """
+    return is_set(typ) and typ in (Set, set)
 
 
 def is_dict(typ) -> bool:
