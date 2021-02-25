@@ -3,50 +3,50 @@ pyserde core module.
 """
 import dataclasses
 import logging
-from dataclasses import dataclass, field, is_dataclass
-from typing import Any, Callable, Dict, Iterator, List, Optional, Type, TypeVar, _GenericAlias
+import re
+from dataclasses import dataclass, field
+from typing import Any, Callable, Dict, Iterator, List, Optional, Type, Union
 
 import stringcase
 
-from .compat import T, is_dict, is_list, is_opt, is_tuple, is_union, type_args, is_bare_list, is_bare_dict, \
-    is_bare_tuple, is_set, is_bare_set
+from .compat import is_dict, is_list, is_opt, is_tuple, is_union, type_args, is_bare_list, is_bare_dict, \
+    is_bare_tuple, is_set, is_bare_set, typename
 
 __all__: List = []
 
 logger = logging.getLogger('serde')
 
-JsonValue = TypeVar('JsonValue', str, int, float, bool, Dict, List)
 
-FROM_ITER = '__serde_from_iter__'
+# name of the serde context key
+SERDE_SCOPE = '__serde__'
 
-FROM_DICT = '__serde_from_dict__'
-
-TO_ITER = '__serde_to_iter__'
-
-TO_DICT = '__serde_to_dict__'
-
-HIDDEN_NAME = '__serde_hidden__'
-
-UNION_SE_PREFIX = '__serde_union_se_'
-
-UNION_DE_PREFIX = '__serde_union_de_'
-
-UNION_ARGS = '__union_args__'
+# main function keys
+FROM_ITER = 'from_iter'
+FROM_DICT = 'from_dict'
+TO_ITER = 'to_iter'
+TO_DICT = 'to_dict'
 
 SETTINGS = dict(debug=False)
 
 
+def init(debug: bool = False):
+    SETTINGS['debug'] = debug
+
+
 @dataclass
-class Hidden:
-    """
-    Hidden information encoded in serde classes.
-    """
+class SerdeScope:
+    funcs: Dict[str, callable] = field(default_factory=dict)
+    defaults: Dict[str, callable] = field(default_factory=dict)
+    types: Dict[str, Type] = field(default_factory=dict)
 
     code: Dict[str, str] = field(default_factory=dict)
 
+    union_de_funcs: Dict[str, callable] = field(default_factory=dict)
+    union_se_funcs: Dict[str, callable] = field(default_factory=dict)
+    union_se_args: Dict[str, List[Type]] = field(default_factory=dict)
 
-def init(debug: bool = False):
-    SETTINGS['debug'] = debug
+    reuse_instances_default: bool = True
+    convert_sets_default: bool = False
 
 
 class SerdeError(TypeError):
@@ -55,7 +55,12 @@ class SerdeError(TypeError):
     """
 
 
-def gen(code: str, globals: Dict = None, locals: Dict = None, cls: Type = None) -> str:
+def raise_unsupported_type(obj):
+    # needed because we can not render a raise statement everywhere, e.g. as argument
+    raise SerdeError(f"Unsupported type: {typename(type(obj))}")
+
+
+def gen(code: str, globals: Dict = None, locals: Dict = None) -> str:
     """
     Customized `exec` function.
     """
@@ -65,10 +70,18 @@ def gen(code: str, globals: Dict = None, locals: Dict = None, cls: Type = None) 
         code = format_str(code, mode=FileMode(line_length=100))
     except Exception:
         pass
-    for_class = 'for ' + cls.__name__ if cls else ''
-    logger.debug(f'Generating {for_class} ...\n{code}')
     exec(code, globals, locals)
     return code
+
+
+def add_func(serde_scope: SerdeScope, target: str, func_name: str, func_code: str, g: Dict) -> None:
+    # Generate function and add it to serde_scope at target
+
+    code = gen(func_code, g)
+    getattr(serde_scope, target)[func_name] = g[func_name]
+
+    if SETTINGS['debug']:
+        serde_scope.code[f"{target}.{func_name}"] = code
 
 
 def is_instance(obj: Any, typ: Type) -> bool:
@@ -217,24 +230,14 @@ def conv(f: Field, case: Optional[str] = None) -> str:
     return name
 
 
-def union_func_suffix(union_args: List[Type]) -> str:
+def union_func_name(union_args: List[Type]) -> str:
     """
-    Generates a function name suffix which contains all types of the union in its name.
-    Use this together with UNION_SE_PREFIX or UNION_DE_PREFIX.
-    :param union_args: type arguments of a Union annotation
-    :return: function name suffix
-
-    >>> from typing import List, Dict
-    >>> from ipaddress import IPv4Network
-    >>> union_func_suffix([str, List[int], Dict[str, IPv4Network]])
-    'str_List_int___Dict_str_IPv4Network____'
+    Generate a function name that contains all union types
+    :param union_args: type arguments of a Union
+    :return: union function name
+    >>> from ipaddress import IPv4Address
+    >>> from typing import List
+    >>> union_func_name([int, List[str], IPv4Address])
+    'union_int_List_str__IPv4Address'
     """
-    name = ""
-    for arg in union_args:
-        # handles container types like List,Tuple & Dict
-        if isinstance(arg, _GenericAlias):
-            name += f"{arg._name}_{union_func_suffix(type_args(arg))}"
-        else:
-            name += arg.__name__
-        name += "_"
-    return name + "_"
+    return  re.sub(r"[ ,\[\]]+", "_", f"union_{'_'.join([typename(e) for e in union_args])}")

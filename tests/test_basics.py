@@ -15,7 +15,6 @@ from typing import Dict, List, Optional, Set, Tuple
 import more_itertools
 import pytest
 
-import serde
 import serde.compat
 from serde import SerdeError, deserialize, from_dict, from_tuple, serialize, to_dict, to_tuple
 from serde.json import from_json, to_json
@@ -594,11 +593,11 @@ def test_exception_on_not_supported_types():
     with pytest.raises(SerdeError) as se_ex:
         to_dict(Foo(UnsupportedClass()))
     assert str(se_ex.value).startswith(
-        "Unsupported type: <class \'tests.test_basics.test_exception_on_not_supported_types.<locals>.UnsupportedClass\'>"
+        "Unsupported type: UnsupportedClass"
     )
 
     with pytest.raises(SerdeError) as de_ex:
         from_dict(Foo, {"b": UnsupportedClass()})
     assert str(de_ex.value).startswith(
-        "Unsupported type: <class \'tests.test_basics.test_exception_on_not_supported_types.<locals>.UnsupportedClass\'>"
+        "Unsupported type: UnsupportedClass"
     )

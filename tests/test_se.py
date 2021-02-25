@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from typing import Set
 
 from serde import asdict, astuple, serialize, to_dict, to_tuple
+from serde.core import SERDE_SCOPE, TO_ITER
 from serde.json import to_json
 from serde.msgpack import to_msgpack
 
@@ -27,33 +28,33 @@ def test_astuple():
 
 def test_se_func_iter():
     # Primitives
-    assert (10,) == Int(10).__serde_to_iter__()
-    assert (10.0,) == Float(10.0).__serde_to_iter__()
-    assert ("10",) == Str("10").__serde_to_iter__()
-    assert (False,) == Bool(False).__serde_to_iter__()
+    assert (10,) == to_tuple(Int(10))
+    assert (10.0,) == to_tuple(Float(10.0))
+    assert ("10",) == to_tuple(Str("10"))
+    assert (False,) == to_tuple(Bool(False))
 
-    assert (10, '10', 10.0, False) == Pri(10, "10", 10.0, False).__serde_to_iter__()
-    assert ((10,),) == NestedInt(Int(10)).__serde_to_iter__()
-    assert ((10,), ('10',), (10.0,), (True,)) == NestedPri(
+    assert (10, '10', 10.0, False) == to_tuple(Pri(10, "10", 10.0, False))
+    assert ((10,),) == to_tuple(NestedInt(Int(10)))
+    assert ((10,), ('10',), (10.0,), (True,)) == to_tuple(NestedPri(
         Int(10), Str("10"), Float(10.0), Bool(True)
-    ).__serde_to_iter__()
+    ))
 
     # List
-    assert ([10], ['10'], [10.0], [False]) == PriList([10], ["10"], [10.0], [False]).__serde_to_iter__()
-    assert ([(10,)], [('10',)], [(10.0,)], [(False,)]) == NestedPriList(
+    assert ([10], ['10'], [10.0], [False]) == to_tuple(PriList([10], ["10"], [10.0], [False]))
+    assert ([(10,)], [('10',)], [(10.0,)], [(False,)]) == to_tuple(NestedPriList(
         [Int(10)], [Str("10")], [Float(10.0)], [Bool(False)]
-    ).__serde_to_iter__()
+    ))
 
     # Dict
-    assert ({'i': 10}, {'s': '10'}, {'f': 10.0}, {'b': False}) == PriDict(
+    assert ({'i': 10}, {'s': '10'}, {'f': 10.0}, {'b': False}) == to_tuple(PriDict(
         {'i': 10}, {'s': "10"}, {'f': 10.0}, {'b': False}
-    ).__serde_to_iter__()
-    assert ({'i': 10}, {'s': '10'}, {'f': 10.0}, {'b': False}) == PriDict(
+    ))
+    assert ({'i': 10}, {'s': '10'}, {'f': 10.0}, {'b': False}) == to_tuple(PriDict(
         {'i': 10}, {'s': "10"}, {'f': 10.0}, {'b': False}
-    ).__serde_to_iter__()
-    assert ({('i',): (10,)}, {('i',): ('10',)}, {('i',): (10.0,)}, {('i',): (True,)}) == NestedPriDict(
+    ))
+    assert ({('i',): (10,)}, {('i',): ('10',)}, {('i',): (10.0,)}, {('i',): (True,)}) == to_tuple(NestedPriDict(
         {Str('i'): Int(10)}, {Str('i'): Str('10')}, {Str('i'): Float(10.0)}, {Str('i'): Bool(True)}
-    ).__serde_to_iter__()
+    ))
 
     # Tuple
     exp = (
@@ -62,12 +63,12 @@ def test_se_func_iter():
         (10.0, 10.0, 10.0, 10.0, 10.0),
         (False, False, False, False, False, False),
     )
-    act = PriTuple(
+    act = to_tuple(PriTuple(
         (10, 10, 10),
         ("10", "10", "10", "10"),
         (10.0, 10.0, 10.0, 10.0, 10.0),
         (False, False, False, False, False, False),
-    ).__serde_to_iter__()
+    ))
     assert act == act
 
     exp = (
@@ -76,16 +77,16 @@ def test_se_func_iter():
         ((10.0,), (10.0,), (10.0,), (10.0,), (10.0,)),
         ((False,), (False,), (False,), (False,), (False,), (False,)),
     )
-    act = NestedPriTuple(
+    act = to_tuple(NestedPriTuple(
         (Int(10), Int(10), Int(10)),
         (Str("10"), Str("10"), Str("10"), Str("10")),
         (Float(10.0), Float(10.0), Float(10.0), Float(10.0), Float(10.0)),
         (Bool(False), Bool(False), Bool(False), Bool(False), Bool(False), Bool(False)),
-    ).__serde_to_iter__()
+    ))
     assert exp == act
 
     # Optional
-    assert (10, '10', 10.0, False) == PriOpt(10, "10", 10.0, False).__serde_to_iter__()
+    assert (10, '10', 10.0, False) == to_tuple(PriOpt(10, "10", 10.0, False))
 
 
 def test_convert_sets_option():
