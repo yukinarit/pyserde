@@ -76,14 +76,15 @@ def serialize(
     '{"intField": 10, "strField": "foo"}'
     """
 
-    @functools.wraps(_cls)
-    def wrap(cls: Type[T]):
+    def wrap(cls: Type):
         g: Dict[str, Any] = {}
 
         # Create a scope storage used by serde.
+        # Each class should get own scope. Child classes can not share scope with parent class.
+        # That's why we need the "scope.cls is not cls" check.
         scope: SerdeScope = getattr(cls, SERDE_SCOPE, None)
-        if scope is None:
-            scope = SerdeScope(
+        if scope is None or scope.cls is not cls:
+            scope = SerdeScope(cls,
                 reuse_instances_default=reuse_instances_default,
                 convert_sets_default=convert_sets_default
             )

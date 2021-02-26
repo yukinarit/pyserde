@@ -69,13 +69,15 @@ def deserialize(_cls=None, rename_all: Optional[str] = None, reuse_instances_def
     RenameAll(int_field=10, str_field='foo')
     """
 
-    def wrap(cls):
+    def wrap(cls: Type):
         g: Dict[str, Any] = {}
 
         # Create a scope storage used by serde.
+        # Each class should get own scope. Child classes can not share scope with parent class.
+        # That's why we need the "scope.cls is not cls" check.
         scope: SerdeScope = getattr(cls, SERDE_SCOPE, None)
-        if scope is None:
-            scope = SerdeScope(reuse_instances_default=reuse_instances_default)
+        if scope is None or scope.cls is not cls:
+            scope = SerdeScope(cls, reuse_instances_default=reuse_instances_default)
             setattr(cls, SERDE_SCOPE, scope)
 
         # Set some globals for all generated functions

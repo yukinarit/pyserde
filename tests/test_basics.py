@@ -17,6 +17,7 @@ import pytest
 
 import serde.compat
 from serde import SerdeError, deserialize, from_dict, from_tuple, serialize, to_dict, to_tuple
+from serde.core import SERDE_SCOPE
 from serde.json import from_json, to_json
 from serde.msgpack import from_msgpack, to_msgpack
 from serde.toml import from_toml, to_toml
@@ -601,3 +602,38 @@ def test_exception_on_not_supported_types():
     assert str(de_ex.value).startswith(
         "Unsupported type: UnsupportedClass"
     )
+
+
+def test_dataclass_inheritance():
+    @deserialize
+    @serialize
+    @dataclass
+    class Base:
+        i: int
+        s: str
+
+    @deserialize
+    @serialize
+    @dataclass
+    class DerivedA(Base):
+        j: int
+
+    @deserialize
+    @serialize
+    @dataclass
+    class DerivedB(Base):
+        k: float
+
+    # each class should have own scope
+    # ensure the generated code of DerivedB does not overwrite the earlier generated code from DerivedA
+    assert getattr(Base, SERDE_SCOPE) is not getattr(DerivedA, SERDE_SCOPE)
+    assert getattr(DerivedA, SERDE_SCOPE) is not getattr(DerivedB, SERDE_SCOPE)
+
+    base = Base(i=0, s="foo")
+    assert base == from_dict(Base, to_dict(base))
+
+    a = DerivedA(i=0, s="foo", j=42)
+    assert a == from_dict(DerivedA, to_dict(a))
+
+    b = DerivedB(i=0, s="foo", k=42.0)
+    assert b == from_dict(DerivedB, to_dict(b))

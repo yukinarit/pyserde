@@ -35,16 +35,24 @@ def init(debug: bool = False):
 
 @dataclass
 class SerdeScope:
+    cls: Type  # the exact class this scope is for (needed to distinguish scopes between inherited classes)
+
+    # core serialize/deserialize functions
     funcs: Dict[str, callable] = field(default_factory=dict)
+    # dataclass default values
     defaults: Dict[str, callable] = field(default_factory=dict)
+    # type references to all used types within the dataclass
     types: Dict[str, Type] = field(default_factory=dict)
 
+    # generated source code (only filled when debug is True)
     code: Dict[str, str] = field(default_factory=dict)
 
+    # functions & state that handles unions
     union_de_funcs: Dict[str, callable] = field(default_factory=dict)
     union_se_funcs: Dict[str, callable] = field(default_factory=dict)
     union_se_args: Dict[str, List[Type]] = field(default_factory=dict)
 
+    # default values for to_dict & from_dict arguments
     reuse_instances_default: bool = True
     convert_sets_default: bool = False
 
