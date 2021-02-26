@@ -68,7 +68,7 @@ def test_se_func_iter():
             (False, False, False, False, False, False),
         )
     )
-    assert act == act
+    assert exp == act
 
     exp = (
         ((10,), (10,), (10,)),
