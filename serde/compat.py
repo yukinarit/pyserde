@@ -153,6 +153,33 @@ def iter_types(cls: Type) -> Iterator[Type]:
         yield cls
 
 
+def iter_unions(cls: Type) -> Iterator[Type]:
+    """
+    Iterate over all unions that are used in the dataclass
+    """
+    if is_union(cls):
+        yield cls
+    if is_dataclass(cls):
+        for f in fields(cls):
+            yield from iter_unions(f.type)
+    elif is_opt(cls):
+        arg = type_args(cls)
+        if arg:
+            yield from iter_unions(arg[0])
+    elif is_list(cls) or is_set(cls):
+        arg = type_args(cls)
+        if arg:
+            yield from iter_unions(arg[0])
+    elif is_tuple(cls):
+        for arg in type_args(cls):
+            yield from iter_unions(arg)
+    elif is_dict(cls):
+        arg = type_args(cls)
+        if arg and len(arg) >= 2:
+            yield from iter_unions(arg[0])
+            yield from iter_unions(arg[1])
+
+
 def is_union(typ) -> bool:
     """
     Test if the type is `typing.Union`.

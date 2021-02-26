@@ -25,8 +25,8 @@ from uuid import UUID
 import jinja2
 
 from .compat import (has_default, has_default_factory, is_bare_dict, is_bare_list, is_bare_set, is_bare_tuple, is_dict,
-                     is_enum, is_list, is_none, is_opt, is_primitive, is_set, is_tuple, is_union, iter_types, type_args,
-                     typename)
+                     is_enum, is_list, is_none, is_opt, is_primitive, is_set, is_tuple, is_union, iter_types,
+                     iter_unions, type_args, typename)
 from .core import (FROM_DICT, FROM_ITER, SERDE_SCOPE, Field, SerdeError, SerdeScope, add_func, conv, fields, logger,
                    raise_unsupported_type, union_func_name)
 from .py36_datetime_compat import py36_date_fromisoformat, py36_datetime_fromisoformat
@@ -100,15 +100,17 @@ def deserialize(_cls=None, rename_all: Optional[str] = None, reuse_instances_def
                 elif typ is datetime:
                     g['__py36_datetime_fromisoformat__'] = py36_datetime_fromisoformat
 
+        # render all union functions
+        for union in iter_unions(cls):
+            union_args = type_args(union)
+            add_func(scope, "union_de_funcs", union_func_name(union_args), render_union_func(cls, union_args), g)
+
         # Collect default values and default factories used in the generated code.
         for f in defields(cls):
             if has_default(f):
                 scope.defaults[f.name] = f.default
             elif has_default_factory(f):
                 scope.defaults[f.name] = f.default_factory
-            elif is_union(f.type):  # also render all union functions
-                union_args = type_args(f.type)
-                add_func(scope, "union_de_funcs", union_func_name(union_args), render_union_func(cls, union_args), g)
 
         add_func(scope, "funcs", FROM_ITER, render_from_iter(cls), g)
         add_func(scope, "funcs", FROM_DICT, render_from_dict(cls, rename_all), g)

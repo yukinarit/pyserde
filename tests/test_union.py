@@ -174,11 +174,11 @@ def test_optional_union_with_complex_types():
         v: Optional[Union[int, IPv4Address, UUID]]
 
     a = A(123)
-    assert a == from_dict(A, to_dict(a))
+    assert a == from_dict(A, to_dict(a, reuse_instances=False), reuse_instances=False)
     assert a == from_dict(A, to_dict(a, reuse_instances=True), reuse_instances=True)
 
     a_none = A(None)
-    assert a_none == from_dict(A, to_dict(a_none))
+    assert a_none == from_dict(A, to_dict(a_none, reuse_instances=False), reuse_instances=False)
     assert a_none == from_dict(A, to_dict(a_none, reuse_instances=True), reuse_instances=True)
 
 
@@ -190,15 +190,15 @@ def test_union_with_complex_types_in_containers():
         v: Union[List[IPv4Address], List[UUID]]
 
     a_ips = A([IPv4Address("127.0.0.1"), IPv4Address("10.0.0.1")])
-    assert a_ips == from_dict(A, to_dict(a_ips))
+    assert a_ips == from_dict(A, to_dict(a_ips, reuse_instances=False), reuse_instances=False)
     assert a_ips == from_dict(A, to_dict(a_ips, reuse_instances=True), reuse_instances=True)
 
     a_uids = A([UUID("9c244009-c60d-452b-a378-b8afdc0c2d90"), UUID("5831dc09-20fe-4433-b476-5866b7143364")])
-    assert a_uids == from_dict(A, to_dict(a_uids))
+    assert a_uids == from_dict(A, to_dict(a_uids, reuse_instances=False), reuse_instances=False)
     assert a_uids == from_dict(A, to_dict(a_uids, reuse_instances=True), reuse_instances=True)
 
     a_empty = A([])
-    assert a_empty == from_dict(A, to_dict(a_empty))
+    assert a_empty == from_dict(A, to_dict(a_empty, reuse_instances=False), reuse_instances=False)
     assert a_empty == from_dict(A, to_dict(a_empty, reuse_instances=True), reuse_instances=True)
 
 
@@ -251,13 +251,29 @@ def test_union_in_union():
         v: Union[UUID, Union[int, str]]
 
     a_uuid = A(UUID("00611ee9-7ca3-41d3-9607-ea7268e264ea"))
-    assert a_uuid == from_dict(A, to_dict(a_uuid))
+    assert a_uuid == from_dict(A, to_dict(a_uuid, reuse_instances=False), reuse_instances=False)
     assert a_uuid == from_dict(A, to_dict(a_uuid, reuse_instances=True), reuse_instances=True)
 
     a_int = A(1)
-    assert a_int == from_dict(A, to_dict(a_int))
+    assert a_int == from_dict(A, to_dict(a_int, reuse_instances=False), reuse_instances=False)
     assert a_int == from_dict(A, to_dict(a_int, reuse_instances=True), reuse_instances=True)
 
     a_str = A("hello")
-    assert a_str == from_dict(A, to_dict(a_str))
+    assert a_str == from_dict(A, to_dict(a_str, reuse_instances=False), reuse_instances=False)
     assert a_str == from_dict(A, to_dict(a_str, reuse_instances=True), reuse_instances=True)
+
+
+def test_union_in_other_type():
+    @deserialize
+    @serialize
+    @dataclass
+    class A:
+        v: Dict[str, Union[UUID, int]]
+
+    a_uuid = A({"key": UUID("00611ee9-7ca3-41d3-9607-ea7268e264ea")})
+    assert a_uuid == from_dict(A, to_dict(a_uuid, reuse_instances=False), reuse_instances=False)
+    assert a_uuid == from_dict(A, to_dict(a_uuid, reuse_instances=True), reuse_instances=True)
+
+    a_int = A({"key": 1})
+    assert a_int == from_dict(A, to_dict(a_int, reuse_instances=False), reuse_instances=False)
+    assert a_int == from_dict(A, to_dict(a_int, reuse_instances=True), reuse_instances=True)

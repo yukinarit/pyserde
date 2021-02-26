@@ -17,7 +17,7 @@ from uuid import UUID
 import jinja2
 
 from .compat import (T, is_bare_dict, is_bare_list, is_bare_set, is_bare_tuple, is_dict, is_enum, is_list, is_none,
-                     is_opt, is_primitive, is_set, is_tuple, is_union, iter_types, type_args, typename)
+                     is_opt, is_primitive, is_set, is_tuple, is_union, iter_types, iter_unions, type_args, typename)
 from .core import (SERDE_SCOPE, TO_DICT, TO_ITER, Field, SerdeError, SerdeScope, add_func, conv, fields, is_instance,
                    logger, raise_unsupported_type, union_func_name)
 
@@ -104,14 +104,16 @@ def serialize(
             if is_dataclass(typ) or is_enum(typ) or not is_primitive(typ):
                 scope.types[typ.__name__] = typ
 
+        # render all union functions
+        for union in iter_unions(cls):
+            union_args = type_args(union)
+            union_key = union_func_name(union_args)
+            add_func(scope, "union_se_funcs", union_key, render_union_func(cls, union_args), g)
+            scope.union_se_args[union_key] = union_args
+
         for f in sefields(cls):
             if f.skip_if:
                 g[f.skip_if.name] = f.skip_if
-            if is_union(f.type):  # render all union functions
-                union_args = type_args(f.type)
-                union_key = union_func_name(union_args)
-                add_func(scope, "union_se_funcs", union_key, render_union_func(cls, union_args), g)
-                scope.union_se_args[union_key] = union_args
 
         add_func(scope, "funcs", TO_ITER, render_to_tuple(cls), g)
         add_func(scope, "funcs", TO_DICT, render_to_dict(cls, rename_all), g)

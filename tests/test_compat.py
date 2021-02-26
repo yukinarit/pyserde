@@ -2,9 +2,8 @@ import sys
 from dataclasses import dataclass
 from typing import Dict, List, Optional, Set, Tuple, Union
 
-import pytest
-
-from serde.compat import is_dict, is_list, is_opt, is_set, is_tuple, is_union, iter_types, type_args, union_args
+from serde.compat import (is_dict, is_list, is_opt, is_set, is_tuple, is_union, iter_types, iter_unions, type_args,
+                          union_args)
 from serde.core import is_instance
 
 from .data import Bool, Float, Int, Pri, PriOpt, Str
@@ -45,6 +44,23 @@ def test_iter_types():
     assert [str] == list(iter_types(List[str]))
     assert [int, str, bool, float] == list(iter_types(Tuple[int, str, bool, float]))
     assert [PriOpt, int, str, float, bool] == list(iter_types(PriOpt))
+
+
+def test_iter_unions():
+    assert [Union[str, int]] == list(iter_unions(Union[str, int]))
+    assert [Union[str, int]] == list(iter_unions(Dict[str, Union[str, int]]))
+    assert [Union[str, int]] == list(iter_unions(Tuple[Union[str, int]]))
+    assert [Union[str, int]] == list(iter_unions(List[Union[str, int]]))
+    assert [Union[str, int]] == list(iter_unions(Set[Union[str, int]]))
+    assert [Union[str, int, type(None)]] == list(iter_unions(Optional[Union[str, int]]))
+
+    @dataclass
+    class A:
+        a: List[Union[int, str]]
+        b: Dict[str, List[Union[float, int]]]
+        C: Dict[Union[bool, str], Union[float, int]]
+
+    assert [Union[int, str], Union[float, int], Union[bool, str], Union[float, int]] == list(iter_unions(A))
 
 
 def test_type_args():
