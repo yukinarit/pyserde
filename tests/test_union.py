@@ -225,9 +225,9 @@ def test_union_exception_if_nothing_matches():
 
     with pytest.raises(SerdeError) as ex3:
         from_dict(A, {"v": None})
-    assert (
-        str(ex3.value)
-        == "Can not deserialize None of type NoneType into Union[IPv4Address, UUID]. Reason: one of the hex, bytes, bytes_le, fields, or int arguments must be given"
+    # omit reason because it is not the same for all python versions & operating systems
+    assert str(ex3.value).startswith(
+        "Can not deserialize None of type NoneType into Union[IPv4Address, UUID]. Reason: "
     )
 
     with pytest.raises(SerdeError) as ex4:
