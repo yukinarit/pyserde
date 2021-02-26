@@ -16,7 +16,7 @@ import os
 import sys
 from typing import Type
 
-from .core import init, SERDE_SCOPE, SerdeScope
+from .core import SERDE_SCOPE, SerdeScope, init
 
 init(True)
 

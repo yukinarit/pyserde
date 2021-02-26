@@ -16,10 +16,10 @@ from uuid import UUID
 
 import jinja2
 
-from .compat import (is_bare_dict, is_bare_list, is_bare_tuple, is_dict, is_enum, is_list, is_opt, is_primitive,
-                     is_tuple, is_union, iter_types, type_args, typename, is_none, is_set, is_bare_set, T)
-from .core import (TO_DICT, TO_ITER, Field, SerdeError, conv, fields, logger, is_instance, SERDE_SCOPE, SerdeScope,
-                   add_func, union_func_name, raise_unsupported_type)
+from .compat import (T, is_bare_dict, is_bare_list, is_bare_set, is_bare_tuple, is_dict, is_enum, is_list, is_none,
+                     is_opt, is_primitive, is_set, is_tuple, is_union, iter_types, type_args, typename)
+from .core import (SERDE_SCOPE, TO_DICT, TO_ITER, Field, SerdeError, SerdeScope, add_func, conv, fields, is_instance,
+                   logger, raise_unsupported_type, union_func_name)
 
 __all__: List = ['serialize', 'is_serializable', 'Serializer', 'to_tuple', 'to_dict']
 
@@ -84,9 +84,8 @@ def serialize(
         # That's why we need the "scope.cls is not cls" check.
         scope: SerdeScope = getattr(cls, SERDE_SCOPE, None)
         if scope is None or scope.cls is not cls:
-            scope = SerdeScope(cls,
-                reuse_instances_default=reuse_instances_default,
-                convert_sets_default=convert_sets_default
+            scope = SerdeScope(
+                cls, reuse_instances_default=reuse_instances_default, convert_sets_default=convert_sets_default
             )
             setattr(cls, SERDE_SCOPE, scope)
 
@@ -100,12 +99,10 @@ def serialize(
         g['typename'] = typename  # used in union functions
         g['is_instance'] = is_instance  # used in union functions
 
-
         # Collect types used in the generated code.
         for typ in iter_types(cls):
             if is_dataclass(typ) or is_enum(typ) or not is_primitive(typ):
                 scope.types[typ.__name__] = typ
-
 
         for f in sefields(cls):
             if f.skip_if:
@@ -292,17 +289,10 @@ def {{func}}(obj, reuse_instances = {{serde_scope.reuse_instances_default}}, con
     env = jinja2.Environment(loader=jinja2.DictLoader({'iter': template}))
     env.filters.update({'rvalue': renderer.render})
     env.filters.update({'arg': to_arg})
-    return env.get_template('iter').render(
-        func=TO_ITER,
-        serde_scope=getattr(cls, SERDE_SCOPE),
-        fields=sefields(cls)
-    )
+    return env.get_template('iter').render(func=TO_ITER, serde_scope=getattr(cls, SERDE_SCOPE), fields=sefields(cls))
 
 
-def render_to_dict(
-    cls: Type,
-    case: Optional[str] = None
-) -> str:
+def render_to_dict(cls: Type, case: Optional[str] = None) -> str:
     template = """
 def {{func}}(obj, reuse_instances = {{serde_scope.reuse_instances_default}}, convert_sets = {{serde_scope.convert_sets_default}}):
   if reuse_instances is Ellipsis:
@@ -338,11 +328,7 @@ def {{func}}(obj, reuse_instances = {{serde_scope.reuse_instances_default}}, con
     env.filters.update({'rvalue': renderer.render})
     env.filters.update({'arg': to_arg})
     env.filters.update({'case': functools.partial(conv, case=case)})
-    return env.get_template('dict').render(
-        func=TO_DICT,
-        serde_scope=getattr(cls, SERDE_SCOPE),
-        fields=sefields(cls)
-    )
+    return env.get_template('dict').render(func=TO_DICT, serde_scope=getattr(cls, SERDE_SCOPE), fields=sefields(cls))
 
 
 def render_union_func(cls: Type, union_args: List[Type]) -> str:
@@ -369,7 +355,10 @@ def {{func}}(obj, reuse_instances):
     return env.get_template('dict').render(
         func=union_func_name(union_args),
         serde_scope=getattr(cls, SERDE_SCOPE),
-        union_args=union_args, union_name=union_name)
+        union_args=union_args,
+        union_name=union_name,
+    )
+
 
 @dataclass
 class Renderer:

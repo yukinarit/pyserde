@@ -593,15 +593,11 @@ def test_exception_on_not_supported_types():
 
     with pytest.raises(SerdeError) as se_ex:
         to_dict(Foo(UnsupportedClass()))
-    assert str(se_ex.value).startswith(
-        "Unsupported type: UnsupportedClass"
-    )
+    assert str(se_ex.value).startswith("Unsupported type: UnsupportedClass")
 
     with pytest.raises(SerdeError) as de_ex:
         from_dict(Foo, {"b": UnsupportedClass()})
-    assert str(de_ex.value).startswith(
-        "Unsupported type: UnsupportedClass"
-    )
+    assert str(de_ex.value).startswith("Unsupported type: UnsupportedClass")
 
 
 def test_dataclass_inheritance():

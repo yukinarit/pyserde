@@ -4,7 +4,7 @@ from typing import Dict, List, Optional, Set, Tuple, Union
 
 import pytest
 
-from serde.compat import is_dict, is_list, is_opt, is_tuple, is_union, iter_types, type_args, union_args, is_set
+from serde.compat import is_dict, is_list, is_opt, is_set, is_tuple, is_union, iter_types, type_args, union_args
 from serde.core import is_instance
 
 from .data import Bool, Float, Int, Pri, PriOpt, Str
@@ -120,8 +120,8 @@ def test_is_instance():
 
     # Tuple
     assert is_instance(tuple(), Tuple[int, str, float, bool])
-    assert is_instance((10,"a"), Tuple)
-    assert is_instance((10,"a"), tuple)
+    assert is_instance((10, "a"), Tuple)
+    assert is_instance((10, "a"), tuple)
     assert is_instance((10, 'foo', 100.0, True), Tuple[int, str, float, bool])
     assert not is_instance((10, 'foo', 100.0, "last-type-is-wrong"), Tuple[int, str, float, bool])
 
@@ -131,8 +131,8 @@ def test_is_instance():
 
     # Dict
     assert is_instance({}, Dict[str, int])
-    assert is_instance({"a":"b"}, Dict)
-    assert is_instance({"a":"b"}, dict)
+    assert is_instance({"a": "b"}, Dict)
+    assert is_instance({"a": "b"}, dict)
     assert is_instance(dict(foo=10, bar=20), Dict[str, int])
     assert not is_instance(dict(foo=10.0, bar=20), Dict[str, int])
 
@@ -151,5 +151,5 @@ def test_is_instance():
     assert not is_instance("wrong-type", Optional[Int])
 
     # Nested containers
-    assert is_instance([({"a":"b"}, 10, [True])], List[Tuple[Dict[str,str],int,List[bool]]])
-    assert not is_instance([({"a":"b"}, 10, ["wrong-type"])], List[Tuple[Dict[str,str],int,List[bool]]])
+    assert is_instance([({"a": "b"}, 10, [True])], List[Tuple[Dict[str, str], int, List[bool]]])
+    assert not is_instance([({"a": "b"}, 10, ["wrong-type"])], List[Tuple[Dict[str, str], int, List[bool]]])

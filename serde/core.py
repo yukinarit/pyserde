@@ -9,8 +9,8 @@ from typing import Any, Callable, Dict, Iterator, List, Optional, Type, Union
 
 import stringcase
 
-from .compat import is_dict, is_list, is_opt, is_tuple, is_union, type_args, is_bare_list, is_bare_dict, \
-    is_bare_tuple, is_set, is_bare_set, typename
+from .compat import (is_bare_dict, is_bare_list, is_bare_set, is_bare_tuple, is_dict, is_list, is_opt, is_set, is_tuple,
+                     is_union, type_args, typename)
 
 __all__: List = []
 
@@ -248,4 +248,4 @@ def union_func_name(union_args: List[Type]) -> str:
     >>> union_func_name([int, List[str], IPv4Address])
     'union_int_List_str__IPv4Address'
     """
-    return  re.sub(r"[ ,\[\]]+", "_", f"union_{'_'.join([typename(e) for e in union_args])}")
+    return re.sub(r"[ ,\[\]]+", "_", f"union_{'_'.join([typename(e) for e in union_args])}")

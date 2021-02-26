@@ -19,16 +19,16 @@ from datetime import date, datetime
 from decimal import Decimal
 from ipaddress import IPv4Address, IPv4Interface, IPv4Network, IPv6Address, IPv6Interface, IPv6Network
 from pathlib import Path, PosixPath, PurePath, PurePosixPath, PureWindowsPath, WindowsPath
-from typing import Any, Callable, Dict, List, Optional, Type, Tuple
+from typing import Any, Callable, Dict, List, Optional, Tuple, Type
 from uuid import UUID
 
 import jinja2
 
-from .compat import (has_default, has_default_factory, is_bare_dict, is_bare_list, is_bare_tuple, is_dict, is_enum,
-                     is_list, is_opt, is_primitive, is_tuple, is_union, iter_types, type_args, typename, is_none,
-                     is_set, is_bare_set)
-from .core import FROM_DICT, FROM_ITER, Field, SerdeError, conv, fields, logger, SERDE_SCOPE, add_func, SerdeScope, \
-    union_func_name, raise_unsupported_type
+from .compat import (has_default, has_default_factory, is_bare_dict, is_bare_list, is_bare_set, is_bare_tuple, is_dict,
+                     is_enum, is_list, is_none, is_opt, is_primitive, is_set, is_tuple, is_union, iter_types, type_args,
+                     typename)
+from .core import (FROM_DICT, FROM_ITER, SERDE_SCOPE, Field, SerdeError, SerdeScope, add_func, conv, fields, logger,
+                   raise_unsupported_type, union_func_name)
 from .py36_datetime_compat import py36_date_fromisoformat, py36_datetime_fromisoformat
 
 __all__: List = ['deserialize', 'is_deserializable', 'Deserializer', 'from_dict', 'from_tuple']
@@ -106,7 +106,7 @@ def deserialize(_cls=None, rename_all: Optional[str] = None, reuse_instances_def
                 scope.defaults[f.name] = f.default
             elif has_default_factory(f):
                 scope.defaults[f.name] = f.default_factory
-            elif is_union(f.type): # also render all union functions
+            elif is_union(f.type):  # also render all union functions
                 union_args = type_args(f.type)
                 add_func(scope, "union_de_funcs", union_func_name(union_args), render_union_func(cls, union_args), g)
 
@@ -624,10 +624,15 @@ def {{func}}(data, reuse_instances):
 
     renderer = Renderer(FROM_DICT)
     env = jinja2.Environment(loader=jinja2.DictLoader({'dict': template}))
-    env.filters.update({'arg': lambda x: DeField(x, datavar="fake_dict", name="fake_key")})  # use custom to_arg for fake field
+    env.filters.update(
+        {'arg': lambda x: DeField(x, datavar="fake_dict", name="fake_key")}
+    )  # use custom to_arg for fake field
     env.filters.update({'rvalue': renderer.render})
     env.filters.update({'is_primitive': is_primitive})
     env.filters.update({'is_none': is_none})
-    return env.get_template('dict').render(func=union_func_name(union_args),
-                                           serde_scope=getattr(cls, SERDE_SCOPE),
-                                           union_args=union_args, union_name=union_name)
+    return env.get_template('dict').render(
+        func=union_func_name(union_args),
+        serde_scope=getattr(cls, SERDE_SCOPE),
+        union_args=union_args,
+        union_name=union_name,
+    )
