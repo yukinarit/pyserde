@@ -18,8 +18,8 @@ import jinja2
 
 from .compat import (T, is_bare_dict, is_bare_list, is_bare_set, is_bare_tuple, is_dict, is_enum, is_list, is_none,
                      is_opt, is_primitive, is_set, is_tuple, is_union, iter_types, iter_unions, type_args, typename)
-from .core import (SERDE_SCOPE, TO_DICT, TO_ITER, Field, SerdeError, SerdeScope, add_func, conv, fields, is_instance,
-                   logger, raise_unsupported_type, union_func_name)
+from .core import (SERDE_SCOPE, TO_DICT, TO_ITER, UNION_SE_PREFIX, Field, SerdeError, SerdeScope, add_func, conv,
+                   fields, is_instance, logger, raise_unsupported_type, union_func_name)
 
 __all__: List = ['serialize', 'is_serializable', 'Serializer', 'to_tuple', 'to_dict']
 
@@ -107,16 +107,16 @@ def serialize(
         # render all union functions
         for union in iter_unions(cls):
             union_args = type_args(union)
-            union_key = union_func_name(union_args)
-            add_func(scope, "union_se_funcs", union_key, render_union_func(cls, union_args), g)
+            union_key = union_func_name(UNION_SE_PREFIX, union_args)
+            add_func(scope, union_key, render_union_func(cls, union_args), g)
             scope.union_se_args[union_key] = union_args
 
         for f in sefields(cls):
             if f.skip_if:
                 g[f.skip_if.name] = f.skip_if
 
-        add_func(scope, "funcs", TO_ITER, render_to_tuple(cls), g)
-        add_func(scope, "funcs", TO_DICT, render_to_dict(cls, rename_all), g)
+        add_func(scope, TO_ITER, render_to_tuple(cls), g)
+        add_func(scope, TO_DICT, render_to_dict(cls, rename_all), g)
 
         logger.debug(f'{cls.__name__}: {SERDE_SCOPE} {scope}')
 
@@ -355,7 +355,7 @@ def {{func}}(obj, reuse_instances):
     env.filters.update({'arg': lambda x: SeField(x, "obj")})
     env.filters.update({'rvalue': renderer.render})
     return env.get_template('dict').render(
-        func=union_func_name(union_args),
+        func=union_func_name(UNION_SE_PREFIX, union_args),
         serde_scope=getattr(cls, SERDE_SCOPE),
         union_args=union_args,
         union_name=union_name,
@@ -517,8 +517,8 @@ class Renderer:
         return f"str({arg.varname})"
 
     def union_func(self, arg: SeField) -> str:
-        func_name = union_func_name(type_args(arg.type))
-        return f"serde_scope.union_se_funcs['{func_name}']({arg.varname}, reuse_instances)"
+        func_name = union_func_name(UNION_SE_PREFIX, type_args(arg.type))
+        return f"serde_scope.funcs['{func_name}']({arg.varname}, reuse_instances)"
 
 
 def enum_value(cls, e):

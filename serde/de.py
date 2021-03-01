@@ -27,8 +27,8 @@ import jinja2
 from .compat import (has_default, has_default_factory, is_bare_dict, is_bare_list, is_bare_set, is_bare_tuple, is_dict,
                      is_enum, is_list, is_none, is_opt, is_primitive, is_set, is_tuple, is_union, iter_types,
                      iter_unions, type_args, typename)
-from .core import (FROM_DICT, FROM_ITER, SERDE_SCOPE, Field, SerdeError, SerdeScope, add_func, conv, fields, logger,
-                   raise_unsupported_type, union_func_name)
+from .core import (FROM_DICT, FROM_ITER, SERDE_SCOPE, UNION_DE_PREFIX, Field, SerdeError, SerdeScope, add_func, conv,
+                   fields, logger, raise_unsupported_type, union_func_name)
 from .py36_datetime_compat import py36_date_fromisoformat, py36_datetime_fromisoformat
 
 __all__: List = ['deserialize', 'is_deserializable', 'Deserializer', 'from_dict', 'from_tuple']
@@ -103,7 +103,7 @@ def deserialize(_cls=None, rename_all: Optional[str] = None, reuse_instances_def
         # render all union functions
         for union in iter_unions(cls):
             union_args = type_args(union)
-            add_func(scope, "union_de_funcs", union_func_name(union_args), render_union_func(cls, union_args), g)
+            add_func(scope, union_func_name(UNION_DE_PREFIX, union_args), render_union_func(cls, union_args), g)
 
         # Collect default values and default factories used in the generated code.
         for f in defields(cls):
@@ -112,8 +112,8 @@ def deserialize(_cls=None, rename_all: Optional[str] = None, reuse_instances_def
             elif has_default_factory(f):
                 scope.defaults[f.name] = f.default_factory
 
-        add_func(scope, "funcs", FROM_ITER, render_from_iter(cls), g)
-        add_func(scope, "funcs", FROM_DICT, render_from_dict(cls, rename_all), g)
+        add_func(scope, FROM_ITER, render_from_iter(cls), g)
+        add_func(scope, FROM_DICT, render_from_dict(cls, rename_all), g)
 
         logger.debug(f'{cls.__name__}: {SERDE_SCOPE} {scope}')
 
@@ -523,8 +523,8 @@ class Renderer:
         return f"{arg.data} if isinstance({arg.data}, {arg.type.__name__}) else {ctor}"
 
     def union_func(self, arg: DeField) -> str:
-        func_name = union_func_name(type_args(arg.type))
-        return f"serde_scope.union_de_funcs['{func_name}']({arg.data}, reuse_instances)"
+        func_name = union_func_name(UNION_DE_PREFIX, type_args(arg.type))
+        return f"serde_scope.funcs['{func_name}']({arg.data}, reuse_instances)"
 
 
 def to_arg(f: DeField, index, rename_all: Optional[str] = None) -> DeField:
@@ -633,7 +633,7 @@ def {{func}}(data, reuse_instances):
     env.filters.update({'is_primitive': is_primitive})
     env.filters.update({'is_none': is_none})
     return env.get_template('dict').render(
-        func=union_func_name(union_args),
+        func=union_func_name(UNION_DE_PREFIX, union_args),
         serde_scope=getattr(cls, SERDE_SCOPE),
         union_args=union_args,
         union_name=union_name,

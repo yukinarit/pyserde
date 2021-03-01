@@ -26,6 +26,10 @@ FROM_DICT = 'from_dict'
 TO_ITER = 'to_iter'
 TO_DICT = 'to_dict'
 
+# prefixes used to distinguish the direction of a union function
+UNION_SE_PREFIX = "union_se"
+UNION_DE_PREFIX = "union_de"
+
 SETTINGS = dict(debug=False)
 
 
@@ -37,19 +41,17 @@ def init(debug: bool = False):
 class SerdeScope:
     cls: Type  # the exact class this scope is for (needed to distinguish scopes between inherited classes)
 
-    # core serialize/deserialize functions
+    # generated serialize and deserialize functions
     funcs: Dict[str, callable] = field(default_factory=dict)
-    # dataclass default values
-    defaults: Dict[str, callable] = field(default_factory=dict)
+    # default values of the dataclass fields (factories & normal values)
+    defaults: Dict[str, Union[callable, Any]] = field(default_factory=dict)
     # type references to all used types within the dataclass
     types: Dict[str, Type] = field(default_factory=dict)
 
     # generated source code (only filled when debug is True)
     code: Dict[str, str] = field(default_factory=dict)
 
-    # functions & state that handles unions
-    union_de_funcs: Dict[str, callable] = field(default_factory=dict)
-    union_se_funcs: Dict[str, callable] = field(default_factory=dict)
+    # the union serializing functions need references to their types
     union_se_args: Dict[str, List[Type]] = field(default_factory=dict)
 
     # default values for to_dict & from_dict arguments
@@ -82,14 +84,20 @@ def gen(code: str, globals: Dict = None, locals: Dict = None) -> str:
     return code
 
 
-def add_func(serde_scope: SerdeScope, target: str, func_name: str, func_code: str, g: Dict) -> None:
-    # Generate function and add it to serde_scope at target
+def add_func(serde_scope: SerdeScope, func_name: str, func_code: str, globals: Dict) -> None:
+    """
+    Generate a function and add it to a SerdeScope's `funcs` dictionary.
+    :param serde_scope: the SerdeScope instance to modify
+    :param func_name: the name of the function
+    :param func_code: the source code of the function
+    :param globals: global variables that should be accessible to the generated function
+    """
 
-    code = gen(func_code, g)
-    getattr(serde_scope, target)[func_name] = g[func_name]
+    code = gen(func_code, globals)
+    serde_scope.funcs[func_name] = globals[func_name]
 
     if SETTINGS['debug']:
-        serde_scope.code[f"{target}.{func_name}"] = code
+        serde_scope.code[func_name] = code
 
 
 def is_instance(obj: Any, typ: Type) -> bool:
@@ -238,14 +246,15 @@ def conv(f: Field, case: Optional[str] = None) -> str:
     return name
 
 
-def union_func_name(union_args: List[Type]) -> str:
+def union_func_name(prefix: str, union_args: List[Type]) -> str:
     """
     Generate a function name that contains all union types
+    :param prefix: prefix to distinguish between serializing and deserializing
     :param union_args: type arguments of a Union
     :return: union function name
     >>> from ipaddress import IPv4Address
     >>> from typing import List
-    >>> union_func_name([int, List[str], IPv4Address])
-    'union_int_List_str__IPv4Address'
+    >>> union_func_name("union_se", [int, List[str], IPv4Address])
+    'union_se_int_List_str__IPv4Address'
     """
-    return re.sub(r"[ ,\[\]]+", "_", f"union_{'_'.join([typename(e) for e in union_args])}")
+    return re.sub(r"[ ,\[\]]+", "_", f"{prefix}_{'_'.join([typename(e) for e in union_args])}")
