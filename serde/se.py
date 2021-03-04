@@ -16,10 +16,10 @@ from uuid import UUID
 
 import jinja2
 
-from .compat import (is_bare_dict, is_bare_list, is_bare_set, is_bare_tuple, is_dict, is_enum, is_list, is_opt,
-                     is_primitive, is_set, is_tuple, is_union, iter_types, type_args)
-from .core import HIDDEN_NAME, SETTINGS, TO_DICT, TO_ITER, Field, Hidden, SerdeError, T, conv, fields, gen, logger
-from .more_types import serialize as custom
+from .compat import (T, is_bare_dict, is_bare_list, is_bare_set, is_bare_tuple, is_dict, is_enum, is_list, is_none,
+                     is_opt, is_primitive, is_set, is_tuple, is_union, iter_types, iter_unions, type_args, typename)
+from .core import (SERDE_SCOPE, TO_DICT, TO_ITER, UNION_SE_PREFIX, Field, SerdeError, SerdeScope, add_func, conv,
+                   fields, is_instance, logger, raise_unsupported_type, union_func_name)
 
 __all__: List = ['serialize', 'is_serializable', 'Serializer', 'to_tuple', 'to_dict']
 
@@ -76,37 +76,50 @@ def serialize(
     '{"intField": 10, "strField": "foo"}'
     """
 
-    @functools.wraps(_cls)
-    def wrap(cls: Type[T]):
-        if not hasattr(cls, HIDDEN_NAME):
-            setattr(cls, HIDDEN_NAME, Hidden())
+    def wrap(cls: Type):
+        g: Dict[str, Any] = {}
 
         # Create a scope storage used by serde.
-        scope = getattr(cls, '__serde_scope__', None)
-        if scope is None:
-            scope = {}
-            setattr(cls, '__serde_scope__', scope)
+        # Each class should get own scope. Child classes can not share scope with parent class.
+        # That's why we need the "scope.cls is not cls" check.
+        scope: SerdeScope = getattr(cls, SERDE_SCOPE, None)
+        if scope is None or scope.cls is not cls:
+            scope = SerdeScope(
+                cls, reuse_instances_default=reuse_instances_default, convert_sets_default=convert_sets_default
+            )
+            setattr(cls, SERDE_SCOPE, scope)
 
-        g: Dict[str, Any] = {}
+        # Set some globals for all generated functions
+        g['cls'] = cls
+        g['serde_scope'] = scope
+        g['SerdeError'] = SerdeError
+        g['raise_unsupported_type'] = raise_unsupported_type
+        g['enum_value'] = enum_value
+        g['is_dataclass'] = is_dataclass
+        g['typename'] = typename  # used in union functions
+        g['is_instance'] = is_instance  # used in union functions
+
+        # Collect types used in the generated code.
+        for typ in iter_types(cls):
+            if is_dataclass(typ) or is_enum(typ) or not is_primitive(typ):
+                scope.types[typ.__name__] = typ
+
+        # render all union functions
+        for union in iter_unions(cls):
+            union_args = type_args(union)
+            union_key = union_func_name(UNION_SE_PREFIX, union_args)
+            add_func(scope, union_key, render_union_func(cls, union_args), g)
+            scope.union_se_args[union_key] = union_args
+
         for f in sefields(cls):
             if f.skip_if:
                 g[f.skip_if.name] = f.skip_if
 
-        # Collect types used in the gernerated code.
-        for typ in iter_types(cls):
-            if is_dataclass(typ) or is_enum(typ):
-                getattr(cls, '__serde_scope__')[typ.__name__] = typ
+        add_func(scope, TO_ITER, render_to_tuple(cls), g)
+        add_func(scope, TO_DICT, render_to_dict(cls, rename_all), g)
 
-        logger.debug(f'{cls.__name__}: __serde_scope__ {scope}')
+        logger.debug(f'{cls.__name__}: {SERDE_SCOPE} {scope}')
 
-        g['is_dataclass'] = is_dataclass
-        g['__custom_serializer__'] = custom
-        g['__serde_enum_value__'] = enum_value
-
-        to_tuple_code = render_to_tuple(cls, reuse_instances_default, convert_sets_default, custom)
-        cls = se_func(cls, TO_ITER, to_tuple_code, g)
-        to_dict_code = render_to_dict(cls, rename_all, reuse_instances_default, convert_sets_default, custom)
-        cls = se_func(cls, TO_DICT, to_dict_code, g)
         return cls
 
     if _cls is None:
@@ -130,7 +143,7 @@ def is_serializable(instance_or_class: Any) -> bool:
     >>> is_serializable(Foo)
     True
     """
-    return hasattr(instance_or_class, TO_ITER) or hasattr(instance_or_class, TO_DICT)
+    return hasattr(instance_or_class, SERDE_SCOPE)
 
 
 def to_obj(o, named: bool, reuse_instances: bool, convert_sets: bool):
@@ -138,10 +151,11 @@ def to_obj(o, named: bool, reuse_instances: bool, convert_sets: bool):
     if o is None:
         return None
     if is_serializable(o):
+        serde_scope: SerdeScope = getattr(o, SERDE_SCOPE)
         if named:
-            return getattr(o, TO_DICT)(reuse_instances=reuse_instances, convert_sets=convert_sets)
+            return serde_scope.funcs[TO_DICT](o, reuse_instances=reuse_instances, convert_sets=convert_sets)
         else:
-            return getattr(o, TO_ITER)(reuse_instances=reuse_instances, convert_sets=convert_sets)
+            return serde_scope.funcs[TO_ITER](o, reuse_instances=reuse_instances, convert_sets=convert_sets)
     elif is_dataclass(o):
         if named:
             return dataclasses.asdict(o)
@@ -248,74 +262,56 @@ def to_arg(f: SeField) -> SeField:
     return f
 
 
-def render_to_tuple(
-    cls: Type, reuse_instances_default: bool = True, convert_sets_default: bool = False, custom: Custom = None
-) -> str:
+def render_to_tuple(cls: Type) -> str:
     template = """
-def {{func}}(obj, reuse_instances = {{reuse_instances_default}}, convert_sets = {{convert_sets_default}}):
+def {{func}}(obj, reuse_instances = {{serde_scope.reuse_instances_default}}, convert_sets = {{serde_scope.convert_sets_default}}):
   if reuse_instances is Ellipsis:
-    reuse_instances = {{reuse_instances_default}}
+    reuse_instances = {{serde_scope.reuse_instances_default}}
   if convert_sets is Ellipsis:
-    convert_sets = {{convert_sets_default}}
+    convert_sets = {{serde_scope.convert_sets_default}}
 
   if not is_dataclass(obj):
     return copy.deepcopy(obj)
 
-  {# List up all classes used by this class. -#}
-  {% for name in cls.__serde_scope__ -%}
-  {{name}} = getattr(obj, '__serde_scope__')['{{name}}']
-  {% endfor -%}
+  {# List up all classes used by this class. #}
+  {% for name in serde_scope.types.keys() %}
+  {{name}} = serde_scope.types['{{name}}']
+  {% endfor %}
 
-  {% if cls|is_dataclass %}
   res = []
-  {% for f in cls|fields -%}
-  {% if not f.skip|default(False) -%}
+  {% for f in fields -%}
+  {% if not f.skip|default(False) %}
   res.append({{f|arg|rvalue()}})
   {% endif -%}
   {% endfor -%}
   return tuple(res)
-  {% endif %}
     """
 
-    renderer = Renderer(TO_ITER, custom)
+    renderer = Renderer(TO_ITER)
     env = jinja2.Environment(loader=jinja2.DictLoader({'iter': template}))
-    env.filters.update({'fields': sefields})
-    env.filters.update({'is_dataclass': is_dataclass})
     env.filters.update({'rvalue': renderer.render})
     env.filters.update({'arg': to_arg})
-    return env.get_template('iter').render(
-        func=TO_ITER,
-        cls=cls,
-        reuse_instances_default=reuse_instances_default,
-        convert_sets_default=convert_sets_default,
-    )
+    return env.get_template('iter').render(func=TO_ITER, serde_scope=getattr(cls, SERDE_SCOPE), fields=sefields(cls))
 
 
-def render_to_dict(
-    cls: Type,
-    case: Optional[str] = None,
-    reuse_instances_default: bool = True,
-    convert_sets_default: bool = False,
-    custom: Custom = None,
-) -> str:
+def render_to_dict(cls: Type, case: Optional[str] = None) -> str:
     template = """
-def {{func}}(obj, reuse_instances = {{reuse_instances_default}}, convert_sets = {{convert_sets_default}}):
+def {{func}}(obj, reuse_instances = {{serde_scope.reuse_instances_default}}, convert_sets = {{serde_scope.convert_sets_default}}):
   if reuse_instances is Ellipsis:
-    reuse_instances = {{reuse_instances_default}}
+    reuse_instances = {{serde_scope.reuse_instances_default}}
   if convert_sets is Ellipsis:
-    convert_sets = {{convert_sets_default}}
+    convert_sets = {{serde_scope.convert_sets_default}}
 
   if not is_dataclass(obj):
     return copy.deepcopy(obj)
 
-  {# List up all classes used by this class. -#}
-  {% for name in cls.__serde_scope__ -%}
-  {{name}} = getattr(obj, '__serde_scope__')['{{name}}']
+  {# List up all classes used by this class. #}
+  {% for name in serde_scope.types.keys() -%}
+  {{name}} = serde_scope.types['{{name}}']
   {% endfor -%}
 
-  {% if cls|is_dataclass -%}
   res = {}
-  {% for f in cls|fields -%}
+  {% for f in fields -%}
 
   {% if not f.skip -%}
     {% if f.skip_if -%}
@@ -328,20 +324,41 @@ def {{func}}(obj, reuse_instances = {{reuse_instances_default}}, convert_sets = 
 
   {% endfor -%}
   return res
-  {% endif -%}
     """
-    renderer = Renderer(TO_DICT, custom)
+    renderer = Renderer(TO_DICT)
     env = jinja2.Environment(loader=jinja2.DictLoader({'dict': template}))
-    env.filters.update({'fields': sefields})
-    env.filters.update({'is_dataclass': is_dataclass})
     env.filters.update({'rvalue': renderer.render})
     env.filters.update({'arg': to_arg})
     env.filters.update({'case': functools.partial(conv, case=case)})
+    return env.get_template('dict').render(func=TO_DICT, serde_scope=getattr(cls, SERDE_SCOPE), fields=sefields(cls))
+
+
+def render_union_func(cls: Type, union_args: List[Type]) -> str:
+    template = """
+def {{func}}(obj, reuse_instances):
+  {% for name in serde_scope.types.keys() %}
+  {{name}} = serde_scope.types['{{name}}']
+  {% endfor %}
+  
+  union_args = serde_scope.union_se_args['{{func}}']
+  
+  {% for t in union_args %}
+  if is_instance(obj, union_args[{{loop.index0}}]):
+    return {{t|arg|rvalue()}}
+  {% endfor %}
+  raise SerdeError("Can not serialize " + repr(obj) + " of type " + typename(type(obj)) + " for {{union_name}}")
+    """
+    union_name = f"Union[{', '.join([typename(a) for a in union_args])}]"
+
+    renderer = Renderer(TO_DICT)
+    env = jinja2.Environment(loader=jinja2.DictLoader({'dict': template}))
+    env.filters.update({'arg': lambda x: SeField(x, "obj")})
+    env.filters.update({'rvalue': renderer.render})
     return env.get_template('dict').render(
-        func=TO_DICT,
-        cls=cls,
-        reuse_instances_default=reuse_instances_default,
-        convert_sets_default=convert_sets_default,
+        func=union_func_name(UNION_SE_PREFIX, union_args),
+        serde_scope=getattr(cls, SERDE_SCOPE),
+        union_args=union_args,
+        union_name=union_name,
     )
 
 
@@ -352,7 +369,6 @@ class Renderer:
     """
 
     func: str
-    custom: Custom = None
 
     def render(self, arg: SeField) -> str:
         """
@@ -369,19 +385,19 @@ class Renderer:
         ... class Foo:
         ...    val: int
         >>> Renderer(TO_ITER).render(SeField(Foo, 'foo'))
-        'foo.__serde_to_iter__(reuse_instances=reuse_instances, convert_sets=convert_sets)'
+        "foo.__serde__.funcs['to_iter'](foo, reuse_instances=reuse_instances, convert_sets=convert_sets)"
 
         >>> Renderer(TO_ITER).render(SeField(List[Foo], 'foo'))
-        '[v.__serde_to_iter__(reuse_instances=reuse_instances, convert_sets=convert_sets) for v in foo]'
+        "[v.__serde__.funcs['to_iter'](v, reuse_instances=reuse_instances, convert_sets=convert_sets) for v in foo]"
 
         >>> Renderer(TO_ITER).render(SeField(Dict[str, Foo], 'foo'))
-        '{k: v.__serde_to_iter__(reuse_instances=reuse_instances, convert_sets=convert_sets) for k, v in foo.items()}'
+        "{k: v.__serde__.funcs['to_iter'](v, reuse_instances=reuse_instances, convert_sets=convert_sets) for k, v in foo.items()}"
 
         >>> Renderer(TO_ITER).render(SeField(Dict[Foo, Foo], 'foo'))
-        '{k.__serde_to_iter__(reuse_instances=reuse_instances, convert_sets=convert_sets): v.__serde_to_iter__(reuse_instances=reuse_instances, convert_sets=convert_sets) for k, v in foo.items()}'
+        "{k.__serde__.funcs['to_iter'](k, reuse_instances=reuse_instances, convert_sets=convert_sets): v.__serde__.funcs['to_iter'](v, reuse_instances=reuse_instances, convert_sets=convert_sets) for k, v in foo.items()}"
 
         >>> Renderer(TO_ITER).render(SeField(Tuple[str, Foo, int], 'foo'))
-        '(foo[0], foo[1].__serde_to_iter__(reuse_instances=reuse_instances, convert_sets=convert_sets), foo[2])'
+        "(foo[0], foo[1].__serde__.funcs['to_iter'](foo[1], reuse_instances=reuse_instances, convert_sets=convert_sets), foo[2])"
         """
         if is_dataclass(arg.type):
             return self.dataclass(arg)
@@ -397,8 +413,10 @@ class Renderer:
             return self.tuple(arg)
         elif is_enum(arg.type):
             return self.enum(arg)
-        elif any(f(arg.type) for f in (is_primitive, is_union)):
+        elif is_primitive(arg.type):
             return self.primitive(arg)
+        elif is_union(arg.type):
+            return self.union_func(arg)
         elif arg.type in [
             Decimal,
             Path,
@@ -418,14 +436,16 @@ class Renderer:
             return f"{arg.varname} if reuse_instances else {self.str(arg)}"
         elif arg.type in [date, datetime]:
             return f"{arg.varname} if reuse_instances else {arg.varname}.isoformat()"
+        elif is_none(arg.type):
+            return "None"
         else:
-            return f'__custom_serializer__({arg.varname})'
+            return f"raise_unsupported_type({arg.varname})"
 
     def dataclass(self, arg: SeField) -> str:
         """
         Render rvalue for dataclass.
         """
-        return f'{arg.varname}.{self.func}(reuse_instances=reuse_instances, convert_sets=convert_sets)'
+        return f"{arg.varname}.{SERDE_SCOPE}.funcs['{self.func}']({arg.varname}, reuse_instances=reuse_instances, convert_sets=convert_sets)"
 
     def opt(self, arg: SeField) -> str:
         """
@@ -485,7 +505,7 @@ class Renderer:
             return f'{{{self.render(karg)}: {self.render(varg)} for k, v in {arg.varname}.items()}}'
 
     def enum(self, arg: SeField) -> str:
-        return f'__serde_enum_value__({arg.type.__name__}, {arg.varname})'
+        return f'enum_value({arg.type.__name__}, {arg.varname})'
 
     def primitive(self, arg: SeField) -> str:
         """
@@ -496,20 +516,9 @@ class Renderer:
     def str(self, arg: SeField) -> str:
         return f"str({arg.varname})"
 
-
-def se_func(cls: Type[T], func: str, code: str, g: Dict) -> Type[T]:
-    """
-    Generate function to serialize into an object.
-    """
-    # Generate serialize function.
-    code = gen(code, g, cls=cls)
-
-    setattr(cls, func, g[func])
-    if SETTINGS['debug']:
-        hidden = getattr(cls, HIDDEN_NAME)
-        hidden.code[func] = code
-
-    return cls
+    def union_func(self, arg: SeField) -> str:
+        func_name = union_func_name(UNION_SE_PREFIX, type_args(arg.type))
+        return f"serde_scope.funcs['{func_name}']({arg.varname}, reuse_instances)"
 
 
 def enum_value(cls, e):

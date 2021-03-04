@@ -5,7 +5,8 @@ from typing import Any, Dict, Type
 
 import msgpack
 
-from .core import SerdeError, T
+from .compat import T
+from .core import SerdeError
 from .de import Deserializer, from_dict, from_tuple
 from .se import Serializer, to_dict, to_tuple
 

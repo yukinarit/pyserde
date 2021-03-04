@@ -3,43 +3,60 @@ pyserde core module.
 """
 import dataclasses
 import logging
-from dataclasses import dataclass, field, is_dataclass
-from typing import Any, Callable, Dict, Iterator, List, Optional, Type, TypeVar
+import re
+from dataclasses import dataclass, field
+from typing import Any, Callable, Dict, Iterator, List, Optional, Type, Union
 
 import stringcase
 
-from .compat import T, assert_type, is_dict, is_list, is_opt, is_set, is_tuple, is_union, type_args
+from .compat import (is_bare_dict, is_bare_list, is_bare_set, is_bare_tuple, is_dict, is_list, is_opt, is_set, is_tuple,
+                     is_union, type_args, typename)
 
 __all__: List = []
 
 logger = logging.getLogger('serde')
 
-JsonValue = TypeVar('JsonValue', str, int, float, bool, Dict, List)
 
-FROM_ITER = '__serde_from_iter__'
+# name of the serde context key
+SERDE_SCOPE = '__serde__'
 
-FROM_DICT = '__serde_from_dict__'
+# main function keys
+FROM_ITER = 'from_iter'
+FROM_DICT = 'from_dict'
+TO_ITER = 'to_iter'
+TO_DICT = 'to_dict'
 
-TO_ITER = '__serde_to_iter__'
-
-TO_DICT = '__serde_to_dict__'
-
-HIDDEN_NAME = '__serde_hidden__'
+# prefixes used to distinguish the direction of a union function
+UNION_SE_PREFIX = "union_se"
+UNION_DE_PREFIX = "union_de"
 
 SETTINGS = dict(debug=False)
 
 
-@dataclass
-class Hidden:
-    """
-    Hidden information encoded in serde classes.
-    """
-
-    code: Dict[str, str] = field(default_factory=dict)
-
-
 def init(debug: bool = False):
     SETTINGS['debug'] = debug
+
+
+@dataclass
+class SerdeScope:
+    cls: Type  # the exact class this scope is for (needed to distinguish scopes between inherited classes)
+
+    # generated serialize and deserialize functions
+    funcs: Dict[str, callable] = field(default_factory=dict)
+    # default values of the dataclass fields (factories & normal values)
+    defaults: Dict[str, Union[callable, Any]] = field(default_factory=dict)
+    # type references to all used types within the dataclass
+    types: Dict[str, Type] = field(default_factory=dict)
+
+    # generated source code (only filled when debug is True)
+    code: Dict[str, str] = field(default_factory=dict)
+
+    # the union serializing functions need references to their types
+    union_se_args: Dict[str, List[Type]] = field(default_factory=dict)
+
+    # default values for to_dict & from_dict arguments
+    reuse_instances_default: bool = True
+    convert_sets_default: bool = False
 
 
 class SerdeError(TypeError):
@@ -48,7 +65,12 @@ class SerdeError(TypeError):
     """
 
 
-def gen(code: str, globals: Dict = None, locals: Dict = None, cls: Type = None) -> str:
+def raise_unsupported_type(obj):
+    # needed because we can not render a raise statement everywhere, e.g. as argument
+    raise SerdeError(f"Unsupported type: {typename(type(obj))}")
+
+
+def gen(code: str, globals: Dict = None, locals: Dict = None) -> str:
     """
     Customized `exec` function.
     """
@@ -58,76 +80,75 @@ def gen(code: str, globals: Dict = None, locals: Dict = None, cls: Type = None) 
         code = format_str(code, mode=FileMode(line_length=100))
     except Exception:
         pass
-    for_class = 'for ' + cls.__name__ if cls else ''
-    logger.debug(f'Generating {for_class} ...\n{code}')
     exec(code, globals, locals)
     return code
 
 
-def typecheck(cls: Type[T], obj: T) -> None:
+def add_func(serde_scope: SerdeScope, func_name: str, func_code: str, globals: Dict) -> None:
     """
-    type check type-annotated classes.
+    Generate a function and add it to a SerdeScope's `funcs` dictionary.
+    :param serde_scope: the SerdeScope instance to modify
+    :param func_name: the name of the function
+    :param func_code: the source code of the function
+    :param globals: global variables that should be accessible to the generated function
+    """
 
-    >>> @dataclass
-    ... class Foo:
-    ...     s: str
-    >>>
-    >>> typecheck(Foo, Foo('foo'))
-    >>>
-    >>> # Type mismatch raises `ValueError`.
-    >>> try:
-    ...     typecheck(Foo, Foo(10))
-    ... except:
-    ...     pass
-    >>>
-    """
-    if is_dataclass(obj):
-        # If dataclass, type check recursively.
-        for f in dataclasses.fields(obj):
-            typecheck(f.type, getattr(obj, f.name, None))
-    elif is_opt(cls):
-        if obj is not None:
-            typ = type_args(cls)[0]
-            typecheck(typ, obj)
-    elif is_union(cls):
-        success = False
-        for typ in type_args(cls):
-            try:
-                typecheck(typ, obj)
-                success = True
-                break
-            except (SerdeError, ValueError):
-                pass
-        if not success:
-            raise ValueError(f'{obj} is not instance of {cls}')
-    elif is_list(cls):
-        assert_type(list, obj)
-        if isinstance(obj, list):
-            typ = type_args(cls)[0]
-            for e in obj:
-                typecheck(typ, e)
-    elif is_set(cls):
-        assert_type(set, obj)
-        if isinstance(obj, set):
-            typ = type_args(cls)[0]
-            for e in obj:
-                typecheck(typ, e)
-    elif is_tuple(cls):
-        assert_type(tuple, obj)
-        if isinstance(obj, tuple):
-            for i, typ in enumerate(type_args(cls)):
-                typecheck(typ, obj[i])
-    elif is_dict(cls):
-        assert_type(dict, obj)
-        if isinstance(obj, dict):
-            ktyp = type_args(cls)[0]
-            vtyp = type_args(cls)[1]
-            for k, v in obj.items():
-                typecheck(ktyp, k)
-                typecheck(vtyp, v)
+    code = gen(func_code, globals)
+    serde_scope.funcs[func_name] = globals[func_name]
+
+    if SETTINGS['debug']:
+        serde_scope.code[func_name] = code
+
+
+def is_instance(obj: Any, typ: Type) -> bool:
+    if is_opt(typ):
+        if obj is None:
+            return True
+        opt_arg = type_args(typ)[0]
+        return is_instance(obj, opt_arg)
+    elif is_union(typ):
+        for arg in type_args(typ):
+            if is_instance(obj, arg):
+                return True
+        return False
+    elif is_list(typ):
+        if not isinstance(obj, list):
+            return False
+        if len(obj) == 0 or is_bare_list(typ):
+            return True
+        list_arg = type_args(typ)[0]
+        # for speed reasons we just check the type of the 1st element
+        return is_instance(obj[0], list_arg)
+    elif is_set(typ):
+        if not isinstance(obj, set):
+            return False
+        if len(obj) == 0 or is_bare_set(typ):
+            return True
+        set_arg = type_args(typ)[0]
+        # for speed reasons we just check the type of the 1st element
+        return is_instance(next(iter(obj)), set_arg)
+    elif is_tuple(typ):
+        if not isinstance(obj, tuple):
+            return False
+        if len(obj) == 0 or is_bare_tuple(typ):
+            return True
+        for i, arg in enumerate(type_args(typ)):
+            if not is_instance(obj[i], arg):
+                return False
+        return True
+    elif is_dict(typ):
+        if not isinstance(obj, dict):
+            return False
+        if len(obj) == 0 or is_bare_dict(typ):
+            return True
+        ktyp = type_args(typ)[0]
+        vtyp = type_args(typ)[1]
+        for k, v in obj.items():
+            # for speed reasons we just check the type of the 1st element
+            return is_instance(k, ktyp) and is_instance(v, vtyp)
+        return False
     else:
-        if not isinstance(obj, cls):
-            raise ValueError(f'{obj} is not instance of {cls}')
+        return isinstance(obj, typ)
 
 
 @dataclass
@@ -223,3 +244,17 @@ def conv(f: Field, case: Optional[str] = None) -> str:
     if name is None:
         raise SerdeError('Field name is None.')
     return name
+
+
+def union_func_name(prefix: str, union_args: List[Type]) -> str:
+    """
+    Generate a function name that contains all union types
+    :param prefix: prefix to distinguish between serializing and deserializing
+    :param union_args: type arguments of a Union
+    :return: union function name
+    >>> from ipaddress import IPv4Address
+    >>> from typing import List
+    >>> union_func_name("union_se", [int, List[str], IPv4Address])
+    'union_se_int_List_str__IPv4Address'
+    """
+    return re.sub(r"[ ,\[\]]+", "_", f"{prefix}_{'_'.join([typename(e) for e in union_args])}")

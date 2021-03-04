@@ -5,7 +5,7 @@ from typing import List, Type  # noqa
 
 import yaml
 
-from .core import T
+from .compat import T
 from .de import Deserializer, from_dict
 from .se import Serializer, to_dict
 

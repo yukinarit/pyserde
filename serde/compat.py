@@ -153,6 +153,33 @@ def iter_types(cls: Type) -> Iterator[Type]:
         yield cls
 
 
+def iter_unions(cls: Type) -> Iterator[Type]:
+    """
+    Iterate over all unions that are used in the dataclass
+    """
+    if is_union(cls):
+        yield cls
+    if is_dataclass(cls):
+        for f in fields(cls):
+            yield from iter_unions(f.type)
+    elif is_opt(cls):
+        arg = type_args(cls)
+        if arg:
+            yield from iter_unions(arg[0])
+    elif is_list(cls) or is_set(cls):
+        arg = type_args(cls)
+        if arg:
+            yield from iter_unions(arg[0])
+    elif is_tuple(cls):
+        for arg in type_args(cls):
+            yield from iter_unions(arg)
+    elif is_dict(cls):
+        arg = type_args(cls)
+        if arg and len(arg) >= 2:
+            yield from iter_unions(arg[0])
+            yield from iter_unions(arg[1])
+
+
 def is_union(typ) -> bool:
     """
     Test if the type is `typing.Union`.
@@ -194,7 +221,7 @@ def is_bare_list(typ) -> bool:
     >>> is_bare_list(List)
     True
     """
-    return is_list(typ) and typ in (List, list)
+    return typ in (List, list)
 
 
 def is_tuple(typ) -> bool:
@@ -217,7 +244,7 @@ def is_bare_tuple(typ) -> bool:
     >>> is_bare_tuple(Tuple)
     True
     """
-    return is_tuple(typ) and typ in (Tuple, tuple)
+    return typ in (Tuple, tuple)
 
 
 def is_set(typ) -> bool:
@@ -246,7 +273,7 @@ def is_bare_set(typ) -> bool:
     >>> is_bare_set(Set)
     True
     """
-    return is_set(typ) and typ in (Set, set)
+    return typ in (Set, set)
 
 
 def is_dict(typ) -> bool:
@@ -275,7 +302,7 @@ def is_bare_dict(typ) -> bool:
     >>> is_bare_dict(Dict)
     True
     """
-    return is_dict(typ) and typ in (Dict, dict)
+    return typ in (Dict, dict)
 
 
 def is_none(typ) -> bool:
@@ -353,9 +380,3 @@ def has_default_factory(field) -> bool:
     True
     """
     return not isinstance(field.default_factory, dataclasses._MISSING_TYPE)
-
-
-def assert_type(typ: Type, obj, throw=False) -> None:
-    if not isinstance(obj, typ):
-        if throw:
-            raise ValueError(f'{obj} is not instance of {typ}')

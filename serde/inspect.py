@@ -16,7 +16,7 @@ import os
 import sys
 from typing import Type
 
-from .core import HIDDEN_NAME, init
+from .core import SERDE_SCOPE, SerdeScope, init
 
 init(True)
 
@@ -25,8 +25,8 @@ def inspect(cls: Type) -> str:
     """
     Inspect a pyserde class.
     """
-    hidden = getattr(cls, HIDDEN_NAME, None)
-    return '\n'.join(hidden.code.values())
+    scope: SerdeScope = getattr(cls, SERDE_SCOPE, {})
+    return '\n'.join(scope.code.values())
 
 
 def main(arg):
@@ -40,7 +40,7 @@ def main(arg):
     cls = getattr(pkg, arg.name)
     print(inspect(cls))
     print('----------------------------------')
-    print(f"serde_scope: {getattr(cls, '__serde_scope__')}")
+    print(f"serde_scope: {getattr(cls, SERDE_SCOPE)}")
 
 
 parser = argparse.ArgumentParser(description='pyserde-inspect')

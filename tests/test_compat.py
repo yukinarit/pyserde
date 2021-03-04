@@ -2,10 +2,9 @@ import sys
 from dataclasses import dataclass
 from typing import Dict, List, Optional, Set, Tuple, Union
 
-import pytest
-
-from serde import typecheck
-from serde.compat import is_dict, is_list, is_opt, is_set, is_tuple, is_union, iter_types, type_args, union_args
+from serde.compat import (is_dict, is_list, is_opt, is_set, is_tuple, is_union, iter_types, iter_unions, type_args,
+                          union_args)
+from serde.core import is_instance
 
 from .data import Bool, Float, Int, Pri, PriOpt, Str
 
@@ -47,6 +46,23 @@ def test_iter_types():
     assert [PriOpt, int, str, float, bool] == list(iter_types(PriOpt))
 
 
+def test_iter_unions():
+    assert [Union[str, int]] == list(iter_unions(Union[str, int]))
+    assert [Union[str, int]] == list(iter_unions(Dict[str, Union[str, int]]))
+    assert [Union[str, int]] == list(iter_unions(Tuple[Union[str, int]]))
+    assert [Union[str, int]] == list(iter_unions(List[Union[str, int]]))
+    assert [Union[str, int]] == list(iter_unions(Set[Union[str, int]]))
+    assert [Union[str, int, type(None)]] == list(iter_unions(Optional[Union[str, int]]))
+
+    @dataclass
+    class A:
+        a: List[Union[int, str]]
+        b: Dict[str, List[Union[float, int]]]
+        C: Dict[Union[bool, str], Union[float, int]]
+
+    assert [Union[int, str], Union[float, int], Union[bool, str], Union[float, int]] == list(iter_unions(A))
+
+
 def test_type_args():
     assert (int,) == type_args(List[int])
     assert (int, str) == type_args(Dict[int, str])
@@ -68,19 +84,22 @@ def test_union_args():
     assert (Optional[int], str) == union_args(Union[Optional[int], str])
 
 
-def test_typecheck():
+def test_is_instance():
     # Primitive
-    typecheck(int, 10)
-    with pytest.raises(ValueError):
-        typecheck(int, 10.0)
+    assert is_instance(10, int)
+    assert is_instance("str", str)
+    assert is_instance(1.0, float)
+    assert is_instance(False, bool)
+    assert not is_instance(10.0, int)
+    assert not is_instance("10", int)
+    assert is_instance(True, int)  # see why this is true https://stackoverflow.com/a/37888668
 
     # Dataclass
     p = Pri(i=10, s='foo', f=100.0, b=True)
-    typecheck(Pri, p)
-
-    with pytest.raises(ValueError):
-        p.i = 10.0
-        typecheck(Pri, p)
+    assert is_instance(p, Pri)
+    p.i = 10.0
+    # for speed reasons we do not detect wrong types within dataclasses
+    assert is_instance(p, Pri)
 
     # Dataclass (Nested)
     @dataclass
@@ -88,56 +107,65 @@ def test_typecheck():
         p: Pri
 
     h = Foo(Pri(i=10, s='foo', f=100.0, b=True))
-    typecheck(Foo, h)
-
-    with pytest.raises(ValueError):
-        h.p.i = 10.0
-        typecheck(Foo, h)
+    assert is_instance(h, Foo)
+    h.p.i = 10.0
+    # for speed reasons we do not detect wrong types within dataclasses
+    assert is_instance(h, Foo)
 
     # List
-    typecheck(List[int], [10])
-    with pytest.raises(ValueError):
-        typecheck(List[int], [10.0])
+    assert is_instance([], List[int])
+    assert is_instance([10], List)
+    assert is_instance([10], list)
+    assert is_instance([10], List[int])
+    assert not is_instance([10.0], List[int])
 
     # List of dataclasses
-    typecheck(List[Int], [Int(n) for n in range(1, 10)])
-    with pytest.raises(ValueError):
-        typecheck(List[Pri], [Pri(i=10.0, s='foo', f=100.0, b=True)])
+    assert is_instance([Int(n) for n in range(1, 10)], List[Int])
+    assert not is_instance([Str("foo")], List[Int])
 
     # Set
-    typecheck(Set[int], {10})
-    with pytest.raises(ValueError):
-        typecheck(Set[int], {10.0})
+    assert is_instance(set(), Set[int])
+    assert is_instance({10}, Set)
+    assert is_instance({10}, set)
+    assert is_instance({10}, Set[int])
+    assert not is_instance({10.0}, Set[int])
+
+    # Set of dataclasses
+    assert is_instance({Int(n) for n in range(1, 10)}, Set[Int])
+    assert not is_instance({Str("foo")}, Set[Int])
 
     # Tuple
-    typecheck(Tuple[int, str, float, bool], (10, 'foo', 100.0, True))
-    with pytest.raises(ValueError):
-        typecheck(Tuple[int, str, float, bool], (10.0, 'foo', 100.0, True))
+    assert is_instance(tuple(), Tuple[int, str, float, bool])
+    assert is_instance((10, "a"), Tuple)
+    assert is_instance((10, "a"), tuple)
+    assert is_instance((10, 'foo', 100.0, True), Tuple[int, str, float, bool])
+    assert not is_instance((10, 'foo', 100.0, "last-type-is-wrong"), Tuple[int, str, float, bool])
 
     # Tuple of dataclasses
-    typecheck(Tuple[Int, Str, Float, Bool], (Int(10), Str('foo'), Float(100.0), Bool(True)))
-    with pytest.raises(ValueError):
-        typecheck(Tuple[Int, Str, Float, Bool], (Int(10.0), Str('foo'), Float(100.0), Bool(True)))
+    assert is_instance((Int(10), Str('foo'), Float(100.0), Bool(True)), Tuple[Int, Str, Float, Bool])
+    assert not is_instance((Int(10), Str('foo'), Str("wrong-class"), Bool(True)), Tuple[Int, Str, Float, Bool])
 
     # Dict
-    typecheck(Dict[str, int], dict(foo=10, bar=20))
-    with pytest.raises(ValueError):
-        typecheck(Dict[str, int], dict(foo=10.0, bar=20))
+    assert is_instance({}, Dict[str, int])
+    assert is_instance({"a": "b"}, Dict)
+    assert is_instance({"a": "b"}, dict)
+    assert is_instance(dict(foo=10, bar=20), Dict[str, int])
+    assert not is_instance(dict(foo=10.0, bar=20), Dict[str, int])
 
     # Dict of dataclasses
-    typecheck(Dict[Str, Int], {Str('foo'): Int(10), Str('bar'): Int(20)})
-    with pytest.raises(ValueError):
-        typecheck(Dict[Str, Int], {Str('foo'): Int(10.0), Str('bar'): Int(20)})
+    assert is_instance({Str('foo'): Int(10), Str('bar'): Int(20)}, Dict[Str, Int])
+    assert not is_instance({Str('foo'): Str('wrong-type'), Str('bar'): Int(10)}, Dict[Str, Int])
 
     # Optional
-    typecheck(Optional[int], 10)
-    typecheck(Optional[int], None)
-    with pytest.raises(ValueError):
-        typecheck(Optional[int], 10.0)
+    assert is_instance(None, type(None))
+    assert is_instance(10, Optional[int])
+    assert is_instance(None, Optional[int])
+    assert not is_instance("wrong-type", Optional[int])
 
     # Optional of dataclass
-    typecheck(Optional[Int], Int(10))
-    typecheck(Optional[Int], None)
-    with pytest.raises(ValueError):
-        typecheck(Optional[Int], 10.0)
-        typecheck(Optional[Int], Int(10.0))
+    assert is_instance(Int(10), Optional[Int])
+    assert not is_instance("wrong-type", Optional[Int])
+
+    # Nested containers
+    assert is_instance([({"a": "b"}, 10, [True])], List[Tuple[Dict[str, str], int, List[bool]]])
+    assert not is_instance([({"a": "b"}, 10, ["wrong-type"])], List[Tuple[Dict[str, str], int, List[bool]]])
