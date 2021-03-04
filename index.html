@@ -281,7 +281,7 @@ print(to_json(world))
 .. include:: ../README.md
 
 &#34;&#34;&#34;
-from .core import SerdeError, init, logger, typecheck  # noqa
+from .core import SerdeError, init, logger  # noqa
 from .de import deserialize, from_dict, from_tuple, is_deserializable  # noqa
 from .se import asdict, astuple, is_serializable, serialize, to_dict, to_tuple  # noqa
 
@@ -325,10 +325,6 @@ __all__ = [
 <dt><code class="name"><a title="serde.json" href="json.html">serde.json</a></code></dt>
 <dd>
 <div class="desc"><p>Serialize and Deserialize in JSON format.</p></div>
-</dd>
-<dt><code class="name"><a title="serde.more_types" href="more_types.html">serde.more_types</a></code></dt>
-<dd>
-<div class="desc"><p>Additional type support such as Decimal.</p></div>
 </dd>
 <dt><code class="name"><a title="serde.msgpack" href="msgpack.html">serde.msgpack</a></code></dt>
 <dd>
@@ -458,27 +454,28 @@ RenameAll(int_field=10, str_field='foo')
     RenameAll(int_field=10, str_field=&#39;foo&#39;)
     &#34;&#34;&#34;
 
-    def wrap(cls):
+    def wrap(cls: Type):
         g: Dict[str, Any] = {}
 
-        # Create hidden object used by serde.
-        if not hasattr(cls, HIDDEN_NAME):
-            setattr(cls, HIDDEN_NAME, Hidden())
-
         # Create a scope storage used by serde.
+        # Each class should get own scope. Child classes can not share scope with parent class.
+        # That&#39;s why we need the &#34;scope.cls is not cls&#34; check.
+        scope: SerdeScope = getattr(cls, SERDE_SCOPE, None)
+        if scope is None or scope.cls is not cls:
+            scope = SerdeScope(cls, reuse_instances_default=reuse_instances_default)
+            setattr(cls, SERDE_SCOPE, scope)
 
-        scope = getattr(cls, &#39;__serde_scope__&#39;, None)
-        if scope is None:
-            scope = {}
-            setattr(cls, &#39;__serde_scope__&#39;, scope)
+        # Set some globals for all generated functions
+        g[&#39;cls&#39;] = cls
+        g[&#39;serde_scope&#39;] = scope
+        g[&#39;SerdeError&#39;] = SerdeError
+        g[&#39;raise_unsupported_type&#39;] = raise_unsupported_type
+        g[&#39;typename&#39;] = typename  # used in union functions
 
-        # Set custom deserializer.
-        g[&#39;__custom_deserializer__&#39;] = custom
-
-        # Collect types used in the gernerated code.
+        # Collect types used in the generated code.
         for typ in iter_types(cls):
             if is_dataclass(typ) or is_enum(typ) or not is_primitive(typ):
-                getattr(cls, &#39;__serde_scope__&#39;)[typ.__name__] = typ
+                scope.types[typ.__name__] = typ
 
             # python 3.6 has no fromisoformat functions for date &amp; datetime, so we have to add our own.
             # See Renderer.render for usage
@@ -488,18 +485,23 @@ RenameAll(int_field=10, str_field='foo')
                 elif typ is datetime:
                     g[&#39;__py36_datetime_fromisoformat__&#39;] = py36_datetime_fromisoformat
 
+        # render all union functions
+        for union in iter_unions(cls):
+            union_args = type_args(union)
+            add_func(scope, union_func_name(UNION_DE_PREFIX, union_args), render_union_func(cls, union_args), g)
+
         # Collect default values and default factories used in the generated code.
-        # To avoid name conflicts, name the variables like &#34;__default_&lt;NAME&gt;__&#34;.
-        for f in dataclasses.fields(cls):
+        for f in defields(cls):
             if has_default(f):
-                g[f&#39;__default_{f.name}__&#39;] = f.default
+                scope.defaults[f.name] = f.default
             elif has_default_factory(f):
-                g[f&#39;__default_{f.name}__&#39;] = f.default_factory
+                scope.defaults[f.name] = f.default_factory
 
-        logger.debug(f&#39;{cls.__name__}: __serde_scope__ {scope}&#39;)
+        add_func(scope, FROM_ITER, render_from_iter(cls), g)
+        add_func(scope, FROM_DICT, render_from_dict(cls, rename_all), g)
 
-        cls = de_func(cls, FROM_ITER, render_from_iter(cls, reuse_instances_default, custom), g)
-        cls = de_func(cls, FROM_DICT, render_from_dict(cls, rename_all, reuse_instances_default, custom), g)
+        logger.debug(f&#39;{cls.__name__}: {SERDE_SCOPE} {scope}&#39;)
+
         return cls
 
     if _cls is None:
@@ -635,7 +637,7 @@ True
     &gt;&gt;&gt; is_deserializable(Foo)
     True
     &#34;&#34;&#34;
-    return hasattr(instance_or_class, FROM_ITER) or hasattr(instance_or_class, FROM_DICT)</code></pre>
+    return hasattr(instance_or_class, SERDE_SCOPE)</code></pre>
 </details>
 </dd>
 <dt id="serde.is_serializable"><code class="name flex">
@@ -673,7 +675,7 @@ True
     &gt;&gt;&gt; is_serializable(Foo)
     True
     &#34;&#34;&#34;
-    return hasattr(instance_or_class, TO_ITER) or hasattr(instance_or_class, TO_DICT)</code></pre>
+    return hasattr(instance_or_class, SERDE_SCOPE)</code></pre>
 </details>
 </dd>
 <dt id="serde.serialize"><code class="name flex">
@@ -750,37 +752,50 @@ into an object in various data format such as JSON and MsgPack.</p>
     &#39;{&#34;intField&#34;: 10, &#34;strField&#34;: &#34;foo&#34;}&#39;
     &#34;&#34;&#34;
 
-    @functools.wraps(_cls)
-    def wrap(cls: Type[T]):
-        if not hasattr(cls, HIDDEN_NAME):
-            setattr(cls, HIDDEN_NAME, Hidden())
+    def wrap(cls: Type):
+        g: Dict[str, Any] = {}
 
         # Create a scope storage used by serde.
-        scope = getattr(cls, &#39;__serde_scope__&#39;, None)
-        if scope is None:
-            scope = {}
-            setattr(cls, &#39;__serde_scope__&#39;, scope)
+        # Each class should get own scope. Child classes can not share scope with parent class.
+        # That&#39;s why we need the &#34;scope.cls is not cls&#34; check.
+        scope: SerdeScope = getattr(cls, SERDE_SCOPE, None)
+        if scope is None or scope.cls is not cls:
+            scope = SerdeScope(
+                cls, reuse_instances_default=reuse_instances_default, convert_sets_default=convert_sets_default
+            )
+            setattr(cls, SERDE_SCOPE, scope)
 
-        g: Dict[str, Any] = {}
+        # Set some globals for all generated functions
+        g[&#39;cls&#39;] = cls
+        g[&#39;serde_scope&#39;] = scope
+        g[&#39;SerdeError&#39;] = SerdeError
+        g[&#39;raise_unsupported_type&#39;] = raise_unsupported_type
+        g[&#39;enum_value&#39;] = enum_value
+        g[&#39;is_dataclass&#39;] = is_dataclass
+        g[&#39;typename&#39;] = typename  # used in union functions
+        g[&#39;is_instance&#39;] = is_instance  # used in union functions
+
+        # Collect types used in the generated code.
+        for typ in iter_types(cls):
+            if is_dataclass(typ) or is_enum(typ) or not is_primitive(typ):
+                scope.types[typ.__name__] = typ
+
+        # render all union functions
+        for union in iter_unions(cls):
+            union_args = type_args(union)
+            union_key = union_func_name(UNION_SE_PREFIX, union_args)
+            add_func(scope, union_key, render_union_func(cls, union_args), g)
+            scope.union_se_args[union_key] = union_args
+
         for f in sefields(cls):
             if f.skip_if:
                 g[f.skip_if.name] = f.skip_if
 
-        # Collect types used in the gernerated code.
-        for typ in iter_types(cls):
-            if is_dataclass(typ) or is_enum(typ):
-                getattr(cls, &#39;__serde_scope__&#39;)[typ.__name__] = typ
+        add_func(scope, TO_ITER, render_to_tuple(cls), g)
+        add_func(scope, TO_DICT, render_to_dict(cls, rename_all), g)
 
-        logger.debug(f&#39;{cls.__name__}: __serde_scope__ {scope}&#39;)
+        logger.debug(f&#39;{cls.__name__}: {SERDE_SCOPE} {scope}&#39;)
 
-        g[&#39;is_dataclass&#39;] = is_dataclass
-        g[&#39;__custom_serializer__&#39;] = custom
-        g[&#39;__serde_enum_value__&#39;] = enum_value
-
-        to_tuple_code = render_to_tuple(cls, reuse_instances_default, convert_sets_default, custom)
-        cls = se_func(cls, TO_ITER, to_tuple_code, g)
-        to_dict_code = render_to_dict(cls, rename_all, reuse_instances_default, convert_sets_default, custom)
-        cls = se_func(cls, TO_DICT, to_dict_code, g)
         return cls
 
     if _cls is None:
@@ -950,7 +965,6 @@ into an object in various data format such as JSON and MsgPack.</p>
 <li><code><a title="serde.de" href="de.html">serde.de</a></code></li>
 <li><code><a title="serde.inspect" href="inspect.html">serde.inspect</a></code></li>
 <li><code><a title="serde.json" href="json.html">serde.json</a></code></li>
-<li><code><a title="serde.more_types" href="more_types.html">serde.more_types</a></code></li>
 <li><code><a title="serde.msgpack" href="msgpack.html">serde.msgpack</a></code></li>
 <li><code><a title="serde.py36_datetime_compat" href="py36_datetime_compat.html">serde.py36_datetime_compat</a></code></li>
 <li><code><a title="serde.se" href="se.html">serde.se</a></code></li>

@@ -182,6 +182,33 @@ def iter_types(cls: Type) -&gt; Iterator[Type]:
         yield cls
 
 
+def iter_unions(cls: Type) -&gt; Iterator[Type]:
+    &#34;&#34;&#34;
+    Iterate over all unions that are used in the dataclass
+    &#34;&#34;&#34;
+    if is_union(cls):
+        yield cls
+    if is_dataclass(cls):
+        for f in fields(cls):
+            yield from iter_unions(f.type)
+    elif is_opt(cls):
+        arg = type_args(cls)
+        if arg:
+            yield from iter_unions(arg[0])
+    elif is_list(cls) or is_set(cls):
+        arg = type_args(cls)
+        if arg:
+            yield from iter_unions(arg[0])
+    elif is_tuple(cls):
+        for arg in type_args(cls):
+            yield from iter_unions(arg)
+    elif is_dict(cls):
+        arg = type_args(cls)
+        if arg and len(arg) &gt;= 2:
+            yield from iter_unions(arg[0])
+            yield from iter_unions(arg[1])
+
+
 def is_union(typ) -&gt; bool:
     &#34;&#34;&#34;
     Test if the type is `typing.Union`.
@@ -223,7 +250,7 @@ def is_bare_list(typ) -&gt; bool:
     &gt;&gt;&gt; is_bare_list(List)
     True
     &#34;&#34;&#34;
-    return is_list(typ) and typ in (List, list)
+    return typ in (List, list)
 
 
 def is_tuple(typ) -&gt; bool:
@@ -246,7 +273,7 @@ def is_bare_tuple(typ) -&gt; bool:
     &gt;&gt;&gt; is_bare_tuple(Tuple)
     True
     &#34;&#34;&#34;
-    return is_tuple(typ) and typ in (Tuple, tuple)
+    return typ in (Tuple, tuple)
 
 
 def is_set(typ) -&gt; bool:
@@ -275,7 +302,7 @@ def is_bare_set(typ) -&gt; bool:
     &gt;&gt;&gt; is_bare_set(Set)
     True
     &#34;&#34;&#34;
-    return is_set(typ) and typ in (Set, set)
+    return typ in (Set, set)
 
 
 def is_dict(typ) -&gt; bool:
@@ -304,7 +331,7 @@ def is_bare_dict(typ) -&gt; bool:
     &gt;&gt;&gt; is_bare_dict(Dict)
     True
     &#34;&#34;&#34;
-    return is_dict(typ) and typ in (Dict, dict)
+    return typ in (Dict, dict)
 
 
 def is_none(typ) -&gt; bool:
@@ -381,13 +408,7 @@ def has_default_factory(field) -&gt; bool:
     &gt;&gt;&gt; has_default_factory(fields(C)[1])
     True
     &#34;&#34;&#34;
-    return not isinstance(field.default_factory, dataclasses._MISSING_TYPE)
-
-
-def assert_type(typ: Type, obj, throw=False) -&gt; None:
-    if not isinstance(obj, typ):
-        if throw:
-            raise ValueError(f&#39;{obj} is not instance of {typ}&#39;)</code></pre>
+    return not isinstance(field.default_factory, dataclasses._MISSING_TYPE)</code></pre>
 </details>
 </section>
 <section>

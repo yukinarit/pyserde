@@ -51,7 +51,7 @@ import os
 import sys
 from typing import Type
 
-from .core import HIDDEN_NAME, init
+from .core import SERDE_SCOPE, SerdeScope, init
 
 init(True)
 
@@ -60,8 +60,8 @@ def inspect(cls: Type) -&gt; str:
     &#34;&#34;&#34;
     Inspect a pyserde class.
     &#34;&#34;&#34;
-    hidden = getattr(cls, HIDDEN_NAME, None)
-    return &#39;\n&#39;.join(hidden.code.values())
+    scope: SerdeScope = getattr(cls, SERDE_SCOPE, {})
+    return &#39;\n&#39;.join(scope.code.values())
 
 
 def main(arg):
@@ -75,7 +75,7 @@ def main(arg):
     cls = getattr(pkg, arg.name)
     print(inspect(cls))
     print(&#39;----------------------------------&#39;)
-    print(f&#34;serde_scope: {getattr(cls, &#39;__serde_scope__&#39;)}&#34;)
+    print(f&#34;serde_scope: {getattr(cls, SERDE_SCOPE)}&#34;)
 
 
 parser = argparse.ArgumentParser(description=&#39;pyserde-inspect&#39;)
@@ -109,8 +109,8 @@ if __name__ == &#39;__main__&#39;:
     &#34;&#34;&#34;
     Inspect a pyserde class.
     &#34;&#34;&#34;
-    hidden = getattr(cls, HIDDEN_NAME, None)
-    return &#39;\n&#39;.join(hidden.code.values())</code></pre>
+    scope: SerdeScope = getattr(cls, SERDE_SCOPE, {})
+    return &#39;\n&#39;.join(scope.code.values())</code></pre>
 </details>
 </dd>
 <dt id="serde.inspect.main"><code class="name flex">
@@ -133,7 +133,7 @@ if __name__ == &#39;__main__&#39;:
     cls = getattr(pkg, arg.name)
     print(inspect(cls))
     print(&#39;----------------------------------&#39;)
-    print(f&#34;serde_scope: {getattr(cls, &#39;__serde_scope__&#39;)}&#34;)</code></pre>
+    print(f&#34;serde_scope: {getattr(cls, SERDE_SCOPE)}&#34;)</code></pre>
 </details>
 </dd>
 </dl>
