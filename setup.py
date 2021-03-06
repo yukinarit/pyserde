@@ -44,6 +44,7 @@ setup(
     author_email='yukinarit84@gmail.com',
     url='https://github.com/yukinarit/pyserde',
     packages=find_packages(exclude=['test_serde', 'bench']),
+    package_data={'serde': ['py.typed']},
     python_requires=">=3.6",
     setup_requires=setup_requires,
     install_requires=requires,
