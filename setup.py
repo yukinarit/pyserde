@@ -1,6 +1,5 @@
 import pathlib
 import re
-import sys
 from codecs import open
 from setuptools import setup, find_packages
 
@@ -17,6 +16,7 @@ setup_requires = [
 ]
 
 requires = [
+    'dataclasses;python_version==\'3.6\'',
     'stringcase',
     'typing_inspect>=0.4.0',
     'jinja2',
@@ -24,10 +24,6 @@ requires = [
 msgpack_requires = ['msgpack']
 toml_requires = ['toml']
 yaml_requires = ['pyyaml']
-
-# Installs dataclasses from PyPI for python < 3.7
-if sys.version_info < (3, 7):
-    requires.append('dataclasses')
 
 tests_require = [
     'coverage',
