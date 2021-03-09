@@ -9,6 +9,7 @@ import rename
 import skip
 import tomlfile
 import yamlfile
+import union
 
 
 def run_all():
@@ -21,6 +22,7 @@ def run_all():
     run(jsonfile)
     run(tomlfile)
     run(yamlfile)
+    run(union)
 
 
 def run(module):
