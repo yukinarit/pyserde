@@ -20,7 +20,7 @@ class Foo:
 
 
 def main():
-    print(to_json(Foo(class_name='Foge')))
+    print(to_json(Foo(class_name='Foo')))
 
 
 if __name__ == '__main__':

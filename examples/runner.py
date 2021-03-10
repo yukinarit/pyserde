@@ -5,6 +5,7 @@ import default
 import env
 import jsonfile
 import rename
+import rename_all
 import simple
 import skip
 import tomlfile
@@ -17,9 +18,10 @@ def run_all():
     run(collection)
     run(default)
     run(env)
-    run(rename)
-    run(skip)
     run(jsonfile)
+    run(rename)
+    run(rename_all)
+    run(skip)
     run(tomlfile)
     run(yamlfile)
     run(union)
