@@ -234,6 +234,14 @@ class Field:
         """
         return f'{field.name}_{name}'
 
+    @property
+    def conv_name(self) -> str:
+        """
+        Get an actual field name which `rename` and `rename_all` conversions
+        are made. Use `name` property to get a field name before conversion.
+        """
+        return conv(self, self.case)
+
 
 def fields(FieldCls: Type, cls: Type) -> Iterator[Field]:
     return iter(FieldCls.from_dataclass(f) for f in dataclasses.fields(cls))
@@ -245,12 +253,10 @@ def conv(f: Field, case: Optional[str] = None) -> str:
     """
     name = f.name
     if case:
-        casef = getattr(stringcase, case or '', None)
+        casef = getattr(stringcase, case, None)
         if not casef:
-            raise SerdeError(
-                (f"Unkown case type: {f.case}." f"Pass the name of case supported by 'stringcase' package.")
-            )
-        name = casef(f.name)
+            raise SerdeError(f"Unkown case type: {f.case}. Pass the name of case supported by 'stringcase' package.")
+        name = casef(name)
     if f.rename:
         name = f.rename
     if name is None:
