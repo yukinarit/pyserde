@@ -9,6 +9,7 @@ all: setup pep8 mypy docs test examples
 setup:
 	$(PIPENV) install --dev --skip-lock
 	$(PIPENV) run pip list
+	$(PIPENV) run pre-commit install
 	pushd examples && $(PIPENV) install --dev && popd
 
 setup-bench:
@@ -34,8 +35,7 @@ mypy:
 	$(PIPENV) run mypy serde
 
 fmt:
-	$(PIPENV) run black serde tests examples bench/bench.py
-	$(PIPENV) run isort -rc --atomic serde tests bench/bench.py
+	$(PIPENV) run pre-commit run -a
 
 docs:
 	mkdir -p docs
