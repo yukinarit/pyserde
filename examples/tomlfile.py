@@ -7,8 +7,9 @@ Usage:
     $ pipenv install
     $ pipenv run tomlfile.py
 """
-from typing import List, Dict, Optional, Union
 from dataclasses import dataclass
+from typing import Dict, List, Optional, Union
+
 from serde import deserialize
 from serde.toml import from_toml
 

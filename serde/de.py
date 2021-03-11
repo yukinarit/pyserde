@@ -24,11 +24,42 @@ from uuid import UUID
 
 import jinja2
 
-from .compat import (has_default, has_default_factory, is_bare_dict, is_bare_list, is_bare_set, is_bare_tuple, is_dict,
-                     is_enum, is_list, is_none, is_opt, is_primitive, is_set, is_tuple, is_union, iter_types,
-                     iter_unions, type_args, typename)
-from .core import (FROM_DICT, FROM_ITER, SERDE_SCOPE, UNION_DE_PREFIX, Field, SerdeError, SerdeScope, add_func, conv,
-                   fields, logger, raise_unsupported_type, union_func_name)
+from .compat import (
+    has_default,
+    has_default_factory,
+    is_bare_dict,
+    is_bare_list,
+    is_bare_set,
+    is_bare_tuple,
+    is_dict,
+    is_enum,
+    is_list,
+    is_none,
+    is_opt,
+    is_primitive,
+    is_set,
+    is_tuple,
+    is_union,
+    iter_types,
+    iter_unions,
+    type_args,
+    typename,
+)
+from .core import (
+    FROM_DICT,
+    FROM_ITER,
+    SERDE_SCOPE,
+    UNION_DE_PREFIX,
+    Field,
+    SerdeError,
+    SerdeScope,
+    add_func,
+    conv,
+    fields,
+    logger,
+    raise_unsupported_type,
+    union_func_name,
+)
 from .py36_datetime_compat import py36_date_fromisoformat, py36_datetime_fromisoformat
 
 __all__: List = ['deserialize', 'is_deserializable', 'Deserializer', 'from_dict', 'from_tuple']
@@ -545,7 +576,7 @@ def render_from_iter(cls: Type) -> str:
 def {{func}}(data, reuse_instances = {{serde_scope.reuse_instances_default}}):
   if reuse_instances is Ellipsis:
     reuse_instances = {{serde_scope.reuse_instances_default}}
-    
+
   {# List up all classes used by this class. -#}
   {% for name in serde_scope.types.keys() -%}
   {{name}} = serde_scope.types['{{name}}']
@@ -573,7 +604,7 @@ def render_from_dict(cls: Type, rename_all: Optional[str] = None) -> str:
 def {{func}}(data, reuse_instances = {{serde_scope.reuse_instances_default}}):
   if reuse_instances is Ellipsis:
     reuse_instances = {{serde_scope.reuse_instances_default}}
-    
+
   {# List up all classes used by this class. #}
   {% for name in serde_scope.types.keys() %}
   {{name}} = serde_scope.types['{{name}}']
@@ -605,7 +636,7 @@ def {{func}}(data, reuse_instances):
 
   # create fake dict so we can reuse the normal render function
   fake_dict = {"fake_key":data}
-  
+
   error = "Exhausted all types"
   {% for t in union_args %}
   {% if t | is_primitive or t | is_none %}

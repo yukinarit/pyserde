@@ -16,10 +16,42 @@ from uuid import UUID
 
 import jinja2
 
-from .compat import (T, is_bare_dict, is_bare_list, is_bare_set, is_bare_tuple, is_dict, is_enum, is_list, is_none,
-                     is_opt, is_primitive, is_set, is_tuple, is_union, iter_types, iter_unions, type_args, typename)
-from .core import (SERDE_SCOPE, TO_DICT, TO_ITER, UNION_SE_PREFIX, Field, SerdeError, SerdeScope, add_func, conv,
-                   fields, is_instance, logger, raise_unsupported_type, union_func_name)
+from .compat import (
+    T,
+    is_bare_dict,
+    is_bare_list,
+    is_bare_set,
+    is_bare_tuple,
+    is_dict,
+    is_enum,
+    is_list,
+    is_none,
+    is_opt,
+    is_primitive,
+    is_set,
+    is_tuple,
+    is_union,
+    iter_types,
+    iter_unions,
+    type_args,
+    typename,
+)
+from .core import (
+    SERDE_SCOPE,
+    TO_DICT,
+    TO_ITER,
+    UNION_SE_PREFIX,
+    Field,
+    SerdeError,
+    SerdeScope,
+    add_func,
+    conv,
+    fields,
+    is_instance,
+    logger,
+    raise_unsupported_type,
+    union_func_name,
+)
 
 __all__: List = ['serialize', 'is_serializable', 'Serializer', 'to_tuple', 'to_dict']
 
@@ -339,9 +371,9 @@ def {{func}}(obj, reuse_instances):
   {% for name in serde_scope.types.keys() %}
   {{name}} = serde_scope.types['{{name}}']
   {% endfor %}
-  
+
   union_args = serde_scope.union_se_args['{{func}}']
-  
+
   {% for t in union_args %}
   if is_instance(obj, union_args[{{loop.index0}}]):
     return {{t|arg|rvalue()}}

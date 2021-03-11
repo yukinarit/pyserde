@@ -2,8 +2,18 @@ import sys
 from dataclasses import dataclass
 from typing import Dict, List, Optional, Set, Tuple, Union
 
-from serde.compat import (is_dict, is_list, is_opt, is_set, is_tuple, is_union, iter_types, iter_unions, type_args,
-                          union_args)
+from serde.compat import (
+    is_dict,
+    is_list,
+    is_opt,
+    is_set,
+    is_tuple,
+    is_union,
+    iter_types,
+    iter_unions,
+    type_args,
+    union_args,
+)
 from serde.core import is_instance
 
 from .data import Bool, Float, Int, Pri, PriOpt, Str

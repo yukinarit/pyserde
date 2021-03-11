@@ -7,10 +7,11 @@ Usage:
     $ pipenv install
     $ pipenv run jsonfile.py
 """
+from dataclasses import dataclass
+from typing import List, Optional
+
 import requests
 
-from typing import List, Optional
-from dataclasses import dataclass
 from serde import deserialize
 from serde.json import from_json
 
