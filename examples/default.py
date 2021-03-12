@@ -1,7 +1,8 @@
 from dataclasses import dataclass, field
+from typing import Dict
+
 from serde import deserialize, serialize
 from serde.json import from_json, to_json
-from typing import Dict
 
 
 @deserialize

@@ -6,8 +6,22 @@ from serde.json import to_json
 from serde.msgpack import to_msgpack
 
 from . import data
-from .data import (Bool, Float, Int, NestedInt, NestedPri, NestedPriDict, NestedPriList, NestedPriTuple, Pri, PriDict,
-                   PriList, PriOpt, PriTuple, Str)
+from .data import (
+    Bool,
+    Float,
+    Int,
+    NestedInt,
+    NestedPri,
+    NestedPriDict,
+    NestedPriList,
+    NestedPriTuple,
+    Pri,
+    PriDict,
+    PriList,
+    PriOpt,
+    PriTuple,
+    Str,
+)
 
 
 def test_asdict():

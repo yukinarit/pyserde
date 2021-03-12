@@ -1,7 +1,9 @@
 from dataclasses import dataclass
-from flask import Flask, request, Response
-from serde import serialize, deserialize
-from serde.json import to_json, from_json
+
+from flask import Flask, Response, request
+
+from serde import deserialize, serialize
+from serde.json import from_json, to_json
 
 
 @deserialize

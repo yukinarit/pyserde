@@ -1,9 +1,10 @@
 import enum
 from dataclasses import dataclass
-from serde import serialize, deserialize
-from serde.json import to_json, from_json
 
 import imported
+
+from serde import deserialize, serialize
+from serde.json import from_json, to_json
 
 
 class Nested(enum.Enum):

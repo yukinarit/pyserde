@@ -1,8 +1,9 @@
 import sys
 from dataclasses import dataclass
+from typing import Dict, List, Tuple
+
 from serde import deserialize, serialize
 from serde.json import from_json, to_json
-from typing import List, Tuple, Dict
 
 PY39 = sys.version_info[:3] >= (3, 9, 0)
 

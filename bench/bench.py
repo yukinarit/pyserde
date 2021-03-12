@@ -10,7 +10,6 @@ from platform import python_implementation
 from typing import Any, Callable, Dict, List, Tuple, Union
 
 import click
-
 import data
 import dataclasses_class as dc
 import pyserde_class as ps  # noqa: F401
@@ -19,14 +18,14 @@ from runner import Size
 
 try:
     if python_implementation() != 'PyPy':
-        import dacite_class as da  # noqa: F401
-        import mashumaro_class as mc  # noqa: F401
-        import marshmallow_class as ms  # noqa: F401
         import attrs_class as at  # noqa: F401
         import cattrs_class as ca  # noqa: F401
-        import seaborn as sns
+        import dacite_class as da  # noqa: F401
+        import marshmallow_class as ms  # noqa: F401
+        import mashumaro_class as mc  # noqa: F401
         import matplotlib.pyplot as plt
         import numpy as np
+        import seaborn as sns
 except ImportError:
     pass
 

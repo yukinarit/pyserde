@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+
 from serde import deserialize, serialize
 from serde.json import from_json, to_json
 

@@ -268,8 +268,9 @@ def test_dict(se, de, opt):
 @pytest.mark.parametrize('opt', opt_case, ids=opt_case_ids())
 @pytest.mark.parametrize('se,de', all_formats)
 def test_enum(se, de, opt):
-    from .data import E, IE
     from serde.compat import is_enum
+
+    from .data import IE, E
 
     class Inner(enum.IntEnum):
         V0 = enum.auto()

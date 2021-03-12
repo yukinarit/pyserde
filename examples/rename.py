@@ -7,6 +7,7 @@ Usage:
     $ pipenv run rename.py
 """
 from dataclasses import dataclass, field
+
 from serde import serialize
 from serde.json import to_json
 

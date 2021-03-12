@@ -36,6 +36,35 @@ jobs:
         pytest tests --doctest-modules serde -v
         cd examples && python runner.py
 
+  check_formatting:
+    name: Check formatting
+    needs: test
+    runs-on: ubuntu-20.04
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+    - name: Set up Python 3.7
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.7
+    - name: Restore pip cache
+      uses: actions/cache@v2
+      with:
+        path: ${{ env.pythonLocation }}
+        key: ubuntu-20.04-${{ env.pythonLocation }}-${{ hashFiles('**/.pre-commit-config.yaml', '**/pyproject.toml') }}
+    - name: Install dependencies
+      run: |
+        pip install pre-commit
+        pre-commit install
+    - name: Check formatting
+      run: pre-commit run -a
+    - name: Comment PR
+      if: ${{ failure() && github.event_name == 'pull_request' }}
+      uses: thollander/actions-comment-pull-request@master
+      with:
+        message: 'Please consider formatting your code according to the standards described here: https://github.com/yukinarit/pyserde/blob/master/CONTRIBUTING.md'
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
   check_coverage:
     name: Check coverage
     needs: test

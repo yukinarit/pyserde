@@ -20,4 +20,3 @@ pipenv run python app.py
     $ curl -X POST http://localhost:5000/todos -d '{"id": 1, "title": "Play games", "description": "Play 聖剣伝説3", "done": false}'
     A new ToDo ToDo(id=1, title='Play games', description='Play 聖剣伝説3', done=False) successfully created.⏎
     ```
-
