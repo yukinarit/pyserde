@@ -277,3 +277,14 @@ def test_union_in_other_type():
     a_int = A({"key": 1})
     assert a_int == from_dict(A, to_dict(a_int, reuse_instances=False), reuse_instances=False)
     assert a_int == from_dict(A, to_dict(a_int, reuse_instances=True), reuse_instances=True)
+
+
+def test_union_rename_all():
+    @deserialize(rename_all='pascalcase')
+    @serialize(rename_all='pascalcase')
+    @dataclass
+    class Foo:
+        bar_baz: Union[int, str]
+
+    assert to_dict(Foo(10)) == {'BarBaz': 10}
+    assert from_dict(Foo, {'BarBaz': 'foo'}) == Foo('foo')

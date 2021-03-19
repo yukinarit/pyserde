@@ -54,7 +54,6 @@ from .core import (
     SerdeError,
     SerdeScope,
     add_func,
-    conv,
     fields,
     logger,
     raise_unsupported_type,
@@ -290,12 +289,19 @@ class DeField(Field):
         Access inner `Field` e.g. T of List[T].
         """
         typ = type_args(self.type)[n]
+        opts = {
+            'case': self.case,
+            'rename': self.rename,
+            'skip': self.skip,
+            'skip_if': self.skip_if,
+            'skip_if_false': self.skip_if_false,
+        }
         if is_list(self.type) or is_dict(self.type) or is_set(self.type):
-            return InnerField(typ, 'v', datavar='v')
+            return InnerField(typ, 'v', datavar='v', **opts)
         elif is_tuple(self.type):
-            return InnerField(typ, f'{self.data}[{n}]', datavar=f'{self.data}[{n}]')
+            return InnerField(typ, f'{self.data}[{n}]', datavar=f'{self.data}[{n}]', **opts)
         else:
-            return DeField(typ, self.name, datavar=self.datavar, index=self.index, iterbased=self.iterbased)
+            return DeField(typ, self.name, datavar=self.datavar, index=self.index, iterbased=self.iterbased, **opts)
 
     def key_field(self) -> 'DeField':
         """
@@ -317,7 +323,7 @@ class DeField(Field):
         if self.iterbased:
             return f'{self.datavar}[{self.index}]'
         else:
-            return f'{self.datavar}["{conv(self, self.case)}"]'
+            return f'{self.datavar}["{self.conv_name}"]'
 
     @data.setter
     def data(self, d):
@@ -408,7 +414,7 @@ class Renderer:
             if arg.iterbased:
                 exists = f'{arg.data} is not None'
             else:
-                exists = f'{arg.datavar}.get("{arg.name}") is not None'
+                exists = f'{arg.datavar}.get("{arg.conv_name}") is not None'
             if has_default(arg):
                 res = f'({res}) if {exists} else serde_scope.defaults["{arg.name}"]'
             elif has_default_factory(arg):
@@ -447,7 +453,7 @@ class Renderer:
             if arg.iterbased:
                 exists = f'{arg.data} is not None'
             else:
-                exists = f'{arg.datavar}.get("{arg.name}") is not None'
+                exists = f'{arg.datavar}.get("{arg.conv_name}") is not None'
             return f'({self.render(value)}) if {exists} else None'
 
     def list(self, arg: DeField) -> str:
