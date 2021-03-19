@@ -91,7 +91,6 @@ from .core import (
     SerdeError,
     SerdeScope,
     add_func,
-    conv,
     fields,
     logger,
     raise_unsupported_type,
@@ -327,12 +326,19 @@ class DeField(Field):
         Access inner `Field` e.g. T of List[T].
         &#34;&#34;&#34;
         typ = type_args(self.type)[n]
+        opts = {
+            &#39;case&#39;: self.case,
+            &#39;rename&#39;: self.rename,
+            &#39;skip&#39;: self.skip,
+            &#39;skip_if&#39;: self.skip_if,
+            &#39;skip_if_false&#39;: self.skip_if_false,
+        }
         if is_list(self.type) or is_dict(self.type) or is_set(self.type):
-            return InnerField(typ, &#39;v&#39;, datavar=&#39;v&#39;)
+            return InnerField(typ, &#39;v&#39;, datavar=&#39;v&#39;, **opts)
         elif is_tuple(self.type):
-            return InnerField(typ, f&#39;{self.data}[{n}]&#39;, datavar=f&#39;{self.data}[{n}]&#39;)
+            return InnerField(typ, f&#39;{self.data}[{n}]&#39;, datavar=f&#39;{self.data}[{n}]&#39;, **opts)
         else:
-            return DeField(typ, self.name, datavar=self.datavar, index=self.index, iterbased=self.iterbased)
+            return DeField(typ, self.name, datavar=self.datavar, index=self.index, iterbased=self.iterbased, **opts)
 
     def key_field(self) -&gt; &#39;DeField&#39;:
         &#34;&#34;&#34;
@@ -354,7 +360,7 @@ class DeField(Field):
         if self.iterbased:
             return f&#39;{self.datavar}[{self.index}]&#39;
         else:
-            return f&#39;{self.datavar}[&#34;{conv(self, self.case)}&#34;]&#39;
+            return f&#39;{self.datavar}[&#34;{self.conv_name}&#34;]&#39;
 
     @data.setter
     def data(self, d):
@@ -445,7 +451,7 @@ class Renderer:
             if arg.iterbased:
                 exists = f&#39;{arg.data} is not None&#39;
             else:
-                exists = f&#39;{arg.datavar}.get(&#34;{arg.name}&#34;) is not None&#39;
+                exists = f&#39;{arg.datavar}.get(&#34;{arg.conv_name}&#34;) is not None&#39;
             if has_default(arg):
                 res = f&#39;({res}) if {exists} else serde_scope.defaults[&#34;{arg.name}&#34;]&#39;
             elif has_default_factory(arg):
@@ -484,7 +490,7 @@ class Renderer:
             if arg.iterbased:
                 exists = f&#39;{arg.data} is not None&#39;
             else:
-                exists = f&#39;{arg.datavar}.get(&#34;{arg.name}&#34;) is not None&#39;
+                exists = f&#39;{arg.datavar}.get(&#34;{arg.conv_name}&#34;) is not None&#39;
             return f&#39;({self.render(value)}) if {exists} else None&#39;
 
     def list(self, arg: DeField) -&gt; str:
