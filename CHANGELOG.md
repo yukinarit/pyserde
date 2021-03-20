@@ -1,3 +1,9 @@
+## 0.3.1 (2021-03-21)
+
+* fix: Add type annotation to serde decorators ([f885a27](https://github.com/yukinarit/pyserde/commit/f885a27))
+
+You can get the code completion from the class with `serialize` and `deserialize` decorators. I would recommend everyone to upgrade to v0.3.1.
+
 ## 0.3.0 (2021-03-20)
 
 * feat: Support PEP585 type hint annotation ([81d3f4f](https://github.com/yukinarit/pyserde/commit/81d3f4f))
