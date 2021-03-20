@@ -15,8 +15,8 @@ class Foo:
 
 
 def main():
-    h = Foo(i=10, s='foo', f=100.0, b=True)
-    print(f"Into Json: {to_json(h)}")
+    f = Foo(i=10, s='foo', f=100.0, b=True)
+    print(f"Into Json: {to_json(f)}")
 
     s = '{"i": 10, "s": "foo", "f": 100.0, "b": true}'
     print(f"From Json: {from_json(Foo, s)}")
