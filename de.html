@@ -62,6 +62,7 @@ from uuid import UUID
 import jinja2
 
 from .compat import (
+    T,
     has_default,
     has_default_factory,
     is_bare_dict,
@@ -103,7 +104,9 @@ __all__: List = [&#39;deserialize&#39;, &#39;is_deserializable&#39;, &#39;Deseri
 Custom = Optional[Callable[[&#39;DeField&#39;, Any], Any]]
 
 
-def deserialize(_cls=None, rename_all: Optional[str] = None, reuse_instances_default: bool = True):
+def deserialize(
+    _cls: Type[T] = None, rename_all: Optional[str] = None, reuse_instances_default: bool = True
+) -&gt; Type[T]:
     &#34;&#34;&#34;
     `deserialize` decorator. A dataclass with this decorator can be deserialized
     into an object from various data format such as JSON and MsgPack.
@@ -187,7 +190,7 @@ def deserialize(_cls=None, rename_all: Optional[str] = None, reuse_instances_def
         return cls
 
     if _cls is None:
-        return wrap
+        return wrap  # type: ignore
 
     return wrap(_cls)
 
@@ -722,7 +725,7 @@ def {{func}}(data, reuse_instances):
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
 <dt id="serde.de.deserialize"><code class="name flex">
-<span>def <span class="ident">deserialize</span></span>(<span>rename_all: Union[str, NoneType] = None, reuse_instances_default: bool = True)</span>
+<span>def <span class="ident">deserialize</span></span>(<span>rename_all: Union[str, NoneType] = None, reuse_instances_default: bool = True) ‑> Type[~T]</span>
 </code></dt>
 <dd>
 <div class="desc"><p><code><a title="serde.de.deserialize" href="#serde.de.deserialize">deserialize()</a></code> decorator. A dataclass with this decorator can be deserialized
@@ -757,7 +760,9 @@ RenameAll(int_field=10, str_field='foo')
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def deserialize(_cls=None, rename_all: Optional[str] = None, reuse_instances_default: bool = True):
+<pre><code class="python">def deserialize(
+    _cls: Type[T] = None, rename_all: Optional[str] = None, reuse_instances_default: bool = True
+) -&gt; Type[T]:
     &#34;&#34;&#34;
     `deserialize` decorator. A dataclass with this decorator can be deserialized
     into an object from various data format such as JSON and MsgPack.
@@ -841,7 +846,7 @@ RenameAll(int_field=10, str_field='foo')
         return cls
 
     if _cls is None:
-        return wrap
+        return wrap  # type: ignore
 
     return wrap(_cls)</code></pre>
 </details>

@@ -100,11 +100,11 @@ class Serializer(metaclass=abc.ABCMeta):
 
 
 def serialize(
-    _cls=None,
+    _cls: Type[T] = None,
     rename_all: Optional[str] = None,
     reuse_instances_default: bool = True,
     convert_sets_default: bool = False,
-):
+) -&gt; Type[T]:
     &#34;&#34;&#34;
     `serialize` decorator. A dataclass with this decorator can be serialized
     into an object in various data format such as JSON and MsgPack.
@@ -184,7 +184,7 @@ def serialize(
         return cls
 
     if _cls is None:
-        return wrap
+        return wrap  # type: ignore
 
     return wrap(_cls)
 
@@ -643,7 +643,7 @@ True
 </details>
 </dd>
 <dt id="serde.se.serialize"><code class="name flex">
-<span>def <span class="ident">serialize</span></span>(<span>rename_all: Union[str, NoneType] = None, reuse_instances_default: bool = True, convert_sets_default: bool = False)</span>
+<span>def <span class="ident">serialize</span></span>(<span>rename_all: Union[str, NoneType] = None, reuse_instances_default: bool = True, convert_sets_default: bool = False) ‑> Type[~T]</span>
 </code></dt>
 <dd>
 <div class="desc"><p><code><a title="serde.se.serialize" href="#serde.se.serialize">serialize()</a></code> decorator. A dataclass with this decorator can be serialized
@@ -679,11 +679,11 @@ into an object in various data format such as JSON and MsgPack.</p>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def serialize(
-    _cls=None,
+    _cls: Type[T] = None,
     rename_all: Optional[str] = None,
     reuse_instances_default: bool = True,
     convert_sets_default: bool = False,
-):
+) -&gt; Type[T]:
     &#34;&#34;&#34;
     `serialize` decorator. A dataclass with this decorator can be serialized
     into an object in various data format such as JSON and MsgPack.
@@ -763,7 +763,7 @@ into an object in various data format such as JSON and MsgPack.</p>
         return cls
 
     if _cls is None:
-        return wrap
+        return wrap  # type: ignore
 
     return wrap(_cls)</code></pre>
 </details>
