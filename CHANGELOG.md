@@ -1,4 +1,4 @@
-## 0.3.0 (2020-03-08)
+## 0.3.0 (2021-03-20)
 
 * feat: Support PEP585 type hint annotation ([81d3f4f](https://github.com/yukinarit/pyserde/commit/81d3f4f))
     ```python
@@ -38,7 +38,7 @@
 
 This release had contibutions from 2 people: [@ydylla](https://github.com/ydylla), [@alexmisk](https://github.com/alexmisk). Thank you so much! :tada: :joy:
 
-## 0.2.2 (2020-01-19)
+## 0.2.2 (2021-01-19)
 
 * Support inference of types on deserialization ([8c4efb2](https://github.com/yukinarit/pyserde/commit/8c4efb2))
 * Fix pytest error ([09ee66a](https://github.com/yukinarit/pyserde/commit/09ee66a))
