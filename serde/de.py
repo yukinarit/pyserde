@@ -25,6 +25,7 @@ from uuid import UUID
 import jinja2
 
 from .compat import (
+    T,
     has_default,
     has_default_factory,
     is_bare_dict,
@@ -66,7 +67,9 @@ __all__: List = ['deserialize', 'is_deserializable', 'Deserializer', 'from_dict'
 Custom = Optional[Callable[['DeField', Any], Any]]
 
 
-def deserialize(_cls=None, rename_all: Optional[str] = None, reuse_instances_default: bool = True):
+def deserialize(
+    _cls: Type[T] = None, rename_all: Optional[str] = None, reuse_instances_default: bool = True
+) -> Type[T]:
     """
     `deserialize` decorator. A dataclass with this decorator can be deserialized
     into an object from various data format such as JSON and MsgPack.
@@ -150,7 +153,7 @@ def deserialize(_cls=None, rename_all: Optional[str] = None, reuse_instances_def
         return cls
 
     if _cls is None:
-        return wrap
+        return wrap  # type: ignore
 
     return wrap(_cls)
 

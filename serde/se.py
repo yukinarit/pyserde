@@ -71,11 +71,11 @@ class Serializer(metaclass=abc.ABCMeta):
 
 
 def serialize(
-    _cls=None,
+    _cls: Type[T] = None,
     rename_all: Optional[str] = None,
     reuse_instances_default: bool = True,
     convert_sets_default: bool = False,
-):
+) -> Type[T]:
     """
     `serialize` decorator. A dataclass with this decorator can be serialized
     into an object in various data format such as JSON and MsgPack.
@@ -155,7 +155,7 @@ def serialize(
         return cls
 
     if _cls is None:
-        return wrap
+        return wrap  # type: ignore
 
     return wrap(_cls)
 
