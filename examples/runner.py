@@ -4,6 +4,7 @@ import collection
 import default
 import env
 import jsonfile
+import newtype
 import rename
 import rename_all
 import simple
@@ -15,6 +16,7 @@ import yamlfile
 
 def run_all():
     run(simple)
+    run(newtype)
     run(collection)
     run(default)
     run(env)
