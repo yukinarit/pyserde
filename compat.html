@@ -365,8 +365,6 @@ def is_primitive(typ) -&gt; bool:
 
     &gt;&gt;&gt; is_primitive(int)
     True
-    &gt;&gt;&gt; is_primitive(float)
-    True
     &gt;&gt;&gt; class CustomInt(int):
     ...     pass
     &gt;&gt;&gt; is_primitive(CustomInt)
@@ -375,7 +373,11 @@ def is_primitive(typ) -&gt; bool:
     try:
         return any(issubclass(typ, ty) for ty in PRIMITIVES)
     except TypeError:
-        return any(isinstance(typ, ty) for ty in PRIMITIVES)
+        inner = getattr(typ, &#39;__supertype__&#39;, None)
+        if inner:
+            return is_primitive(inner)
+        else:
+            return any(isinstance(typ, ty) for ty in PRIMITIVES)
 
 
 def has_default(field) -&gt; bool:
