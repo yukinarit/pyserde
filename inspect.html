@@ -56,12 +56,12 @@ from .core import SERDE_SCOPE, SerdeScope, init
 init(True)
 
 
-def inspect(cls: Type) -&gt; str:
+def inspect(cls: Type) -&gt; None:
     &#34;&#34;&#34;
     Inspect a pyserde class.
     &#34;&#34;&#34;
     scope: SerdeScope = getattr(cls, SERDE_SCOPE, {})
-    return &#39;\n&#39;.join(scope.code.values())
+    print(scope)
 
 
 def main(arg):
@@ -69,13 +69,11 @@ def main(arg):
         logging.basicConfig(level=logging.DEBUG)
     dir = os.path.dirname(arg.path)
     mod = os.path.basename(arg.path)[:-3]
-    print(f&#39;Loading {mod}.{arg.name} from {dir}.&#39;)
+    print(f&#39;Loading {mod}.{arg.name} from {dir}/{mod}.py&#39;)
     sys.path.append(dir)
     pkg = importlib.import_module(mod)
     cls = getattr(pkg, arg.name)
-    print(inspect(cls))
-    print(&#39;----------------------------------&#39;)
-    print(f&#34;serde_scope: {getattr(cls, SERDE_SCOPE)}&#34;)
+    inspect(cls)
 
 
 parser = argparse.ArgumentParser(description=&#39;pyserde-inspect&#39;)
@@ -97,7 +95,7 @@ if __name__ == &#39;__main__&#39;:
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
 <dt id="serde.inspect.inspect"><code class="name flex">
-<span>def <span class="ident">inspect</span></span>(<span>cls: Type) ‑> str</span>
+<span>def <span class="ident">inspect</span></span>(<span>cls: Type) ‑> NoneType</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Inspect a pyserde class.</p></div>
@@ -105,12 +103,12 @@ if __name__ == &#39;__main__&#39;:
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def inspect(cls: Type) -&gt; str:
+<pre><code class="python">def inspect(cls: Type) -&gt; None:
     &#34;&#34;&#34;
     Inspect a pyserde class.
     &#34;&#34;&#34;
     scope: SerdeScope = getattr(cls, SERDE_SCOPE, {})
-    return &#39;\n&#39;.join(scope.code.values())</code></pre>
+    print(scope)</code></pre>
 </details>
 </dd>
 <dt id="serde.inspect.main"><code class="name flex">
@@ -127,13 +125,11 @@ if __name__ == &#39;__main__&#39;:
         logging.basicConfig(level=logging.DEBUG)
     dir = os.path.dirname(arg.path)
     mod = os.path.basename(arg.path)[:-3]
-    print(f&#39;Loading {mod}.{arg.name} from {dir}.&#39;)
+    print(f&#39;Loading {mod}.{arg.name} from {dir}/{mod}.py&#39;)
     sys.path.append(dir)
     pkg = importlib.import_module(mod)
     cls = getattr(pkg, arg.name)
-    print(inspect(cls))
-    print(&#39;----------------------------------&#39;)
-    print(f&#34;serde_scope: {getattr(cls, SERDE_SCOPE)}&#34;)</code></pre>
+    inspect(cls)</code></pre>
 </details>
 </dd>
 </dl>
