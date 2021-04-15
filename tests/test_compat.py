@@ -1,11 +1,12 @@
 import sys
 from dataclasses import dataclass
-from typing import Dict, List, Optional, Set, Tuple, Union
+from typing import Dict, List, NewType, Optional, Set, Tuple, Union
 
 from serde.compat import (
     is_dict,
     is_list,
     is_opt,
+    is_primitive,
     is_set,
     is_tuple,
     is_union,
@@ -40,6 +41,9 @@ def test_types():
     assert is_set(set)
     assert is_tuple(tuple)
     assert is_dict(dict)
+
+    assert is_primitive(int)
+    assert is_primitive(NewType('Int', int))
 
     if sys.version_info[:3] >= (3, 9, 0):
         assert is_list(list[int])

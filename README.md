@@ -146,6 +146,7 @@ That's it! pyserde offers many more features. If you're interested, please read 
 * Containers (List, Set, Tuple, Dict)
 * [`Optional`](https://docs.python.org/3/library/typing.html#typing.Optional)
 * User defined class with [`@dataclass`](https://docs.python.org/3/library/dataclasses.html)
+* [`typing.NewType`](https://docs.python.org/3/library/typing.html#newtype) for primitive types
 * [Enum](https://docs.python.org/3/library/enum.html#enum.Enum) and [IntEnum](https://docs.python.org/3/library/enum.html#enum.IntEnum)
 * More types
     * [`pathlib.Path`](https://docs.python.org/3/library/pathlib.html)
