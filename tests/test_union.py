@@ -211,24 +211,26 @@ def test_union_exception_if_nothing_matches():
 
     with pytest.raises(SerdeError) as ex1:
         from_dict(A, {"v": "not-ip-or-uuid"})
-    assert (
-        str(ex1.value)
-        == "Can not deserialize 'not-ip-or-uuid' of type str into Union[IPv4Address, UUID]. Reason: badly formed hexadecimal UUID string"
+    assert str(ex1.value) == (
+        "Can not deserialize 'not-ip-or-uuid' of type str into Union[IPv4Address, UUID].\n"
+        "Reasons:\n"
+        " Failed to deserialize into IPv4Address: Expected 4 octets in 'not-ip-or-uuid'\n"
+        " Failed to deserialize into UUID: badly formed hexadecimal UUID string"
     )
 
     with pytest.raises(SerdeError) as ex2:
         from_dict(A, {"v": "not-ip-or-uuid"}, reuse_instances=True)
-    assert (
-        str(ex2.value)
-        == "Can not deserialize 'not-ip-or-uuid' of type str into Union[IPv4Address, UUID]. Reason: badly formed hexadecimal UUID string"
+    assert str(ex2.value) == (
+        "Can not deserialize 'not-ip-or-uuid' of type str into Union[IPv4Address, UUID].\n"
+        "Reasons:\n"
+        " Failed to deserialize into IPv4Address: Expected 4 octets in 'not-ip-or-uuid'\n"
+        " Failed to deserialize into UUID: badly formed hexadecimal UUID string"
     )
 
     with pytest.raises(SerdeError) as ex3:
         from_dict(A, {"v": None})
     # omit reason because it is not the same for all python versions & operating systems
-    assert str(ex3.value).startswith(
-        "Can not deserialize None of type NoneType into Union[IPv4Address, UUID]. Reason: "
-    )
+    assert str(ex3.value).startswith("Can not deserialize None of type NoneType into Union[IPv4Address, UUID].")
 
     with pytest.raises(SerdeError) as ex4:
         to_dict(A("not-ip-or-uuid"))
