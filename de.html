@@ -683,21 +683,21 @@ def {{func}}(data, reuse_instances):
   # create fake dict so we can reuse the normal render function
   fake_dict = {&#34;fake_key&#34;:data}
 
-  error = &#34;Exhausted all types&#34;
+  errors = []
   {% for t in union_args %}
   {% if t | is_primitive or t | is_none %}
   if isinstance(data, {{t.__name__}}):
     return {{t|arg|rvalue}}
   else:
-    error = &#34;input is not of type {{t.__name__}}&#34;
+    errors.append(&#34;input is not of type {{t.__name__}}&#34;)
   {% else %}
   try:
     return {{t|arg|rvalue}}
   except Exception as e:
-    error = str(e)
+    errors.append(f&#39; Failed to deserialize into {{t.__name__}}: {e}&#39;)
   {% endif %}
   {% endfor %}
-  raise SerdeError(&#34;Can not deserialize &#34; + repr(data) + &#34; of type &#34; + typename(type(data)) + &#34; into {{union_name}}. Reason: &#34; + error)
+  raise SerdeError(&#34;Can not deserialize &#34; + repr(data) + &#34; of type &#34; + typename(type(data)) + &#34; into {{union_name}}.\\nReasons:\\n&#34; + &#34;\\n&#34;.join(errors))
     &#34;&#34;&#34;
     union_name = f&#34;Union[{&#39;, &#39;.join([typename(a) for a in union_args])}]&#34;
 
