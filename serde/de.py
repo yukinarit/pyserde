@@ -122,6 +122,9 @@ def deserialize(
 
         # Collect types used in the generated code.
         for typ in iter_types(cls):
+            if typ is cls:
+                continue
+
             if is_dataclass(typ) or is_enum(typ) or not is_primitive(typ):
                 scope.types[typ.__name__] = typ
 
