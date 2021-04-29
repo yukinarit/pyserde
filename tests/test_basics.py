@@ -10,7 +10,7 @@ import sys
 import uuid
 from dataclasses import dataclass, field
 from datetime import date, datetime
-from typing import Dict, List, NewType, Optional, Set, Tuple
+from typing import Any, Dict, List, NewType, Optional, Set, Tuple
 
 import more_itertools
 import pytest
@@ -75,6 +75,7 @@ types: List = [
     (Pri(10, 'foo', 100.0, True), Optional[Pri]),
     (None, Optional[Pri]),
     (10, NewType('Int', int)),  # NewType
+    ({'a': 1}, Any),  # Any
     (pathlib.Path('/tmp/foo'), pathlib.Path),  # Extended types
     (pathlib.Path('/tmp/foo'), Optional[pathlib.Path]),
     (None, Optional[pathlib.Path]),
