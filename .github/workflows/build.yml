@@ -19,11 +19,11 @@ jobs:
        uses: actions/setup-python@v2
        with:
          python-version: 3.7
-     - name: Restore pip cache
-       uses: actions/cache@v2
-       with:
-         path: ${{ env.pythonLocation }}
-         key: ubuntu-20.04-${{ env.pythonLocation }}-${{ hashFiles('**/Pipfile') }}
+     # - name: Restore pip cache
+     #   uses: actions/cache@v2
+     #   with:
+     #     path: ${{ env.pythonLocation }}
+     #     key: ubuntu-20.04-${{ env.pythonLocation }}-${{ hashFiles('**/Pipfile') }}
      - name: Install dependencies
        run: |
          pip install pipenv
