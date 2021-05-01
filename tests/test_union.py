@@ -1,7 +1,7 @@
 import logging
 from dataclasses import dataclass
 from ipaddress import IPv4Address
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Optional, Union, Tuple
 from uuid import UUID
 
 import pytest
@@ -309,3 +309,27 @@ def test_union_with_union_in_nested_types():
     assert to_dict(a_int) == {"v": [1]}
     assert a_int == from_dict(A, to_dict(a_int, reuse_instances=False), reuse_instances=False)
     assert a_int == from_dict(A, to_dict(a_int, reuse_instances=True), reuse_instances=True)
+
+
+# relates to https://github.com/yukinarit/pyserde/issues/113
+def test_union_with_union_in_nested_tuple():
+    @deserialize
+    @serialize
+    @dataclass
+    class A:
+        v: Union[bool, Tuple[Union[str, int]]]
+
+    a_bool = A(False)
+    a_bool_dict = {"v": False}
+    assert to_dict(a_bool) == a_bool_dict
+    assert from_dict(A, a_bool_dict) == a_bool
+
+    a_str = A(("a",))
+    a_str_dict = {"v": ("a",)}
+    assert to_dict(a_str) == a_str_dict
+    assert from_dict(A, a_str_dict) == a_str
+
+    a_int = A((1,))
+    a_int_dict = {"v": (1,)}
+    assert to_dict(a_int) == a_int_dict
+    assert from_dict(A, a_int_dict) == a_int

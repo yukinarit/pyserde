@@ -432,7 +432,7 @@ class Renderer:
         "{k.__serde__.funcs['to_iter'](k, reuse_instances=reuse_instances, convert_sets=convert_sets): v.__serde__.funcs['to_iter'](v, reuse_instances=reuse_instances, convert_sets=convert_sets) for k, v in foo.items()}"
 
         >>> Renderer(TO_ITER).render(SeField(Tuple[str, Foo, int], 'foo'))
-        "(foo[0], foo[1].__serde__.funcs['to_iter'](foo[1], reuse_instances=reuse_instances, convert_sets=convert_sets), foo[2])"
+        "(foo[0], foo[1].__serde__.funcs['to_iter'](foo[1], reuse_instances=reuse_instances, convert_sets=convert_sets), foo[2],)"
         """
         if is_dataclass(arg.type):
             return self.dataclass(arg)
@@ -524,7 +524,7 @@ class Renderer:
                 r = arg[i]
                 r.name = f'{arg.varname}[{i}]'
                 rvalues.append(self.render(r))
-            return f"({', '.join(rvalues)})"
+            return f"({', '.join(rvalues)},)"  # trailing , is required for single element tuples
 
     def dict(self, arg: SeField) -> str:
         """
