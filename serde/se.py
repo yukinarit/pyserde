@@ -370,7 +370,7 @@ def {{func}}(obj, reuse_instances = {{serde_scope.reuse_instances_default}}, con
 
 def render_union_func(cls: Type, union_args: List[Type]) -> str:
     template = """
-def {{func}}(obj, reuse_instances):
+def {{func}}(obj, reuse_instances, convert_sets):
   {% for name in serde_scope.types.keys() %}
   {{name}} = serde_scope.types['{{name}}']
   {% endfor %}
@@ -553,7 +553,7 @@ class Renderer:
 
     def union_func(self, arg: SeField) -> str:
         func_name = union_func_name(UNION_SE_PREFIX, type_args(arg.type))
-        return f"serde_scope.funcs['{func_name}']({arg.varname}, reuse_instances)"
+        return f"serde_scope.funcs['{func_name}']({arg.varname}, reuse_instances, convert_sets)"
 
 
 def enum_value(cls, e):

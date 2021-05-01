@@ -1,7 +1,7 @@
 import logging
 from dataclasses import dataclass
 from ipaddress import IPv4Address
-from typing import Dict, List, Optional, Union, Tuple
+from typing import Dict, List, Optional, Tuple, Union
 from uuid import UUID
 
 import pytest
@@ -290,6 +290,25 @@ def test_union_rename_all():
 
     assert to_dict(Foo(10)) == {'BarBaz': 10}
     assert from_dict(Foo, {'BarBaz': 'foo'}) == Foo('foo')
+
+
+def test_union_with_list_of_other_class():
+    @deserialize
+    @serialize
+    @dataclass
+    class A:
+        a: int
+
+    @deserialize
+    @serialize
+    @dataclass
+    class B:
+        b: Union[List[A], str]
+
+    b = B([A(1)])
+    b_dict = {"b": [{"a": 1}]}
+    assert to_dict(b) == b_dict
+    assert from_dict(B, b_dict) == b
 
 
 # relates to https://github.com/yukinarit/pyserde/issues/113
