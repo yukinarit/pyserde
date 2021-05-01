@@ -32,6 +32,7 @@ tests_require = [
     'pytest-flake8',
     'mypy',
     'flake8',
+    'pre-commit',
 ]
 
 setup(
