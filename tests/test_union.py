@@ -290,3 +290,22 @@ def test_union_rename_all():
 
     assert to_dict(Foo(10)) == {'BarBaz': 10}
     assert from_dict(Foo, {'BarBaz': 'foo'}) == Foo('foo')
+
+
+# relates to https://github.com/yukinarit/pyserde/issues/113
+def test_union_with_union_in_nested_types():
+    @deserialize
+    @serialize
+    @dataclass
+    class A:
+        v: Union[UUID, List[Union[UUID, int]]]
+
+    a_uuid = A([UUID("00611ee9-7ca3-41d3-9607-ea7268e264ea")])
+    assert to_dict(a_uuid, reuse_instances=False) == {"v": ["00611ee9-7ca3-41d3-9607-ea7268e264ea"]}
+    assert a_uuid == from_dict(A, to_dict(a_uuid, reuse_instances=False), reuse_instances=False)
+    assert a_uuid == from_dict(A, to_dict(a_uuid, reuse_instances=True), reuse_instances=True)
+
+    a_int = A([1])
+    assert to_dict(a_int) == {"v": [1]}
+    assert a_int == from_dict(A, to_dict(a_int, reuse_instances=False), reuse_instances=False)
+    assert a_int == from_dict(A, to_dict(a_int, reuse_instances=True), reuse_instances=True)

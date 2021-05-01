@@ -159,6 +159,8 @@ def iter_unions(cls: Type) -> Iterator[Type]:
     """
     if is_union(cls):
         yield cls
+        for arg in type_args(cls):
+            yield from iter_unions(arg)
     if is_dataclass(cls):
         for f in fields(cls):
             yield from iter_unions(f.type)
