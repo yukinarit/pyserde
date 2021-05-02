@@ -18,13 +18,13 @@ jobs:
       uses: actions/setup-python@v2
       with:
         python-version: ${{ matrix.python-version }}
-    - name: Restore pip cache
-      # Caching on Windows is turned off due to inconsistent behaviour
-      if: matrix.os != 'windows-2019'
-      uses: actions/cache@v2
-      with:
-        path: ${{ env.pythonLocation }}
-        key: ${{ matrix.os }}-${{ env.pythonLocation }}-${{ hashFiles('**/Pipfile') }}
+    # - name: Restore pip cache
+    #   # Caching on Windows is turned off due to inconsistent behaviour
+    #   if: matrix.os != 'windows-2019'
+    #   uses: actions/cache@v2
+    #   with:
+    #     path: ${{ env.pythonLocation }}
+    #     key: ${{ matrix.os }}-${{ env.pythonLocation }}-${{ hashFiles('**/Pipfile') }}
     - name: Install dependencies
       run: |
         pip install pipenv
@@ -47,11 +47,11 @@ jobs:
       uses: actions/setup-python@v2
       with:
         python-version: 3.7
-    - name: Restore pip cache
-      uses: actions/cache@v2
-      with:
-        path: ${{ env.pythonLocation }}
-        key: ubuntu-20.04-${{ env.pythonLocation }}-${{ hashFiles('**/.pre-commit-config.yaml', '**/pyproject.toml') }}
+    # - name: Restore pip cache
+    #   uses: actions/cache@v2
+    #   with:
+    #     path: ${{ env.pythonLocation }}
+    #     key: ubuntu-20.04-${{ env.pythonLocation }}-${{ hashFiles('**/.pre-commit-config.yaml', '**/pyproject.toml') }}
     - name: Install dependencies
       run: |
         pip install pre-commit
@@ -76,11 +76,11 @@ jobs:
       uses: actions/setup-python@v2
       with:
         python-version: 3.7
-    - name: Restore pip cache
-      uses: actions/cache@v2
-      with:
-        path: ${{ env.pythonLocation }}
-        key: ubuntu-20.04-${{ env.pythonLocation }}-${{ hashFiles('**/Pipfile') }}
+    # - name: Restore pip cache
+    #   uses: actions/cache@v2
+    #   with:
+    #     path: ${{ env.pythonLocation }}
+    #     key: ubuntu-20.04-${{ env.pythonLocation }}-${{ hashFiles('**/Pipfile') }}
     - name: Install dependencies
       run: |
         pip install pipenv
@@ -101,11 +101,11 @@ jobs:
       uses: actions/setup-python@v2
       with:
         python-version: 3.7
-    - name: Restore pip cache
-      uses: actions/cache@v2
-      with:
-        path: ${{ env.pythonLocation }}
-        key: ubuntu-20.04-${{ env.pythonLocation }}-${{ hashFiles('**/Pipfile') }}
+    # - name: Restore pip cache
+    #   uses: actions/cache@v2
+    #   with:
+    #     path: ${{ env.pythonLocation }}
+    #     key: ubuntu-20.04-${{ env.pythonLocation }}-${{ hashFiles('**/Pipfile') }}
     - name: Install dependencies
       run: |
         pip install pipenv
