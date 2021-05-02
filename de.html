@@ -540,11 +540,11 @@ class Renderer:
         ... @dataclass
         ... class Foo: pass
         &gt;&gt;&gt; Renderer(&#39;foo&#39;).render(DeField(Tuple[str, int, List[int], Foo], &#39;d&#39;, datavar=&#39;data&#39;))
-        &#39;(data[&#34;d&#34;][0], data[&#34;d&#34;][1], [v for v in data[&#34;d&#34;][2]], Foo.__serde__.funcs[\\&#39;foo\\&#39;](data[&#34;d&#34;][3], reuse_instances=reuse_instances))&#39;
+        &#39;(data[&#34;d&#34;][0], data[&#34;d&#34;][1], [v for v in data[&#34;d&#34;][2]], Foo.__serde__.funcs[\\&#39;foo\\&#39;](data[&#34;d&#34;][3], reuse_instances=reuse_instances),)&#39;
 
         &gt;&gt;&gt; field = DeField(Tuple[str, int, List[int], Foo], &#39;d&#39;, datavar=&#39;data&#39;, index=0, iterbased=True)
         &gt;&gt;&gt; Renderer(&#39;foo&#39;).render(field)
-        &#34;(data[0][0], data[0][1], [v for v in data[0][2]], Foo.__serde__.funcs[&#39;foo&#39;](data[0][3], reuse_instances=reuse_instances))&#34;
+        &#34;(data[0][0], data[0][1], [v for v in data[0][2]], Foo.__serde__.funcs[&#39;foo&#39;](data[0][3], reuse_instances=reuse_instances),)&#34;
         &#34;&#34;&#34;
         if is_bare_tuple(arg.type):
             return f&#39;tuple({arg.data})&#39;
@@ -553,7 +553,7 @@ class Renderer:
             for i, typ in enumerate(type_args(arg.type)):
                 inner = arg[i]
                 values.append(self.render(inner))
-            return f&#39;({&#34;, &#34;.join(values)})&#39;
+            return f&#39;({&#34;, &#34;.join(values)},)&#39;  # trailing , is required for single element tuples
 
     def dict(self, arg: DeField) -&gt; str:
         &#34;&#34;&#34;
