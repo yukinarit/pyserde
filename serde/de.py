@@ -503,11 +503,11 @@ class Renderer:
         ... @dataclass
         ... class Foo: pass
         >>> Renderer('foo').render(DeField(Tuple[str, int, List[int], Foo], 'd', datavar='data'))
-        '(data["d"][0], data["d"][1], [v for v in data["d"][2]], Foo.__serde__.funcs[\\'foo\\'](data["d"][3], reuse_instances=reuse_instances))'
+        '(data["d"][0], data["d"][1], [v for v in data["d"][2]], Foo.__serde__.funcs[\\'foo\\'](data["d"][3], reuse_instances=reuse_instances),)'
 
         >>> field = DeField(Tuple[str, int, List[int], Foo], 'd', datavar='data', index=0, iterbased=True)
         >>> Renderer('foo').render(field)
-        "(data[0][0], data[0][1], [v for v in data[0][2]], Foo.__serde__.funcs['foo'](data[0][3], reuse_instances=reuse_instances))"
+        "(data[0][0], data[0][1], [v for v in data[0][2]], Foo.__serde__.funcs['foo'](data[0][3], reuse_instances=reuse_instances),)"
         """
         if is_bare_tuple(arg.type):
             return f'tuple({arg.data})'
@@ -516,7 +516,7 @@ class Renderer:
             for i, typ in enumerate(type_args(arg.type)):
                 inner = arg[i]
                 values.append(self.render(inner))
-            return f'({", ".join(values)})'
+            return f'({", ".join(values)},)'  # trailing , is required for single element tuples
 
     def dict(self, arg: DeField) -> str:
         """

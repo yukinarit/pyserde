@@ -1,7 +1,7 @@
 import logging
 from dataclasses import dataclass
 from ipaddress import IPv4Address
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Optional, Tuple, Union
 from uuid import UUID
 
 import pytest
@@ -290,3 +290,65 @@ def test_union_rename_all():
 
     assert to_dict(Foo(10)) == {'BarBaz': 10}
     assert from_dict(Foo, {'BarBaz': 'foo'}) == Foo('foo')
+
+
+def test_union_with_list_of_other_class():
+    @deserialize
+    @serialize
+    @dataclass
+    class A:
+        a: int
+
+    @deserialize
+    @serialize
+    @dataclass
+    class B:
+        b: Union[List[A], str]
+
+    b = B([A(1)])
+    b_dict = {"b": [{"a": 1}]}
+    assert to_dict(b) == b_dict
+    assert from_dict(B, b_dict) == b
+
+
+# relates to https://github.com/yukinarit/pyserde/issues/113
+def test_union_with_union_in_nested_types():
+    @deserialize
+    @serialize
+    @dataclass
+    class A:
+        v: Union[UUID, List[Union[UUID, int]]]
+
+    a_uuid = A([UUID("00611ee9-7ca3-41d3-9607-ea7268e264ea")])
+    assert to_dict(a_uuid, reuse_instances=False) == {"v": ["00611ee9-7ca3-41d3-9607-ea7268e264ea"]}
+    assert a_uuid == from_dict(A, to_dict(a_uuid, reuse_instances=False), reuse_instances=False)
+    assert a_uuid == from_dict(A, to_dict(a_uuid, reuse_instances=True), reuse_instances=True)
+
+    a_int = A([1])
+    assert to_dict(a_int) == {"v": [1]}
+    assert a_int == from_dict(A, to_dict(a_int, reuse_instances=False), reuse_instances=False)
+    assert a_int == from_dict(A, to_dict(a_int, reuse_instances=True), reuse_instances=True)
+
+
+# relates to https://github.com/yukinarit/pyserde/issues/113
+def test_union_with_union_in_nested_tuple():
+    @deserialize
+    @serialize
+    @dataclass
+    class A:
+        v: Union[bool, Tuple[Union[str, int]]]
+
+    a_bool = A(False)
+    a_bool_dict = {"v": False}
+    assert to_dict(a_bool) == a_bool_dict
+    assert from_dict(A, a_bool_dict) == a_bool
+
+    a_str = A(("a",))
+    a_str_dict = {"v": ("a",)}
+    assert to_dict(a_str) == a_str_dict
+    assert from_dict(A, a_str_dict) == a_str
+
+    a_int = A((1,))
+    a_int_dict = {"v": (1,)}
+    assert to_dict(a_int) == a_int_dict
+    assert from_dict(A, a_int_dict) == a_int

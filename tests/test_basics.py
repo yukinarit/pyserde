@@ -377,6 +377,21 @@ def test_tuple(se, de, opt):
 
 
 @pytest.mark.parametrize('se,de', all_formats)
+def test_single_element_tuples(se, de):
+    @deserialize
+    @serialize
+    @dataclass
+    class Foo:
+        a: Tuple[int]
+        b: Tuple[uuid.UUID]
+
+    foo = Foo(a=(1,), b=(uuid.UUID("855f07da-c3cd-46f2-9557-b8dbeb99ff42"),))
+    assert to_dict(foo) == {"a": foo.a, "b": foo.b}
+
+    assert foo == de(Foo, se(foo))
+
+
+@pytest.mark.parametrize('se,de', all_formats)
 def test_dataclass_default_factory(se, de):
     @deserialize
     @serialize

@@ -370,7 +370,7 @@ def {{func}}(obj, reuse_instances = {{serde_scope.reuse_instances_default}}, con
 
 def render_union_func(cls: Type, union_args: List[Type]) -> str:
     template = """
-def {{func}}(obj, reuse_instances):
+def {{func}}(obj, reuse_instances, convert_sets):
   {% for name in serde_scope.types.keys() %}
   {{name}} = serde_scope.types['{{name}}']
   {% endfor %}
@@ -432,7 +432,7 @@ class Renderer:
         "{k.__serde__.funcs['to_iter'](k, reuse_instances=reuse_instances, convert_sets=convert_sets): v.__serde__.funcs['to_iter'](v, reuse_instances=reuse_instances, convert_sets=convert_sets) for k, v in foo.items()}"
 
         >>> Renderer(TO_ITER).render(SeField(Tuple[str, Foo, int], 'foo'))
-        "(foo[0], foo[1].__serde__.funcs['to_iter'](foo[1], reuse_instances=reuse_instances, convert_sets=convert_sets), foo[2])"
+        "(foo[0], foo[1].__serde__.funcs['to_iter'](foo[1], reuse_instances=reuse_instances, convert_sets=convert_sets), foo[2],)"
         """
         if is_dataclass(arg.type):
             return self.dataclass(arg)
@@ -524,7 +524,7 @@ class Renderer:
                 r = arg[i]
                 r.name = f'{arg.varname}[{i}]'
                 rvalues.append(self.render(r))
-            return f"({', '.join(rvalues)})"
+            return f"({', '.join(rvalues)},)"  # trailing , is required for single element tuples
 
     def dict(self, arg: SeField) -> str:
         """
@@ -553,7 +553,7 @@ class Renderer:
 
     def union_func(self, arg: SeField) -> str:
         func_name = union_func_name(UNION_SE_PREFIX, type_args(arg.type))
-        return f"serde_scope.funcs['{func_name}']({arg.varname}, reuse_instances)"
+        return f"serde_scope.funcs['{func_name}']({arg.varname}, reuse_instances, convert_sets)"
 
 
 def enum_value(cls, e):
