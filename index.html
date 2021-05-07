@@ -149,6 +149,7 @@ print(from_json(Foo, s))
 <li><a href="https://docs.python.org/3/library/typing.html#typing.Optional"><code>Optional</code></a></li>
 <li>User defined class with <a href="https://docs.python.org/3/library/dataclasses.html"><code>@dataclass</code></a></li>
 <li><a href="https://docs.python.org/3/library/typing.html#newtype"><code>typing.NewType</code></a> for primitive types</li>
+<li><a href="https://docs.python.org/3/library/typing.html#the-any-type"><code>typing.Any</code></a></li>
 <li><a href="https://docs.python.org/3/library/enum.html#enum.Enum">Enum</a> and <a href="https://docs.python.org/3/library/enum.html#enum.IntEnum">IntEnum</a></li>
 <li>More types<ul>
 <li><a href="https://docs.python.org/3/library/pathlib.html"><code>pathlib.Path</code></a></li>
@@ -517,6 +518,9 @@ RenameAll(int_field=10, str_field='foo')
             if typ is cls:
                 continue
 
+            if typ is Any:
+                continue
+
             if is_dataclass(typ) or is_enum(typ) or not is_primitive(typ):
                 scope.types[typ.__name__] = typ
 
@@ -817,10 +821,14 @@ into an object in various data format such as JSON and MsgPack.</p>
         g[&#39;is_dataclass&#39;] = is_dataclass
         g[&#39;typename&#39;] = typename  # used in union functions
         g[&#39;is_instance&#39;] = is_instance  # used in union functions
+        g[&#39;to_obj&#39;] = to_obj
 
         # Collect types used in the generated code.
         for typ in iter_types(cls):
             if typ is cls:
+                continue
+
+            if typ is Any:
                 continue
 
             if is_dataclass(typ) or is_enum(typ) or not is_primitive(typ):

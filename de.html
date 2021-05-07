@@ -162,6 +162,9 @@ def deserialize(
             if typ is cls:
                 continue
 
+            if typ is Any:
+                continue
+
             if is_dataclass(typ) or is_enum(typ) or not is_primitive(typ):
                 scope.types[typ.__name__] = typ
 
@@ -450,6 +453,8 @@ class Renderer:
             res = f&#34;({arg.data} if isinstance({arg.data}, {arg.type.__name__}) else {from_iso}) if reuse_instances else {from_iso}&#34;
         elif is_none(arg.type):
             res = &#34;None&#34;
+        elif arg.type is Any:
+            res = arg.data
         else:
             return f&#34;raise_unsupported_type({arg.data})&#34;
 
@@ -819,6 +824,9 @@ RenameAll(int_field=10, str_field='foo')
         # Collect types used in the generated code.
         for typ in iter_types(cls):
             if typ is cls:
+                continue
+
+            if typ is Any:
                 continue
 
             if is_dataclass(typ) or is_enum(typ) or not is_primitive(typ):

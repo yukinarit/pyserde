@@ -35,7 +35,7 @@ import enum
 import typing
 from dataclasses import fields, is_dataclass
 from itertools import zip_longest
-from typing import Dict, Iterator, List, Optional, Set, Tuple, Type, TypeVar, Union
+from typing import Any, Dict, Iterator, List, Optional, Set, Tuple, Type, TypeVar, Union
 
 import typing_inspect
 
@@ -66,7 +66,7 @@ def get_args(typ):
 
 def typename(typ) -&gt; str:
     &#34;&#34;&#34;
-    &gt;&gt;&gt; from typing import List, Dict, Set
+    &gt;&gt;&gt; from typing import List, Dict, Set, Any
     &gt;&gt;&gt; typename(int)
     &#39;int&#39;
     &gt;&gt;&gt; class Foo: pass
@@ -84,6 +84,8 @@ def typename(typ) -&gt; str:
     &#39;Union[Optional[Foo], List[Foo], str, int]&#39;
     &gt;&gt;&gt; typename(Set[Foo])
     &#39;Set[Foo]&#39;
+    &gt;&gt;&gt; typename(Any)
+    &#39;Any&#39;
     &#34;&#34;&#34;
     if is_opt(typ):
         return f&#39;Optional[{typename(type_args(typ)[0])}]&#39;
@@ -113,8 +115,14 @@ def typename(typ) -&gt; str:
             return &#39;Dict&#39;
     elif is_tuple(typ):
         return f&#39;Tuple[{&#34;, &#34;.join([typename(e) for e in type_args(typ)])}]&#39;
+    elif typ is Any:
+        return &#39;Any&#39;
     else:
-        return typ.__name__
+        name = getattr(typ, &#39;_name&#39;, None)
+        if name:
+            return name
+        else:
+            return typ.__name__
 
 
 def type_args(typ):
