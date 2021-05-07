@@ -1,10 +1,25 @@
-## 0.3.1 (2021-03-21)
+## `0.3.2` (2021-05-07)
+
+* feat: Improve error description for union type ([8abb549](https://github.com/yukinarit/pyserde/commit/8abb549))
+* feat: Improve serde.inspect ([8b8635a](https://github.com/yukinarit/pyserde/commit/8b8635a))
+* feat: Support typing.any ([988a621](https://github.com/yukinarit/pyserde/commit/988a621))
+* feat: Support typing.NewType for primitives ([731ed79](https://github.com/yukinarit/pyserde/commit/731ed79))
+* build: add pre-commit to test requirements ([a88ea40](https://github.com/yukinarit/pyserde/commit/a88ea40))
+* fix: correctly render single element tuples ([a8a6456](https://github.com/yukinarit/pyserde/commit/a8a6456))
+* fix: pass convert_sets argument to union functions ([ab40cc9](https://github.com/yukinarit/pyserde/commit/ab40cc9))
+* fix: support unions with nested unions in containers (#113) ([c26e828](https://github.com/yukinarit/pyserde/commit/c26e828)), closes [#113](https://github.com/yukinarit/pyserde/issues/113)
+* ci: Don't cache pip to workaround pip error ([c912429](https://github.com/yukinarit/pyserde/commit/c912429))
+* refactor: Remove self class from scope ([da81f1f](https://github.com/yukinarit/pyserde/commit/da81f1f))
+
+This release had contibutions from 1 person: [@ydylla](https://github.com/ydylla). Thank you so much! :tada: :joy:
+
+## `0.3.1` (2021-03-21)
 
 * fix: Add type annotation to serde decorators ([f885a27](https://github.com/yukinarit/pyserde/commit/f885a27))
 
 You can get the code completion from the class with `serialize` and `deserialize` decorators. I would recommend everyone to upgrade to v0.3.1.
 
-## 0.3.0 (2021-03-20)
+## `0.3.0` (2021-03-20)
 
 * feat: Support PEP585 type hint annotation ([81d3f4f](https://github.com/yukinarit/pyserde/commit/81d3f4f))
     ```python
@@ -44,14 +59,14 @@ You can get the code completion from the class with `serialize` and `deserialize
 
 This release had contibutions from 2 people: [@ydylla](https://github.com/ydylla), [@alexmisk](https://github.com/alexmisk). Thank you so much! :tada: :joy:
 
-## 0.2.2 (2021-01-19)
+## `0.2.2` (2021-01-19)
 
 * Support inference of types on deserialization ([8c4efb2](https://github.com/yukinarit/pyserde/commit/8c4efb2))
 * Fix pytest error ([09ee66a](https://github.com/yukinarit/pyserde/commit/09ee66a))
 
 This release had contibutions from 1 person: [@adsharma](https://github.com/adsharma). Thank you so much! :tada: :joy:
 
-## 0.2.1 (2020-11-29)
+## `0.2.1` (2020-11-29)
 
 * feat: Allow enum compatible value for enum field ([14006ee](https://github.com/yukinarit/pyserde/commit/14006ee))
 * fix: Support optional extended types ([d0418fc](https://github.com/yukinarit/pyserde/commit/d0418fc))
@@ -64,7 +79,7 @@ This release had contibutions from 1 person: [@adsharma](https://github.com/adsh
 
 This release had contibutions from 2 people: [@alexmisk](https://github.com/alexmisk), [@pranavvp10](https://github.com/pranavvp10). Thank you so much! :turkey: :joy:
 
-## 0.2.0 (2020-10-31)
+## `0.2.0` (2020-10-31)
 
 Please note this release has a breaking change, where `pip install pyserde` no longer installs `msgpack`, `pyyaml` and `toml`. If you want the same behavior as in 0.1.5, use `pip install pyserde[all]`.
 
@@ -75,23 +90,23 @@ Please note this release has a breaking change, where `pip install pyserde` no l
 
 This release had contibutions from 2 people: [@alexmisk](https://github.com/alexmisk), [@andreymal](https://github.com/andreymal). Thank you so much! :tada: :joy:
 
-## 0.1.5 (2020-10-05)
+## `0.1.5` (2020-10-05)
 
 * fix: Type error ([2a271ac](https://github.com/yukinarit/pyserde/commit/2a271acf32bb7b37546d0037ac5b62f39cdc5bb3))
 * feat: Now supports Optional of Enum/IntEnum class ([e3618e5](https://github.com/yukinarit/pyserde/commit/e3618e5daea30cb787e80a0f3df23438c8bffcef))
 
-## 0.1.4 (2020-09-25)
+## `0.1.4` (2020-09-25)
 
 * feat: Enum support ([6dca279](https://github.com/yukinarit/pyserde/commit/6dca2792c32ceadbfdbd6e8aa50c0ac511661e7d))
 
-## 0.1.3 (2020-09-12)
+## `0.1.3` (2020-09-12)
 
 * fix: Fix "has no attribute 'mangle'" error ([c71cb3b](https://github.com/yukinarit/pyserde/commit/c71cb3b5aaad16d008d0220a72c119ee0fbddc1a))
 
-## 0.1.2 (2020-08-01)
+## `0.1.2` (2020-08-01)
 
 * feat: Add support for pathlib.Path fields ([28c8c1a](https://github.com/yukinarit/pyserde/commit/28c8c1a))
 
-## 0.1.1 (2020-04-23)
+## `0.1.1` (2020-04-23)
 
 * fix: astuple incorrectly deserialize dict ([dfd69e8](https://github.com/yukinarit/pyserde/commit/dfd69e8))
