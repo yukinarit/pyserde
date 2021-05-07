@@ -130,10 +130,14 @@ def serialize(
         g['is_dataclass'] = is_dataclass
         g['typename'] = typename  # used in union functions
         g['is_instance'] = is_instance  # used in union functions
+        g['to_obj'] = to_obj
 
         # Collect types used in the generated code.
         for typ in iter_types(cls):
             if typ is cls:
+                continue
+
+            if typ is Any:
                 continue
 
             if is_dataclass(typ) or is_enum(typ) or not is_primitive(typ):
@@ -473,6 +477,8 @@ class Renderer:
             return f"{arg.varname} if reuse_instances else {arg.varname}.isoformat()"
         elif is_none(arg.type):
             return "None"
+        elif arg.type is Any:
+            return f"to_obj({arg.varname}, True, False, False)"
         else:
             return f"raise_unsupported_type({arg.varname})"
 

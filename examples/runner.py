@@ -1,5 +1,6 @@
 import sys
 
+import any
 import collection
 import default
 import env
@@ -15,6 +16,7 @@ import yamlfile
 
 
 def run_all():
+    run(any)
     run(simple)
     run(newtype)
     run(collection)
