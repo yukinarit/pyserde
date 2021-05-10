@@ -5,12 +5,13 @@ import dataclasses
 import logging
 import re
 from dataclasses import dataclass, field
-from typing import Any, Callable, Dict, Iterator, List, Optional, Type, Union
+from typing import Any, Callable, Dict, Iterator, List, Optional, Type, TypeVar, Union
 
 import stringcase
 
 from .compat import (
     SerdeError,
+    T,
     dataclass_fields,
     is_bare_dict,
     is_bare_list,
@@ -239,6 +240,11 @@ def skip_if_false(v):
 
 
 @dataclass
+class FlattenOpts:
+    pass
+
+
+@dataclass
 class Field:
     """
     Field in pyserde class.
@@ -255,6 +261,7 @@ class Field:
     skip_if_false: Optional[bool] = None
     serializer: Optional[Func] = None  # Custom field serializer.
     deserializer: Optional[Func] = None  # Custom field deserializer.
+    flatten: Optional[FlattenOpts] = None
 
     @classmethod
     def from_dataclass(cls, f: dataclasses.Field) -> 'Field':
@@ -278,6 +285,10 @@ class Field:
         if func:
             deserializer = Func(func, cls.mangle(f, 'deserializer'))
 
+        flatten = f.metadata.get('serde_flatten')
+        if flatten is True:
+            flatten = FlattenOpts()
+
         return cls(
             f.type,
             f.name,
@@ -288,6 +299,7 @@ class Field:
             skip_if=skip_if or skip_if_false_func,
             serializer=serializer,
             deserializer=deserializer,
+            flatten=flatten,
         )
 
     @staticmethod
@@ -305,7 +317,10 @@ class Field:
         return conv(self, case or self.case)
 
 
-def fields(FieldCls: Type, cls: Type) -> Iterator[Field]:
+def fields(FieldCls: Type[Field], cls: Type) -> Iterator[Field]:
+    """
+    Pyserde's customized `fields` method.
+    """
     return iter(FieldCls.from_dataclass(f) for f in dataclass_fields(cls))
 
 

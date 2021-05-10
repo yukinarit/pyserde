@@ -487,7 +487,20 @@ class Renderer:
         return f"{arg.deserializer.name}({arg.data})"
 
     def dataclass(self, arg: DeField) -> str:
-        return f"{arg.type.__name__}.{SERDE_SCOPE}.funcs['{self.func}']({arg.data}, reuse_instances=reuse_instances)"
+        if not arg.flatten:
+            # e.g. "data['field']" will be used as variable name.
+            var = arg.data
+        else:
+            # Because the field is flattened
+            # e.g. "data" will be used as variable name.
+            assert arg.datavar
+            if arg.iterbased:
+                var = f"{arg.datavar}[{arg.index}:]"
+            else:
+                var = arg.datavar
+
+        opts = "reuse_instances=reuse_instances"
+        return f"{arg.type.__name__}.{SERDE_SCOPE}.funcs['{self.func}']({var}, {opts})"
 
     def opt(self, arg: DeField) -> str:
         """
