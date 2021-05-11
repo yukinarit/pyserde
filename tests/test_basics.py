@@ -15,8 +15,9 @@ from typing import Any, Dict, List, NewType, Optional, Set, Tuple
 import more_itertools
 import pytest
 
-import serde.compat
+import serde
 from serde import SerdeError, deserialize, from_dict, from_tuple, serialize, to_dict, to_tuple
+from serde.compat import dataclass_fields
 from serde.core import SERDE_SCOPE
 from serde.json import from_json, to_json
 from serde.msgpack import from_msgpack, to_msgpack
@@ -211,22 +212,57 @@ def test_non_dataclass():
             i: int
 
 
-def test_forward_declaration():
-    @serialize
-    @deserialize
-    @dataclass
-    class Foo:
-        bar: 'Bar'
+# test_string_forward_reference_works currently only works with global visible classes
+# and can not be mixed with PEP 563 "from __future__ import annotations"
+@dataclass
+class ForwardReferenceFoo:
+    bar: 'ForwardReferenceBar'
 
-    @serialize
-    @deserialize
-    @dataclass
-    class Bar:
-        i: int
 
-    h = Foo(bar=Bar(i=10))
-    assert h.bar.i == 10
-    assert 'Bar' == dataclasses.fields(Foo)[0].type
+@serialize
+@deserialize
+@dataclass
+class ForwardReferenceBar:
+    i: int
+
+
+# assert type is str
+assert 'ForwardReferenceBar' == dataclasses.fields(ForwardReferenceFoo)[0].type
+
+# setup pyserde for Foo after Bar becomes visible to global scope
+deserialize(ForwardReferenceFoo)
+serialize(ForwardReferenceFoo)
+
+# now the type really is of type Bar
+assert ForwardReferenceBar == dataclasses.fields(ForwardReferenceFoo)[0].type
+assert ForwardReferenceBar == next(dataclass_fields(ForwardReferenceFoo)).type
+
+# verify usage works
+def test_string_forward_reference_works():
+    h = ForwardReferenceFoo(bar=ForwardReferenceBar(i=10))
+    h_dict = {"bar": {"i": 10}}
+
+    assert to_dict(h) == h_dict
+    assert from_dict(ForwardReferenceFoo, h_dict) == h
+
+
+# trying to use string forward reference normally will throw
+def test_unresolved_forward_reference_throws():
+    with pytest.raises(SerdeError) as e:
+
+        @serialize
+        @deserialize
+        @dataclass
+        class UnresolvedForwardFoo:
+            bar: 'UnresolvedForwardBar'
+
+        @serialize
+        @deserialize
+        @dataclass
+        class UnresolvedForwardBar:
+            i: int
+
+    assert "Failed to resolve type hints for UnresolvedForwardFoo" in str(e)
 
 
 @pytest.mark.parametrize('opt', opt_case, ids=opt_case_ids())

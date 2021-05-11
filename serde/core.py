@@ -10,6 +10,8 @@ from typing import Any, Callable, Dict, Iterator, List, Optional, Type, Union
 import stringcase
 
 from .compat import (
+    SerdeError,
+    dataclass_fields,
     is_bare_dict,
     is_bare_list,
     is_bare_set,
@@ -122,12 +124,6 @@ class SerdeScope:
     def _justify(self, s: str, length=50) -> str:
         white_spaces = int((50 - len(s)) / 2)
         return ' ' * (white_spaces if white_spaces > 0 else 0) + s
-
-
-class SerdeError(TypeError):
-    """
-    Serde error class.
-    """
 
 
 def raise_unsupported_type(obj):
@@ -297,7 +293,7 @@ class Field:
 
 
 def fields(FieldCls: Type, cls: Type) -> Iterator[Field]:
-    return iter(FieldCls.from_dataclass(f) for f in dataclasses.fields(cls))
+    return iter(FieldCls.from_dataclass(f) for f in dataclass_fields(cls))
 
 
 def conv(f: Field, case: Optional[str] = None) -> str:
