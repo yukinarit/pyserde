@@ -3,8 +3,9 @@ Module for compatibility.
 """
 import dataclasses
 import enum
+import sys
 import typing
-from dataclasses import fields, is_dataclass
+from dataclasses import is_dataclass
 from itertools import zip_longest
 from typing import Any, Dict, Iterator, List, Optional, Set, Tuple, Type, TypeVar, Union
 
@@ -13,6 +14,13 @@ import typing_inspect
 __all__: List = []
 
 T = TypeVar('T')
+
+
+# moved SerdeError from core.py to compat.py to prevent circular dependency issues
+class SerdeError(TypeError):
+    """
+    Serde error class.
+    """
 
 
 def get_origin(typ):
@@ -128,13 +136,41 @@ def union_args(typ: Union) -> Tuple:
     return tuple(types)
 
 
+def dataclass_fields(cls: Type) -> Iterator:
+    raw_fields = dataclasses.fields(cls)
+
+    try:
+        # this resolves types when string forward reference
+        # or PEP 563: "from __future__ import annotations" are used
+        resolved_hints = typing.get_type_hints(cls)
+    except Exception as e:
+        raise SerdeError(
+            f"Failed to resolve type hints for {typename(cls)}:\n"
+            f"{e.__class__.__name__}: {e}\n\n"
+            f"If you are using forward references make sure you are calling deserialize & serialize after all classes are globally visible."
+        )
+
+    for f in raw_fields:
+        real_type = resolved_hints.get(f.name)
+        # python <= 3.6 has no typing.ForwardRef so we need to skip the check
+        if sys.version_info[:2] != (3, 6) and isinstance(real_type, typing.ForwardRef):
+            raise SerdeError(
+                f"Failed to resolve {real_type} for {typename(cls)}.\n\n"
+                f"Make sure you are calling deserialize & serialize after all classes are globally visible."
+            )
+        if real_type is not None:
+            f.type = real_type
+
+    return iter(raw_fields)
+
+
 def iter_types(cls: Type) -> Iterator[Type]:
     """
     Iterate field types recursively.
     """
     if is_dataclass(cls):
         yield cls
-        for f in fields(cls):
+        for f in dataclass_fields(cls):
             yield from iter_types(f.type)
     elif isinstance(cls, str):
         yield cls
@@ -170,7 +206,7 @@ def iter_unions(cls: Type) -> Iterator[Type]:
         for arg in type_args(cls):
             yield from iter_unions(arg)
     if is_dataclass(cls):
-        for f in fields(cls):
+        for f in dataclass_fields(cls):
             yield from iter_unions(f.type)
     elif is_opt(cls):
         arg = type_args(cls)
@@ -369,9 +405,9 @@ def has_default(field) -> bool:
     ... class C:
     ...     a: int
     ...     d: int = 10
-    >>> has_default(fields(C)[0])
+    >>> has_default(dataclasses.fields(C)[0])
     False
-    >>> has_default(fields(C)[1])
+    >>> has_default(dataclasses.fields(C)[1])
     True
     """
     return not isinstance(field.default, dataclasses._MISSING_TYPE)
@@ -386,9 +422,9 @@ def has_default_factory(field) -> bool:
     ... class C:
     ...     a: int
     ...     d: Dict = dataclasses.field(default_factory=dict)
-    >>> has_default_factory(fields(C)[0])
+    >>> has_default_factory(dataclasses.fields(C)[0])
     False
-    >>> has_default_factory(fields(C)[1])
+    >>> has_default_factory(dataclasses.fields(C)[1])
     True
     """
     return not isinstance(field.default_factory, dataclasses._MISSING_TYPE)
