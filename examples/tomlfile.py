@@ -10,11 +10,12 @@ Usage:
 from dataclasses import dataclass
 from typing import Dict, List, Optional, Union
 
-from serde import deserialize
+from serde import deserialize, serialize
 from serde.toml import from_toml
 
 
 @deserialize
+@serialize
 @dataclass
 class Source:
     url: str
@@ -23,12 +24,14 @@ class Source:
 
 
 @deserialize
+@serialize
 @dataclass
 class Requires:
     python_version: str
 
 
 @deserialize
+@serialize
 @dataclass
 class Package:
     path: Optional[str] = None
@@ -37,6 +40,7 @@ class Package:
 
 
 @deserialize
+@serialize
 @dataclass
 class Pipfile:
     source: List[Source]

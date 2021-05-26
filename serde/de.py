@@ -286,7 +286,7 @@ def from_tuple(cls, o, reuse_instances: bool = ...):
 @dataclass
 class DeField(Field):
     """
-    Feild class for deserialization.
+    Field class for deserialization.
     """
 
     datavar: Optional[str] = None  # name of variable to deserialize from.
