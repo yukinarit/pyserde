@@ -77,6 +77,7 @@ serialize(ForwardReferenceFoo)
 assert ForwardReferenceBar == dataclasses.fields(ForwardReferenceFoo)[0].type
 assert ForwardReferenceBar == next(dataclass_fields(ForwardReferenceFoo)).type
 
+
 # verify usage works
 def test_forward_reference_works():
     h = ForwardReferenceFoo(bar=ForwardReferenceBar(i=10))

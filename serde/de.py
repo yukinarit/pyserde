@@ -19,7 +19,7 @@ from datetime import date, datetime
 from decimal import Decimal
 from ipaddress import IPv4Address, IPv4Interface, IPv4Network, IPv6Address, IPv6Interface, IPv6Network
 from pathlib import Path, PosixPath, PurePath, PurePosixPath, PureWindowsPath, WindowsPath
-from typing import Any, Callable, Dict, List, Optional, Tuple, Type
+from typing import Any, Callable, Dict, List, Optional, Type
 from uuid import UUID
 
 import jinja2
@@ -413,7 +413,8 @@ class Renderer:
                 elif arg.type is datetime:
                     from_iso = f"__py36_datetime_fromisoformat__({arg.data})"
 
-            res = f"({arg.data} if isinstance({arg.data}, {arg.type.__name__}) else {from_iso}) if reuse_instances else {from_iso}"
+            res = f"({arg.data} if isinstance({arg.data}, {arg.type.__name__}) else {from_iso}) \
+                    if reuse_instances else {from_iso}"
         elif is_none(arg.type):
             res = "None"
         elif arg.type is Any:
@@ -455,7 +456,8 @@ class Renderer:
         ... class Foo:
         ...     o: Optional[List[int]]
         >>> Renderer('foo').render(DeField(Optional[Foo], 'f', datavar='data'))
-        '(Foo.__serde__.funcs[\\'foo\\'](data["f"], reuse_instances=reuse_instances)) if data.get("f") is not None else None'
+        '(Foo.__serde__.funcs[\\'foo\\'](data["f"], reuse_instances=reuse_instances)) \
+if data.get("f") is not None else None'
         """
         value = arg[0]
         if has_default(arg):
@@ -508,11 +510,13 @@ class Renderer:
         ... @dataclass
         ... class Foo: pass
         >>> Renderer('foo').render(DeField(Tuple[str, int, List[int], Foo], 'd', datavar='data'))
-        '(data["d"][0], data["d"][1], [v for v in data["d"][2]], Foo.__serde__.funcs[\\'foo\\'](data["d"][3], reuse_instances=reuse_instances),)'
+        '(data["d"][0], data["d"][1], [v for v in data["d"][2]], \
+Foo.__serde__.funcs[\\'foo\\'](data["d"][3], reuse_instances=reuse_instances),)'
 
         >>> field = DeField(Tuple[str, int, List[int], Foo], 'd', datavar='data', index=0, iterbased=True)
         >>> Renderer('foo').render(field)
-        "(data[0][0], data[0][1], [v for v in data[0][2]], Foo.__serde__.funcs['foo'](data[0][3], reuse_instances=reuse_instances),)"
+        "(data[0][0], data[0][1], [v for v in data[0][2]], \
+Foo.__serde__.funcs['foo'](data[0][3], reuse_instances=reuse_instances),)"
         """
         if is_bare_tuple(arg.type):
             return f'tuple({arg.data})'
@@ -535,7 +539,8 @@ class Renderer:
         ... @dataclass
         ... class Foo: pass
         >>> Renderer('foo').render(DeField(Dict[Foo, List[Foo]], 'f', datavar='data'))
-        '{Foo.__serde__.funcs[\\'foo\\'](k, reuse_instances=reuse_instances): [Foo.__serde__.funcs[\\'foo\\'](v, reuse_instances=reuse_instances) for v in v] for k, v in data["f"].items()}'
+        '{Foo.__serde__.funcs[\\'foo\\'](k, reuse_instances=reuse_instances): \
+[Foo.__serde__.funcs[\\'foo\\'](v, reuse_instances=reuse_instances) for v in v] for k, v in data["f"].items()}'
         """
         if is_bare_dict(arg.type):
             return arg.data
@@ -668,7 +673,8 @@ def {{func}}(data, reuse_instances):
     errors.append(f' Failed to deserialize into {{t.__name__}}: {e}')
   {% endif %}
   {% endfor %}
-  raise SerdeError("Can not deserialize " + repr(data) + " of type " + typename(type(data)) + " into {{union_name}}.\\nReasons:\\n" + "\\n".join(errors))
+  raise SerdeError("Can not deserialize " + repr(data) + " of type " + \
+          typename(type(data)) + " into {{union_name}}.\\nReasons:\\n" + "\\n".join(errors))
     """
     union_name = f"Union[{', '.join([typename(a) for a in union_args])}]"
 

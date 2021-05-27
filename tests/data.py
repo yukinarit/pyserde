@@ -217,7 +217,6 @@ class PriDefault:
 
 
 class E(enum.Enum):
-    I = 1
     S = 'foo'
     F = 10.0
     B = True
