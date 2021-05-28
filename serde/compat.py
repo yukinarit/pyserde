@@ -16,7 +16,6 @@ __all__: List = []
 T = TypeVar('T')
 
 
-# moved SerdeError from core.py to compat.py to prevent circular dependency issues
 class SerdeError(TypeError):
     """
     Serde error class.

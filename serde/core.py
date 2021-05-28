@@ -283,13 +283,12 @@ class Field:
         """
         return f'{field.name}_{name}'
 
-    @property
-    def conv_name(self) -> str:
+    def conv_name(self, case: Optional[str] = None) -> str:
         """
         Get an actual field name which `rename` and `rename_all` conversions
         are made. Use `name` property to get a field name before conversion.
         """
-        return conv(self, self.case)
+        return conv(self, case or self.case)
 
 
 def fields(FieldCls: Type, cls: Type) -> Iterator[Field]:
