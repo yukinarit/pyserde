@@ -237,6 +237,7 @@ serialize(ForwardReferenceFoo)
 assert ForwardReferenceBar == dataclasses.fields(ForwardReferenceFoo)[0].type
 assert ForwardReferenceBar == next(dataclass_fields(ForwardReferenceFoo)).type
 
+
 # verify usage works
 def test_string_forward_reference_works():
     h = ForwardReferenceFoo(bar=ForwardReferenceBar(i=10))
@@ -329,7 +330,7 @@ def test_enum(se, de, opt):
         ie2: IE = IE.V1
         ne2: NestedEnum = NestedEnum.V
 
-    f = Foo(E.I, IE.V0, NestedEnum.V)
+    f = Foo(E.S, IE.V0, NestedEnum.V)
     ff = de(Foo, se(f))
     assert f == ff
     assert is_enum(ff.e) and isinstance(ff.e, E)
