@@ -390,10 +390,10 @@ def {{func}}(obj, reuse_instances = {{serde_scope.reuse_instances_default}}, con
 
   {% if not f.skip -%}
     {% if f.skip_if -%}
-  if not {{f.skip_if.name}}({{f|rvalue()}}):
-    res[&#34;{{f|case}}&#34;] = {{f|rvalue()}}
+  if not {{f.skip_if.name}}({{f|rvalue}}):
+   {{f|lvalue}} = {{f|rvalue}}
     {% else -%}
-  res[&#34;{{f|case}}&#34;] = {{f|rvalue()}}
+   {{f|lvalue}} = {{f|rvalue}}
     {% endif -%}
   {% endif %}
 
@@ -401,8 +401,10 @@ def {{func}}(obj, reuse_instances = {{serde_scope.reuse_instances_default}}, con
   return res
     &#34;&#34;&#34;
     renderer = Renderer(TO_DICT)
+    lrenderer = LRenderer(case)
     env = jinja2.Environment(loader=jinja2.DictLoader({&#39;dict&#39;: template}))
     env.filters.update({&#39;rvalue&#39;: renderer.render})
+    env.filters.update({&#39;lvalue&#39;: lrenderer.render})
     env.filters.update({&#39;case&#39;: functools.partial(conv, case=case)})
     return env.get_template(&#39;dict&#39;).render(func=TO_DICT, serde_scope=getattr(cls, SERDE_SCOPE), fields=sefields(cls))
 
@@ -437,9 +439,24 @@ def {{func}}(obj, reuse_instances, convert_sets):
 
 
 @dataclass
+class LRenderer:
+    &#34;&#34;&#34;
+    Render lvalue for code generation.
+    &#34;&#34;&#34;
+
+    case: Optional[str]
+
+    def render(self, arg: SeField) -&gt; str:
+        &#34;&#34;&#34;
+        Render lvalue
+        &#34;&#34;&#34;
+        return f&#39;res[&#34;{arg.conv_name(self.case)}&#34;]&#39;
+
+
+@dataclass
 class Renderer:
     &#34;&#34;&#34;
-    Render rvalue for various types.
+    Render rvalue for code generation.
     &#34;&#34;&#34;
 
     func: str

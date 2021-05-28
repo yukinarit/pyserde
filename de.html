@@ -369,7 +369,7 @@ class DeField(Field):
         if self.iterbased:
             return f&#39;{self.datavar}[{self.index}]&#39;
         else:
-            return f&#39;{self.datavar}[&#34;{self.conv_name}&#34;]&#39;
+            return f&#39;{self.datavar}[&#34;{self.conv_name()}&#34;]&#39;
 
     @data.setter
     def data(self, d):
@@ -397,7 +397,7 @@ defields = functools.partial(fields, DeField)
 @dataclass
 class Renderer:
     &#34;&#34;&#34;
-    Render rvalue for various types.
+    Render rvalue for code generation.
     &#34;&#34;&#34;
 
     func: str
@@ -462,7 +462,7 @@ class Renderer:
             if arg.iterbased:
                 exists = f&#39;{arg.data} is not None&#39;
             else:
-                exists = f&#39;{arg.datavar}.get(&#34;{arg.conv_name}&#34;) is not None&#39;
+                exists = f&#39;{arg.datavar}.get(&#34;{arg.conv_name()}&#34;) is not None&#39;
             if has_default(arg):
                 res = f&#39;({res}) if {exists} else serde_scope.defaults[&#34;{arg.name}&#34;]&#39;
             elif has_default_factory(arg):
@@ -501,7 +501,7 @@ class Renderer:
             if arg.iterbased:
                 exists = f&#39;{arg.data} is not None&#39;
             else:
-                exists = f&#39;{arg.datavar}.get(&#34;{arg.conv_name}&#34;) is not None&#39;
+                exists = f&#39;{arg.datavar}.get(&#34;{arg.conv_name()}&#34;) is not None&#39;
             return f&#39;({self.render(value)}) if {exists} else None&#39;
 
     def list(self, arg: DeField) -&gt; str:
