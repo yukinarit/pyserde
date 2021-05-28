@@ -40,7 +40,7 @@ from datetime import date, datetime
 from decimal import Decimal
 from ipaddress import IPv4Address, IPv4Interface, IPv4Network, IPv6Address, IPv6Interface, IPv6Network
 from pathlib import Path, PosixPath, PurePath, PurePosixPath, PureWindowsPath, WindowsPath
-from typing import Any, Callable, Dict, List, Optional, Tuple, Type
+from typing import Any, Callable, Dict, Iterator, List, Optional, Tuple, Type
 from uuid import UUID
 
 import jinja2
@@ -305,10 +305,17 @@ def to_dict(o, reuse_instances: bool = ..., convert_sets: bool = ...) -&gt; Any:
 
 @dataclass
 class SeField(Field):
+    &#34;&#34;&#34;
+    Field class for serialization.
+    &#34;&#34;&#34;
+
     parent: Optional[&#39;SeField&#39;] = None
 
     @property
     def varname(self) -&gt; str:
+        &#34;&#34;&#34;
+        Get variable name in the generated code e.g. obj.a.b
+        &#34;&#34;&#34;
         var = self.parent.varname if self.parent else None
         if var:
             return f&#39;{var}.{self.name}&#39;
@@ -322,12 +329,13 @@ class SeField(Field):
         return SeField(typ, name=None)
 
 
-sefields = functools.partial(fields, SeField)
-
-
-def to_arg(f: SeField) -&gt; SeField:
-    f.parent = SeField(None, &#39;obj&#39;)  # type: ignore
-    return f
+def sefields(cls: Type) -&gt; Iterator[Field]:
+    &#34;&#34;&#34;
+    Iterate fields for serialization.
+    &#34;&#34;&#34;
+    for f in fields(SeField, cls):
+        f.parent = SeField(None, &#39;obj&#39;)  # type: ignore
+        yield f
 
 
 def render_to_tuple(cls: Type) -&gt; str:
@@ -349,7 +357,7 @@ def {{func}}(obj, reuse_instances = {{serde_scope.reuse_instances_default}}, con
   res = []
   {% for f in fields -%}
   {% if not f.skip|default(False) %}
-  res.append({{f|arg|rvalue()}})
+  res.append({{f|rvalue()}})
   {% endif -%}
   {% endfor -%}
   return tuple(res)
@@ -358,7 +366,6 @@ def {{func}}(obj, reuse_instances = {{serde_scope.reuse_instances_default}}, con
     renderer = Renderer(TO_ITER)
     env = jinja2.Environment(loader=jinja2.DictLoader({&#39;iter&#39;: template}))
     env.filters.update({&#39;rvalue&#39;: renderer.render})
-    env.filters.update({&#39;arg&#39;: to_arg})
     return env.get_template(&#39;iter&#39;).render(func=TO_ITER, serde_scope=getattr(cls, SERDE_SCOPE), fields=sefields(cls))
 
 
@@ -383,10 +390,10 @@ def {{func}}(obj, reuse_instances = {{serde_scope.reuse_instances_default}}, con
 
   {% if not f.skip -%}
     {% if f.skip_if -%}
-  if not {{f.skip_if.name}}({{f|arg|rvalue()}}):
-    res[&#34;{{f|case}}&#34;] = {{f|arg|rvalue()}}
+  if not {{f.skip_if.name}}({{f|rvalue()}}):
+    res[&#34;{{f|case}}&#34;] = {{f|rvalue()}}
     {% else -%}
-  res[&#34;{{f|case}}&#34;] = {{f|arg|rvalue()}}
+  res[&#34;{{f|case}}&#34;] = {{f|rvalue()}}
     {% endif -%}
   {% endif %}
 
@@ -396,7 +403,6 @@ def {{func}}(obj, reuse_instances = {{serde_scope.reuse_instances_default}}, con
     renderer = Renderer(TO_DICT)
     env = jinja2.Environment(loader=jinja2.DictLoader({&#39;dict&#39;: template}))
     env.filters.update({&#39;rvalue&#39;: renderer.render})
-    env.filters.update({&#39;arg&#39;: to_arg})
     env.filters.update({&#39;case&#39;: functools.partial(conv, case=case)})
     return env.get_template(&#39;dict&#39;).render(func=TO_DICT, serde_scope=getattr(cls, SERDE_SCOPE), fields=sefields(cls))
 
