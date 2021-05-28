@@ -175,7 +175,8 @@ def dataclass_fields(cls: Type) -&gt; Iterator:
         raise SerdeError(
             f&#34;Failed to resolve type hints for {typename(cls)}:\n&#34;
             f&#34;{e.__class__.__name__}: {e}\n\n&#34;
-            f&#34;If you are using forward references make sure you are calling deserialize &amp; serialize after all classes are globally visible.&#34;
+            f&#34;If you are using forward references make sure you are calling deserialize &amp; &#34;
+            &#34;serialize after all classes are globally visible.&#34;
         )
 
     for f in raw_fields:

@@ -40,7 +40,7 @@ from datetime import date, datetime
 from decimal import Decimal
 from ipaddress import IPv4Address, IPv4Interface, IPv4Network, IPv6Address, IPv6Interface, IPv6Network
 from pathlib import Path, PosixPath, PurePath, PurePosixPath, PureWindowsPath, WindowsPath
-from typing import Any, Callable, Dict, Iterator, List, Optional, Tuple, Type
+from typing import Any, Callable, Dict, Iterator, List, Optional, Type
 from uuid import UUID
 
 import jinja2
@@ -340,7 +340,8 @@ def sefields(cls: Type) -&gt; Iterator[Field]:
 
 def render_to_tuple(cls: Type) -&gt; str:
     template = &#34;&#34;&#34;
-def {{func}}(obj, reuse_instances = {{serde_scope.reuse_instances_default}}, convert_sets = {{serde_scope.convert_sets_default}}):
+def {{func}}(obj, reuse_instances = {{serde_scope.reuse_instances_default}},
+             convert_sets = {{serde_scope.convert_sets_default}}):
   if reuse_instances is Ellipsis:
     reuse_instances = {{serde_scope.reuse_instances_default}}
   if convert_sets is Ellipsis:
@@ -371,7 +372,8 @@ def {{func}}(obj, reuse_instances = {{serde_scope.reuse_instances_default}}, con
 
 def render_to_dict(cls: Type, case: Optional[str] = None) -&gt; str:
     template = &#34;&#34;&#34;
-def {{func}}(obj, reuse_instances = {{serde_scope.reuse_instances_default}}, convert_sets = {{serde_scope.convert_sets_default}}):
+def {{func}}(obj, reuse_instances = {{serde_scope.reuse_instances_default}},
+             convert_sets = {{serde_scope.convert_sets_default}}):
   if reuse_instances is Ellipsis:
     reuse_instances = {{serde_scope.reuse_instances_default}}
   if convert_sets is Ellipsis:
@@ -465,6 +467,7 @@ class Renderer:
         &#34;&#34;&#34;
         Render rvalue
 
+        &gt;&gt;&gt; from typing import Tuple
         &gt;&gt;&gt; Renderer(TO_ITER).render(SeField(int, &#39;i&#39;))
         &#39;i&#39;
 
@@ -482,13 +485,17 @@ class Renderer:
         &#34;[v.__serde__.funcs[&#39;to_iter&#39;](v, reuse_instances=reuse_instances, convert_sets=convert_sets) for v in foo]&#34;
 
         &gt;&gt;&gt; Renderer(TO_ITER).render(SeField(Dict[str, Foo], &#39;foo&#39;))
-        &#34;{k: v.__serde__.funcs[&#39;to_iter&#39;](v, reuse_instances=reuse_instances, convert_sets=convert_sets) for k, v in foo.items()}&#34;
+        &#34;{k: v.__serde__.funcs[&#39;to_iter&#39;](v, reuse_instances=reuse_instances, \
+convert_sets=convert_sets) for k, v in foo.items()}&#34;
 
         &gt;&gt;&gt; Renderer(TO_ITER).render(SeField(Dict[Foo, Foo], &#39;foo&#39;))
-        &#34;{k.__serde__.funcs[&#39;to_iter&#39;](k, reuse_instances=reuse_instances, convert_sets=convert_sets): v.__serde__.funcs[&#39;to_iter&#39;](v, reuse_instances=reuse_instances, convert_sets=convert_sets) for k, v in foo.items()}&#34;
+        &#34;{k.__serde__.funcs[&#39;to_iter&#39;](k, reuse_instances=reuse_instances, \
+convert_sets=convert_sets): v.__serde__.funcs[&#39;to_iter&#39;](v, reuse_instances=reuse_instances, \
+convert_sets=convert_sets) for k, v in foo.items()}&#34;
 
         &gt;&gt;&gt; Renderer(TO_ITER).render(SeField(Tuple[str, Foo, int], &#39;foo&#39;))
-        &#34;(foo[0], foo[1].__serde__.funcs[&#39;to_iter&#39;](foo[1], reuse_instances=reuse_instances, convert_sets=convert_sets), foo[2],)&#34;
+        &#34;(foo[0], foo[1].__serde__.funcs[&#39;to_iter&#39;](foo[1], reuse_instances=reuse_instances, \
+convert_sets=convert_sets), foo[2],)&#34;
         &#34;&#34;&#34;
         if is_dataclass(arg.type):
             return self.dataclass(arg)
@@ -538,7 +545,10 @@ class Renderer:
         &#34;&#34;&#34;
         Render rvalue for dataclass.
         &#34;&#34;&#34;
-        return f&#34;{arg.varname}.{SERDE_SCOPE}.funcs[&#39;{self.func}&#39;]({arg.varname}, reuse_instances=reuse_instances, convert_sets=convert_sets)&#34;
+        return (
+            f&#34;{arg.varname}.{SERDE_SCOPE}.funcs[&#39;{self.func}&#39;]({arg.varname},&#34;
+            &#34; reuse_instances=reuse_instances, convert_sets=convert_sets)&#34;
+        )
 
     def opt(self, arg: SeField) -&gt; str:
         &#34;&#34;&#34;
@@ -568,7 +578,10 @@ class Renderer:
         else:
             earg = arg[0]
             earg.name = &#39;v&#39;
-            return f&#39;[{self.render(earg)} for v in {arg.varname}] if convert_sets else set({self.render(earg)} for v in {arg.varname})&#39;
+            return (
+                f&#39;[{self.render(earg)} for v in {arg.varname}] &#39;
+                f&#39;if convert_sets else set({self.render(earg)} for v in {arg.varname})&#39;
+            )
 
     def tuple(self, arg: SeField) -&gt; str:
         &#34;&#34;&#34;

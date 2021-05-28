@@ -56,7 +56,7 @@ from datetime import date, datetime
 from decimal import Decimal
 from ipaddress import IPv4Address, IPv4Interface, IPv4Network, IPv6Address, IPv6Interface, IPv6Network
 from pathlib import Path, PosixPath, PurePath, PurePosixPath, PureWindowsPath, WindowsPath
-from typing import Any, Callable, Dict, List, Optional, Tuple, Type
+from typing import Any, Callable, Dict, List, Optional, Type
 from uuid import UUID
 
 import jinja2
@@ -450,7 +450,8 @@ class Renderer:
                 elif arg.type is datetime:
                     from_iso = f&#34;__py36_datetime_fromisoformat__({arg.data})&#34;
 
-            res = f&#34;({arg.data} if isinstance({arg.data}, {arg.type.__name__}) else {from_iso}) if reuse_instances else {from_iso}&#34;
+            res = f&#34;({arg.data} if isinstance({arg.data}, {arg.type.__name__}) else {from_iso}) \
+                    if reuse_instances else {from_iso}&#34;
         elif is_none(arg.type):
             res = &#34;None&#34;
         elif arg.type is Any:
@@ -492,7 +493,8 @@ class Renderer:
         ... class Foo:
         ...     o: Optional[List[int]]
         &gt;&gt;&gt; Renderer(&#39;foo&#39;).render(DeField(Optional[Foo], &#39;f&#39;, datavar=&#39;data&#39;))
-        &#39;(Foo.__serde__.funcs[\\&#39;foo\\&#39;](data[&#34;f&#34;], reuse_instances=reuse_instances)) if data.get(&#34;f&#34;) is not None else None&#39;
+        &#39;(Foo.__serde__.funcs[\\&#39;foo\\&#39;](data[&#34;f&#34;], reuse_instances=reuse_instances)) \
+if data.get(&#34;f&#34;) is not None else None&#39;
         &#34;&#34;&#34;
         value = arg[0]
         if has_default(arg):
@@ -545,11 +547,13 @@ class Renderer:
         ... @dataclass
         ... class Foo: pass
         &gt;&gt;&gt; Renderer(&#39;foo&#39;).render(DeField(Tuple[str, int, List[int], Foo], &#39;d&#39;, datavar=&#39;data&#39;))
-        &#39;(data[&#34;d&#34;][0], data[&#34;d&#34;][1], [v for v in data[&#34;d&#34;][2]], Foo.__serde__.funcs[\\&#39;foo\\&#39;](data[&#34;d&#34;][3], reuse_instances=reuse_instances),)&#39;
+        &#39;(data[&#34;d&#34;][0], data[&#34;d&#34;][1], [v for v in data[&#34;d&#34;][2]], \
+Foo.__serde__.funcs[\\&#39;foo\\&#39;](data[&#34;d&#34;][3], reuse_instances=reuse_instances),)&#39;
 
         &gt;&gt;&gt; field = DeField(Tuple[str, int, List[int], Foo], &#39;d&#39;, datavar=&#39;data&#39;, index=0, iterbased=True)
         &gt;&gt;&gt; Renderer(&#39;foo&#39;).render(field)
-        &#34;(data[0][0], data[0][1], [v for v in data[0][2]], Foo.__serde__.funcs[&#39;foo&#39;](data[0][3], reuse_instances=reuse_instances),)&#34;
+        &#34;(data[0][0], data[0][1], [v for v in data[0][2]], \
+Foo.__serde__.funcs[&#39;foo&#39;](data[0][3], reuse_instances=reuse_instances),)&#34;
         &#34;&#34;&#34;
         if is_bare_tuple(arg.type):
             return f&#39;tuple({arg.data})&#39;
@@ -572,7 +576,8 @@ class Renderer:
         ... @dataclass
         ... class Foo: pass
         &gt;&gt;&gt; Renderer(&#39;foo&#39;).render(DeField(Dict[Foo, List[Foo]], &#39;f&#39;, datavar=&#39;data&#39;))
-        &#39;{Foo.__serde__.funcs[\\&#39;foo\\&#39;](k, reuse_instances=reuse_instances): [Foo.__serde__.funcs[\\&#39;foo\\&#39;](v, reuse_instances=reuse_instances) for v in v] for k, v in data[&#34;f&#34;].items()}&#39;
+        &#39;{Foo.__serde__.funcs[\\&#39;foo\\&#39;](k, reuse_instances=reuse_instances): \
+[Foo.__serde__.funcs[\\&#39;foo\\&#39;](v, reuse_instances=reuse_instances) for v in v] for k, v in data[&#34;f&#34;].items()}&#39;
         &#34;&#34;&#34;
         if is_bare_dict(arg.type):
             return arg.data
@@ -705,7 +710,8 @@ def {{func}}(data, reuse_instances):
     errors.append(f&#39; Failed to deserialize into {{t.__name__}}: {e}&#39;)
   {% endif %}
   {% endfor %}
-  raise SerdeError(&#34;Can not deserialize &#34; + repr(data) + &#34; of type &#34; + typename(type(data)) + &#34; into {{union_name}}.\\nReasons:\\n&#34; + &#34;\\n&#34;.join(errors))
+  raise SerdeError(&#34;Can not deserialize &#34; + repr(data) + &#34; of type &#34; + \
+          typename(type(data)) + &#34; into {{union_name}}.\\nReasons:\\n&#34; + &#34;\\n&#34;.join(errors))
     &#34;&#34;&#34;
     union_name = f&#34;Union[{&#39;, &#39;.join([typename(a) for a in union_args])}]&#34;
 
