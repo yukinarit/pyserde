@@ -1,7 +1,7 @@
 """
 Serialize and Deserialize in TOML format.
 """
-from typing import List, Type  # noqa
+from typing import Type
 
 import toml
 
@@ -22,10 +22,11 @@ class TomlDeserializer(Deserializer):
         return toml.loads(s, **opts)
 
 
-def to_toml(obj, se: Serializer = TomlSerializer, **opts) -> str:
+def to_toml(obj, se: Type[Serializer] = TomlSerializer, **opts) -> str:
     """
     Take an object and return toml string.
 
+    >>> from typing import List
     >>> from dataclasses import dataclass
     >>> from serde import serialize
     >>> from serde.toml import to_toml
@@ -49,10 +50,11 @@ def to_toml(obj, se: Serializer = TomlSerializer, **opts) -> str:
     return se.serialize(to_dict(obj, reuse_instances=False), **opts)
 
 
-def from_toml(c: Type[T], s: str, de: Deserializer = TomlDeserializer, **opts) -> T:
+def from_toml(c: Type[T], s: str, de: Type[Deserializer] = TomlDeserializer, **opts) -> T:
     """
     Take toml string and return deserialized object.
 
+    >>> from typing import List
     >>> from dataclasses import dataclass
     >>> from serde import deserialize
     >>> from serde.toml import to_toml
