@@ -32,7 +32,7 @@ Defines classes and functions for `serialize` decorator.
 
 &#34;&#34;&#34;
 import abc
-import copy  # noqa
+import copy
 import dataclasses
 import functools
 from dataclasses import dataclass, is_dataclass
@@ -152,6 +152,7 @@ def serialize(
 
         # Set some globals for all generated functions
         g[&#39;cls&#39;] = cls
+        g[&#39;copy&#39;] = copy
         g[&#39;serde_scope&#39;] = scope
         g[&#39;SerdeError&#39;] = SerdeError
         g[&#39;raise_unsupported_type&#39;] = raise_unsupported_type
@@ -531,7 +532,7 @@ convert_sets=convert_sets), foo[2],)&#34;
             IPv4Interface,
             IPv6Interface,
         ]:
-            return f&#34;{arg.varname} if reuse_instances else {self.str(arg)}&#34;
+            return f&#34;{arg.varname} if reuse_instances else {self.string(arg)}&#34;
         elif arg.type in [date, datetime]:
             return f&#34;{arg.varname} if reuse_instances else {arg.varname}.isoformat()&#34;
         elif is_none(arg.type):
@@ -619,7 +620,7 @@ convert_sets=convert_sets), foo[2],)&#34;
         &#34;&#34;&#34;
         return f&#39;{arg.varname}&#39;
 
-    def str(self, arg: SeField) -&gt; str:
+    def string(self, arg: SeField) -&gt; str:
         return f&#34;str({arg.varname})&#34;
 
     def union_func(self, arg: SeField) -&gt; str:
@@ -776,6 +777,7 @@ into an object in various data format such as JSON and MsgPack.</p>
 
         # Set some globals for all generated functions
         g[&#39;cls&#39;] = cls
+        g[&#39;copy&#39;] = copy
         g[&#39;serde_scope&#39;] = scope
         g[&#39;SerdeError&#39;] = SerdeError
         g[&#39;raise_unsupported_type&#39;] = raise_unsupported_type

@@ -539,6 +539,7 @@ RenameAll(int_field=10, str_field='foo')
 
         # Collect default values and default factories used in the generated code.
         for f in defields(cls):
+            assert f.name
             if has_default(f):
                 scope.defaults[f.name] = f.default
             elif has_default_factory(f):
@@ -814,6 +815,7 @@ into an object in various data format such as JSON and MsgPack.</p>
 
         # Set some globals for all generated functions
         g[&#39;cls&#39;] = cls
+        g[&#39;copy&#39;] = copy
         g[&#39;serde_scope&#39;] = scope
         g[&#39;SerdeError&#39;] = SerdeError
         g[&#39;raise_unsupported_type&#39;] = raise_unsupported_type

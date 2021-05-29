@@ -30,7 +30,7 @@
 <pre><code class="python">&#34;&#34;&#34;
 Serialize and Deserialize in TOML format.
 &#34;&#34;&#34;
-from typing import List, Type  # noqa
+from typing import Type
 
 import toml
 
@@ -51,10 +51,11 @@ class TomlDeserializer(Deserializer):
         return toml.loads(s, **opts)
 
 
-def to_toml(obj, se: Serializer = TomlSerializer, **opts) -&gt; str:
+def to_toml(obj, se: Type[Serializer] = TomlSerializer, **opts) -&gt; str:
     &#34;&#34;&#34;
     Take an object and return toml string.
 
+    &gt;&gt;&gt; from typing import List
     &gt;&gt;&gt; from dataclasses import dataclass
     &gt;&gt;&gt; from serde import serialize
     &gt;&gt;&gt; from serde.toml import to_toml
@@ -78,10 +79,11 @@ def to_toml(obj, se: Serializer = TomlSerializer, **opts) -&gt; str:
     return se.serialize(to_dict(obj, reuse_instances=False), **opts)
 
 
-def from_toml(c: Type[T], s: str, de: Deserializer = TomlDeserializer, **opts) -&gt; T:
+def from_toml(c: Type[T], s: str, de: Type[Deserializer] = TomlDeserializer, **opts) -&gt; T:
     &#34;&#34;&#34;
     Take toml string and return deserialized object.
 
+    &gt;&gt;&gt; from typing import List
     &gt;&gt;&gt; from dataclasses import dataclass
     &gt;&gt;&gt; from serde import deserialize
     &gt;&gt;&gt; from serde.toml import to_toml
@@ -109,11 +111,12 @@ def from_toml(c: Type[T], s: str, de: Deserializer = TomlDeserializer, **opts) -
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
 <dt id="serde.toml.from_toml"><code class="name flex">
-<span>def <span class="ident">from_toml</span></span>(<span>c: Type[~T], s: str, de: <a title="serde.de.Deserializer" href="de.html#serde.de.Deserializer">Deserializer</a> = serde.toml.TomlDeserializer, **opts) ‑> ~T</span>
+<span>def <span class="ident">from_toml</span></span>(<span>c: Type[~T], s: str, de: Type[<a title="serde.de.Deserializer" href="de.html#serde.de.Deserializer">Deserializer</a>] = serde.toml.TomlDeserializer, **opts) ‑> ~T</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Take toml string and return deserialized object.</p>
-<pre><code class="language-python-repl">&gt;&gt;&gt; from dataclasses import dataclass
+<pre><code class="language-python-repl">&gt;&gt;&gt; from typing import List
+&gt;&gt;&gt; from dataclasses import dataclass
 &gt;&gt;&gt; from serde import deserialize
 &gt;&gt;&gt; from serde.toml import to_toml
 &gt;&gt;&gt;
@@ -133,10 +136,11 @@ Settings(host='localhost', port=8080, upstream=['localhost:8081', 'localhost:808
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def from_toml(c: Type[T], s: str, de: Deserializer = TomlDeserializer, **opts) -&gt; T:
+<pre><code class="python">def from_toml(c: Type[T], s: str, de: Type[Deserializer] = TomlDeserializer, **opts) -&gt; T:
     &#34;&#34;&#34;
     Take toml string and return deserialized object.
 
+    &gt;&gt;&gt; from typing import List
     &gt;&gt;&gt; from dataclasses import dataclass
     &gt;&gt;&gt; from serde import deserialize
     &gt;&gt;&gt; from serde.toml import to_toml
@@ -157,11 +161,12 @@ Settings(host='localhost', port=8080, upstream=['localhost:8081', 'localhost:808
 </details>
 </dd>
 <dt id="serde.toml.to_toml"><code class="name flex">
-<span>def <span class="ident">to_toml</span></span>(<span>obj, se: <a title="serde.se.Serializer" href="se.html#serde.se.Serializer">Serializer</a> = serde.toml.TomlSerializer, **opts) ‑> str</span>
+<span>def <span class="ident">to_toml</span></span>(<span>obj, se: Type[<a title="serde.se.Serializer" href="se.html#serde.se.Serializer">Serializer</a>] = serde.toml.TomlSerializer, **opts) ‑> str</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Take an object and return toml string.</p>
-<pre><code class="language-python-repl">&gt;&gt;&gt; from dataclasses import dataclass
+<pre><code class="language-python-repl">&gt;&gt;&gt; from typing import List
+&gt;&gt;&gt; from dataclasses import dataclass
 &gt;&gt;&gt; from serde import serialize
 &gt;&gt;&gt; from serde.toml import to_toml
 &gt;&gt;&gt;
@@ -185,10 +190,11 @@ Settings(host='localhost', port=8080, upstream=['localhost:8081', 'localhost:808
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def to_toml(obj, se: Serializer = TomlSerializer, **opts) -&gt; str:
+<pre><code class="python">def to_toml(obj, se: Type[Serializer] = TomlSerializer, **opts) -&gt; str:
     &#34;&#34;&#34;
     Take an object and return toml string.
 
+    &gt;&gt;&gt; from typing import List
     &gt;&gt;&gt; from dataclasses import dataclass
     &gt;&gt;&gt; from serde import serialize
     &gt;&gt;&gt; from serde.toml import to_toml

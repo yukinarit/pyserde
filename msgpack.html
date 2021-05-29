@@ -58,7 +58,7 @@ class MsgPackDeserializer(Deserializer):
 
 
 def to_msgpack(
-    obj: Any, se: Serializer = MsgPackSerializer, named: bool = True, ext_dict: Dict[Type, int] = None, **opts
+    obj: Any, se: Type[Serializer] = MsgPackSerializer, named: bool = True, ext_dict: Dict[Type, int] = None, **opts
 ) -&gt; bytes:
     &#34;&#34;&#34;
     If `ext_dict` option is specified, `obj` is encoded as a `msgpack.ExtType`
@@ -77,7 +77,7 @@ def to_msgpack(
 def from_msgpack(
     c: Type[T],
     s: str,
-    de: Deserializer = MsgPackDeserializer,
+    de: Type[Deserializer] = MsgPackDeserializer,
     named: bool = True,
     ext_dict: Dict[int, Type] = None,
     **opts,
@@ -104,7 +104,7 @@ def from_msgpack(
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
 <dt id="serde.msgpack.from_msgpack"><code class="name flex">
-<span>def <span class="ident">from_msgpack</span></span>(<span>c: Type[~T], s: str, de: <a title="serde.de.Deserializer" href="de.html#serde.de.Deserializer">Deserializer</a> = serde.msgpack.MsgPackDeserializer, named: bool = True, ext_dict: Dict[int, Type] = None, **opts) ‑> Type[~T]</span>
+<span>def <span class="ident">from_msgpack</span></span>(<span>c: Type[~T], s: str, de: Type[<a title="serde.de.Deserializer" href="de.html#serde.de.Deserializer">Deserializer</a>] = serde.msgpack.MsgPackDeserializer, named: bool = True, ext_dict: Dict[int, Type] = None, **opts) ‑> Type[~T]</span>
 </code></dt>
 <dd>
 <div class="desc"><p>If <code>ext_dict</code> option is specified, <code>c</code> is ignored and type is inferred from <code>msgpack.ExtType</code></p></div>
@@ -115,7 +115,7 @@ def from_msgpack(
 <pre><code class="python">def from_msgpack(
     c: Type[T],
     s: str,
-    de: Deserializer = MsgPackDeserializer,
+    de: Type[Deserializer] = MsgPackDeserializer,
     named: bool = True,
     ext_dict: Dict[int, Type] = None,
     **opts,
@@ -135,7 +135,7 @@ def from_msgpack(
 </details>
 </dd>
 <dt id="serde.msgpack.to_msgpack"><code class="name flex">
-<span>def <span class="ident">to_msgpack</span></span>(<span>obj: Any, se: <a title="serde.se.Serializer" href="se.html#serde.se.Serializer">Serializer</a> = serde.msgpack.MsgPackSerializer, named: bool = True, ext_dict: Dict[Type, int] = None, **opts) ‑> bytes</span>
+<span>def <span class="ident">to_msgpack</span></span>(<span>obj: Any, se: Type[<a title="serde.se.Serializer" href="se.html#serde.se.Serializer">Serializer</a>] = serde.msgpack.MsgPackSerializer, named: bool = True, ext_dict: Dict[Type, int] = None, **opts) ‑> bytes</span>
 </code></dt>
 <dd>
 <div class="desc"><p>If <code>ext_dict</code> option is specified, <code>obj</code> is encoded as a <code>msgpack.ExtType</code></p></div>
@@ -144,7 +144,7 @@ def from_msgpack(
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def to_msgpack(
-    obj: Any, se: Serializer = MsgPackSerializer, named: bool = True, ext_dict: Dict[Type, int] = None, **opts
+    obj: Any, se: Type[Serializer] = MsgPackSerializer, named: bool = True, ext_dict: Dict[Type, int] = None, **opts
 ) -&gt; bytes:
     &#34;&#34;&#34;
     If `ext_dict` option is specified, `obj` is encoded as a `msgpack.ExtType`
