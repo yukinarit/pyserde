@@ -146,6 +146,7 @@ def deserialize(
 
         # Collect default values and default factories used in the generated code.
         for f in defields(cls):
+            assert f.name
             if has_default(f):
                 scope.defaults[f.name] = f.default
             elif has_default_factory(f):

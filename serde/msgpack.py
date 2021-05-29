@@ -29,7 +29,7 @@ class MsgPackDeserializer(Deserializer):
 
 
 def to_msgpack(
-    obj: Any, se: Serializer = MsgPackSerializer, named: bool = True, ext_dict: Dict[Type, int] = None, **opts
+    obj: Any, se: Type[Serializer] = MsgPackSerializer, named: bool = True, ext_dict: Dict[Type, int] = None, **opts
 ) -> bytes:
     """
     If `ext_dict` option is specified, `obj` is encoded as a `msgpack.ExtType`
@@ -48,7 +48,7 @@ def to_msgpack(
 def from_msgpack(
     c: Type[T],
     s: str,
-    de: Deserializer = MsgPackDeserializer,
+    de: Type[Deserializer] = MsgPackDeserializer,
     named: bool = True,
     ext_dict: Dict[int, Type] = None,
     **opts,

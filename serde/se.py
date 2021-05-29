@@ -3,7 +3,7 @@ Defines classes and functions for `serialize` decorator.
 
 """
 import abc
-import copy  # noqa
+import copy
 import dataclasses
 import functools
 from dataclasses import dataclass, is_dataclass
@@ -123,6 +123,7 @@ def serialize(
 
         # Set some globals for all generated functions
         g['cls'] = cls
+        g['copy'] = copy
         g['serde_scope'] = scope
         g['SerdeError'] = SerdeError
         g['raise_unsupported_type'] = raise_unsupported_type
@@ -502,7 +503,7 @@ convert_sets=convert_sets), foo[2],)"
             IPv4Interface,
             IPv6Interface,
         ]:
-            return f"{arg.varname} if reuse_instances else {self.str(arg)}"
+            return f"{arg.varname} if reuse_instances else {self.string(arg)}"
         elif arg.type in [date, datetime]:
             return f"{arg.varname} if reuse_instances else {arg.varname}.isoformat()"
         elif is_none(arg.type):
@@ -590,7 +591,7 @@ convert_sets=convert_sets), foo[2],)"
         """
         return f'{arg.varname}'
 
-    def str(self, arg: SeField) -> str:
+    def string(self, arg: SeField) -> str:
         return f"str({arg.varname})"
 
     def union_func(self, arg: SeField) -> str:

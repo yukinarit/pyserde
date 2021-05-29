@@ -56,9 +56,9 @@ class SerdeScope:
     cls: Type  # the exact class this scope is for (needed to distinguish scopes between inherited classes)
 
     # generated serialize and deserialize functions
-    funcs: Dict[str, callable] = field(default_factory=dict)
+    funcs: Dict[str, Callable] = field(default_factory=dict)
     # default values of the dataclass fields (factories & normal values)
-    defaults: Dict[str, Union[callable, Any]] = field(default_factory=dict)
+    defaults: Dict[str, Union[Callable, Any]] = field(default_factory=dict)
     # type references to all used types within the dataclass
     types: Dict[str, Type] = field(default_factory=dict)
 
