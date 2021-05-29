@@ -102,7 +102,7 @@ if os.name == "nt":
     types.append((pathlib.WindowsPath('C:\\tmp'), pathlib.WindowsPath))
 
 if sys.version_info[:3] >= (3, 9, 0):
-    types.extend([([1, 2], list[int]), ({'a': 1}, dict[str, int]), ((1, 1), tuple[int, int])])
+    types.extend([([1, 2], list[int]), ({'a': 1}, dict[str, int]), ((1, 1), tuple[int, int])])  # type: ignore
 
 types_combinations: List = list(map(lambda c: list(more_itertools.flatten(c)), itertools.combinations(types, 2)))
 
