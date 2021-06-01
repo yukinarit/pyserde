@@ -3,10 +3,11 @@ Tests for custom serializer/deserializer.
 """
 from dataclasses import dataclass, field
 from datetime import datetime
+from typing import Optional
 
 import pytest
 
-from serde import deserialize, serialize
+from serde import SerdeSkip, default_deserialize, default_serialize, deserialize, serialize
 from serde.json import from_json, to_json
 
 
@@ -17,6 +18,26 @@ def test_custom_field_serializer():
     class Foo:
         dt1: datetime
         dt2: datetime = field(
+            metadata={
+                'serde_serialize': lambda x: x.strftime('%d/%m/%y'),
+                'serde_deserialize': lambda x: datetime.strptime(x, '%d/%m/%y'),
+            }
+        )
+
+    dt = datetime(2021, 1, 1, 0, 0, 0)
+    f = Foo(dt, dt)
+
+    assert to_json(f) == '{"dt1": "2021-01-01T00:00:00", "dt2": "01/01/21"}'
+    assert f == from_json(Foo, to_json(f))
+
+
+def test_custom_field_serializer_optional():
+    @deserialize
+    @serialize
+    @dataclass
+    class Foo:
+        dt1: datetime
+        dt2: Optional[datetime] = field(
             metadata={
                 'serde_serialize': lambda x: x.strftime('%d/%m/%y'),
                 'serde_deserialize': lambda x: datetime.strptime(x, '%d/%m/%y'),
@@ -61,3 +82,92 @@ def test_wrong_signature():
 
     with pytest.raises(TypeError):
         from_json(Foo, '{"i": 10}')
+
+
+def test_custom_class_serializer():
+    def serializer(cls, o):
+        if cls is datetime:
+            return o.strftime('%d/%m/%y')
+        else:
+            raise SerdeSkip()
+
+    def deserializer(cls, o):
+        if cls is datetime:
+            return datetime.strptime(o, '%d/%m/%y')
+        else:
+            raise SerdeSkip()
+
+    @deserialize(deserialize=deserializer)
+    @serialize(serialize=serializer)
+    @dataclass
+    class Foo:
+        i: int
+        dt1: datetime
+        dt2: datetime
+
+    dt = datetime(2021, 1, 1, 0, 0, 0)
+    f = Foo(10, dt, dt)
+
+    assert to_json(f) == '{"i": 10, "dt1": "01/01/21", "dt2": "01/01/21"}'
+    assert f == from_json(Foo, to_json(f))
+
+
+def test_field_serialize_override_class_serializer():
+    def serializer(cls, o):
+        if cls is datetime:
+            return o.strftime('%d/%m/%y')
+        else:
+            raise SerdeSkip()
+
+    def deserializer(cls, o):
+        if cls is datetime:
+            return datetime.strptime(o, '%d/%m/%y')
+        else:
+            raise SerdeSkip()
+
+    @deserialize(deserialize=deserializer)
+    @serialize(serialize=serializer)
+    @dataclass
+    class Foo:
+        i: int
+        dt1: datetime
+        dt2: datetime = field(
+            metadata={
+                'serde_serialize': lambda x: x.strftime('%y.%m.%d'),
+                'serde_deserialize': lambda x: datetime.strptime(x, '%y.%m.%d'),
+            }
+        )
+
+    dt = datetime(2021, 1, 1, 0, 0, 0)
+    f = Foo(10, dt, dt)
+
+    assert to_json(f) == '{"i": 10, "dt1": "01/01/21", "dt2": "21.01.01"}'
+    assert f == from_json(Foo, to_json(f))
+
+
+def test_override_by_default_serializer():
+    def serializer(cls, o):
+        if cls is datetime:
+            return o.strftime('%d/%m/%y')
+        else:
+            raise SerdeSkip()
+
+    def deserializer(cls, o):
+        if cls is datetime:
+            return datetime.strptime(o, '%d/%m/%y')
+        else:
+            raise SerdeSkip()
+
+    @deserialize(deserialize=deserializer)
+    @serialize(serialize=serializer)
+    @dataclass
+    class Foo:
+        i: int
+        dt1: datetime
+        dt2: datetime = field(metadata={'serde_serialize': default_serialize, 'serde_deserialize': default_deserialize})
+
+    dt = datetime(2021, 1, 1, 0, 0, 0)
+    f = Foo(10, dt, dt)
+
+    assert to_json(f) == '{"i": 10, "dt1": "01/01/21", "dt2": "2021-01-01T00:00:00"}'
+    assert f == from_json(Foo, to_json(f))

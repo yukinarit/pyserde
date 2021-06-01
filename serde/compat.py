@@ -22,6 +22,12 @@ class SerdeError(TypeError):
     """
 
 
+class SerdeSkip(Exception):
+    """
+    Skip a field in custom (de)serializer.
+    """
+
+
 def get_origin(typ):
     """
     Provide `get_origin` that works in all python versions.

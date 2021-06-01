@@ -319,9 +319,9 @@ As you can see below, field is skipped in serialization if `buddy` is "Pikachu".
 
 For complete example, please see [./examples/skip.py](./examples/skip.py)
 
-## Custom serializer/deserializer
+## Custom field serializer/deserializer
 
-If you want to provide a custom function to override the default (de)serialization behaviour of a field, you can pass your function to `serde_serialize` and `serde_deserialize` field attributes.
+If you want to provide a custom function to override the default (de)serialization behaviour of a field, you can pass your functions to `serde_serialize` and `serde_deserialize` dataclass metadata.
 
 ```python
 @deserialize
@@ -339,6 +339,34 @@ class Foo:
 `dt1` in the example will serialized into `2021-01-01T00:00:00` because the pyserde's default (de)serializier for datetime is ISO 8601. `dt2` field in the example will be serialized into `01/01/21` by the custom field serializer.
 
 For complete example, please see [./examples/custom_field_serializer.py](./examples/custom_field_serializer.py)
+
+## Custom class serializer/deserializer
+
+If you want to provide (de)serializer at class level, you can pass your functions to `serialize` and `deserialize` class attributes.
+
+```python
+def serializer(cls, o):
+    if cls is datetime:
+        return o.strftime('%d/%m/%y')
+    else:
+        raise SerdeSkip()
+
+def deserializer(cls, o):
+    if cls is datetime:
+        return datetime.strptime(o, '%d/%m/%y')
+    else:
+        raise SerdeSkip()
+
+@deserialize(deserialize=deserializer)
+@serialize(serialize=serializer)
+@dataclass
+class Foo:
+    i: int
+    dt1: datetime
+    dt2: datetime
+```
+
+For complete example, please see [./examples/custom_class_serializer.py](./examples/custom_class_serializer.py)
 
 ## FAQ
 

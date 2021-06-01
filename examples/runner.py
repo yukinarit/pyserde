@@ -2,6 +2,7 @@ import sys
 
 import any
 import collection
+import custom_class_serializer
 import custom_field_serializer
 import default
 import env
@@ -30,6 +31,7 @@ def run_all():
     run(tomlfile)
     run(yamlfile)
     run(union)
+    run(custom_class_serializer)
     run(custom_field_serializer)
 
 
