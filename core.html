@@ -252,10 +252,10 @@ class Func:
     multiple fields receives `skip_if` attribute.
     &#34;&#34;&#34;
 
-    inner: Callable[[Any], bool]
+    inner: Callable
     mangeld: str = &#34;&#34;
 
-    def __call__(self, v) -&gt; bool:
+    def __call__(self, v):
         return self.inner(v)  # type: ignore
 
     @property
@@ -282,6 +282,8 @@ class Field:
     skip: Optional[bool] = None
     skip_if: Optional[Func] = None
     skip_if_false: Optional[bool] = None
+    serialize: Optional[Func] = None  # Custom field serializer.
+    deserialize: Optional[Func] = None  # Custom field deserializer.
 
     @classmethod
     def from_dataclass(cls, f: dataclasses.Field) -&gt; &#39;Field&#39;:
@@ -295,6 +297,16 @@ class Field:
             if callable(func):
                 skip_if = Func(func, cls.mangle(f, &#39;skip_if&#39;))
 
+        serialize: Optional[Func] = None
+        func = f.metadata.get(&#39;serde_serialize&#39;)
+        if func:
+            serialize = Func(func, cls.mangle(f, &#39;serialize&#39;))
+
+        deserialize: Optional[Func] = None
+        func = f.metadata.get(&#39;serde_deserialize&#39;)
+        if func:
+            deserialize = Func(func, cls.mangle(f, &#39;deserialize&#39;))
+
         return cls(
             f.type,
             f.name,
@@ -303,6 +315,8 @@ class Field:
             rename=f.metadata.get(&#39;serde_rename&#39;),
             skip=f.metadata.get(&#39;serde_skip&#39;),
             skip_if=skip_if or skip_if_false_func,
+            serialize=serialize,
+            deserialize=deserialize,
         )
 
     @staticmethod
