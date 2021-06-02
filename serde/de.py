@@ -151,6 +151,8 @@ def deserialize(
                 scope.defaults[f.name] = f.default
             elif has_default_factory(f):
                 scope.defaults[f.name] = f.default_factory
+            if f.deserialize:
+                g[f.deserialize.name] = f.deserialize
 
         add_func(scope, FROM_ITER, render_from_iter(cls), g)
         add_func(scope, FROM_DICT, render_from_dict(cls, rename_all), g)
@@ -370,7 +372,9 @@ class Renderer:
         """
         Render rvalue
         """
-        if is_dataclass(arg.type):
+        if arg.serialize:
+            res = self.custom_field_deserializer(arg)
+        elif is_dataclass(arg.type):
             res = self.dataclass(arg)
         elif is_opt(arg.type):
             res = self.opt(arg)
@@ -434,6 +438,13 @@ class Renderer:
                 res = f'({res}) if {exists} else serde_scope.defaults["{arg.name}"]()'
 
         return res
+
+    def custom_field_deserializer(self, arg: DeField) -> str:
+        """
+        Render rvalue for the field with custom deserializer.
+        """
+        assert arg.deserialize
+        return f"{arg.deserialize.name}({arg.data})"
 
     def dataclass(self, arg: DeField) -> str:
         return f"{arg.type.__name__}.{SERDE_SCOPE}.funcs['{self.func}']({arg.data}, reuse_instances=reuse_instances)"

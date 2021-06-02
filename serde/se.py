@@ -154,6 +154,8 @@ def serialize(
         for f in sefields(cls):
             if f.skip_if:
                 g[f.skip_if.name] = f.skip_if
+            if f.serialize:
+                g[f.serialize.name] = f.serialize
 
         add_func(scope, TO_ITER, render_to_tuple(cls), g)
         add_func(scope, TO_DICT, render_to_dict(cls, rename_all), g)
@@ -469,7 +471,9 @@ convert_sets=convert_sets) for k, v in foo.items()}"
         "(foo[0], foo[1].__serde__.funcs['to_iter'](foo[1], reuse_instances=reuse_instances, \
 convert_sets=convert_sets), foo[2],)"
         """
-        if is_dataclass(arg.type):
+        if arg.serialize:
+            return self.custom_field_serializer(arg)
+        elif is_dataclass(arg.type):
             return self.dataclass(arg)
         elif is_opt(arg.type):
             return self.opt(arg)
@@ -512,6 +516,13 @@ convert_sets=convert_sets), foo[2],)"
             return f"to_obj({arg.varname}, True, False, False)"
         else:
             return f"raise_unsupported_type({arg.varname})"
+
+    def custom_field_serializer(self, arg: SeField) -> str:
+        """
+        Render rvalue for the field with custom serializer.
+        """
+        assert arg.serialize
+        return f"{arg.serialize.name}({arg.varname})"
 
     def dataclass(self, arg: SeField) -> str:
         """

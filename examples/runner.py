@@ -2,6 +2,7 @@ import sys
 
 import any
 import collection
+import custom_field_serializer
 import default
 import env
 import jsonfile
@@ -29,6 +30,7 @@ def run_all():
     run(tomlfile)
     run(yamlfile)
     run(union)
+    run(custom_field_serializer)
 
 
 def run(module):
