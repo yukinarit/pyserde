@@ -321,7 +321,7 @@ For complete example, please see [./examples/skip.py](./examples/skip.py)
 
 ## Custom field serializer/deserializer
 
-If you want to provide a custom function to override the default (de)serialization behaviour of a field, you can pass your functions to `serde_serialize` and `serde_deserialize` dataclass metadata.
+If you want to provide a custom function to override the default (de)serialization behaviour of a field, you can pass your functions to `serde_serializer` and `serde_deserializer` dataclass metadata.
 
 ```python
 @deserialize
@@ -331,8 +331,8 @@ class Foo:
     dt1: datetime
     dt2: datetime = field(
         metadata={
-            'serde_serialize': lambda x: x.strftime('%d/%m/%y'),
-            'serde_deserialize': lambda x: datetime.strptime(x, '%d/%m/%y'),
+            'serde_serializer': lambda x: x.strftime('%d/%m/%y'),
+            'serde_deserializer': lambda x: datetime.strptime(x, '%d/%m/%y'),
         }
     )
 ```
@@ -342,7 +342,7 @@ For complete example, please see [./examples/custom_field_serializer.py](./examp
 
 ## Custom class serializer/deserializer
 
-If you want to provide (de)serializer at class level, you can pass your functions to `serialize` and `deserialize` class attributes.
+If you want to provide (de)serializer at class level, you can pass your functions to `serializer` and `deserializer` class attributes.
 
 ```python
 def serializer(cls, o):
@@ -357,8 +357,8 @@ def deserializer(cls, o):
     else:
         raise SerdeSkip()
 
-@deserialize(deserialize=deserializer)
-@serialize(serialize=serializer)
+@deserialize(deserializer=deserializer)
+@serialize(serializer=serializer)
 @dataclass
 class Foo:
     i: int

@@ -12,8 +12,8 @@ class Foo:
     dt1: datetime
     dt2: datetime = field(
         metadata={
-            'serde_serialize': lambda x: x.strftime('%d/%m/%y'),
-            'serde_deserialize': lambda x: datetime.strptime(x, '%d/%m/%y'),
+            'serde_serializer': lambda x: x.strftime('%d/%m/%y'),
+            'serde_deserializer': lambda x: datetime.strptime(x, '%d/%m/%y'),
         }
     )
 

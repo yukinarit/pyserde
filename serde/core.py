@@ -253,8 +253,8 @@ class Field:
     skip: Optional[bool] = None
     skip_if: Optional[Func] = None
     skip_if_false: Optional[bool] = None
-    serialize: Optional[Func] = None  # Custom field serializer.
-    deserialize: Optional[Func] = None  # Custom field deserializer.
+    serializer: Optional[Func] = None  # Custom field serializer.
+    deserializer: Optional[Func] = None  # Custom field deserializer.
 
     @classmethod
     def from_dataclass(cls, f: dataclasses.Field) -> 'Field':
@@ -268,15 +268,15 @@ class Field:
             if callable(func):
                 skip_if = Func(func, cls.mangle(f, 'skip_if'))
 
-        serialize: Optional[Func] = None
-        func = f.metadata.get('serde_serialize')
+        serializer: Optional[Func] = None
+        func = f.metadata.get('serde_serializer')
         if func:
-            serialize = Func(func, cls.mangle(f, 'serialize'))
+            serializer = Func(func, cls.mangle(f, 'serializer'))
 
-        deserialize: Optional[Func] = None
-        func = f.metadata.get('serde_deserialize')
+        deserializer: Optional[Func] = None
+        func = f.metadata.get('serde_deserializer')
         if func:
-            deserialize = Func(func, cls.mangle(f, 'deserialize'))
+            deserializer = Func(func, cls.mangle(f, 'deserializer'))
 
         return cls(
             f.type,
@@ -286,8 +286,8 @@ class Field:
             rename=f.metadata.get('serde_rename'),
             skip=f.metadata.get('serde_skip'),
             skip_if=skip_if or skip_if_false_func,
-            serialize=serialize,
-            deserialize=deserialize,
+            serializer=serializer,
+            deserializer=deserializer,
         )
 
     @staticmethod

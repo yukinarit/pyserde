@@ -60,7 +60,7 @@ __all__: List = ['serialize', 'is_serializable', 'Serializer', 'to_tuple', 'to_d
 SerializeFunc = Callable[[Type, Any], Any]
 
 
-def default_serialize(_cls: Type, obj):
+def default_serializer(_cls: Type, obj):
     """
     Marker function to tell serde to use the default serializer. It's used when custom serializer is specified
     at the class but you want to override a field with the default serializer.
@@ -91,7 +91,7 @@ def serialize(
     rename_all: Optional[str] = None,
     reuse_instances_default: bool = True,
     convert_sets_default: bool = False,
-    serialize: Optional[SerializeFunc] = None,
+    serializer: Optional[SerializeFunc] = None,
 ) -> Type[T]:
     """
     `serialize` decorator. A dataclass with this decorator can be serialized
@@ -150,7 +150,7 @@ def serialize(
         g['is_instance'] = is_instance  # used in union functions
         g['to_obj'] = to_obj
         if serialize:
-            g['serde_custom_class_serializer'] = functools.partial(serde_custom_class_serializer, custom=serialize)
+            g['serde_custom_class_serializer'] = functools.partial(serde_custom_class_serializer, custom=serializer)
 
         # Collect types used in the generated code.
         for typ in iter_types(cls):
@@ -173,11 +173,11 @@ def serialize(
         for f in sefields(cls):
             if f.skip_if:
                 g[f.skip_if.name] = f.skip_if
-            if f.serialize:
-                g[f.serialize.name] = f.serialize
+            if f.serializer:
+                g[f.serializer.name] = f.serializer
 
-        add_func(scope, TO_ITER, render_to_tuple(cls, serialize), g)
-        add_func(scope, TO_DICT, render_to_dict(cls, rename_all, serialize), g)
+        add_func(scope, TO_ITER, render_to_tuple(cls, serializer), g)
+        add_func(scope, TO_DICT, render_to_dict(cls, rename_all, serializer), g)
 
         logger.debug(f'{cls.__name__}: {SERDE_SCOPE} {scope}')
 
@@ -331,7 +331,7 @@ def sefields(cls: Type) -> Iterator[Field]:
         yield f
 
 
-def render_to_tuple(cls: Type, serialize: Optional[SerializeFunc] = None) -> str:
+def render_to_tuple(cls: Type, custom: Optional[SerializeFunc] = None) -> str:
     template = """
 def {{func}}(obj, reuse_instances = {{serde_scope.reuse_instances_default}},
              convert_sets = {{serde_scope.convert_sets_default}}):
@@ -357,13 +357,13 @@ def {{func}}(obj, reuse_instances = {{serde_scope.reuse_instances_default}},
   return tuple(res)
     """
 
-    renderer = Renderer(TO_ITER)
+    renderer = Renderer(TO_ITER, custom)
     env = jinja2.Environment(loader=jinja2.DictLoader({'iter': template}))
     env.filters.update({'rvalue': renderer.render})
     return env.get_template('iter').render(func=TO_ITER, serde_scope=getattr(cls, SERDE_SCOPE), fields=sefields(cls))
 
 
-def render_to_dict(cls: Type, case: Optional[str] = None, serialize: Optional[SerializeFunc] = None) -> str:
+def render_to_dict(cls: Type, case: Optional[str] = None, custom: Optional[SerializeFunc] = None) -> str:
     template = """
 def {{func}}(obj, reuse_instances = {{serde_scope.reuse_instances_default}},
              convert_sets = {{serde_scope.convert_sets_default}}):
@@ -394,7 +394,7 @@ def {{func}}(obj, reuse_instances = {{serde_scope.reuse_instances_default}},
   {% endfor -%}
   return res
     """
-    renderer = Renderer(TO_DICT, serialize)
+    renderer = Renderer(TO_DICT, custom)
     lrenderer = LRenderer(case)
     env = jinja2.Environment(loader=jinja2.DictLoader({'dict': template}))
     env.filters.update({'rvalue': renderer.render})
@@ -490,7 +490,7 @@ convert_sets=convert_sets) for k, v in foo.items()}"
         "(foo[0], foo[1].__serde__.funcs['to_iter'](foo[1], reuse_instances=reuse_instances, \
 convert_sets=convert_sets), foo[2],)"
         """
-        if arg.serialize and arg.serialize.inner is not default_serialize:
+        if arg.serializer and arg.serializer.inner is not default_serializer:
             res = self.custom_field_serializer(arg)
         elif is_dataclass(arg.type):
             res = self.dataclass(arg)
@@ -537,7 +537,7 @@ convert_sets=convert_sets), foo[2],)"
             res = f"raise_unsupported_type({arg.varname})"
 
         # Custom field serializer overrides custom class serializer.
-        if self.custom and not arg.serialize:
+        if self.custom and not arg.serializer:
             return f'serde_custom_class_serializer({arg.type.__name__}, {arg.varname}, default=lambda: {res})'
         else:
             return res
@@ -546,8 +546,8 @@ convert_sets=convert_sets), foo[2],)"
         """
         Render rvalue for the field with custom serializer.
         """
-        assert arg.serialize
-        return f"{arg.serialize.name}({arg.varname})"
+        assert arg.serializer
+        return f"{arg.serializer.name}({arg.varname})"
 
     def dataclass(self, arg: SeField) -> str:
         """

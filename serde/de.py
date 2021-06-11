@@ -85,7 +85,7 @@ def serde_custom_class_deserializer(cls: Type, datavar, value, custom: Deseriali
         return default()
 
 
-def default_deserialize(_cls: Type, obj):
+def default_deserializer(_cls: Type, obj):
     """
     Marker function to tell serde to use the default deserializer. It's used when custom deserializer is specified
     at the class but you want to override a field with the default deserializer.
@@ -96,7 +96,7 @@ def deserialize(
     _cls: Type[T] = None,
     rename_all: Optional[str] = None,
     reuse_instances_default: bool = True,
-    deserialize: Optional[DeserializeFunc] = None,
+    deserializer: Optional[DeserializeFunc] = None,
 ) -> Type[T]:
     """
     `deserialize` decorator. A dataclass with this decorator can be deserialized
@@ -149,7 +149,7 @@ def deserialize(
         g['typename'] = typename  # used in union functions
         if deserialize:
             g['serde_custom_class_deserializer'] = functools.partial(
-                serde_custom_class_deserializer, custom=deserialize
+                serde_custom_class_deserializer, custom=deserializer
             )
 
         # Collect types used in the generated code.
@@ -183,11 +183,11 @@ def deserialize(
                 scope.defaults[f.name] = f.default
             elif has_default_factory(f):
                 scope.defaults[f.name] = f.default_factory
-            if f.deserialize:
-                g[f.deserialize.name] = f.deserialize
+            if f.deserializer:
+                g[f.deserializer.name] = f.deserializer
 
-        add_func(scope, FROM_ITER, render_from_iter(cls, deserialize), g)
-        add_func(scope, FROM_DICT, render_from_dict(cls, rename_all, deserialize), g)
+        add_func(scope, FROM_ITER, render_from_iter(cls, deserializer), g)
+        add_func(scope, FROM_DICT, render_from_dict(cls, rename_all, deserializer), g)
 
         logger.debug(f'{cls.__name__}: {SERDE_SCOPE} {scope}')
 
@@ -405,7 +405,7 @@ class Renderer:
         """
         Render rvalue
         """
-        if arg.deserialize and arg.deserialize.inner is not default_deserialize:
+        if arg.deserializer and arg.deserializer.inner is not default_deserializer:
             res = self.custom_field_deserializer(arg)
         elif is_dataclass(arg.type):
             res = self.dataclass(arg)
@@ -470,7 +470,7 @@ class Renderer:
             elif has_default_factory(arg):
                 res = f'({res}) if {exists} else serde_scope.defaults["{arg.name}"]()'
 
-        if self.custom and not arg.deserialize:
+        if self.custom and not arg.deserializer:
             # The function takes a closure in order to execute the default value lazily.
             return (
                 f'serde_custom_class_deserializer({arg.type.__name__}, {arg.datavar}, {arg.data}, '
@@ -483,8 +483,8 @@ class Renderer:
         """
         Render rvalue for the field with custom deserializer.
         """
-        assert arg.deserialize
-        return f"{arg.deserialize.name}({arg.data})"
+        assert arg.deserializer
+        return f"{arg.deserializer.name}({arg.data})"
 
     def dataclass(self, arg: DeField) -> str:
         return f"{arg.type.__name__}.{SERDE_SCOPE}.funcs['{self.func}']({arg.data}, reuse_instances=reuse_instances)"

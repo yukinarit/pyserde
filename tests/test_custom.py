@@ -7,7 +7,7 @@ from typing import Optional
 
 import pytest
 
-from serde import SerdeSkip, default_deserialize, default_serialize, deserialize, serialize
+from serde import SerdeSkip, default_deserializer, default_serializer, deserialize, serialize
 from serde.json import from_json, to_json
 
 
@@ -19,8 +19,8 @@ def test_custom_field_serializer():
         dt1: datetime
         dt2: datetime = field(
             metadata={
-                'serde_serialize': lambda x: x.strftime('%d/%m/%y'),
-                'serde_deserialize': lambda x: datetime.strptime(x, '%d/%m/%y'),
+                'serde_serializer': lambda x: x.strftime('%d/%m/%y'),
+                'serde_deserializer': lambda x: datetime.strptime(x, '%d/%m/%y'),
             }
         )
 
@@ -39,8 +39,8 @@ def test_custom_field_serializer_optional():
         dt1: datetime
         dt2: Optional[datetime] = field(
             metadata={
-                'serde_serialize': lambda x: x.strftime('%d/%m/%y'),
-                'serde_deserialize': lambda x: datetime.strptime(x, '%d/%m/%y'),
+                'serde_serializer': lambda x: x.strftime('%d/%m/%y'),
+                'serde_deserializer': lambda x: datetime.strptime(x, '%d/%m/%y'),
             }
         )
 
@@ -59,7 +59,7 @@ def test_raise_error():
     @serialize
     @dataclass
     class Foo:
-        i: int = field(metadata={'serde_serialize': raise_exception, 'serde_deserialize': raise_exception})
+        i: int = field(metadata={'serde_serializer': raise_exception, 'serde_deserializer': raise_exception})
 
     f = Foo(10)
     with pytest.raises(Exception):
@@ -74,7 +74,7 @@ def test_wrong_signature():
     @serialize
     @dataclass
     class Foo:
-        i: int = field(metadata={'serde_serialize': lambda: '10', 'serde_deserialize': lambda: 10})
+        i: int = field(metadata={'serde_serializer': lambda: '10', 'serde_deserializer': lambda: 10})
 
     f = Foo(10)
     with pytest.raises(TypeError):
@@ -97,8 +97,8 @@ def test_custom_class_serializer():
         else:
             raise SerdeSkip()
 
-    @deserialize(deserialize=deserializer)
-    @serialize(serialize=serializer)
+    @deserialize(deserializer=deserializer)
+    @serialize(serializer=serializer)
     @dataclass
     class Foo:
         i: int
@@ -125,16 +125,16 @@ def test_field_serialize_override_class_serializer():
         else:
             raise SerdeSkip()
 
-    @deserialize(deserialize=deserializer)
-    @serialize(serialize=serializer)
+    @deserialize(deserializer=deserializer)
+    @serialize(serializer=serializer)
     @dataclass
     class Foo:
         i: int
         dt1: datetime
         dt2: datetime = field(
             metadata={
-                'serde_serialize': lambda x: x.strftime('%y.%m.%d'),
-                'serde_deserialize': lambda x: datetime.strptime(x, '%y.%m.%d'),
+                'serde_serializer': lambda x: x.strftime('%y.%m.%d'),
+                'serde_deserializer': lambda x: datetime.strptime(x, '%y.%m.%d'),
             }
         )
 
@@ -158,13 +158,15 @@ def test_override_by_default_serializer():
         else:
             raise SerdeSkip()
 
-    @deserialize(deserialize=deserializer)
-    @serialize(serialize=serializer)
+    @deserialize(deserializer=deserializer)
+    @serialize(serializer=serializer)
     @dataclass
     class Foo:
         i: int
         dt1: datetime
-        dt2: datetime = field(metadata={'serde_serialize': default_serialize, 'serde_deserialize': default_deserialize})
+        dt2: datetime = field(
+            metadata={'serde_serializer': default_serializer, 'serde_deserializer': default_deserializer}
+        )
 
     dt = datetime(2021, 1, 1, 0, 0, 0)
     f = Foo(10, dt, dt)
