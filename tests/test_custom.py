@@ -7,7 +7,7 @@ from typing import Optional
 
 import pytest
 
-from serde import SerdeSkip, default_deserializer, default_serializer, deserialize, serialize
+from serde import SerdeSkip, default_deserializer, default_serializer, deserialize, from_tuple, serialize, to_tuple
 from serde.json import from_json, to_json
 
 
@@ -23,32 +23,21 @@ def test_custom_field_serializer():
                 'serde_deserializer': lambda x: datetime.strptime(x, '%d/%m/%y'),
             }
         )
-
-    dt = datetime(2021, 1, 1, 0, 0, 0)
-    f = Foo(dt, dt)
-
-    assert to_json(f) == '{"dt1": "2021-01-01T00:00:00", "dt2": "01/01/21"}'
-    assert f == from_json(Foo, to_json(f))
-
-
-def test_custom_field_serializer_optional():
-    @deserialize
-    @serialize
-    @dataclass
-    class Foo:
-        dt1: datetime
-        dt2: Optional[datetime] = field(
+        dt3: Optional[datetime] = field(
             metadata={
-                'serde_serializer': lambda x: x.strftime('%d/%m/%y'),
-                'serde_deserializer': lambda x: datetime.strptime(x, '%d/%m/%y'),
+                'serde_serializer': lambda x: x.strftime('%d/%m/%y') if x else None,
+                'serde_deserializer': lambda x: datetime.strptime(x, '%d/%m/%y') if x else None,
             }
         )
 
     dt = datetime(2021, 1, 1, 0, 0, 0)
-    f = Foo(dt, dt)
+    f = Foo(dt, dt, None)
 
-    assert to_json(f) == '{"dt1": "2021-01-01T00:00:00", "dt2": "01/01/21"}'
+    assert to_json(f) == '{"dt1": "2021-01-01T00:00:00", "dt2": "01/01/21", "dt3": null}'
     assert f == from_json(Foo, to_json(f))
+
+    assert to_tuple(f) == (datetime(2021, 1, 1, 0, 0), '01/01/21', None)
+    assert f == from_tuple(Foo, to_tuple(f))
 
 
 def test_raise_error():
@@ -111,6 +100,9 @@ def test_custom_class_serializer():
     assert to_json(f) == '{"i": 10, "dt1": "01/01/21", "dt2": "01/01/21"}'
     assert f == from_json(Foo, to_json(f))
 
+    assert to_tuple(f) == (10, '01/01/21', '01/01/21')
+    assert f == from_tuple(Foo, to_tuple(f))
+
 
 def test_field_serialize_override_class_serializer():
     def serializer(cls, o):
@@ -144,6 +136,9 @@ def test_field_serialize_override_class_serializer():
     assert to_json(f) == '{"i": 10, "dt1": "01/01/21", "dt2": "21.01.01"}'
     assert f == from_json(Foo, to_json(f))
 
+    assert to_tuple(f) == (10, '01/01/21', '21.01.01')
+    assert f == from_tuple(Foo, to_tuple(f))
+
 
 def test_override_by_default_serializer():
     def serializer(cls, o):
@@ -173,3 +168,6 @@ def test_override_by_default_serializer():
 
     assert to_json(f) == '{"i": 10, "dt1": "01/01/21", "dt2": "2021-01-01T00:00:00"}'
     assert f == from_json(Foo, to_json(f))
+
+    assert to_tuple(f) == (10, '01/01/21', datetime(2021, 1, 1, 0, 0))
+    assert f == from_tuple(Foo, to_tuple(f))
