@@ -6,14 +6,14 @@ associated with serialization.
 import abc
 import copy
 import dataclasses
+import decimal
 import functools
+import ipaddress
+import pathlib
+import uuid
 from dataclasses import dataclass, is_dataclass
 from datetime import date, datetime
-from decimal import Decimal
-from ipaddress import IPv4Address, IPv4Interface, IPv4Network, IPv6Address, IPv6Interface, IPv6Network
-from pathlib import Path, PosixPath, PurePath, PurePosixPath, PureWindowsPath, WindowsPath
 from typing import Any, Callable, Dict, Iterator, List, Optional, Type
-from uuid import UUID
 
 import jinja2
 
@@ -553,20 +553,20 @@ convert_sets=convert_sets), foo[2],)"
         elif is_union(arg.type):
             res = self.union_func(arg)
         elif arg.type in [
-            Decimal,
-            Path,
-            PosixPath,
-            WindowsPath,
-            PurePath,
-            PurePosixPath,
-            PureWindowsPath,
-            UUID,
-            IPv4Address,
-            IPv6Address,
-            IPv4Network,
-            IPv6Network,
-            IPv4Interface,
-            IPv6Interface,
+            decimal.Decimal,
+            pathlib.Path,
+            pathlib.PosixPath,
+            pathlib.WindowsPath,
+            pathlib.PurePath,
+            pathlib.PurePosixPath,
+            pathlib.PureWindowsPath,
+            uuid.UUID,
+            ipaddress.IPv4Address,
+            ipaddress.IPv6Address,
+            ipaddress.IPv4Network,
+            ipaddress.IPv6Network,
+            ipaddress.IPv4Interface,
+            ipaddress.IPv6Interface,
         ]:
             res = f"{arg.varname} if reuse_instances else {self.string(arg)}"
         elif arg.type in [date, datetime]:
