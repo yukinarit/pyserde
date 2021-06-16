@@ -17,6 +17,8 @@ from uuid import UUID
 import jinja2
 
 from .compat import (
+    SerdeError,
+    SerdeSkip,
     T,
     is_bare_dict,
     is_bare_list,
@@ -42,7 +44,6 @@ from .core import (
     TO_ITER,
     UNION_SE_PREFIX,
     Field,
-    SerdeError,
     SerdeScope,
     add_func,
     conv,
@@ -55,7 +56,22 @@ from .core import (
 
 __all__: List = ['serialize', 'is_serializable', 'Serializer', 'to_tuple', 'to_dict']
 
-Custom = Optional[Callable[[Any], Any]]
+# Interface of Custom serialize function.
+SerializeFunc = Callable[[Type, Any], Any]
+
+
+def default_serializer(_cls: Type, obj):
+    """
+    Marker function to tell serde to use the default serializer. It's used when custom serializer is specified
+    at the class but you want to override a field with the default serializer.
+    """
+
+
+def serde_custom_class_serializer(cls: Type, obj, custom: SerializeFunc, default: Callable):
+    try:
+        return custom(cls, obj)
+    except SerdeSkip:
+        return default()
 
 
 class Serializer(metaclass=abc.ABCMeta):
@@ -75,6 +91,7 @@ def serialize(
     rename_all: Optional[str] = None,
     reuse_instances_default: bool = True,
     convert_sets_default: bool = False,
+    serializer: Optional[SerializeFunc] = None,
 ) -> Type[T]:
     """
     `serialize` decorator. A dataclass with this decorator can be serialized
@@ -132,6 +149,8 @@ def serialize(
         g['typename'] = typename  # used in union functions
         g['is_instance'] = is_instance  # used in union functions
         g['to_obj'] = to_obj
+        if serialize:
+            g['serde_custom_class_serializer'] = functools.partial(serde_custom_class_serializer, custom=serializer)
 
         # Collect types used in the generated code.
         for typ in iter_types(cls):
@@ -154,11 +173,11 @@ def serialize(
         for f in sefields(cls):
             if f.skip_if:
                 g[f.skip_if.name] = f.skip_if
-            if f.serialize:
-                g[f.serialize.name] = f.serialize
+            if f.serializer:
+                g[f.serializer.name] = f.serializer
 
-        add_func(scope, TO_ITER, render_to_tuple(cls), g)
-        add_func(scope, TO_DICT, render_to_dict(cls, rename_all), g)
+        add_func(scope, TO_ITER, render_to_tuple(cls, serializer), g)
+        add_func(scope, TO_DICT, render_to_dict(cls, rename_all, serializer), g)
 
         logger.debug(f'{cls.__name__}: {SERDE_SCOPE} {scope}')
 
@@ -312,7 +331,7 @@ def sefields(cls: Type) -> Iterator[Field]:
         yield f
 
 
-def render_to_tuple(cls: Type) -> str:
+def render_to_tuple(cls: Type, custom: Optional[SerializeFunc] = None) -> str:
     template = """
 def {{func}}(obj, reuse_instances = {{serde_scope.reuse_instances_default}},
              convert_sets = {{serde_scope.convert_sets_default}}):
@@ -338,13 +357,13 @@ def {{func}}(obj, reuse_instances = {{serde_scope.reuse_instances_default}},
   return tuple(res)
     """
 
-    renderer = Renderer(TO_ITER)
+    renderer = Renderer(TO_ITER, custom)
     env = jinja2.Environment(loader=jinja2.DictLoader({'iter': template}))
     env.filters.update({'rvalue': renderer.render})
     return env.get_template('iter').render(func=TO_ITER, serde_scope=getattr(cls, SERDE_SCOPE), fields=sefields(cls))
 
 
-def render_to_dict(cls: Type, case: Optional[str] = None) -> str:
+def render_to_dict(cls: Type, case: Optional[str] = None, custom: Optional[SerializeFunc] = None) -> str:
     template = """
 def {{func}}(obj, reuse_instances = {{serde_scope.reuse_instances_default}},
              convert_sets = {{serde_scope.convert_sets_default}}):
@@ -363,20 +382,19 @@ def {{func}}(obj, reuse_instances = {{serde_scope.reuse_instances_default}},
 
   res = {}
   {% for f in fields -%}
-
   {% if not f.skip -%}
     {% if f.skip_if -%}
   if not {{f.skip_if.name}}({{f|rvalue}}):
-   {{f|lvalue}} = {{f|rvalue}}
+    {{f|lvalue}} = {{f|rvalue}}
     {% else -%}
-   {{f|lvalue}} = {{f|rvalue}}
+  {{f|lvalue}} = {{f|rvalue}}
     {% endif -%}
   {% endif %}
 
   {% endfor -%}
   return res
     """
-    renderer = Renderer(TO_DICT)
+    renderer = Renderer(TO_DICT, custom)
     lrenderer = LRenderer(case)
     env = jinja2.Environment(loader=jinja2.DictLoader({'dict': template}))
     env.filters.update({'rvalue': renderer.render})
@@ -436,6 +454,7 @@ class Renderer:
     """
 
     func: str
+    custom: Optional[SerializeFunc] = None  # Custom class level serializer.
 
     def render(self, arg: SeField) -> str:
         """
@@ -471,26 +490,26 @@ convert_sets=convert_sets) for k, v in foo.items()}"
         "(foo[0], foo[1].__serde__.funcs['to_iter'](foo[1], reuse_instances=reuse_instances, \
 convert_sets=convert_sets), foo[2],)"
         """
-        if arg.serialize:
-            return self.custom_field_serializer(arg)
+        if arg.serializer and arg.serializer.inner is not default_serializer:
+            res = self.custom_field_serializer(arg)
         elif is_dataclass(arg.type):
-            return self.dataclass(arg)
+            res = self.dataclass(arg)
         elif is_opt(arg.type):
-            return self.opt(arg)
+            res = self.opt(arg)
         elif is_list(arg.type):
-            return self.list(arg)
+            res = self.list(arg)
         elif is_set(arg.type):
-            return self.set(arg)
+            res = self.set(arg)
         elif is_dict(arg.type):
-            return self.dict(arg)
+            res = self.dict(arg)
         elif is_tuple(arg.type):
-            return self.tuple(arg)
+            res = self.tuple(arg)
         elif is_enum(arg.type):
-            return self.enum(arg)
+            res = self.enum(arg)
         elif is_primitive(arg.type):
-            return self.primitive(arg)
+            res = self.primitive(arg)
         elif is_union(arg.type):
-            return self.union_func(arg)
+            res = self.union_func(arg)
         elif arg.type in [
             Decimal,
             Path,
@@ -507,22 +526,28 @@ convert_sets=convert_sets), foo[2],)"
             IPv4Interface,
             IPv6Interface,
         ]:
-            return f"{arg.varname} if reuse_instances else {self.string(arg)}"
+            res = f"{arg.varname} if reuse_instances else {self.string(arg)}"
         elif arg.type in [date, datetime]:
-            return f"{arg.varname} if reuse_instances else {arg.varname}.isoformat()"
+            res = f"{arg.varname} if reuse_instances else {arg.varname}.isoformat()"
         elif is_none(arg.type):
-            return "None"
+            res = "None"
         elif arg.type is Any:
-            return f"to_obj({arg.varname}, True, False, False)"
+            res = f"to_obj({arg.varname}, True, False, False)"
         else:
-            return f"raise_unsupported_type({arg.varname})"
+            res = f"raise_unsupported_type({arg.varname})"
+
+        # Custom field serializer overrides custom class serializer.
+        if self.custom and not arg.serializer:
+            return f'serde_custom_class_serializer({arg.type.__name__}, {arg.varname}, default=lambda: {res})'
+        else:
+            return res
 
     def custom_field_serializer(self, arg: SeField) -> str:
         """
         Render rvalue for the field with custom serializer.
         """
-        assert arg.serialize
-        return f"{arg.serialize.name}({arg.varname})"
+        assert arg.serializer
+        return f"{arg.serializer.name}({arg.varname})"
 
     def dataclass(self, arg: SeField) -> str:
         """

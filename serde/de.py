@@ -25,6 +25,8 @@ from uuid import UUID
 import jinja2
 
 from .compat import (
+    SerdeError,
+    SerdeSkip,
     T,
     has_default,
     has_default_factory,
@@ -52,7 +54,6 @@ from .core import (
     SERDE_SCOPE,
     UNION_DE_PREFIX,
     Field,
-    SerdeError,
     SerdeScope,
     add_func,
     fields,
@@ -64,11 +65,38 @@ from .py36_datetime_compat import py36_date_fromisoformat, py36_datetime_fromiso
 
 __all__: List = ['deserialize', 'is_deserializable', 'Deserializer', 'from_dict', 'from_tuple']
 
-Custom = Optional[Callable[['DeField', Any], Any]]
+# Interface of Custom deserialize function.
+DeserializeFunc = Callable[[Type, Any], Any]
+
+
+def serde_custom_class_deserializer(cls: Type, datavar, value, custom: DeserializeFunc, default: Callable):
+    """
+    Handle custom deserialization. Use default deserialization logic if it receives `SerdeSkip` exception.
+
+    :param cls: Type of the field.
+    :param datavar: The whole variable to deserialize from. e.g. "data"
+    :param value: The value for the field. e.g. "data['i']"
+    :param custom: Custom deserialize function.
+    :param default: Default deserialize function.
+    """
+    try:
+        return custom(cls, value)
+    except SerdeSkip:
+        return default()
+
+
+def default_deserializer(_cls: Type, obj):
+    """
+    Marker function to tell serde to use the default deserializer. It's used when custom deserializer is specified
+    at the class but you want to override a field with the default deserializer.
+    """
 
 
 def deserialize(
-    _cls: Type[T] = None, rename_all: Optional[str] = None, reuse_instances_default: bool = True
+    _cls: Type[T] = None,
+    rename_all: Optional[str] = None,
+    reuse_instances_default: bool = True,
+    deserializer: Optional[DeserializeFunc] = None,
 ) -> Type[T]:
     """
     `deserialize` decorator. A dataclass with this decorator can be deserialized
@@ -119,6 +147,10 @@ def deserialize(
         g['SerdeError'] = SerdeError
         g['raise_unsupported_type'] = raise_unsupported_type
         g['typename'] = typename  # used in union functions
+        if deserialize:
+            g['serde_custom_class_deserializer'] = functools.partial(
+                serde_custom_class_deserializer, custom=deserializer
+            )
 
         # Collect types used in the generated code.
         for typ in iter_types(cls):
@@ -151,11 +183,11 @@ def deserialize(
                 scope.defaults[f.name] = f.default
             elif has_default_factory(f):
                 scope.defaults[f.name] = f.default_factory
-            if f.deserialize:
-                g[f.deserialize.name] = f.deserialize
+            if f.deserializer:
+                g[f.deserializer.name] = f.deserializer
 
-        add_func(scope, FROM_ITER, render_from_iter(cls), g)
-        add_func(scope, FROM_DICT, render_from_dict(cls, rename_all), g)
+        add_func(scope, FROM_ITER, render_from_iter(cls, deserializer), g)
+        add_func(scope, FROM_DICT, render_from_dict(cls, rename_all, deserializer), g)
 
         logger.debug(f'{cls.__name__}: {SERDE_SCOPE} {scope}')
 
@@ -367,12 +399,13 @@ class Renderer:
     """
 
     func: str
+    custom: Optional[DeserializeFunc] = None  # Custom class level deserializer.
 
     def render(self, arg: DeField) -> str:
         """
         Render rvalue
         """
-        if arg.serialize:
+        if arg.deserializer and arg.deserializer.inner is not default_deserializer:
             res = self.custom_field_deserializer(arg)
         elif is_dataclass(arg.type):
             res = self.dataclass(arg)
@@ -437,14 +470,21 @@ class Renderer:
             elif has_default_factory(arg):
                 res = f'({res}) if {exists} else serde_scope.defaults["{arg.name}"]()'
 
-        return res
+        if self.custom and not arg.deserializer:
+            # The function takes a closure in order to execute the default value lazily.
+            return (
+                f'serde_custom_class_deserializer({arg.type.__name__}, {arg.datavar}, {arg.data}, '
+                f'default=lambda: {res})'
+            )
+        else:
+            return res
 
     def custom_field_deserializer(self, arg: DeField) -> str:
         """
         Render rvalue for the field with custom deserializer.
         """
-        assert arg.deserialize
-        return f"{arg.deserialize.name}({arg.data})"
+        assert arg.deserializer
+        return f"{arg.deserializer.name}({arg.data})"
 
     def dataclass(self, arg: DeField) -> str:
         return f"{arg.type.__name__}.{SERDE_SCOPE}.funcs['{self.func}']({arg.data}, reuse_instances=reuse_instances)"
@@ -605,7 +645,7 @@ def to_iter_arg(f: DeField, *args, **kwargs) -> DeField:
     return f
 
 
-def render_from_iter(cls: Type) -> str:
+def render_from_iter(cls: Type, custom: Optional[DeserializeFunc] = None) -> str:
     template = """
 def {{func}}(data, reuse_instances = {{serde_scope.reuse_instances_default}}):
   if reuse_instances is Ellipsis:
@@ -626,14 +666,14 @@ def {{func}}(data, reuse_instances = {{serde_scope.reuse_instances_default}}):
   )
     """
 
-    renderer = Renderer(FROM_ITER)
+    renderer = Renderer(FROM_ITER, custom)
     env = jinja2.Environment(loader=jinja2.DictLoader({'iter': template}))
     env.filters.update({'rvalue': renderer.render})
     env.filters.update({'arg': to_iter_arg})
     return env.get_template('iter').render(func=FROM_ITER, serde_scope=getattr(cls, SERDE_SCOPE), fields=defields(cls))
 
 
-def render_from_dict(cls: Type, rename_all: Optional[str] = None) -> str:
+def render_from_dict(cls: Type, rename_all: Optional[str] = None, custom: Optional[DeserializeFunc] = None) -> str:
     template = """
 def {{func}}(data, reuse_instances = {{serde_scope.reuse_instances_default}}):
   if reuse_instances is Ellipsis:
@@ -654,7 +694,7 @@ def {{func}}(data, reuse_instances = {{serde_scope.reuse_instances_default}}):
   )
     """
 
-    renderer = Renderer(FROM_DICT)
+    renderer = Renderer(FROM_DICT, custom)
     env = jinja2.Environment(loader=jinja2.DictLoader({'dict': template}))
     env.filters.update({'rvalue': renderer.render})
     env.filters.update({'arg': functools.partial(to_arg, rename_all=rename_all)})
