@@ -8,42 +8,23 @@ import os
 import pathlib
 import sys
 import uuid
+import more_itertools
+import serde
+import pytest
 from dataclasses import dataclass, field
 from datetime import date, datetime
 from typing import Any, Dict, List, NewType, Optional, Set, Tuple
+from serde import SerdeError, deserialize, from_dict, serialize, to_dict
 
-import more_itertools
-import pytest
-
-import serde
-from serde import SerdeError, deserialize, from_dict, from_tuple, serialize, to_dict, to_tuple
-from serde.compat import dataclass_fields
-from serde.core import SERDE_SCOPE
-from serde.json import from_json, to_json
-from serde.msgpack import from_msgpack, to_msgpack
-from serde.toml import from_toml, to_toml
-from serde.yaml import from_yaml, to_yaml
 
 from . import data
 from .data import Bool, Float, Int, ListPri, Pri, PriDefault, Str
+from .common import format_dict, format_json, format_msgpack, format_toml, format_tuple, format_yaml, all_formats
 
 log = logging.getLogger('test')
 
 serde.init(True)
 
-format_dict: List = [(to_dict, from_dict)]
-
-format_tuple: List = [(to_tuple, from_tuple)]
-
-format_json: List = [(to_json, from_json)]
-
-format_msgpack: List = [(to_msgpack, from_msgpack)]
-
-format_yaml: List = [(to_yaml, from_yaml)]
-
-format_toml: List = [(to_toml, from_toml)]
-
-all_formats: List = format_dict + format_tuple + format_json + format_msgpack + format_yaml + format_toml
 
 opt_case: List = [
     {'reuse_instances_default': False},
@@ -235,7 +216,7 @@ serialize(ForwardReferenceFoo)
 
 # now the type really is of type Bar
 assert ForwardReferenceBar == dataclasses.fields(ForwardReferenceFoo)[0].type
-assert ForwardReferenceBar == next(dataclass_fields(ForwardReferenceFoo)).type
+assert ForwardReferenceBar == next(serde.compat.dataclass_fields(ForwardReferenceFoo)).type
 
 
 # verify usage works
@@ -276,7 +257,7 @@ def test_list(se, de, opt):
         d: List
 
     # List can contain different types (except Toml).
-    if se is not to_toml:
+    if se is not serde.toml.to_toml:
         p = Variant([10, 'foo', 10.0, True])
         assert p == de(Variant, se(p))
 
@@ -286,7 +267,7 @@ def test_list(se, de, opt):
 def test_dict(se, de, opt):
     from .data import PriDict
 
-    if se in (to_json, to_msgpack, to_toml):
+    if se in (serde.json.to_json, serde.msgpack.to_msgpack, serde.toml.to_toml):
         # JSON, Msgpack, Toml don't allow non string key.
         p = PriDict({'10': 10}, {'foo': 'bar'}, {'100.0': 100.0}, {'True': False})
         assert p == de(PriDict, se(p))
@@ -386,7 +367,7 @@ def test_tuple(se, de, opt):
         t: Tuple[int, str, float, bool]
 
     # Toml doesn't support variant type of array.
-    if se is not to_toml:
+    if se is not serde.toml.to_toml:
         p = Variant((10, 'a', 10.0, True))
         assert p == de(Variant, se(p))
 
@@ -409,7 +390,7 @@ def test_tuple(se, de, opt):
         b: Tuple[Bool, Bool]
 
     # hmmm.. Nested tuple doesn't work ..
-    if se is not to_toml:
+    if se is not serde.toml.to_toml:
         p = Nested((Int(10), Int(20)), (Str("a"), Str("b")), (Float(10.0), Float(20.0)), (Bool(True), Bool(False)))
         assert p == de(Nested, se(p))
 
@@ -484,25 +465,25 @@ def test_dict_pri(se, de):
 def test_json():
     p = Pri(10, 'foo', 100.0, True)
     s = '{"i": 10, "s": "foo", "f": 100.0, "b": true}'
-    assert s == to_json(p)
+    assert s == serde.json.to_json(p)
 
-    assert '10' == to_json(10)
-    assert '[10, 20, 30]' == to_json([10, 20, 30])
-    assert '{"foo": 10, "fuga": 10}' == to_json({'foo': 10, 'fuga': 10})
+    assert '10' == serde.json.to_json(10)
+    assert '[10, 20, 30]' == serde.json.to_json([10, 20, 30])
+    assert '{"foo": 10, "fuga": 10}' == serde.json.to_json({'foo': 10, 'fuga': 10})
 
 
 def test_msgpack():
     p = Pri(10, 'foo', 100.0, True)
     d = b'\x84\xa1i\n\xa1s\xa3foo\xa1f\xcb@Y\x00\x00\x00\x00\x00\x00\xa1b\xc3'
-    assert d == to_msgpack(p)
-    assert p == from_msgpack(Pri, d)
+    assert d == serde.msgpack.to_msgpack(p)
+    assert p == serde.msgpack.from_msgpack(Pri, d)
 
 
 def test_msgpack_unnamed():
     p = Pri(10, 'foo', 100.0, True)
     d = b'\x94\n\xa3foo\xcb@Y\x00\x00\x00\x00\x00\x00\xc3'
-    assert d == to_msgpack(p, named=False)
-    assert p == from_msgpack(Pri, d, named=False)
+    assert d == serde.msgpack.to_msgpack(p, named=False)
+    assert p == serde.msgpack.from_msgpack(Pri, d, named=False)
 
 
 @pytest.mark.parametrize('se,de', all_formats)
@@ -589,7 +570,7 @@ def test_skip_if_overrides_skip_if_false(se, de):
     assert ff.comments == []
 
 
-@pytest.mark.parametrize('se,de', (format_msgpack))
+@pytest.mark.parametrize('se,de', format_msgpack)
 def test_ext(se, de):
     @deserialize
     @serialize
@@ -677,8 +658,8 @@ def test_dataclass_inheritance():
 
     # each class should have own scope
     # ensure the generated code of DerivedB does not overwrite the earlier generated code from DerivedA
-    assert getattr(Base, SERDE_SCOPE) is not getattr(DerivedA, SERDE_SCOPE)
-    assert getattr(DerivedA, SERDE_SCOPE) is not getattr(DerivedB, SERDE_SCOPE)
+    assert getattr(Base, serde.core.SERDE_SCOPE) is not getattr(DerivedA, serde.core.SERDE_SCOPE)
+    assert getattr(DerivedA, serde.core.SERDE_SCOPE) is not getattr(DerivedB, serde.core.SERDE_SCOPE)
 
     base = Base(i=0, s="foo")
     assert base == from_dict(Base, to_dict(base))
