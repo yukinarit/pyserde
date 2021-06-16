@@ -46,6 +46,8 @@ from uuid import UUID
 import jinja2
 
 from .compat import (
+    SerdeError,
+    SerdeSkip,
     T,
     is_bare_dict,
     is_bare_list,
@@ -71,7 +73,6 @@ from .core import (
     TO_ITER,
     UNION_SE_PREFIX,
     Field,
-    SerdeError,
     SerdeScope,
     add_func,
     conv,
@@ -84,7 +85,22 @@ from .core import (
 
 __all__: List = [&#39;serialize&#39;, &#39;is_serializable&#39;, &#39;Serializer&#39;, &#39;to_tuple&#39;, &#39;to_dict&#39;]
 
-Custom = Optional[Callable[[Any], Any]]
+# Interface of Custom serialize function.
+SerializeFunc = Callable[[Type, Any], Any]
+
+
+def default_serializer(_cls: Type, obj):
+    &#34;&#34;&#34;
+    Marker function to tell serde to use the default serializer. It&#39;s used when custom serializer is specified
+    at the class but you want to override a field with the default serializer.
+    &#34;&#34;&#34;
+
+
+def serde_custom_class_serializer(cls: Type, obj, custom: SerializeFunc, default: Callable):
+    try:
+        return custom(cls, obj)
+    except SerdeSkip:
+        return default()
 
 
 class Serializer(metaclass=abc.ABCMeta):
@@ -104,6 +120,7 @@ def serialize(
     rename_all: Optional[str] = None,
     reuse_instances_default: bool = True,
     convert_sets_default: bool = False,
+    serializer: Optional[SerializeFunc] = None,
 ) -&gt; Type[T]:
     &#34;&#34;&#34;
     `serialize` decorator. A dataclass with this decorator can be serialized
@@ -161,6 +178,8 @@ def serialize(
         g[&#39;typename&#39;] = typename  # used in union functions
         g[&#39;is_instance&#39;] = is_instance  # used in union functions
         g[&#39;to_obj&#39;] = to_obj
+        if serialize:
+            g[&#39;serde_custom_class_serializer&#39;] = functools.partial(serde_custom_class_serializer, custom=serializer)
 
         # Collect types used in the generated code.
         for typ in iter_types(cls):
@@ -183,11 +202,11 @@ def serialize(
         for f in sefields(cls):
             if f.skip_if:
                 g[f.skip_if.name] = f.skip_if
-            if f.serialize:
-                g[f.serialize.name] = f.serialize
+            if f.serializer:
+                g[f.serializer.name] = f.serializer
 
-        add_func(scope, TO_ITER, render_to_tuple(cls), g)
-        add_func(scope, TO_DICT, render_to_dict(cls, rename_all), g)
+        add_func(scope, TO_ITER, render_to_tuple(cls, serializer), g)
+        add_func(scope, TO_DICT, render_to_dict(cls, rename_all, serializer), g)
 
         logger.debug(f&#39;{cls.__name__}: {SERDE_SCOPE} {scope}&#39;)
 
@@ -341,7 +360,7 @@ def sefields(cls: Type) -&gt; Iterator[Field]:
         yield f
 
 
-def render_to_tuple(cls: Type) -&gt; str:
+def render_to_tuple(cls: Type, custom: Optional[SerializeFunc] = None) -&gt; str:
     template = &#34;&#34;&#34;
 def {{func}}(obj, reuse_instances = {{serde_scope.reuse_instances_default}},
              convert_sets = {{serde_scope.convert_sets_default}}):
@@ -367,13 +386,13 @@ def {{func}}(obj, reuse_instances = {{serde_scope.reuse_instances_default}},
   return tuple(res)
     &#34;&#34;&#34;
 
-    renderer = Renderer(TO_ITER)
+    renderer = Renderer(TO_ITER, custom)
     env = jinja2.Environment(loader=jinja2.DictLoader({&#39;iter&#39;: template}))
     env.filters.update({&#39;rvalue&#39;: renderer.render})
     return env.get_template(&#39;iter&#39;).render(func=TO_ITER, serde_scope=getattr(cls, SERDE_SCOPE), fields=sefields(cls))
 
 
-def render_to_dict(cls: Type, case: Optional[str] = None) -&gt; str:
+def render_to_dict(cls: Type, case: Optional[str] = None, custom: Optional[SerializeFunc] = None) -&gt; str:
     template = &#34;&#34;&#34;
 def {{func}}(obj, reuse_instances = {{serde_scope.reuse_instances_default}},
              convert_sets = {{serde_scope.convert_sets_default}}):
@@ -392,20 +411,19 @@ def {{func}}(obj, reuse_instances = {{serde_scope.reuse_instances_default}},
 
   res = {}
   {% for f in fields -%}
-
   {% if not f.skip -%}
     {% if f.skip_if -%}
   if not {{f.skip_if.name}}({{f|rvalue}}):
-   {{f|lvalue}} = {{f|rvalue}}
+    {{f|lvalue}} = {{f|rvalue}}
     {% else -%}
-   {{f|lvalue}} = {{f|rvalue}}
+  {{f|lvalue}} = {{f|rvalue}}
     {% endif -%}
   {% endif %}
 
   {% endfor -%}
   return res
     &#34;&#34;&#34;
-    renderer = Renderer(TO_DICT)
+    renderer = Renderer(TO_DICT, custom)
     lrenderer = LRenderer(case)
     env = jinja2.Environment(loader=jinja2.DictLoader({&#39;dict&#39;: template}))
     env.filters.update({&#39;rvalue&#39;: renderer.render})
@@ -465,6 +483,7 @@ class Renderer:
     &#34;&#34;&#34;
 
     func: str
+    custom: Optional[SerializeFunc] = None  # Custom class level serializer.
 
     def render(self, arg: SeField) -&gt; str:
         &#34;&#34;&#34;
@@ -500,26 +519,26 @@ convert_sets=convert_sets) for k, v in foo.items()}&#34;
         &#34;(foo[0], foo[1].__serde__.funcs[&#39;to_iter&#39;](foo[1], reuse_instances=reuse_instances, \
 convert_sets=convert_sets), foo[2],)&#34;
         &#34;&#34;&#34;
-        if arg.serialize:
-            return self.custom_field_serializer(arg)
+        if arg.serializer and arg.serializer.inner is not default_serializer:
+            res = self.custom_field_serializer(arg)
         elif is_dataclass(arg.type):
-            return self.dataclass(arg)
+            res = self.dataclass(arg)
         elif is_opt(arg.type):
-            return self.opt(arg)
+            res = self.opt(arg)
         elif is_list(arg.type):
-            return self.list(arg)
+            res = self.list(arg)
         elif is_set(arg.type):
-            return self.set(arg)
+            res = self.set(arg)
         elif is_dict(arg.type):
-            return self.dict(arg)
+            res = self.dict(arg)
         elif is_tuple(arg.type):
-            return self.tuple(arg)
+            res = self.tuple(arg)
         elif is_enum(arg.type):
-            return self.enum(arg)
+            res = self.enum(arg)
         elif is_primitive(arg.type):
-            return self.primitive(arg)
+            res = self.primitive(arg)
         elif is_union(arg.type):
-            return self.union_func(arg)
+            res = self.union_func(arg)
         elif arg.type in [
             Decimal,
             Path,
@@ -536,22 +555,28 @@ convert_sets=convert_sets), foo[2],)&#34;
             IPv4Interface,
             IPv6Interface,
         ]:
-            return f&#34;{arg.varname} if reuse_instances else {self.string(arg)}&#34;
+            res = f&#34;{arg.varname} if reuse_instances else {self.string(arg)}&#34;
         elif arg.type in [date, datetime]:
-            return f&#34;{arg.varname} if reuse_instances else {arg.varname}.isoformat()&#34;
+            res = f&#34;{arg.varname} if reuse_instances else {arg.varname}.isoformat()&#34;
         elif is_none(arg.type):
-            return &#34;None&#34;
+            res = &#34;None&#34;
         elif arg.type is Any:
-            return f&#34;to_obj({arg.varname}, True, False, False)&#34;
+            res = f&#34;to_obj({arg.varname}, True, False, False)&#34;
         else:
-            return f&#34;raise_unsupported_type({arg.varname})&#34;
+            res = f&#34;raise_unsupported_type({arg.varname})&#34;
+
+        # Custom field serializer overrides custom class serializer.
+        if self.custom and not arg.serializer:
+            return f&#39;serde_custom_class_serializer({arg.type.__name__}, {arg.varname}, default=lambda: {res})&#39;
+        else:
+            return res
 
     def custom_field_serializer(self, arg: SeField) -&gt; str:
         &#34;&#34;&#34;
         Render rvalue for the field with custom serializer.
         &#34;&#34;&#34;
-        assert arg.serialize
-        return f&#34;{arg.serialize.name}({arg.varname})&#34;
+        assert arg.serializer
+        return f&#34;{arg.serializer.name}({arg.varname})&#34;
 
     def dataclass(self, arg: SeField) -&gt; str:
         &#34;&#34;&#34;
@@ -700,7 +725,7 @@ True
 </details>
 </dd>
 <dt id="serde.se.serialize"><code class="name flex">
-<span>def <span class="ident">serialize</span></span>(<span>rename_all: Union[str, NoneType] = None, reuse_instances_default: bool = True, convert_sets_default: bool = False) ‑> Type[~T]</span>
+<span>def <span class="ident">serialize</span></span>(<span>rename_all: Union[str, NoneType] = None, reuse_instances_default: bool = True, convert_sets_default: bool = False, serializer: Union[Callable[[Type, Any], Any], NoneType] = None) ‑> Type[~T]</span>
 </code></dt>
 <dd>
 <div class="desc"><p><code><a title="serde.se.serialize" href="#serde.se.serialize">serialize()</a></code> decorator. A dataclass with this decorator can be serialized
@@ -740,6 +765,7 @@ into an object in various data format such as JSON and MsgPack.</p>
     rename_all: Optional[str] = None,
     reuse_instances_default: bool = True,
     convert_sets_default: bool = False,
+    serializer: Optional[SerializeFunc] = None,
 ) -&gt; Type[T]:
     &#34;&#34;&#34;
     `serialize` decorator. A dataclass with this decorator can be serialized
@@ -797,6 +823,8 @@ into an object in various data format such as JSON and MsgPack.</p>
         g[&#39;typename&#39;] = typename  # used in union functions
         g[&#39;is_instance&#39;] = is_instance  # used in union functions
         g[&#39;to_obj&#39;] = to_obj
+        if serialize:
+            g[&#39;serde_custom_class_serializer&#39;] = functools.partial(serde_custom_class_serializer, custom=serializer)
 
         # Collect types used in the generated code.
         for typ in iter_types(cls):
@@ -819,11 +847,11 @@ into an object in various data format such as JSON and MsgPack.</p>
         for f in sefields(cls):
             if f.skip_if:
                 g[f.skip_if.name] = f.skip_if
-            if f.serialize:
-                g[f.serialize.name] = f.serialize
+            if f.serializer:
+                g[f.serializer.name] = f.serializer
 
-        add_func(scope, TO_ITER, render_to_tuple(cls), g)
-        add_func(scope, TO_DICT, render_to_dict(cls, rename_all), g)
+        add_func(scope, TO_ITER, render_to_tuple(cls, serializer), g)
+        add_func(scope, TO_DICT, render_to_dict(cls, rename_all, serializer), g)
 
         logger.debug(f&#39;{cls.__name__}: {SERDE_SCOPE} {scope}&#39;)
 

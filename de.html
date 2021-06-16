@@ -62,6 +62,8 @@ from uuid import UUID
 import jinja2
 
 from .compat import (
+    SerdeError,
+    SerdeSkip,
     T,
     has_default,
     has_default_factory,
@@ -89,7 +91,6 @@ from .core import (
     SERDE_SCOPE,
     UNION_DE_PREFIX,
     Field,
-    SerdeError,
     SerdeScope,
     add_func,
     fields,
@@ -101,11 +102,38 @@ from .py36_datetime_compat import py36_date_fromisoformat, py36_datetime_fromiso
 
 __all__: List = [&#39;deserialize&#39;, &#39;is_deserializable&#39;, &#39;Deserializer&#39;, &#39;from_dict&#39;, &#39;from_tuple&#39;]
 
-Custom = Optional[Callable[[&#39;DeField&#39;, Any], Any]]
+# Interface of Custom deserialize function.
+DeserializeFunc = Callable[[Type, Any], Any]
+
+
+def serde_custom_class_deserializer(cls: Type, datavar, value, custom: DeserializeFunc, default: Callable):
+    &#34;&#34;&#34;
+    Handle custom deserialization. Use default deserialization logic if it receives `SerdeSkip` exception.
+
+    :param cls: Type of the field.
+    :param datavar: The whole variable to deserialize from. e.g. &#34;data&#34;
+    :param value: The value for the field. e.g. &#34;data[&#39;i&#39;]&#34;
+    :param custom: Custom deserialize function.
+    :param default: Default deserialize function.
+    &#34;&#34;&#34;
+    try:
+        return custom(cls, value)
+    except SerdeSkip:
+        return default()
+
+
+def default_deserializer(_cls: Type, obj):
+    &#34;&#34;&#34;
+    Marker function to tell serde to use the default deserializer. It&#39;s used when custom deserializer is specified
+    at the class but you want to override a field with the default deserializer.
+    &#34;&#34;&#34;
 
 
 def deserialize(
-    _cls: Type[T] = None, rename_all: Optional[str] = None, reuse_instances_default: bool = True
+    _cls: Type[T] = None,
+    rename_all: Optional[str] = None,
+    reuse_instances_default: bool = True,
+    deserializer: Optional[DeserializeFunc] = None,
 ) -&gt; Type[T]:
     &#34;&#34;&#34;
     `deserialize` decorator. A dataclass with this decorator can be deserialized
@@ -156,6 +184,10 @@ def deserialize(
         g[&#39;SerdeError&#39;] = SerdeError
         g[&#39;raise_unsupported_type&#39;] = raise_unsupported_type
         g[&#39;typename&#39;] = typename  # used in union functions
+        if deserialize:
+            g[&#39;serde_custom_class_deserializer&#39;] = functools.partial(
+                serde_custom_class_deserializer, custom=deserializer
+            )
 
         # Collect types used in the generated code.
         for typ in iter_types(cls):
@@ -188,11 +220,11 @@ def deserialize(
                 scope.defaults[f.name] = f.default
             elif has_default_factory(f):
                 scope.defaults[f.name] = f.default_factory
-            if f.deserialize:
-                g[f.deserialize.name] = f.deserialize
+            if f.deserializer:
+                g[f.deserializer.name] = f.deserializer
 
-        add_func(scope, FROM_ITER, render_from_iter(cls), g)
-        add_func(scope, FROM_DICT, render_from_dict(cls, rename_all), g)
+        add_func(scope, FROM_ITER, render_from_iter(cls, deserializer), g)
+        add_func(scope, FROM_DICT, render_from_dict(cls, rename_all, deserializer), g)
 
         logger.debug(f&#39;{cls.__name__}: {SERDE_SCOPE} {scope}&#39;)
 
@@ -404,12 +436,13 @@ class Renderer:
     &#34;&#34;&#34;
 
     func: str
+    custom: Optional[DeserializeFunc] = None  # Custom class level deserializer.
 
     def render(self, arg: DeField) -&gt; str:
         &#34;&#34;&#34;
         Render rvalue
         &#34;&#34;&#34;
-        if arg.serialize:
+        if arg.deserializer and arg.deserializer.inner is not default_deserializer:
             res = self.custom_field_deserializer(arg)
         elif is_dataclass(arg.type):
             res = self.dataclass(arg)
@@ -474,14 +507,21 @@ class Renderer:
             elif has_default_factory(arg):
                 res = f&#39;({res}) if {exists} else serde_scope.defaults[&#34;{arg.name}&#34;]()&#39;
 
-        return res
+        if self.custom and not arg.deserializer:
+            # The function takes a closure in order to execute the default value lazily.
+            return (
+                f&#39;serde_custom_class_deserializer({arg.type.__name__}, {arg.datavar}, {arg.data}, &#39;
+                f&#39;default=lambda: {res})&#39;
+            )
+        else:
+            return res
 
     def custom_field_deserializer(self, arg: DeField) -&gt; str:
         &#34;&#34;&#34;
         Render rvalue for the field with custom deserializer.
         &#34;&#34;&#34;
-        assert arg.deserialize
-        return f&#34;{arg.deserialize.name}({arg.data})&#34;
+        assert arg.deserializer
+        return f&#34;{arg.deserializer.name}({arg.data})&#34;
 
     def dataclass(self, arg: DeField) -&gt; str:
         return f&#34;{arg.type.__name__}.{SERDE_SCOPE}.funcs[&#39;{self.func}&#39;]({arg.data}, reuse_instances=reuse_instances)&#34;
@@ -642,7 +682,7 @@ def to_iter_arg(f: DeField, *args, **kwargs) -&gt; DeField:
     return f
 
 
-def render_from_iter(cls: Type) -&gt; str:
+def render_from_iter(cls: Type, custom: Optional[DeserializeFunc] = None) -&gt; str:
     template = &#34;&#34;&#34;
 def {{func}}(data, reuse_instances = {{serde_scope.reuse_instances_default}}):
   if reuse_instances is Ellipsis:
@@ -663,14 +703,14 @@ def {{func}}(data, reuse_instances = {{serde_scope.reuse_instances_default}}):
   )
     &#34;&#34;&#34;
 
-    renderer = Renderer(FROM_ITER)
+    renderer = Renderer(FROM_ITER, custom)
     env = jinja2.Environment(loader=jinja2.DictLoader({&#39;iter&#39;: template}))
     env.filters.update({&#39;rvalue&#39;: renderer.render})
     env.filters.update({&#39;arg&#39;: to_iter_arg})
     return env.get_template(&#39;iter&#39;).render(func=FROM_ITER, serde_scope=getattr(cls, SERDE_SCOPE), fields=defields(cls))
 
 
-def render_from_dict(cls: Type, rename_all: Optional[str] = None) -&gt; str:
+def render_from_dict(cls: Type, rename_all: Optional[str] = None, custom: Optional[DeserializeFunc] = None) -&gt; str:
     template = &#34;&#34;&#34;
 def {{func}}(data, reuse_instances = {{serde_scope.reuse_instances_default}}):
   if reuse_instances is Ellipsis:
@@ -691,7 +731,7 @@ def {{func}}(data, reuse_instances = {{serde_scope.reuse_instances_default}}):
   )
     &#34;&#34;&#34;
 
-    renderer = Renderer(FROM_DICT)
+    renderer = Renderer(FROM_DICT, custom)
     env = jinja2.Environment(loader=jinja2.DictLoader({&#39;dict&#39;: template}))
     env.filters.update({&#39;rvalue&#39;: renderer.render})
     env.filters.update({&#39;arg&#39;: functools.partial(to_arg, rename_all=rename_all)})
@@ -751,7 +791,7 @@ def {{func}}(data, reuse_instances):
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
 <dt id="serde.de.deserialize"><code class="name flex">
-<span>def <span class="ident">deserialize</span></span>(<span>rename_all: Union[str, NoneType] = None, reuse_instances_default: bool = True) ‑> Type[~T]</span>
+<span>def <span class="ident">deserialize</span></span>(<span>rename_all: Union[str, NoneType] = None, reuse_instances_default: bool = True, deserializer: Union[Callable[[Type, Any], Any], NoneType] = None) ‑> Type[~T]</span>
 </code></dt>
 <dd>
 <div class="desc"><p><code><a title="serde.de.deserialize" href="#serde.de.deserialize">deserialize()</a></code> decorator. A dataclass with this decorator can be deserialized
@@ -787,7 +827,10 @@ RenameAll(int_field=10, str_field='foo')
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def deserialize(
-    _cls: Type[T] = None, rename_all: Optional[str] = None, reuse_instances_default: bool = True
+    _cls: Type[T] = None,
+    rename_all: Optional[str] = None,
+    reuse_instances_default: bool = True,
+    deserializer: Optional[DeserializeFunc] = None,
 ) -&gt; Type[T]:
     &#34;&#34;&#34;
     `deserialize` decorator. A dataclass with this decorator can be deserialized
@@ -838,6 +881,10 @@ RenameAll(int_field=10, str_field='foo')
         g[&#39;SerdeError&#39;] = SerdeError
         g[&#39;raise_unsupported_type&#39;] = raise_unsupported_type
         g[&#39;typename&#39;] = typename  # used in union functions
+        if deserialize:
+            g[&#39;serde_custom_class_deserializer&#39;] = functools.partial(
+                serde_custom_class_deserializer, custom=deserializer
+            )
 
         # Collect types used in the generated code.
         for typ in iter_types(cls):
@@ -870,11 +917,11 @@ RenameAll(int_field=10, str_field='foo')
                 scope.defaults[f.name] = f.default
             elif has_default_factory(f):
                 scope.defaults[f.name] = f.default_factory
-            if f.deserialize:
-                g[f.deserialize.name] = f.deserialize
+            if f.deserializer:
+                g[f.deserializer.name] = f.deserializer
 
-        add_func(scope, FROM_ITER, render_from_iter(cls), g)
-        add_func(scope, FROM_DICT, render_from_dict(cls, rename_all), g)
+        add_func(scope, FROM_ITER, render_from_iter(cls, deserializer), g)
+        add_func(scope, FROM_DICT, render_from_dict(cls, rename_all, deserializer), g)
 
         logger.debug(f&#39;{cls.__name__}: {SERDE_SCOPE} {scope}&#39;)
 
