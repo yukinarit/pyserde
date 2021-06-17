@@ -177,17 +177,6 @@ class Foo:
     o: Optional[str]
     nested: Bar
 </code></pre>
-<p>For python &gt;= 3.9, you can use <a href="https://www.python.org/dev/peps/pep-0585/">PEP585</a> style type annotations for standard collections.</p>
-<pre><code class="language-python">@deserialize
-@serialize
-class Foo:
-    i: int
-    l: list[str]
-    t: tuple[int, float, str, bool]
-    d: dict[str, list[tuple[str, int]]]
-    o: Optional[str]
-    nested: Bar
-</code></pre>
 <h2 id="supported-data-formats">Supported data formats</h2>
 <h3 id="json">JSON</h3>
 <pre><code class="language-python">from serde.json import from_json, to_json
@@ -209,6 +198,58 @@ print(from_toml(Foo, s))
 print(to_msgpack(f))
 print(from_msgpack(Foo, s))
 </code></pre>
+<h2 id="python-39-type-hiting">Python 3.9 type hiting</h2>
+<p>For python &gt;= 3.9, you can use <a href="https://www.python.org/dev/peps/pep-0585/">PEP585</a> style type annotations for standard collections.</p>
+<pre><code class="language-python">@deserialize
+@serialize
+class Foo:
+    i: int
+    l: list[str]
+    t: tuple[int, float, str, bool]
+    d: dict[str, list[tuple[str, int]]]
+    o: Optional[str]
+    nested: Bar
+</code></pre>
+<p>For complete example, please see <a href="./examples/collection.py">./examples/collection.py</a></p>
+<h2 id="postponed-evaluation-of-type-annotation">Postponed evaluation of type annotation</h2>
+<p><a href="https://www.python.org/dev/peps/pep-0563/">PEP563</a> Postponed evaluation of type annotation is supported.</p>
+<pre><code class="language-python">from __future__ import annotations
+from dataclasses import dataclass
+from serde import deserialize, serialize
+
+@deserialize
+@serialize
+@dataclass
+class Foo:
+    i: int
+    s: str
+    f: float
+    b: bool
+
+    def foo(self, cls: Foo):  # You can use &quot;Foo&quot; type before it's defined.
+        print('foo')
+</code></pre>
+<p>For complete example, please see <a href="./examples/lazy_type_evaluation.py">./examples/lazy_type_evaluation.py</a></p>
+<h2 id="forward-reference">Forward reference</h2>
+<p>You can use a forward reference in annotations.</p>
+<pre><code class="language-python">@dataclass
+class Foo:
+    i: int
+    s: str
+    bar: 'Bar'  # Specify type annotation in string.
+
+@deserialize
+@serialize
+@dataclass
+class Bar:
+    f: float
+    b: bool
+
+# Evaluate pyserde decorators after `Bar` is defined.
+deserialize(Foo)
+serialize(Foo)
+</code></pre>
+<p>For complete example, please see <a href="./examples/forward_reference.py">./examples/forward_reference.py</a></p>
 <h2 id="case-conversion">Case Conversion</h2>
 <p>Converting <code>snake_case</code> fields into supported case styles e.g. <code>camelCase</code> and <code>kebab-case</code>.</p>
 <pre><code class="language-python">@serialize(rename_all = 'camelcase')
@@ -1118,6 +1159,9 @@ into an object in various data format such as JSON and MsgPack.</p>
 <li><a href="#msgpack">MsgPack</a></li>
 </ul>
 </li>
+<li><a href="#python-39-type-hiting">Python 3.9 type hiting</a></li>
+<li><a href="#postponed-evaluation-of-type-annotation">Postponed evaluation of type annotation</a></li>
+<li><a href="#forward-reference">Forward reference</a></li>
 <li><a href="#case-conversion">Case Conversion</a></li>
 <li><a href="#rename-field">Rename Field</a></li>
 <li><a href="#skip">Skip</a></li>
