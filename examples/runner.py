@@ -6,6 +6,7 @@ import custom_class_serializer
 import custom_field_serializer
 import default
 import env
+import forward_reference
 import jsonfile
 import newtype
 import rename
@@ -15,6 +16,11 @@ import skip
 import tomlfile
 import union
 import yamlfile
+
+PY36 = sys.version_info[:3] < (3, 7, 0)
+
+if not PY36:
+    import lazy_type_evaluation
 
 
 def run_all():
@@ -33,6 +39,9 @@ def run_all():
     run(union)
     run(custom_class_serializer)
     run(custom_field_serializer)
+    run(forward_reference)
+    if not PY36:
+        run(lazy_type_evaluation)
 
 
 def run(module):
