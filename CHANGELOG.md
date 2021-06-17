@@ -1,3 +1,68 @@
+## `0.4.0` (2021-06-17)
+
+* feat: add support for lazy annotations PEP563 (#112) ([f7f6996](https://github.com/yukinarit/pyserde/commit/f7f6996)), closes [#112](https://github.com/yukinarit/pyserde/issues/112)
+
+```python
+from __future__ import annotations
+from dataclasses import dataclass
+from serde import deserialize, serialize
+
+@deserialize
+@serialize
+@dataclass
+class Foo:
+    i: int
+    s: str
+    f: float
+    b: bool
+
+    def foo(self, cls: Foo):  # You can use "Foo" type before it's defined.
+        print('foo')
+```
+
+* feat: Implement custom class (de)serializer ([3484d46](https://github.com/yukinarit/pyserde/commit/3484d46))
+* feat: Implement custom field (de)serializer ([14b791c](https://github.com/yukinarit/pyserde/commit/14b791c))
+
+```python
+def serializer(cls, o):
+    ...
+
+def deserializer(cls, o):
+    ...
+
+@deserialize(deserializer=deserializer)
+@serialize(serializer=serializer)
+@dataclass
+class Foo:
+    i: int
+    # Class serializer/deserializer is used as default.
+    dt1: datetime
+    # Override by field serializer/deserializer.
+    dt2: datetime = field(
+        metadata={
+            'serde_serializer': lambda x: x.strftime('%y.%m.%d'),
+            'serde_deserializer': lambda x: datetime.strptime(x, '%y.%m.%d'),
+        }
+    )
+```
+
+* feat: Improve error description for union type ([8abb549](https://github.com/yukinarit/pyserde/commit/8abb549))
+* feat: Improve serde.inspect ([8b8635a](https://github.com/yukinarit/pyserde/commit/8b8635a))
+* feat: Support typing.any ([988a621](https://github.com/yukinarit/pyserde/commit/988a621))
+* feat: Support typing.NewType for primitives ([731ed79](https://github.com/yukinarit/pyserde/commit/731ed79))
+* refactor: Add lvalue renderer for serialization ([665dc77](https://github.com/yukinarit/pyserde/commit/665dc77))
+* refactor: Remove arg template filter from se.py ([0377655](https://github.com/yukinarit/pyserde/commit/0377655))
+* refactor: Remove self class from scope ([da81f1f](https://github.com/yukinarit/pyserde/commit/da81f1f))
+* refactor: Rename custom (de)serializer attributes ([03b2274](https://github.com/yukinarit/pyserde/commit/03b2274))
+* ci: Add python 3.10-dev to CI pipeline ([1f33e59](https://github.com/yukinarit/pyserde/commit/1f33e59))
+* ci: Don't cache pip to workaround pip error ([c912429](https://github.com/yukinarit/pyserde/commit/c912429))
+* build: add pre-commit to test requirements ([a88ea40](https://github.com/yukinarit/pyserde/commit/a88ea40))
+* fix: correctly render single element tuples ([a8a6456](https://github.com/yukinarit/pyserde/commit/a8a6456))
+* fix: pass convert_sets argument to union functions ([ab40cc9](https://github.com/yukinarit/pyserde/commit/ab40cc9))
+* fix: support unions with nested unions in containers (#113) ([c26e828](https://github.com/yukinarit/pyserde/commit/c26e828)), closes [#113](https://github.com/yukinarit/pyserde/issues/113)
+
+This release had contibutions from 1 person: [@ydylla](https://github.com/ydylla). Thank you so much! :tada: :joy:
+
 ## `0.3.2` (2021-05-07)
 
 * feat: Improve error description for union type ([8abb549](https://github.com/yukinarit/pyserde/commit/8abb549))
