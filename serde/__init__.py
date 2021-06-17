@@ -8,7 +8,7 @@ from .de import default_deserializer, deserialize, from_dict, from_tuple, is_des
 from .se import asdict, astuple, default_serializer, is_serializable, serialize, to_dict, to_tuple  # noqa
 
 """ Version of pyserde. """
-__version__ = '0.3.2'
+__version__ = '0.4.0'
 
 __all__ = [
     'serialize',
