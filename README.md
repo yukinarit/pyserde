@@ -175,20 +175,6 @@ class Foo:
     nested: Bar
 ```
 
-For python >= 3.9, you can use [PEP585](https://www.python.org/dev/peps/pep-0585/) style type annotations for standard collections.
-
-```python
-@deserialize
-@serialize
-class Foo:
-    i: int
-    l: list[str]
-    t: tuple[int, float, str, bool]
-    d: dict[str, list[tuple[str, int]]]
-    o: Optional[str]
-    nested: Bar
-```
-
 ## Supported data formats
 
 ### JSON
@@ -222,6 +208,73 @@ from serde.msgpack import from_msgpack, to_msgpack
 print(to_msgpack(f))
 print(from_msgpack(Foo, s))
 ```
+
+## Python 3.9 type hiting
+
+For python >= 3.9, you can use [PEP585](https://www.python.org/dev/peps/pep-0585/) style type annotations for standard collections.
+
+```python
+@deserialize
+@serialize
+class Foo:
+    i: int
+    l: list[str]
+    t: tuple[int, float, str, bool]
+    d: dict[str, list[tuple[str, int]]]
+    o: Optional[str]
+    nested: Bar
+```
+
+For complete example, please see [./examples/collection.py](./examples/collection.py)
+
+## Postponed evaluation of type annotation
+
+[PEP563](https://www.python.org/dev/peps/pep-0563/) Postponed evaluation of type annotation is supported.
+
+```python
+from __future__ import annotations
+from dataclasses import dataclass
+from serde import deserialize, serialize
+
+@deserialize
+@serialize
+@dataclass
+class Foo:
+    i: int
+    s: str
+    f: float
+    b: bool
+
+    def foo(self, cls: Foo):  # You can use "Foo" type before it's defined.
+        print('foo')
+```
+
+For complete example, please see [./examples/lazy_type_evaluation.py](./examples/lazy_type_evaluation.py)
+
+## Forward reference
+
+You can use a forward reference in annotations.
+
+```python
+@dataclass
+class Foo:
+    i: int
+    s: str
+    bar: 'Bar'  # Specify type annotation in string.
+
+@deserialize
+@serialize
+@dataclass
+class Bar:
+    f: float
+    b: bool
+
+# Evaluate pyserde decorators after `Bar` is defined.
+deserialize(Foo)
+serialize(Foo)
+```
+
+For complete example, please see [./examples/forward_reference.py](./examples/forward_reference.py)
 
 ## Case Conversion
 
