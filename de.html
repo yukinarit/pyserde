@@ -130,11 +130,11 @@ def default_deserializer(_cls: Type, obj):
 
 
 def deserialize(
-    _cls: Type[T] = None,
+    _cls=None,
     rename_all: Optional[str] = None,
     reuse_instances_default: bool = True,
     deserializer: Optional[DeserializeFunc] = None,
-) -&gt; Type[T]:
+):
     &#34;&#34;&#34;
     `deserialize` decorator. A dataclass with this decorator can be deserialized
     into an object from various data format such as JSON and MsgPack.
@@ -791,7 +791,7 @@ def {{func}}(data, reuse_instances):
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
 <dt id="serde.de.deserialize"><code class="name flex">
-<span>def <span class="ident">deserialize</span></span>(<span>rename_all: Union[str, NoneType] = None, reuse_instances_default: bool = True, deserializer: Union[Callable[[Type, Any], Any], NoneType] = None) ‑> Type[~T]</span>
+<span>def <span class="ident">deserialize</span></span>(<span>rename_all: Union[str, NoneType] = None, reuse_instances_default: bool = True, deserializer: Union[Callable[[Type, Any], Any], NoneType] = None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p><code><a title="serde.de.deserialize" href="#serde.de.deserialize">deserialize()</a></code> decorator. A dataclass with this decorator can be deserialized
@@ -827,11 +827,11 @@ RenameAll(int_field=10, str_field='foo')
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def deserialize(
-    _cls: Type[T] = None,
+    _cls=None,
     rename_all: Optional[str] = None,
     reuse_instances_default: bool = True,
     deserializer: Optional[DeserializeFunc] = None,
-) -&gt; Type[T]:
+):
     &#34;&#34;&#34;
     `deserialize` decorator. A dataclass with this decorator can be deserialized
     into an object from various data format such as JSON and MsgPack.
