@@ -16,7 +16,7 @@ import os
 import sys
 from typing import Type
 
-from .core import SERDE_SCOPE, SerdeScope, init
+from .core import SERDE_SCOPE, SerdeScope, init, logger
 
 init(True)
 
@@ -32,6 +32,14 @@ def inspect(cls: Type) -> None:
 def main(arg):
     if arg.verbose:
         logging.basicConfig(level=logging.DEBUG)
+
+    try:
+        import black
+
+        assert black
+    except ImportError:
+        logger.warning(('Tips: Installing "black" makes the output prettier! Try this command:\n' 'pip install back'))
+
     dir = os.path.dirname(arg.path)
     mod = os.path.basename(arg.path)[:-3]
     print(f'Loading {mod}.{arg.name} from {dir}/{mod}.py')
