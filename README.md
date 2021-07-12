@@ -144,11 +144,12 @@ That's it! pyserde offers many more features. If you're interested, please read 
 
 * Primitives (int, float, str, bool)
 * Containers (List, Set, Tuple, Dict)
-* [`Optional`](https://docs.python.org/3/library/typing.html#typing.Optional)
+* [`typing.Optional`](https://docs.python.org/3/library/typing.html#typing.Optional)
+* [`typing.Union`](https://docs.python.org/3/library/typing.html#typing.Union)
 * User defined class with [`@dataclass`](https://docs.python.org/3/library/dataclasses.html)
 * [`typing.NewType`](https://docs.python.org/3/library/typing.html#newtype) for primitive types
 * [`typing.Any`](https://docs.python.org/3/library/typing.html#the-any-type)
-* [Enum](https://docs.python.org/3/library/enum.html#enum.Enum) and [IntEnum](https://docs.python.org/3/library/enum.html#enum.IntEnum)
+* [`Enum`](https://docs.python.org/3/library/enum.html#enum.Enum) and [`IntEnum`](https://docs.python.org/3/library/enum.html#enum.IntEnum)
 * More types
     * [`pathlib.Path`](https://docs.python.org/3/library/pathlib.html)
     * [`decimal.Decimal`](https://docs.python.org/3/library/decimal.html)

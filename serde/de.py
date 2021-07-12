@@ -93,11 +93,11 @@ def default_deserializer(_cls: Type, obj):
 
 
 def deserialize(
-    _cls: Type[T] = None,
+    _cls=None,
     rename_all: Optional[str] = None,
     reuse_instances_default: bool = True,
     deserializer: Optional[DeserializeFunc] = None,
-) -> Type[T]:
+):
     """
     `deserialize` decorator. A dataclass with this decorator can be deserialized
     into an object from various data format such as JSON and MsgPack.
