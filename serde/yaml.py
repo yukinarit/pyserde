@@ -1,7 +1,7 @@
 """
 Serialize and Deserialize in YAML format.
 """
-from typing import List, Type  # noqa
+from typing import Type
 
 import yaml
 
@@ -26,6 +26,7 @@ def to_yaml(obj, se: Type[Serializer] = YamlSerializer, **opts) -> str:
     """
     Take an object and return yaml string.
 
+    >>> from typing import List
     >>> from dataclasses import dataclass
     >>> from serde import serialize
     >>>
@@ -47,6 +48,7 @@ def from_yaml(c: Type[T], s: str, de: Type[Deserializer] = YamlDeserializer, **o
     """
     Take yaml string and return deserialized object..
 
+    >>> from typing import List
     >>> from dataclasses import dataclass
     >>> from serde import deserialize
     >>>
