@@ -30,7 +30,7 @@
 <pre><code class="python">&#34;&#34;&#34;
 Serialize and Deserialize in YAML format.
 &#34;&#34;&#34;
-from typing import List, Type  # noqa
+from typing import Type
 
 import yaml
 
@@ -55,6 +55,7 @@ def to_yaml(obj, se: Type[Serializer] = YamlSerializer, **opts) -&gt; str:
     &#34;&#34;&#34;
     Take an object and return yaml string.
 
+    &gt;&gt;&gt; from typing import List
     &gt;&gt;&gt; from dataclasses import dataclass
     &gt;&gt;&gt; from serde import serialize
     &gt;&gt;&gt;
@@ -76,6 +77,7 @@ def from_yaml(c: Type[T], s: str, de: Type[Deserializer] = YamlDeserializer, **o
     &#34;&#34;&#34;
     Take yaml string and return deserialized object..
 
+    &gt;&gt;&gt; from typing import List
     &gt;&gt;&gt; from dataclasses import dataclass
     &gt;&gt;&gt; from serde import deserialize
     &gt;&gt;&gt;
@@ -105,7 +107,8 @@ def from_yaml(c: Type[T], s: str, de: Type[Deserializer] = YamlDeserializer, **o
 </code></dt>
 <dd>
 <div class="desc"><p>Take yaml string and return deserialized object..</p>
-<pre><code class="language-python-repl">&gt;&gt;&gt; from dataclasses import dataclass
+<pre><code class="language-python-repl">&gt;&gt;&gt; from typing import List
+&gt;&gt;&gt; from dataclasses import dataclass
 &gt;&gt;&gt; from serde import deserialize
 &gt;&gt;&gt;
 &gt;&gt;&gt; @deserialize
@@ -127,6 +130,7 @@ Settings(host='localhost', port=8080, upstream=['localhost:8081', 'localhost:808
     &#34;&#34;&#34;
     Take yaml string and return deserialized object..
 
+    &gt;&gt;&gt; from typing import List
     &gt;&gt;&gt; from dataclasses import dataclass
     &gt;&gt;&gt; from serde import deserialize
     &gt;&gt;&gt;
@@ -149,7 +153,8 @@ Settings(host='localhost', port=8080, upstream=['localhost:8081', 'localhost:808
 </code></dt>
 <dd>
 <div class="desc"><p>Take an object and return yaml string.</p>
-<pre><code class="language-python-repl">&gt;&gt;&gt; from dataclasses import dataclass
+<pre><code class="language-python-repl">&gt;&gt;&gt; from typing import List
+&gt;&gt;&gt; from dataclasses import dataclass
 &gt;&gt;&gt; from serde import serialize
 &gt;&gt;&gt;
 &gt;&gt;&gt; @serialize
@@ -171,6 +176,7 @@ Settings(host='localhost', port=8080, upstream=['localhost:8081', 'localhost:808
     &#34;&#34;&#34;
     Take an object and return yaml string.
 
+    &gt;&gt;&gt; from typing import List
     &gt;&gt;&gt; from dataclasses import dataclass
     &gt;&gt;&gt; from serde import serialize
     &gt;&gt;&gt;
