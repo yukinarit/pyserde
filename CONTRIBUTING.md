@@ -33,9 +33,15 @@ Thank you for considering contributing to Pyserde!
   git remote add upstream https://github.com/yukinarit/pyserde
   git fetch upstream
   ```
-- Install pipenv:
+- Install Poetry (used for dependency management and packaging):  
+
+  For OSX / Linux / WSL
   ```bash
-  pip install pipenv
+  curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python -
+  ```
+  For Windows Powershell
+  ```bash
+  (Invoke-WebRequest -Uri https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py -UseBasicParsing).Content | python -
   ```
 - Run setup script:
   ```bash
