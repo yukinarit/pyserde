@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "pyserde_bench"
+version = "0.1.0"
+description = "Benchmark package for pyserde"
+authors = ["yukinarit <yukinarit84@gmail.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.6.1"
+click = "*"
+pyserde = {path = "../"}
+
+[tool.poetry.dev-dependencies]
+dacite = "*"
+mashumaro = "*"
+marshmallow = "~=3.2"
+attrs = "*"
+cattrs = "*"
+seaborn = "==0.9.0"
+matplotlib = "==3.1.1"
+numpy = "==1.17.2"
