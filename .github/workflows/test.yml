@@ -9,7 +9,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        python-version: [3.6, 3.7, 3.8, 3.9, 3.10-dev, pypy3]
+        python-version: [3.6, 3.7, 3.8, 3.9, pypy3]
         os: [ubuntu-20.04, macos-10.15, windows-2019]
     steps:
     - name: Checkout
@@ -27,14 +27,12 @@ jobs:
     #     key: ${{ matrix.os }}-${{ env.pythonLocation }}-${{ hashFiles('**/Pipfile') }}
     - name: Install dependencies
       run: |
-        pip install pipenv
-        pipenv install --skip-lock --system --dev
-        pip list
-        cd examples && pipenv install --skip-lock --system --dev
+        pip install poetry
+        make setup
     - name: Run tests
       run: |
-        pytest tests --doctest-modules serde -v
-        cd examples && python runner.py
+        make test
+        make examples
 
   check_formatting:
     name: Check formatting
@@ -83,10 +81,10 @@ jobs:
     #     key: ubuntu-20.04-${{ env.pythonLocation }}-${{ hashFiles('**/Pipfile') }}
     - name: Install dependencies
       run: |
-        pip install pipenv
-        pipenv install --skip-lock --system --dev
+        pip install poetry
+        poetry install
     - name: Check coverage
-      run: pytest tests --doctest-modules serde -v --cov=serde --cov-report term --cov-report xml
+      run: make coverage
     - name: Upload coverage report to codecov.io
       uses: codecov/codecov-action@v1
 
@@ -108,8 +106,7 @@ jobs:
     #     key: ubuntu-20.04-${{ env.pythonLocation }}-${{ hashFiles('**/Pipfile') }}
     - name: Install dependencies
       run: |
-        pip install pipenv
-        cd bench && pipenv install --skip-lock --system
+        pip install poetry
+        make setup-bench
     - name: Run benchmark
-      run: |
-        python bench/bench.py
+      run: make bench
