@@ -4,8 +4,8 @@ jsonfile.py
 Make an http request to JSON WebAPI.
 
 Usage:
-    $ pipenv install
-    $ pipenv run jsonfile.py
+    $ poetry install
+    $ poetry run python jsonfile.py
 """
 from dataclasses import dataclass
 from typing import List, Optional

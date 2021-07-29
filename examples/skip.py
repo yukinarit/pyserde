@@ -4,8 +4,8 @@ skip.py
 Example usage of skip and skip_if attributes.
 
 Usage:
-    $ pipenv install
-    $ pipenv run skip.py
+    $ poetry install
+    $ poetry run python skip.py
 """
 
 from dataclasses import dataclass, field

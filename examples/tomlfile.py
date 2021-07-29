@@ -4,8 +4,8 @@ tomlfile.py
 Read Pipenv Pipfile by pyserde.
 
 Usage:
-    $ pipenv install
-    $ pipenv run tomlfile.py
+    $ poetry install
+    $ poetry run python tomlfile.py
 """
 from dataclasses import dataclass
 from typing import Dict, List, Optional, Union
