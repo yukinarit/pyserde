@@ -11,8 +11,20 @@ repos:
     rev: 19.3b0
     hooks:
       - id: black
+        args: [
+               "--target-version=py36",
+               "--target-version=py37",
+               "--target-version=py38",
+               "--line-length=120",
+               "--skip-string-normalization",
+              ]
 
   - repo: https://github.com/timothycrosley/isort
     rev: 5.7.0
     hooks:
       - id: isort
+        args: [
+               "--profile=black",
+               "--line-length=120",
+               "--atomic",
+              ]
