@@ -33,15 +33,6 @@ jinja2 = "*"
 msgpack = { version = "*", markers = "extra == 'msgpack' or extra == 'all'", optional = true }
 toml = { version = "*", markers = "extra == 'toml' or extra == 'all'", optional = true }
 pyyaml = { version = "*", markers = "extra == 'yaml' or extra == 'all'", optional = true }
-flake8 = { version = "*", markers = "extra == 'test'", optional = true }
-pytest = { version = "*", markers = "extra == 'test'", optional = true }
-pytest-cov = { version = "*", markers = "extra == 'test'", optional = true }
-pytest-watch = { version = "*", markers = "extra == 'test'", optional = true }
-pytest-flake8 = { version = "*", markers = "extra == 'test'", optional = true }
-coverage = { version = "==4.5.4", markers = "extra == 'test'", optional = true }
-mypy = { version = "==0.782", markers = "extra == 'test' and platform_python_implementation!='PyPy'"}
-more-itertools = { version = "~=8.6.0", markers = "extra == 'test'", optional = true }
-pre-commit = { version = "==v2.10.1", markers = "extra == 'test'", optional = true }
 
 [tool.poetry.dev-dependencies]
 pyyaml = "*"
@@ -63,7 +54,6 @@ msgpack = ["msgpack"]
 toml = ["toml"]
 yaml = ["pyyaml"]
 all = ["msgpack", "toml", "pyyaml"]
-test = ["coverage", "pytest", "pytest-cov", "pytest-flake8", "mypy", "flake8", "pre-commit"]
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
