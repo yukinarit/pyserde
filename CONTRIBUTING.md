@@ -35,7 +35,7 @@ Thank you for considering contributing to Pyserde!
   ```
 - Install Poetry (used for dependency management and packaging):  
 
-  For OSX / Linux / WSL
+  For macOS / Linux / WSL
   ```bash
   curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python -
   ```
