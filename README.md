@@ -70,8 +70,8 @@ To run benchmark in your environment:
 ```sh
 git clone git@github.com:yukinarit/pyserde.git
 cd pyserde/bench
-pipenv install
-pipenv run python bench.py --full
+poetry install
+poetry run python bench.py --full
 ```
 
 You can check [the benchmarking code](https://github.com/yukinarit/pyserde/blob/master/bench/bench.py) for more information.
@@ -435,7 +435,7 @@ e.g. in pyserde project
 
 ```
 cd pyserde
-pipenv shell
+poetry shell
 python -m serde.inspect examples/simple.py Foo
 ```
 

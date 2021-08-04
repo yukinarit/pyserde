@@ -1,0 +1,13 @@
+[tool.poetry]
+name = "pyserde_examples"
+version = "0.1.0"
+description = "Examples package for pyserde"
+authors = ["yukinarit <yukinarit84@gmail.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.6.1"
+pyserde = {path = "../"}
+toml = "*"
+pytoml = "*"
+requests = "*"
+envclasses = "==0.2.1"

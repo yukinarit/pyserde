@@ -3,8 +3,8 @@ rename.py
 
 
 Usage:
-    $ pipenv install
-    $ pipenv run rename.py
+    $ poetry install
+    $ poetry run python rename.py
 """
 from dataclasses import dataclass, field
 

@@ -3,8 +3,8 @@
 ## Run
 
 ```
-pipenv install
-pipenv run python app.py
+poetry install
+poetry run python app.py
 ```
 
 ## Usage

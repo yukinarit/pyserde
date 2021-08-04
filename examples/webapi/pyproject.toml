@@ -1,0 +1,10 @@
+[tool.poetry]
+name = "pyserde_examples_webapi"
+version = "0.1.0"
+description = "WebAPI example package for pyserde"
+authors = ["yukinarit <yukinarit84@gmail.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.6.1"
+pyserde = {path = "../../"}
+flask = "~=1.1"

@@ -26,8 +26,8 @@ jobs:
      #     key: ubuntu-20.04-${{ env.pythonLocation }}-${{ hashFiles('**/Pipfile') }}
      - name: Install dependencies
        run: |
-         pip install pipenv
-         pipenv install --skip-lock --system --dev
+         pip install poetry
+         poetry install
      - name: Get PR number
        uses: jwalton/gh-find-current-pr@v1
        id: findPr
@@ -44,10 +44,7 @@ jobs:
        env:
          PR: ${{ steps.findPr.outputs.pr }}
      - name: Build docs
-       run: |
-         mkdir -p docs
-         pdoc serde --html -o html --force
-         cp -f html/serde/* docs/
+       run: make docs
      - name: Deploy on gh-pages
        uses: JamesIves/github-pages-deploy-action@3.7.1
        with:

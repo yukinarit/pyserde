@@ -4,8 +4,8 @@ yamlfile.py
 Read swagger echo example yaml.
 
 Usage:
-    $ pipenv install
-    $ pipenv run yamlfile.py
+    $ poetry install
+    $ poetry run python yamlfile.py
 """
 from dataclasses import dataclass
 from typing import Dict, List, Optional, Union

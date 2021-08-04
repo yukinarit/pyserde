@@ -1,13 +1,60 @@
-[tool.black]
-line-length = 120
-target-version = ['py36', 'py37', 'py38']
-skip-string-normalization = true
+[tool.poetry]
+name = "pyserde"
+version = "0.4.0"
+description = "Yet another serialization library on top of dataclasses"
+authors = ["yukinarit <yukinarit84@gmail.com>"]
+license = "MIT"
+readme = "README.md"
+repository = "https://github.com/yukinarit/pyserde"
+homepage = "https://github.com/yukinarit/pyserde"
+packages = [
+    { include = "serde" },
+    { include = "tests" },
+    { include = "examples" },
+]
+classifiers=[
+        "Development Status :: 4 - Beta",
+        "Intended Audience :: Developers",
+        "License :: OSI Approved :: MIT License",
+        "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: Implementation :: CPython",
+        "Programming Language :: Python :: Implementation :: PyPy",
+    ]
 
-[tool.isort]
-multi_line_output = 3
-include_trailing_comma = true
-force_grid_wrap = 0
-use_parentheses = true
-ensure_newline_before_comments = true
-line_length = 120
-atomic = true
+[tool.poetry.dependencies]
+python = "^3.6.1"
+dataclasses = {version = "*", markers = "python_version < '3.7'"}
+typing_inspect = ">=0.4.0"
+stringcase = "*"
+jinja2 = "*"
+msgpack = { version = "*", markers = "extra == 'msgpack' or extra == 'all'", optional = true }
+toml = { version = "*", markers = "extra == 'toml' or extra == 'all'", optional = true }
+pyyaml = { version = "*", markers = "extra == 'yaml' or extra == 'all'", optional = true }
+
+[tool.poetry.dev-dependencies]
+pyyaml = "*"
+toml = "*"
+msgpack = "*"
+flake8 = "*"
+pytest = "*"
+pytest-cov = "*"
+pytest-watch = "*"
+pytest-flake8 = "*"
+coverage = "==4.5.4"
+pdoc3 = "~=0.9"
+mypy = {version = "==0.782", markers = "platform_python_implementation!='PyPy'"}
+more-itertools = "~=8.6.0"
+pre-commit = "==v2.10.1"
+
+[tool.poetry.extras]
+msgpack = ["msgpack"]
+toml = ["toml"]
+yaml = ["pyyaml"]
+all = ["msgpack", "toml", "pyyaml"]
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
