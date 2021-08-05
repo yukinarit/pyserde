@@ -7,9 +7,6 @@ from .core import init, logger  # noqa
 from .de import default_deserializer, deserialize, from_dict, from_tuple, is_deserializable  # noqa
 from .se import asdict, astuple, default_serializer, is_serializable, serialize, to_dict, to_tuple  # noqa
 
-""" Version of pyserde. """
-__version__ = '0.4.0'
-
 __all__ = [
     'serialize',
     'deserialize',
