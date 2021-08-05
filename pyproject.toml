@@ -48,6 +48,7 @@ pdoc3 = "~=0.9"
 mypy = {version = "==0.782", markers = "platform_python_implementation!='PyPy'"}
 more-itertools = "~=8.6.0"
 pre-commit = "==v2.10.1"
+pytest-xdist = "^2.3.0"
 
 [tool.poetry.extras]
 msgpack = ["msgpack"]
