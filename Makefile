@@ -19,13 +19,13 @@ build:
 	$(POETRY) build
 
 test:
-	$(POETRY) run pytest tests --doctest-modules serde -v
+	$(POETRY) run pytest tests --doctest-modules serde -v -nauto
 
 examples:
 	pushd examples && $(POETRY) run $(PYTHON) runner.py && popd
 
 coverage:
-	$(POETRY) run pytest tests --doctest-modules serde -v --cov=serde --cov-report term --cov-report xml
+	$(POETRY) run pytest tests --doctest-modules serde -v -nauto --cov=serde --cov-report term --cov-report xml
 
 pep8:
 	$(POETRY) run flake8

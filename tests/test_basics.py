@@ -91,8 +91,8 @@ types: List = [
     (ipaddress.IPv4Interface("192.168.1.1/24"), ipaddress.IPv4Interface),
     (ipaddress.IPv6Interface("::1/128"), ipaddress.IPv6Interface),
     (decimal.Decimal(10), decimal.Decimal),
-    (datetime.now(), datetime),
-    (date.today(), date),
+    (datetime.strptime('Jan 1 2021 1:55PM', '%b %d %Y %I:%M%p'), datetime),
+    (datetime.strptime('Jan 1 2021 1:55PM', '%b %d %Y %I:%M%p').date(), date),
 ]
 
 # these types can only be instantiated on their corresponding system
