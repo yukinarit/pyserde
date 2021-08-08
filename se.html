@@ -357,7 +357,7 @@ class SeField(Field):
         return SeField(typ, name=None)
 
 
-def sefields(cls: Type) -&gt; Iterator[Field]:
+def sefields(cls: Type) -&gt; Iterator[SeField]:
     &#34;&#34;&#34;
     Iterate fields for serialization.
     &#34;&#34;&#34;
@@ -383,13 +383,13 @@ def {{func}}(obj, reuse_instances = {{serde_scope.reuse_instances_default}},
   {{name}} = serde_scope.types[&#39;{{name}}&#39;]
   {% endfor %}
 
-  res = []
+  return (
   {% for f in fields -%}
   {% if not f.skip|default(False) %}
-  res.append({{f|rvalue()}})
+  {{f|rvalue()}},
   {% endif -%}
   {% endfor -%}
-  return tuple(res)
+  )
     &#34;&#34;&#34;
 
     renderer = Renderer(TO_ITER, custom)
@@ -470,7 +470,7 @@ def {{func}}(obj, reuse_instances, convert_sets):
 @dataclass
 class LRenderer:
     &#34;&#34;&#34;
-    Render lvalue for code generation.
+    Render lvalue for various types.
     &#34;&#34;&#34;
 
     case: Optional[str]
@@ -479,7 +479,19 @@ class LRenderer:
         &#34;&#34;&#34;
         Render lvalue
         &#34;&#34;&#34;
-        return f&#39;res[&#34;{arg.conv_name(self.case)}&#34;]&#39;
+        if is_dataclass(arg.type) and arg.flatten:
+            return self.flatten(arg)
+        else:
+            return f&#39;res[&#34;{arg.conv_name(self.case)}&#34;]&#39;
+
+    def flatten(self, arg: SeField) -&gt; str:
+        &#34;&#34;&#34;
+        Render field with flatten attribute.
+        &#34;&#34;&#34;
+        flattened = []
+        for f in sefields(arg.type):
+            flattened.append(self.render(f))
+        return &#34;, &#34;.join(flattened)
 
 
 @dataclass
@@ -588,10 +600,17 @@ convert_sets=convert_sets), foo[2],)&#34;
         &#34;&#34;&#34;
         Render rvalue for dataclass.
         &#34;&#34;&#34;
-        return (
-            f&#34;{arg.varname}.{SERDE_SCOPE}.funcs[&#39;{self.func}&#39;]({arg.varname},&#34;
-            &#34; reuse_instances=reuse_instances, convert_sets=convert_sets)&#34;
-        )
+        if arg.flatten:
+            flattened = []
+            for f in sefields(arg.type):
+                f.parent = arg  # type: ignore
+                flattened.append(self.render(f))  # type: ignore
+            return &#34;, &#34;.join(flattened)
+        else:
+            return (
+                f&#34;{arg.varname}.{SERDE_SCOPE}.funcs[&#39;{self.func}&#39;]({arg.varname},&#34;
+                &#34; reuse_instances=reuse_instances, convert_sets=convert_sets)&#34;
+            )
 
     def opt(self, arg: SeField) -&gt; str:
         &#34;&#34;&#34;

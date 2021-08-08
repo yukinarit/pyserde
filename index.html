@@ -257,6 +257,25 @@ deserialize(Foo)
 serialize(Foo)
 </code></pre>
 <p>For complete example, please see <a href="./examples/forward_reference.py">./examples/forward_reference.py</a></p>
+<h2 id="flatten">Flatten</h2>
+<p>You can flatten the fields of the nested structure.</p>
+<pre><code class="language-pyrhon">@deserialize
+@serialize
+@dataclass
+class Bar:
+    c: float
+    d: bool
+
+
+@deserialize
+@serialize
+@dataclass
+class Foo:
+    a: int
+    b: str
+    bar: Bar = field(metadata={'serde_flatten': True})
+</code></pre>
+<p>Bar's c, d fields will be deserialized as if they are defined in Foo.</p>
 <h2 id="case-conversion">Case Conversion</h2>
 <p>Converting <code>snake_case</code> fields into supported case styles e.g. <code>camelCase</code> and <code>kebab-case</code>.</p>
 <pre><code class="language-python">@serialize(rename_all = 'camelcase')
@@ -1170,6 +1189,7 @@ data-gaCategoryParameter="serde">
 <li><a href="#python-39-type-hiting">Python 3.9 type hiting</a></li>
 <li><a href="#postponed-evaluation-of-type-annotation">Postponed evaluation of type annotation</a></li>
 <li><a href="#forward-reference">Forward reference</a></li>
+<li><a href="#flatten">Flatten</a></li>
 <li><a href="#case-conversion">Case Conversion</a></li>
 <li><a href="#rename-field">Rename Field</a></li>
 <li><a href="#skip">Skip</a></li>
