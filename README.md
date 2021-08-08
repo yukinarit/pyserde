@@ -277,6 +277,30 @@ serialize(Foo)
 
 For complete example, please see [./examples/forward_reference.py](./examples/forward_reference.py)
 
+## Flatten
+
+You can flatten the fields of the nested structure.
+
+```pyrhon
+@deserialize
+@serialize
+@dataclass
+class Bar:
+    c: float
+    d: bool
+
+
+@deserialize
+@serialize
+@dataclass
+class Foo:
+    a: int
+    b: str
+    bar: Bar = field(metadata={'serde_flatten': True})
+```
+
+Bar's c, d fields will be deserialized as if they are defined in Foo.
+
 ## Case Conversion
 
 Converting `snake_case` fields into supported case styles e.g. `camelCase` and `kebab-case`.

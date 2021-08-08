@@ -322,7 +322,7 @@ class SeField(Field):
         return SeField(typ, name=None)
 
 
-def sefields(cls: Type) -> Iterator[Field]:
+def sefields(cls: Type) -> Iterator[SeField]:
     """
     Iterate fields for serialization.
     """
@@ -348,13 +348,13 @@ def {{func}}(obj, reuse_instances = {{serde_scope.reuse_instances_default}},
   {{name}} = serde_scope.types['{{name}}']
   {% endfor %}
 
-  res = []
+  return (
   {% for f in fields -%}
   {% if not f.skip|default(False) %}
-  res.append({{f|rvalue()}})
+  {{f|rvalue()}},
   {% endif -%}
   {% endfor -%}
-  return tuple(res)
+  )
     """
 
     renderer = Renderer(TO_ITER, custom)
@@ -435,7 +435,7 @@ def {{func}}(obj, reuse_instances, convert_sets):
 @dataclass
 class LRenderer:
     """
-    Render lvalue for code generation.
+    Render lvalue for various types.
     """
 
     case: Optional[str]
@@ -444,7 +444,19 @@ class LRenderer:
         """
         Render lvalue
         """
-        return f'res["{arg.conv_name(self.case)}"]'
+        if is_dataclass(arg.type) and arg.flatten:
+            return self.flatten(arg)
+        else:
+            return f'res["{arg.conv_name(self.case)}"]'
+
+    def flatten(self, arg: SeField) -> str:
+        """
+        Render field with flatten attribute.
+        """
+        flattened = []
+        for f in sefields(arg.type):
+            flattened.append(self.render(f))
+        return ", ".join(flattened)
 
 
 @dataclass
@@ -553,10 +565,17 @@ convert_sets=convert_sets), foo[2],)"
         """
         Render rvalue for dataclass.
         """
-        return (
-            f"{arg.varname}.{SERDE_SCOPE}.funcs['{self.func}']({arg.varname},"
-            " reuse_instances=reuse_instances, convert_sets=convert_sets)"
-        )
+        if arg.flatten:
+            flattened = []
+            for f in sefields(arg.type):
+                f.parent = arg  # type: ignore
+                flattened.append(self.render(f))  # type: ignore
+            return ", ".join(flattened)
+        else:
+            return (
+                f"{arg.varname}.{SERDE_SCOPE}.funcs['{self.func}']({arg.varname},"
+                " reuse_instances=reuse_instances, convert_sets=convert_sets)"
+            )
 
     def opt(self, arg: SeField) -> str:
         """

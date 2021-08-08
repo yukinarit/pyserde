@@ -6,6 +6,7 @@ import custom_class_serializer
 import custom_field_serializer
 import default
 import env
+import flatten
 import forward_reference
 import jsonfile
 import newtype
@@ -30,6 +31,7 @@ def run_all():
     run(collection)
     run(default)
     run(env)
+    run(flatten)
     run(jsonfile)
     run(rename)
     run(rename_all)
