@@ -37,12 +37,13 @@ fmt:
 	$(POETRY) run pre-commit run -a
 
 docs:
-	mkdir -p docs
-	$(POETRY) run pdoc serde --html -o html --force --template-dir docs/template
-	cp -f html/serde/* docs/
+	mkdir -p docs out/api out/guide
+	cp -f CHANGELOG.md docs/
+	$(POETRY) run pdoc -e serde=https://github.com/yukinarit/pyserde/tree/master/serde/ serde -o out/api
+	mdbook build -d out/guide
 
 open-docs:
-	$(POETRY) run pdoc serde --html -o html --force --template-dir docs/template --http 127.0.0.1:5001
+	$(POETRY) run pdoc -e serde=https://github.com/yukinarit/pyserde/tree/master/serde serde
 
 bench:
 	pushd bench && $(POETRY) run $(PYTHON) bench.py && popd

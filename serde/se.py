@@ -1,7 +1,8 @@
 """
-Defines classes and functions for `serialize` decorator.
-
+This module provides `serialize`, `is_serializable` `to_dict`, `to_tuple` and classes and functions
+associated with serialization.
 """
+
 import abc
 import copy
 import dataclasses
@@ -54,7 +55,7 @@ from .core import (
     union_func_name,
 )
 
-__all__: List = ['serialize', 'is_serializable', 'Serializer', 'to_tuple', 'to_dict']
+__all__ = ["serialize", "is_serializable", "to_dict", "to_tuple"]
 
 # Interface of Custom serialize function.
 SerializeFunc = Callable[[Type, Any], Any]
@@ -94,13 +95,11 @@ def serialize(
     serializer: Optional[SerializeFunc] = None,
 ):
     """
-    `serialize` decorator. A dataclass with this decorator can be serialized
-    into an object in various data format such as JSON and MsgPack.
+    A dataclass with this decorator is serializable into any of the data formats supported by pyserde.
 
     >>> from serde import serialize
     >>> from serde.json import to_json
     >>>
-    >>> # Mark the class serializable.
     >>> @serialize
     ... @dataclass
     ... class Foo:
@@ -112,8 +111,13 @@ def serialize(
     >>> to_json(Foo(i=10, s='foo', f=100.0, b=True))
     '{"i": 10, "s": "foo", "f": 100.0, "b": true}'
 
-    Additionally, `serialize` supports case conversion. Pass case name in
-    `serialize` decorator as shown below.
+    #### Class Attributes
+
+    Class attributes can be specified as arguments in the `serialize` decorator in order to customize the serialization
+    behaviour of the class entirely.
+
+    * `rename_all` attribute converts field names into the specified string case.
+    The following example converts snake-case field names into camel-case names.
 
     >>> @serialize(rename_all = 'camelcase')
     ... @dataclass
@@ -123,6 +127,30 @@ def serialize(
     >>>
     >>> to_json(Foo(int_field=10, str_field='foo'))
     '{"intField": 10, "strField": "foo"}'
+
+    * `serializer` takes a custom class-level serialize function. The function applies to the all the fields
+    in the class.
+
+    >>> def serializer(cls, o):
+    ...    if cls is datetime:
+    ...        return o.strftime('%d/%m/%y')
+    ...    else:
+    ...        raise SerdeSkip()
+
+    The first argument `cls` is a class of the field and the second argument `o` is a value of the field.
+    `serializer` function will be called for every field. If you don't want to use the custom serializer
+    for a certain field, raise `serde.SerdeSkip` exception, pyserde will use the default serializer for that field.
+
+    >>> @serialize(serializer=serializer)
+    ... @dataclass
+    ... class Foo:
+    ...     i: int
+    ...     dt: datetime
+
+    This custom serializer serializes `datetime` object into the string in `MM/DD/YY` format.
+
+    >>> to_json(Foo(10, datetime(2021, 1, 1, 0, 0, 0)))
+    '{"i": 10, "dt": "01/01/21"}'
     """
 
     def wrap(cls: Type):
@@ -191,17 +219,19 @@ def serialize(
 
 def is_serializable(instance_or_class: Any) -> bool:
     """
-    Test if arg can `serialize`. Arg must be also an instance of class.
+    Test if an instance or class is serializable.
 
-    >>> from dataclasses import dataclass
-    >>> from serde import serialize, is_serializable
-    >>>
     >>> @serialize
     ... @dataclass
     ... class Foo:
     ...     pass
-    >>>
+
+    Testing `Foo` class object returns `True`.
     >>> is_serializable(Foo)
+    True
+
+    Testing `Foo` object laso returns `True`.
+    >>> is_serializable(Foo())
     True
     """
     return hasattr(instance_or_class, SERDE_SCOPE)
@@ -243,24 +273,24 @@ def astuple(v):
 
 def to_tuple(o, reuse_instances: bool = ..., convert_sets: bool = ...) -> Any:
     """
-    Convert object into tuple.
+    Serialize object into tuple.
 
     >>> @serialize
     ... @dataclass
     ... class Foo:
     ...     i: int
+    ...     s: str = 'foo'
+    ...     f: float = 100.0
+    ...     b: bool = True
     >>>
-    >>> to_tuple(Foo(10))
-    (10,)
-    >>>
-    >>> to_tuple([Foo(10), Foo(20)])
-    [(10,), (20,)]
-    >>>
-    >>> to_tuple({'a': Foo(10), 'b': Foo(20)})
-    {'a': (10,), 'b': (20,)}
-    >>>
-    >>> to_tuple((Foo(10), Foo(20)))
-    ((10,), (20,))
+    >>> to_tuple(Foo(i=10))
+    (10, 'foo', 100.0, True)
+
+    You can pass any type supported by pyserde. For example,
+
+    >>> lst = [Foo(i=10), Foo(i=20)]
+    >>> to_tuple(lst)
+    [(10, 'foo', 100.0, True), (20, 'foo', 100.0, True)]
     """
     return to_obj(o, named=False, reuse_instances=reuse_instances, convert_sets=convert_sets)
 
@@ -274,24 +304,24 @@ def asdict(v):
 
 def to_dict(o, reuse_instances: bool = ..., convert_sets: bool = ...) -> Any:
     """
-    Convert object into dictionary.
+    Serialize object into dictionary.
 
     >>> @serialize
     ... @dataclass
     ... class Foo:
     ...     i: int
+    ...     s: str = 'foo'
+    ...     f: float = 100.0
+    ...     b: bool = True
     >>>
-    >>> to_dict(Foo(10))
-    {'i': 10}
-    >>>
-    >>> to_dict([Foo(10), Foo(20)])
-    [{'i': 10}, {'i': 20}]
-    >>>
-    >>> to_dict({'a': Foo(10), 'b': Foo(20)})
-    {'a': {'i': 10}, 'b': {'i': 20}}
-    >>>
-    >>> to_dict((Foo(10), Foo(20)))
-    ({'i': 10}, {'i': 20})
+    >>> to_dict(Foo(i=10))
+    {'i': 10, 's': 'foo', 'f': 100.0, 'b': True}
+
+    You can pass any type supported by pyserde. For example,
+
+    >>> lst = [Foo(i=10), Foo(i=20)]
+    >>> to_dict(lst)
+    [{'i': 10, 's': 'foo', 'f': 100.0, 'b': True}, {'i': 20, 's': 'foo', 'f': 100.0, 'b': True}]
     """
     return to_obj(o, named=True, reuse_instances=reuse_instances, convert_sets=convert_sets)
 

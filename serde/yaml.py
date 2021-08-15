@@ -1,5 +1,5 @@
 """
-Serialize and Deserialize in YAML format.
+Serialize and Deserialize in YAML format. This module depends on [pyyaml](https://pypi.org/project/PyYAML/) package.
 """
 from typing import Type
 
@@ -8,6 +8,8 @@ import yaml
 from .compat import T
 from .de import Deserializer, from_dict
 from .se import Serializer, to_dict
+
+__all__ = ["from_yaml", "to_yaml"]
 
 
 class YamlSerializer(Serializer):
@@ -24,43 +26,21 @@ class YamlDeserializer(Deserializer):
 
 def to_yaml(obj, se: Type[Serializer] = YamlSerializer, **opts) -> str:
     """
-    Take an object and return yaml string.
+    Serialize the object into YAML.
 
-    >>> from typing import List
-    >>> from dataclasses import dataclass
-    >>> from serde import serialize
-    >>>
-    >>> @serialize
-    ... @dataclass
-    ... class Settings:
-    ...     host: str
-    ...     port: int
-    ...     upstream: List[str]
-    >>>
-    >>> to_yaml(Settings(host='localhost', port=8080, upstream=['localhost:8081', 'localhost:8082']))
-    'host: localhost\\nport: 8080\\nupstream:\\n- localhost:8081\\n- localhost:8082\\n'
-    >>>
+    You can pass any serializable `obj`. If you supply keyword arguments other than `se`,
+    they will be passed in `yaml.safe_dump` function.
+
+    If you want to use the other yaml package, you can subclass `YamlSerializer` and implement your own logic.
     """
     return se.serialize(to_dict(obj, reuse_instances=False), **opts)
 
 
 def from_yaml(c: Type[T], s: str, de: Type[Deserializer] = YamlDeserializer, **opts) -> T:
     """
-    Take yaml string and return deserialized object..
+    `c` is a class obejct and `s` is YAML string. If you supply keyword arguments other than `de`,
+    they will be passed in `yaml.safe_load` function.
 
-    >>> from typing import List
-    >>> from dataclasses import dataclass
-    >>> from serde import deserialize
-    >>>
-    >>> @deserialize
-    ... @dataclass
-    ... class Settings:
-    ...     host: str
-    ...     port: int
-    ...     upstream: List[str]
-    >>>
-    >>> s = 'host: localhost\\nport: 8080\\nupstream:\\n- localhost:8081\\n- localhost:8082\\n'
-    >>> from_yaml(Settings, s)
-    Settings(host='localhost', port=8080, upstream=['localhost:8081', 'localhost:8082'])
+    If you want to use the other yaml package, you can subclass `YamlDeserializer` and implement your own logic.
     """
     return from_dict(c, de.deserialize(s, **opts), reuse_instances=False)

@@ -1,5 +1,6 @@
 """
-Serialize and Deserialize in MsgPack format.
+Serialize and Deserialize in MsgPack format. This module depends on
+[msgpack](https://pypi.org/project/msgpack/) package.
 """
 from typing import Any, Dict, Type
 
@@ -9,6 +10,8 @@ from .compat import T
 from .core import SerdeError
 from .de import Deserializer, from_dict, from_tuple
 from .se import Serializer, to_dict, to_tuple
+
+__all__ = ["from_msgpack", "to_msgpack"]
 
 
 class MsgPackSerializer(Serializer):
@@ -32,7 +35,16 @@ def to_msgpack(
     obj: Any, se: Type[Serializer] = MsgPackSerializer, named: bool = True, ext_dict: Dict[Type, int] = None, **opts
 ) -> bytes:
     """
-    If `ext_dict` option is specified, `obj` is encoded as a `msgpack.ExtType`
+    Serialize the object into MsgPack.
+
+    You can pass any serializable `obj`. If `ext_dict` option is specified, `obj` is encoded as a `msgpack.ExtType`
+    If you supply other keyword arguments, they will be passed in `msgpack.packb` function.
+
+    If `named` is True, field names are preserved, namely the object is encoded as `dict` then serialized into MsgPack.
+    If `named` is False, the object is encoded as `tuple` then serialized into MsgPack. `named=False` will produces
+    compact binary.
+
+    If you want to use the other msgpack package, you can subclass `MsgPackSerializer` and implement your own logic.
     """
     ext_type_code = None
     if ext_dict is not None:
@@ -54,7 +66,13 @@ def from_msgpack(
     **opts,
 ) -> Type[T]:
     """
-    If `ext_dict` option is specified, `c` is ignored and type is inferred from `msgpack.ExtType`
+    Deserialize from MsgPack into the object.
+
+    `c` is a class obejct and `s` is MsgPack binary. If `ext_dict` option is specified, `c` is ignored and type is
+    inferred from `msgpack.ExtType` If you supply other keyword arguments, they will be passed in
+    `msgpack.unpackb` function.
+
+    If you want to use the other msgpack package, you can subclass `MsgPackDeserializer` and implement your own logic.
     """
     if ext_dict is not None:
         ext = de.deserialize(s, **opts)

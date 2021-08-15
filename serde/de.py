@@ -1,16 +1,8 @@
 """
-Defines classes and functions for `deserialize` decorator.
-
-`deserialize` is a decorator to make a `dataclasses.dataclass` class deserializable.
-`is_deserializable` is used to test a class is with `deserialize`.
-`Deserializer` is a deserializer base class used in `from_obj`,
-`serde.json.from_json`. You can subclass it to make your own deserializer.
-`from_obj` deserializes from an object into an instance of the class with
-`deserialize`.
-
-`args_from_iter` and `args_from_dict` are private functions but they are the core
-parts of pyserde.
+This module provides `deserialize`, `is_deserializable` `from_dict`, `from_tuple` and classes and functions
+associated with deserialization.
 """
+
 import abc
 import functools
 import sys
@@ -63,7 +55,7 @@ from .core import (
 )
 from .py36_datetime_compat import py36_date_fromisoformat, py36_datetime_fromisoformat
 
-__all__: List = ['deserialize', 'is_deserializable', 'Deserializer', 'from_dict', 'from_tuple']
+__all__: List = ['deserialize', 'is_deserializable', 'from_dict', 'from_tuple']
 
 # Interface of Custom deserialize function.
 DeserializeFunc = Callable[[Type, Any], Any]
@@ -99,13 +91,11 @@ def deserialize(
     deserializer: Optional[DeserializeFunc] = None,
 ):
     """
-    `deserialize` decorator. A dataclass with this decorator can be deserialized
-    into an object from various data format such as JSON and MsgPack.
+    A dataclass with this decorator is deserializable from any of the data formats supported by pyserde.
 
     >>> from serde import deserialize
     >>> from serde.json import from_json
     >>>
-    >>> # Mark the class deserializable.
     >>> @deserialize
     ... @dataclass
     ... class Foo:
@@ -113,21 +103,50 @@ def deserialize(
     ...     s: str
     ...     f: float
     ...     b: bool
+    >>>
     >>> from_json(Foo, '{"i": 10, "s": "foo", "f": 100.0, "b": true}')
     Foo(i=10, s='foo', f=100.0, b=True)
 
-    Additionally, `deserialize` supports case conversion. Pass case name in
-    `deserialize` decorator as shown below.
+    #### Class Attributes
 
-    >>> from serde import deserialize
-    >>>
+    Class attributes can be specified as arguments in the `deserialize` decorator in order to customize the
+    deserialization behaviour of the class entirely.
+
+    * `rename_all` attribute converts field names into the specified string case.
+    The following example converts camel-case field names into snake-case names.
+
     >>> @deserialize(rename_all = 'camelcase')
     ... @dataclass
-    ... class RenameAll:
+    ... class Foo:
     ...     int_field: int
     ...     str_field: str
-    >>> from_json(RenameAll, '{"intField": 10, "strField": "foo"}')
-    RenameAll(int_field=10, str_field='foo')
+    >>>
+    >>> from_json(Foo, '{"intField": 10, "strField": "foo"}')
+    Foo(int_field=10, str_field='foo')
+
+    * `deserializer` takes a custom class-level deserialize function. The function applies to the all the fields
+    in the class.
+
+    >>> def deserializer(cls, o):
+    ...     if cls is datetime:
+    ...         return datetime.strptime(o, '%d/%m/%y')
+    ...     else:
+    ...         raise SerdeSkip()
+
+    The first argument `cls` is a class of the field and the second argument `o` is value to deserialize from.
+    `deserializer` function will be called for every field. If you don't want to use the custom deserializer
+    for a certain field, raise `serde.SerdeSkip` exception, pyserde will use the default deserializer for that field.
+
+    >>> @deserialize(deserializer=deserializer)
+    ... @dataclass
+    ... class Foo:
+    ...     i: int
+    ...     dt: datetime
+
+    This custom deserializer deserializes `datetime` the string in `MM/DD/YY` format into datetime object.
+
+    >>> from_json(Foo, '{"i": 10, "dt": "01/01/21"}')
+    Foo(i=10, dt=datetime.datetime(2021, 1, 1, 0, 0))
     """
 
     def wrap(cls: Type):
@@ -201,10 +220,8 @@ def deserialize(
 
 def is_deserializable(instance_or_class: Any) -> bool:
     """
-    Test if arg can `deserialize`. Arg must be also an instance of class.
+    Test if an instance or class is deserializable.
 
-    >>> from serde import deserialize, is_deserializable
-    >>>
     >>> @deserialize
     ... @dataclass
     ... class Foo:
@@ -274,46 +291,48 @@ def from_obj(c: Type, o: Any, named: bool, reuse_instances: bool):
 
 def from_dict(cls, o, reuse_instances: bool = ...):
     """
-    Deserialize from dictionary.
+    Deserialize dictionary into object.
 
-    ### Dataclass
-
-    >>> from serde import deserialize
-    >>>
     >>> @deserialize
     ... @dataclass
     ... class Foo:
     ...     i: int
-    ...     f: float
-    ...     s: str
-    ...     b: bool
+    ...     s: str = 'foo'
+    ...     f: float = 100.0
+    ...     b: bool = True
     >>>
-    >>> obj = {'i': 10, 'f': 0.1, 's': 'foo', 'b': False}
-    >>> from_dict(Foo, obj)
-    Foo(i=10, f=0.1, s='foo', b=False)
+    >>> from_dict(Foo, {'i': 10, 's': 'foo', 'f': 100.0, 'b': True})
+    Foo(i=10, s='foo', f=100.0, b=True)
 
-    ### Containers
+    You can pass any type supported by pyserde. For example,
 
-    >>> from serde import deserialize
-    >>> from typing import List
-    >>>
-    >>> @deserialize
-    ... @dataclass
-    ... class Foo:
-    ...     i: int
-    >>>
-    >>> from_dict(List[Foo], [{'i': 10}, {'i': 20}])
-    [Foo(i=10), Foo(i=20)]
-    >>>
-    >>> from_dict(Dict[str, Foo], {'foo1': {'i': 10}, 'foo2': {'i': 20}})
-    {'foo1': Foo(i=10), 'foo2': Foo(i=20)}
+    >>> lst = [{'i': 10, 's': 'foo', 'f': 100.0, 'b': True}, {'i': 20, 's': 'foo', 'f': 100.0, 'b': True}]
+    >>> from_dict(List[Foo], lst)
+    [Foo(i=10, s='foo', f=100.0, b=True), Foo(i=20, s='foo', f=100.0, b=True)]
     """
     return from_obj(cls, o, named=True, reuse_instances=reuse_instances)
 
 
 def from_tuple(cls, o, reuse_instances: bool = ...):
     """
-    Deserialize from tuple.
+    Deserialize tuple into object.
+
+    >>> @deserialize
+    ... @dataclass
+    ... class Foo:
+    ...     i: int
+    ...     s: str = 'foo'
+    ...     f: float = 100.0
+    ...     b: bool = True
+    >>>
+    >>> from_tuple(Foo, (10, 'foo', 100.0, True))
+    Foo(i=10, s='foo', f=100.0, b=True)
+
+    You can pass any type supported by pyserde. For example,
+
+    >>> lst = [(10, 'foo', 100.0, True), (20, 'foo', 100.0, True)]
+    >>> from_tuple(List[Foo], lst)
+    [Foo(i=10, s='foo', f=100.0, b=True), Foo(i=20, s='foo', f=100.0, b=True)]
     """
     return from_obj(cls, o, named=False, reuse_instances=reuse_instances)
 

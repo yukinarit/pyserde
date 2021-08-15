@@ -1,17 +1,6 @@
-# `pyserde`
+# Introduction
 
-Yet another serialization library on top of [dataclasses](https://docs.python.org/3/library/dataclasses.html).
-
-[![image](https://img.shields.io/pypi/v/pyserde.svg)](https://pypi.org/project/pyserde/)
-[![image](https://img.shields.io/pypi/pyversions/pyserde.svg)](https://pypi.org/project/pyserde/)
-![Tests](https://github.com/yukinarit/pyserde/workflows/Tests/badge.svg)
-[![codecov](https://codecov.io/gh/yukinarit/pyserde/branch/master/graph/badge.svg)](https://codecov.io/gh/yukinarit/pyserde)
-
-[Guide](https://yukinarit.github.io/pyserde/guide) | [API Docs](https://yukinarit.github.io/pyserde/api/serde.html) | [Examples](./examples)
-
-## Overview
-
-Declare a class with pyserde's `@serialize` and `@deserialize` decorators.
+`pyserde` is a simple yet powerful serialization library on top of [dataclasses](https://docs.python.org/3/library/dataclasses.html). Simply adding pyserde's `@serialize` and `@deserialize` decorators make your class (de)serializable.
 
 ```python
 @deserialize
@@ -39,12 +28,12 @@ Foo(i=10, s='foo', f=100.0, b=True)
 
 ## Features
 
-- Supported data formats
+- [Supported types](supported-types.md)
     - JSON
 	- Yaml
 	- Toml
 	- MsgPack
-- Supported types
+- [Supported data formats](supported-data-formats.md)
     - Primitives (`int`, `float`, `str`, `bool`)
     - Containers (`List`, `Set`, `Tuple`, `Dict`)
     - [`typing.Optional`](https://docs.python.org/3/library/typing.html#typing.Optional)
@@ -53,23 +42,19 @@ Foo(i=10, s='foo', f=100.0, b=True)
     - [`typing.NewType`](https://docs.python.org/3/library/typing.html#newtype) for primitive types
     - [`typing.Any`](https://docs.python.org/3/library/typing.html#the-any-type)
     - [`Enum`](https://docs.python.org/3/library/enum.html#enum.Enum) and [`IntEnum`](https://docs.python.org/3/library/enum.html#enum.IntEnum)
-    - Standard library
+    - More types
         - [`pathlib.Path`](https://docs.python.org/3/library/pathlib.html)
         - [`decimal.Decimal`](https://docs.python.org/3/library/decimal.html)
         - [`uuid.UUID`](https://docs.python.org/3/library/uuid.html)
         - [`datetime.date`](https://docs.python.org/3/library/datetime.html#date-objects) & [`datetime.datetime`](https://docs.python.org/3/library/datetime.html#datetime-objects)
         - [`ipaddress`](https://docs.python.org/3/library/ipaddress.html)
-- [Python 3.9 type hiting](docs/features/python3.9-type-hinting.md)
-- [Postponed evaluation of type annotation](docs/features/postponed-evaluation-of-type-annotation.md)
-- [Forward reference](docs/features/forward-reference.md)
-- [Case Conversion](docs/features/case-conversion.md)
-- [Rename](docs/features/rename.md)
-- [Skip](docs/features/skip.md)
-- [Conditional Skip](docs/features/conditional-skip.md)
-- [Custom field (de)serializer](docs/features/custom-field-serializer.md)
-- [Custom class (de)serializer](docs/features/custom-class-serializer.md)
-- [Flatten](docs/features/flatten.md)
-
-## LICENSE
-
-This project is licensed under the [MIT license](https://github.com/yukinarit/pyserde/blob/master/LICENSE).
+- [Python 3.9 type hiting](features/python3.9-type-hinting.md)
+- [Postponed evaluation of type annotation](features/postponed-evaluation-of-type-annotation.md)
+- [Forward reference](features/forward-reference.md)
+- [Case Conversion](features/case-conversion.md)
+- [Rename](features/rename.md)
+- [Skip](features/skip.md)
+- [Conditional Skip](features/conditional-skip.md)
+- [Custom field (de)serializer](features/custom-field-serializer.md)
+- [Custom class (de)serializer](features/custom-class-serializer.md)
+- [Flatten](features/flatten.md)

@@ -1,12 +1,14 @@
 """
 pyserde inspection tool.
 
-USAGE:
+#### Usage
 
+```
 $ python -m serde.inspect <PATH> <NAME>
 
  PATH  Python script path.
  NAME  Pyserde class name.
+```
 
 """
 import argparse
@@ -30,6 +32,9 @@ def inspect(cls: Type) -> None:
 
 
 def main(arg):
+    """
+    Main entrypoint of `serde.inspect`.
+    """
     if arg.verbose:
         logging.basicConfig(level=logging.DEBUG)
 
