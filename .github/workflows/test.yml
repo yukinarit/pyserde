@@ -103,7 +103,6 @@ jobs:
     #   uses: actions/cache@v2
     #   with:
     #     path: ${{ env.pythonLocation }}
-    #     key: ubuntu-20.04-${{ env.pythonLocation }}-${{ hashFiles('**/Pipfile') }}
     - name: Install dependencies
       run: |
         pip install poetry
