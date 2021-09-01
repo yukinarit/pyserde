@@ -58,7 +58,7 @@ jobs:
       run: pre-commit run -a
     - name: Comment PR
       if: ${{ failure() && github.event_name == 'pull_request' }}
-      uses: thollander/actions-comment-pull-request@master
+      uses: thollander/actions-comment-pull-request@1.0.2
       with:
         message: 'Please consider formatting your code according to the standards described here: https://github.com/yukinarit/pyserde/blob/master/CONTRIBUTING.md'
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
