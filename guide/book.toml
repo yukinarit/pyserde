@@ -1,0 +1,6 @@
+[book]
+authors = ["yukinari"]
+language = "en"
+multilingual = true
+src = "."
+title = "pyserde"
