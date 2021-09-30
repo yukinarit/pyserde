@@ -1,3 +1,35 @@
+## `0.5.0` (2021-09-30)
+
+* New documentation is available!
+    * [Guide](https://yukinarit.github.io/pyserde/guide/)
+    * [API Docs](https://yukinarit.github.io/pyserde/api/serde.html)
+* feat: Implement flatten ([a7bb6f0](https://github.com/yukinarit/pyserde/commit/a7bb6f0))
+
+```python
+@deserialize
+@serialize
+@dataclass
+class Bar:
+    c: float
+    d: bool
+
+@deserialize
+@serialize
+@dataclass
+class Foo:
+    a: int
+    b: str
+    bar: Bar = field(metadata={'serde_flatten': True})
+```
+
+* feat: Print Tips in serde.inspect ([62c74f3](https://github.com/yukinarit/pyserde/commit/62c74f3))
+* fix: "Cannot instantiate type" type error ([6b3afbd](https://github.com/yukinarit/pyserde/commit/6b3afbd))
+* ci: Use actions-comment-pull-request@1.0.2 ([45a999c](https://github.com/yukinarit/pyserde/commit/45a999c))
+* build: Parallel test execution ([#148](https://github.com/yukinarit/pyserde/pull/148))
+* build: Migrate to poetry ([#144](https://github.com/yukinarit/pyserde/pull/144))
+
+This release had contributions from 1 person: [@alexmisk](https://github.com/alexmisk). Thank you so much! :tada: :joy:
+
 ## `0.4.0` (2021-06-17)
 
 * feat: add support for lazy annotations PEP563 (#112) ([f7f6996](https://github.com/yukinarit/pyserde/commit/f7f6996)), closes [#112](https://github.com/yukinarit/pyserde/issues/112)
@@ -61,7 +93,7 @@ class Foo:
 * fix: pass convert_sets argument to union functions ([ab40cc9](https://github.com/yukinarit/pyserde/commit/ab40cc9))
 * fix: support unions with nested unions in containers (#113) ([c26e828](https://github.com/yukinarit/pyserde/commit/c26e828)), closes [#113](https://github.com/yukinarit/pyserde/issues/113)
 
-This release had contibutions from 1 person: [@ydylla](https://github.com/ydylla). Thank you so much! :tada: :joy:
+This release had contributions from 1 person: [@ydylla](https://github.com/ydylla). Thank you so much! :tada: :joy:
 
 ## `0.3.2` (2021-05-07)
 
@@ -76,7 +108,7 @@ This release had contibutions from 1 person: [@ydylla](https://github.com/ydylla
 * ci: Don't cache pip to workaround pip error ([c912429](https://github.com/yukinarit/pyserde/commit/c912429))
 * refactor: Remove self class from scope ([da81f1f](https://github.com/yukinarit/pyserde/commit/da81f1f))
 
-This release had contibutions from 1 person: [@ydylla](https://github.com/ydylla). Thank you so much! :tada: :joy:
+This release had contributions from 1 person: [@ydylla](https://github.com/ydylla). Thank you so much! :tada: :joy:
 
 ## `0.3.1` (2021-03-21)
 
@@ -122,7 +154,7 @@ You can get the code completion from the class with `serialize` and `deserialize
 * build: setup pre-commit as formatting tool ([2876de4](https://github.com/yukinarit/pyserde/commit/2876de4))
 * ci: add code style check ([c52f7e9](https://github.com/yukinarit/pyserde/commit/c52f7e9))
 
-This release had contibutions from 2 people: [@ydylla](https://github.com/ydylla), [@alexmisk](https://github.com/alexmisk). Thank you so much! :tada: :joy:
+This release had contributions from 2 people: [@ydylla](https://github.com/ydylla), [@alexmisk](https://github.com/alexmisk). Thank you so much! :tada: :joy:
 
 ## `0.2.2` (2021-01-19)
 
@@ -142,7 +174,7 @@ This release had contibutions from 1 person: [@adsharma](https://github.com/adsh
     * Rename testing step for better readability
     * Change Python 3.9-dev to 3.9 in test matrix
 
-This release had contibutions from 2 people: [@alexmisk](https://github.com/alexmisk), [@pranavvp10](https://github.com/pranavvp10). Thank you so much! :turkey: :joy:
+This release had contributions from 2 people: [@alexmisk](https://github.com/alexmisk), [@pranavvp10](https://github.com/pranavvp10). Thank you so much! :turkey: :joy:
 
 ## `0.2.0` (2020-10-31)
 
@@ -153,7 +185,7 @@ Please note this release has a breaking change, where `pip install pyserde` no l
 * Migrate from Travis to Github Action ([#45](https://github.com/yukinarit/pyserde/pull/45))
 * Make data format dependencies optional ([4a130ab](https://github.com/yukinarit/pyserde/commit/4a130ab))
 
-This release had contibutions from 2 people: [@alexmisk](https://github.com/alexmisk), [@andreymal](https://github.com/andreymal). Thank you so much! :tada: :joy:
+This release had contributions from 2 people: [@alexmisk](https://github.com/alexmisk), [@andreymal](https://github.com/andreymal). Thank you so much! :tada: :joy:
 
 ## `0.1.5` (2020-10-05)
 
