@@ -28,6 +28,9 @@ jobs:
        run: |
          pip install poetry
          poetry install
+         curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain stable
+         source $HOME/.cargo/env
+         cargo install mdbook
      - name: Get PR number
        uses: jwalton/gh-find-current-pr@v1
        id: findPr
@@ -50,6 +53,6 @@ jobs:
        with:
          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
          BRANCH: gh-pages
-         FOLDER: docs
+         FOLDER: out
          COMMIT_MESSAGE: ${{ env.COMMIT_MESSAGE }}
          CLEAN: true

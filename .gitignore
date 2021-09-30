@@ -15,3 +15,5 @@ pip-wheel-metadata
 .DS_Store
 venv/
 .idea/
+out/
+docs/CHANGELOG.md

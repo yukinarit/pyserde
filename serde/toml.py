@@ -1,5 +1,5 @@
 """
-Serialize and Deserialize in TOML format.
+Serialize and Deserialize in TOML format. This module depends on [toml](https://pypi.org/project/toml/) package.
 """
 from typing import Type
 
@@ -8,6 +8,8 @@ import toml
 from .compat import T
 from .de import Deserializer, from_dict
 from .se import Serializer, to_dict
+
+__all__ = ["from_toml", "to_toml"]
 
 
 class TomlSerializer(Serializer):
@@ -24,51 +26,23 @@ class TomlDeserializer(Deserializer):
 
 def to_toml(obj, se: Type[Serializer] = TomlSerializer, **opts) -> str:
     """
-    Take an object and return toml string.
+    Serialize the object into TOML.
 
-    >>> from typing import List
-    >>> from dataclasses import dataclass
-    >>> from serde import serialize
-    >>> from serde.toml import to_toml
-    >>>
-    >>> @serialize
-    ... @dataclass
-    ... class General:
-    ...     host: str
-    ...     port: int
-    ...     upstream: List[str]
-    >>>
-    >>> @serialize
-    ... @dataclass
-    ... class Settings:
-    ...     general: General
-    >>>
-    >>> to_toml(Settings(General(host='localhost', port=8080, upstream=['localhost:8081', 'localhost:8082'])))
-    '[general]\\nhost = \"localhost\"\\nport = 8080\\nupstream = [ \"localhost:8081\", \"localhost:8082\",]\\n'
-    >>>
+    You can pass any serializable `obj`. If you supply keyword arguments other than `se`,
+    they will be passed in `toml.dumps` function.
+
+    If you want to use the other toml package, you can subclass `TomlSerializer` and implement your own logic.
     """
     return se.serialize(to_dict(obj, reuse_instances=False), **opts)
 
 
 def from_toml(c: Type[T], s: str, de: Type[Deserializer] = TomlDeserializer, **opts) -> T:
     """
-    Take toml string and return deserialized object.
+    Deserialize from TOML into the object.
 
-    >>> from typing import List
-    >>> from dataclasses import dataclass
-    >>> from serde import deserialize
-    >>> from serde.toml import to_toml
-    >>>
-    >>> @deserialize
-    ... @dataclass
-    ... class Settings:
-    ...     host: str
-    ...     port: int
-    ...     upstream: List[str]
-    >>>
-    >>> s = 'host = \"localhost\"\\nport = 8080\\nupstream = [ \"localhost:8081\", \"localhost:8082\",]\\n'
-    >>> from_toml(Settings, s)
-    Settings(host='localhost', port=8080, upstream=['localhost:8081', 'localhost:8082'])
-    >>>
+    `c` is a class obejct and `s` is TOML string. If you supply keyword arguments other than `de`,
+    they will be passed in `toml.loads` function.
+
+    If you want to use the other toml package, you can subclass `TomlDeserializer` and implement your own logic.
     """
     return from_dict(c, de.deserialize(s, **opts), reuse_instances=False)

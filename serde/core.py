@@ -27,7 +27,7 @@ from .compat import (
     typename,
 )
 
-__all__: List = []
+__all__ = ["SerdeScope", "gen", "add_func", "Func", "Field", "fields", "FlattenOpts", "conv", "union_func_name"]
 
 logger = logging.getLogger('serde')
 
@@ -134,7 +134,7 @@ def raise_unsupported_type(obj):
 
 def gen(code: str, globals: Dict = None, locals: Dict = None) -> str:
     """
-    Customized `exec` function.
+    A wrapper of builtin `exec` function.
     """
     try:
         from black import FileMode, format_str
@@ -149,10 +149,11 @@ def gen(code: str, globals: Dict = None, locals: Dict = None) -> str:
 def add_func(serde_scope: SerdeScope, func_name: str, func_code: str, globals: Dict) -> None:
     """
     Generate a function and add it to a SerdeScope's `funcs` dictionary.
-    :param serde_scope: the SerdeScope instance to modify
-    :param func_name: the name of the function
-    :param func_code: the source code of the function
-    :param globals: global variables that should be accessible to the generated function
+
+    * `serde_scope`: the SerdeScope instance to modify
+    * `func_name`: the name of the function
+    * `func_code`: the source code of the function
+    * `globals`: global variables that should be accessible to the generated function
     """
 
     code = gen(func_code, globals)
@@ -241,13 +242,71 @@ def skip_if_false(v):
 
 @dataclass
 class FlattenOpts:
-    pass
+    """
+    Flatten options. Currently not used.
+    """
 
 
 @dataclass
 class Field:
     """
-    Field in pyserde class.
+    Field class is similar to `dataclasses.Field`. It provides pyserde specific options.
+
+
+    `type`, `name`, `default` and `default_factory` are the same members as `dataclasses.Field`.
+
+    #### Field attributes
+
+    Field attributes are options to customize (de)serialization behaviour specific to field. Field attributes
+    can be specified through [metadata](https://docs.python.org/3/library/dataclasses.html#dataclasses.field)
+    of `dataclasses.field`. dataclasses metadata is a container where users can pass arbitrary key and value.
+
+    pyserde's field attributes have `serde` prefix to avoid conflicts with other libraries.
+
+    ```python
+    @deserialize
+    @serialize
+    @dataclass
+    class Foo:
+        i: int = field(metadata={"serde_<ATTRIBUTE_NAME>": <ATTRIBUTE_VALUE>})
+    ```
+
+    * `case` is an actual case name determined in regard with `rename_all` class attribute.
+    This attribute is currently internal use only.
+
+    * `rename` (Attribute name: `serde_rename`) is used to rename field name during (de)serialization. This attribute is
+    convenient when you want to use a python keyword in field name. For example, this code renames `id` to `ID`.
+
+    ```python
+    @serialize
+    @dataclass
+    class Foo:
+        id: int = field(metadata={"serde_rename": "ID"})
+    ```
+
+    * `skip` (Attribute name: `serde_skip`) is used to skip (de)serialization for a field.
+
+    * `skip_if` (Attribute name: `serde_skip_if`) skips (de)serialization if the callable evaluates to `True`.
+
+    * `skip_if_false` (Attribute name: `serde_skip_if_false`) skips (de)serialization if the field value evaluates
+    to `False`. For example, this code skip (de)serialize `v` if `v` is empty.
+
+    ```python
+    @deserialize
+    @serialize
+    @dataclass
+    class Foo:
+        v: List[int] = field(metadata={"serde_skip_if_false": True})
+    ```
+
+    * `serializer` (Attribute name: `serde_serializer`) takes a custom function to override the default serialization
+    behaviour of a field.
+
+    * `deserializer` (Attribute name: `serde_deserializer`) takes a custom function to override the default
+    deserialization behaviour of a field.
+
+    * `flatten` (Attribute name: `serde_flatten`) flattens the fields of the nested dataclass.
+
     """
 
     type: Type
@@ -265,6 +324,9 @@ class Field:
 
     @classmethod
     def from_dataclass(cls, f: dataclasses.Field) -> 'Field':
+        """
+        Create `Field` object from `dataclasses.Field`.
+        """
         skip_if_false_func: Optional[Func] = None
         if f.metadata.get('serde_skip_if_false'):
             skip_if_false_func = Func(skip_if_false, cls.mangle(f, 'skip_if'))
@@ -319,7 +381,7 @@ class Field:
 
 def fields(FieldCls: Type[Field], cls: Type) -> Iterator[Field]:
     """
-    Pyserde's customized `fields` method.
+    Iterate fields of the dataclass and returns `Field`.
     """
     return iter(FieldCls.from_dataclass(f) for f in dataclass_fields(cls))
 
@@ -344,9 +406,10 @@ def conv(f: Field, case: Optional[str] = None) -> str:
 def union_func_name(prefix: str, union_args: List[Type]) -> str:
     """
     Generate a function name that contains all union types
-    :param prefix: prefix to distinguish between serializing and deserializing
-    :param union_args: type arguments of a Union
-    :return: union function name
+
+    * `prefix` prefix to distinguish between serializing and deserializing
+    * `union_args`: type arguments of a Union
+
     >>> from ipaddress import IPv4Address
     >>> from typing import List
     >>> union_func_name("union_se", [int, List[str], IPv4Address])
