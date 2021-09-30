@@ -140,7 +140,40 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h2 id="040-2021-06-17"><a class="header" href="#040-2021-06-17"><code>0.4.0</code> (2021-06-17)</a></h2>
+                        <h2 id="050-2021-09-30"><a class="header" href="#050-2021-09-30"><code>0.5.0</code> (2021-09-30)</a></h2>
+<ul>
+<li>New documentation is available!
+<ul>
+<li><a href="https://yukinarit.github.io/pyserde/guide/">Guide</a></li>
+<li><a href="https://yukinarit.github.io/pyserde/api/serde.html">API Docs</a></li>
+</ul>
+</li>
+<li>feat: Implement flatten (<a href="https://github.com/yukinarit/pyserde/commit/a7bb6f0">a7bb6f0</a>)</li>
+</ul>
+<pre><code class="language-python">@deserialize
+@serialize
+@dataclass
+class Bar:
+    c: float
+    d: bool
+
+@deserialize
+@serialize
+@dataclass
+class Foo:
+    a: int
+    b: str
+    bar: Bar = field(metadata={'serde_flatten': True})
+</code></pre>
+<ul>
+<li>feat: Print Tips in serde.inspect (<a href="https://github.com/yukinarit/pyserde/commit/62c74f3">62c74f3</a>)</li>
+<li>fix: &quot;Cannot instantiate type&quot; type error (<a href="https://github.com/yukinarit/pyserde/commit/6b3afbd">6b3afbd</a>)</li>
+<li>ci: Use actions-comment-pull-request@1.0.2 (<a href="https://github.com/yukinarit/pyserde/commit/45a999c">45a999c</a>)</li>
+<li>build: Parallel test execution (<a href="https://github.com/yukinarit/pyserde/pull/148">#148</a>)</li>
+<li>build: Migrate to poetry (<a href="https://github.com/yukinarit/pyserde/pull/144">#144</a>)</li>
+</ul>
+<p>This release had contributions from 1 person: <a href="https://github.com/alexmisk">@alexmisk</a>. Thank you so much! :tada: :joy:</p>
+<h2 id="040-2021-06-17"><a class="header" href="#040-2021-06-17"><code>0.4.0</code> (2021-06-17)</a></h2>
 <ul>
 <li>feat: add support for lazy annotations PEP563 (#112) (<a href="https://github.com/yukinarit/pyserde/commit/f7f6996">f7f6996</a>), closes <a href="https://github.com/yukinarit/pyserde/issues/112">#112</a></li>
 </ul>
@@ -201,7 +234,7 @@ class Foo:
 <li>fix: pass convert_sets argument to union functions (<a href="https://github.com/yukinarit/pyserde/commit/ab40cc9">ab40cc9</a>)</li>
 <li>fix: support unions with nested unions in containers (#113) (<a href="https://github.com/yukinarit/pyserde/commit/c26e828">c26e828</a>), closes <a href="https://github.com/yukinarit/pyserde/issues/113">#113</a></li>
 </ul>
-<p>This release had contibutions from 1 person: <a href="https://github.com/ydylla">@ydylla</a>. Thank you so much! :tada: :joy:</p>
+<p>This release had contributions from 1 person: <a href="https://github.com/ydylla">@ydylla</a>. Thank you so much! :tada: :joy:</p>
 <h2 id="032-2021-05-07"><a class="header" href="#032-2021-05-07"><code>0.3.2</code> (2021-05-07)</a></h2>
 <ul>
 <li>feat: Improve error description for union type (<a href="https://github.com/yukinarit/pyserde/commit/8abb549">8abb549</a>)</li>
@@ -215,7 +248,7 @@ class Foo:
 <li>ci: Don't cache pip to workaround pip error (<a href="https://github.com/yukinarit/pyserde/commit/c912429">c912429</a>)</li>
 <li>refactor: Remove self class from scope (<a href="https://github.com/yukinarit/pyserde/commit/da81f1f">da81f1f</a>)</li>
 </ul>
-<p>This release had contibutions from 1 person: <a href="https://github.com/ydylla">@ydylla</a>. Thank you so much! :tada: :joy:</p>
+<p>This release had contributions from 1 person: <a href="https://github.com/ydylla">@ydylla</a>. Thank you so much! :tada: :joy:</p>
 <h2 id="031-2021-03-21"><a class="header" href="#031-2021-03-21"><code>0.3.1</code> (2021-03-21)</a></h2>
 <ul>
 <li>fix: Add type annotation to serde decorators (<a href="https://github.com/yukinarit/pyserde/commit/f885a27">f885a27</a>)</li>
@@ -262,7 +295,7 @@ class Foo:
 <li>build: setup pre-commit as formatting tool (<a href="https://github.com/yukinarit/pyserde/commit/2876de4">2876de4</a>)</li>
 <li>ci: add code style check (<a href="https://github.com/yukinarit/pyserde/commit/c52f7e9">c52f7e9</a>)</li>
 </ul>
-<p>This release had contibutions from 2 people: <a href="https://github.com/ydylla">@ydylla</a>, <a href="https://github.com/alexmisk">@alexmisk</a>. Thank you so much! :tada: :joy:</p>
+<p>This release had contributions from 2 people: <a href="https://github.com/ydylla">@ydylla</a>, <a href="https://github.com/alexmisk">@alexmisk</a>. Thank you so much! :tada: :joy:</p>
 <h2 id="022-2021-01-19"><a class="header" href="#022-2021-01-19"><code>0.2.2</code> (2021-01-19)</a></h2>
 <ul>
 <li>Support inference of types on deserialization (<a href="https://github.com/yukinarit/pyserde/commit/8c4efb2">8c4efb2</a>)</li>
@@ -283,7 +316,7 @@ class Foo:
 </ul>
 </li>
 </ul>
-<p>This release had contibutions from 2 people: <a href="https://github.com/alexmisk">@alexmisk</a>, <a href="https://github.com/pranavvp10">@pranavvp10</a>. Thank you so much! :turkey: :joy:</p>
+<p>This release had contributions from 2 people: <a href="https://github.com/alexmisk">@alexmisk</a>, <a href="https://github.com/pranavvp10">@pranavvp10</a>. Thank you so much! :turkey: :joy:</p>
 <h2 id="020-2020-10-31"><a class="header" href="#020-2020-10-31"><code>0.2.0</code> (2020-10-31)</a></h2>
 <p>Please note this release has a breaking change, where <code>pip install pyserde</code> no longer installs <code>msgpack</code>, <code>pyyaml</code> and <code>toml</code>. If you want the same behavior as in 0.1.5, use <code>pip install pyserde[all]</code>.</p>
 <ul>
@@ -292,7 +325,7 @@ class Foo:
 <li>Migrate from Travis to Github Action (<a href="https://github.com/yukinarit/pyserde/pull/45">#45</a>)</li>
 <li>Make data format dependencies optional (<a href="https://github.com/yukinarit/pyserde/commit/4a130ab">4a130ab</a>)</li>
 </ul>
-<p>This release had contibutions from 2 people: <a href="https://github.com/alexmisk">@alexmisk</a>, <a href="https://github.com/andreymal">@andreymal</a>. Thank you so much! :tada: :joy:</p>
+<p>This release had contributions from 2 people: <a href="https://github.com/alexmisk">@alexmisk</a>, <a href="https://github.com/andreymal">@andreymal</a>. Thank you so much! :tada: :joy:</p>
 <h2 id="015-2020-10-05"><a class="header" href="#015-2020-10-05"><code>0.1.5</code> (2020-10-05)</a></h2>
 <ul>
 <li>fix: Type error (<a href="https://github.com/yukinarit/pyserde/commit/2a271acf32bb7b37546d0037ac5b62f39cdc5bb3">2a271ac</a>)</li>
