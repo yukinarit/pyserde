@@ -1,6 +1,8 @@
 """
-pyserde is a yet another serialization library on top of
+`pyserde` is a yet another serialization library on top of
 [dataclasses](https://docs.python.org/3/library/dataclasses.html).
+
+## Overview
 
 Declare a class with pyserde's `@serialize` and `@deserialize` decorators.
 
@@ -22,18 +24,20 @@ You can serialize `Foo` object into JSON.
 >>> to_json(Foo(i=10, s='foo', f=100.0, b=True))
 '{"i": 10, "s": "foo", "f": 100.0, "b": true}'
 
-You can deserialize JSON into `Foo`.
+You can deserialize JSON into `Foo` object.
 >>> from serde.json import from_json
 >>> from_json(Foo, '{"i": 10, "s": "foo", "f": 100.0, "b": true}')
 Foo(i=10, s='foo', f=100.0, b=True)
 
-The following modules provide the core functionalities of `pyserde`.
-* `serde.se`: It's all about serialization.
-* `serde.de`: It's all about deserialization.
-* `serde.core`: Core module used by `serde.se` and `serde.de`.
-* `serde.compat`: Provides compatibility layer handling typing.
+## Modules
 
-The following modules provides data format supports.
+The following modules provide the core functionalities of `pyserde`.
+* `serde.se`: All about serialization.
+* `serde.de`: All about deserialization.
+* `serde.core`: Core module used by `serde.se` and `serde.de`.
+* `serde.compat`: Provides compatibility layer which handles typing.
+
+The following modules provides functionalities for supported data formats.
 * `serde.json`: Serialize and Deserialize in JSON.
 * `serde.msgpack`: Serialize and Deserialize in MsgPack.
 * `serde.yaml`: Serialize and Deserialize in YAML.

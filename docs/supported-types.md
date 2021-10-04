@@ -8,7 +8,7 @@
 * [`typing.NewType`](https://docs.python.org/3/library/typing.html#newtype) for primitive types
 * [`typing.Any`](https://docs.python.org/3/library/typing.html#the-any-type)
 * [`Enum`](https://docs.python.org/3/library/enum.html#enum.Enum) and [`IntEnum`](https://docs.python.org/3/library/enum.html#enum.IntEnum)
-* More types
+* Standard library
     * [`pathlib.Path`](https://docs.python.org/3/library/pathlib.html)
     * [`decimal.Decimal`](https://docs.python.org/3/library/decimal.html)
     * [`uuid.UUID`](https://docs.python.org/3/library/uuid.html)

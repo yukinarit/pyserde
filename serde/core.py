@@ -5,13 +5,12 @@ import dataclasses
 import logging
 import re
 from dataclasses import dataclass, field
-from typing import Any, Callable, Dict, Iterator, List, Optional, Type, TypeVar, Union
+from typing import Any, Callable, Dict, Iterator, List, Optional, Type, Union
 
 import stringcase
 
 from .compat import (
     SerdeError,
-    T,
     dataclass_fields,
     is_bare_dict,
     is_bare_list,
@@ -54,23 +53,31 @@ def init(debug: bool = False):
 
 @dataclass
 class SerdeScope:
-    cls: Type  # the exact class this scope is for (needed to distinguish scopes between inherited classes)
+    """
+    Container to store types and functions used in code generation context.
+    """
 
-    # generated serialize and deserialize functions
+    cls: Type
+    """ The exact class this scope is for (needed to distinguish scopes between inherited classes) """
+
     funcs: Dict[str, Callable] = field(default_factory=dict)
-    # default values of the dataclass fields (factories & normal values)
+    """ Generated serialize and deserialize functions """
+
     defaults: Dict[str, Union[Callable, Any]] = field(default_factory=dict)
-    # type references to all used types within the dataclass
+    """ Default values of the dataclass fields (factories & normal values) """
+
     types: Dict[str, Type] = field(default_factory=dict)
+    """ Type references to all used types within the dataclass """
 
-    # generated source code (only filled when debug is True)
     code: Dict[str, str] = field(default_factory=dict)
+    """ Generated source code (only filled when debug is True) """
 
-    # the union serializing functions need references to their types
     union_se_args: Dict[str, List[Type]] = field(default_factory=dict)
+    """ The union serializing functions need references to their types """
 
-    # default values for to_dict & from_dict arguments
     reuse_instances_default: bool = True
+    """ Default values for to_dict & from_dict arguments """
+
     convert_sets_default: bool = False
 
     def __repr__(self) -> str:
@@ -217,7 +224,7 @@ def is_instance(obj: Any, typ: Type) -> bool:
 @dataclass
 class Func:
     """
-    Function wrapper that has `mangled` optional field.
+    Function wrapper that provides `mangled` optional field.
 
     pyserde copies every function reference into global scope
     for code generation. Mangling function names is needed in
@@ -226,13 +233,19 @@ class Func:
     """
 
     inner: Callable
+    """ Function to wrap in """
+
     mangeld: str = ""
+    """ Mangled function name """
 
     def __call__(self, v):
         return self.inner(v)  # type: ignore
 
     @property
     def name(self) -> str:
+        """
+        Mangled function name
+        """
         return self.mangeld
 
 

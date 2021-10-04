@@ -19,7 +19,6 @@ import jinja2
 from .compat import (
     SerdeError,
     SerdeSkip,
-    T,
     has_default,
     has_default_factory,
     is_bare_dict,

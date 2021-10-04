@@ -20,7 +20,7 @@ You can serialize `Foo` object into JSON.
 {"i": 10, "s": "foo", "f": 100.0, "b": true}
 ```
 
-You can deserialize JSON into `Foo`.
+You can deserialize JSON into `Foo` object.
 ```python
 >>> from_json(Foo, '{"i": 10, "s": "foo", "f": 100.0, "b": true}')
 Foo(i=10, s='foo', f=100.0, b=True)
@@ -42,7 +42,7 @@ Foo(i=10, s='foo', f=100.0, b=True)
     - [`typing.NewType`](https://docs.python.org/3/library/typing.html#newtype) for primitive types
     - [`typing.Any`](https://docs.python.org/3/library/typing.html#the-any-type)
     - [`Enum`](https://docs.python.org/3/library/enum.html#enum.Enum) and [`IntEnum`](https://docs.python.org/3/library/enum.html#enum.IntEnum)
-    - More types
+    - Standard library
         - [`pathlib.Path`](https://docs.python.org/3/library/pathlib.html)
         - [`decimal.Decimal`](https://docs.python.org/3/library/decimal.html)
         - [`uuid.UUID`](https://docs.python.org/3/library/uuid.html)
