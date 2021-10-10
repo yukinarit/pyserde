@@ -285,7 +285,7 @@ def from_obj(c: Type, o: Any, named: bool, reuse_instances: bool):
     elif is_dict(c):
         return {thisfunc(type_args(c)[0], k): thisfunc(type_args(c)[1], v) for k, v in o.items()}
 
-    return o
+    return c(o)
 
 
 def from_dict(cls, o, reuse_instances: bool = ...):
