@@ -1,3 +1,8 @@
+## `0.5.1` (2021-10-10)
+
+* feat: deserialize to the type more correctly ([a4c155c](https://github.com/yukinarit/pyserde/commit/a4c155c))
+* refactor: import minimum names ([f242a93](https://github.com/yukinarit/pyserde/commit/f242a93))
+
 ## `0.5.0` (2021-09-30)
 
 * New documentation is available!
