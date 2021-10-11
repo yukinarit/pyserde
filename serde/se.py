@@ -20,7 +20,6 @@ import jinja2
 from .compat import (
     SerdeError,
     SerdeSkip,
-    T,
     is_bare_dict,
     is_bare_list,
     is_bare_set,
