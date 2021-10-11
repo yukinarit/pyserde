@@ -8,6 +8,5 @@ authors = ["yukinarit <yukinarit84@gmail.com>"]
 python = "^3.6.1"
 pyserde = {path = "../"}
 toml = "*"
-pytoml = "*"
 requests = "*"
-envclasses = "==0.2.1"
+envclasses = "^0.2.1"
