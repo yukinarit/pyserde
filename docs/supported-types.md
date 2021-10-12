@@ -12,7 +12,7 @@
     * [`pathlib.Path`](https://docs.python.org/3/library/pathlib.html)
     * [`decimal.Decimal`](https://docs.python.org/3/library/decimal.html)
     * [`uuid.UUID`](https://docs.python.org/3/library/uuid.html)
-    * [`datetime.date`](https://docs.python.org/3/library/datetime.html#date-objects) & [`datetime.datetime`](https://docs.python.org/3/library/datetime.html#datetime-objects)
+    * [`datetime.date`](https://docs.python.org/3/library/datetime.html#date-objects), [`datetime.time`](https://docs.python.org/3/library/datetime.html#time-objects), [`datetime.datetime`](https://docs.python.org/3/library/datetime.html#datetime-objects)
     * [`ipaddress`](https://docs.python.org/3/library/ipaddress.html)
 
 You can write pretty complex class like this:

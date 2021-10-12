@@ -61,6 +61,9 @@ def test_simple(se, de, opt, t, T):
     c = C(Nested(t))
     assert c == de(C, se(c))
 
+    if se is not serde.toml.to_toml:
+        assert t == de(T, se(t))
+
 
 @pytest.mark.parametrize('t,T', types, ids=type_ids())
 @pytest.mark.parametrize('opt', opt_case, ids=opt_case_ids())
@@ -214,32 +217,32 @@ def test_enum(se, de, opt):
     @serialize(**opt)
     @dataclass
     class Foo:
-        e: E
-        ie: IE
-        ne: NestedEnum
-        e2: E = E.S
-        ie2: IE = IE.V1
-        ne2: NestedEnum = NestedEnum.V
+        a: E
+        b: IE
+        c: NestedEnum
+        d: E = E.S
+        e: IE = IE.V1
+        f: NestedEnum = NestedEnum.V
 
     f = Foo(E.S, IE.V0, NestedEnum.V)
     ff = de(Foo, se(f))
     assert f == ff
-    assert is_enum(ff.e) and isinstance(ff.e, E)
-    assert is_enum(ff.ie) and isinstance(ff.ie, IE)
-    assert is_enum(ff.ne) and isinstance(ff.ne, NestedEnum)
-    assert is_enum(ff.e2) and isinstance(ff.e2, E)
-    assert is_enum(ff.ie2) and isinstance(ff.ie2, IE)
-    assert is_enum(ff.ne2) and isinstance(ff.ne2, NestedEnum)
+    assert is_enum(ff.a) and isinstance(ff.a, E)
+    assert is_enum(ff.b) and isinstance(ff.b, IE)
+    assert is_enum(ff.c) and isinstance(ff.c, NestedEnum)
+    assert is_enum(ff.d) and isinstance(ff.d, E)
+    assert is_enum(ff.e) and isinstance(ff.e, IE)
+    assert is_enum(ff.f) and isinstance(ff.f, NestedEnum)
 
     # pyserde automatically convert enum compatible value.
     f = Foo('foo', 2, Inner.V0, True, 10, Inner.V0)
     ff = de(Foo, se(f))
-    assert is_enum(ff.e) and isinstance(ff.e, E) and ff.e == E.S
-    assert is_enum(ff.ie) and isinstance(ff.ie, IE) and ff.ie == IE.V1
-    assert is_enum(ff.ne) and isinstance(ff.ne, NestedEnum) and ff.ne == NestedEnum.V
-    assert is_enum(ff.e2) and isinstance(ff.e2, E) and ff.e2 == E.B
-    assert is_enum(ff.ie2) and isinstance(ff.ie2, IE) and ff.ie2 == IE.V2
-    assert is_enum(ff.ne2) and isinstance(ff.ne2, NestedEnum) and ff.ne2 == NestedEnum.V
+    assert is_enum(ff.a) and isinstance(ff.a, E) and ff.a == E.S
+    assert is_enum(ff.b) and isinstance(ff.b, IE) and ff.b == IE.V1
+    assert is_enum(ff.c) and isinstance(ff.c, NestedEnum) and ff.c == NestedEnum.V
+    assert is_enum(ff.d) and isinstance(ff.d, E) and ff.d == E.B
+    assert is_enum(ff.e) and isinstance(ff.e, IE) and ff.e == IE.V2
+    assert is_enum(ff.f) and isinstance(ff.f, NestedEnum) and ff.f == NestedEnum.V
 
 
 @pytest.mark.parametrize('se,de', all_formats)

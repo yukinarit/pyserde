@@ -6,11 +6,7 @@ associated with serialization.
 import abc
 import copy
 import dataclasses
-import decimal
 import functools
-import ipaddress
-import pathlib
-import uuid
 from dataclasses import dataclass, is_dataclass
 from datetime import date, datetime
 from typing import Any, Callable, Dict, Iterator, List, Optional, Type
@@ -44,8 +40,10 @@ from .core import (
     TO_DICT,
     TO_ITER,
     UNION_SE_PREFIX,
+    DateTimeTypes,
     Field,
     SerdeScope,
+    StrSerializableTypes,
     add_func,
     conv,
     fields,
@@ -257,9 +255,13 @@ def to_obj(o, named: bool, reuse_instances: bool, convert_sets: bool):
     elif isinstance(o, tuple):
         return tuple(thisfunc(e) for e in o)
     elif isinstance(o, set):
-        return set(thisfunc(e) for e in o)
+        return [thisfunc(e) for e in o]
     elif isinstance(o, dict):
         return {k: thisfunc(v) for k, v in o.items()}
+    elif isinstance(o, StrSerializableTypes):
+        return str(o)
+    elif isinstance(o, DateTimeTypes):
+        return o.isoformat()
 
     return o
 
@@ -552,24 +554,9 @@ convert_sets=convert_sets), foo[2],)"
             res = self.primitive(arg)
         elif is_union(arg.type):
             res = self.union_func(arg)
-        elif arg.type in [
-            decimal.Decimal,
-            pathlib.Path,
-            pathlib.PosixPath,
-            pathlib.WindowsPath,
-            pathlib.PurePath,
-            pathlib.PurePosixPath,
-            pathlib.PureWindowsPath,
-            uuid.UUID,
-            ipaddress.IPv4Address,
-            ipaddress.IPv6Address,
-            ipaddress.IPv4Network,
-            ipaddress.IPv6Network,
-            ipaddress.IPv4Interface,
-            ipaddress.IPv6Interface,
-        ]:
+        elif arg.type in StrSerializableTypes:
             res = f"{arg.varname} if reuse_instances else {self.string(arg)}"
-        elif arg.type in [date, datetime]:
+        elif arg.type in DateTimeTypes:
             res = f"{arg.varname} if reuse_instances else {arg.varname}.isoformat()"
         elif is_none(arg.type):
             res = "None"
