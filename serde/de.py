@@ -52,7 +52,6 @@ from .core import (
     raise_unsupported_type,
     union_func_name,
 )
-from .py36_datetime_compat import py36_date_fromisoformat, py36_datetime_fromisoformat
 
 __all__: List = ['deserialize', 'is_deserializable', 'from_dict', 'from_tuple']
 
@@ -180,14 +179,6 @@ def deserialize(
 
             if is_dataclass(typ) or is_enum(typ) or not is_primitive(typ):
                 scope.types[typ.__name__] = typ
-
-            # python 3.6 has no fromisoformat functions for date & datetime, so we have to add our own.
-            # See Renderer.render for usage
-            if sys.version_info[:2] == (3, 6):
-                if typ is date:
-                    g['__py36_date_fromisoformat__'] = py36_date_fromisoformat
-                elif typ is datetime:
-                    g['__py36_datetime_fromisoformat__'] = py36_datetime_fromisoformat
 
         # render all union functions
         for union in iter_unions(cls):
@@ -462,13 +453,6 @@ class Renderer:
             res = f"({self.c_tor_with_check(arg)}) if reuse_instances else {self.c_tor(arg)}"
         elif arg.type in [date, datetime]:
             from_iso = f"{arg.type.__name__}.fromisoformat({arg.data})"
-
-            if sys.version_info[:2] == (3, 6):  # python 3.6 has no fromisoformat functions
-                if arg.type is date:
-                    from_iso = f"__py36_date_fromisoformat__({arg.data})"
-                elif arg.type is datetime:
-                    from_iso = f"__py36_datetime_fromisoformat__({arg.data})"
-
             res = f"({arg.data} if isinstance({arg.data}, {arg.type.__name__}) else {from_iso}) \
                     if reuse_instances else {from_iso}"
         elif is_none(arg.type):

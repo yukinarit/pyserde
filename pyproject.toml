@@ -21,7 +21,6 @@ classifiers=[
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: Implementation :: CPython",
-        "Programming Language :: Python :: Implementation :: PyPy",
     ]
 
 [tool.poetry.dependencies]
@@ -33,6 +32,7 @@ jinja2 = "*"
 msgpack = { version = "*", markers = "extra == 'msgpack' or extra == 'all'", optional = true }
 toml = { version = "*", markers = "extra == 'toml' or extra == 'all'", optional = true }
 pyyaml = { version = "*", markers = "extra == 'yaml' or extra == 'all'", optional = true }
+backports-datetime-fromisoformat = {version = "^1", python = "<3.7"}
 
 [tool.poetry.dev-dependencies]
 pyyaml = "*"
