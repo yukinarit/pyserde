@@ -119,7 +119,6 @@ associated with deserialization.</p>
     <span class="n">raise_unsupported_type</span><span class="p">,</span>
     <span class="n">union_func_name</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="kn">from</span> <span class="nn">.py36_datetime_compat</span> <span class="kn">import</span> <span class="n">py36_date_fromisoformat</span><span class="p">,</span> <span class="n">py36_datetime_fromisoformat</span>
 
 <span class="n">__all__</span><span class="p">:</span> <span class="n">List</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;deserialize&#39;</span><span class="p">,</span> <span class="s1">&#39;is_deserializable&#39;</span><span class="p">,</span> <span class="s1">&#39;from_dict&#39;</span><span class="p">,</span> <span class="s1">&#39;from_tuple&#39;</span><span class="p">]</span>
 
@@ -247,14 +246,6 @@ associated with deserialization.</p>
 
             <span class="k">if</span> <span class="n">is_dataclass</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span> <span class="ow">or</span> <span class="n">is_enum</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">is_primitive</span><span class="p">(</span><span class="n">typ</span><span class="p">):</span>
                 <span class="n">scope</span><span class="o">.</span><span class="n">types</span><span class="p">[</span><span class="n">typ</span><span class="o">.</span><span class="vm">__name__</span><span class="p">]</span> <span class="o">=</span> <span class="n">typ</span>
-
-            <span class="c1"># python 3.6 has no fromisoformat functions for date &amp; datetime, so we have to add our own.</span>
-            <span class="c1"># See Renderer.render for usage</span>
-            <span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">version_info</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">6</span><span class="p">):</span>
-                <span class="k">if</span> <span class="n">typ</span> <span class="ow">is</span> <span class="n">date</span><span class="p">:</span>
-                    <span class="n">g</span><span class="p">[</span><span class="s1">&#39;__py36_date_fromisoformat__&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">py36_date_fromisoformat</span>
-                <span class="k">elif</span> <span class="n">typ</span> <span class="ow">is</span> <span class="n">datetime</span><span class="p">:</span>
-                    <span class="n">g</span><span class="p">[</span><span class="s1">&#39;__py36_datetime_fromisoformat__&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">py36_datetime_fromisoformat</span>
 
         <span class="c1"># render all union functions</span>
         <span class="k">for</span> <span class="n">union</span> <span class="ow">in</span> <span class="n">iter_unions</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
@@ -529,13 +520,6 @@ associated with deserialization.</p>
             <span class="n">res</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;(</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">c_tor_with_check</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span><span class="si">}</span><span class="s2">) if reuse_instances else </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">c_tor</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
         <span class="k">elif</span> <span class="n">arg</span><span class="o">.</span><span class="n">type</span> <span class="ow">in</span> <span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">]:</span>
             <span class="n">from_iso</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">arg</span><span class="o">.</span><span class="n">type</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">.fromisoformat(</span><span class="si">{</span><span class="n">arg</span><span class="o">.</span><span class="n">data</span><span class="si">}</span><span class="s2">)&quot;</span>
-
-            <span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">version_info</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">6</span><span class="p">):</span>  <span class="c1"># python 3.6 has no fromisoformat functions</span>
-                <span class="k">if</span> <span class="n">arg</span><span class="o">.</span><span class="n">type</span> <span class="ow">is</span> <span class="n">date</span><span class="p">:</span>
-                    <span class="n">from_iso</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;__py36_date_fromisoformat__(</span><span class="si">{</span><span class="n">arg</span><span class="o">.</span><span class="n">data</span><span class="si">}</span><span class="s2">)&quot;</span>
-                <span class="k">elif</span> <span class="n">arg</span><span class="o">.</span><span class="n">type</span> <span class="ow">is</span> <span class="n">datetime</span><span class="p">:</span>
-                    <span class="n">from_iso</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;__py36_datetime_fromisoformat__(</span><span class="si">{</span><span class="n">arg</span><span class="o">.</span><span class="n">data</span><span class="si">}</span><span class="s2">)&quot;</span>
-
             <span class="n">res</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;(</span><span class="si">{</span><span class="n">arg</span><span class="o">.</span><span class="n">data</span><span class="si">}</span><span class="s2"> if isinstance(</span><span class="si">{</span><span class="n">arg</span><span class="o">.</span><span class="n">data</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">arg</span><span class="o">.</span><span class="n">type</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">) else </span><span class="si">{</span><span class="n">from_iso</span><span class="si">}</span><span class="s2">) </span><span class="se">\</span>
 <span class="s2">                    if reuse_instances else </span><span class="si">{</span><span class="n">from_iso</span><span class="si">}</span><span class="s2">&quot;</span>
         <span class="k">elif</span> <span class="n">is_none</span><span class="p">(</span><span class="n">arg</span><span class="o">.</span><span class="n">type</span><span class="p">):</span>
@@ -959,14 +943,6 @@ associated with deserialization.</p>
 
             <span class="k">if</span> <span class="n">is_dataclass</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span> <span class="ow">or</span> <span class="n">is_enum</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">is_primitive</span><span class="p">(</span><span class="n">typ</span><span class="p">):</span>
                 <span class="n">scope</span><span class="o">.</span><span class="n">types</span><span class="p">[</span><span class="n">typ</span><span class="o">.</span><span class="vm">__name__</span><span class="p">]</span> <span class="o">=</span> <span class="n">typ</span>
-
-            <span class="c1"># python 3.6 has no fromisoformat functions for date &amp; datetime, so we have to add our own.</span>
-            <span class="c1"># See Renderer.render for usage</span>
-            <span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">version_info</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">6</span><span class="p">):</span>
-                <span class="k">if</span> <span class="n">typ</span> <span class="ow">is</span> <span class="n">date</span><span class="p">:</span>
-                    <span class="n">g</span><span class="p">[</span><span class="s1">&#39;__py36_date_fromisoformat__&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">py36_date_fromisoformat</span>
-                <span class="k">elif</span> <span class="n">typ</span> <span class="ow">is</span> <span class="n">datetime</span><span class="p">:</span>
-                    <span class="n">g</span><span class="p">[</span><span class="s1">&#39;__py36_datetime_fromisoformat__&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">py36_datetime_fromisoformat</span>
 
         <span class="c1"># render all union functions</span>
         <span class="k">for</span> <span class="n">union</span> <span class="ow">in</span> <span class="n">iter_unions</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
