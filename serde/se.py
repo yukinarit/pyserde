@@ -16,7 +16,6 @@ import jinja2
 from .compat import (
     SerdeError,
     SerdeSkip,
-    T,
     is_bare_dict,
     is_bare_list,
     is_bare_set,
@@ -268,7 +267,7 @@ def to_obj(o, named: bool, reuse_instances: bool, convert_sets: bool):
 
 def astuple(v):
     """
-    Convert class with `serialize` to `tuple`.
+    Serialize object into tuple.
     """
     return to_tuple(v, reuse_instances=False, convert_sets=False)
 
@@ -299,7 +298,7 @@ def to_tuple(o, reuse_instances: bool = ..., convert_sets: bool = ...) -> Any:
 
 def asdict(v):
     """
-    Convert class with `serialize` to `dict`.
+    Serialize object into dictionary.
     """
     return to_dict(v, reuse_instances=False, convert_sets=False)
 
@@ -360,6 +359,7 @@ def sefields(cls: Type) -> Iterator[SeField]:
     """
     for f in fields(SeField, cls):
         f.parent = SeField(None, 'obj')  # type: ignore
+        assert isinstance(f, SeField)
         yield f
 
 
