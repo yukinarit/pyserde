@@ -73,11 +73,7 @@ associated with serialization.</p>
 <span class="kn">import</span> <span class="nn">abc</span>
 <span class="kn">import</span> <span class="nn">copy</span>
 <span class="kn">import</span> <span class="nn">dataclasses</span>
-<span class="kn">import</span> <span class="nn">decimal</span>
 <span class="kn">import</span> <span class="nn">functools</span>
-<span class="kn">import</span> <span class="nn">ipaddress</span>
-<span class="kn">import</span> <span class="nn">pathlib</span>
-<span class="kn">import</span> <span class="nn">uuid</span>
 <span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">dataclass</span><span class="p">,</span> <span class="n">is_dataclass</span>
 <span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">date</span><span class="p">,</span> <span class="n">datetime</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Iterator</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Type</span>
@@ -111,8 +107,10 @@ associated with serialization.</p>
     <span class="n">TO_DICT</span><span class="p">,</span>
     <span class="n">TO_ITER</span><span class="p">,</span>
     <span class="n">UNION_SE_PREFIX</span><span class="p">,</span>
+    <span class="n">DateTimeTypes</span><span class="p">,</span>
     <span class="n">Field</span><span class="p">,</span>
     <span class="n">SerdeScope</span><span class="p">,</span>
+    <span class="n">StrSerializableTypes</span><span class="p">,</span>
     <span class="n">add_func</span><span class="p">,</span>
     <span class="n">conv</span><span class="p">,</span>
     <span class="n">fields</span><span class="p">,</span>
@@ -324,9 +322,13 @@ associated with serialization.</p>
     <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">o</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
         <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">thisfunc</span><span class="p">(</span><span class="n">e</span><span class="p">)</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">o</span><span class="p">)</span>
     <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">o</span><span class="p">,</span> <span class="nb">set</span><span class="p">):</span>
-        <span class="k">return</span> <span class="nb">set</span><span class="p">(</span><span class="n">thisfunc</span><span class="p">(</span><span class="n">e</span><span class="p">)</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">o</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">thisfunc</span><span class="p">(</span><span class="n">e</span><span class="p">)</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">o</span><span class="p">]</span>
     <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">o</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
         <span class="k">return</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">thisfunc</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">o</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">o</span><span class="p">,</span> <span class="n">StrSerializableTypes</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">o</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">o</span><span class="p">,</span> <span class="n">DateTimeTypes</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">o</span><span class="o">.</span><span class="n">isoformat</span><span class="p">()</span>
 
     <span class="k">return</span> <span class="n">o</span>
 
@@ -619,24 +621,9 @@ associated with serialization.</p>
             <span class="n">res</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">primitive</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">is_union</span><span class="p">(</span><span class="n">arg</span><span class="o">.</span><span class="n">type</span><span class="p">):</span>
             <span class="n">res</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">union_func</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="n">arg</span><span class="o">.</span><span class="n">type</span> <span class="ow">in</span> <span class="p">[</span>
-            <span class="n">decimal</span><span class="o">.</span><span class="n">Decimal</span><span class="p">,</span>
-            <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">,</span>
-            <span class="n">pathlib</span><span class="o">.</span><span class="n">PosixPath</span><span class="p">,</span>
-            <span class="n">pathlib</span><span class="o">.</span><span class="n">WindowsPath</span><span class="p">,</span>
-            <span class="n">pathlib</span><span class="o">.</span><span class="n">PurePath</span><span class="p">,</span>
-            <span class="n">pathlib</span><span class="o">.</span><span class="n">PurePosixPath</span><span class="p">,</span>
-            <span class="n">pathlib</span><span class="o">.</span><span class="n">PureWindowsPath</span><span class="p">,</span>
-            <span class="n">uuid</span><span class="o">.</span><span class="n">UUID</span><span class="p">,</span>
-            <span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv4Address</span><span class="p">,</span>
-            <span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv6Address</span><span class="p">,</span>
-            <span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv4Network</span><span class="p">,</span>
-            <span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv6Network</span><span class="p">,</span>
-            <span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv4Interface</span><span class="p">,</span>
-            <span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv6Interface</span><span class="p">,</span>
-        <span class="p">]:</span>
+        <span class="k">elif</span> <span class="n">arg</span><span class="o">.</span><span class="n">type</span> <span class="ow">in</span> <span class="n">StrSerializableTypes</span><span class="p">:</span>
             <span class="n">res</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">arg</span><span class="o">.</span><span class="n">varname</span><span class="si">}</span><span class="s2"> if reuse_instances else </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">string</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
-        <span class="k">elif</span> <span class="n">arg</span><span class="o">.</span><span class="n">type</span> <span class="ow">in</span> <span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">]:</span>
+        <span class="k">elif</span> <span class="n">arg</span><span class="o">.</span><span class="n">type</span> <span class="ow">in</span> <span class="n">DateTimeTypes</span><span class="p">:</span>
             <span class="n">res</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">arg</span><span class="o">.</span><span class="n">varname</span><span class="si">}</span><span class="s2"> if reuse_instances else </span><span class="si">{</span><span class="n">arg</span><span class="o">.</span><span class="n">varname</span><span class="si">}</span><span class="s2">.isoformat()&quot;</span>
         <span class="k">elif</span> <span class="n">is_none</span><span class="p">(</span><span class="n">arg</span><span class="o">.</span><span class="n">type</span><span class="p">):</span>
             <span class="n">res</span> <span class="o">=</span> <span class="s2">&quot;None&quot;</span>

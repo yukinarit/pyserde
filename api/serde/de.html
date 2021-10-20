@@ -71,12 +71,8 @@ associated with deserialization.</p>
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">abc</span>
-<span class="kn">import</span> <span class="nn">decimal</span>
 <span class="kn">import</span> <span class="nn">functools</span>
-<span class="kn">import</span> <span class="nn">ipaddress</span>
-<span class="kn">import</span> <span class="nn">pathlib</span>
 <span class="kn">import</span> <span class="nn">sys</span>
-<span class="kn">import</span> <span class="nn">uuid</span>
 <span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">dataclass</span><span class="p">,</span> <span class="n">is_dataclass</span>
 <span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">date</span><span class="p">,</span> <span class="n">datetime</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Type</span>
@@ -111,8 +107,10 @@ associated with deserialization.</p>
     <span class="n">FROM_ITER</span><span class="p">,</span>
     <span class="n">SERDE_SCOPE</span><span class="p">,</span>
     <span class="n">UNION_DE_PREFIX</span><span class="p">,</span>
+    <span class="n">DateTimeTypes</span><span class="p">,</span>
     <span class="n">Field</span><span class="p">,</span>
     <span class="n">SerdeScope</span><span class="p">,</span>
+    <span class="n">StrSerializableTypes</span><span class="p">,</span>
     <span class="n">add_func</span><span class="p">,</span>
     <span class="n">fields</span><span class="p">,</span>
     <span class="n">logger</span><span class="p">,</span>
@@ -336,12 +334,30 @@ associated with deserialization.</p>
             <span class="k">except</span> <span class="p">(</span><span class="n">SerdeError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">):</span>
                 <span class="k">pass</span>
         <span class="k">return</span> <span class="n">v</span>
-    <span class="k">elif</span> <span class="n">is_list</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="ow">or</span> <span class="n">is_set</span><span class="p">(</span><span class="n">c</span><span class="p">):</span>
-        <span class="k">return</span> <span class="p">[</span><span class="n">thisfunc</span><span class="p">(</span><span class="n">type_args</span><span class="p">(</span><span class="n">c</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span> <span class="n">e</span><span class="p">)</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">o</span><span class="p">]</span>
+    <span class="k">elif</span> <span class="n">is_list</span><span class="p">(</span><span class="n">c</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">is_bare_list</span><span class="p">(</span><span class="n">c</span><span class="p">):</span>
+            <span class="k">return</span> <span class="p">[</span><span class="n">e</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">o</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">[</span><span class="n">thisfunc</span><span class="p">(</span><span class="n">type_args</span><span class="p">(</span><span class="n">c</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span> <span class="n">e</span><span class="p">)</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">o</span><span class="p">]</span>
+    <span class="k">elif</span> <span class="n">is_set</span><span class="p">(</span><span class="n">c</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">is_bare_set</span><span class="p">(</span><span class="n">c</span><span class="p">):</span>
+            <span class="k">return</span> <span class="nb">set</span><span class="p">(</span><span class="n">e</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">o</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">set</span><span class="p">(</span><span class="n">thisfunc</span><span class="p">(</span><span class="n">type_args</span><span class="p">(</span><span class="n">c</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span> <span class="n">e</span><span class="p">)</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">o</span><span class="p">)</span>
     <span class="k">elif</span> <span class="n">is_tuple</span><span class="p">(</span><span class="n">c</span><span class="p">):</span>
-        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">thisfunc</span><span class="p">(</span><span class="n">type_args</span><span class="p">(</span><span class="n">c</span><span class="p">)[</span><span class="n">i</span><span class="p">],</span> <span class="n">e</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">e</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">o</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">is_bare_tuple</span><span class="p">(</span><span class="n">c</span><span class="p">):</span>
+            <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">e</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">o</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">thisfunc</span><span class="p">(</span><span class="n">type_args</span><span class="p">(</span><span class="n">c</span><span class="p">)[</span><span class="n">i</span><span class="p">],</span> <span class="n">e</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">e</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">o</span><span class="p">))</span>
     <span class="k">elif</span> <span class="n">is_dict</span><span class="p">(</span><span class="n">c</span><span class="p">):</span>
-        <span class="k">return</span> <span class="p">{</span><span class="n">thisfunc</span><span class="p">(</span><span class="n">type_args</span><span class="p">(</span><span class="n">c</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span> <span class="n">k</span><span class="p">):</span> <span class="n">thisfunc</span><span class="p">(</span><span class="n">type_args</span><span class="p">(</span><span class="n">c</span><span class="p">)[</span><span class="mi">1</span><span class="p">],</span> <span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">o</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+        <span class="k">if</span> <span class="n">is_bare_dict</span><span class="p">(</span><span class="n">c</span><span class="p">):</span>
+            <span class="k">return</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">o</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">{</span><span class="n">thisfunc</span><span class="p">(</span><span class="n">type_args</span><span class="p">(</span><span class="n">c</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span> <span class="n">k</span><span class="p">):</span> <span class="n">thisfunc</span><span class="p">(</span><span class="n">type_args</span><span class="p">(</span><span class="n">c</span><span class="p">)[</span><span class="mi">1</span><span class="p">],</span> <span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">o</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+    <span class="k">elif</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">DateTimeTypes</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">c</span><span class="o">.</span><span class="n">fromisoformat</span><span class="p">(</span><span class="n">o</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">c</span> <span class="ow">is</span> <span class="n">Any</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">o</span>
 
     <span class="k">return</span> <span class="n">c</span><span class="p">(</span><span class="n">o</span><span class="p">)</span>
 
@@ -501,24 +517,9 @@ associated with deserialization.</p>
             <span class="n">res</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">primitive</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">is_union</span><span class="p">(</span><span class="n">arg</span><span class="o">.</span><span class="n">type</span><span class="p">):</span>
             <span class="n">res</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">union_func</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="n">arg</span><span class="o">.</span><span class="n">type</span> <span class="ow">in</span> <span class="p">[</span>
-            <span class="n">decimal</span><span class="o">.</span><span class="n">Decimal</span><span class="p">,</span>
-            <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">,</span>
-            <span class="n">pathlib</span><span class="o">.</span><span class="n">PosixPath</span><span class="p">,</span>
-            <span class="n">pathlib</span><span class="o">.</span><span class="n">WindowsPath</span><span class="p">,</span>
-            <span class="n">pathlib</span><span class="o">.</span><span class="n">PurePath</span><span class="p">,</span>
-            <span class="n">pathlib</span><span class="o">.</span><span class="n">PurePosixPath</span><span class="p">,</span>
-            <span class="n">pathlib</span><span class="o">.</span><span class="n">PureWindowsPath</span><span class="p">,</span>
-            <span class="n">uuid</span><span class="o">.</span><span class="n">UUID</span><span class="p">,</span>
-            <span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv4Address</span><span class="p">,</span>
-            <span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv6Address</span><span class="p">,</span>
-            <span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv4Network</span><span class="p">,</span>
-            <span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv6Network</span><span class="p">,</span>
-            <span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv4Interface</span><span class="p">,</span>
-            <span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv6Interface</span><span class="p">,</span>
-        <span class="p">]:</span>
+        <span class="k">elif</span> <span class="n">arg</span><span class="o">.</span><span class="n">type</span> <span class="ow">in</span> <span class="n">StrSerializableTypes</span><span class="p">:</span>
             <span class="n">res</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;(</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">c_tor_with_check</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span><span class="si">}</span><span class="s2">) if reuse_instances else </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">c_tor</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
-        <span class="k">elif</span> <span class="n">arg</span><span class="o">.</span><span class="n">type</span> <span class="ow">in</span> <span class="p">[</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">]:</span>
+        <span class="k">elif</span> <span class="n">arg</span><span class="o">.</span><span class="n">type</span> <span class="ow">in</span> <span class="n">DateTimeTypes</span><span class="p">:</span>
             <span class="n">from_iso</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">arg</span><span class="o">.</span><span class="n">type</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">.fromisoformat(</span><span class="si">{</span><span class="n">arg</span><span class="o">.</span><span class="n">data</span><span class="si">}</span><span class="s2">)&quot;</span>
             <span class="n">res</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;(</span><span class="si">{</span><span class="n">arg</span><span class="o">.</span><span class="n">data</span><span class="si">}</span><span class="s2"> if isinstance(</span><span class="si">{</span><span class="n">arg</span><span class="o">.</span><span class="n">data</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">arg</span><span class="o">.</span><span class="n">type</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">) else </span><span class="si">{</span><span class="n">from_iso</span><span class="si">}</span><span class="s2">) </span><span class="se">\</span>
 <span class="s2">                    if reuse_instances else </span><span class="si">{</span><span class="n">from_iso</span><span class="si">}</span><span class="s2">&quot;</span>
