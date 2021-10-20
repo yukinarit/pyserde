@@ -4,12 +4,8 @@ associated with deserialization.
 """
 
 import abc
-import decimal
 import functools
-import ipaddress
-import pathlib
 import sys
-import uuid
 from dataclasses import dataclass, is_dataclass
 from datetime import date, datetime
 from typing import Any, Callable, Dict, List, Optional, Type
@@ -44,8 +40,10 @@ from .core import (
     FROM_ITER,
     SERDE_SCOPE,
     UNION_DE_PREFIX,
+    DateTimeTypes,
     Field,
     SerdeScope,
+    StrSerializableTypes,
     add_func,
     fields,
     logger,
@@ -269,12 +267,30 @@ def from_obj(c: Type, o: Any, named: bool, reuse_instances: bool):
             except (SerdeError, ValueError):
                 pass
         return v
-    elif is_list(c) or is_set(c):
-        return [thisfunc(type_args(c)[0], e) for e in o]
+    elif is_list(c):
+        if is_bare_list(c):
+            return [e for e in o]
+        else:
+            return [thisfunc(type_args(c)[0], e) for e in o]
+    elif is_set(c):
+        if is_bare_set(c):
+            return set(e for e in o)
+        else:
+            return set(thisfunc(type_args(c)[0], e) for e in o)
     elif is_tuple(c):
-        return tuple(thisfunc(type_args(c)[i], e) for i, e in enumerate(o))
+        if is_bare_tuple(c):
+            return tuple(e for e in o)
+        else:
+            return tuple(thisfunc(type_args(c)[i], e) for i, e in enumerate(o))
     elif is_dict(c):
-        return {thisfunc(type_args(c)[0], k): thisfunc(type_args(c)[1], v) for k, v in o.items()}
+        if is_bare_dict(c):
+            return {k: v for k, v in o.items()}
+        else:
+            return {thisfunc(type_args(c)[0], k): thisfunc(type_args(c)[1], v) for k, v in o.items()}
+    elif c in DateTimeTypes:
+        return c.fromisoformat(o)
+    elif c is Any:
+        return o
 
     return c(o)
 
@@ -434,24 +450,9 @@ class Renderer:
             res = self.primitive(arg)
         elif is_union(arg.type):
             res = self.union_func(arg)
-        elif arg.type in [
-            decimal.Decimal,
-            pathlib.Path,
-            pathlib.PosixPath,
-            pathlib.WindowsPath,
-            pathlib.PurePath,
-            pathlib.PurePosixPath,
-            pathlib.PureWindowsPath,
-            uuid.UUID,
-            ipaddress.IPv4Address,
-            ipaddress.IPv6Address,
-            ipaddress.IPv4Network,
-            ipaddress.IPv6Network,
-            ipaddress.IPv4Interface,
-            ipaddress.IPv6Interface,
-        ]:
+        elif arg.type in StrSerializableTypes:
             res = f"({self.c_tor_with_check(arg)}) if reuse_instances else {self.c_tor(arg)}"
-        elif arg.type in [date, datetime]:
+        elif arg.type in DateTimeTypes:
             from_iso = f"{arg.type.__name__}.fromisoformat({arg.data})"
             res = f"({arg.data} if isinstance({arg.data}, {arg.type.__name__}) else {from_iso}) \
                     if reuse_instances else {from_iso}"

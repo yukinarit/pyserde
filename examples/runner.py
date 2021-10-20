@@ -15,6 +15,8 @@ import rename_all
 import simple
 import skip
 import tomlfile
+import type_datetime
+import type_decimal
 import union
 import yamlfile
 
@@ -42,6 +44,8 @@ def run_all():
     run(custom_class_serializer)
     run(custom_field_serializer)
     run(forward_reference)
+    run(type_decimal)
+    run(type_datetime)
     if not PY36:
         run(lazy_type_evaluation)
 

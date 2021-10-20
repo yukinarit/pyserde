@@ -73,6 +73,7 @@ types: List = [
     (decimal.Decimal(10), decimal.Decimal),
     (datetime.datetime.strptime('Jan 1 2021 1:55PM', '%b %d %Y %I:%M%p'), datetime.datetime),
     (datetime.datetime.strptime('Jan 1 2021 1:55PM', '%b %d %Y %I:%M%p').date(), datetime.date),
+    (datetime.datetime.strptime('Jan 1 2021 1:55PM', '%b %d %Y %I:%M%p').time(), datetime.time),
 ]
 
 # these types can only be instantiated on their corresponding system

@@ -2,8 +2,13 @@
 pyserde core module.
 """
 import dataclasses
+import datetime
+import decimal
+import ipaddress
 import logging
+import pathlib
 import re
+import uuid
 from dataclasses import dataclass, field
 from typing import Any, Callable, Dict, Iterator, List, Optional, Type, Union
 
@@ -45,6 +50,27 @@ UNION_SE_PREFIX = "union_se"
 UNION_DE_PREFIX = "union_de"
 
 SETTINGS = dict(debug=False)
+
+StrSerializableTypes = (
+    decimal.Decimal,
+    pathlib.Path,
+    pathlib.PosixPath,
+    pathlib.WindowsPath,
+    pathlib.PurePath,
+    pathlib.PurePosixPath,
+    pathlib.PureWindowsPath,
+    uuid.UUID,
+    ipaddress.IPv4Address,
+    ipaddress.IPv6Address,
+    ipaddress.IPv4Network,
+    ipaddress.IPv6Network,
+    ipaddress.IPv4Interface,
+    ipaddress.IPv6Interface,
+)
+""" List of standard types (de)serializable to str """
+
+DateTimeTypes = (datetime.date, datetime.time, datetime.datetime)
+""" List of datetime types """
 
 
 def init(debug: bool = False):
