@@ -1,3 +1,11 @@
+## `0.5.2` (2021-10-21)
+
+* feat: (de)serialize non dataclass types correctly ([0ffb9ea](https://github.com/yukinarit/pyserde/commit/0ffb9ea))
+* refactor: Fix minor type error ([bef0c4f](https://github.com/yukinarit/pyserde/commit/bef0c4f))
+* refactor: Remove unused imports ([cc16d58](https://github.com/yukinarit/pyserde/commit/cc16d58))
+* refactor: Use backports-datetime-fromisoformat for python 3.6 ([014296f](https://github.com/yukinarit/pyserde/commit/014296f))
+* build: Remove unused dependency for examples ([3a5ca01](https://github.com/yukinarit/pyserde/commit/3a5ca01))
+
 ## `0.5.1` (2021-10-10)
 
 * feat: deserialize to the type more correctly ([a4c155c](https://github.com/yukinarit/pyserde/commit/a4c155c))
