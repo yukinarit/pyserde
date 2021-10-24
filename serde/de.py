@@ -5,9 +5,7 @@ associated with deserialization.
 
 import abc
 import functools
-import sys
 from dataclasses import dataclass, is_dataclass
-from datetime import date, datetime
 from typing import Any, Callable, Dict, List, Optional, Type
 
 import jinja2
@@ -124,6 +122,7 @@ def deserialize(
     * `deserializer` takes a custom class-level deserialize function. The function applies to the all the fields
     in the class.
 
+    >>> from datetime import datetime
     >>> def deserializer(cls, o):
     ...     if cls is datetime:
     ...         return datetime.strptime(o, '%d/%m/%y')
