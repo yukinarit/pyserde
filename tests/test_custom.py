@@ -3,7 +3,7 @@ Tests for custom serializer/deserializer.
 """
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import Optional
+from typing import Optional, Union
 
 import pytest
 
@@ -93,14 +93,16 @@ def test_custom_class_serializer():
         i: int
         dt1: datetime
         dt2: datetime
+        s: Optional[str] = None
+        u: Union[str, int] = 10
 
     dt = datetime(2021, 1, 1, 0, 0, 0)
     f = Foo(10, dt, dt)
 
-    assert to_json(f) == '{"i": 10, "dt1": "01/01/21", "dt2": "01/01/21"}'
+    assert to_json(f) == '{"i": 10, "dt1": "01/01/21", "dt2": "01/01/21", "s": null, "u": 10}'
     assert f == from_json(Foo, to_json(f))
 
-    assert to_tuple(f) == (10, '01/01/21', '01/01/21')
+    assert to_tuple(f) == (10, '01/01/21', '01/01/21', None, 10)
     assert f == from_tuple(Foo, to_tuple(f))
 
 

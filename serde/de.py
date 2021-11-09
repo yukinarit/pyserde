@@ -46,6 +46,7 @@ from .core import (
     StrSerializableTypes,
     add_func,
     fields,
+    filter_scope,
     logger,
     raise_unsupported_type,
     union_func_name,
@@ -169,14 +170,11 @@ def deserialize(
 
         # Collect types used in the generated code.
         for typ in iter_types(cls):
-            if typ is cls:
+            if typ is cls or (is_primitive(typ) and not is_enum(typ)):
                 continue
 
-            if typ is Any:
-                continue
-
-            if is_dataclass(typ) or is_enum(typ) or not is_primitive(typ):
-                scope.types[typ.__name__] = typ
+            scope.types[typename(typ)] = typ
+            g[typename(typ)] = typ
 
         # render all union functions
         for union in iter_unions(cls):
@@ -473,7 +471,7 @@ class Renderer:
         if self.custom and not arg.deserializer:
             # The function takes a closure in order to execute the default value lazily.
             return (
-                f'serde_custom_class_deserializer({arg.type.__name__}, {arg.datavar}, {arg.data}, '
+                f'serde_custom_class_deserializer({typename(arg.type)}, {arg.datavar}, {arg.data}, '
                 f'default=lambda: {res})'
             )
         else:
@@ -665,7 +663,7 @@ def {{func}}(data, reuse_instances = {{serde_scope.reuse_instances_default}}):
     reuse_instances = {{serde_scope.reuse_instances_default}}
 
   {# List up all classes used by this class. -#}
-  {% for name in serde_scope.types.keys() -%}
+  {% for name in serde_scope.types|filter_scope -%}
   {{name}} = serde_scope.types['{{name}}']
   {% endfor -%}
 
@@ -683,6 +681,7 @@ def {{func}}(data, reuse_instances = {{serde_scope.reuse_instances_default}}):
     env = jinja2.Environment(loader=jinja2.DictLoader({'iter': template}))
     env.filters.update({'rvalue': renderer.render})
     env.filters.update({'arg': to_iter_arg})
+    env.filters.update({'filter_scope': filter_scope})
     return env.get_template('iter').render(func=FROM_ITER, serde_scope=getattr(cls, SERDE_SCOPE), fields=defields(cls))
 
 
@@ -693,7 +692,7 @@ def {{func}}(data, reuse_instances = {{serde_scope.reuse_instances_default}}):
     reuse_instances = {{serde_scope.reuse_instances_default}}
 
   {# List up all classes used by this class. #}
-  {% for name in serde_scope.types.keys() %}
+  {% for name in serde_scope.types|filter_scope %}
   {{name}} = serde_scope.types['{{name}}']
   {% endfor %}
 
@@ -711,13 +710,14 @@ def {{func}}(data, reuse_instances = {{serde_scope.reuse_instances_default}}):
     env = jinja2.Environment(loader=jinja2.DictLoader({'dict': template}))
     env.filters.update({'rvalue': renderer.render})
     env.filters.update({'arg': functools.partial(to_arg, rename_all=rename_all)})
+    env.filters.update({'filter_scope': filter_scope})
     return env.get_template('dict').render(func=FROM_DICT, serde_scope=getattr(cls, SERDE_SCOPE), fields=defields(cls))
 
 
 def render_union_func(cls: Type, union_args: List[Type]) -> str:
     template = """
 def {{func}}(data, reuse_instances):
-  {% for name in serde_scope.types.keys() %}
+  {% for name in serde_scope.types|filter_scope %}
   {{name}} = serde_scope.types['{{name}}']
   {% endfor %}
 
@@ -751,6 +751,7 @@ def {{func}}(data, reuse_instances):
     env.filters.update({'rvalue': renderer.render})
     env.filters.update({'is_primitive': is_primitive})
     env.filters.update({'is_none': is_none})
+    env.filters.update({'filter_scope': filter_scope})
     return env.get_template('dict').render(
         func=union_func_name(UNION_DE_PREFIX, union_args),
         serde_scope=getattr(cls, SERDE_SCOPE),
