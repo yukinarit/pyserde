@@ -216,6 +216,18 @@ class PriDefault:
     b: bool = True
 
 
+@deserialize
+@serialize
+@dataclass
+class OptDefault:
+    """
+    Optionals.
+    """
+
+    n: Optional[int] = None
+    i: Optional[int] = 10
+
+
 class E(enum.Enum):
     S = 'foo'
     F = 10.0

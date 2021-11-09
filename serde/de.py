@@ -467,7 +467,7 @@ class Renderer:
             if arg.iterbased:
                 exists = f'{arg.data} is not None'
             else:
-                exists = f'{arg.datavar}.get("{arg.conv_name()}") is not None'
+                exists = f'"{arg.conv_name()}" in {arg.datavar}'
             if has_default(arg):
                 res = f'({res}) if {exists} else serde_scope.defaults["{arg.name}"]'
             elif has_default_factory(arg):
