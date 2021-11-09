@@ -463,11 +463,8 @@ class Renderer:
         else:
             return f"raise_unsupported_type({arg.data})"
 
-        if has_default(arg) or has_default_factory(arg):
-            if arg.iterbased:
-                exists = f'{arg.data} is not None'
-            else:
-                exists = f'"{arg.conv_name()}" in {arg.datavar}'
+        if not arg.iterbased and (has_default(arg) or has_default_factory(arg)):
+            exists = f'"{arg.conv_name()}" in {arg.datavar}'
             if has_default(arg):
                 res = f'({res}) if {exists} else serde_scope.defaults["{arg.name}"]'
             elif has_default_factory(arg):
