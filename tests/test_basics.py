@@ -8,7 +8,7 @@ from typing import Dict, List, Optional, Tuple
 import pytest
 
 import serde
-from serde import SerdeError, deserialize, from_dict, serialize, to_dict
+from serde import SerdeError, deserialize, from_dict, from_tuple, serialize, to_dict
 
 from . import data
 from .common import (
@@ -346,7 +346,7 @@ def test_dataclass_default_factory(se, de):
 
 @pytest.mark.parametrize('se,de', all_formats)
 def test_default(se, de):
-    from .data import PriDefault
+    from .data import OptDefault, PriDefault
 
     p = PriDefault()
     assert p == de(PriDefault, se(p))
@@ -357,6 +357,20 @@ def test_default(se, de):
     assert p == from_dict(PriDefault, {'i': 10, 's': 'foo'})
     assert p == from_dict(PriDefault, {'i': 10, 's': 'foo', 'f': 100.0})
     assert p == from_dict(PriDefault, {'i': 10, 's': 'foo', 'f': 100.0, 'b': True})
+    assert p == from_tuple(PriDefault, (10, 'foo', 100.0, True))
+
+    o = OptDefault()
+    assert o == de(OptDefault, se(o))
+
+    o = OptDefault()
+    assert o == from_dict(OptDefault, {})
+    assert o == from_dict(OptDefault, {"n": None})
+    assert o == from_dict(OptDefault, {"n": None, "i": 10})
+    assert o == from_tuple(OptDefault, (None, 10))
+
+    o = OptDefault(n=None, i=None)
+    assert o == from_dict(OptDefault, {"n": None, "i": None})
+    assert o == from_tuple(OptDefault, (None, None))
 
     assert 10 == dataclasses.fields(PriDefault)[0].default
     assert 'foo' == dataclasses.fields(PriDefault)[1].default
