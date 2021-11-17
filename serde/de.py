@@ -630,7 +630,7 @@ Foo.__serde__.funcs['foo'](data[0][3], reuse_instances=reuse_instances),)"
         >>> Renderer('foo').render(DeField(int, 'i', datavar='data', index=1, iterbased=True))
         'data[1]'
         """
-        return arg.data
+        return f'{typename(arg.type)}({arg.data})'
 
     def c_tor(self, arg: DeField) -> str:
         return f"{arg.type.__name__}({arg.data})"

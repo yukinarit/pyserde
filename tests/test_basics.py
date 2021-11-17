@@ -97,7 +97,36 @@ def test_simple_with_reuse_instances(se, de, opt, t, T):
     assert c == de(C, se(c, reuse_instances=True), reuse_instances=True)
 
 
-def test_non_dataclass():
+def test_type_cast_primitives():
+    d = {"i": "10", "s": 100, "f": 1000, "b": "True"}
+    p = from_dict(data.Pri, d)
+    assert p.i == 10
+    assert p.s == "100"
+    assert p.f == 1000.0
+    assert p.b
+
+    p = data.Pri("10", 100, 1000, "True")
+    d = to_dict(p)
+    assert d["i"] == 10
+    assert d["s"] == "100"
+    assert d["f"] == 1000.0
+    assert d["b"]
+
+    # with pytest.raises(SerdeError):
+    #    d = {"i": "foo", "s": 100, "f": "bar", "b": "True"}
+    #    p = from_dict(data.Pri, d)
+
+    p = data.NestedPri(data.Int("10"), data.Str(100), data.Float(1000), data.Bool("True"))
+    d = to_dict(p)
+    assert d["i"]["i"] == 10
+    assert d["s"]["s"] == "100"
+    assert d["f"]["f"] == 1000.0
+    assert d["b"]["b"]
+
+    # TODO Flaten case
+
+
+def test_non_data_dataclass():
     with pytest.raises(TypeError):
 
         @deserialize

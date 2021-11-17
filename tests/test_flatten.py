@@ -60,5 +60,5 @@ def test_flatten(se, de):
         b: str
         bar: Bar = field(metadata={'serde_flatten': True})
 
-    f = Foo(a=10, b='foo', bar=Bar(c=100.0, d=True, baz=Baz([1, 2], {"a": 10})))
+    f = Foo(a=10, b='foo', bar=Bar(c=100.0, d=True, baz=Baz([1, 2], {"a": "10"})))
     assert de(Foo, se(f)) == f

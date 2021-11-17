@@ -3,8 +3,7 @@ from dataclasses import dataclass
 from typing import Dict, List, Optional, Tuple
 
 from serde import deserialize, serialize
-
-from . import imported
+from tests import imported
 
 
 @deserialize
