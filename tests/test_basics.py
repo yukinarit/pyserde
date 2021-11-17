@@ -337,7 +337,7 @@ def test_default(se, de):
     assert p == from_dict(PriDefault, {'i': 10, 's': 'foo', 'f': 100.0, 'b': True})
     assert p == from_tuple(PriDefault, (10, 'foo', 100.0, True))
 
-    if se is not serde.toml.to_toml:
+    if se is not serde.toml.to_toml:  # Toml doesn't support None.
         o = OptDefault()
         assert o == de(OptDefault, se(o))
         o = OptDefault()
@@ -754,7 +754,7 @@ test_cases = [
     (Dict[str, data.Int], {"foo": data.Int(1.0)}, True),  # type: ignore
     (Set[int], {10}, False),
     (Set[int], {10.0}, True),
-    (Set[int], [10], False),  # List is coerced into Set
+    (Set[int], [10], True),
     (Tuple[int], (10,), False),
     (Tuple[int], (10.0,), True),
     (Tuple[int, str], (10, "foo"), False),
@@ -767,7 +767,7 @@ test_cases = [
     (Union[int, data.Int], data.Int(10), False),
     (datetime.date, datetime.date.today(), False),
     (pathlib.Path, pathlib.Path(), False),
-    (pathlib.Path, "foo", False),  # str is coerced into Path
+    (pathlib.Path, "foo", True),
 ]
 
 
@@ -779,8 +779,52 @@ def test_type_check(T, data, exc):
 
     if exc:
         with pytest.raises(serde.SerdeError):
-            d = serde.to_dict(C(data))
+            d = serde.to_dict(C(data), type_check=Strict)
             serde.from_dict(C, d, type_check=Strict)
     else:
-        d = serde.to_dict(C(data))
+        d = serde.to_dict(C(data), type_check=Strict)
         serde.from_dict(C, d, type_check=Strict)
+
+
+def test_uncoercible():
+    @serde.serde
+    class Foo:
+        i: int
+
+    with pytest.raises(serde.SerdeError):
+        serde.to_dict(Foo("foo"))
+
+    with pytest.raises(serde.SerdeError):
+        serde.from_dict(Foo, {"i": "foo"})
+
+
+def test_coerce():
+    d = {"i": "10", "s": 100, "f": 1000, "b": "True"}
+    p = serde.from_dict(data.Pri, d)
+    assert p.i == 10
+    assert p.s == "100"
+    assert p.f == 1000.0
+    assert p.b
+
+    p = data.Pri("10", 100, 1000, "True")
+    d = serde.to_dict(p)
+    assert d["i"] == 10
+    assert d["s"] == "100"
+    assert d["f"] == 1000.0
+    assert d["b"]
+
+    # Couldn't coerce
+    with pytest.raises(serde.SerdeError):
+        d = {"i": "foo", "s": 100, "f": "bar", "b": "True"}
+        p = serde.from_dict(data.Pri, d)
+
+    # Nested structure
+    p = data.NestedPri(data.Int("10"), data.Str(100), data.Float(1000), data.Bool("True"))
+    d = serde.to_dict(p)
+    assert d["i"]["i"] == 10
+    assert d["s"]["s"] == "100"
+    assert d["f"]["f"] == 1000.0
+    assert d["b"]["b"]
+
+    d = {"i": "10", "s": 100, "f": 1000, "b": "True"}
+    p = serde.from_dict(data.Pri, d)

@@ -58,10 +58,10 @@ from .core import (
     Field,
     NoCheck,
     SerdeScope,
-    Strict,
     Tagging,
     TypeCheck,
     add_func,
+    coerce,
     ensure,
     fields,
     is_dict_instance,
@@ -232,6 +232,9 @@ def deserialize(
         g['from_obj'] = from_obj
         g['get_generic_arg'] = get_generic_arg
         g['is_instance'] = is_instance
+        g['TypeCheck'] = TypeCheck
+        g['Coerce'] = Coerce
+        g['coerce'] = coerce
         if deserialize:
             g['serde_custom_class_deserializer'] = functools.partial(
                 serde_custom_class_deserializer, custom=deserializer
@@ -341,7 +344,9 @@ def from_obj(c: Type, o: Any, named: bool, reuse_instances: bool, type_check: Ty
         if is_deserializable(c):
             serde_scope: SerdeScope = getattr(c, SERDE_SCOPE)
             func_name = FROM_DICT if named else FROM_ITER
-            res = serde_scope.funcs[func_name](c, maybe_generic=maybe_generic, data=o, reuse_instances=reuse_instances)
+            res = serde_scope.funcs[func_name](
+                c, maybe_generic=maybe_generic, data=o, reuse_instances=reuse_instances, type_check=type_check
+            )
             if strict:
                 serde_scope.funcs[TYPE_CHECK](res)
             return res
@@ -550,6 +555,7 @@ class Renderer:
     cls: Optional[Type] = None
     custom: Optional[DeserializeFunc] = None  # Custom class level deserializer.
     import_numpy: bool = False
+    suppress_coerce: bool = False
 
     def render(self, arg: DeField) -> str:
         """
@@ -654,13 +660,13 @@ class Renderer:
 
         >>> from typing import List
         >>> Renderer('foo').render(DeField(Optional[int], 'o', datavar='data'))
-        '(data["o"]) if data.get("o") is not None else None'
+        '(coerce(int, data["o"], type_check)) if data.get("o") is not None else None'
 
         >>> Renderer('foo').render(DeField(Optional[List[int]], 'o', datavar='data'))
-        '([v for v in data["o"]]) if data.get("o") is not None else None'
+        '([coerce(int, v, type_check) for v in data["o"]]) if data.get("o") is not None else None'
 
         >>> Renderer('foo').render(DeField(Optional[List[int]], 'o', datavar='data'))
-        '([v for v in data["o"]]) if data.get("o") is not None else None'
+        '([coerce(int, v, type_check) for v in data["o"]]) if data.get("o") is not None else None'
 
         >>> @deserialize
         ... class Foo:
@@ -685,10 +691,10 @@ if data.get("f") is not None else None'
 
         >>> from typing import List
         >>> Renderer('foo').render(DeField(List[int], 'l', datavar='data'))
-        '[v for v in data["l"]]'
+        '[coerce(int, v, type_check) for v in data["l"]]'
 
         >>> Renderer('foo').render(DeField(List[List[int]], 'l', datavar='data'))
-        '[[v for v in v] for v in data["l"]]'
+        '[[coerce(int, v, type_check) for v in v] for v in data["l"]]'
         """
         if is_bare_list(arg.type):
             return f'list({arg.data})'
@@ -701,10 +707,10 @@ if data.get("f") is not None else None'
 
         >>> from typing import Set
         >>> Renderer('foo').render(DeField(Set[int], 'l', datavar='data'))
-        'set(v for v in data["l"])'
+        'set(coerce(int, v, type_check) for v in data["l"])'
 
         >>> Renderer('foo').render(DeField(Set[Set[int]], 'l', datavar='data'))
-        'set(set(v for v in v) for v in data["l"])'
+        'set(set(coerce(int, v, type_check) for v in v) for v in data["l"])'
         """
         if is_bare_set(arg.type):
             return f'set({arg.data})'
@@ -719,13 +725,15 @@ if data.get("f") is not None else None'
         >>> @deserialize
         ... class Foo: pass
         >>> Renderer('foo').render(DeField(Tuple[str, int, List[int], Foo], 'd', datavar='data'))
-        '(data["d"][0], data["d"][1], [v for v in data["d"][2]], \
+        '(coerce(str, data["d"][0], type_check), coerce(int, data["d"][1], type_check), \
+[coerce(int, v, type_check) for v in data["d"][2]], \
 Foo.__serde__.funcs[\\'foo\\'](data=data["d"][3], reuse_instances=reuse_instances),)'
 
         >>> field = DeField(Tuple[str, int, List[int], Foo], 'd', datavar='data', index=0, iterbased=True)
         >>> Renderer('foo').render(field)
-        "(data[0][0], data[0][1], [v for v in data[0][2]], \
-Foo.__serde__.funcs['foo'](data=data[0][3], reuse_instances=reuse_instances),)"
+        "(coerce(str, data[0][0], type_check), coerce(int, data[0][1], type_check), \
+[coerce(int, v, type_check) for v in data[0][2]], Foo.__serde__.funcs['foo'](data=data[0][3], \
+reuse_instances=reuse_instances),)"
         """
         if is_bare_tuple(arg.type):
             return f'tuple({arg.data})'
@@ -742,7 +750,7 @@ Foo.__serde__.funcs['foo'](data=data[0][3], reuse_instances=reuse_instances),)"
 
         >>> from typing import List
         >>> Renderer('foo').render(DeField(Dict[str, int], 'd', datavar='data'))
-        '{k: v for k, v in data["d"].items()}'
+        '{coerce(str, k, type_check): coerce(int, v, type_check) for k, v in data["d"].items()}'
 
         >>> @deserialize
         ... class Foo: pass
@@ -760,20 +768,25 @@ Foo.__serde__.funcs['foo'](data=data[0][3], reuse_instances=reuse_instances),)"
     def enum(self, arg: DeField) -> str:
         return f'{typename(arg.type)}({self.primitive(arg)})'
 
-    def primitive(self, arg: DeField) -> str:
+    def primitive(self, arg: DeField, suppress_coerce: bool = False) -> str:
         """
         Render rvalue for primitives.
 
         >>> Renderer('foo').render(DeField(int, 'i', datavar='data'))
-        'data["i"]'
+        'coerce(int, data["i"], type_check)'
 
         >>> Renderer('foo').render(DeField(int, 'int_field', datavar='data', case='camelcase'))
-        'data["intField"]'
+        'coerce(int, data["intField"], type_check)'
 
         >>> Renderer('foo').render(DeField(int, 'i', datavar='data', index=1, iterbased=True))
-        'data[1]'
+        'coerce(int, data[1], type_check)'
         """
-        return arg.data
+        typ = typename(arg.type)
+        dat = arg.data
+        if self.suppress_coerce:
+            return dat
+        else:
+            return f'coerce({typ}, {dat}, type_check)'
 
     def c_tor(self, arg: DeField) -> str:
         return f"{typename(arg.type)}({arg.data})"
@@ -816,7 +829,8 @@ def to_iter_arg(f: DeField, *args, **kwargs) -> DeField:
 
 def render_from_iter(cls: Type, custom: Optional[DeserializeFunc] = None) -> str:
     template = """
-def {{func}}(cls=cls, maybe_generic=None, data=None, reuse_instances = {{serde_scope.reuse_instances_default}}):
+def {{func}}(cls=cls, maybe_generic=None, data=None, reuse_instances = {{serde_scope.reuse_instances_default}},
+             type_check: TypeCheck=Coerce):
   if reuse_instances is Ellipsis:
     reuse_instances = {{serde_scope.reuse_instances_default}}
 
@@ -851,7 +865,9 @@ def {{func}}(cls=cls, maybe_generic=None, data=None, reuse_instances = {{serde_s
 
 def render_from_dict(cls: Type, rename_all: Optional[str] = None, custom: Optional[DeserializeFunc] = None) -> str:
     template = """
-def {{func}}(cls=cls, maybe_generic=None, data=None, reuse_instances = {{serde_scope.reuse_instances_default}}):
+def {{func}}(cls=cls, maybe_generic=None, data=None,
+             reuse_instances = {{serde_scope.reuse_instances_default}},
+             type_check: TypeCheck = Coerce):
   if reuse_instances is Ellipsis:
     reuse_instances = {{serde_scope.reuse_instances_default}}
 
@@ -888,7 +904,8 @@ def {{func}}(cls=cls, maybe_generic=None, data=None, reuse_instances = {{serde_s
 
 def render_union_func(cls: Type, union_args: List[Type], tagging: Tagging = DefaultTagging) -> str:
     template = """
-def {{func}}(cls=cls, maybe_generic=None, data=None, reuse_instances = {{serde_scope.reuse_instances_default}}):
+def {{func}}(cls=cls, maybe_generic=None, data=None, reuse_instances = {{serde_scope.reuse_instances_default}},
+             type_check: TypeCheck=Coerce):
   errors = []
   {% for t in union_args %}
   try:
@@ -925,7 +942,7 @@ def {{func}}(cls=cls, maybe_generic=None, data=None, reuse_instances = {{serde_s
     """
     union_name = f"Union[{', '.join([typename(a) for a in union_args])}]"
 
-    renderer = Renderer(FROM_DICT, cls=cls)
+    renderer = Renderer(FROM_DICT, cls=cls, suppress_coerce=True)
     env = jinja2.Environment(loader=jinja2.DictLoader({'dict': template}))
     env.filters.update(
         {'arg': lambda x: DeField(x, datavar="fake_dict", name="fake_key")}

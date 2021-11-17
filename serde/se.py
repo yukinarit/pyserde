@@ -54,10 +54,10 @@ from .core import (
     DefaultTagging,
     Field,
     SerdeScope,
-    Strict,
     Tagging,
     TypeCheck,
     add_func,
+    coerce,
     conv,
     fields,
     is_dict_instance,
@@ -236,6 +236,9 @@ def serialize(
         g["to_obj"] = to_obj
         g["typing"] = typing
         g["Literal"] = Literal
+        g["TypeCheck"] = TypeCheck
+        g["Coerce"] = Coerce
+        g["coerce"] = coerce
         if serialize:
             g["serde_custom_class_serializer"] = functools.partial(serde_custom_class_serializer, custom=serializer)
 
@@ -308,7 +311,9 @@ def to_obj(o, named: bool, reuse_instances: bool, convert_sets: bool, c: Type = 
             func_name = TO_DICT if named else TO_ITER
             if strict:
                 serde_scope.funcs[TYPE_CHECK](o)
-            return serde_scope.funcs[func_name](o, reuse_instances=reuse_instances, convert_sets=convert_sets)
+            return serde_scope.funcs[func_name](
+                o, reuse_instances=reuse_instances, convert_sets=convert_sets, type_check=type_check
+            )
         elif is_dataclass(o):
             if strict:
                 serde_scope.funcs[TYPE_CHECK](o)
@@ -446,7 +451,8 @@ def sefields(cls: Type) -> Iterator[SeField]:
 def render_to_tuple(cls: Type, custom: Optional[SerializeFunc] = None) -> str:
     template = """
 def {{func}}(obj, reuse_instances = {{serde_scope.reuse_instances_default}},
-             convert_sets = {{serde_scope.convert_sets_default}}):
+             convert_sets = {{serde_scope.convert_sets_default}},
+             type_check: TypeCheck=Coerce):
   if reuse_instances is Ellipsis:
     reuse_instances = {{serde_scope.reuse_instances_default}}
   if convert_sets is Ellipsis:
@@ -473,7 +479,8 @@ def {{func}}(obj, reuse_instances = {{serde_scope.reuse_instances_default}},
 def render_to_dict(cls: Type, case: Optional[str] = None, custom: Optional[SerializeFunc] = None) -> str:
     template = """
 def {{func}}(obj, reuse_instances = {{serde_scope.reuse_instances_default}},
-             convert_sets = {{serde_scope.convert_sets_default}}):
+             convert_sets = {{serde_scope.convert_sets_default}},
+             type_check: TypeCheck = Coerce):
   if reuse_instances is Ellipsis:
     reuse_instances = {{serde_scope.reuse_instances_default}}
   if convert_sets is Ellipsis:
@@ -510,7 +517,7 @@ def render_union_func(cls: Type, union_args: List[Type], tagging: Tagging = Defa
     Render function that serializes a field with union type.
     """
     template = """
-def {{func}}(obj, reuse_instances, convert_sets):
+def {{func}}(obj, reuse_instances, convert_sets, type_check: TypeCheck=Coerce):
   union_args = serde_scope.union_se_args['{{func}}']
 
   {% for t in union_args %}
@@ -536,7 +543,7 @@ def {{func}}(obj, reuse_instances, convert_sets):
     """
     union_name = f"Union[{', '.join([typename(a) for a in union_args])}]"
 
-    renderer = Renderer(TO_DICT)
+    renderer = Renderer(TO_DICT, suppress_coerce=True)
     env = jinja2.Environment(loader=jinja2.DictLoader({"dict": template}))
     env.filters.update({"arg": lambda x: SeField(x, "obj")})
     env.filters.update({"rvalue": renderer.render})
@@ -586,6 +593,7 @@ class Renderer:
 
     func: str
     custom: Optional[SerializeFunc] = None  # Custom class level serializer.
+    suppress_coerce: bool = False
 
     def render(self, arg: SeField) -> str:
         """
@@ -593,10 +601,10 @@ class Renderer:
 
         >>> from typing import Tuple
         >>> Renderer(TO_ITER).render(SeField(int, 'i'))
-        'i'
+        'coerce(int, i, type_check)'
 
         >>> Renderer(TO_ITER).render(SeField(List[int], 'l'))
-        '[v for v in l]'
+        '[coerce(int, v, type_check) for v in l]'
 
         >>> @serialize
         ... @dataclass(unsafe_hash=True)
@@ -609,7 +617,7 @@ class Renderer:
         "[v.__serde__.funcs['to_iter'](v, reuse_instances=reuse_instances, convert_sets=convert_sets) for v in foo]"
 
         >>> Renderer(TO_ITER).render(SeField(Dict[str, Foo], 'foo'))
-        "{k: v.__serde__.funcs['to_iter'](v, reuse_instances=reuse_instances, \
+        "{coerce(str, k, type_check): v.__serde__.funcs['to_iter'](v, reuse_instances=reuse_instances, \
 convert_sets=convert_sets) for k, v in foo.items()}"
 
         >>> Renderer(TO_ITER).render(SeField(Dict[Foo, Foo], 'foo'))
@@ -618,8 +626,8 @@ convert_sets=convert_sets): v.__serde__.funcs['to_iter'](v, reuse_instances=reus
 convert_sets=convert_sets) for k, v in foo.items()}"
 
         >>> Renderer(TO_ITER).render(SeField(Tuple[str, Foo, int], 'foo'))
-        "(foo[0], foo[1].__serde__.funcs['to_iter'](foo[1], reuse_instances=reuse_instances, \
-convert_sets=convert_sets), foo[2],)"
+        "(coerce(str, foo[0], type_check), foo[1].__serde__.funcs['to_iter'](foo[1], reuse_instances=reuse_instances, \
+convert_sets=convert_sets), coerce(int, foo[2], type_check),)"
         """
         if arg.serializer and arg.serializer.inner is not default_serializer:
             res = self.custom_field_serializer(arg)
@@ -762,7 +770,12 @@ convert_sets=convert_sets), foo[2],)"
         """
         Render rvalue for primitives.
         """
-        return f"{arg.varname}"
+        typ = typename(arg.type)
+        var = arg.varname
+        if self.suppress_coerce:
+            return var
+        else:
+            return f'coerce({typ}, {var}, type_check)'
 
     def string(self, arg: SeField) -> str:
         return f"str({arg.varname})"
