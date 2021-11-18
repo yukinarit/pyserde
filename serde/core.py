@@ -10,7 +10,7 @@ import pathlib
 import re
 import uuid
 from dataclasses import dataclass, field
-from typing import Any, Callable, Dict, Iterator, List, Optional, Type, Union
+from typing import Any, Callable, Dict, Iterator, List, Mapping, Optional, Type, Union
 
 import stringcase
 
@@ -352,6 +352,11 @@ class Field:
     name: Optional[str]
     default: Any = field(default_factory=dataclasses._MISSING_TYPE)
     default_factory: Any = field(default_factory=dataclasses._MISSING_TYPE)
+    init: Any = field(default_factory=dataclasses._MISSING_TYPE)
+    repr: Any = field(default_factory=dataclasses._MISSING_TYPE)
+    hash: Any = field(default_factory=dataclasses._MISSING_TYPE)
+    compare: Any = field(default_factory=dataclasses._MISSING_TYPE)
+    metadata: Mapping[str, Any] = field(default_factory=dict)
     case: Optional[str] = None
     rename: Optional[str] = None
     skip: Optional[bool] = None
@@ -395,6 +400,11 @@ class Field:
             f.name,
             default=f.default,
             default_factory=f.default_factory,  # type: ignore
+            init=f.init,
+            repr=f.repr,
+            hash=f.hash,
+            compare=f.compare,
+            metadata=f.metadata,
             rename=f.metadata.get('serde_rename'),
             skip=f.metadata.get('serde_skip'),
             skip_if=skip_if or skip_if_false_func,
