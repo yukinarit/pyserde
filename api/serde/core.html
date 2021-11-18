@@ -181,7 +181,7 @@
 <span class="kn">import</span> <span class="nn">re</span>
 <span class="kn">import</span> <span class="nn">uuid</span>
 <span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">dataclass</span><span class="p">,</span> <span class="n">field</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Iterator</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Type</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Iterator</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Type</span><span class="p">,</span> <span class="n">Union</span>
 
 <span class="kn">import</span> <span class="nn">stringcase</span>
 
@@ -523,6 +523,11 @@
     <span class="n">name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
     <span class="n">default</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="n">dataclasses</span><span class="o">.</span><span class="n">_MISSING_TYPE</span><span class="p">)</span>
     <span class="n">default_factory</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="n">dataclasses</span><span class="o">.</span><span class="n">_MISSING_TYPE</span><span class="p">)</span>
+    <span class="n">init</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="n">dataclasses</span><span class="o">.</span><span class="n">_MISSING_TYPE</span><span class="p">)</span>
+    <span class="nb">repr</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="n">dataclasses</span><span class="o">.</span><span class="n">_MISSING_TYPE</span><span class="p">)</span>
+    <span class="nb">hash</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="n">dataclasses</span><span class="o">.</span><span class="n">_MISSING_TYPE</span><span class="p">)</span>
+    <span class="n">compare</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="n">dataclasses</span><span class="o">.</span><span class="n">_MISSING_TYPE</span><span class="p">)</span>
+    <span class="n">metadata</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span>
     <span class="n">case</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">rename</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">skip</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
@@ -566,6 +571,11 @@
             <span class="n">f</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
             <span class="n">default</span><span class="o">=</span><span class="n">f</span><span class="o">.</span><span class="n">default</span><span class="p">,</span>
             <span class="n">default_factory</span><span class="o">=</span><span class="n">f</span><span class="o">.</span><span class="n">default_factory</span><span class="p">,</span>  <span class="c1"># type: ignore</span>
+            <span class="n">init</span><span class="o">=</span><span class="n">f</span><span class="o">.</span><span class="n">init</span><span class="p">,</span>
+            <span class="nb">repr</span><span class="o">=</span><span class="n">f</span><span class="o">.</span><span class="n">repr</span><span class="p">,</span>
+            <span class="nb">hash</span><span class="o">=</span><span class="n">f</span><span class="o">.</span><span class="n">hash</span><span class="p">,</span>
+            <span class="n">compare</span><span class="o">=</span><span class="n">f</span><span class="o">.</span><span class="n">compare</span><span class="p">,</span>
+            <span class="n">metadata</span><span class="o">=</span><span class="n">f</span><span class="o">.</span><span class="n">metadata</span><span class="p">,</span>
             <span class="n">rename</span><span class="o">=</span><span class="n">f</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;serde_rename&#39;</span><span class="p">),</span>
             <span class="n">skip</span><span class="o">=</span><span class="n">f</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;serde_skip&#39;</span><span class="p">),</span>
             <span class="n">skip_if</span><span class="o">=</span><span class="n">skip_if</span> <span class="ow">or</span> <span class="n">skip_if_false_func</span><span class="p">,</span>
@@ -1091,6 +1101,11 @@ multiple fields receives <code>skip_if</code> attribute.</p>
     <span class="n">name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
     <span class="n">default</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="n">dataclasses</span><span class="o">.</span><span class="n">_MISSING_TYPE</span><span class="p">)</span>
     <span class="n">default_factory</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="n">dataclasses</span><span class="o">.</span><span class="n">_MISSING_TYPE</span><span class="p">)</span>
+    <span class="n">init</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="n">dataclasses</span><span class="o">.</span><span class="n">_MISSING_TYPE</span><span class="p">)</span>
+    <span class="nb">repr</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="n">dataclasses</span><span class="o">.</span><span class="n">_MISSING_TYPE</span><span class="p">)</span>
+    <span class="nb">hash</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="n">dataclasses</span><span class="o">.</span><span class="n">_MISSING_TYPE</span><span class="p">)</span>
+    <span class="n">compare</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="n">dataclasses</span><span class="o">.</span><span class="n">_MISSING_TYPE</span><span class="p">)</span>
+    <span class="n">metadata</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span>
     <span class="n">case</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">rename</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">skip</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
@@ -1134,6 +1149,11 @@ multiple fields receives <code>skip_if</code> attribute.</p>
             <span class="n">f</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
             <span class="n">default</span><span class="o">=</span><span class="n">f</span><span class="o">.</span><span class="n">default</span><span class="p">,</span>
             <span class="n">default_factory</span><span class="o">=</span><span class="n">f</span><span class="o">.</span><span class="n">default_factory</span><span class="p">,</span>  <span class="c1"># type: ignore</span>
+            <span class="n">init</span><span class="o">=</span><span class="n">f</span><span class="o">.</span><span class="n">init</span><span class="p">,</span>
+            <span class="nb">repr</span><span class="o">=</span><span class="n">f</span><span class="o">.</span><span class="n">repr</span><span class="p">,</span>
+            <span class="nb">hash</span><span class="o">=</span><span class="n">f</span><span class="o">.</span><span class="n">hash</span><span class="p">,</span>
+            <span class="n">compare</span><span class="o">=</span><span class="n">f</span><span class="o">.</span><span class="n">compare</span><span class="p">,</span>
+            <span class="n">metadata</span><span class="o">=</span><span class="n">f</span><span class="o">.</span><span class="n">metadata</span><span class="p">,</span>
             <span class="n">rename</span><span class="o">=</span><span class="n">f</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;serde_rename&#39;</span><span class="p">),</span>
             <span class="n">skip</span><span class="o">=</span><span class="n">f</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;serde_skip&#39;</span><span class="p">),</span>
             <span class="n">skip_if</span><span class="o">=</span><span class="n">skip_if</span> <span class="ow">or</span> <span class="n">skip_if_false_func</span><span class="p">,</span>
@@ -1224,6 +1244,11 @@ deserialization behaviour of a field.</p></li>
     name: Union[str, NoneType],
     default: Any = &lt;factory&gt;,
     default_factory: Any = &lt;factory&gt;,
+    init: Any = &lt;factory&gt;,
+    repr: Any = &lt;factory&gt;,
+    hash: Any = &lt;factory&gt;,
+    compare: Any = &lt;factory&gt;,
+    metadata: Mapping[str, Any] = &lt;factory&gt;,
     case: Union[str, NoneType] = None,
     rename: Union[str, NoneType] = None,
     skip: Union[bool, NoneType] = None,
@@ -1356,6 +1381,11 @@ deserialization behaviour of a field.</p></li>
             <span class="n">f</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
             <span class="n">default</span><span class="o">=</span><span class="n">f</span><span class="o">.</span><span class="n">default</span><span class="p">,</span>
             <span class="n">default_factory</span><span class="o">=</span><span class="n">f</span><span class="o">.</span><span class="n">default_factory</span><span class="p">,</span>  <span class="c1"># type: ignore</span>
+            <span class="n">init</span><span class="o">=</span><span class="n">f</span><span class="o">.</span><span class="n">init</span><span class="p">,</span>
+            <span class="nb">repr</span><span class="o">=</span><span class="n">f</span><span class="o">.</span><span class="n">repr</span><span class="p">,</span>
+            <span class="nb">hash</span><span class="o">=</span><span class="n">f</span><span class="o">.</span><span class="n">hash</span><span class="p">,</span>
+            <span class="n">compare</span><span class="o">=</span><span class="n">f</span><span class="o">.</span><span class="n">compare</span><span class="p">,</span>
+            <span class="n">metadata</span><span class="o">=</span><span class="n">f</span><span class="o">.</span><span class="n">metadata</span><span class="p">,</span>
             <span class="n">rename</span><span class="o">=</span><span class="n">f</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;serde_rename&#39;</span><span class="p">),</span>
             <span class="n">skip</span><span class="o">=</span><span class="n">f</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;serde_skip&#39;</span><span class="p">),</span>
             <span class="n">skip_if</span><span class="o">=</span><span class="n">skip_if</span> <span class="ow">or</span> <span class="n">skip_if_false_func</span><span class="p">,</span>
