@@ -455,3 +455,10 @@ def union_func_name(prefix: str, union_args: List[Type]) -> str:
     'union_se_int_List_str__IPv4Address'
     """
     return re.sub(r"[ ,\[\]]+", "_", f"{prefix}_{'_'.join([typename(e) for e in union_args])}")
+
+
+def filter_scope(scope: Dict[str, Any]) -> Iterator[str]:
+    for k, v in scope.items():
+        if v.__module__ == "typing":
+            continue
+        yield k

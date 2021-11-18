@@ -72,9 +72,17 @@ def typename(typ) -> str:
     'Any'
     """
     if is_opt(typ):
-        return f'Optional[{typename(type_args(typ)[0])}]'
+        args = type_args(typ)
+        if args:
+            return f'Optional[{typename(type_args(typ)[0])}]'
+        else:
+            return 'Optional'
     elif is_union(typ):
-        return f'Union[{", ".join([typename(e) for e in union_args(typ)])}]'
+        args = union_args(typ)
+        if args:
+            return f'Union[{", ".join([typename(e) for e in args])}]'
+        else:
+            return 'Union'
     elif is_list(typ):
         args = type_args(typ)
         if args:
@@ -98,7 +106,11 @@ def typename(typ) -> str:
         else:
             return 'Dict'
     elif is_tuple(typ):
-        return f'Tuple[{", ".join([typename(e) for e in type_args(typ)])}]'
+        args = type_args(typ)
+        if args:
+            return f'Tuple[{", ".join([typename(e) for e in args])}]'
+        else:
+            return 'Tuple'
     elif typ is Any:
         return 'Any'
     else:
@@ -170,9 +182,12 @@ def dataclass_fields(cls: Type) -> Iterator:
     return iter(raw_fields)
 
 
-def iter_types(cls: Type) -> Iterator[Type]:
+def iter_types(cls: Type) -> Iterator[Union[Type, typing.Any]]:
     """
     Iterate field types recursively.
+
+    The correct return type is `Iterator[Union[Type, typing._specialform]],
+    but `typing._specialform` doesn't exist for python 3.6. Use `Any` instead.
     """
     if is_dataclass(cls):
         yield cls
@@ -181,20 +196,30 @@ def iter_types(cls: Type) -> Iterator[Type]:
     elif isinstance(cls, str):
         yield cls
     elif is_opt(cls):
+        yield Optional
         arg = type_args(cls)
         if arg:
             yield from iter_types(arg[0])
     elif is_union(cls):
+        yield Union
         for arg in type_args(cls):
             yield from iter_types(arg)
     elif is_list(cls) or is_set(cls):
+        yield List
+        arg = type_args(cls)
+        if arg:
+            yield from iter_types(arg[0])
+    elif is_set(cls):
+        yield Set
         arg = type_args(cls)
         if arg:
             yield from iter_types(arg[0])
     elif is_tuple(cls):
+        yield Tuple
         for arg in type_args(cls):
             yield from iter_types(arg)
     elif is_dict(cls):
+        yield Dict
         arg = type_args(cls)
         if arg and len(arg) >= 2:
             yield from iter_types(arg[0])
@@ -242,9 +267,32 @@ def is_union(typ) -> bool:
 def is_opt(typ) -> bool:
     """
     Test if the type is `typing.Optional`.
+
+    >>> is_opt(Optional[int])
+    True
+    >>> is_opt(Optional)
+    True
+    >>> is_opt(None.__class__)
+    False
     """
-    args = get_args(typ)
-    return typing_inspect.is_optional_type(typ) and len(args) == 2 and not is_none(args[0]) and is_none(args[1])
+    args = type_args(typ)
+    if args:
+        return typing_inspect.is_optional_type(typ) and len(args) == 2 and not is_none(args[0]) and is_none(args[1])
+    else:
+        return typ is Optional
+
+
+def is_bare_opt(typ) -> bool:
+    """
+    Test if the type is `typing.Optional` without type args.
+    >>> is_bare_opt(Optional[int])
+    False
+    >>> is_bare_opt(Optional)
+    True
+    >>> is_bare_opt(None.__class__)
+    False
+    """
+    return not type_args(typ) and typ is Optional
 
 
 def is_list(typ) -> bool:

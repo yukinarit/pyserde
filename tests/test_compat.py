@@ -13,6 +13,7 @@ from serde.compat import (
     iter_types,
     iter_unions,
     type_args,
+    typename,
     union_args,
 )
 from serde.core import is_instance
@@ -52,12 +53,16 @@ def test_types():
         assert is_dict(dict[str, int])
 
 
+def test_typename():
+    assert typename(Optional) == "Optional"
+
+
 def test_iter_types():
     assert [Pri, int, str, float, bool] == list(iter_types(Pri))
-    assert [str, Pri, int, str, float, bool] == list(iter_types(Dict[str, Pri]))
-    assert [str] == list(iter_types(List[str]))
-    assert [int, str, bool, float] == list(iter_types(Tuple[int, str, bool, float]))
-    assert [PriOpt, int, str, float, bool] == list(iter_types(PriOpt))
+    assert [Dict, str, Pri, int, str, float, bool] == list(iter_types(Dict[str, Pri]))
+    assert [List, str] == list(iter_types(List[str]))
+    assert [Tuple, int, str, bool, float] == list(iter_types(Tuple[int, str, bool, float]))
+    assert [PriOpt, Optional, int, Optional, str, Optional, float, Optional, bool] == list(iter_types(PriOpt))
 
 
 def test_iter_unions():

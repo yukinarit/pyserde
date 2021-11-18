@@ -18,6 +18,7 @@ from .compat import (
     SerdeSkip,
     is_bare_dict,
     is_bare_list,
+    is_bare_opt,
     is_bare_set,
     is_bare_tuple,
     is_dict,
@@ -46,6 +47,7 @@ from .core import (
     add_func,
     conv,
     fields,
+    filter_scope,
     is_instance,
     logger,
     raise_unsupported_type,
@@ -179,14 +181,11 @@ def serialize(
 
         # Collect types used in the generated code.
         for typ in iter_types(cls):
-            if typ is cls:
+            if typ is cls or (is_primitive(typ) and not is_enum(typ)):
                 continue
 
-            if typ is Any:
-                continue
-
-            if is_dataclass(typ) or is_enum(typ) or not is_primitive(typ):
-                scope.types[typ.__name__] = typ
+            scope.types[typename(typ)] = typ
+            g[typename(typ)] = typ
 
         # render all union functions
         for union in iter_unions(cls):
@@ -376,7 +375,7 @@ def {{func}}(obj, reuse_instances = {{serde_scope.reuse_instances_default}},
     return copy.deepcopy(obj)
 
   {# List up all classes used by this class. #}
-  {% for name in serde_scope.types.keys() %}
+  {% for name in serde_scope.types|filter_scope %}
   {{name}} = serde_scope.types['{{name}}']
   {% endfor %}
 
@@ -392,6 +391,7 @@ def {{func}}(obj, reuse_instances = {{serde_scope.reuse_instances_default}},
     renderer = Renderer(TO_ITER, custom)
     env = jinja2.Environment(loader=jinja2.DictLoader({'iter': template}))
     env.filters.update({'rvalue': renderer.render})
+    env.filters.update({'filter_scope': filter_scope})
     return env.get_template('iter').render(func=TO_ITER, serde_scope=getattr(cls, SERDE_SCOPE), fields=sefields(cls))
 
 
@@ -408,7 +408,7 @@ def {{func}}(obj, reuse_instances = {{serde_scope.reuse_instances_default}},
     return copy.deepcopy(obj)
 
   {# List up all classes used by this class. #}
-  {% for name in serde_scope.types.keys() -%}
+  {% for name in serde_scope.types|filter_scope -%}
   {{name}} = serde_scope.types['{{name}}']
   {% endfor -%}
 
@@ -432,13 +432,14 @@ def {{func}}(obj, reuse_instances = {{serde_scope.reuse_instances_default}},
     env.filters.update({'rvalue': renderer.render})
     env.filters.update({'lvalue': lrenderer.render})
     env.filters.update({'case': functools.partial(conv, case=case)})
+    env.filters.update({'filter_scope': filter_scope})
     return env.get_template('dict').render(func=TO_DICT, serde_scope=getattr(cls, SERDE_SCOPE), fields=sefields(cls))
 
 
 def render_union_func(cls: Type, union_args: List[Type]) -> str:
     template = """
 def {{func}}(obj, reuse_instances, convert_sets):
-  {% for name in serde_scope.types.keys() %}
+  {% for name in serde_scope.types|filter_scope %}
   {{name}} = serde_scope.types['{{name}}']
   {% endfor %}
 
@@ -456,6 +457,7 @@ def {{func}}(obj, reuse_instances, convert_sets):
     env = jinja2.Environment(loader=jinja2.DictLoader({'dict': template}))
     env.filters.update({'arg': lambda x: SeField(x, "obj")})
     env.filters.update({'rvalue': renderer.render})
+    env.filters.update({'filter_scope': filter_scope})
     return env.get_template('dict').render(
         func=union_func_name(UNION_SE_PREFIX, union_args),
         serde_scope=getattr(cls, SERDE_SCOPE),
@@ -567,7 +569,7 @@ convert_sets=convert_sets), foo[2],)"
 
         # Custom field serializer overrides custom class serializer.
         if self.custom and not arg.serializer:
-            return f'serde_custom_class_serializer({arg.type.__name__}, {arg.varname}, default=lambda: {res})'
+            return f'serde_custom_class_serializer({typename(arg.type)}, {arg.varname}, default=lambda: {res})'
         else:
             return res
 
@@ -598,9 +600,12 @@ convert_sets=convert_sets), foo[2],)"
         """
         Render rvalue for optional.
         """
-        inner = arg[0]
-        inner.name = arg.varname
-        return f'({self.render(inner)}) if {arg.varname} is not None else None'
+        if is_bare_opt(arg.type):
+            return f'{arg.varname} if {arg.varname} is not None else None'
+        else:
+            inner = arg[0]
+            inner.name = arg.varname
+            return f'({self.render(inner)}) if {arg.varname} is not None else None'
 
     def list(self, arg: SeField) -> str:
         """
