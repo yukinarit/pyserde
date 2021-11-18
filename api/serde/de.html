@@ -113,6 +113,7 @@ associated with deserialization.</p>
     <span class="n">StrSerializableTypes</span><span class="p">,</span>
     <span class="n">add_func</span><span class="p">,</span>
     <span class="n">fields</span><span class="p">,</span>
+    <span class="n">filter_scope</span><span class="p">,</span>
     <span class="n">logger</span><span class="p">,</span>
     <span class="n">raise_unsupported_type</span><span class="p">,</span>
     <span class="n">union_func_name</span><span class="p">,</span>
@@ -236,14 +237,11 @@ associated with deserialization.</p>
 
         <span class="c1"># Collect types used in the generated code.</span>
         <span class="k">for</span> <span class="n">typ</span> <span class="ow">in</span> <span class="n">iter_types</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
-            <span class="k">if</span> <span class="n">typ</span> <span class="ow">is</span> <span class="bp">cls</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">typ</span> <span class="ow">is</span> <span class="bp">cls</span> <span class="ow">or</span> <span class="p">(</span><span class="n">is_primitive</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">is_enum</span><span class="p">(</span><span class="n">typ</span><span class="p">)):</span>
                 <span class="k">continue</span>
 
-            <span class="k">if</span> <span class="n">typ</span> <span class="ow">is</span> <span class="n">Any</span><span class="p">:</span>
-                <span class="k">continue</span>
-
-            <span class="k">if</span> <span class="n">is_dataclass</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span> <span class="ow">or</span> <span class="n">is_enum</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">is_primitive</span><span class="p">(</span><span class="n">typ</span><span class="p">):</span>
-                <span class="n">scope</span><span class="o">.</span><span class="n">types</span><span class="p">[</span><span class="n">typ</span><span class="o">.</span><span class="vm">__name__</span><span class="p">]</span> <span class="o">=</span> <span class="n">typ</span>
+            <span class="n">scope</span><span class="o">.</span><span class="n">types</span><span class="p">[</span><span class="n">typename</span><span class="p">(</span><span class="n">typ</span><span class="p">)]</span> <span class="o">=</span> <span class="n">typ</span>
+            <span class="n">g</span><span class="p">[</span><span class="n">typename</span><span class="p">(</span><span class="n">typ</span><span class="p">)]</span> <span class="o">=</span> <span class="n">typ</span>
 
         <span class="c1"># render all union functions</span>
         <span class="k">for</span> <span class="n">union</span> <span class="ow">in</span> <span class="n">iter_unions</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
@@ -540,7 +538,7 @@ associated with deserialization.</p>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">custom</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">arg</span><span class="o">.</span><span class="n">deserializer</span><span class="p">:</span>
             <span class="c1"># The function takes a closure in order to execute the default value lazily.</span>
             <span class="k">return</span> <span class="p">(</span>
-                <span class="sa">f</span><span class="s1">&#39;serde_custom_class_deserializer(</span><span class="si">{</span><span class="n">arg</span><span class="o">.</span><span class="n">type</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">, </span><span class="si">{</span><span class="n">arg</span><span class="o">.</span><span class="n">datavar</span><span class="si">}</span><span class="s1">, </span><span class="si">{</span><span class="n">arg</span><span class="o">.</span><span class="n">data</span><span class="si">}</span><span class="s1">, &#39;</span>
+                <span class="sa">f</span><span class="s1">&#39;serde_custom_class_deserializer(</span><span class="si">{</span><span class="n">typename</span><span class="p">(</span><span class="n">arg</span><span class="o">.</span><span class="n">type</span><span class="p">)</span><span class="si">}</span><span class="s1">, </span><span class="si">{</span><span class="n">arg</span><span class="o">.</span><span class="n">datavar</span><span class="si">}</span><span class="s1">, </span><span class="si">{</span><span class="n">arg</span><span class="o">.</span><span class="n">data</span><span class="si">}</span><span class="s1">, &#39;</span>
                 <span class="sa">f</span><span class="s1">&#39;default=lambda: </span><span class="si">{</span><span class="n">res</span><span class="si">}</span><span class="s1">)&#39;</span>
             <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
@@ -732,7 +730,7 @@ associated with deserialization.</p>
 <span class="s2">    reuse_instances = {{serde_scope.reuse_instances_default}}</span>
 
 <span class="s2">  {# List up all classes used by this class. -#}</span>
-<span class="s2">  {</span><span class="si">% f</span><span class="s2">or name in serde_scope.types.keys() -%}</span>
+<span class="s2">  {</span><span class="si">% f</span><span class="s2">or name in serde_scope.types|filter_scope -%}</span>
 <span class="s2">  {{name}} = serde_scope.types[&#39;{{name}}&#39;]</span>
 <span class="s2">  {</span><span class="si">% e</span><span class="s2">ndfor -%}</span>
 
@@ -750,6 +748,7 @@ associated with deserialization.</p>
     <span class="n">env</span> <span class="o">=</span> <span class="n">jinja2</span><span class="o">.</span><span class="n">Environment</span><span class="p">(</span><span class="n">loader</span><span class="o">=</span><span class="n">jinja2</span><span class="o">.</span><span class="n">DictLoader</span><span class="p">({</span><span class="s1">&#39;iter&#39;</span><span class="p">:</span> <span class="n">template</span><span class="p">}))</span>
     <span class="n">env</span><span class="o">.</span><span class="n">filters</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;rvalue&#39;</span><span class="p">:</span> <span class="n">renderer</span><span class="o">.</span><span class="n">render</span><span class="p">})</span>
     <span class="n">env</span><span class="o">.</span><span class="n">filters</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;arg&#39;</span><span class="p">:</span> <span class="n">to_iter_arg</span><span class="p">})</span>
+    <span class="n">env</span><span class="o">.</span><span class="n">filters</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;filter_scope&#39;</span><span class="p">:</span> <span class="n">filter_scope</span><span class="p">})</span>
     <span class="k">return</span> <span class="n">env</span><span class="o">.</span><span class="n">get_template</span><span class="p">(</span><span class="s1">&#39;iter&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">func</span><span class="o">=</span><span class="n">FROM_ITER</span><span class="p">,</span> <span class="n">serde_scope</span><span class="o">=</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">SERDE_SCOPE</span><span class="p">),</span> <span class="n">fields</span><span class="o">=</span><span class="n">defields</span><span class="p">(</span><span class="bp">cls</span><span class="p">))</span>
 
 
@@ -760,7 +759,7 @@ associated with deserialization.</p>
 <span class="s2">    reuse_instances = {{serde_scope.reuse_instances_default}}</span>
 
 <span class="s2">  {# List up all classes used by this class. #}</span>
-<span class="s2">  {</span><span class="si">% f</span><span class="s2">or name in serde_scope.types.keys() %}</span>
+<span class="s2">  {</span><span class="si">% f</span><span class="s2">or name in serde_scope.types|filter_scope %}</span>
 <span class="s2">  {{name}} = serde_scope.types[&#39;{{name}}&#39;]</span>
 <span class="s2">  {</span><span class="si">% e</span><span class="s2">ndfor %}</span>
 
@@ -778,13 +777,14 @@ associated with deserialization.</p>
     <span class="n">env</span> <span class="o">=</span> <span class="n">jinja2</span><span class="o">.</span><span class="n">Environment</span><span class="p">(</span><span class="n">loader</span><span class="o">=</span><span class="n">jinja2</span><span class="o">.</span><span class="n">DictLoader</span><span class="p">({</span><span class="s1">&#39;dict&#39;</span><span class="p">:</span> <span class="n">template</span><span class="p">}))</span>
     <span class="n">env</span><span class="o">.</span><span class="n">filters</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;rvalue&#39;</span><span class="p">:</span> <span class="n">renderer</span><span class="o">.</span><span class="n">render</span><span class="p">})</span>
     <span class="n">env</span><span class="o">.</span><span class="n">filters</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;arg&#39;</span><span class="p">:</span> <span class="n">functools</span><span class="o">.</span><span class="n">partial</span><span class="p">(</span><span class="n">to_arg</span><span class="p">,</span> <span class="n">rename_all</span><span class="o">=</span><span class="n">rename_all</span><span class="p">)})</span>
+    <span class="n">env</span><span class="o">.</span><span class="n">filters</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;filter_scope&#39;</span><span class="p">:</span> <span class="n">filter_scope</span><span class="p">})</span>
     <span class="k">return</span> <span class="n">env</span><span class="o">.</span><span class="n">get_template</span><span class="p">(</span><span class="s1">&#39;dict&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">func</span><span class="o">=</span><span class="n">FROM_DICT</span><span class="p">,</span> <span class="n">serde_scope</span><span class="o">=</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">SERDE_SCOPE</span><span class="p">),</span> <span class="n">fields</span><span class="o">=</span><span class="n">defields</span><span class="p">(</span><span class="bp">cls</span><span class="p">))</span>
 
 
 <span class="k">def</span> <span class="nf">render_union_func</span><span class="p">(</span><span class="bp">cls</span><span class="p">:</span> <span class="n">Type</span><span class="p">,</span> <span class="n">union_args</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Type</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
     <span class="n">template</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
 <span class="s2">def {{func}}(data, reuse_instances):</span>
-<span class="s2">  {</span><span class="si">% f</span><span class="s2">or name in serde_scope.types.keys() %}</span>
+<span class="s2">  {</span><span class="si">% f</span><span class="s2">or name in serde_scope.types|filter_scope %}</span>
 <span class="s2">  {{name}} = serde_scope.types[&#39;{{name}}&#39;]</span>
 <span class="s2">  {</span><span class="si">% e</span><span class="s2">ndfor %}</span>
 
@@ -818,6 +818,7 @@ associated with deserialization.</p>
     <span class="n">env</span><span class="o">.</span><span class="n">filters</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;rvalue&#39;</span><span class="p">:</span> <span class="n">renderer</span><span class="o">.</span><span class="n">render</span><span class="p">})</span>
     <span class="n">env</span><span class="o">.</span><span class="n">filters</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;is_primitive&#39;</span><span class="p">:</span> <span class="n">is_primitive</span><span class="p">})</span>
     <span class="n">env</span><span class="o">.</span><span class="n">filters</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;is_none&#39;</span><span class="p">:</span> <span class="n">is_none</span><span class="p">})</span>
+    <span class="n">env</span><span class="o">.</span><span class="n">filters</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;filter_scope&#39;</span><span class="p">:</span> <span class="n">filter_scope</span><span class="p">})</span>
     <span class="k">return</span> <span class="n">env</span><span class="o">.</span><span class="n">get_template</span><span class="p">(</span><span class="s1">&#39;dict&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">render</span><span class="p">(</span>
         <span class="n">func</span><span class="o">=</span><span class="n">union_func_name</span><span class="p">(</span><span class="n">UNION_DE_PREFIX</span><span class="p">,</span> <span class="n">union_args</span><span class="p">),</span>
         <span class="n">serde_scope</span><span class="o">=</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">SERDE_SCOPE</span><span class="p">),</span>
@@ -933,14 +934,11 @@ associated with deserialization.</p>
 
         <span class="c1"># Collect types used in the generated code.</span>
         <span class="k">for</span> <span class="n">typ</span> <span class="ow">in</span> <span class="n">iter_types</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
-            <span class="k">if</span> <span class="n">typ</span> <span class="ow">is</span> <span class="bp">cls</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">typ</span> <span class="ow">is</span> <span class="bp">cls</span> <span class="ow">or</span> <span class="p">(</span><span class="n">is_primitive</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">is_enum</span><span class="p">(</span><span class="n">typ</span><span class="p">)):</span>
                 <span class="k">continue</span>
 
-            <span class="k">if</span> <span class="n">typ</span> <span class="ow">is</span> <span class="n">Any</span><span class="p">:</span>
-                <span class="k">continue</span>
-
-            <span class="k">if</span> <span class="n">is_dataclass</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span> <span class="ow">or</span> <span class="n">is_enum</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">is_primitive</span><span class="p">(</span><span class="n">typ</span><span class="p">):</span>
-                <span class="n">scope</span><span class="o">.</span><span class="n">types</span><span class="p">[</span><span class="n">typ</span><span class="o">.</span><span class="vm">__name__</span><span class="p">]</span> <span class="o">=</span> <span class="n">typ</span>
+            <span class="n">scope</span><span class="o">.</span><span class="n">types</span><span class="p">[</span><span class="n">typename</span><span class="p">(</span><span class="n">typ</span><span class="p">)]</span> <span class="o">=</span> <span class="n">typ</span>
+            <span class="n">g</span><span class="p">[</span><span class="n">typename</span><span class="p">(</span><span class="n">typ</span><span class="p">)]</span> <span class="o">=</span> <span class="n">typ</span>
 
         <span class="c1"># render all union functions</span>
         <span class="k">for</span> <span class="n">union</span> <span class="ow">in</span> <span class="n">iter_unions</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
