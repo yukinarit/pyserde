@@ -75,7 +75,6 @@ associated with serialization.</p>
 <span class="kn">import</span> <span class="nn">dataclasses</span>
 <span class="kn">import</span> <span class="nn">functools</span>
 <span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">dataclass</span><span class="p">,</span> <span class="n">is_dataclass</span>
-<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">date</span><span class="p">,</span> <span class="n">datetime</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Iterator</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Type</span>
 
 <span class="kn">import</span> <span class="nn">jinja2</span>
@@ -163,6 +162,7 @@ associated with serialization.</p>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A dataclass with this decorator is serializable into any of the data formats supported by pyserde.</span>
 
+<span class="sd">    &gt;&gt;&gt; from datetime import datetime</span>
 <span class="sd">    &gt;&gt;&gt; from serde import serialize</span>
 <span class="sd">    &gt;&gt;&gt; from serde.json import to_json</span>
 <span class="sd">    &gt;&gt;&gt;</span>
@@ -787,6 +787,7 @@ associated with serialization.</p>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A dataclass with this decorator is serializable into any of the data formats supported by pyserde.</span>
 
+<span class="sd">    &gt;&gt;&gt; from datetime import datetime</span>
 <span class="sd">    &gt;&gt;&gt; from serde import serialize</span>
 <span class="sd">    &gt;&gt;&gt; from serde.json import to_json</span>
 <span class="sd">    &gt;&gt;&gt;</span>
@@ -908,7 +909,8 @@ associated with serialization.</p>
 
             <div class="docstring"><p>A dataclass with this decorator is serializable into any of the data formats supported by pyserde.</p>
 
-<div class="codehilite"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">serde</span> <span class="kn">import</span> <span class="n">serialize</span>
+<div class="codehilite"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">serde</span> <span class="kn">import</span> <span class="n">serialize</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn"><a href="json.html">serde.json</a></span> <span class="kn">import</span> <span class="n">to_json</span>
 <span class="go">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nd">@serialize</span>

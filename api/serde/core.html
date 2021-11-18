@@ -181,7 +181,7 @@
 <span class="kn">import</span> <span class="nn">re</span>
 <span class="kn">import</span> <span class="nn">uuid</span>
 <span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">dataclass</span><span class="p">,</span> <span class="n">field</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Iterator</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Type</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Iterator</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Type</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">,</span> <span class="n">Union</span>
 
 <span class="kn">import</span> <span class="nn">stringcase</span>
 
@@ -599,11 +599,14 @@
         <span class="k">return</span> <span class="n">conv</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">case</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">case</span><span class="p">)</span>
 
 
-<span class="k">def</span> <span class="nf">fields</span><span class="p">(</span><span class="n">FieldCls</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">Field</span><span class="p">],</span> <span class="bp">cls</span><span class="p">:</span> <span class="n">Type</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="n">Field</span><span class="p">]:</span>
+<span class="n">F</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">&#39;F&#39;</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="n">Field</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">fields</span><span class="p">(</span><span class="n">field_cls</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">F</span><span class="p">],</span> <span class="bp">cls</span><span class="p">:</span> <span class="n">Type</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="n">F</span><span class="p">]:</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Iterate fields of the dataclass and returns `Field`.</span>
+<span class="sd">    Iterate fields of the dataclass and returns `serde.core.Field`.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="nb">iter</span><span class="p">(</span><span class="n">FieldCls</span><span class="o">.</span><span class="n">from_dataclass</span><span class="p">(</span><span class="n">f</span><span class="p">)</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">dataclass_fields</span><span class="p">(</span><span class="bp">cls</span><span class="p">))</span>
+    <span class="k">return</span> <span class="nb">iter</span><span class="p">(</span><span class="n">field_cls</span><span class="o">.</span><span class="n">from_dataclass</span><span class="p">(</span><span class="n">f</span><span class="p">)</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">dataclass_fields</span><span class="p">(</span><span class="bp">cls</span><span class="p">))</span>
 
 
 <span class="k">def</span> <span class="nf">conv</span><span class="p">(</span><span class="n">f</span><span class="p">:</span> <span class="n">Field</span><span class="p">,</span> <span class="n">case</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
@@ -1460,24 +1463,21 @@ are made. Use <code>name</code> property to get a field name before conversion.<
 
         
             <span class="def">def</span>
-            <span class="name">fields</span><span class="signature">(
-    FieldCls: Type[<a href="#Field">serde.core.Field</a>],
-    cls: Type
-) -&gt; Iterator[<a href="#Field">serde.core.Field</a>]</span>:
+            <span class="name">fields</span><span class="signature">(field_cls: Type[~F], cls: Type) -&gt; Iterator[~F]</span>:
     </div>
 
                 <details>
             <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">fields</span><span class="p">(</span><span class="n">FieldCls</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">Field</span><span class="p">],</span> <span class="bp">cls</span><span class="p">:</span> <span class="n">Type</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="n">Field</span><span class="p">]:</span>
+            <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">fields</span><span class="p">(</span><span class="n">field_cls</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">F</span><span class="p">],</span> <span class="bp">cls</span><span class="p">:</span> <span class="n">Type</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="n">F</span><span class="p">]:</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Iterate fields of the dataclass and returns `Field`.</span>
+<span class="sd">    Iterate fields of the dataclass and returns `serde.core.Field`.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="nb">iter</span><span class="p">(</span><span class="n">FieldCls</span><span class="o">.</span><span class="n">from_dataclass</span><span class="p">(</span><span class="n">f</span><span class="p">)</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">dataclass_fields</span><span class="p">(</span><span class="bp">cls</span><span class="p">))</span>
+    <span class="k">return</span> <span class="nb">iter</span><span class="p">(</span><span class="n">field_cls</span><span class="o">.</span><span class="n">from_dataclass</span><span class="p">(</span><span class="n">f</span><span class="p">)</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">dataclass_fields</span><span class="p">(</span><span class="bp">cls</span><span class="p">))</span>
 </pre></div>
 
         </details>
 
-            <div class="docstring"><p>Iterate fields of the dataclass and returns <code><a href="#Field">Field</a></code>.</p>
+            <div class="docstring"><p>Iterate fields of the dataclass and returns <code><a href="#Field">serde.core.Field</a></code>.</p>
 </div>
 
 
