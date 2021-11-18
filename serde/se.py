@@ -8,7 +8,6 @@ import copy
 import dataclasses
 import functools
 from dataclasses import dataclass, is_dataclass
-from datetime import date, datetime
 from typing import Any, Callable, Dict, Iterator, List, Optional, Type
 
 import jinja2
@@ -96,6 +95,7 @@ def serialize(
     """
     A dataclass with this decorator is serializable into any of the data formats supported by pyserde.
 
+    >>> from datetime import datetime
     >>> from serde import serialize
     >>> from serde.json import to_json
     >>>
