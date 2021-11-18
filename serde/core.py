@@ -92,9 +92,6 @@ class SerdeScope:
     defaults: Dict[str, Union[Callable, Any]] = field(default_factory=dict)
     """ Default values of the dataclass fields (factories & normal values) """
 
-    types: Dict[str, Type] = field(default_factory=dict)
-    """ Type references to all used types within the dataclass """
-
     code: Dict[str, str] = field(default_factory=dict)
     """ Generated source code (only filled when debug is True) """
 
@@ -134,14 +131,6 @@ class SerdeScope:
             res.append(self._justify('Default values for the dataclass fields'))
             res.append('--------------------------------------------------')
             for k, v in self.defaults.items():
-                res.append(f'{k}: {v}')
-            res.append('')
-
-        if self.types:
-            res.append('--------------------------------------------------')
-            res.append(self._justify('Type references in scope'))
-            res.append('--------------------------------------------------')
-            for k, v in self.types.items():
                 res.append(f'{k}: {v}')
             res.append('')
 

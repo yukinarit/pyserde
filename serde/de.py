@@ -171,8 +171,6 @@ def deserialize(
         for typ in iter_types(cls):
             if typ is cls or (is_primitive(typ) and not is_enum(typ)):
                 continue
-
-            scope.types[typename(typ)] = typ
             g[typename(typ)] = typ
 
         # render all union functions
@@ -661,11 +659,6 @@ def {{func}}(data, reuse_instances = {{serde_scope.reuse_instances_default}}):
   if reuse_instances is Ellipsis:
     reuse_instances = {{serde_scope.reuse_instances_default}}
 
-  {# List up all classes used by this class. -#}
-  {% for name in serde_scope.types|filter_scope -%}
-  {{name}} = serde_scope.types['{{name}}']
-  {% endfor -%}
-
   if data is None:
     return None
 
@@ -690,11 +683,6 @@ def {{func}}(data, reuse_instances = {{serde_scope.reuse_instances_default}}):
   if reuse_instances is Ellipsis:
     reuse_instances = {{serde_scope.reuse_instances_default}}
 
-  {# List up all classes used by this class. #}
-  {% for name in serde_scope.types|filter_scope %}
-  {{name}} = serde_scope.types['{{name}}']
-  {% endfor %}
-
   if data is None:
     return None
 
@@ -716,10 +704,6 @@ def {{func}}(data, reuse_instances = {{serde_scope.reuse_instances_default}}):
 def render_union_func(cls: Type, union_args: List[Type]) -> str:
     template = """
 def {{func}}(data, reuse_instances):
-  {% for name in serde_scope.types|filter_scope %}
-  {{name}} = serde_scope.types['{{name}}']
-  {% endfor %}
-
   # create fake dict so we can reuse the normal render function
   fake_dict = {"fake_key":data}
 
