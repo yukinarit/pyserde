@@ -183,8 +183,6 @@ def serialize(
         for typ in iter_types(cls):
             if typ is cls or (is_primitive(typ) and not is_enum(typ)):
                 continue
-
-            scope.types[typename(typ)] = typ
             g[typename(typ)] = typ
 
         # render all union functions
@@ -374,11 +372,6 @@ def {{func}}(obj, reuse_instances = {{serde_scope.reuse_instances_default}},
   if not is_dataclass(obj):
     return copy.deepcopy(obj)
 
-  {# List up all classes used by this class. #}
-  {% for name in serde_scope.types|filter_scope %}
-  {{name}} = serde_scope.types['{{name}}']
-  {% endfor %}
-
   return (
   {% for f in fields -%}
   {% if not f.skip|default(False) %}
@@ -407,11 +400,6 @@ def {{func}}(obj, reuse_instances = {{serde_scope.reuse_instances_default}},
   if not is_dataclass(obj):
     return copy.deepcopy(obj)
 
-  {# List up all classes used by this class. #}
-  {% for name in serde_scope.types|filter_scope -%}
-  {{name}} = serde_scope.types['{{name}}']
-  {% endfor -%}
-
   res = {}
   {% for f in fields -%}
   {% if not f.skip -%}
@@ -439,10 +427,6 @@ def {{func}}(obj, reuse_instances = {{serde_scope.reuse_instances_default}},
 def render_union_func(cls: Type, union_args: List[Type]) -> str:
     template = """
 def {{func}}(obj, reuse_instances, convert_sets):
-  {% for name in serde_scope.types|filter_scope %}
-  {{name}} = serde_scope.types['{{name}}']
-  {% endfor %}
-
   union_args = serde_scope.union_se_args['{{func}}']
 
   {% for t in union_args %}
