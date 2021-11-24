@@ -250,8 +250,6 @@ associated with serialization.</p>
         <span class="k">for</span> <span class="n">typ</span> <span class="ow">in</span> <span class="n">iter_types</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">typ</span> <span class="ow">is</span> <span class="bp">cls</span> <span class="ow">or</span> <span class="p">(</span><span class="n">is_primitive</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">is_enum</span><span class="p">(</span><span class="n">typ</span><span class="p">)):</span>
                 <span class="k">continue</span>
-
-            <span class="n">scope</span><span class="o">.</span><span class="n">types</span><span class="p">[</span><span class="n">typename</span><span class="p">(</span><span class="n">typ</span><span class="p">)]</span> <span class="o">=</span> <span class="n">typ</span>
             <span class="n">g</span><span class="p">[</span><span class="n">typename</span><span class="p">(</span><span class="n">typ</span><span class="p">)]</span> <span class="o">=</span> <span class="n">typ</span>
 
         <span class="c1"># render all union functions</span>
@@ -441,11 +439,6 @@ associated with serialization.</p>
 <span class="s2">  if not is_dataclass(obj):</span>
 <span class="s2">    return copy.deepcopy(obj)</span>
 
-<span class="s2">  {# List up all classes used by this class. #}</span>
-<span class="s2">  {</span><span class="si">% f</span><span class="s2">or name in serde_scope.types|filter_scope %}</span>
-<span class="s2">  {{name}} = serde_scope.types[&#39;{{name}}&#39;]</span>
-<span class="s2">  {</span><span class="si">% e</span><span class="s2">ndfor %}</span>
-
 <span class="s2">  return (</span>
 <span class="s2">  {</span><span class="si">% f</span><span class="s2">or f in fields -%}</span>
 <span class="s2">  {</span><span class="si">% i</span><span class="s2">f not f.skip|default(False) %}</span>
@@ -474,11 +467,6 @@ associated with serialization.</p>
 <span class="s2">  if not is_dataclass(obj):</span>
 <span class="s2">    return copy.deepcopy(obj)</span>
 
-<span class="s2">  {# List up all classes used by this class. #}</span>
-<span class="s2">  {</span><span class="si">% f</span><span class="s2">or name in serde_scope.types|filter_scope -%}</span>
-<span class="s2">  {{name}} = serde_scope.types[&#39;{{name}}&#39;]</span>
-<span class="s2">  {</span><span class="si">% e</span><span class="s2">ndfor -%}</span>
-
 <span class="s2">  res = </span><span class="si">{}</span><span class="s2"></span>
 <span class="s2">  {</span><span class="si">% f</span><span class="s2">or f in fields -%}</span>
 <span class="s2">  {</span><span class="si">% i</span><span class="s2">f not f.skip -%}</span>
@@ -506,10 +494,6 @@ associated with serialization.</p>
 <span class="k">def</span> <span class="nf">render_union_func</span><span class="p">(</span><span class="bp">cls</span><span class="p">:</span> <span class="n">Type</span><span class="p">,</span> <span class="n">union_args</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Type</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
     <span class="n">template</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
 <span class="s2">def {{func}}(obj, reuse_instances, convert_sets):</span>
-<span class="s2">  {</span><span class="si">% f</span><span class="s2">or name in serde_scope.types|filter_scope %}</span>
-<span class="s2">  {{name}} = serde_scope.types[&#39;{{name}}&#39;]</span>
-<span class="s2">  {</span><span class="si">% e</span><span class="s2">ndfor %}</span>
-
 <span class="s2">  union_args = serde_scope.union_se_args[&#39;{{func}}&#39;]</span>
 
 <span class="s2">  {</span><span class="si">% f</span><span class="s2">or t in union_args %}</span>
@@ -875,8 +859,6 @@ associated with serialization.</p>
         <span class="k">for</span> <span class="n">typ</span> <span class="ow">in</span> <span class="n">iter_types</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">typ</span> <span class="ow">is</span> <span class="bp">cls</span> <span class="ow">or</span> <span class="p">(</span><span class="n">is_primitive</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">is_enum</span><span class="p">(</span><span class="n">typ</span><span class="p">)):</span>
                 <span class="k">continue</span>
-
-            <span class="n">scope</span><span class="o">.</span><span class="n">types</span><span class="p">[</span><span class="n">typename</span><span class="p">(</span><span class="n">typ</span><span class="p">)]</span> <span class="o">=</span> <span class="n">typ</span>
             <span class="n">g</span><span class="p">[</span><span class="n">typename</span><span class="p">(</span><span class="n">typ</span><span class="p">)]</span> <span class="o">=</span> <span class="n">typ</span>
 
         <span class="c1"># render all union functions</span>

@@ -238,8 +238,6 @@ associated with deserialization.</p>
         <span class="k">for</span> <span class="n">typ</span> <span class="ow">in</span> <span class="n">iter_types</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">typ</span> <span class="ow">is</span> <span class="bp">cls</span> <span class="ow">or</span> <span class="p">(</span><span class="n">is_primitive</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">is_enum</span><span class="p">(</span><span class="n">typ</span><span class="p">)):</span>
                 <span class="k">continue</span>
-
-            <span class="n">scope</span><span class="o">.</span><span class="n">types</span><span class="p">[</span><span class="n">typename</span><span class="p">(</span><span class="n">typ</span><span class="p">)]</span> <span class="o">=</span> <span class="n">typ</span>
             <span class="n">g</span><span class="p">[</span><span class="n">typename</span><span class="p">(</span><span class="n">typ</span><span class="p">)]</span> <span class="o">=</span> <span class="n">typ</span>
 
         <span class="c1"># render all union functions</span>
@@ -728,11 +726,6 @@ associated with deserialization.</p>
 <span class="s2">  if reuse_instances is Ellipsis:</span>
 <span class="s2">    reuse_instances = {{serde_scope.reuse_instances_default}}</span>
 
-<span class="s2">  {# List up all classes used by this class. -#}</span>
-<span class="s2">  {</span><span class="si">% f</span><span class="s2">or name in serde_scope.types|filter_scope -%}</span>
-<span class="s2">  {{name}} = serde_scope.types[&#39;{{name}}&#39;]</span>
-<span class="s2">  {</span><span class="si">% e</span><span class="s2">ndfor -%}</span>
-
 <span class="s2">  if data is None:</span>
 <span class="s2">    return None</span>
 
@@ -757,11 +750,6 @@ associated with deserialization.</p>
 <span class="s2">  if reuse_instances is Ellipsis:</span>
 <span class="s2">    reuse_instances = {{serde_scope.reuse_instances_default}}</span>
 
-<span class="s2">  {# List up all classes used by this class. #}</span>
-<span class="s2">  {</span><span class="si">% f</span><span class="s2">or name in serde_scope.types|filter_scope %}</span>
-<span class="s2">  {{name}} = serde_scope.types[&#39;{{name}}&#39;]</span>
-<span class="s2">  {</span><span class="si">% e</span><span class="s2">ndfor %}</span>
-
 <span class="s2">  if data is None:</span>
 <span class="s2">    return None</span>
 
@@ -783,10 +771,6 @@ associated with deserialization.</p>
 <span class="k">def</span> <span class="nf">render_union_func</span><span class="p">(</span><span class="bp">cls</span><span class="p">:</span> <span class="n">Type</span><span class="p">,</span> <span class="n">union_args</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Type</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
     <span class="n">template</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
 <span class="s2">def {{func}}(data, reuse_instances):</span>
-<span class="s2">  {</span><span class="si">% f</span><span class="s2">or name in serde_scope.types|filter_scope %}</span>
-<span class="s2">  {{name}} = serde_scope.types[&#39;{{name}}&#39;]</span>
-<span class="s2">  {</span><span class="si">% e</span><span class="s2">ndfor %}</span>
-
 <span class="s2">  # create fake dict so we can reuse the normal render function</span>
 <span class="s2">  fake_dict = {&quot;fake_key&quot;:data}</span>
 
@@ -936,8 +920,6 @@ associated with deserialization.</p>
         <span class="k">for</span> <span class="n">typ</span> <span class="ow">in</span> <span class="n">iter_types</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">typ</span> <span class="ow">is</span> <span class="bp">cls</span> <span class="ow">or</span> <span class="p">(</span><span class="n">is_primitive</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">is_enum</span><span class="p">(</span><span class="n">typ</span><span class="p">)):</span>
                 <span class="k">continue</span>
-
-            <span class="n">scope</span><span class="o">.</span><span class="n">types</span><span class="p">[</span><span class="n">typename</span><span class="p">(</span><span class="n">typ</span><span class="p">)]</span> <span class="o">=</span> <span class="n">typ</span>
             <span class="n">g</span><span class="p">[</span><span class="n">typename</span><span class="p">(</span><span class="n">typ</span><span class="p">)]</span> <span class="o">=</span> <span class="n">typ</span>
 
         <span class="c1"># render all union functions</span>
