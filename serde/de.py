@@ -146,6 +146,10 @@ def deserialize(
     """
 
     def wrap(cls: Type):
+        # If no `dataclass` found in the class, put it automatically.
+        if not is_dataclass(cls):
+            cls = dataclass(cls)
+
         g: Dict[str, Any] = {}
 
         # Create a scope storage used by serde.

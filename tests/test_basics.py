@@ -98,12 +98,10 @@ def test_simple_with_reuse_instances(se, de, opt, t, T):
 
 
 def test_non_dataclass():
-    with pytest.raises(TypeError):
-
-        @deserialize
-        @serialize
-        class Foo:
-            i: int
+    @deserialize
+    @serialize
+    class Foo:
+        i: int
 
 
 # test_string_forward_reference_works currently only works with global visible classes
