@@ -274,55 +274,59 @@ def from_obj(c: Type, o: Any, named: bool, reuse_instances: bool):
     Deserialize from an object into an instance of the type specified as arg `c`.
     `c` can be either primitive type, `List`, `Tuple`, `Dict` or `deserialize` class.
     """
-    thisfunc = functools.partial(from_obj, named=named, reuse_instances=reuse_instances)
-    if o is None:
-        return None
-    if is_deserializable(c):
-        serde_scope: SerdeScope = getattr(c, SERDE_SCOPE)
-        if named:
-            return serde_scope.funcs[FROM_DICT](o, reuse_instances=reuse_instances)
-        else:
-            return serde_scope.funcs[FROM_ITER](o, reuse_instances=reuse_instances)
-    elif is_opt(c):
+    try:
+        thisfunc = functools.partial(from_obj, named=named, reuse_instances=reuse_instances)
         if o is None:
             return None
-        else:
-            return thisfunc(type_args(c)[0], o)
-    elif is_union(c):
-        v = None
-        for typ in type_args(c):
-            try:
-                v = thisfunc(typ, o)
-                break
-            except (SerdeError, ValueError):
-                pass
-        return v
-    elif is_list(c):
-        if is_bare_list(c):
-            return [e for e in o]
-        else:
-            return [thisfunc(type_args(c)[0], e) for e in o]
-    elif is_set(c):
-        if is_bare_set(c):
-            return set(e for e in o)
-        else:
-            return set(thisfunc(type_args(c)[0], e) for e in o)
-    elif is_tuple(c):
-        if is_bare_tuple(c):
-            return tuple(e for e in o)
-        else:
-            return tuple(thisfunc(type_args(c)[i], e) for i, e in enumerate(o))
-    elif is_dict(c):
-        if is_bare_dict(c):
-            return {k: v for k, v in o.items()}
-        else:
-            return {thisfunc(type_args(c)[0], k): thisfunc(type_args(c)[1], v) for k, v in o.items()}
-    elif c in DateTimeTypes:
-        return c.fromisoformat(o)
-    elif c is Any:
-        return o
+        if is_deserializable(c):
+            serde_scope: SerdeScope = getattr(c, SERDE_SCOPE)
+            if named:
+                return serde_scope.funcs[FROM_DICT](o, reuse_instances=reuse_instances)
+            else:
+                return serde_scope.funcs[FROM_ITER](o, reuse_instances=reuse_instances)
+        elif is_opt(c):
+            if o is None:
+                return None
+            else:
+                return thisfunc(type_args(c)[0], o)
+        elif is_union(c):
+            v = None
+            for typ in type_args(c):
+                try:
+                    v = thisfunc(typ, o)
+                    break
+                except (SerdeError, ValueError):
+                    pass
+            return v
+        elif is_list(c):
+            if is_bare_list(c):
+                return [e for e in o]
+            else:
+                return [thisfunc(type_args(c)[0], e) for e in o]
+        elif is_set(c):
+            if is_bare_set(c):
+                return set(e for e in o)
+            else:
+                return set(thisfunc(type_args(c)[0], e) for e in o)
+        elif is_tuple(c):
+            if is_bare_tuple(c):
+                return tuple(e for e in o)
+            else:
+                return tuple(thisfunc(type_args(c)[i], e) for i, e in enumerate(o))
+        elif is_dict(c):
+            if is_bare_dict(c):
+                return {k: v for k, v in o.items()}
+            else:
+                return {thisfunc(type_args(c)[0], k): thisfunc(type_args(c)[1], v) for k, v in o.items()}
+        elif c in DateTimeTypes:
+            return c.fromisoformat(o)
+        elif c is Any:
+            return o
 
-    return c(o)
+        return c(o)
+
+    except Exception as e:
+        raise SerdeError(e)
 
 
 def from_dict(cls, o, reuse_instances: bool = ...):
