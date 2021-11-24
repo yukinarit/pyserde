@@ -3,16 +3,12 @@
 You can flatten the fields of the nested structure.
 
 ```python
-@deserialize
-@serialize
-@dataclass
+@serde
 class Bar:
     c: float
     d: bool
 
-@deserialize
-@serialize
-@dataclass
+@serde
 class Foo:
     a: int
     b: str

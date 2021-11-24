@@ -1,20 +1,15 @@
-from dataclasses import dataclass
 from typing import Any
 
-from serde import deserialize, serialize
+from serde import serde
 from serde.json import from_json, to_json
 
 
-@deserialize
-@serialize
-@dataclass
+@serde
 class Bar:
     v: float
 
 
-@deserialize
-@serialize
-@dataclass
+@serde
 class Foo:
     a: Any
     b: Any

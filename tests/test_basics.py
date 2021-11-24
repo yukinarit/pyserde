@@ -2,13 +2,11 @@ import dataclasses
 import enum
 import logging
 import uuid
-from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Tuple
 
 import pytest
 
 import serde
-from serde import SerdeError, deserialize, from_dict, from_tuple, serialize, to_dict
 
 from . import data
 from .common import (
@@ -36,9 +34,7 @@ serde.init(True)
 def test_simple(se, de, opt, t, T):
     log.info(f'Running test with se={se.__name__} de={de.__name__} opts={opt}')
 
-    @deserialize(**opt)
-    @serialize(**opt)
-    @dataclass
+    @serde.serde(**opt)
     class C:
         i: int
         t: T
@@ -46,15 +42,11 @@ def test_simple(se, de, opt, t, T):
     c = C(10, t)
     assert c == de(C, se(c))
 
-    @deserialize(**opt)
-    @serialize(**opt)
-    @dataclass
+    @serde.serde(**opt)
     class Nested:
         t: T
 
-    @deserialize(**opt)
-    @serialize(**opt)
-    @dataclass
+    @serde.serde(**opt)
     class C:
         n: Nested
 
@@ -71,9 +63,7 @@ def test_simple(se, de, opt, t, T):
 def test_simple_with_reuse_instances(se, de, opt, t, T):
     log.info(f'Running test with se={se.__name__} de={de.__name__} opts={opt} while reusing instances')
 
-    @deserialize(**opt)
-    @serialize(**opt)
-    @dataclass
+    @serde.serde(**opt)
     class C:
         i: int
         t: T
@@ -81,15 +71,11 @@ def test_simple_with_reuse_instances(se, de, opt, t, T):
     c = C(10, t)
     assert c == de(C, se(c, reuse_instances=True), reuse_instances=True)
 
-    @deserialize(**opt)
-    @serialize(**opt)
-    @dataclass
+    @serde.serde(**opt)
     class Nested:
         t: T
 
-    @deserialize(**opt)
-    @serialize(**opt)
-    @dataclass
+    @serde.serde(**opt)
     class C:
         n: Nested
 
@@ -98,22 +84,27 @@ def test_simple_with_reuse_instances(se, de, opt, t, T):
 
 
 def test_non_dataclass():
-    @deserialize
-    @serialize
+    @serde.serde
     class Foo:
+        i: int
+
+    @serde.serialize
+    class Bar:
+        i: int
+
+    @serde.deserialize
+    class Baz:
         i: int
 
 
 # test_string_forward_reference_works currently only works with global visible classes
 # and can not be mixed with PEP 563 "from __future__ import annotations"
-@dataclass
+@dataclasses.dataclass
 class ForwardReferenceFoo:
     bar: 'ForwardReferenceBar'
 
 
-@serialize
-@deserialize
-@dataclass
+@serde.serde
 class ForwardReferenceBar:
     i: int
 
@@ -122,8 +113,7 @@ class ForwardReferenceBar:
 assert 'ForwardReferenceBar' == dataclasses.fields(ForwardReferenceFoo)[0].type
 
 # setup pyserde for Foo after Bar becomes visible to global scope
-deserialize(ForwardReferenceFoo)
-serialize(ForwardReferenceFoo)
+serde.serde(ForwardReferenceFoo)
 
 # now the type really is of type Bar
 assert ForwardReferenceBar == dataclasses.fields(ForwardReferenceFoo)[0].type
@@ -135,23 +125,19 @@ def test_string_forward_reference_works():
     h = ForwardReferenceFoo(bar=ForwardReferenceBar(i=10))
     h_dict = {"bar": {"i": 10}}
 
-    assert to_dict(h) == h_dict
-    assert from_dict(ForwardReferenceFoo, h_dict) == h
+    assert serde.to_dict(h) == h_dict
+    assert serde.from_dict(ForwardReferenceFoo, h_dict) == h
 
 
 # trying to use string forward reference normally will throw
 def test_unresolved_forward_reference_throws():
-    with pytest.raises(SerdeError) as e:
+    with pytest.raises(serde.SerdeError) as e:
 
-        @serialize
-        @deserialize
-        @dataclass
+        @serde.serde
         class UnresolvedForwardFoo:
             bar: 'UnresolvedForwardBar'
 
-        @serialize
-        @deserialize
-        @dataclass
+        @serde.serde
         class UnresolvedForwardBar:
             i: int
 
@@ -161,9 +147,7 @@ def test_unresolved_forward_reference_throws():
 @pytest.mark.parametrize('opt', opt_case, ids=opt_case_ids())
 @pytest.mark.parametrize('se,de', all_formats)
 def test_list(se, de, opt):
-    @deserialize(**opt)
-    @serialize(**opt)
-    @dataclass
+    @serde.serde(**opt)
     class Variant:
         d: List
 
@@ -186,9 +170,7 @@ def test_dict(se, de, opt):
         p = PriDict({10: 10}, {'foo': 'bar'}, {100.0: 100.0}, {True: False})
         assert p == de(PriDict, se(p))
 
-    @deserialize(**opt)
-    @serialize(**opt)
-    @dataclass
+    @serde.serde(**opt)
     class Variant:
         d: Dict[int, str]
 
@@ -211,9 +193,7 @@ def test_enum(se, de, opt):
     class NestedEnum(enum.Enum):
         V = Inner.V0
 
-    @deserialize(**opt)
-    @serialize(**opt)
-    @dataclass
+    @serde.serde(**opt)
     class Foo:
         a: E
         b: IE
@@ -255,9 +235,7 @@ def test_enum_imported(se, de):
 @pytest.mark.parametrize('opt', opt_case, ids=opt_case_ids())
 @pytest.mark.parametrize('se,de', all_formats)
 def test_tuple(se, de, opt):
-    @deserialize(**opt)
-    @serialize(**opt)
-    @dataclass
+    @serde.serde(**opt)
     class Homogeneous:
         i: Tuple[int, int]
         s: Tuple[str, str]
@@ -271,9 +249,7 @@ def test_tuple(se, de, opt):
     p = Homogeneous([10, 20], ['a', 'b'], [10.0, 20.0], [True, False])
     assert p != de(Homogeneous, se(p))
 
-    @deserialize(**opt)
-    @serialize(**opt)
-    @dataclass
+    @serde.serde(**opt)
     class Variant:
         t: Tuple[int, str, float, bool]
 
@@ -282,18 +258,14 @@ def test_tuple(se, de, opt):
         p = Variant((10, 'a', 10.0, True))
         assert p == de(Variant, se(p))
 
-    @deserialize(**opt)
-    @serialize(**opt)
-    @dataclass
+    @serde.serde(**opt)
     class BareTuple:
         t: Tuple
 
     p = BareTuple((10, 20))
     assert p == de(BareTuple, se(p))
 
-    @deserialize(**opt)
-    @serialize(**opt)
-    @dataclass
+    @serde.serde(**opt)
     class Nested:
         i: Tuple[data.Int, data.Int]
         s: Tuple[data.Str, data.Str]
@@ -313,37 +285,35 @@ def test_tuple(se, de, opt):
 
 @pytest.mark.parametrize('se,de', all_formats)
 def test_single_element_tuples(se, de):
-    @deserialize
-    @serialize
-    @dataclass
+    @serde.serde
     class Foo:
         a: Tuple[int]
         b: Tuple[uuid.UUID]
 
     foo = Foo(a=(1,), b=(uuid.UUID("855f07da-c3cd-46f2-9557-b8dbeb99ff42"),))
-    assert to_dict(foo) == {"a": foo.a, "b": foo.b}
+    assert serde.to_dict(foo) == {"a": foo.a, "b": foo.b}
 
     assert foo == de(Foo, se(foo))
 
 
 @pytest.mark.parametrize('se,de', all_formats)
 def test_dataclass_default_factory(se, de):
-    @deserialize
-    @serialize
-    @dataclass
+    @serde.serde
     class Foo:
         foo: str
-        items: Dict[str, int] = field(default_factory=dict)
+        items: Dict[str, int] = dataclasses.field(default_factory=dict)
 
     f = Foo('bar')
     assert f == de(Foo, se(f))
 
-    assert {'foo': 'bar', 'items': {}} == to_dict(f)
-    assert f == from_dict(Foo, {'foo': 'bar'})
+    assert {'foo': 'bar', 'items': {}} == serde.to_dict(f)
+    assert f == serde.from_dict(Foo, {'foo': 'bar'})
 
 
 @pytest.mark.parametrize('se,de', all_formats)
 def test_default(se, de):
+    from serde import from_dict, from_tuple
+
     from .data import OptDefault, PriDefault
 
     p = PriDefault()
@@ -420,11 +390,9 @@ def test_msgpack_unnamed():
 
 @pytest.mark.parametrize('se,de', all_formats)
 def test_rename(se, de):
-    @deserialize
-    @serialize
-    @dataclass
+    @serde.serde
     class Foo:
-        class_name: str = field(metadata={'serde_rename': 'class'})
+        class_name: str = dataclasses.field(metadata={'serde_rename': 'class'})
 
     f = Foo(class_name='foo')
     assert f == de(Foo, se(f))
@@ -432,9 +400,7 @@ def test_rename(se, de):
 
 @pytest.mark.parametrize('se,de', format_msgpack)
 def test_rename_msgpack(se, de):
-    @deserialize(rename_all='camelcase')
-    @serialize(rename_all='camelcase')
-    @dataclass
+    @serde.serde(rename_all='camelcase')
     class Foo:
         class_name: str
 
@@ -445,9 +411,7 @@ def test_rename_msgpack(se, de):
 
 @pytest.mark.parametrize('se,de', (format_dict + format_json + format_yaml + format_toml))
 def test_rename_formats(se, de):
-    @deserialize(rename_all='camelcase')
-    @serialize(rename_all='camelcase')
-    @dataclass
+    @serde.serde(rename_all='camelcase')
     class Foo:
         class_name: str
 
@@ -457,12 +421,12 @@ def test_rename_formats(se, de):
 
 @pytest.mark.parametrize('se,de', (format_dict + format_json + format_msgpack + format_yaml + format_toml))
 def test_skip_if(se, de):
-    @deserialize
-    @serialize
-    @dataclass
+    @serde.serde
     class Foo:
-        comments: Optional[List[str]] = field(default_factory=list, metadata={'serde_skip_if': lambda v: len(v) == 0})
-        attrs: Optional[Dict[str, str]] = field(
+        comments: Optional[List[str]] = dataclasses.field(
+            default_factory=list, metadata={'serde_skip_if': lambda v: len(v) == 0}
+        )
+        attrs: Optional[Dict[str, str]] = dataclasses.field(
             default_factory=dict, metadata={'serde_skip_if': lambda v: v is None or len(v) == 0}
         )
 
@@ -477,11 +441,9 @@ def test_skip_if(se, de):
 
 @pytest.mark.parametrize('se,de', all_formats)
 def test_skip_if_false(se, de):
-    @deserialize
-    @serialize
-    @dataclass
+    @serde.serde
     class Foo:
-        comments: Optional[List[str]] = field(default_factory=list, metadata={'serde_skip_if_false': True})
+        comments: Optional[List[str]] = dataclasses.field(default_factory=list, metadata={'serde_skip_if_false': True})
 
     f = Foo(['foo'])
     assert f == de(Foo, se(f))
@@ -489,11 +451,9 @@ def test_skip_if_false(se, de):
 
 @pytest.mark.parametrize('se,de', (format_dict + format_json + format_msgpack + format_yaml + format_toml))
 def test_skip_if_overrides_skip_if_false(se, de):
-    @deserialize
-    @serialize
-    @dataclass
+    @serde.serde
     class Foo:
-        comments: Optional[List[str]] = field(
+        comments: Optional[List[str]] = dataclasses.field(
             default_factory=list, metadata={'serde_skip_if_false': True, 'serde_skip_if': lambda v: len(v) == 1}
         )
 
@@ -503,23 +463,35 @@ def test_skip_if_overrides_skip_if_false(se, de):
 
 
 @pytest.mark.parametrize('se,de', format_msgpack)
+def test_inheritance(se, de):
+    @serde.serde
+    class Base:
+        a: int
+        b: str
+
+    @serde.serde
+    class Derived(Base):
+        c: float
+
+    base = Base(10, "foo")
+    assert base == de(Base, se(base))
+
+    derived = Derived(10, "foo", 100.0)
+    assert derived == de(Derived, se(derived))
+
+
+@pytest.mark.parametrize('se,de', format_msgpack)
 def test_ext(se, de):
-    @deserialize
-    @serialize
-    @dataclass
+    @serde.serde
     class Base:
         i: int
         s: str
 
-    @deserialize
-    @serialize
-    @dataclass
+    @serde.serde
     class DerivedA(Base):
         j: int
 
-    @deserialize
-    @serialize
-    @dataclass
+    @serde.serde
     class DerivedB(Base):
         k: float
 
@@ -539,11 +511,11 @@ def test_ext(se, de):
     bb = de(None, se(b, ext_dict=EXT_TYPE_DICT_REVERSED), ext_dict=EXT_TYPE_DICT)
     assert b == bb
 
-    with pytest.raises(SerdeError) as se_ex:
+    with pytest.raises(serde.SerdeError) as se_ex:
         se(a, ext_dict={})
     assert str(se_ex.value) == "Could not find type code for DerivedA in ext_dict"
 
-    with pytest.raises(SerdeError) as de_ex:
+    with pytest.raises(serde.SerdeError) as de_ex:
         de(None, se(a, ext_dict=EXT_TYPE_DICT_REVERSED), ext_dict={})
     assert str(de_ex.value) == "Could not find type for code 0 in ext_dict"
 
@@ -553,38 +525,30 @@ def test_exception_on_not_supported_types():
         def __init__(self):
             pass
 
-    @deserialize
-    @serialize
-    @dataclass
+    @serde.serde
     class Foo:
         b: UnsupportedClass
 
-    with pytest.raises(SerdeError) as se_ex:
-        to_dict(Foo(UnsupportedClass()))
+    with pytest.raises(serde.SerdeError) as se_ex:
+        serde.to_dict(Foo(UnsupportedClass()))
     assert str(se_ex.value).startswith("Unsupported type: UnsupportedClass")
 
-    with pytest.raises(SerdeError) as de_ex:
-        from_dict(Foo, {"b": UnsupportedClass()})
+    with pytest.raises(serde.SerdeError) as de_ex:
+        serde.from_dict(Foo, {"b": UnsupportedClass()})
     assert str(de_ex.value).startswith("Unsupported type: UnsupportedClass")
 
 
 def test_dataclass_inheritance():
-    @deserialize
-    @serialize
-    @dataclass
+    @serde.serde
     class Base:
         i: int
         s: str
 
-    @deserialize
-    @serialize
-    @dataclass
+    @serde.serde
     class DerivedA(Base):
         j: int
 
-    @deserialize
-    @serialize
-    @dataclass
+    @serde.serde
     class DerivedB(Base):
         k: float
 
@@ -594,10 +558,10 @@ def test_dataclass_inheritance():
     assert getattr(DerivedA, serde.core.SERDE_SCOPE) is not getattr(DerivedB, serde.core.SERDE_SCOPE)
 
     base = Base(i=0, s="foo")
-    assert base == from_dict(Base, to_dict(base))
+    assert base == serde.from_dict(Base, serde.to_dict(base))
 
     a = DerivedA(i=0, s="foo", j=42)
-    assert a == from_dict(DerivedA, to_dict(a))
+    assert a == serde.from_dict(DerivedA, serde.to_dict(a))
 
     b = DerivedB(i=0, s="foo", k=42.0)
-    assert b == from_dict(DerivedB, to_dict(b))
+    assert b == serde.from_dict(DerivedB, serde.to_dict(b))

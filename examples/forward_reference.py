@@ -1,27 +1,21 @@
-from dataclasses import dataclass
-
-from serde import deserialize, serialize
+from serde import serde
 from serde.json import from_json, to_json
 
 
-@dataclass
 class Foo:
     i: int
     s: str
     bar: 'Bar'  # Specify type annotation in string.
 
 
-@deserialize
-@serialize
-@dataclass
+@serde
 class Bar:
     f: float
     b: bool
 
 
-# Evaluate pyserde decorators after `Bar` is defined.
-deserialize(Foo)
-serialize(Foo)
+# Evaluate pyserde decorator after `Bar` is defined.
+serde(Foo)
 
 
 def main():

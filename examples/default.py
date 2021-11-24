@@ -1,13 +1,11 @@
-from dataclasses import dataclass, field
+from dataclasses import field
 from typing import Dict
 
-from serde import deserialize, serialize
+from serde import serde
 from serde.json import from_json, to_json
 
 
-@deserialize
-@serialize
-@dataclass
+@serde
 class Foo:
     i: int = 10
     s: str = 'foo'

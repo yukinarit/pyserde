@@ -21,12 +21,9 @@ pip install "pyserde[all]"
 Define your class with pyserde's `@serialize` and `@deserialize` decorators. Be careful that module name is `serde`, not `pyserde`. `pyserde` depends on `dataclasses` module. If you are new to dataclass, I would recommend to read [dataclasses documentation](https://docs.python.org/3/library/dataclasses.html) first.
 
 ```python
-from serde import serialize, deserialize
-from dataclasses import dataclass
+from serde import serde
 
-@deserialize
-@serialize
-@dataclass
+@serde
 class Foo:
     i: int
     s: str
@@ -34,14 +31,15 @@ class Foo:
     b: bool
 ```
 
-pyserde generates methods necessary for serialization by `@serialize` and methods necessary for deserialization by `@deserialize` when a class is loaded into python interpreter. The code generation occurs only once and there is no overhead when you use the generated methods. Now your class is serializable and deserializable in the data formats supported by pyserde.
+pyserde generates methods necessary for (de)serialization by `@serde` when a class is loaded into python interpreter. The code generation occurs only once and there is no overhead when you use the generated methods. Now your class is serializable and deserializable in the data formats supported by pyserde.
 
-> **Note:** If you need only either of serialization or deserialization functionality, you can omit one of those decorators.
+> **Note:** If you need only either serialization or deserialization functionality, you can use `@serialize` or `@deserialize` instead of `@serde` decorator.
 >
-> e.g. If you don't need deserialization, you can add `@serialization` decorator only. But, calling deserialize API e.g. `from_json` for `Foo` will raise an error.
+> e.g. If you don't need deserialization functionality, you can add `@serialize` decorator only. But, calling deserialize API e.g. `from_json` for `Foo` will raise an error.
 > ```python
+> from serde import serialize
+>
 > @serialize
-> @dataclass
 > class Foo:
 >     i: int
 >     s: str

@@ -1,13 +1,11 @@
-from dataclasses import dataclass, field
+from dataclasses import field
 from datetime import datetime
 
-from serde import deserialize, serialize
+from serde import serde
 from serde.json import from_json, to_json
 
 
-@deserialize
-@serialize
-@dataclass
+@serde
 class Foo:
     dt1: datetime
     dt2: datetime = field(

@@ -1,20 +1,18 @@
 """
 Tests for custom serializer/deserializer.
 """
-from dataclasses import dataclass, field
+from dataclasses import field
 from datetime import datetime
 from typing import Optional, Union
 
 import pytest
 
-from serde import SerdeSkip, default_deserializer, default_serializer, deserialize, from_tuple, serialize, to_tuple
+from serde import SerdeSkip, default_deserializer, default_serializer, from_tuple, serde, to_tuple
 from serde.json import from_json, to_json
 
 
 def test_custom_field_serializer():
-    @deserialize
-    @serialize
-    @dataclass
+    @serde
     class Foo:
         dt1: datetime
         dt2: datetime = field(
@@ -44,9 +42,7 @@ def test_raise_error():
     def raise_exception(_):
         raise Exception()
 
-    @deserialize
-    @serialize
-    @dataclass
+    @serde
     class Foo:
         i: int = field(metadata={'serde_serializer': raise_exception, 'serde_deserializer': raise_exception})
 
@@ -59,9 +55,7 @@ def test_raise_error():
 
 
 def test_wrong_signature():
-    @deserialize
-    @serialize
-    @dataclass
+    @serde
     class Foo:
         i: int = field(metadata={'serde_serializer': lambda: '10', 'serde_deserializer': lambda: 10})
 
@@ -86,9 +80,7 @@ def test_custom_class_serializer():
         else:
             raise SerdeSkip()
 
-    @deserialize(deserializer=deserializer)
-    @serialize(serializer=serializer)
-    @dataclass
+    @serde(serializer=serializer, deserializer=deserializer)
     class Foo:
         i: int
         dt1: datetime
@@ -119,9 +111,7 @@ def test_field_serialize_override_class_serializer():
         else:
             raise SerdeSkip()
 
-    @deserialize(deserializer=deserializer)
-    @serialize(serializer=serializer)
-    @dataclass
+    @serde(serializer=serializer, deserializer=deserializer)
     class Foo:
         i: int
         dt1: datetime
@@ -155,9 +145,7 @@ def test_override_by_default_serializer():
         else:
             raise SerdeSkip()
 
-    @deserialize(deserializer=deserializer)
-    @serialize(serializer=serializer)
-    @dataclass
+    @serde(serializer=serializer, deserializer=deserializer)
     class Foo:
         i: int
         dt1: datetime

@@ -3,12 +3,8 @@
 Currently `JSON`, `Yaml`, `Toml` and `MsgPack` are supported.
 
 ```python
-from serde import serialize, deserialize
-from dataclasses import dataclass
 
-@deserialize
-@serialize
-@dataclass
+@serde
 class Foo:
     i: int
     s: str

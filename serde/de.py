@@ -84,6 +84,7 @@ def deserialize(
     rename_all: Optional[str] = None,
     reuse_instances_default: bool = True,
     deserializer: Optional[DeserializeFunc] = None,
+    **kwargs,
 ):
     """
     A dataclass with this decorator is deserializable from any of the data formats supported by pyserde.
@@ -92,7 +93,6 @@ def deserialize(
     >>> from serde.json import from_json
     >>>
     >>> @deserialize
-    ... @dataclass
     ... class Foo:
     ...     i: int
     ...     s: str
@@ -111,7 +111,6 @@ def deserialize(
     The following example converts camel-case field names into snake-case names.
 
     >>> @deserialize(rename_all = 'camelcase')
-    ... @dataclass
     ... class Foo:
     ...     int_field: int
     ...     str_field: str
@@ -134,7 +133,6 @@ def deserialize(
     for a certain field, raise `serde.SerdeSkip` exception, pyserde will use the default deserializer for that field.
 
     >>> @deserialize(deserializer=deserializer)
-    ... @dataclass
     ... class Foo:
     ...     i: int
     ...     dt: datetime
@@ -146,9 +144,9 @@ def deserialize(
     """
 
     def wrap(cls: Type):
-        # If no `dataclass` found in the class, put it automatically.
+        # If no `dataclass` found in the class, dataclassify it automatically.
         if not is_dataclass(cls):
-            cls = dataclass(cls)
+            dataclass(cls)
 
         g: Dict[str, Any] = {}
 
@@ -210,7 +208,6 @@ def is_deserializable(instance_or_class: Any) -> bool:
     Test if an instance or class is deserializable.
 
     >>> @deserialize
-    ... @dataclass
     ... class Foo:
     ...     pass
     >>>
@@ -299,7 +296,6 @@ def from_dict(cls, o, reuse_instances: bool = ...):
     Deserialize dictionary into object.
 
     >>> @deserialize
-    ... @dataclass
     ... class Foo:
     ...     i: int
     ...     s: str = 'foo'
@@ -323,7 +319,6 @@ def from_tuple(cls, o, reuse_instances: bool = ...):
     Deserialize tuple into object.
 
     >>> @deserialize
-    ... @dataclass
     ... class Foo:
     ...     i: int
     ...     s: str = 'foo'
@@ -516,7 +511,6 @@ class Renderer:
         '([v for v in data["o"]]) if data.get("o") is not None else None'
 
         >>> @deserialize
-        ... @dataclass
         ... class Foo:
         ...     o: Optional[List[int]]
         >>> Renderer('foo').render(DeField(Optional[Foo], 'f', datavar='data'))
@@ -571,7 +565,6 @@ if data.get("f") is not None else None'
 
         >>> from typing import List, Tuple
         >>> @deserialize
-        ... @dataclass
         ... class Foo: pass
         >>> Renderer('foo').render(DeField(Tuple[str, int, List[int], Foo], 'd', datavar='data'))
         '(data["d"][0], data["d"][1], [v for v in data["d"][2]], \
@@ -600,7 +593,6 @@ Foo.__serde__.funcs['foo'](data[0][3], reuse_instances=reuse_instances),)"
         '{k: v for k, v in data["d"].items()}'
 
         >>> @deserialize
-        ... @dataclass
         ... class Foo: pass
         >>> Renderer('foo').render(DeField(Dict[Foo, List[Foo]], 'f', datavar='data'))
         '{Foo.__serde__.funcs[\\'foo\\'](k, reuse_instances=reuse_instances): \

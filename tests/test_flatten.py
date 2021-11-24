@@ -2,28 +2,24 @@
 Tests for flatten attribute.
 """
 
-from dataclasses import dataclass, field
+from dataclasses import field
 from typing import Dict, List
 
 import pytest
 
-from serde import deserialize, serialize
+from serde import serde
 from serde.json import from_json, to_json
 
 from .common import all_formats
 
 
 def test_flatten_simple():
-    @deserialize
-    @serialize
-    @dataclass
+    @serde
     class Bar:
         c: float
         d: bool
 
-    @deserialize
-    @serialize
-    @dataclass
+    @serde
     class Foo:
         a: int
         b: str
@@ -37,24 +33,18 @@ def test_flatten_simple():
 
 @pytest.mark.parametrize('se,de', all_formats)
 def test_flatten(se, de):
-    @deserialize
-    @serialize
-    @dataclass
+    @serde
     class Baz:
         e: List[int]
         f: Dict[str, str]
 
-    @deserialize
-    @serialize
-    @dataclass
+    @serde
     class Bar:
         c: float
         d: bool
         baz: Baz = field(metadata={'serde_flatten': True})
 
-    @deserialize
-    @serialize
-    @dataclass
+    @serde
     class Foo:
         a: int
         b: str

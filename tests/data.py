@@ -2,13 +2,12 @@ import enum
 from dataclasses import dataclass
 from typing import Dict, List, Optional, Tuple
 
-from serde import deserialize, serialize
+from serde import serde
 
 from . import imported
 
 
-@deserialize
-@serialize
+@serde
 @dataclass(unsafe_hash=True)
 class Int:
     """
@@ -18,8 +17,7 @@ class Int:
     i: int
 
 
-@deserialize
-@serialize
+@serde
 @dataclass(unsafe_hash=True)
 class Str:
     """
@@ -29,8 +27,7 @@ class Str:
     s: str
 
 
-@deserialize
-@serialize
+@serde
 @dataclass(unsafe_hash=True)
 class Float:
     """
@@ -40,8 +37,7 @@ class Float:
     f: float
 
 
-@deserialize
-@serialize
+@serde
 @dataclass(unsafe_hash=True)
 class Bool:
     """
@@ -51,8 +47,7 @@ class Bool:
     b: bool
 
 
-@deserialize
-@serialize
+@serde
 @dataclass(unsafe_hash=True)
 class Pri:
     """
@@ -65,9 +60,7 @@ class Pri:
     b: bool
 
 
-@deserialize
-@serialize
-@dataclass
+@serde
 class PriOpt:
     """
     Optional Primitives.
@@ -79,9 +72,7 @@ class PriOpt:
     b: Optional[bool]
 
 
-@deserialize
-@serialize
-@dataclass
+@serde
 class PriList:
     """
     List containing primitives.
@@ -93,9 +84,7 @@ class PriList:
     b: List[bool]
 
 
-@deserialize
-@serialize
-@dataclass
+@serde
 class PriDict:
     """
     Dict containing primitives.
@@ -107,9 +96,7 @@ class PriDict:
     b: Dict[bool, bool]
 
 
-@deserialize
-@serialize
-@dataclass
+@serde
 class PriTuple:
     """
     Tuple containing primitives.
@@ -121,8 +108,7 @@ class PriTuple:
     b: Tuple[bool, bool, bool, bool, bool, bool]
 
 
-@deserialize
-@serialize
+@serde
 @dataclass(unsafe_hash=True)
 class NestedInt:
     """
@@ -132,8 +118,7 @@ class NestedInt:
     i: Int
 
 
-@deserialize
-@serialize
+@serde
 @dataclass(unsafe_hash=True)
 class NestedPri:
     """
@@ -146,9 +131,7 @@ class NestedPri:
     b: Bool
 
 
-@deserialize
-@serialize
-@dataclass
+@serde
 class NestedPriOpt:
     """
     Optional Primitives.
@@ -160,9 +143,7 @@ class NestedPriOpt:
     b: Optional[Bool]
 
 
-@deserialize
-@serialize
-@dataclass
+@serde
 class NestedPriList:
     """
     List containing nested primitives.
@@ -174,9 +155,7 @@ class NestedPriList:
     b: List[Bool]
 
 
-@deserialize
-@serialize
-@dataclass
+@serde
 class NestedPriDict:
     """
     Dict containing nested primitives.
@@ -188,9 +167,7 @@ class NestedPriDict:
     b: Dict[Str, Bool]
 
 
-@deserialize
-@serialize
-@dataclass
+@serde
 class NestedPriTuple:
     """
     Tuple containing nested primitives.
@@ -202,8 +179,7 @@ class NestedPriTuple:
     b: Tuple[Bool, Bool, Bool, Bool, Bool, Bool]
 
 
-@deserialize
-@serialize
+@serde
 @dataclass(unsafe_hash=True)
 class PriDefault:
     """
@@ -216,9 +192,7 @@ class PriDefault:
     b: bool = True
 
 
-@deserialize
-@serialize
-@dataclass
+@serde
 class OptDefault:
     """
     Optionals.
@@ -241,9 +215,7 @@ class IE(enum.IntEnum):
     V3 = 100
 
 
-@deserialize
-@serialize
-@dataclass
+@serde
 class EnumInClass:
     """
     Class having enum fields.

@@ -1,4 +1,3 @@
-from dataclasses import dataclass
 from typing import Set
 
 from serde import asdict, astuple, serialize, to_dict, to_tuple
@@ -106,7 +105,6 @@ def test_se_func_iter():
 
 def test_convert_sets_option():
     @serialize
-    @dataclass
     class A:
         v: Set[str]
 

@@ -7,25 +7,22 @@ Usage:
     $ poetry install
     $ poetry run python jsonfile.py
 """
-from dataclasses import dataclass
 from typing import List, Optional
 
 import requests
 
-from serde import deserialize
+from serde import serde
 from serde.json import from_json
 
 
-@deserialize
-@dataclass
+@serde
 class Slide:
     title: str
     type: str
     items: Optional[List[str]]
 
 
-@deserialize
-@dataclass
+@serde
 class Slideshow:
     author: str
     date: str
@@ -33,8 +30,7 @@ class Slideshow:
     title: str
 
 
-@deserialize
-@dataclass
+@serde
 class Data:
     slideshow: Slideshow
 

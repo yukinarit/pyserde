@@ -4,12 +4,9 @@
 
 ```python
 from __future__ import annotations
-from dataclasses import dataclass
-from serde import deserialize, serialize
+from serde import serde
 
-@deserialize
-@serialize
-@dataclass
+@serde
 class Foo:
     i: int
     s: str

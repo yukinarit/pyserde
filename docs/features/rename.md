@@ -3,8 +3,7 @@
 In case you want to use a keyword as field such as `class`, you can use `serde_rename` field attribute.
 
 ```python
-@serialize
-@dataclass
+@serde
 class Foo:
     class_name: str = field(metadata={'serde_rename': 'class'})
 

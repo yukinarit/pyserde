@@ -1,15 +1,12 @@
-from dataclasses import dataclass
 from typing import NewType
 
-from serde import deserialize, serialize
+from serde import serde
 from serde.json import from_json, to_json
 
 UserId = NewType("UserId", int)
 
 
-@deserialize
-@serialize
-@dataclass
+@serde
 class Foo:
     id: UserId
 

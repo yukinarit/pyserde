@@ -7,41 +7,32 @@ Usage:
     $ poetry install
     $ poetry run python tomlfile.py
 """
-from dataclasses import dataclass
 from typing import Dict, List, Optional, Union
 
-from serde import deserialize, serialize
+from serde import serde
 from serde.toml import from_toml
 
 
-@deserialize
-@serialize
-@dataclass
+@serde
 class Source:
     url: str
     verify_ssl: bool
     name: str
 
 
-@deserialize
-@serialize
-@dataclass
+@serde
 class Requires:
     python_version: str
 
 
-@deserialize
-@serialize
-@dataclass
+@serde
 class Package:
     path: Optional[str] = None
     version: Optional[str] = None
     editable: Optional[bool] = False
 
 
-@deserialize
-@serialize
-@dataclass
+@serde
 class Pipfile:
     source: List[Source]
     requires: Optional[Requires]

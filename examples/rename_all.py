@@ -6,16 +6,13 @@ Usage:
     $ poetry install
     $ poetry run python rename_all.py
 """
-from dataclasses import dataclass
 from typing import Optional
 
-from serde import deserialize, serialize
+from serde import serde
 from serde.json import from_json, to_json
 
 
-@deserialize(rename_all='pascalcase')
-@serialize(rename_all='pascalcase')
-@dataclass()
+@serde(rename_all='pascalcase')
 class Foo:
     name: str
     no: Optional[int] = None

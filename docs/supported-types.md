@@ -17,14 +17,11 @@
 
 You can write pretty complex class like this:
 ```python
-@deserialize
-@serialize
-@dataclass
+@serde
 class bar:
     i: int
 
-@deserialize
-@serialize
+@serde
 class Foo:
     i: int
     l: List[str]

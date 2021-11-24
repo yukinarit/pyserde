@@ -1,11 +1,9 @@
 # Introduction
 
-`pyserde` is a simple yet powerful serialization library on top of [dataclasses](https://docs.python.org/3/library/dataclasses.html). Simply adding pyserde's `@serialize` and `@deserialize` decorators make your class (de)serializable.
+`pyserde` is a simple yet powerful serialization library on top of [dataclasses](https://docs.python.org/3/library/dataclasses.html). Simply adding pyserde's `@serde` decorator makes your class (de)serializable.
 
 ```python
-@deserialize
-@serialize
-@dataclass
+@serde
 class Foo:
     i: int
     s: str

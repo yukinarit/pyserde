@@ -6,12 +6,9 @@
 
 Declare a class with pyserde's `@serialize` and `@deserialize` decorators.
 
->>> from dataclasses import dataclass
->>> from serde import serialize, deserialize
+>>> from serde import serde
 >>>
->>> @deserialize
-... @serialize
-... @dataclass
+>>> @serde
 ... class Foo:
 ...     i: int
 ...     s: str
@@ -44,6 +41,7 @@ The following modules provides functionalities for supported data formats.
 * `serde.toml`: Serialize and Deserialize in TOML.
 """
 
+import dataclasses
 import sys
 
 from .compat import SerdeError, SerdeSkip  # noqa
@@ -55,3 +53,16 @@ if sys.version_info[:2] == (3, 6):
     import backports.datetime_fromisoformat
 
     backports.datetime_fromisoformat.MonkeyPatch.patch_fromisoformat()
+
+
+def serde(_cls=None, **kwargs):
+    def wrap(cls):
+        dataclasses.dataclass(cls)
+        serialize(cls, **kwargs)
+        deserialize(cls, **kwargs)
+        return cls
+
+    if _cls is None:
+        return wrap  # type: ignore
+
+    return wrap(_cls)

@@ -1,13 +1,10 @@
-from dataclasses import dataclass
 from typing import Dict, List, Union
 
-from serde import deserialize, serialize
+from serde import serde
 from serde.json import from_json, to_json
 
 
-@deserialize
-@serialize
-@dataclass
+@serde
 class Foo:
     v: Union[int, str]
     c: Union[Dict[str, int], List[int]]

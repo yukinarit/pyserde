@@ -7,23 +7,20 @@ Usage:
     $ poetry install
     $ poetry run python yamlfile.py
 """
-from dataclasses import dataclass
 from typing import Dict, List, Optional, Union
 
-from serde import deserialize
+from serde import serde
 from serde.yaml import from_yaml
 
 
-@deserialize(rename_all='camelcase')
-@dataclass
+@serde(rename_all='camelcase')
 class Info:
     title: str
     description: str
     version: str
 
 
-@deserialize(rename_all='camelcase')
-@dataclass
+@serde(rename_all='camelcase')
 class Parameter:
     name: str
     # not yet supported.
@@ -32,14 +29,12 @@ class Parameter:
     required: bool
 
 
-@deserialize(rename_all='camelcase')
-@dataclass
+@serde(rename_all='camelcase')
 class Response:
     description: str
 
 
-@deserialize(rename_all='camelcase')
-@dataclass
+@serde(rename_all='camelcase')
 class Path:
     description: str
     operation_id: str
@@ -47,22 +42,19 @@ class Path:
     responses: Dict[Union[str, int], Response]
 
 
-@deserialize(rename_all='camelcase')
-@dataclass
+@serde(rename_all='camelcase')
 class Prop:
     type: str
     format: Optional[str]
 
 
-@deserialize(rename_all='camelcase')
-@dataclass
+@serde(rename_all='camelcase')
 class Definition:
     required: Optional[List[str]]
     properties: Dict[str, Prop]
 
 
-@deserialize(rename_all='camelcase')
-@dataclass
+@serde(rename_all='camelcase')
 class Swagger:
     swagger: int
     info: Info
