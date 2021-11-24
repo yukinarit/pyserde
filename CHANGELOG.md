@@ -1,3 +1,17 @@
+## `0.5.3` (2021-11-24)
+
+* feat: Add more dataclass Field's attrs to Field ([7b57c53](https://github.com/yukinarit/pyserde/commit/7b57c53))
+* feat: Support python 3.10 ([2f0c557](https://github.com/yukinarit/pyserde/commit/2f0c557))
+* refactor: Delete unused imports ([629d040](https://github.com/yukinarit/pyserde/commit/629d040))
+* refactor: Remove type references from SerdeScope ([bdd8784](https://github.com/yukinarit/pyserde/commit/bdd8784))
+* refactor: Speficy correct type bound for serde.core.fields ([c3b555c](https://github.com/yukinarit/pyserde/commit/c3b555c))
+* fix: Add types in typing module to scope ([e12e802](https://github.com/yukinarit/pyserde/commit/e12e802))
+* fix: Never use default value for from_tuple ([3ce4f6b](https://github.com/yukinarit/pyserde/commit/3ce4f6b))
+* fix: Use default value only if key isn't present ([3fa4ab6](https://github.com/yukinarit/pyserde/commit/3fa4ab6))
+* Fix typo in README ([5f957d0](https://github.com/yukinarit/pyserde/commit/5f957d0))
+
+This release had contributions from 2 people: [@rnestler](https://github.com/rnestler), [@mauvealerts](https://github.com/mauvealerts). Thank you so much! :tada: :joy:
+
 ## `0.5.2` (2021-10-21)
 
 * feat: (de)serialize non dataclass types correctly ([0ffb9ea](https://github.com/yukinarit/pyserde/commit/0ffb9ea))
