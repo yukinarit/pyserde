@@ -641,14 +641,16 @@
                                 <div class="attr class">
         <a class="headerlink" href="#SerdeScope">#&nbsp;&nbsp</a>
 
-        
+                <div class="decorator">@dataclass</div>
+
         <span class="def">class</span>
         <span class="name">SerdeScope</span>:
     </div>
 
                 <details>
             <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">SerdeScope</span><span class="p">:</span>
+            <div class="codehilite"><pre><span></span><span class="nd">@dataclass</span>
+<span class="k">class</span> <span class="nc">SerdeScope</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Container to store types and functions used in code generation context.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -901,14 +903,16 @@
                                 <div class="attr class">
         <a class="headerlink" href="#Func">#&nbsp;&nbsp</a>
 
-        
+                <div class="decorator">@dataclass</div>
+
         <span class="def">class</span>
         <span class="name">Func</span>:
     </div>
 
                 <details>
             <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Func</span><span class="p">:</span>
+            <div class="codehilite"><pre><span></span><span class="nd">@dataclass</span>
+<span class="k">class</span> <span class="nc">Func</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Function wrapper that provides `mangled` optional field.</span>
 
@@ -995,14 +999,16 @@ multiple fields receives <code>skip_if</code> attribute.</p>
                                 <div class="attr class">
         <a class="headerlink" href="#Field">#&nbsp;&nbsp</a>
 
-        
+                <div class="decorator">@dataclass</div>
+
         <span class="def">class</span>
         <span class="name">Field</span>:
     </div>
 
                 <details>
             <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Field</span><span class="p">:</span>
+            <div class="codehilite"><pre><span></span><span class="nd">@dataclass</span>
+<span class="k">class</span> <span class="nc">Field</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Field class is similar to `dataclasses.Field`. It provides pyserde specific options.</span>
 
@@ -1207,7 +1213,7 @@ deserialization behaviour of a field.</p></li>
         
             <span class="name">Field</span><span class="signature">(
     type: Type,
-    name: Union[str, NoneType],
+    name: Optional[str],
     default: Any = &lt;factory&gt;,
     default_factory: Any = &lt;factory&gt;,
     init: Any = &lt;factory&gt;,
@@ -1215,14 +1221,14 @@ deserialization behaviour of a field.</p></li>
     hash: Any = &lt;factory&gt;,
     compare: Any = &lt;factory&gt;,
     metadata: Mapping[str, Any] = &lt;factory&gt;,
-    case: Union[str, NoneType] = None,
-    rename: Union[str, NoneType] = None,
-    skip: Union[bool, NoneType] = None,
-    skip_if: Union[<a href="#Func">serde.core.Func</a>, NoneType] = None,
-    skip_if_false: Union[bool, NoneType] = None,
-    serializer: Union[<a href="#Func">serde.core.Func</a>, NoneType] = None,
-    deserializer: Union[<a href="#Func">serde.core.Func</a>, NoneType] = None,
-    flatten: Union[<a href="#FlattenOpts">serde.core.FlattenOpts</a>, NoneType] = None
+    case: Optional[str] = None,
+    rename: Optional[str] = None,
+    skip: Optional[bool] = None,
+    skip_if: Optional[<a href="#Func">serde.core.Func</a>] = None,
+    skip_if_false: Optional[bool] = None,
+    serializer: Optional[<a href="#Func">serde.core.Func</a>] = None,
+    deserializer: Optional[<a href="#Func">serde.core.Func</a>] = None,
+    flatten: Optional[<a href="#FlattenOpts">serde.core.FlattenOpts</a>] = None
 )</span>
     </div>
 
@@ -1233,7 +1239,7 @@ deserialization behaviour of a field.</p></li>
                             <div id="Field.case" class="classattr">
                                             <div class="attr variable"><a class="headerlink" href="#Field.case">#&nbsp;&nbsp</a>
 
-        <span class="name">case</span><span class="annotation">: Union[str, NoneType]</span><span class="default_value"> = None</span>
+        <span class="name">case</span><span class="annotation">: Optional[str]</span><span class="default_value"> = None</span>
     </div>
 
     
@@ -1242,7 +1248,7 @@ deserialization behaviour of a field.</p></li>
                             <div id="Field.rename" class="classattr">
                                             <div class="attr variable"><a class="headerlink" href="#Field.rename">#&nbsp;&nbsp</a>
 
-        <span class="name">rename</span><span class="annotation">: Union[str, NoneType]</span><span class="default_value"> = None</span>
+        <span class="name">rename</span><span class="annotation">: Optional[str]</span><span class="default_value"> = None</span>
     </div>
 
     
@@ -1251,7 +1257,7 @@ deserialization behaviour of a field.</p></li>
                             <div id="Field.skip" class="classattr">
                                             <div class="attr variable"><a class="headerlink" href="#Field.skip">#&nbsp;&nbsp</a>
 
-        <span class="name">skip</span><span class="annotation">: Union[bool, NoneType]</span><span class="default_value"> = None</span>
+        <span class="name">skip</span><span class="annotation">: Optional[bool]</span><span class="default_value"> = None</span>
     </div>
 
     
@@ -1260,7 +1266,7 @@ deserialization behaviour of a field.</p></li>
                             <div id="Field.skip_if" class="classattr">
                                             <div class="attr variable"><a class="headerlink" href="#Field.skip_if">#&nbsp;&nbsp</a>
 
-        <span class="name">skip_if</span><span class="annotation">: Union[<a href="#Func">serde.core.Func</a>, NoneType]</span><span class="default_value"> = None</span>
+        <span class="name">skip_if</span><span class="annotation">: Optional[<a href="#Func">serde.core.Func</a>]</span><span class="default_value"> = None</span>
     </div>
 
     
@@ -1269,7 +1275,7 @@ deserialization behaviour of a field.</p></li>
                             <div id="Field.skip_if_false" class="classattr">
                                             <div class="attr variable"><a class="headerlink" href="#Field.skip_if_false">#&nbsp;&nbsp</a>
 
-        <span class="name">skip_if_false</span><span class="annotation">: Union[bool, NoneType]</span><span class="default_value"> = None</span>
+        <span class="name">skip_if_false</span><span class="annotation">: Optional[bool]</span><span class="default_value"> = None</span>
     </div>
 
     
@@ -1278,7 +1284,7 @@ deserialization behaviour of a field.</p></li>
                             <div id="Field.serializer" class="classattr">
                                             <div class="attr variable"><a class="headerlink" href="#Field.serializer">#&nbsp;&nbsp</a>
 
-        <span class="name">serializer</span><span class="annotation">: Union[<a href="#Func">serde.core.Func</a>, NoneType]</span><span class="default_value"> = None</span>
+        <span class="name">serializer</span><span class="annotation">: Optional[<a href="#Func">serde.core.Func</a>]</span><span class="default_value"> = None</span>
     </div>
 
     
@@ -1287,7 +1293,7 @@ deserialization behaviour of a field.</p></li>
                             <div id="Field.deserializer" class="classattr">
                                             <div class="attr variable"><a class="headerlink" href="#Field.deserializer">#&nbsp;&nbsp</a>
 
-        <span class="name">deserializer</span><span class="annotation">: Union[<a href="#Func">serde.core.Func</a>, NoneType]</span><span class="default_value"> = None</span>
+        <span class="name">deserializer</span><span class="annotation">: Optional[<a href="#Func">serde.core.Func</a>]</span><span class="default_value"> = None</span>
     </div>
 
     
@@ -1296,7 +1302,7 @@ deserialization behaviour of a field.</p></li>
                             <div id="Field.flatten" class="classattr">
                                             <div class="attr variable"><a class="headerlink" href="#Field.flatten">#&nbsp;&nbsp</a>
 
-        <span class="name">flatten</span><span class="annotation">: Union[<a href="#FlattenOpts">serde.core.FlattenOpts</a>, NoneType]</span><span class="default_value"> = None</span>
+        <span class="name">flatten</span><span class="annotation">: Optional[<a href="#FlattenOpts">serde.core.FlattenOpts</a>]</span><span class="default_value"> = None</span>
     </div>
 
     
@@ -1399,7 +1405,7 @@ deserialization behaviour of a field.</p></li>
 
         
             <span class="def">def</span>
-            <span class="name">conv_name</span><span class="signature">(self, case: Union[str, NoneType] = None) -&gt; str</span>:
+            <span class="name">conv_name</span><span class="signature">(self, case: Optional[str] = None) -&gt; str</span>:
     </div>
 
                 <details>
@@ -1449,14 +1455,16 @@ are made. Use <code>name</code> property to get a field name before conversion.<
                                 <div class="attr class">
         <a class="headerlink" href="#FlattenOpts">#&nbsp;&nbsp</a>
 
-        
+                <div class="decorator">@dataclass</div>
+
         <span class="def">class</span>
         <span class="name">FlattenOpts</span>:
     </div>
 
                 <details>
             <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">FlattenOpts</span><span class="p">:</span>
+            <div class="codehilite"><pre><span></span><span class="nd">@dataclass</span>
+<span class="k">class</span> <span class="nc">FlattenOpts</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Flatten options. Currently not used.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -1485,7 +1493,7 @@ are made. Use <code>name</code> property to get a field name before conversion.<
 
         
             <span class="def">def</span>
-            <span class="name">conv</span><span class="signature">(f: <a href="#Field">serde.core.Field</a>, case: Union[str, NoneType] = None) -&gt; str</span>:
+            <span class="name">conv</span><span class="signature">(f: <a href="#Field">serde.core.Field</a>, case: Optional[str] = None) -&gt; str</span>:
     </div>
 
                 <details>
