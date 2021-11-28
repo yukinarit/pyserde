@@ -24,7 +24,7 @@ class Info:
 class Parameter:
     name: str
     # not yet supported.
-    # infield: str = field(metadata={'serde_rename': 'in'})
+    # infield: str = field(rename='in')
     type: str
     required: bool
 

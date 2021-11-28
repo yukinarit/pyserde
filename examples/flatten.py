@@ -1,6 +1,4 @@
-from dataclasses import field
-
-from serde import serde
+from serde import field, serde
 from serde.json import from_json, to_json
 
 
@@ -14,7 +12,7 @@ class Bar:
 class Foo:
     a: int
     b: str
-    bar: Bar = field(metadata={'serde_flatten': True})
+    bar: Bar = field(flatten=True)
 
 
 def main():

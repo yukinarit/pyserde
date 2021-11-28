@@ -2,12 +2,11 @@
 Tests for flatten attribute.
 """
 
-from dataclasses import field
 from typing import Dict, List
 
 import pytest
 
-from serde import serde
+from serde import field, serde
 from serde.json import from_json, to_json
 
 from .common import all_formats
@@ -23,7 +22,7 @@ def test_flatten_simple():
     class Foo:
         a: int
         b: str
-        bar: Bar = field(metadata={'serde_flatten': True})
+        bar: Bar = field(flatten=True)
 
     f = Foo(a=10, b='foo', bar=Bar(c=100.0, d=True))
     s = '{"a": 10, "b": "foo", "c": 100.0, "d": true}'
@@ -42,13 +41,13 @@ def test_flatten(se, de):
     class Bar:
         c: float
         d: bool
-        baz: Baz = field(metadata={'serde_flatten': True})
+        baz: Baz = field(flatten=True)
 
     @serde
     class Foo:
         a: int
         b: str
-        bar: Bar = field(metadata={'serde_flatten': True})
+        bar: Bar = field(flatten=True)
 
     f = Foo(a=10, b='foo', bar=Bar(c=100.0, d=True, baz=Baz([1, 2], {"a": 10})))
     assert de(Foo, se(f)) == f

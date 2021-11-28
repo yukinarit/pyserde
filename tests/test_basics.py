@@ -301,7 +301,7 @@ def test_dataclass_default_factory(se, de):
     @serde.serde
     class Foo:
         foo: str
-        items: Dict[str, int] = dataclasses.field(default_factory=dict)
+        items: Dict[str, int] = serde.field(default_factory=dict)
 
     f = Foo('bar')
     assert f == de(Foo, se(f))
@@ -392,7 +392,7 @@ def test_msgpack_unnamed():
 def test_rename(se, de):
     @serde.serde
     class Foo:
-        class_name: str = dataclasses.field(metadata={'serde_rename': 'class'})
+        class_name: str = serde.field(rename='class')
 
     f = Foo(class_name='foo')
     assert f == de(Foo, se(f))
@@ -423,12 +423,8 @@ def test_rename_formats(se, de):
 def test_skip_if(se, de):
     @serde.serde
     class Foo:
-        comments: Optional[List[str]] = dataclasses.field(
-            default_factory=list, metadata={'serde_skip_if': lambda v: len(v) == 0}
-        )
-        attrs: Optional[Dict[str, str]] = dataclasses.field(
-            default_factory=dict, metadata={'serde_skip_if': lambda v: v is None or len(v) == 0}
-        )
+        comments: Optional[List[str]] = serde.field(default_factory=list, skip_if=lambda v: len(v) == 0)
+        attrs: Optional[Dict[str, str]] = serde.field(default_factory=dict, skip_if=lambda v: v is None or len(v) == 0)
 
     f = Foo(['foo'], {"bar": "baz"})
     assert f == de(Foo, se(f))
@@ -443,7 +439,7 @@ def test_skip_if(se, de):
 def test_skip_if_false(se, de):
     @serde.serde
     class Foo:
-        comments: Optional[List[str]] = dataclasses.field(default_factory=list, metadata={'serde_skip_if_false': True})
+        comments: Optional[List[str]] = serde.field(default_factory=list, skip_if_false=True)
 
     f = Foo(['foo'])
     assert f == de(Foo, se(f))
@@ -453,8 +449,8 @@ def test_skip_if_false(se, de):
 def test_skip_if_overrides_skip_if_false(se, de):
     @serde.serde
     class Foo:
-        comments: Optional[List[str]] = dataclasses.field(
-            default_factory=list, metadata={'serde_skip_if_false': True, 'serde_skip_if': lambda v: len(v) == 1}
+        comments: Optional[List[str]] = serde.field(
+            default_factory=list, skip_if_false=True, skip_if=lambda v: len(v) == 1
         )
 
     f = Foo(['foo'])
