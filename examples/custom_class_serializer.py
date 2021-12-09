@@ -1,7 +1,6 @@
-from dataclasses import field
 from datetime import datetime
 
-from serde import SerdeSkip, default_deserializer, default_serializer, serde
+from serde import SerdeSkip, default_deserializer, default_serializer, field, serde
 from serde.json import from_json, to_json
 
 
@@ -34,13 +33,10 @@ class Foo:
     dt1: datetime
     # Override by field serializer/deserializer.
     dt2: datetime = field(
-        metadata={
-            'serde_serializer': lambda x: x.strftime('%y.%m.%d'),
-            'serde_deserializer': lambda x: datetime.strptime(x, '%y.%m.%d'),
-        }
+        serializer=lambda x: x.strftime('%y.%m.%d'), deserializer=lambda x: datetime.strptime(x, '%y.%m.%d')
     )
     # Override by the default serializer/deserializer.
-    dt3: datetime = field(metadata={'serde_serializer': default_serializer, 'serde_deserializer': default_deserializer})
+    dt3: datetime = field(serializer=default_serializer, deserializer=default_deserializer)
 
 
 def main():

@@ -6,17 +6,15 @@ Usage:
     $ poetry install
     $ poetry run python rename.py
 """
-from dataclasses import dataclass, field
 
-from serde import serialize
+from serde import field, serde
 from serde.json import to_json
 
 
-@serialize
-@dataclass
+@serde
 class Foo:
     # Use 'class_name' because 'class' is a keyword.
-    class_name: str = field(metadata={'serde_rename': 'class'})
+    class_name: str = field(rename='class')
 
 
 def main():

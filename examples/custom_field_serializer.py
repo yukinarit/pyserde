@@ -1,7 +1,6 @@
-from dataclasses import field
 from datetime import datetime
 
-from serde import serde
+from serde import field, serde
 from serde.json import from_json, to_json
 
 
@@ -9,10 +8,7 @@ from serde.json import from_json, to_json
 class Foo:
     dt1: datetime
     dt2: datetime = field(
-        metadata={
-            'serde_serializer': lambda x: x.strftime('%d/%m/%y'),
-            'serde_deserializer': lambda x: datetime.strptime(x, '%d/%m/%y'),
-        }
+        serializer=lambda x: x.strftime('%d/%m/%y'), deserializer=lambda x: datetime.strptime(x, '%d/%m/%y')
     )
 
 

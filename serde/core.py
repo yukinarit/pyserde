@@ -9,7 +9,7 @@ import logging
 import pathlib
 import re
 import uuid
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Any, Callable, Dict, Iterator, List, Mapping, Optional, Type, TypeVar, Union
 
 import stringcase
@@ -86,16 +86,16 @@ class SerdeScope:
     cls: Type
     """ The exact class this scope is for (needed to distinguish scopes between inherited classes) """
 
-    funcs: Dict[str, Callable] = field(default_factory=dict)
+    funcs: Dict[str, Callable] = dataclasses.field(default_factory=dict)
     """ Generated serialize and deserialize functions """
 
-    defaults: Dict[str, Union[Callable, Any]] = field(default_factory=dict)
+    defaults: Dict[str, Union[Callable, Any]] = dataclasses.field(default_factory=dict)
     """ Default values of the dataclass fields (factories & normal values) """
 
-    code: Dict[str, str] = field(default_factory=dict)
+    code: Dict[str, str] = dataclasses.field(default_factory=dict)
     """ Generated source code (only filled when debug is True) """
 
-    union_se_args: Dict[str, List[Type]] = field(default_factory=dict)
+    union_se_args: Dict[str, List[Type]] = dataclasses.field(default_factory=dict)
     """ The union serializing functions need references to their types """
 
     reuse_instances_default: bool = True
@@ -273,6 +273,42 @@ class FlattenOpts:
     """
     Flatten options. Currently not used.
     """
+
+
+def field(
+    *args,
+    rename: Optional[str] = None,
+    skip: Optional[bool] = None,
+    skip_if: Optional[Callable] = None,
+    skip_if_false: Optional[Callable] = None,
+    serializer=None,
+    deserializer=None,
+    flatten: Optional[FlattenOpts] = None,
+    metadata=None,
+    **kwargs,
+):
+    """
+    Declare a field with parameters.
+    """
+    if not metadata:
+        metadata = {}
+
+    if rename is not None:
+        metadata["serde_rename"] = rename
+    if skip is not None:
+        metadata["serde_skip"] = skip
+    if skip_if is not None:
+        metadata["serde_skip_if"] = skip_if
+    if skip_if_false is not None:
+        metadata["serde_skip_if_false"] = skip_if_false
+    if serializer:
+        metadata["serde_serializer"] = serializer
+    if deserializer:
+        metadata["serde_deserializer"] = deserializer
+    if flatten:
+        metadata["serde_flatten"] = flatten
+
+    return dataclasses.field(*args, metadata=metadata, **kwargs)
 
 
 @dataclass
