@@ -3,8 +3,7 @@
 If you conditionally skip some fields, you can pass function or lambda in `serde_skip_if`.
 
 ```python
-@serialize
-@dataclass
+@serde
 class World:
     player: str
     buddy: str = field(default='', metadata={'serde_skip_if': lambda v: v == 'Pikachu'})

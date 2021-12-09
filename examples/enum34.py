@@ -1,9 +1,8 @@
 import enum
-from dataclasses import dataclass
 
 import imported
 
-from serde import deserialize, serialize
+from serde import serde
 from serde.json import from_json, to_json
 
 
@@ -24,9 +23,7 @@ class IE(enum.IntEnum):
     V2 = enum.auto()
 
 
-@deserialize
-@serialize
-@dataclass
+@serde
 class Foo:
     v0: IE
     v1: IE = IE.V1  # Default enum value.

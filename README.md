@@ -11,12 +11,10 @@ Yet another serialization library on top of [dataclasses](https://docs.python.or
 
 ## Overview
 
-Declare a class with pyserde's `@serialize` and `@deserialize` decorators.
+Declare a class with pyserde's `@serde` decorator.
 
 ```python
-@deserialize
-@serialize
-@dataclass
+@serde
 class Foo:
     i: int
     s: str
@@ -59,6 +57,7 @@ Foo(i=10, s='foo', f=100.0, b=True)
         - [`uuid.UUID`](https://docs.python.org/3/library/uuid.html)
         - [`datetime.date`](https://docs.python.org/3/library/datetime.html#date-objects), [`datetime.time`](https://docs.python.org/3/library/datetime.html#time-objects), [`datetime.datetime`](https://docs.python.org/3/library/datetime.html#datetime-objects)
         - [`ipaddress`](https://docs.python.org/3/library/ipaddress.html)
+- [decorators](docs/features/decorators.md)
 - [Python 3.9 type hinting](docs/features/python3.9-type-hinting.md)
 - [Postponed evaluation of type annotation](docs/features/postponed-evaluation-of-type-annotation.md)
 - [Forward reference](docs/features/forward-reference.md)

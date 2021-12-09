@@ -91,6 +91,7 @@ def serialize(
     reuse_instances_default: bool = True,
     convert_sets_default: bool = False,
     serializer: Optional[SerializeFunc] = None,
+    **kwargs,
 ):
     """
     A dataclass with this decorator is serializable into any of the data formats supported by pyserde.
@@ -100,7 +101,6 @@ def serialize(
     >>> from serde.json import to_json
     >>>
     >>> @serialize
-    ... @dataclass
     ... class Foo:
     ...     i: int
     ...     s: str
@@ -119,7 +119,6 @@ def serialize(
     The following example converts snake-case field names into camel-case names.
 
     >>> @serialize(rename_all = 'camelcase')
-    ... @dataclass
     ... class Foo:
     ...     int_field: int
     ...     str_field: str
@@ -141,7 +140,6 @@ def serialize(
     for a certain field, raise `serde.SerdeSkip` exception, pyserde will use the default serializer for that field.
 
     >>> @serialize(serializer=serializer)
-    ... @dataclass
     ... class Foo:
     ...     i: int
     ...     dt: datetime
@@ -153,6 +151,10 @@ def serialize(
     """
 
     def wrap(cls: Type):
+        # If no `dataclass` found in the class, dataclassify it automatically.
+        if not is_dataclass(cls):
+            dataclass(cls)
+
         g: Dict[str, Any] = {}
 
         # Create a scope storage used by serde.
@@ -216,7 +218,6 @@ def is_serializable(instance_or_class: Any) -> bool:
     Test if an instance or class is serializable.
 
     >>> @serialize
-    ... @dataclass
     ... class Foo:
     ...     pass
 
@@ -274,7 +275,6 @@ def to_tuple(o, reuse_instances: bool = ..., convert_sets: bool = ...) -> Any:
     Serialize object into tuple.
 
     >>> @serialize
-    ... @dataclass
     ... class Foo:
     ...     i: int
     ...     s: str = 'foo'
@@ -305,7 +305,6 @@ def to_dict(o, reuse_instances: bool = ..., convert_sets: bool = ...) -> Any:
     Serialize object into dictionary.
 
     >>> @serialize
-    ... @dataclass
     ... class Foo:
     ...     i: int
     ...     s: str = 'foo'

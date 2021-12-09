@@ -3,9 +3,7 @@
 If you want to provide a custom function to override the default (de)serialization behaviour of a field, you can pass your functions to `serde_serializer` and `serde_deserializer` dataclass metadata.
 
 ```python
-@deserialize
-@serialize
-@dataclass
+@serde
 class Foo:
     dt1: datetime
     dt2: datetime = field(

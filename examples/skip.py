@@ -8,24 +8,21 @@ Usage:
     $ poetry run python skip.py
 """
 
-from dataclasses import dataclass, field
+from dataclasses import field
 from typing import Dict, List
 
-from serde import deserialize, serialize
+from serde import serde
 from serde.json import to_json
 
 
-@serialize
-@dataclass
+@serde
 class Resource:
     name: str
     hash: str
     metadata: Dict[str, str] = field(default_factory=dict, metadata={'serde_skip': True})
 
 
-@deserialize
-@serialize
-@dataclass
+@serde
 class World:
     player: str
     enemies: List[str] = field(default_factory=list, metadata={'serde_skip_if_false': True})

@@ -3,8 +3,7 @@
 Converting `snake_case` fields into supported case styles e.g. `camelCase` and `kebab-case`.
 
 ```python
-@serialize(rename_all = 'camelcase')
-@dataclass
+@serde(rename_all = 'camelcase')
 class Foo:
     int_field: int
     str_field: str

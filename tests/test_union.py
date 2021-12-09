@@ -6,9 +6,9 @@ from uuid import UUID
 
 import pytest
 
-from serde import SerdeError, deserialize, from_dict
+from serde import SerdeError, from_dict
 from serde import init as serde_init
-from serde import logger, serialize, to_dict
+from serde import logger, serde, to_dict
 from serde.json import from_json, to_json
 
 logging.basicConfig(level=logging.WARNING)
@@ -17,8 +17,7 @@ logger.setLevel(logging.DEBUG)
 serde_init(True)
 
 
-@deserialize
-@serialize
+@serde
 @dataclass(unsafe_hash=True)
 class PriUnion:
     """
@@ -28,8 +27,7 @@ class PriUnion:
     v: Union[int, str, float, bool]
 
 
-@deserialize
-@serialize
+@serde
 @dataclass(unsafe_hash=True)
 class PriOptUnion:
     """
@@ -39,8 +37,7 @@ class PriOptUnion:
     v: Union[Optional[int], Optional[str], Optional[float], Optional[bool]]
 
 
-@deserialize
-@serialize
+@serde
 @dataclass(unsafe_hash=True)
 class ContUnion:
     """
@@ -118,9 +115,7 @@ def test_union_containers():
 
 
 def test_union_with_complex_types():
-    @deserialize
-    @serialize
-    @dataclass
+    @serde
     class A:
         v: Union[int, IPv4Address, UUID]
 
@@ -144,9 +139,7 @@ def test_union_with_complex_types():
 
 
 def test_union_with_complex_types_and_reuse_instances():
-    @deserialize(reuse_instances_default=True)
-    @serialize(reuse_instances_default=True)
-    @dataclass
+    @serde(reuse_instances_default=True)
     class A:
         v: Union[int, IPv4Address, UUID]
 
@@ -167,9 +160,7 @@ def test_union_with_complex_types_and_reuse_instances():
 
 
 def test_optional_union_with_complex_types():
-    @deserialize
-    @serialize
-    @dataclass
+    @serde
     class A:
         v: Optional[Union[int, IPv4Address, UUID]]
 
@@ -183,9 +174,7 @@ def test_optional_union_with_complex_types():
 
 
 def test_union_with_complex_types_in_containers():
-    @deserialize
-    @serialize
-    @dataclass
+    @serde
     class A:
         v: Union[List[IPv4Address], List[UUID]]
 
@@ -203,9 +192,7 @@ def test_union_with_complex_types_in_containers():
 
 
 def test_union_exception_if_nothing_matches():
-    @deserialize
-    @serialize
-    @dataclass
+    @serde
     class A:
         v: Union[IPv4Address, UUID]
 
@@ -246,9 +233,7 @@ def test_union_exception_if_nothing_matches():
 
 
 def test_union_in_union():
-    @deserialize
-    @serialize
-    @dataclass
+    @serde
     class A:
         v: Union[UUID, Union[int, str]]
 
@@ -266,9 +251,7 @@ def test_union_in_union():
 
 
 def test_union_in_other_type():
-    @deserialize
-    @serialize
-    @dataclass
+    @serde
     class A:
         v: Dict[str, Union[UUID, int]]
 
@@ -282,9 +265,7 @@ def test_union_in_other_type():
 
 
 def test_union_rename_all():
-    @deserialize(rename_all='pascalcase')
-    @serialize(rename_all='pascalcase')
-    @dataclass
+    @serde(rename_all='pascalcase')
     class Foo:
         bar_baz: Union[int, str]
 
@@ -293,15 +274,11 @@ def test_union_rename_all():
 
 
 def test_union_with_list_of_other_class():
-    @deserialize
-    @serialize
-    @dataclass
+    @serde
     class A:
         a: int
 
-    @deserialize
-    @serialize
-    @dataclass
+    @serde
     class B:
         b: Union[List[A], str]
 
@@ -313,9 +290,7 @@ def test_union_with_list_of_other_class():
 
 # relates to https://github.com/yukinarit/pyserde/issues/113
 def test_union_with_union_in_nested_types():
-    @deserialize
-    @serialize
-    @dataclass
+    @serde
     class A:
         v: Union[UUID, List[Union[UUID, int]]]
 
@@ -332,9 +307,7 @@ def test_union_with_union_in_nested_types():
 
 # relates to https://github.com/yukinarit/pyserde/issues/113
 def test_union_with_union_in_nested_tuple():
-    @deserialize
-    @serialize
-    @dataclass
+    @serde
     class A:
         v: Union[bool, Tuple[Union[str, int]]]
 

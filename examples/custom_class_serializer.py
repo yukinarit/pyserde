@@ -1,7 +1,7 @@
-from dataclasses import dataclass, field
+from dataclasses import field
 from datetime import datetime
 
-from serde import SerdeSkip, default_deserializer, default_serializer, deserialize, serialize
+from serde import SerdeSkip, default_deserializer, default_serializer, serde
 from serde.json import from_json, to_json
 
 
@@ -28,9 +28,7 @@ def deserializer(cls, o):
         raise SerdeSkip()
 
 
-@deserialize(deserializer=deserializer)
-@serialize(serializer=serializer)
-@dataclass
+@serde(serializer=serializer, deserializer=deserializer)
 class Foo:
     i: int
     dt1: datetime

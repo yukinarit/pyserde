@@ -1,17 +1,13 @@
 from __future__ import annotations  # this is the line this test file is all about
 
 import dataclasses
-from dataclasses import dataclass
 from enum import Enum
 from typing import List, Tuple
 
 import pytest
 
-import serde
-from serde import SerdeError, deserialize, from_dict, serialize, to_dict
+from serde import SerdeError, deserialize, from_dict, serde, serialize, to_dict
 from serde.compat import dataclass_fields
-
-serde.init(True)
 
 
 class Status(Enum):
@@ -19,18 +15,14 @@ class Status(Enum):
     ERR = "err"
 
 
-@deserialize
-@serialize
-@dataclass
+@serde
 class A:
     a: int
     b: Status
     c: List[str]
 
 
-@deserialize
-@serialize
-@dataclass
+@serde
 class B:
     a: A
     b: Tuple[str, A]
@@ -53,15 +45,13 @@ def test_serde_with_lazy_type_annotations():
 
 
 # test_forward_reference_works currently only works with global visible classes
-@dataclass
+@dataclasses.dataclass
 class ForwardReferenceFoo:
     # this is not a string forward reference because we use PEP 563 (see 1st line of this file)
     bar: ForwardReferenceBar
 
 
-@serialize
-@deserialize
-@dataclass
+@serde
 class ForwardReferenceBar:
     i: int
 
@@ -91,15 +81,11 @@ def test_forward_reference_works():
 def test_unresolved_forward_reference_throws():
     with pytest.raises(SerdeError) as e:
 
-        @serialize
-        @deserialize
-        @dataclass
+        @serde
         class UnresolvedForwardFoo:
             bar: UnresolvedForwardBar
 
-        @serialize
-        @deserialize
-        @dataclass
+        @serde
         class UnresolvedForwardBar:
             i: int
 
@@ -110,16 +96,12 @@ def test_unresolved_forward_reference_throws():
 def test_string_forward_reference_throws():
     with pytest.raises(SerdeError) as e:
 
-        @serialize
-        @deserialize
-        @dataclass
+        @serde
         class UnresolvedStringForwardFoo:
             # string forward references are not compatible with PEP 563 and will throw
             bar: 'UnresolvedStringForwardBar'
 
-        @serialize
-        @deserialize
-        @dataclass
+        @serde
         class UnresolvedStringForwardBar:
             i: int
 

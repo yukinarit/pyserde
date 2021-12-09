@@ -1,16 +1,13 @@
 import sys
-from dataclasses import dataclass
 from typing import Dict, List, Tuple
 
-from serde import deserialize, serialize
+from serde import serde
 from serde.json import from_json, to_json
 
 PY39 = sys.version_info[:3] >= (3, 9, 0)
 
 
-@deserialize
-@serialize
-@dataclass
+@serde
 class Foo:
     l: List[str]
     t: Tuple[str, bool]
@@ -21,9 +18,7 @@ class Foo:
 # style type annotations for standard collections.
 if PY39:
 
-    @deserialize
-    @serialize
-    @dataclass
+    @serde
     class FooPy39:
         l: list[str]
         t: tuple[str, bool]

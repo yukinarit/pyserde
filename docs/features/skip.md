@@ -3,8 +3,7 @@
 You can skip serialization for a certain field, you can use `serde_skip`.
 
 ```python
-@serialize
-@dataclass
+@serde
 class Resource:
     name: str
     hash: str

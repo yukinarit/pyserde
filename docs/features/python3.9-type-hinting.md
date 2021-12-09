@@ -3,9 +3,7 @@
 For python >= 3.9, you can use [PEP585](https://www.python.org/dev/peps/pep-0585/) style type annotations for standard collections.
 
 ```python
-@deserialize
-@serialize
-@dataclass
+@serde
 class Foo:
     i: int
     l: list[str]
