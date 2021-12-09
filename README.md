@@ -1,6 +1,6 @@
 # `pyserde`
 
-Yet another serialization library on top of [dataclasses](https://docs.python.org/3/library/dataclasses.html).
+Yet another serialization library on top of [dataclasses](https://docs.python.org/3/library/dataclasses.html), inspired by [serde-rs](https://github.com/serde-rs/serde).
 
 [![image](https://img.shields.io/pypi/v/pyserde.svg)](https://pypi.org/project/pyserde/)
 [![image](https://img.shields.io/pypi/pyversions/pyserde.svg)](https://pypi.org/project/pyserde/)
@@ -38,6 +38,8 @@ Foo(i=10, s='foo', f=100.0, b=True)
 ## Features
 
 - Supported data formats
+    - dict
+    - tuple
     - JSON
 	- Yaml
 	- Toml
