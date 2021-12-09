@@ -1,6 +1,6 @@
 # Supported data formats
 
-Currently `JSON`, `Yaml`, `Toml` and `MsgPack` are supported.
+Currently `dict, `tuple`, `JSON`, `Yaml`, `Toml` and `MsgPack` are supported.
 
 ```python
 
@@ -10,6 +10,30 @@ class Foo:
     s: str
     f: float
     b: bool
+```
+
+## dict
+
+```python
+>>> from serde import to_dict, from_dict
+
+>>> to_dict(Foo(i=10, s='foo', f=100.0, b=True))
+from_dict(Foo, {"i": 10, "s": "foo", "f": 100.0, "b": True})
+
+>>> from_dict(Foo, {"i": 10, "s": "foo", "f": 100.0, "b": True})
+Foo(i=10, s='foo', f=100.0, b=True)
+```
+
+## tuple
+
+```python
+>>> from serde import to_tuple, from_tuple
+
+>>> to_tuple(Foo(i=10, s='foo', f=100.0, b=True))
+(10, 'foo', 100.0, True)
+
+>>> from_tuple(Foo, (10, 'foo', 100.0, True))
+Foo(i=10, s='foo', f=100.0, b=True)
 ```
 
 ## JSON
