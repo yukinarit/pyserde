@@ -149,7 +149,7 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="supported-data-formats"><a class="header" href="#supported-data-formats">Supported data formats</a></h1>
-<p>Currently <code>JSON</code>, <code>Yaml</code>, <code>Toml</code> and <code>MsgPack</code> are supported.</p>
+<p>Currently <code>dict, </code>tuple<code>, </code>JSON<code>, </code>Yaml<code>, </code>Toml<code>and</code>MsgPack` are supported.</p>
 <pre><code class="language-python">
 @serde
 class Foo:
@@ -157,6 +157,24 @@ class Foo:
     s: str
     f: float
     b: bool
+</code></pre>
+<h2 id="dict"><a class="header" href="#dict">dict</a></h2>
+<pre><code class="language-python">&gt;&gt;&gt; from serde import to_dict, from_dict
+
+&gt;&gt;&gt; to_dict(Foo(i=10, s='foo', f=100.0, b=True))
+from_dict(Foo, {&quot;i&quot;: 10, &quot;s&quot;: &quot;foo&quot;, &quot;f&quot;: 100.0, &quot;b&quot;: True})
+
+&gt;&gt;&gt; from_dict(Foo, {&quot;i&quot;: 10, &quot;s&quot;: &quot;foo&quot;, &quot;f&quot;: 100.0, &quot;b&quot;: True})
+Foo(i=10, s='foo', f=100.0, b=True)
+</code></pre>
+<h2 id="tuple"><a class="header" href="#tuple">tuple</a></h2>
+<pre><code class="language-python">&gt;&gt;&gt; from serde import to_tuple, from_tuple
+
+&gt;&gt;&gt; to_tuple(Foo(i=10, s='foo', f=100.0, b=True))
+(10, 'foo', 100.0, True)
+
+&gt;&gt;&gt; from_tuple(Foo, (10, 'foo', 100.0, True))
+Foo(i=10, s='foo', f=100.0, b=True)
 </code></pre>
 <h2 id="json"><a class="header" href="#json">JSON</a></h2>
 <p>Call <code>to_json</code> to serialize <code>Foo</code> object into JSON string and <code>from_json</code> to deserialize JSON string into <code>Foo</code> object. For more information, please visit <a href="https://yukinarit.github.io/pyserde/api/serde/json.html">serde.json</a> module.</p>
