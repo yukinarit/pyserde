@@ -158,6 +158,7 @@ associated with serialization.</p>
     <span class="n">reuse_instances_default</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="n">convert_sets_default</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">serializer</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">SerializeFunc</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
 <span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A dataclass with this decorator is serializable into any of the data formats supported by pyserde.</span>
@@ -167,7 +168,6 @@ associated with serialization.</p>
 <span class="sd">    &gt;&gt;&gt; from serde.json import to_json</span>
 <span class="sd">    &gt;&gt;&gt;</span>
 <span class="sd">    &gt;&gt;&gt; @serialize</span>
-<span class="sd">    ... @dataclass</span>
 <span class="sd">    ... class Foo:</span>
 <span class="sd">    ...     i: int</span>
 <span class="sd">    ...     s: str</span>
@@ -186,7 +186,6 @@ associated with serialization.</p>
 <span class="sd">    The following example converts snake-case field names into camel-case names.</span>
 
 <span class="sd">    &gt;&gt;&gt; @serialize(rename_all = &#39;camelcase&#39;)</span>
-<span class="sd">    ... @dataclass</span>
 <span class="sd">    ... class Foo:</span>
 <span class="sd">    ...     int_field: int</span>
 <span class="sd">    ...     str_field: str</span>
@@ -208,7 +207,6 @@ associated with serialization.</p>
 <span class="sd">    for a certain field, raise `serde.SerdeSkip` exception, pyserde will use the default serializer for that field.</span>
 
 <span class="sd">    &gt;&gt;&gt; @serialize(serializer=serializer)</span>
-<span class="sd">    ... @dataclass</span>
 <span class="sd">    ... class Foo:</span>
 <span class="sd">    ...     i: int</span>
 <span class="sd">    ...     dt: datetime</span>
@@ -220,6 +218,10 @@ associated with serialization.</p>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="nf">wrap</span><span class="p">(</span><span class="bp">cls</span><span class="p">:</span> <span class="n">Type</span><span class="p">):</span>
+        <span class="c1"># If no `dataclass` found in the class, dataclassify it automatically.</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">is_dataclass</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+            <span class="n">dataclass</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
+
         <span class="n">g</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
 
         <span class="c1"># Create a scope storage used by serde.</span>
@@ -283,7 +285,6 @@ associated with serialization.</p>
 <span class="sd">    Test if an instance or class is serializable.</span>
 
 <span class="sd">    &gt;&gt;&gt; @serialize</span>
-<span class="sd">    ... @dataclass</span>
 <span class="sd">    ... class Foo:</span>
 <span class="sd">    ...     pass</span>
 
@@ -341,7 +342,6 @@ associated with serialization.</p>
 <span class="sd">    Serialize object into tuple.</span>
 
 <span class="sd">    &gt;&gt;&gt; @serialize</span>
-<span class="sd">    ... @dataclass</span>
 <span class="sd">    ... class Foo:</span>
 <span class="sd">    ...     i: int</span>
 <span class="sd">    ...     s: str = &#39;foo&#39;</span>
@@ -372,7 +372,6 @@ associated with serialization.</p>
 <span class="sd">    Serialize object into dictionary.</span>
 
 <span class="sd">    &gt;&gt;&gt; @serialize</span>
-<span class="sd">    ... @dataclass</span>
 <span class="sd">    ... class Foo:</span>
 <span class="sd">    ...     i: int</span>
 <span class="sd">    ...     s: str = &#39;foo&#39;</span>
@@ -755,7 +754,8 @@ associated with serialization.</p>
     rename_all: Optional[str] = None,
     reuse_instances_default: bool = True,
     convert_sets_default: bool = False,
-    serializer: Optional[Callable[[Type, Any], Any]] = None
+    serializer: Optional[Callable[[Type, Any], Any]] = None,
+    **kwargs
 )</span>:
     </div>
 
@@ -767,6 +767,7 @@ associated with serialization.</p>
     <span class="n">reuse_instances_default</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="n">convert_sets_default</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">serializer</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">SerializeFunc</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
 <span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A dataclass with this decorator is serializable into any of the data formats supported by pyserde.</span>
@@ -776,7 +777,6 @@ associated with serialization.</p>
 <span class="sd">    &gt;&gt;&gt; from serde.json import to_json</span>
 <span class="sd">    &gt;&gt;&gt;</span>
 <span class="sd">    &gt;&gt;&gt; @serialize</span>
-<span class="sd">    ... @dataclass</span>
 <span class="sd">    ... class Foo:</span>
 <span class="sd">    ...     i: int</span>
 <span class="sd">    ...     s: str</span>
@@ -795,7 +795,6 @@ associated with serialization.</p>
 <span class="sd">    The following example converts snake-case field names into camel-case names.</span>
 
 <span class="sd">    &gt;&gt;&gt; @serialize(rename_all = &#39;camelcase&#39;)</span>
-<span class="sd">    ... @dataclass</span>
 <span class="sd">    ... class Foo:</span>
 <span class="sd">    ...     int_field: int</span>
 <span class="sd">    ...     str_field: str</span>
@@ -817,7 +816,6 @@ associated with serialization.</p>
 <span class="sd">    for a certain field, raise `serde.SerdeSkip` exception, pyserde will use the default serializer for that field.</span>
 
 <span class="sd">    &gt;&gt;&gt; @serialize(serializer=serializer)</span>
-<span class="sd">    ... @dataclass</span>
 <span class="sd">    ... class Foo:</span>
 <span class="sd">    ...     i: int</span>
 <span class="sd">    ...     dt: datetime</span>
@@ -829,6 +827,10 @@ associated with serialization.</p>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="nf">wrap</span><span class="p">(</span><span class="bp">cls</span><span class="p">:</span> <span class="n">Type</span><span class="p">):</span>
+        <span class="c1"># If no `dataclass` found in the class, dataclassify it automatically.</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">is_dataclass</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+            <span class="n">dataclass</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
+
         <span class="n">g</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
 
         <span class="c1"># Create a scope storage used by serde.</span>
@@ -896,7 +898,6 @@ associated with serialization.</p>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn"><a href="json.html">serde.json</a></span> <span class="kn">import</span> <span class="n">to_json</span>
 <span class="go">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nd">@serialize</span>
-<span class="gp">... </span><span class="nd">@dataclass</span>
 <span class="gp">... </span><span class="k">class</span> <span class="nc">Foo</span><span class="p">:</span>
 <span class="gp">... </span>    <span class="n">i</span><span class="p">:</span> <span class="nb">int</span>
 <span class="gp">... </span>    <span class="n">s</span><span class="p">:</span> <span class="nb">str</span>
@@ -918,7 +919,6 @@ The following example converts snake-case field names into camel-case names.</li
 </ul>
 
 <div class="codehilite"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="nd">@serialize</span><span class="p">(</span><span class="n">rename_all</span> <span class="o">=</span> <span class="s1">&#39;camelcase&#39;</span><span class="p">)</span>
-<span class="gp">... </span><span class="nd">@dataclass</span>
 <span class="gp">... </span><span class="k">class</span> <span class="nc">Foo</span><span class="p">:</span>
 <span class="gp">... </span>    <span class="n">int_field</span><span class="p">:</span> <span class="nb">int</span>
 <span class="gp">... </span>    <span class="n">str_field</span><span class="p">:</span> <span class="nb">str</span>
@@ -944,7 +944,6 @@ in the class.</li>
 for a certain field, raise <code><a href="../serde.html#SerdeSkip">serde.SerdeSkip</a></code> exception, pyserde will use the default serializer for that field.</p>
 
 <div class="codehilite"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="nd">@serialize</span><span class="p">(</span><span class="n">serializer</span><span class="o">=</span><span class="n">serializer</span><span class="p">)</span>
-<span class="gp">... </span><span class="nd">@dataclass</span>
 <span class="gp">... </span><span class="k">class</span> <span class="nc">Foo</span><span class="p">:</span>
 <span class="gp">... </span>    <span class="n">i</span><span class="p">:</span> <span class="nb">int</span>
 <span class="gp">... </span>    <span class="n">dt</span><span class="p">:</span> <span class="n">datetime</span>
@@ -974,7 +973,6 @@ for a certain field, raise <code><a href="../serde.html#SerdeSkip">serde.SerdeSk
 <span class="sd">    Test if an instance or class is serializable.</span>
 
 <span class="sd">    &gt;&gt;&gt; @serialize</span>
-<span class="sd">    ... @dataclass</span>
 <span class="sd">    ... class Foo:</span>
 <span class="sd">    ...     pass</span>
 
@@ -994,7 +992,6 @@ for a certain field, raise <code><a href="../serde.html#SerdeSkip">serde.SerdeSk
             <div class="docstring"><p>Test if an instance or class is serializable.</p>
 
 <div class="codehilite"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="nd">@serialize</span>
-<span class="gp">... </span><span class="nd">@dataclass</span>
 <span class="gp">... </span><span class="k">class</span> <span class="nc">Foo</span><span class="p">:</span>
 <span class="gp">... </span>    <span class="k">pass</span>
 </code></pre></div>
@@ -1033,7 +1030,6 @@ for a certain field, raise <code><a href="../serde.html#SerdeSkip">serde.SerdeSk
 <span class="sd">    Serialize object into dictionary.</span>
 
 <span class="sd">    &gt;&gt;&gt; @serialize</span>
-<span class="sd">    ... @dataclass</span>
 <span class="sd">    ... class Foo:</span>
 <span class="sd">    ...     i: int</span>
 <span class="sd">    ...     s: str = &#39;foo&#39;</span>
@@ -1057,7 +1053,6 @@ for a certain field, raise <code><a href="../serde.html#SerdeSkip">serde.SerdeSk
             <div class="docstring"><p>Serialize object into dictionary.</p>
 
 <div class="codehilite"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="nd">@serialize</span>
-<span class="gp">... </span><span class="nd">@dataclass</span>
 <span class="gp">... </span><span class="k">class</span> <span class="nc">Foo</span><span class="p">:</span>
 <span class="gp">... </span>    <span class="n">i</span><span class="p">:</span> <span class="nb">int</span>
 <span class="gp">... </span>    <span class="n">s</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;foo&#39;</span>
@@ -1097,7 +1092,6 @@ for a certain field, raise <code><a href="../serde.html#SerdeSkip">serde.SerdeSk
 <span class="sd">    Serialize object into tuple.</span>
 
 <span class="sd">    &gt;&gt;&gt; @serialize</span>
-<span class="sd">    ... @dataclass</span>
 <span class="sd">    ... class Foo:</span>
 <span class="sd">    ...     i: int</span>
 <span class="sd">    ...     s: str = &#39;foo&#39;</span>
@@ -1121,7 +1115,6 @@ for a certain field, raise <code><a href="../serde.html#SerdeSkip">serde.SerdeSk
             <div class="docstring"><p>Serialize object into tuple.</p>
 
 <div class="codehilite"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="nd">@serialize</span>
-<span class="gp">... </span><span class="nd">@dataclass</span>
 <span class="gp">... </span><span class="k">class</span> <span class="nc">Foo</span><span class="p">:</span>
 <span class="gp">... </span>    <span class="n">i</span><span class="p">:</span> <span class="nb">int</span>
 <span class="gp">... </span>    <span class="n">s</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;foo&#39;</span>
