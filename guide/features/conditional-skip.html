@@ -149,11 +149,12 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="conditional-skip"><a class="header" href="#conditional-skip">Conditional Skip</a></h1>
-<p>If you conditionally skip some fields, you can pass function or lambda in <code>serde_skip_if</code>.</p>
+<h2 id="skip_if"><a class="header" href="#skip_if"><code>skip_if</code></a></h2>
+<p>If you conditionally skip some fields, you can pass function or lambda in <code>skip_if</code>.</p>
 <pre><code class="language-python">@serde
 class World:
     player: str
-    buddy: str = field(default='', metadata={'serde_skip_if': lambda v: v == 'Pikachu'})
+    buddy: str = field(default='', skip_if=lambda v: v == 'Pikachu')
 
 world = World('satoshi', 'Pikachu')
 print(to_json(world))
@@ -165,6 +166,10 @@ print(to_json(world))
 <pre><code class="language-json">{&quot;player&quot;: &quot;satoshi&quot;}
 {&quot;player&quot;: &quot;green&quot;, &quot;buddy&quot;: &quot;Charmander&quot;}
 </code></pre>
+<h2 id="skip_if_false"><a class="header" href="#skip_if_false"><code>skip_if_false</code></a></h2>
+<p><code>skip_if_false</code> is a shorthand of <code>skip_if=lambda v: not v</code>.</p>
+<h2 id="skip_if_default"><a class="header" href="#skip_if_default"><code>skip_if_default</code></a></h2>
+<p><code>skip_if_false</code> is a shorthand of <code>skip_if=lambda v: v == &lt;default_value&gt;</code>.</p>
 <p>For complete example, please see <a href="https://github.com/yukinarit/pyserde/blob/master/examples/skip.py">examples/skip.py</a></p>
 
                     </main>

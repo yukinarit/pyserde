@@ -106,6 +106,9 @@
                                 <a class="variable" href="#Field.skip_if_false">skip_if_false</a>
                         </li>
                         <li>
+                                <a class="variable" href="#Field.skip_if_default">skip_if_default</a>
+                        </li>
+                        <li>
                                 <a class="variable" href="#Field.serializer">serializer</a>
                         </li>
                         <li>
@@ -172,6 +175,7 @@
 <span class="kn">import</span> <span class="nn">dataclasses</span>
 <span class="kn">import</span> <span class="nn">datetime</span>
 <span class="kn">import</span> <span class="nn">decimal</span>
+<span class="kn">import</span> <span class="nn">functools</span>
 <span class="kn">import</span> <span class="nn">ipaddress</span>
 <span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">import</span> <span class="nn">pathlib</span>
@@ -436,6 +440,10 @@
     <span class="k">return</span> <span class="ow">not</span> <span class="nb">bool</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
 
 
+<span class="k">def</span> <span class="nf">skip_if_default</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">v</span> <span class="o">==</span> <span class="n">default</span>
+
+
 <span class="nd">@dataclass</span>
 <span class="k">class</span> <span class="nc">FlattenOpts</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -448,7 +456,8 @@
     <span class="n">rename</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">skip</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">skip_if</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Callable</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">skip_if_false</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Callable</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">skip_if_false</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">skip_if_default</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">serializer</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">deserializer</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">flatten</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">FlattenOpts</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -469,6 +478,8 @@
         <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;serde_skip_if&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">skip_if</span>
     <span class="k">if</span> <span class="n">skip_if_false</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;serde_skip_if_false&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">skip_if_false</span>
+    <span class="k">if</span> <span class="n">skip_if_default</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;serde_skip_if_default&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">skip_if_default</span>
     <span class="k">if</span> <span class="n">serializer</span><span class="p">:</span>
         <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;serde_serializer&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">serializer</span>
     <span class="k">if</span> <span class="n">deserializer</span><span class="p">:</span>
@@ -523,6 +534,9 @@
 <span class="sd">    * `skip_if_false` (Attribute name: `serde_skip_if_false`) skips (de)serialization if the field value evaluates</span>
 <span class="sd">    to `False`. For example, this code skip (de)serialize `v` if `v` is empty.</span>
 
+<span class="sd">    * `skip_if_default` (Attribute name: `serde_skip_if_default`) skips (de)serialization if the field value is equal</span>
+<span class="sd">    to the default value</span>
+
 <span class="sd">    ```python</span>
 <span class="sd">    @deserialize</span>
 <span class="sd">    @serialize</span>
@@ -555,6 +569,7 @@
     <span class="n">skip</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">skip_if</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Func</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">skip_if_false</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">skip_if_default</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">serializer</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Func</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># Custom field serializer.</span>
     <span class="n">deserializer</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Func</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># Custom field deserializer.</span>
     <span class="n">flatten</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">FlattenOpts</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
@@ -566,7 +581,12 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">skip_if_false_func</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Func</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">if</span> <span class="n">f</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;serde_skip_if_false&#39;</span><span class="p">):</span>
-            <span class="n">skip_if_false_func</span> <span class="o">=</span> <span class="n">Func</span><span class="p">(</span><span class="n">skip_if_false</span><span class="p">,</span> <span class="bp">cls</span><span class="o">.</span><span class="n">mangle</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="s1">&#39;skip_if&#39;</span><span class="p">))</span>
+            <span class="n">skip_if_false_func</span> <span class="o">=</span> <span class="n">Func</span><span class="p">(</span><span class="n">skip_if_false</span><span class="p">,</span> <span class="bp">cls</span><span class="o">.</span><span class="n">mangle</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="s1">&#39;skip_if_false&#39;</span><span class="p">))</span>
+
+        <span class="n">skip_if_default_func</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Func</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">f</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;serde_skip_if_default&#39;</span><span class="p">):</span>
+            <span class="n">skip_if_def</span> <span class="o">=</span> <span class="n">functools</span><span class="o">.</span><span class="n">partial</span><span class="p">(</span><span class="n">skip_if_default</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="n">f</span><span class="o">.</span><span class="n">default</span><span class="p">)</span>
+            <span class="n">skip_if_default_func</span> <span class="o">=</span> <span class="n">Func</span><span class="p">(</span><span class="n">skip_if_def</span><span class="p">,</span> <span class="bp">cls</span><span class="o">.</span><span class="n">mangle</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="s1">&#39;skip_if_default&#39;</span><span class="p">))</span>
 
         <span class="n">skip_if</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Func</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">if</span> <span class="n">f</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;serde_skip_if&#39;</span><span class="p">):</span>
@@ -600,7 +620,7 @@
             <span class="n">metadata</span><span class="o">=</span><span class="n">f</span><span class="o">.</span><span class="n">metadata</span><span class="p">,</span>
             <span class="n">rename</span><span class="o">=</span><span class="n">f</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;serde_rename&#39;</span><span class="p">),</span>
             <span class="n">skip</span><span class="o">=</span><span class="n">f</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;serde_skip&#39;</span><span class="p">),</span>
-            <span class="n">skip_if</span><span class="o">=</span><span class="n">skip_if</span> <span class="ow">or</span> <span class="n">skip_if_false_func</span><span class="p">,</span>
+            <span class="n">skip_if</span><span class="o">=</span><span class="n">skip_if</span> <span class="ow">or</span> <span class="n">skip_if_false_func</span> <span class="ow">or</span> <span class="n">skip_if_default_func</span><span class="p">,</span>
             <span class="n">serializer</span><span class="o">=</span><span class="n">serializer</span><span class="p">,</span>
             <span class="n">deserializer</span><span class="o">=</span><span class="n">deserializer</span><span class="p">,</span>
             <span class="n">flatten</span><span class="o">=</span><span class="n">flatten</span><span class="p">,</span>
@@ -1087,6 +1107,9 @@ multiple fields receives <code>skip_if</code> attribute.</p>
 <span class="sd">    * `skip_if_false` (Attribute name: `serde_skip_if_false`) skips (de)serialization if the field value evaluates</span>
 <span class="sd">    to `False`. For example, this code skip (de)serialize `v` if `v` is empty.</span>
 
+<span class="sd">    * `skip_if_default` (Attribute name: `serde_skip_if_default`) skips (de)serialization if the field value is equal</span>
+<span class="sd">    to the default value</span>
+
 <span class="sd">    ```python</span>
 <span class="sd">    @deserialize</span>
 <span class="sd">    @serialize</span>
@@ -1119,6 +1142,7 @@ multiple fields receives <code>skip_if</code> attribute.</p>
     <span class="n">skip</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">skip_if</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Func</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">skip_if_false</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">skip_if_default</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">serializer</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Func</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># Custom field serializer.</span>
     <span class="n">deserializer</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Func</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># Custom field deserializer.</span>
     <span class="n">flatten</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">FlattenOpts</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
@@ -1130,7 +1154,12 @@ multiple fields receives <code>skip_if</code> attribute.</p>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">skip_if_false_func</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Func</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">if</span> <span class="n">f</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;serde_skip_if_false&#39;</span><span class="p">):</span>
-            <span class="n">skip_if_false_func</span> <span class="o">=</span> <span class="n">Func</span><span class="p">(</span><span class="n">skip_if_false</span><span class="p">,</span> <span class="bp">cls</span><span class="o">.</span><span class="n">mangle</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="s1">&#39;skip_if&#39;</span><span class="p">))</span>
+            <span class="n">skip_if_false_func</span> <span class="o">=</span> <span class="n">Func</span><span class="p">(</span><span class="n">skip_if_false</span><span class="p">,</span> <span class="bp">cls</span><span class="o">.</span><span class="n">mangle</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="s1">&#39;skip_if_false&#39;</span><span class="p">))</span>
+
+        <span class="n">skip_if_default_func</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Func</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">f</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;serde_skip_if_default&#39;</span><span class="p">):</span>
+            <span class="n">skip_if_def</span> <span class="o">=</span> <span class="n">functools</span><span class="o">.</span><span class="n">partial</span><span class="p">(</span><span class="n">skip_if_default</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="n">f</span><span class="o">.</span><span class="n">default</span><span class="p">)</span>
+            <span class="n">skip_if_default_func</span> <span class="o">=</span> <span class="n">Func</span><span class="p">(</span><span class="n">skip_if_def</span><span class="p">,</span> <span class="bp">cls</span><span class="o">.</span><span class="n">mangle</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="s1">&#39;skip_if_default&#39;</span><span class="p">))</span>
 
         <span class="n">skip_if</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Func</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">if</span> <span class="n">f</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;serde_skip_if&#39;</span><span class="p">):</span>
@@ -1164,7 +1193,7 @@ multiple fields receives <code>skip_if</code> attribute.</p>
             <span class="n">metadata</span><span class="o">=</span><span class="n">f</span><span class="o">.</span><span class="n">metadata</span><span class="p">,</span>
             <span class="n">rename</span><span class="o">=</span><span class="n">f</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;serde_rename&#39;</span><span class="p">),</span>
             <span class="n">skip</span><span class="o">=</span><span class="n">f</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;serde_skip&#39;</span><span class="p">),</span>
-            <span class="n">skip_if</span><span class="o">=</span><span class="n">skip_if</span> <span class="ow">or</span> <span class="n">skip_if_false_func</span><span class="p">,</span>
+            <span class="n">skip_if</span><span class="o">=</span><span class="n">skip_if</span> <span class="ow">or</span> <span class="n">skip_if_false_func</span> <span class="ow">or</span> <span class="n">skip_if_default_func</span><span class="p">,</span>
             <span class="n">serializer</span><span class="o">=</span><span class="n">serializer</span><span class="p">,</span>
             <span class="n">deserializer</span><span class="o">=</span><span class="n">deserializer</span><span class="p">,</span>
             <span class="n">flatten</span><span class="o">=</span><span class="n">flatten</span><span class="p">,</span>
@@ -1224,6 +1253,8 @@ convenient when you want to use a python keyword in field name. For example, thi
 <li><p><code><a href="#Field.skip_if">skip_if</a></code> (Attribute name: <code>serde_skip_if</code>) skips (de)serialization if the callable evaluates to <code>True</code>.</p></li>
 <li><p><code><a href="#Field.skip_if_false">skip_if_false</a></code> (Attribute name: <code>serde_skip_if_false</code>) skips (de)serialization if the field value evaluates
 to <code>False</code>. For example, this code skip (de)serialize <code>v</code> if <code>v</code> is empty.</p></li>
+<li><p><code><a href="#Field.skip_if_default">skip_if_default</a></code> (Attribute name: <code>serde_skip_if_default</code>) skips (de)serialization if the field value is equal
+to the default value</p></li>
 </ul>
 
 <div class="codehilite"><pre><span></span><code><span class="nd">@deserialize</span>
@@ -1262,6 +1293,7 @@ deserialization behaviour of a field.</p></li>
     skip: Optional[bool] = None,
     skip_if: Optional[<a href="#Func">serde.core.Func</a>] = None,
     skip_if_false: Optional[bool] = None,
+    skip_if_default: Optional[bool] = None,
     serializer: Optional[<a href="#Func">serde.core.Func</a>] = None,
     deserializer: Optional[<a href="#Func">serde.core.Func</a>] = None,
     flatten: Optional[<a href="#FlattenOpts">serde.core.FlattenOpts</a>] = None
@@ -1317,6 +1349,15 @@ deserialization behaviour of a field.</p></li>
     
 
                             </div>
+                            <div id="Field.skip_if_default" class="classattr">
+                                            <div class="attr variable"><a class="headerlink" href="#Field.skip_if_default">#&nbsp;&nbsp</a>
+
+        <span class="name">skip_if_default</span><span class="annotation">: Optional[bool]</span><span class="default_value"> = None</span>
+    </div>
+
+    
+
+                            </div>
                             <div id="Field.serializer" class="classattr">
                                             <div class="attr variable"><a class="headerlink" href="#Field.serializer">#&nbsp;&nbsp</a>
 
@@ -1362,7 +1403,12 @@ deserialization behaviour of a field.</p></li>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">skip_if_false_func</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Func</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">if</span> <span class="n">f</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;serde_skip_if_false&#39;</span><span class="p">):</span>
-            <span class="n">skip_if_false_func</span> <span class="o">=</span> <span class="n">Func</span><span class="p">(</span><span class="n">skip_if_false</span><span class="p">,</span> <span class="bp">cls</span><span class="o">.</span><span class="n">mangle</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="s1">&#39;skip_if&#39;</span><span class="p">))</span>
+            <span class="n">skip_if_false_func</span> <span class="o">=</span> <span class="n">Func</span><span class="p">(</span><span class="n">skip_if_false</span><span class="p">,</span> <span class="bp">cls</span><span class="o">.</span><span class="n">mangle</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="s1">&#39;skip_if_false&#39;</span><span class="p">))</span>
+
+        <span class="n">skip_if_default_func</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Func</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">f</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;serde_skip_if_default&#39;</span><span class="p">):</span>
+            <span class="n">skip_if_def</span> <span class="o">=</span> <span class="n">functools</span><span class="o">.</span><span class="n">partial</span><span class="p">(</span><span class="n">skip_if_default</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="n">f</span><span class="o">.</span><span class="n">default</span><span class="p">)</span>
+            <span class="n">skip_if_default_func</span> <span class="o">=</span> <span class="n">Func</span><span class="p">(</span><span class="n">skip_if_def</span><span class="p">,</span> <span class="bp">cls</span><span class="o">.</span><span class="n">mangle</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="s1">&#39;skip_if_default&#39;</span><span class="p">))</span>
 
         <span class="n">skip_if</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Func</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">if</span> <span class="n">f</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;serde_skip_if&#39;</span><span class="p">):</span>
@@ -1396,7 +1442,7 @@ deserialization behaviour of a field.</p></li>
             <span class="n">metadata</span><span class="o">=</span><span class="n">f</span><span class="o">.</span><span class="n">metadata</span><span class="p">,</span>
             <span class="n">rename</span><span class="o">=</span><span class="n">f</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;serde_rename&#39;</span><span class="p">),</span>
             <span class="n">skip</span><span class="o">=</span><span class="n">f</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;serde_skip&#39;</span><span class="p">),</span>
-            <span class="n">skip_if</span><span class="o">=</span><span class="n">skip_if</span> <span class="ow">or</span> <span class="n">skip_if_false_func</span><span class="p">,</span>
+            <span class="n">skip_if</span><span class="o">=</span><span class="n">skip_if</span> <span class="ow">or</span> <span class="n">skip_if_false_func</span> <span class="ow">or</span> <span class="n">skip_if_default_func</span><span class="p">,</span>
             <span class="n">serializer</span><span class="o">=</span><span class="n">serializer</span><span class="p">,</span>
             <span class="n">deserializer</span><span class="o">=</span><span class="n">deserializer</span><span class="p">,</span>
             <span class="n">flatten</span><span class="o">=</span><span class="n">flatten</span><span class="p">,</span>
