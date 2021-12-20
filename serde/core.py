@@ -4,6 +4,7 @@ pyserde core module.
 import dataclasses
 import datetime
 import decimal
+import functools
 import ipaddress
 import logging
 import pathlib
@@ -268,6 +269,10 @@ def skip_if_false(v):
     return not bool(v)
 
 
+def skip_if_default(v, default=None):
+    return v == default
+
+
 @dataclass
 class FlattenOpts:
     """
@@ -280,7 +285,8 @@ def field(
     rename: Optional[str] = None,
     skip: Optional[bool] = None,
     skip_if: Optional[Callable] = None,
-    skip_if_false: Optional[Callable] = None,
+    skip_if_false: Optional[bool] = None,
+    skip_if_default: Optional[bool] = None,
     serializer=None,
     deserializer=None,
     flatten: Optional[FlattenOpts] = None,
@@ -301,6 +307,8 @@ def field(
         metadata["serde_skip_if"] = skip_if
     if skip_if_false is not None:
         metadata["serde_skip_if_false"] = skip_if_false
+    if skip_if_default is not None:
+        metadata["serde_skip_if_default"] = skip_if_default
     if serializer:
         metadata["serde_serializer"] = serializer
     if deserializer:
@@ -355,6 +363,9 @@ class Field:
     * `skip_if_false` (Attribute name: `serde_skip_if_false`) skips (de)serialization if the field value evaluates
     to `False`. For example, this code skip (de)serialize `v` if `v` is empty.
 
+    * `skip_if_default` (Attribute name: `serde_skip_if_default`) skips (de)serialization if the field value is equal
+    to the default value
+
     ```python
     @deserialize
     @serialize
@@ -387,6 +398,7 @@ class Field:
     skip: Optional[bool] = None
     skip_if: Optional[Func] = None
     skip_if_false: Optional[bool] = None
+    skip_if_default: Optional[bool] = None
     serializer: Optional[Func] = None  # Custom field serializer.
     deserializer: Optional[Func] = None  # Custom field deserializer.
     flatten: Optional[FlattenOpts] = None
@@ -398,7 +410,12 @@ class Field:
         """
         skip_if_false_func: Optional[Func] = None
         if f.metadata.get('serde_skip_if_false'):
-            skip_if_false_func = Func(skip_if_false, cls.mangle(f, 'skip_if'))
+            skip_if_false_func = Func(skip_if_false, cls.mangle(f, 'skip_if_false'))
+
+        skip_if_default_func: Optional[Func] = None
+        if f.metadata.get('serde_skip_if_default'):
+            skip_if_def = functools.partial(skip_if_default, default=f.default)
+            skip_if_default_func = Func(skip_if_def, cls.mangle(f, 'skip_if_default'))
 
         skip_if: Optional[Func] = None
         if f.metadata.get('serde_skip_if'):
@@ -432,7 +449,7 @@ class Field:
             metadata=f.metadata,
             rename=f.metadata.get('serde_rename'),
             skip=f.metadata.get('serde_skip'),
-            skip_if=skip_if or skip_if_false_func,
+            skip_if=skip_if or skip_if_false_func or skip_if_default_func,
             serializer=serializer,
             deserializer=deserializer,
             flatten=flatten,

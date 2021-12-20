@@ -458,6 +458,21 @@ def test_skip_if_overrides_skip_if_false(se, de):
     assert ff.comments == []
 
 
+@pytest.mark.parametrize('se,de', all_formats)
+def test_skip_if_default(se, de):
+    @serde.serde
+    class Foo:
+        a: str = serde.field(default='foo', skip_if_default=True)
+
+    f = Foo()
+    assert f == de(Foo, se(f))
+
+    assert serde.to_dict(Foo()) == {}
+    assert serde.to_dict(Foo('bar')) == {'a': 'bar'}
+    assert serde.from_dict(Foo, {}) == Foo()
+    assert serde.from_dict(Foo, {'a': 'bar'}) == Foo('bar')
+
+
 @pytest.mark.parametrize('se,de', format_msgpack)
 def test_inheritance(se, de):
     @serde.serde

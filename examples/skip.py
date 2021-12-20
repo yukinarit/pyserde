@@ -26,6 +26,7 @@ class World:
     player: str
     enemies: List[str] = field(default_factory=list, skip_if_false=True)
     buddy: str = field(default='', skip_if=lambda v: v == 'Pikachu')
+    town: str = field(default='Masara Town', skip_if_default=True)
 
 
 def main():
@@ -35,10 +36,12 @@ def main():
     ]
     print(to_json(resources))
 
+    # "buddy" and "town" field will be omitted
     world = World('satoshi', ['Rattata', 'Pidgey'], 'Pikachu')
     print(to_json(world))
 
-    world = World('green', [], 'Charmander')
+    # "enemies" field will be omitted
+    world = World('green', [], 'Charmander', 'Black City')
     print(to_json(world))
 
 
