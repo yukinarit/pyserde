@@ -624,7 +624,31 @@ poetry install
 poetry run python bench.py --full
 </code></pre>
 <p>You can check <a href="https://github.com/yukinarit/pyserde/blob/master/bench/bench.py">the benchmarking code</a> for more information.</p>
-<div style="break-before: page; page-break-before: always;"></div><h2 id="053-2021-11-24"><a class="header" href="#053-2021-11-24"><code>0.5.3</code> (2021-11-24)</a></h2>
+<div style="break-before: page; page-break-before: always;"></div><h2 id="060-2021-12-20"><a class="header" href="#060-2021-12-20"><code>0.6.0</code> (2021-12-20)</a></h2>
+<ul>
+<li>feat: Add @serde decorator (<a href="https://github.com/yukinarit/pyserde/commit/523dc9c">523dc9c</a>)</li>
+<li>feat: Add serde field function (<a href="https://github.com/yukinarit/pyserde/commit/488bf00">488bf00</a>)</li>
+<li>feat: Add serde_skip_default field attribute (<a href="https://github.com/yukinarit/pyserde/commit/0f0b212">0f0b212</a>)</li>
+<li>feat: Automatically put dataclass decorator (<a href="https://github.com/yukinarit/pyserde/commit/2f0cf01">2f0cf01</a>)</li>
+</ul>
+<p>With <code>serde</code> decorator and <code>field</code> function, you can declare pyserde class more easily.</p>
+<pre><code class="language-python">from serde import serde, field
+
+@serde
+class Foo:
+    a : List[str] = field(default_factory=list, skip_if_false=True)
+</code></pre>
+<p>The declaration until v0.5.3 still works.</p>
+<pre><code class="language-python">from dataclasses import dataclass
+from serde import serialize, deserialize
+
+@deserialize
+@serialize
+@dataclass
+class Foo:
+    a : List[str] = field(default_factory=list, metadata={'serde_skip_if_false': True})
+</code></pre>
+<h2 id="053-2021-11-24"><a class="header" href="#053-2021-11-24"><code>0.5.3</code> (2021-11-24)</a></h2>
 <ul>
 <li>feat: Add more dataclass Field's attrs to Field (<a href="https://github.com/yukinarit/pyserde/commit/7b57c53">7b57c53</a>)</li>
 <li>feat: Support python 3.10 (<a href="https://github.com/yukinarit/pyserde/commit/2f0c557">2f0c557</a>)</li>
