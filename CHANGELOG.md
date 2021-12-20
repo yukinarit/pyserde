@@ -1,3 +1,33 @@
+## `0.6.0` (2021-12-20)
+
+* feat: Add @serde decorator ([523dc9c](https://github.com/yukinarit/pyserde/commit/523dc9c))
+* feat: Add serde field function ([488bf00](https://github.com/yukinarit/pyserde/commit/488bf00))
+* feat: Add serde_skip_default field attribute ([0f0b212](https://github.com/yukinarit/pyserde/commit/0f0b212))
+* feat: Automatically put dataclass decorator ([2f0cf01](https://github.com/yukinarit/pyserde/commit/2f0cf01))
+
+With `serde` decorator and `field` function, you can declare pyserde class more easily.
+
+```python
+from serde import serde, field
+
+@serde
+class Foo:
+    a : List[str] = field(default_factory=list, skip_if_false=True)
+```
+
+The declaration until v0.5.3 still works.
+
+```python
+from dataclasses import dataclass
+from serde import serialize, deserialize
+
+@deserialize
+@serialize
+@dataclass
+class Foo:
+    a : List[str] = field(default_factory=list, metadata={'serde_skip_if_false': True})
+```
+
 ## `0.5.3` (2021-11-24)
 
 * feat: Add more dataclass Field's attrs to Field ([7b57c53](https://github.com/yukinarit/pyserde/commit/7b57c53))
