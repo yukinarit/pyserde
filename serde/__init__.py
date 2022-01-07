@@ -45,7 +45,7 @@ import dataclasses
 import sys
 
 from .compat import SerdeError, SerdeSkip  # noqa
-from .core import field, init, logger  # noqa
+from .core import AdjacentTagging, ExternalTagging, InternalTagging, Untagged, field, init, logger  # noqa
 from .de import default_deserializer, deserialize, from_dict, from_tuple, is_deserializable  # noqa
 from .se import asdict, astuple, default_serializer, is_serializable, serialize, to_dict, to_tuple  # noqa
 

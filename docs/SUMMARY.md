@@ -7,6 +7,7 @@
 - [Features](features/summary.md)
     - [Attributes](features/attributes.md)
     - [Decorators](features/decorators.md)
+    - [Union Representation](features/union.md)
     - [Python 3.9 type hinting](features/python3.9-type-hinting.md)
     - [Postponed evaluation of type annotation](features/postponed-evaluation-of-type-annotation.md)
     - [Forward reference](features/forward-reference.md)

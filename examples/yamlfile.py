@@ -9,7 +9,7 @@ Usage:
 """
 from typing import Dict, List, Optional, Union
 
-from serde import serde
+from serde import Untagged, serde
 from serde.yaml import from_yaml
 
 
@@ -34,7 +34,7 @@ class Response:
     description: str
 
 
-@serde(rename_all='camelcase')
+@serde(rename_all='camelcase', tagging=Untagged)
 class Path:
     description: str
     operation_id: str

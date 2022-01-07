@@ -325,3 +325,226 @@ def test_union_with_union_in_nested_tuple():
     a_int_dict = {"v": (1,)}
     assert to_dict(a_int) == a_int_dict
     assert from_dict(A, a_int_dict) == a_int
+
+
+def test_external_tagging():
+    @serde
+    class Bar:
+        b: int
+
+    @serde
+    class Baz:
+        b: int
+
+    @serde
+    class Nested:
+        v: Union[Bar, Baz]
+
+    @serde
+    class Foo:
+        a: Union[Bar, Baz]
+        b: Union[int, str]
+        c: Union[Dict[int, str], List[int]]
+        d: Union[int, Nested]
+
+    f = Foo(Bar(10), 'foo', {10: 'bar'}, Nested(Baz(100)))
+    d = {
+        "a": {"Bar": {"b": 10}},  # Union of dataclasses will be (de)serialized with external tagging
+        "b": "foo",  # non dataclass will be untagged
+        "c": {10: "bar"},
+        "d": {"Nested": {"v": {"Baz": {"b": 100}}}},
+    }
+    assert to_dict(f) == d
+    assert from_dict(Foo, d) == f
+
+    @serde
+    class Foo:
+        a: Union[Bar, int]  # Mix of dataclass and non dataclass
+
+    f = Foo(Bar(10))
+    assert from_dict(Foo, to_dict(f)) == f
+    f = Foo(10)
+    assert from_dict(Foo, to_dict(f)) == f
+
+    @serde
+    class Foo:
+        a: Union[Bar, Baz]
+
+    f = Foo(Bar(10))
+
+    # Tag not found
+    with pytest.raises(Exception):
+        assert from_dict(Foo, {"a": {"TagNotFound": {"b": 10}}})
+
+    # Tag is correct, but incompatible data
+    with pytest.raises(Exception):
+        assert from_dict(Foo, {"a": {"Bar": {"c": 10}}})
+
+
+def test_internal_tagging():
+    from serde import InternalTagging
+
+    @serde
+    class Bar:
+        v: int
+
+    @serde
+    class Baz:
+        v: int
+
+    @serde(tagging=InternalTagging("type"))
+    class Nested:
+        v: Union[Bar, Baz]
+
+    @serde(tagging=InternalTagging("type"))
+    class Foo:
+        a: Union[Bar, Baz]
+        b: Union[int, str]
+        c: Union[Dict[int, str], List[int]]
+        d: Union[int, Nested]
+
+    f = Foo(Bar(10), 'foo', {10: 'bar'}, Nested(Baz(100)))
+    d = {
+        "a": {"type": "Bar", "v": 10},  # Union of dataclasses will be (de)serialized with internal tagging
+        "b": "foo",  # non dataclass will be untagged
+        "c": {10: "bar"},
+        "d": {"type": "Nested", "v": {"type": "Baz", "v": 100}},
+    }
+    assert to_dict(f) == d
+    assert from_dict(Foo, d) == f
+
+    @serde(tagging=InternalTagging("type"))
+    class Foo:
+        a: Union[Bar, Baz]
+
+    f = Foo(Bar(10))
+
+    # Tag not found
+    with pytest.raises(Exception):
+        assert from_dict(Foo, {"a": {"TagNotFound": "", "v": 10}})
+
+    # Tag is correct, but incompatible data
+    with pytest.raises(Exception):
+        assert from_dict(Foo, {"a": {"type": "Bar", "c": 10}})
+
+    with pytest.raises(SerdeError):
+        # Tag is not specified in attribute
+        @serde(tagging=InternalTagging())
+        class Foo:
+            pass
+
+
+def test_adjacent_tagging():
+    from serde import AdjacentTagging
+
+    @serde
+    class Bar:
+        v: int
+
+    @serde
+    class Baz:
+        v: int
+
+    @serde(tagging=AdjacentTagging("type", "content"))
+    class Nested:
+        v: Union[Bar, Baz]
+
+    @serde(tagging=AdjacentTagging("type", "content"))
+    class Foo:
+        a: Union[Bar, Baz]
+        b: Union[int, str]
+        c: Union[Dict[int, str], List[int]]
+        d: Union[int, Nested]
+
+    f = Foo(Bar(10), 'foo', {10: 'bar'}, Nested(Baz(100)))
+    d = {
+        "a": {"type": "Bar", "content": {"v": 10}},  # Union of dataclasses will be (de)serialized with adjacent tagging
+        "b": "foo",  # non dataclass will be untagged
+        "c": {10: "bar"},
+        "d": {"type": "Nested", "content": {"v": {"type": "Baz", "content": {"v": 100}}}},
+    }
+    assert to_dict(f) == d
+    assert from_dict(Foo, d) == f
+
+    @serde(tagging=AdjacentTagging("type", "content"))
+    class Foo:
+        a: Union[Bar, Baz]
+
+    f = Foo(Bar(10))
+
+    # Tag not found
+    with pytest.raises(Exception):
+        assert from_dict(Foo, {"a": {"TagNotFound": "", "content": {"v": 10}}})
+
+    # Content tag not found
+    with pytest.raises(Exception):
+        assert from_dict(Foo, {"a": {"type": "Bar", "TagNotFound": {"v": 10}}})
+
+    # Tag is correct, but incompatible data
+    with pytest.raises(Exception):
+        assert from_dict(Foo, {"a": {"type": "Bar", "content": {"c": 10}}})
+
+    with pytest.raises(SerdeError):
+        # Tag is not specified in attribute
+        @serde(tagging=AdjacentTagging(content="content"))
+        class Foo:
+            pass
+
+    with pytest.raises(SerdeError):
+        # Content is not specified in attribute
+        @serde(tagging=AdjacentTagging(tag="tag"))
+        class Foo:
+            pass
+
+    with pytest.raises(SerdeError):
+        # Tag/Content is not specified in attribute
+        @serde(tagging=AdjacentTagging())
+        class Foo:
+            pass
+
+
+def test_untagged():
+    from serde import Untagged
+
+    @serde
+    class Bar:
+        v: int
+
+    @serde
+    class Baz:
+        v: int
+
+    @serde(tagging=Untagged)
+    class Nested:
+        v: Union[Bar, Baz]
+
+    @serde(tagging=Untagged)
+    class Foo:
+        a: Union[Bar, Baz]
+        b: Union[int, str]
+        c: Union[Dict[int, str], List[int]]
+        d: Union[int, Nested]
+
+    f = Foo(Bar(10), 'foo', {10: 'bar'}, Nested(Bar(100)))
+    d = {"a": {"v": 10}, "b": "foo", "c": {10: "bar"}, "d": {"v": {"v": 100}}}
+    assert to_dict(f) == d
+    assert from_dict(Foo, d) == f
+
+    @serde(tagging=Untagged)
+    class Foo:
+        a: Union[Bar, Baz]
+
+    f = Foo(Baz(10))
+
+    # Untagged can't differenciate the dataclass with similar fields
+    with pytest.raises(Exception):
+        assert to_dict(from_dict(Foo, d)) == f
+
+    # Untaggled can't differenciate Dict and List.
+    @serde
+    class Foo:
+        a: Union[List[int], Dict[int, str]]
+
+    f = Foo({10: 'bar'})
+    with pytest.raises(Exception):
+        assert to_dict(from_dict(Foo, d)) == f

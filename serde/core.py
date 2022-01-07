@@ -4,6 +4,7 @@ pyserde core module.
 import dataclasses
 import datetime
 import decimal
+import enum
 import functools
 import ipaddress
 import logging
@@ -527,8 +528,57 @@ def union_func_name(prefix: str, union_args: List[Type]) -> str:
     return re.sub(r"[ ,\[\]]+", "_", f"{prefix}_{'_'.join([typename(e) for e in union_args])}")
 
 
-def filter_scope(scope: Dict[str, Any]) -> Iterator[str]:
-    for k, v in scope.items():
-        if v.__module__ == "typing":
-            continue
-        yield k
+@dataclass
+class Tagging:
+    """
+    Controls how union is (de)serialized. This is the same concept as in
+    https://serde.rs/enum-representations.html
+    """
+
+    class Kind(enum.Enum):
+        External = enum.auto()
+        Internal = enum.auto()
+        Adjacent = enum.auto()
+        Untagged = enum.auto()
+
+    tag: Optional[str] = None
+    content: Optional[str] = None
+    kind: Kind = Kind.External
+
+    def is_external(self):
+        return self.kind == self.Kind.External
+
+    def is_internal(self):
+        return self.kind == self.Kind.Internal
+
+    def is_adjacent(self):
+        return self.kind == self.Kind.Adjacent
+
+    def is_untagged(self):
+        return self.kind == self.Kind.Untagged
+
+    @classmethod
+    def is_taggable(cls, typ):
+        return dataclasses.is_dataclass(typ)
+
+    def check(self):
+        if self.is_internal() and self.tag is None:
+            raise SerdeError("\"tag\" must be specified in InternalTagging")
+        if self.is_adjacent() and (self.tag is None or self.content is None):
+            raise SerdeError("\"tag\" and \"content\" must be specified in AdjacentTagging")
+
+
+ExternalTagging = Tagging()
+
+InternalTagging = functools.partial(Tagging, kind=Tagging.Kind.Internal)
+
+AdjacentTagging = functools.partial(Tagging, kind=Tagging.Kind.Adjacent)
+
+Untagged = Tagging(kind=Tagging.Kind.Untagged)
+
+DefaultTagging = ExternalTagging
+
+
+def ensure(expr, description):
+    if not expr:
+        raise Exception(description)

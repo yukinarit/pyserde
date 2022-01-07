@@ -40,13 +40,14 @@ from .core import (
     TO_ITER,
     UNION_SE_PREFIX,
     DateTimeTypes,
+    DefaultTagging,
     Field,
     SerdeScope,
     StrSerializableTypes,
+    Tagging,
     add_func,
     conv,
     fields,
-    filter_scope,
     is_instance,
     logger,
     raise_unsupported_type,
@@ -116,6 +117,7 @@ def serialize(
     reuse_instances_default: bool = True,
     convert_sets_default: bool = False,
     serializer: Optional[SerializeFunc] = None,
+    tagging: Tagging = DefaultTagging,
     **kwargs,
 ):
     """
@@ -176,6 +178,8 @@ def serialize(
     """
 
     def wrap(cls: Type):
+        tagging.check()
+
         # If no `dataclass` found in the class, dataclassify it automatically.
         if not is_dataclass(cls):
             dataclass(cls)
@@ -216,7 +220,7 @@ def serialize(
         for union in iter_unions(cls):
             union_args = type_args(union)
             union_key = union_func_name(UNION_SE_PREFIX, union_args)
-            add_func(scope, union_key, render_union_func(cls, union_args), g)
+            add_func(scope, union_key, render_union_func(cls, union_args, tagging), g)
             scope.union_se_args[union_key] = union_args
 
         for f in sefields(cls):
@@ -408,7 +412,6 @@ def {{func}}(obj, reuse_instances = {{serde_scope.reuse_instances_default}},
     renderer = Renderer(TO_ITER, custom)
     env = jinja2.Environment(loader=jinja2.DictLoader({'iter': template}))
     env.filters.update({'rvalue': renderer.render})
-    env.filters.update({'filter_scope': filter_scope})
     return env.get_template('iter').render(func=TO_ITER, serde_scope=getattr(cls, SERDE_SCOPE), fields=sefields(cls))
 
 
@@ -444,18 +447,35 @@ def {{func}}(obj, reuse_instances = {{serde_scope.reuse_instances_default}},
     env.filters.update({'rvalue': renderer.render})
     env.filters.update({'lvalue': lrenderer.render})
     env.filters.update({'case': functools.partial(conv, case=case)})
-    env.filters.update({'filter_scope': filter_scope})
     return env.get_template('dict').render(func=TO_DICT, serde_scope=getattr(cls, SERDE_SCOPE), fields=sefields(cls))
 
 
-def render_union_func(cls: Type, union_args: List[Type]) -> str:
+def render_union_func(cls: Type, union_args: List[Type], tagging: Tagging = DefaultTagging) -> str:
+    """
+    Render function that serializes a field with union type.
+    """
     template = """
 def {{func}}(obj, reuse_instances, convert_sets):
   union_args = serde_scope.union_se_args['{{func}}']
 
   {% for t in union_args %}
   if is_instance(obj, union_args[{{loop.index0}}]):
-    return {{t|arg|rvalue()}}
+    {% if tagging.is_external() and is_taggable(t) %}
+    return {"{{t|typename}}": {{t|arg|rvalue}}}
+
+    {% elif tagging.is_internal() and is_taggable(t) %}
+    res = {{t|arg|rvalue}}
+    res["{{tagging.tag}}"] = "{{t|typename}}"
+    return res
+
+    {% elif tagging.is_adjacent() and is_taggable(t) %}
+    res = {"{{tagging.content}}": {{t|arg|rvalue}}}
+    res["{{tagging.tag}}"] = "{{t|typename}}"
+    return res
+
+    {% else %}
+    return {{t|arg|rvalue}}
+    {% endif %}
   {% endfor %}
   raise SerdeError("Can not serialize " + repr(obj) + " of type " + typename(type(obj)) + " for {{union_name}}")
     """
@@ -465,12 +485,14 @@ def {{func}}(obj, reuse_instances, convert_sets):
     env = jinja2.Environment(loader=jinja2.DictLoader({'dict': template}))
     env.filters.update({'arg': lambda x: SeField(x, "obj")})
     env.filters.update({'rvalue': renderer.render})
-    env.filters.update({'filter_scope': filter_scope})
+    env.filters.update({'typename': typename})
     return env.get_template('dict').render(
         func=union_func_name(UNION_SE_PREFIX, union_args),
         serde_scope=getattr(cls, SERDE_SCOPE),
         union_args=union_args,
         union_name=union_name,
+        tagging=tagging,
+        is_taggable=Tagging.is_taggable,
     )
 
 

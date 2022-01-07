@@ -40,12 +40,14 @@ from .core import (
     SERDE_SCOPE,
     UNION_DE_PREFIX,
     DateTimeTypes,
+    DefaultTagging,
     Field,
     SerdeScope,
     StrSerializableTypes,
+    Tagging,
     add_func,
+    ensure,
     fields,
-    filter_scope,
     logger,
     raise_unsupported_type,
     union_func_name,
@@ -110,6 +112,7 @@ def deserialize(
     rename_all: Optional[str] = None,
     reuse_instances_default: bool = True,
     deserializer: Optional[DeserializeFunc] = None,
+    tagging: Tagging = DefaultTagging,
     **kwargs,
 ):
     """
@@ -170,6 +173,8 @@ def deserialize(
     """
 
     def wrap(cls: Type):
+        tagging.check()
+
         # If no `dataclass` found in the class, dataclassify it automatically.
         if not is_dataclass(cls):
             dataclass(cls)
@@ -190,6 +195,7 @@ def deserialize(
         g['SerdeError'] = SerdeError
         g['raise_unsupported_type'] = raise_unsupported_type
         g['typename'] = typename  # used in union functions
+        g['ensure'] = ensure
         if deserialize:
             g['serde_custom_class_deserializer'] = functools.partial(
                 serde_custom_class_deserializer, custom=deserializer
@@ -204,7 +210,9 @@ def deserialize(
         # render all union functions
         for union in iter_unions(cls):
             union_args = type_args(union)
-            add_func(scope, union_func_name(UNION_DE_PREFIX, union_args), render_union_func(cls, union_args), g)
+            add_func(
+                scope, union_func_name(UNION_DE_PREFIX, union_args), render_union_func(cls, union_args, tagging), g
+            )
 
         # Collect default values and default factories used in the generated code.
         for f in defields(cls):
@@ -695,7 +703,6 @@ def {{func}}(data, reuse_instances = {{serde_scope.reuse_instances_default}}):
     env = jinja2.Environment(loader=jinja2.DictLoader({'iter': template}))
     env.filters.update({'rvalue': renderer.render})
     env.filters.update({'arg': to_iter_arg})
-    env.filters.update({'filter_scope': filter_scope})
     return env.get_template('iter').render(func=FROM_ITER, serde_scope=getattr(cls, SERDE_SCOPE), fields=defields(cls))
 
 
@@ -719,29 +726,42 @@ def {{func}}(data, reuse_instances = {{serde_scope.reuse_instances_default}}):
     env = jinja2.Environment(loader=jinja2.DictLoader({'dict': template}))
     env.filters.update({'rvalue': renderer.render})
     env.filters.update({'arg': functools.partial(to_arg, rename_all=rename_all)})
-    env.filters.update({'filter_scope': filter_scope})
     return env.get_template('dict').render(func=FROM_DICT, serde_scope=getattr(cls, SERDE_SCOPE), fields=defields(cls))
 
 
-def render_union_func(cls: Type, union_args: List[Type]) -> str:
+def render_union_func(cls: Type, union_args: List[Type], tagging: Tagging = DefaultTagging) -> str:
     template = """
 def {{func}}(data, reuse_instances):
-  # create fake dict so we can reuse the normal render function
-  fake_dict = {"fake_key":data}
-
   errors = []
   {% for t in union_args %}
-  {% if t | is_primitive or t | is_none %}
-  if isinstance(data, {{t.__name__}}):
-    return {{t|arg|rvalue}}
-  else:
-    errors.append("input is not of type {{t.__name__}}")
-  {% else %}
   try:
+    # create fake dict so we can reuse the normal render function
+    {% if tagging.is_external() and is_taggable(t)  %}
+    ensure("{{t|typename}}" in data , "'{{t|typename}}' key is not present")
+    fake_dict = {"fake_key": data["{{t|typename}}"]}
+
+    {% elif tagging.is_internal() and is_taggable(t) %}
+    ensure("{{tagging.tag}}" in data , "'{{tagging.tag}}' key is not present")
+    ensure("{{t|typename}}" == data["{{tagging.tag}}"], "tag '{{t|typename}}' isn't found")
+    fake_dict = {"fake_key": data}
+
+    {% elif tagging.is_adjacent() and is_taggable(t) %}
+    ensure("{{tagging.tag}}" in data , "'{{tagging.tag}}' key is not present")
+    ensure("{{tagging.content}}" in data , "'{{tagging.content}}' key is not present")
+    ensure("{{t|typename}}" == data["{{tagging.tag}}"], "tag '{{t|typename}}' isn't found")
+    fake_dict = {"fake_key": data["{{tagging.content}}"]}
+
+    {% else %}
+    fake_dict = {"fake_key": data}
+    {% endif %}
+
+    {% if t|is_primitive or t |is_none %}
+    if not isinstance(fake_dict["fake_key"], {{t.__name__}}):
+        raise Exception("Not a type of {{t.__name__}}")
+    {% endif %}
     return {{t|arg|rvalue}}
   except Exception as e:
     errors.append(f' Failed to deserialize into {{t.__name__}}: {e}')
-  {% endif %}
   {% endfor %}
   raise SerdeError("Can not deserialize " + repr(data) + " of type " + \
           typename(type(data)) + " into {{union_name}}.\\nReasons:\\n" + "\\n".join(errors))
@@ -756,10 +776,12 @@ def {{func}}(data, reuse_instances):
     env.filters.update({'rvalue': renderer.render})
     env.filters.update({'is_primitive': is_primitive})
     env.filters.update({'is_none': is_none})
-    env.filters.update({'filter_scope': filter_scope})
+    env.filters.update({'typename': typename})
     return env.get_template('dict').render(
         func=union_func_name(UNION_DE_PREFIX, union_args),
         serde_scope=getattr(cls, SERDE_SCOPE),
         union_args=union_args,
         union_name=union_name,
+        tagging=tagging,
+        is_taggable=Tagging.is_taggable,
     )

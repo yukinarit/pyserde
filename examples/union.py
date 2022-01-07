@@ -5,22 +5,33 @@ from serde.json import from_json, to_json
 
 
 @serde
+class Bar:
+    v: int
+
+
+@serde
+class Baz:
+    v: float
+
+
+@serde
 class Foo:
-    v: Union[int, str]
-    c: Union[Dict[str, int], List[int]]
+    a: Union[int, str]
+    b: Union[Dict[str, int], List[int]]
+    c: Union[Bar, Baz]
 
 
 def main():
-    f = Foo(10, [1, 2, 3])
+    f = Foo(10, [1, 2, 3], Bar(10))
     print(f"Into Json: {to_json(f)}")
 
-    s = '{"v": 10, "c": [1, 2, 3]}'
+    s = '{"a": 10, "b": [1, 2, 3], "c": {"Bar": {"v": 10}}}'
     print(f"From Json: {from_json(Foo, s)}")
 
-    f = Foo('foo', {'bar': 1, 'baz': 2})
+    f = Foo('foo', {'bar': 1, 'baz': 2}, Baz(100.0))
     print(f"Into Json: {to_json(f)}")
 
-    s = '{"v": "foo", "c": {"bar": 1, "baz": 2}}'
+    s = '{"a": "foo", "b": {"bar": 1, "baz": 2}, "c": {"Baz": {"v": 100.0}}}'
     print(f"From Json: {from_json(Foo, s)}")
 
 
