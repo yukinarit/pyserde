@@ -4,6 +4,7 @@ associated with deserialization.
 """
 
 import abc
+import dataclasses
 import functools
 from dataclasses import dataclass, is_dataclass
 from typing import Any, Callable, Dict, List, Optional, Type
@@ -77,6 +78,31 @@ def default_deserializer(_cls: Type, obj):
     Marker function to tell serde to use the default deserializer. It's used when custom deserializer is specified
     at the class but you want to override a field with the default deserializer.
     """
+
+
+def _make_deserialize(
+    cls_name: str,
+    fields,
+    *args,
+    rename_all: Optional[str] = None,
+    reuse_instances_default: bool = True,
+    convert_sets_default: bool = False,
+    serializer: Optional[DeserializeFunc] = None,
+    **kwargs,
+):
+    """
+    Create a deserializable class programatically.
+    """
+    C = dataclasses.make_dataclass(cls_name, fields, *args, **kwargs)
+    C = deserialize(
+        C,
+        *args,
+        rename_all=rename_all,
+        reuse_instances_default=reuse_instances_default,
+        convert_sets_default=convert_sets_default,
+        **kwargs,
+    )
+    return C
 
 
 def deserialize(
