@@ -85,6 +85,31 @@ class Serializer(metaclass=abc.ABCMeta):
         pass
 
 
+def _make_serialize(
+    cls_name: str,
+    fields,
+    *args,
+    rename_all: Optional[str] = None,
+    reuse_instances_default: bool = True,
+    convert_sets_default: bool = False,
+    serializer: Optional[SerializeFunc] = None,
+    **kwargs,
+):
+    """
+    Create a serializable class programatically.
+    """
+    C = dataclasses.make_dataclass(cls_name, fields, *args, **kwargs)
+    C = serialize(
+        C,
+        *args,
+        rename_all=rename_all,
+        reuse_instances_default=reuse_instances_default,
+        convert_sets_default=convert_sets_default,
+        **kwargs,
+    )
+    return C
+
+
 def serialize(
     _cls=None,
     rename_all: Optional[str] = None,

@@ -576,3 +576,52 @@ def test_dataclass_inheritance():
 
     b = DerivedB(i=0, s="foo", k=42.0)
     assert b == serde.from_dict(DerivedB, serde.to_dict(b))
+
+
+def make_serde(class_name: str, se: bool, fields, *args, **kwargs):
+    if se:
+        return serde.de.deserialize(serde.se._make_serialize(class_name, fields, *args, **kwargs), **kwargs)
+    else:
+        return serde.se.serialize(serde.de._make_deserialize(class_name, fields, *args, **kwargs), **kwargs)
+
+
+@pytest.mark.parametrize('se', (True, False))
+def test_make_serialize_deserialize(se):
+    fields = [('i', int, dataclasses.field())]
+    Foo = make_serde('Foo', se, fields)
+
+    f = Foo(10)
+    assert serde.to_dict(f) == {'i': 10}
+    assert str(f) == 'Foo(i=10)'
+    assert serde.from_dict(Foo, {'i': 10}) == f
+
+    # Test class attribute
+    fields = [('int_field', int, dataclasses.field())]
+    Foo = make_serde('Foo', se, fields, rename_all='pascalcase')
+    f = Foo(10)
+    assert serde.to_dict(f) == {'IntField': 10}
+
+    # Test field attribute
+    fields = [('i', int, dataclasses.field(metadata={'serde_skip': True})), ('j', float, dataclasses.field())]
+    Foo = make_serde('Foo', se, fields)
+    f = Foo(10, 100.0)
+    assert serde.to_dict(f) == {'j': 100.0}
+
+    # Test class/field attributes at the same time
+    fields = [
+        ('int_field', int, dataclasses.field(metadata={'serde_rename': 'renamed_field'})),
+        ('float_field', float, dataclasses.field()),
+    ]
+    Foo = make_serde('Foo', se, fields, rename_all='pascalcase')
+    f = Foo(10, 100.0)
+    assert serde.to_dict(f) == {'renamed_field': 10, 'FloatField': 100.0}
+
+    # Nested
+    fields = [('v', int, dataclasses.field())]
+    Bar = make_serde('Bar', se, fields)
+
+    fields = [('bar', Bar, dataclasses.field())]
+    Foo = make_serde('Foo', se, fields)
+    f = Foo(Bar(10))
+    assert serde.to_dict(f) == {'bar': {'v': 10}}
+    assert serde.from_dict(Foo, {'bar': {'v': 10}}) == f

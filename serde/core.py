@@ -455,6 +455,21 @@ class Field:
             flatten=flatten,
         )
 
+    def to_dataclass(self) -> dataclasses.Field:
+        f = dataclasses.Field(
+            default=self.default,
+            default_factory=self.default_factory,
+            init=self.init,
+            repr=self.repr,
+            hash=self.hash,
+            compare=self.compare,
+            metadata=self.metadata,
+        )
+        assert self.name
+        f.name = self.name
+        f.type = self.type
+        return f
+
     @staticmethod
     def mangle(field: dataclasses.Field, name: str) -> str:
         """
