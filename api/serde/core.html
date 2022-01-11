@@ -121,6 +121,9 @@
                                 <a class="function" href="#Field.from_dataclass">from_dataclass</a>
                         </li>
                         <li>
+                                <a class="function" href="#Field.to_dataclass">to_dataclass</a>
+                        </li>
+                        <li>
                                 <a class="function" href="#Field.mangle">mangle</a>
                         </li>
                         <li>
@@ -625,6 +628,21 @@
             <span class="n">deserializer</span><span class="o">=</span><span class="n">deserializer</span><span class="p">,</span>
             <span class="n">flatten</span><span class="o">=</span><span class="n">flatten</span><span class="p">,</span>
         <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">to_dataclass</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">Field</span><span class="p">:</span>
+        <span class="n">f</span> <span class="o">=</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">Field</span><span class="p">(</span>
+            <span class="n">default</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">default</span><span class="p">,</span>
+            <span class="n">default_factory</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">default_factory</span><span class="p">,</span>
+            <span class="n">init</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">init</span><span class="p">,</span>
+            <span class="nb">repr</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">repr</span><span class="p">,</span>
+            <span class="nb">hash</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">hash</span><span class="p">,</span>
+            <span class="n">compare</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">compare</span><span class="p">,</span>
+            <span class="n">metadata</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">type</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">type</span>
+        <span class="k">return</span> <span class="n">f</span>
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">mangle</span><span class="p">(</span><span class="n">field</span><span class="p">:</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">Field</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
@@ -1199,6 +1217,21 @@ multiple fields receives <code>skip_if</code> attribute.</p>
             <span class="n">flatten</span><span class="o">=</span><span class="n">flatten</span><span class="p">,</span>
         <span class="p">)</span>
 
+    <span class="k">def</span> <span class="nf">to_dataclass</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">Field</span><span class="p">:</span>
+        <span class="n">f</span> <span class="o">=</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">Field</span><span class="p">(</span>
+            <span class="n">default</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">default</span><span class="p">,</span>
+            <span class="n">default_factory</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">default_factory</span><span class="p">,</span>
+            <span class="n">init</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">init</span><span class="p">,</span>
+            <span class="nb">repr</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">repr</span><span class="p">,</span>
+            <span class="nb">hash</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">hash</span><span class="p">,</span>
+            <span class="n">compare</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">compare</span><span class="p">,</span>
+            <span class="n">metadata</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">type</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">type</span>
+        <span class="k">return</span> <span class="n">f</span>
+
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">mangle</span><span class="p">(</span><span class="n">field</span><span class="p">:</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">Field</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -1454,6 +1487,37 @@ deserialization behaviour of a field.</p></li>
             <div class="docstring"><p>Create <code><a href="#Field">Field</a></code> object from <code>dataclasses.Field</code>.</p>
 </div>
 
+
+                            </div>
+                            <div id="Field.to_dataclass" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#Field.to_dataclass">#&nbsp;&nbsp</a>
+
+        
+            <span class="def">def</span>
+            <span class="name">to_dataclass</span><span class="signature">(self) -&gt; dataclasses.Field</span>:
+    </div>
+
+                <details>
+            <summary>View Source</summary>
+            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">to_dataclass</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">Field</span><span class="p">:</span>
+        <span class="n">f</span> <span class="o">=</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">Field</span><span class="p">(</span>
+            <span class="n">default</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">default</span><span class="p">,</span>
+            <span class="n">default_factory</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">default_factory</span><span class="p">,</span>
+            <span class="n">init</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">init</span><span class="p">,</span>
+            <span class="nb">repr</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">repr</span><span class="p">,</span>
+            <span class="nb">hash</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">hash</span><span class="p">,</span>
+            <span class="n">compare</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">compare</span><span class="p">,</span>
+            <span class="n">metadata</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">type</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">type</span>
+        <span class="k">return</span> <span class="n">f</span>
+</pre></div>
+
+        </details>
+
+    
 
                             </div>
                             <div id="Field.mangle" class="classattr">
