@@ -9,7 +9,7 @@ Usage:
 """
 from typing import Dict, List, Optional, Union
 
-from serde import serde
+from serde import Untagged, serde
 from serde.toml import from_toml
 
 
@@ -32,7 +32,7 @@ class Package:
     editable: Optional[bool] = False
 
 
-@serde
+@serde(tagging=Untagged)
 class Pipfile:
     source: List[Source]
     requires: Optional[Requires]

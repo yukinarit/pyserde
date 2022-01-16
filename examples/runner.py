@@ -18,6 +18,7 @@ import tomlfile
 import type_datetime
 import type_decimal
 import union
+import union_tagging
 import yamlfile
 
 PY36 = sys.version_info[:3] < (3, 7, 0)
