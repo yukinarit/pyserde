@@ -107,12 +107,14 @@ associated with deserialization.</p>
     <span class="n">SERDE_SCOPE</span><span class="p">,</span>
     <span class="n">UNION_DE_PREFIX</span><span class="p">,</span>
     <span class="n">DateTimeTypes</span><span class="p">,</span>
+    <span class="n">DefaultTagging</span><span class="p">,</span>
     <span class="n">Field</span><span class="p">,</span>
     <span class="n">SerdeScope</span><span class="p">,</span>
     <span class="n">StrSerializableTypes</span><span class="p">,</span>
+    <span class="n">Tagging</span><span class="p">,</span>
     <span class="n">add_func</span><span class="p">,</span>
+    <span class="n">ensure</span><span class="p">,</span>
     <span class="n">fields</span><span class="p">,</span>
-    <span class="n">filter_scope</span><span class="p">,</span>
     <span class="n">logger</span><span class="p">,</span>
     <span class="n">raise_unsupported_type</span><span class="p">,</span>
     <span class="n">union_func_name</span><span class="p">,</span>
@@ -177,6 +179,7 @@ associated with deserialization.</p>
     <span class="n">rename_all</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">reuse_instances_default</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="n">deserializer</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">DeserializeFunc</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">tagging</span><span class="p">:</span> <span class="n">Tagging</span> <span class="o">=</span> <span class="n">DefaultTagging</span><span class="p">,</span>
     <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
 <span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -237,6 +240,8 @@ associated with deserialization.</p>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="nf">wrap</span><span class="p">(</span><span class="bp">cls</span><span class="p">:</span> <span class="n">Type</span><span class="p">):</span>
+        <span class="n">tagging</span><span class="o">.</span><span class="n">check</span><span class="p">()</span>
+
         <span class="c1"># If no `dataclass` found in the class, dataclassify it automatically.</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">is_dataclass</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
             <span class="n">dataclass</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
@@ -257,6 +262,7 @@ associated with deserialization.</p>
         <span class="n">g</span><span class="p">[</span><span class="s1">&#39;SerdeError&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">SerdeError</span>
         <span class="n">g</span><span class="p">[</span><span class="s1">&#39;raise_unsupported_type&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">raise_unsupported_type</span>
         <span class="n">g</span><span class="p">[</span><span class="s1">&#39;typename&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">typename</span>  <span class="c1"># used in union functions</span>
+        <span class="n">g</span><span class="p">[</span><span class="s1">&#39;ensure&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ensure</span>
         <span class="k">if</span> <span class="n">deserialize</span><span class="p">:</span>
             <span class="n">g</span><span class="p">[</span><span class="s1">&#39;serde_custom_class_deserializer&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">functools</span><span class="o">.</span><span class="n">partial</span><span class="p">(</span>
                 <span class="n">serde_custom_class_deserializer</span><span class="p">,</span> <span class="n">custom</span><span class="o">=</span><span class="n">deserializer</span>
@@ -271,7 +277,9 @@ associated with deserialization.</p>
         <span class="c1"># render all union functions</span>
         <span class="k">for</span> <span class="n">union</span> <span class="ow">in</span> <span class="n">iter_unions</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
             <span class="n">union_args</span> <span class="o">=</span> <span class="n">type_args</span><span class="p">(</span><span class="n">union</span><span class="p">)</span>
-            <span class="n">add_func</span><span class="p">(</span><span class="n">scope</span><span class="p">,</span> <span class="n">union_func_name</span><span class="p">(</span><span class="n">UNION_DE_PREFIX</span><span class="p">,</span> <span class="n">union_args</span><span class="p">),</span> <span class="n">render_union_func</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">union_args</span><span class="p">),</span> <span class="n">g</span><span class="p">)</span>
+            <span class="n">add_func</span><span class="p">(</span>
+                <span class="n">scope</span><span class="p">,</span> <span class="n">union_func_name</span><span class="p">(</span><span class="n">UNION_DE_PREFIX</span><span class="p">,</span> <span class="n">union_args</span><span class="p">),</span> <span class="n">render_union_func</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">union_args</span><span class="p">,</span> <span class="n">tagging</span><span class="p">),</span> <span class="n">g</span>
+            <span class="p">)</span>
 
         <span class="c1"># Collect default values and default factories used in the generated code.</span>
         <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">defields</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
@@ -762,7 +770,6 @@ associated with deserialization.</p>
     <span class="n">env</span> <span class="o">=</span> <span class="n">jinja2</span><span class="o">.</span><span class="n">Environment</span><span class="p">(</span><span class="n">loader</span><span class="o">=</span><span class="n">jinja2</span><span class="o">.</span><span class="n">DictLoader</span><span class="p">({</span><span class="s1">&#39;iter&#39;</span><span class="p">:</span> <span class="n">template</span><span class="p">}))</span>
     <span class="n">env</span><span class="o">.</span><span class="n">filters</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;rvalue&#39;</span><span class="p">:</span> <span class="n">renderer</span><span class="o">.</span><span class="n">render</span><span class="p">})</span>
     <span class="n">env</span><span class="o">.</span><span class="n">filters</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;arg&#39;</span><span class="p">:</span> <span class="n">to_iter_arg</span><span class="p">})</span>
-    <span class="n">env</span><span class="o">.</span><span class="n">filters</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;filter_scope&#39;</span><span class="p">:</span> <span class="n">filter_scope</span><span class="p">})</span>
     <span class="k">return</span> <span class="n">env</span><span class="o">.</span><span class="n">get_template</span><span class="p">(</span><span class="s1">&#39;iter&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">func</span><span class="o">=</span><span class="n">FROM_ITER</span><span class="p">,</span> <span class="n">serde_scope</span><span class="o">=</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">SERDE_SCOPE</span><span class="p">),</span> <span class="n">fields</span><span class="o">=</span><span class="n">defields</span><span class="p">(</span><span class="bp">cls</span><span class="p">))</span>
 
 
@@ -786,29 +793,42 @@ associated with deserialization.</p>
     <span class="n">env</span> <span class="o">=</span> <span class="n">jinja2</span><span class="o">.</span><span class="n">Environment</span><span class="p">(</span><span class="n">loader</span><span class="o">=</span><span class="n">jinja2</span><span class="o">.</span><span class="n">DictLoader</span><span class="p">({</span><span class="s1">&#39;dict&#39;</span><span class="p">:</span> <span class="n">template</span><span class="p">}))</span>
     <span class="n">env</span><span class="o">.</span><span class="n">filters</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;rvalue&#39;</span><span class="p">:</span> <span class="n">renderer</span><span class="o">.</span><span class="n">render</span><span class="p">})</span>
     <span class="n">env</span><span class="o">.</span><span class="n">filters</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;arg&#39;</span><span class="p">:</span> <span class="n">functools</span><span class="o">.</span><span class="n">partial</span><span class="p">(</span><span class="n">to_arg</span><span class="p">,</span> <span class="n">rename_all</span><span class="o">=</span><span class="n">rename_all</span><span class="p">)})</span>
-    <span class="n">env</span><span class="o">.</span><span class="n">filters</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;filter_scope&#39;</span><span class="p">:</span> <span class="n">filter_scope</span><span class="p">})</span>
     <span class="k">return</span> <span class="n">env</span><span class="o">.</span><span class="n">get_template</span><span class="p">(</span><span class="s1">&#39;dict&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">func</span><span class="o">=</span><span class="n">FROM_DICT</span><span class="p">,</span> <span class="n">serde_scope</span><span class="o">=</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">SERDE_SCOPE</span><span class="p">),</span> <span class="n">fields</span><span class="o">=</span><span class="n">defields</span><span class="p">(</span><span class="bp">cls</span><span class="p">))</span>
 
 
-<span class="k">def</span> <span class="nf">render_union_func</span><span class="p">(</span><span class="bp">cls</span><span class="p">:</span> <span class="n">Type</span><span class="p">,</span> <span class="n">union_args</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Type</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="k">def</span> <span class="nf">render_union_func</span><span class="p">(</span><span class="bp">cls</span><span class="p">:</span> <span class="n">Type</span><span class="p">,</span> <span class="n">union_args</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Type</span><span class="p">],</span> <span class="n">tagging</span><span class="p">:</span> <span class="n">Tagging</span> <span class="o">=</span> <span class="n">DefaultTagging</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
     <span class="n">template</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
 <span class="s2">def {{func}}(data, reuse_instances):</span>
-<span class="s2">  # create fake dict so we can reuse the normal render function</span>
-<span class="s2">  fake_dict = {&quot;fake_key&quot;:data}</span>
-
 <span class="s2">  errors = []</span>
 <span class="s2">  {</span><span class="si">% f</span><span class="s2">or t in union_args %}</span>
-<span class="s2">  {</span><span class="si">% i</span><span class="s2">f t | is_primitive or t | is_none %}</span>
-<span class="s2">  if isinstance(data, {{t.__name__}}):</span>
-<span class="s2">    return {{t|arg|rvalue}}</span>
-<span class="s2">  else:</span>
-<span class="s2">    errors.append(&quot;input is not of type {{t.__name__}}&quot;)</span>
-<span class="s2">  {</span><span class="si">% e</span><span class="s2">lse %}</span>
 <span class="s2">  try:</span>
+<span class="s2">    # create fake dict so we can reuse the normal render function</span>
+<span class="s2">    {</span><span class="si">% i</span><span class="s2">f tagging.is_external() and is_taggable(t)  %}</span>
+<span class="s2">    ensure(&quot;{{t|typename}}&quot; in data , &quot;&#39;{{t|typename}}&#39; key is not present&quot;)</span>
+<span class="s2">    fake_dict = {&quot;fake_key&quot;: data[&quot;{{t|typename}}&quot;]}</span>
+
+<span class="s2">    {</span><span class="si">% e</span><span class="s2">lif tagging.is_internal() and is_taggable(t) %}</span>
+<span class="s2">    ensure(&quot;{{tagging.tag}}&quot; in data , &quot;&#39;{{tagging.tag}}&#39; key is not present&quot;)</span>
+<span class="s2">    ensure(&quot;{{t|typename}}&quot; == data[&quot;{{tagging.tag}}&quot;], &quot;tag &#39;{{t|typename}}&#39; isn&#39;t found&quot;)</span>
+<span class="s2">    fake_dict = {&quot;fake_key&quot;: data}</span>
+
+<span class="s2">    {</span><span class="si">% e</span><span class="s2">lif tagging.is_adjacent() and is_taggable(t) %}</span>
+<span class="s2">    ensure(&quot;{{tagging.tag}}&quot; in data , &quot;&#39;{{tagging.tag}}&#39; key is not present&quot;)</span>
+<span class="s2">    ensure(&quot;{{tagging.content}}&quot; in data , &quot;&#39;{{tagging.content}}&#39; key is not present&quot;)</span>
+<span class="s2">    ensure(&quot;{{t|typename}}&quot; == data[&quot;{{tagging.tag}}&quot;], &quot;tag &#39;{{t|typename}}&#39; isn&#39;t found&quot;)</span>
+<span class="s2">    fake_dict = {&quot;fake_key&quot;: data[&quot;{{tagging.content}}&quot;]}</span>
+
+<span class="s2">    {</span><span class="si">% e</span><span class="s2">lse %}</span>
+<span class="s2">    fake_dict = {&quot;fake_key&quot;: data}</span>
+<span class="s2">    {</span><span class="si">% e</span><span class="s2">ndif %}</span>
+
+<span class="s2">    {</span><span class="si">% i</span><span class="s2">f t|is_primitive or t |is_none %}</span>
+<span class="s2">    if not isinstance(fake_dict[&quot;fake_key&quot;], {{t.__name__}}):</span>
+<span class="s2">        raise Exception(&quot;Not a type of {{t.__name__}}&quot;)</span>
+<span class="s2">    {</span><span class="si">% e</span><span class="s2">ndif %}</span>
 <span class="s2">    return {{t|arg|rvalue}}</span>
 <span class="s2">  except Exception as e:</span>
 <span class="s2">    errors.append(f&#39; Failed to deserialize into {{t.__name__}}: </span><span class="si">{e}</span><span class="s2">&#39;)</span>
-<span class="s2">  {</span><span class="si">% e</span><span class="s2">ndif %}</span>
 <span class="s2">  {</span><span class="si">% e</span><span class="s2">ndfor %}</span>
 <span class="s2">  raise SerdeError(&quot;Can not deserialize &quot; + repr(data) + &quot; of type &quot; + </span><span class="se">\</span>
 <span class="s2">          typename(type(data)) + &quot; into {{union_name}}.</span><span class="se">\\</span><span class="s2">nReasons:</span><span class="se">\\</span><span class="s2">n&quot; + &quot;</span><span class="se">\\</span><span class="s2">n&quot;.join(errors))</span>
@@ -823,12 +843,14 @@ associated with deserialization.</p>
     <span class="n">env</span><span class="o">.</span><span class="n">filters</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;rvalue&#39;</span><span class="p">:</span> <span class="n">renderer</span><span class="o">.</span><span class="n">render</span><span class="p">})</span>
     <span class="n">env</span><span class="o">.</span><span class="n">filters</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;is_primitive&#39;</span><span class="p">:</span> <span class="n">is_primitive</span><span class="p">})</span>
     <span class="n">env</span><span class="o">.</span><span class="n">filters</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;is_none&#39;</span><span class="p">:</span> <span class="n">is_none</span><span class="p">})</span>
-    <span class="n">env</span><span class="o">.</span><span class="n">filters</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;filter_scope&#39;</span><span class="p">:</span> <span class="n">filter_scope</span><span class="p">})</span>
+    <span class="n">env</span><span class="o">.</span><span class="n">filters</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;typename&#39;</span><span class="p">:</span> <span class="n">typename</span><span class="p">})</span>
     <span class="k">return</span> <span class="n">env</span><span class="o">.</span><span class="n">get_template</span><span class="p">(</span><span class="s1">&#39;dict&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">render</span><span class="p">(</span>
         <span class="n">func</span><span class="o">=</span><span class="n">union_func_name</span><span class="p">(</span><span class="n">UNION_DE_PREFIX</span><span class="p">,</span> <span class="n">union_args</span><span class="p">),</span>
         <span class="n">serde_scope</span><span class="o">=</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">SERDE_SCOPE</span><span class="p">),</span>
         <span class="n">union_args</span><span class="o">=</span><span class="n">union_args</span><span class="p">,</span>
         <span class="n">union_name</span><span class="o">=</span><span class="n">union_name</span><span class="p">,</span>
+        <span class="n">tagging</span><span class="o">=</span><span class="n">tagging</span><span class="p">,</span>
+        <span class="n">is_taggable</span><span class="o">=</span><span class="n">Tagging</span><span class="o">.</span><span class="n">is_taggable</span><span class="p">,</span>
     <span class="p">)</span>
 </pre></div>
 
@@ -845,6 +867,7 @@ associated with deserialization.</p>
     rename_all: Optional[str] = None,
     reuse_instances_default: bool = True,
     deserializer: Optional[Callable[[Type, Any], Any]] = None,
+    tagging: <a href="core.html#Tagging">serde.core.Tagging</a> = Tagging(tag=None, content=None, kind=&lt;Kind.External: 1&gt;),
     **kwargs
 )</span>:
     </div>
@@ -856,6 +879,7 @@ associated with deserialization.</p>
     <span class="n">rename_all</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">reuse_instances_default</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="n">deserializer</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">DeserializeFunc</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">tagging</span><span class="p">:</span> <span class="n">Tagging</span> <span class="o">=</span> <span class="n">DefaultTagging</span><span class="p">,</span>
     <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
 <span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -916,6 +940,8 @@ associated with deserialization.</p>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="nf">wrap</span><span class="p">(</span><span class="bp">cls</span><span class="p">:</span> <span class="n">Type</span><span class="p">):</span>
+        <span class="n">tagging</span><span class="o">.</span><span class="n">check</span><span class="p">()</span>
+
         <span class="c1"># If no `dataclass` found in the class, dataclassify it automatically.</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">is_dataclass</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
             <span class="n">dataclass</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
@@ -936,6 +962,7 @@ associated with deserialization.</p>
         <span class="n">g</span><span class="p">[</span><span class="s1">&#39;SerdeError&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">SerdeError</span>
         <span class="n">g</span><span class="p">[</span><span class="s1">&#39;raise_unsupported_type&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">raise_unsupported_type</span>
         <span class="n">g</span><span class="p">[</span><span class="s1">&#39;typename&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">typename</span>  <span class="c1"># used in union functions</span>
+        <span class="n">g</span><span class="p">[</span><span class="s1">&#39;ensure&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ensure</span>
         <span class="k">if</span> <span class="n">deserialize</span><span class="p">:</span>
             <span class="n">g</span><span class="p">[</span><span class="s1">&#39;serde_custom_class_deserializer&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">functools</span><span class="o">.</span><span class="n">partial</span><span class="p">(</span>
                 <span class="n">serde_custom_class_deserializer</span><span class="p">,</span> <span class="n">custom</span><span class="o">=</span><span class="n">deserializer</span>
@@ -950,7 +977,9 @@ associated with deserialization.</p>
         <span class="c1"># render all union functions</span>
         <span class="k">for</span> <span class="n">union</span> <span class="ow">in</span> <span class="n">iter_unions</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
             <span class="n">union_args</span> <span class="o">=</span> <span class="n">type_args</span><span class="p">(</span><span class="n">union</span><span class="p">)</span>
-            <span class="n">add_func</span><span class="p">(</span><span class="n">scope</span><span class="p">,</span> <span class="n">union_func_name</span><span class="p">(</span><span class="n">UNION_DE_PREFIX</span><span class="p">,</span> <span class="n">union_args</span><span class="p">),</span> <span class="n">render_union_func</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">union_args</span><span class="p">),</span> <span class="n">g</span><span class="p">)</span>
+            <span class="n">add_func</span><span class="p">(</span>
+                <span class="n">scope</span><span class="p">,</span> <span class="n">union_func_name</span><span class="p">(</span><span class="n">UNION_DE_PREFIX</span><span class="p">,</span> <span class="n">union_args</span><span class="p">),</span> <span class="n">render_union_func</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">union_args</span><span class="p">,</span> <span class="n">tagging</span><span class="p">),</span> <span class="n">g</span>
+            <span class="p">)</span>
 
         <span class="c1"># Collect default values and default factories used in the generated code.</span>
         <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">defields</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
