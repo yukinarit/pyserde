@@ -232,7 +232,7 @@ def serialize(
         add_func(scope, TO_ITER, render_to_tuple(cls, serializer), g)
         add_func(scope, TO_DICT, render_to_dict(cls, rename_all, serializer), g)
 
-        logger.debug(f'{cls.__name__}: {SERDE_SCOPE} {scope}')
+        logger.debug(f'{typename(cls)}: {SERDE_SCOPE} {scope}')
 
         return cls
 
@@ -690,7 +690,7 @@ convert_sets=convert_sets), foo[2],)"
             return f'{{{self.render(karg)}: {self.render(varg)} for k, v in {arg.varname}.items()}}'
 
     def enum(self, arg: SeField) -> str:
-        return f'enum_value({arg.type.__name__}, {arg.varname})'
+        return f'enum_value({typename(arg.type)}, {arg.varname})'
 
     def primitive(self, arg: SeField) -> str:
         """

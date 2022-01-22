@@ -227,7 +227,7 @@ def deserialize(
         add_func(scope, FROM_ITER, render_from_iter(cls, deserializer), g)
         add_func(scope, FROM_DICT, render_from_dict(cls, rename_all, deserializer), g)
 
-        logger.debug(f'{cls.__name__}: {SERDE_SCOPE} {scope}')
+        logger.debug(f'{typename(cls)}: {SERDE_SCOPE} {scope}')
 
         return cls
 
@@ -487,8 +487,8 @@ class Renderer:
         elif arg.type in StrSerializableTypes:
             res = f"({self.c_tor_with_check(arg)}) if reuse_instances else {self.c_tor(arg)}"
         elif arg.type in DateTimeTypes:
-            from_iso = f"{arg.type.__name__}.fromisoformat({arg.data})"
-            res = f"({arg.data} if isinstance({arg.data}, {arg.type.__name__}) else {from_iso}) \
+            from_iso = f"{typename(arg.type)}.fromisoformat({arg.data})"
+            res = f"({arg.data} if isinstance({arg.data}, {typename(arg.type)}) else {from_iso}) \
                     if reuse_instances else {from_iso}"
         elif is_none(arg.type):
             res = "None"
@@ -536,7 +536,7 @@ class Renderer:
                 var = arg.datavar
 
         opts = "reuse_instances=reuse_instances"
-        return f"{arg.type.__name__}.{SERDE_SCOPE}.funcs['{self.func}']({var}, {opts})"
+        return f"{typename(arg.type)}.{SERDE_SCOPE}.funcs['{self.func}']({var}, {opts})"
 
     def opt(self, arg: DeField) -> str:
         """
@@ -648,7 +648,7 @@ Foo.__serde__.funcs['foo'](data[0][3], reuse_instances=reuse_instances),)"
             return f'{{{self.render(k)}: {self.render(v)} for k, v in {arg.data}.items()}}'
 
     def enum(self, arg: DeField) -> str:
-        return f'{arg.type.__name__}({self.primitive(arg)})'
+        return f'{typename(arg.type)}({self.primitive(arg)})'
 
     def primitive(self, arg: DeField) -> str:
         """
@@ -666,12 +666,12 @@ Foo.__serde__.funcs['foo'](data[0][3], reuse_instances=reuse_instances),)"
         return arg.data
 
     def c_tor(self, arg: DeField) -> str:
-        return f"{arg.type.__name__}({arg.data})"
+        return f"{typename(arg.type)}({arg.data})"
 
     def c_tor_with_check(self, arg: DeField, ctor: Optional[str] = None) -> str:
         if ctor is None:
             ctor = self.c_tor(arg)
-        return f"{arg.data} if isinstance({arg.data}, {arg.type.__name__}) else {ctor}"
+        return f"{arg.data} if isinstance({arg.data}, {typename(arg.type)}) else {ctor}"
 
     def union_func(self, arg: DeField) -> str:
         func_name = union_func_name(UNION_DE_PREFIX, type_args(arg.type))
@@ -773,12 +773,12 @@ def {{func}}(data, reuse_instances):
     {% endif %}
 
     {% if t|is_primitive or t |is_none %}
-    if not isinstance(fake_dict["fake_key"], {{t.__name__}}):
-        raise Exception("Not a type of {{t.__name__}}")
+    if not isinstance(fake_dict["fake_key"], {{t|typename}}):
+        raise Exception("Not a type of {{t|typename}}")
     {% endif %}
     return {{t|arg|rvalue}}
   except Exception as e:
-    errors.append(f' Failed to deserialize into {{t.__name__}}: {e}')
+    errors.append(f' Failed to deserialize into {{t|typename}}: {e}')
   {% endfor %}
   raise SerdeError("Can not deserialize " + repr(data) + " of type " + \
           typename(type(data)) + " into {{union_name}}.\\nReasons:\\n" + "\\n".join(errors))
