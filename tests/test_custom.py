@@ -13,11 +13,11 @@ from serde.json import from_json, to_json
 def test_custom_field_serializer():
     @serde
     class Foo:
-        dt1: datetime
-        dt2: datetime = field(
+        a: datetime
+        b: datetime = field(
             serializer=lambda x: x.strftime('%d/%m/%y'), deserializer=lambda x: datetime.strptime(x, '%d/%m/%y')
         )
-        dt3: Optional[datetime] = field(
+        c: Optional[datetime] = field(
             serializer=lambda x: x.strftime('%d/%m/%y') if x else None,
             deserializer=lambda x: datetime.strptime(x, '%d/%m/%y') if x else None,
         )
@@ -25,7 +25,7 @@ def test_custom_field_serializer():
     dt = datetime(2021, 1, 1, 0, 0, 0)
     f = Foo(dt, dt, None)
 
-    assert to_json(f) == '{"dt1": "2021-01-01T00:00:00", "dt2": "01/01/21", "dt3": null}'
+    assert to_json(f) == '{"a": "2021-01-01T00:00:00", "b": "01/01/21", "c": null}'
     assert f == from_json(Foo, to_json(f))
 
     assert to_tuple(f) == (datetime(2021, 1, 1, 0, 0), '01/01/21', None)
@@ -76,20 +76,37 @@ def test_custom_class_serializer():
 
     @serde(serializer=serializer, deserializer=deserializer)
     class Foo:
-        i: int
-        dt1: datetime
-        dt2: datetime
-        s: Optional[str] = None
-        u: Union[str, int] = 10
+        a: int
+        b: datetime
+        c: datetime
+        d: Optional[str] = None
+        e: Union[str, int] = 10
 
     dt = datetime(2021, 1, 1, 0, 0, 0)
     f = Foo(10, dt, dt)
 
-    assert to_json(f) == '{"i": 10, "dt1": "01/01/21", "dt2": "01/01/21", "s": null, "u": 10}'
+    assert to_json(f) == '{"a": 10, "b": "01/01/21", "c": "01/01/21", "d": null, "e": 10}'
     assert f == from_json(Foo, to_json(f))
 
     assert to_tuple(f) == (10, '01/01/21', '01/01/21', None, 10)
     assert f == from_tuple(Foo, to_tuple(f))
+
+    def fallback(_, __):
+        raise SerdeSkip()
+
+    @serde(serializer=fallback, deserializer=fallback)
+    class Foo:
+        a: Optional[str]
+        b: str
+
+    f = Foo("foo", "bar")
+    assert to_json(f) == '{"a": "foo", "b": "bar"}'
+    assert f == from_json(Foo, '{"a": "foo", "b": "bar"}')
+    assert Foo(None, "bar") == from_json(Foo, '{"b": "bar"}')
+    with pytest.raises(Exception):
+        assert Foo(None, "bar") == from_json(Foo, '{}')
+    with pytest.raises(Exception):
+        assert Foo("foo", "bar") == from_json(Foo, '{"a": "foo"}')
 
 
 def test_field_serialize_override_class_serializer():
@@ -107,16 +124,16 @@ def test_field_serialize_override_class_serializer():
 
     @serde(serializer=serializer, deserializer=deserializer)
     class Foo:
-        i: int
-        dt1: datetime
-        dt2: datetime = field(
+        a: int
+        b: datetime
+        c: datetime = field(
             serializer=lambda x: x.strftime('%y.%m.%d'), deserializer=lambda x: datetime.strptime(x, '%y.%m.%d')
         )
 
     dt = datetime(2021, 1, 1, 0, 0, 0)
     f = Foo(10, dt, dt)
 
-    assert to_json(f) == '{"i": 10, "dt1": "01/01/21", "dt2": "21.01.01"}'
+    assert to_json(f) == '{"a": 10, "b": "01/01/21", "c": "21.01.01"}'
     assert f == from_json(Foo, to_json(f))
 
     assert to_tuple(f) == (10, '01/01/21', '21.01.01')
@@ -138,14 +155,14 @@ def test_override_by_default_serializer():
 
     @serde(serializer=serializer, deserializer=deserializer)
     class Foo:
-        i: int
-        dt1: datetime
-        dt2: datetime = field(serializer=default_serializer, deserializer=default_deserializer)
+        a: int
+        b: datetime
+        c: datetime = field(serializer=default_serializer, deserializer=default_deserializer)
 
     dt = datetime(2021, 1, 1, 0, 0, 0)
     f = Foo(10, dt, dt)
 
-    assert to_json(f) == '{"i": 10, "dt1": "01/01/21", "dt2": "2021-01-01T00:00:00"}'
+    assert to_json(f) == '{"a": 10, "b": "01/01/21", "c": "2021-01-01T00:00:00"}'
     assert f == from_json(Foo, to_json(f))
 
     assert to_tuple(f) == (10, '01/01/21', datetime(2021, 1, 1, 0, 0))

@@ -426,6 +426,12 @@ class DeField(Field):
     def data(self, d):
         self.datavar = d
 
+    def data_or(self):
+        if self.iterbased:
+            return self.data
+        else:
+            return f'{self.datavar}.get("{self.conv_name()}")'
+
 
 @dataclass
 class InnerField(DeField):
@@ -491,19 +497,11 @@ class Renderer:
         else:
             return f"raise_unsupported_type({arg.data})"
 
-        if not arg.iterbased and (has_default(arg) or has_default_factory(arg)):
-            exists = f'"{arg.conv_name()}" in {arg.datavar}'
-            if has_default(arg):
-                res = f'({res}) if {exists} else serde_scope.defaults["{arg.name}"]'
-            elif has_default_factory(arg):
-                res = f'({res}) if {exists} else serde_scope.defaults["{arg.name}"]()'
+        if arg.supports_default():
+            res = self.default(arg, res)
 
         if self.custom and not arg.deserializer:
-            # The function takes a closure in order to execute the default value lazily.
-            return (
-                f'serde_custom_class_deserializer({typename(arg.type)}, {arg.datavar}, {arg.data}, '
-                f'default=lambda: {res})'
-            )
+            return self.custom_class_deserializer(arg, res)
         else:
             return res
 
@@ -513,6 +511,16 @@ class Renderer:
         """
         assert arg.deserializer
         return f"{arg.deserializer.name}({arg.data})"
+
+    def custom_class_deserializer(self, arg: DeField, code: str) -> str:
+        """
+        Render custom class deserializer.
+        """
+        # The function takes a closure in order to execute the default value lazily.
+        return (
+            f'serde_custom_class_deserializer({typename(arg.type)}, {arg.datavar}, {arg.data_or()}, '
+            f'default=lambda: {code})'
+        )
 
     def dataclass(self, arg: DeField) -> str:
         if not arg.flatten:
@@ -668,6 +676,15 @@ Foo.__serde__.funcs['foo'](data[0][3], reuse_instances=reuse_instances),)"
     def union_func(self, arg: DeField) -> str:
         func_name = union_func_name(UNION_DE_PREFIX, type_args(arg.type))
         return f"serde_scope.funcs['{func_name}']({arg.data}, reuse_instances)"
+
+    def default(self, arg: DeField, code: str) -> str:
+        exists = f'"{arg.conv_name()}" in {arg.datavar}'
+        if has_default(arg):
+            return f'({code}) if {exists} else serde_scope.defaults["{arg.name}"]'
+        elif has_default_factory(arg):
+            return f'({code}) if {exists} else serde_scope.defaults["{arg.name}"]()'
+        else:
+            return code
 
 
 def to_arg(f: DeField, index, rename_all: Optional[str] = None) -> DeField:
