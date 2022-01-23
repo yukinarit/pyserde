@@ -493,6 +493,12 @@ associated with deserialization.</p>
     <span class="k">def</span> <span class="nf">data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">d</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">datavar</span> <span class="o">=</span> <span class="n">d</span>
 
+    <span class="k">def</span> <span class="nf">data_or</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">iterbased</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">datavar</span><span class="si">}</span><span class="s1">.get(&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">conv_name</span><span class="p">()</span><span class="si">}</span><span class="s1">&quot;)&#39;</span>
+
 
 <span class="nd">@dataclass</span>
 <span class="k">class</span> <span class="nc">InnerField</span><span class="p">(</span><span class="n">DeField</span><span class="p">):</span>
@@ -558,19 +564,11 @@ associated with deserialization.</p>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;raise_unsupported_type(</span><span class="si">{</span><span class="n">arg</span><span class="o">.</span><span class="n">data</span><span class="si">}</span><span class="s2">)&quot;</span>
 
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">arg</span><span class="o">.</span><span class="n">iterbased</span> <span class="ow">and</span> <span class="p">(</span><span class="n">has_default</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span> <span class="ow">or</span> <span class="n">has_default_factory</span><span class="p">(</span><span class="n">arg</span><span class="p">)):</span>
-            <span class="n">exists</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;&quot;</span><span class="si">{</span><span class="n">arg</span><span class="o">.</span><span class="n">conv_name</span><span class="p">()</span><span class="si">}</span><span class="s1">&quot; in </span><span class="si">{</span><span class="n">arg</span><span class="o">.</span><span class="n">datavar</span><span class="si">}</span><span class="s1">&#39;</span>
-            <span class="k">if</span> <span class="n">has_default</span><span class="p">(</span><span class="n">arg</span><span class="p">):</span>
-                <span class="n">res</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;(</span><span class="si">{</span><span class="n">res</span><span class="si">}</span><span class="s1">) if </span><span class="si">{</span><span class="n">exists</span><span class="si">}</span><span class="s1"> else serde_scope.defaults[&quot;</span><span class="si">{</span><span class="n">arg</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">&quot;]&#39;</span>
-            <span class="k">elif</span> <span class="n">has_default_factory</span><span class="p">(</span><span class="n">arg</span><span class="p">):</span>
-                <span class="n">res</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;(</span><span class="si">{</span><span class="n">res</span><span class="si">}</span><span class="s1">) if </span><span class="si">{</span><span class="n">exists</span><span class="si">}</span><span class="s1"> else serde_scope.defaults[&quot;</span><span class="si">{</span><span class="n">arg</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">&quot;]()&#39;</span>
+        <span class="k">if</span> <span class="n">arg</span><span class="o">.</span><span class="n">supports_default</span><span class="p">():</span>
+            <span class="n">res</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">default</span><span class="p">(</span><span class="n">arg</span><span class="p">,</span> <span class="n">res</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">custom</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">arg</span><span class="o">.</span><span class="n">deserializer</span><span class="p">:</span>
-            <span class="c1"># The function takes a closure in order to execute the default value lazily.</span>
-            <span class="k">return</span> <span class="p">(</span>
-                <span class="sa">f</span><span class="s1">&#39;serde_custom_class_deserializer(</span><span class="si">{</span><span class="n">typename</span><span class="p">(</span><span class="n">arg</span><span class="o">.</span><span class="n">type</span><span class="p">)</span><span class="si">}</span><span class="s1">, </span><span class="si">{</span><span class="n">arg</span><span class="o">.</span><span class="n">datavar</span><span class="si">}</span><span class="s1">, </span><span class="si">{</span><span class="n">arg</span><span class="o">.</span><span class="n">data</span><span class="si">}</span><span class="s1">, &#39;</span>
-                <span class="sa">f</span><span class="s1">&#39;default=lambda: </span><span class="si">{</span><span class="n">res</span><span class="si">}</span><span class="s1">)&#39;</span>
-            <span class="p">)</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">custom_class_deserializer</span><span class="p">(</span><span class="n">arg</span><span class="p">,</span> <span class="n">res</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">res</span>
 
@@ -580,6 +578,16 @@ associated with deserialization.</p>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">assert</span> <span class="n">arg</span><span class="o">.</span><span class="n">deserializer</span>
         <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">arg</span><span class="o">.</span><span class="n">deserializer</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">(</span><span class="si">{</span><span class="n">arg</span><span class="o">.</span><span class="n">data</span><span class="si">}</span><span class="s2">)&quot;</span>
+
+    <span class="k">def</span> <span class="nf">custom_class_deserializer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">arg</span><span class="p">:</span> <span class="n">DeField</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Render custom class deserializer.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># The function takes a closure in order to execute the default value lazily.</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="sa">f</span><span class="s1">&#39;serde_custom_class_deserializer(</span><span class="si">{</span><span class="n">typename</span><span class="p">(</span><span class="n">arg</span><span class="o">.</span><span class="n">type</span><span class="p">)</span><span class="si">}</span><span class="s1">, </span><span class="si">{</span><span class="n">arg</span><span class="o">.</span><span class="n">datavar</span><span class="si">}</span><span class="s1">, </span><span class="si">{</span><span class="n">arg</span><span class="o">.</span><span class="n">data_or</span><span class="p">()</span><span class="si">}</span><span class="s1">, &#39;</span>
+            <span class="sa">f</span><span class="s1">&#39;default=lambda: </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">)&#39;</span>
+        <span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">dataclass</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">arg</span><span class="p">:</span> <span class="n">DeField</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">arg</span><span class="o">.</span><span class="n">flatten</span><span class="p">:</span>
@@ -735,6 +743,15 @@ associated with deserialization.</p>
     <span class="k">def</span> <span class="nf">union_func</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">arg</span><span class="p">:</span> <span class="n">DeField</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
         <span class="n">func_name</span> <span class="o">=</span> <span class="n">union_func_name</span><span class="p">(</span><span class="n">UNION_DE_PREFIX</span><span class="p">,</span> <span class="n">type_args</span><span class="p">(</span><span class="n">arg</span><span class="o">.</span><span class="n">type</span><span class="p">))</span>
         <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;serde_scope.funcs[&#39;</span><span class="si">{</span><span class="n">func_name</span><span class="si">}</span><span class="s2">&#39;](</span><span class="si">{</span><span class="n">arg</span><span class="o">.</span><span class="n">data</span><span class="si">}</span><span class="s2">, reuse_instances)&quot;</span>
+
+    <span class="k">def</span> <span class="nf">default</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">arg</span><span class="p">:</span> <span class="n">DeField</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="n">exists</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;&quot;</span><span class="si">{</span><span class="n">arg</span><span class="o">.</span><span class="n">conv_name</span><span class="p">()</span><span class="si">}</span><span class="s1">&quot; in </span><span class="si">{</span><span class="n">arg</span><span class="o">.</span><span class="n">datavar</span><span class="si">}</span><span class="s1">&#39;</span>
+        <span class="k">if</span> <span class="n">has_default</span><span class="p">(</span><span class="n">arg</span><span class="p">):</span>
+            <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;(</span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">) if </span><span class="si">{</span><span class="n">exists</span><span class="si">}</span><span class="s1"> else serde_scope.defaults[&quot;</span><span class="si">{</span><span class="n">arg</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">&quot;]&#39;</span>
+        <span class="k">elif</span> <span class="n">has_default_factory</span><span class="p">(</span><span class="n">arg</span><span class="p">):</span>
+            <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;(</span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">) if </span><span class="si">{</span><span class="n">exists</span><span class="si">}</span><span class="s1"> else serde_scope.defaults[&quot;</span><span class="si">{</span><span class="n">arg</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">&quot;]()&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">code</span>
 
 
 <span class="k">def</span> <span class="nf">to_arg</span><span class="p">(</span><span class="n">f</span><span class="p">:</span> <span class="n">DeField</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">rename_all</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DeField</span><span class="p">:</span>

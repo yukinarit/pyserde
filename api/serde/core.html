@@ -129,6 +129,9 @@
                         <li>
                                 <a class="function" href="#Field.conv_name">conv_name</a>
                         </li>
+                        <li>
+                                <a class="function" href="#Field.supports_default">supports_default</a>
+                        </li>
                 </ul>
 
             </li>
@@ -193,6 +196,8 @@
 <span class="kn">from</span> <span class="nn">.compat</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">SerdeError</span><span class="p">,</span>
     <span class="n">dataclass_fields</span><span class="p">,</span>
+    <span class="n">has_default</span><span class="p">,</span>
+    <span class="n">has_default_factory</span><span class="p">,</span>
     <span class="n">is_bare_dict</span><span class="p">,</span>
     <span class="n">is_bare_list</span><span class="p">,</span>
     <span class="n">is_bare_set</span><span class="p">,</span>
@@ -658,6 +663,9 @@
 <span class="sd">        are made. Use `name` property to get a field name before conversion.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">conv</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">case</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">case</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">supports_default</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="k">return</span> <span class="ow">not</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;iterbased&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">has_default</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="ow">or</span> <span class="n">has_default_factory</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
 
 
 <span class="n">F</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">&#39;F&#39;</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="n">Field</span><span class="p">)</span>
@@ -1295,6 +1303,9 @@ multiple fields receives <code>skip_if</code> attribute.</p>
 <span class="sd">        are made. Use `name` property to get a field name before conversion.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">conv</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">case</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">case</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">supports_default</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="k">return</span> <span class="ow">not</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;iterbased&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">has_default</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="ow">or</span> <span class="n">has_default_factory</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
 </pre></div>
 
         </details>
@@ -1620,6 +1631,25 @@ deserialization behaviour of a field.</p></li>
 are made. Use <code>name</code> property to get a field name before conversion.</p>
 </div>
 
+
+                            </div>
+                            <div id="Field.supports_default" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#Field.supports_default">#&nbsp;&nbsp</a>
+
+        
+            <span class="def">def</span>
+            <span class="name">supports_default</span><span class="signature">(self) -&gt; bool</span>:
+    </div>
+
+                <details>
+            <summary>View Source</summary>
+            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">supports_default</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="k">return</span> <span class="ow">not</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;iterbased&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">has_default</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="ow">or</span> <span class="n">has_default_factory</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
+</pre></div>
+
+        </details>
+
+    
 
                             </div>
                 </section>

@@ -149,15 +149,14 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="custom-field-deserializer"><a class="header" href="#custom-field-deserializer">Custom field (de)serializer</a></h1>
-<p>If you want to provide a custom function to override the default (de)serialization behaviour of a field, you can pass your functions to <code>serde_serializer</code> and <code>serde_deserializer</code> dataclass metadata.</p>
-<pre><code class="language-python">@serde
+<p>If you want to provide a custom function to override the default (de)serialization behaviour of a field, you can pass your functions to <code>serializer</code> and <code>deserializer</code> in <code>serde.field</code>.</p>
+<pre><code class="language-python">from serde import serde, field
+
+@serde
 class Foo:
     dt1: datetime
     dt2: datetime = field(
-        metadata={
-            'serde_serializer': lambda x: x.strftime('%d/%m/%y'),
-            'serde_deserializer': lambda x: datetime.strptime(x, '%d/%m/%y'),
-        }
+        serializer=lambda x: x.strftime('%d/%m/%y'), deserializer=lambda x: datetime.strptime(x, '%d/%m/%y')
     )
 </code></pre>
 <p><code>dt1</code> in the example will serialized into <code>2021-01-01T00:00:00</code> because the pyserde's default (de)serializier for datetime is ISO 8601. <code>dt2</code> field in the example will be serialized into <code>01/01/21</code> by the custom field serializer.</p>
