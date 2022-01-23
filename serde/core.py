@@ -19,6 +19,8 @@ import stringcase
 from .compat import (
     SerdeError,
     dataclass_fields,
+    has_default,
+    has_default_factory,
     is_bare_dict,
     is_bare_list,
     is_bare_set,
@@ -484,6 +486,9 @@ class Field:
         are made. Use `name` property to get a field name before conversion.
         """
         return conv(self, case or self.case)
+
+    def supports_default(self) -> bool:
+        return not getattr(self, "iterbased", False) and (has_default(self) or has_default_factory(self))
 
 
 F = TypeVar('F', bound=Field)
