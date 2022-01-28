@@ -162,12 +162,14 @@ def gen(code: str, globals: Dict = None, locals: Dict = None) -> str:
     """
     A wrapper of builtin `exec` function.
     """
-    try:
-        from black import FileMode, format_str
+    if SETTINGS['debug']:
+        # black formatting is only important when debugging
+        try:
+            from black import FileMode, format_str
 
-        code = format_str(code, mode=FileMode(line_length=100))
-    except Exception:
-        pass
+            code = format_str(code, mode=FileMode(line_length=100))
+        except Exception:
+            pass
     exec(code, globals, locals)
     return code
 
