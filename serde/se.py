@@ -232,7 +232,7 @@ def serialize(
         add_func(scope, TO_ITER, render_to_tuple(cls, serializer), g)
         add_func(scope, TO_DICT, render_to_dict(cls, rename_all, serializer), g)
 
-        logger.debug(f'{cls.__name__}: {SERDE_SCOPE} {scope}')
+        logger.debug(f'{typename(cls)}: {SERDE_SCOPE} {scope}')
 
         return cls
 
@@ -262,34 +262,38 @@ def is_serializable(instance_or_class: Any) -> bool:
 
 
 def to_obj(o, named: bool, reuse_instances: bool, convert_sets: bool):
-    thisfunc = functools.partial(to_obj, named=named, reuse_instances=reuse_instances, convert_sets=convert_sets)
-    if o is None:
-        return None
-    if is_serializable(o):
-        serde_scope: SerdeScope = getattr(o, SERDE_SCOPE)
-        if named:
-            return serde_scope.funcs[TO_DICT](o, reuse_instances=reuse_instances, convert_sets=convert_sets)
-        else:
-            return serde_scope.funcs[TO_ITER](o, reuse_instances=reuse_instances, convert_sets=convert_sets)
-    elif is_dataclass(o):
-        if named:
-            return dataclasses.asdict(o)
-        else:
-            return dataclasses.astuple(o)
-    elif isinstance(o, list):
-        return [thisfunc(e) for e in o]
-    elif isinstance(o, tuple):
-        return tuple(thisfunc(e) for e in o)
-    elif isinstance(o, set):
-        return [thisfunc(e) for e in o]
-    elif isinstance(o, dict):
-        return {k: thisfunc(v) for k, v in o.items()}
-    elif isinstance(o, StrSerializableTypes):
-        return str(o)
-    elif isinstance(o, DateTimeTypes):
-        return o.isoformat()
+    try:
+        thisfunc = functools.partial(to_obj, named=named, reuse_instances=reuse_instances, convert_sets=convert_sets)
+        if o is None:
+            return None
+        if is_serializable(o):
+            serde_scope: SerdeScope = getattr(o, SERDE_SCOPE)
+            if named:
+                return serde_scope.funcs[TO_DICT](o, reuse_instances=reuse_instances, convert_sets=convert_sets)
+            else:
+                return serde_scope.funcs[TO_ITER](o, reuse_instances=reuse_instances, convert_sets=convert_sets)
+        elif is_dataclass(o):
+            if named:
+                return dataclasses.asdict(o)
+            else:
+                return dataclasses.astuple(o)
+        elif isinstance(o, list):
+            return [thisfunc(e) for e in o]
+        elif isinstance(o, tuple):
+            return tuple(thisfunc(e) for e in o)
+        elif isinstance(o, set):
+            return [thisfunc(e) for e in o]
+        elif isinstance(o, dict):
+            return {k: thisfunc(v) for k, v in o.items()}
+        elif isinstance(o, StrSerializableTypes):
+            return str(o)
+        elif isinstance(o, DateTimeTypes):
+            return o.isoformat()
 
-    return o
+        return o
+
+    except Exception as e:
+        raise SerdeError(e)
 
 
 def astuple(v):
@@ -690,7 +694,7 @@ convert_sets=convert_sets), foo[2],)"
             return f'{{{self.render(karg)}: {self.render(varg)} for k, v in {arg.varname}.items()}}'
 
     def enum(self, arg: SeField) -> str:
-        return f'enum_value({arg.type.__name__}, {arg.varname})'
+        return f'enum_value({typename(arg.type)}, {arg.varname})'
 
     def primitive(self, arg: SeField) -> str:
         """

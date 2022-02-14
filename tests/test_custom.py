@@ -6,7 +6,7 @@ from typing import Optional, Union
 
 import pytest
 
-from serde import SerdeSkip, default_deserializer, default_serializer, field, from_tuple, serde, to_tuple
+from serde import SerdeError, SerdeSkip, default_deserializer, default_serializer, field, from_tuple, serde, to_tuple
 from serde.json import from_json, to_json
 
 
@@ -54,10 +54,10 @@ def test_wrong_signature():
         i: int = field(serializer=lambda: '10', deserializer=lambda: 10)
 
     f = Foo(10)
-    with pytest.raises(TypeError):
+    with pytest.raises(SerdeError):
         to_json(f)
 
-    with pytest.raises(TypeError):
+    with pytest.raises(SerdeError):
         from_json(Foo, '{"i": 10}')
 
 

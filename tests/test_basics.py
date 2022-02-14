@@ -625,3 +625,15 @@ def test_make_serialize_deserialize(se):
     f = Foo(Bar(10))
     assert serde.to_dict(f) == {'bar': {'v': 10}}
     assert serde.from_dict(Foo, {'bar': {'v': 10}}) == f
+
+
+def test_exception_to_from_obj():
+    @serde.serde
+    class Foo:
+        a: int
+
+    class Bar:
+        pass
+
+    with pytest.raises(serde.SerdeError):
+        serde.from_dict(Foo, {})

@@ -16,7 +16,7 @@ __all__: List = []
 T = TypeVar('T')
 
 
-class SerdeError(TypeError):
+class SerdeError(Exception):
     """
     Serde error class.
     """
