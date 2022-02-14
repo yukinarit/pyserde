@@ -11,7 +11,7 @@ pyserde = {path = "../"}
 
 [tool.poetry.dev-dependencies]
 dacite = "*"
-mashumaro = "*"
+mashumaro = "^2.11.0"
 marshmallow = "~=3.2"
 attrs = "*"
 cattrs = "*"
