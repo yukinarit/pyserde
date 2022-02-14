@@ -157,8 +157,7 @@ def test_is_instance():
     p = Pri(i=10, s='foo', f=100.0, b=True)
     assert is_instance(p, Pri)
     p.i = 10.0
-    # for speed reasons we do not detect wrong types within dataclasses
-    assert is_instance(p, Pri)
+    assert not is_instance(p, Pri)
 
     # Dataclass (Nested)
     @dataclass
@@ -168,7 +167,6 @@ def test_is_instance():
     h = Foo(Pri(i=10, s='foo', f=100.0, b=True))
     assert is_instance(h, Foo)
     h.p.i = 10.0
-    # for speed reasons we do not detect wrong types within dataclasses
     assert is_instance(h, Foo)
 
     # List

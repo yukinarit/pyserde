@@ -7,12 +7,14 @@ import abc
 import copy
 import dataclasses
 import functools
+import typing
 from dataclasses import dataclass, is_dataclass
 from typing import Any, Callable, Dict, Iterator, List, Optional, Type, TypeVar
 
 import jinja2
 
 from .compat import (
+    Literal,
     SerdeError,
     SerdeSkip,
     get_origin,
@@ -21,15 +23,20 @@ from .compat import (
     is_bare_opt,
     is_bare_set,
     is_bare_tuple,
+    is_datetime,
+    is_datetime_instance,
     is_dict,
     is_enum,
     is_generic,
     is_list,
     is_literal,
+    is_new_type_primitive,
     is_none,
     is_opt,
     is_primitive,
     is_set,
+    is_str_serializable,
+    is_str_serializable_instance,
     is_tuple,
     is_union,
     iter_types,
@@ -41,19 +48,26 @@ from .core import (
     SERDE_SCOPE,
     TO_DICT,
     TO_ITER,
+    TYPE_CHECK,
     UNION_SE_PREFIX,
-    DateTimeTypes,
+    Coerce,
     DefaultTagging,
     Field,
     SerdeScope,
-    StrSerializableTypes,
+    Strict,
     Tagging,
+    TypeCheck,
     add_func,
     conv,
     fields,
+    is_dict_instance,
     is_instance,
+    is_list_instance,
+    is_set_instance,
+    is_tuple_instance,
     logger,
     raise_unsupported_type,
+    render_type_check,
     union_func_name,
 )
 from .numpy import (
@@ -220,12 +234,14 @@ def serialize(
         g["typename"] = typename  # used in union functions
         g["is_instance"] = is_instance  # used in union functions
         g["to_obj"] = to_obj
+        g["typing"] = typing
+        g["Literal"] = Literal
         if serialize:
             g["serde_custom_class_serializer"] = functools.partial(serde_custom_class_serializer, custom=serializer)
 
         # Collect types used in the generated code.
         for typ in iter_types(cls):
-            if typ is cls or (is_primitive(typ) and not is_enum(typ)):
+            if typ is cls or (is_primitive(typ) and not is_enum(typ) and not is_new_type_primitive(typ)):
                 continue
             g[typename(typ)] = typ
 
@@ -244,6 +260,7 @@ def serialize(
 
         add_func(scope, TO_ITER, render_to_tuple(cls, serializer), g)
         add_func(scope, TO_DICT, render_to_dict(cls, rename_all, serializer), g)
+        add_func(scope, TYPE_CHECK, render_type_check(cls), g)
 
         logger.debug(f"{typename(cls)}: {SERDE_SCOPE} {scope}")
 
@@ -274,7 +291,9 @@ def is_serializable(instance_or_class: Any) -> bool:
     return hasattr(instance_or_class, SERDE_SCOPE)
 
 
-def to_obj(o, named: bool, reuse_instances: bool, convert_sets: bool):
+def to_obj(o, named: bool, reuse_instances: bool, convert_sets: bool, c: Type = None, type_check: TypeCheck = Coerce):
+    strict = type_check.is_strict()
+
     try:
         thisfunc = functools.partial(
             to_obj,
@@ -286,26 +305,40 @@ def to_obj(o, named: bool, reuse_instances: bool, convert_sets: bool):
             return None
         if is_serializable(o):
             serde_scope: SerdeScope = getattr(o, SERDE_SCOPE)
-            if named:
-                return serde_scope.funcs[TO_DICT](o, reuse_instances=reuse_instances, convert_sets=convert_sets)
-            else:
-                return serde_scope.funcs[TO_ITER](o, reuse_instances=reuse_instances, convert_sets=convert_sets)
+            func_name = TO_DICT if named else TO_ITER
+            if strict:
+                serde_scope.funcs[TYPE_CHECK](o)
+            return serde_scope.funcs[func_name](o, reuse_instances=reuse_instances, convert_sets=convert_sets)
         elif is_dataclass(o):
+            if strict:
+                serde_scope.funcs[TYPE_CHECK](o)
             if named:
                 return dataclasses.asdict(o)
             else:
                 return dataclasses.astuple(o)
         elif isinstance(o, list):
+            if strict and c:
+                if is_list_instance(o, c):
+                    raise SerdeError(f"Failed to deserialize into {typename(c)}")
             return [thisfunc(e) for e in o]
         elif isinstance(o, tuple):
+            if strict and c:
+                if is_tuple_instance(o, c):
+                    raise SerdeError(f"Failed to deserialize into {typename(c)}")
             return tuple(thisfunc(e) for e in o)
         elif isinstance(o, set):
+            if strict and c:
+                if is_set_instance(o, c):
+                    raise SerdeError(f"Failed to deserialize into {typename(c)}")
             return [thisfunc(e) for e in o]
         elif isinstance(o, dict):
+            if strict and c:
+                if is_dict_instance(o, c):
+                    raise SerdeError(f"Failed to deserialize into {typename(c)}")
             return {k: thisfunc(v) for k, v in o.items()}
-        elif isinstance(o, StrSerializableTypes):
+        elif is_str_serializable_instance(o):
             return str(o)
-        elif isinstance(o, DateTimeTypes):
+        elif is_datetime_instance(o):
             return o.isoformat()
 
         return o
@@ -321,7 +354,7 @@ def astuple(v):
     return to_tuple(v, reuse_instances=False, convert_sets=False)
 
 
-def to_tuple(o, reuse_instances: bool = ..., convert_sets: bool = ...) -> Any:
+def to_tuple(o, reuse_instances: bool = ..., convert_sets: bool = ..., type_check: TypeCheck = Coerce) -> Any:
     """
     Serialize object into tuple.
 
@@ -341,7 +374,7 @@ def to_tuple(o, reuse_instances: bool = ..., convert_sets: bool = ...) -> Any:
     >>> to_tuple(lst)
     [(10, 'foo', 100.0, True), (20, 'foo', 100.0, True)]
     """
-    return to_obj(o, named=False, reuse_instances=reuse_instances, convert_sets=convert_sets)
+    return to_obj(o, named=False, reuse_instances=reuse_instances, convert_sets=convert_sets, type_check=type_check)
 
 
 def asdict(v):
@@ -351,7 +384,7 @@ def asdict(v):
     return to_dict(v, reuse_instances=False, convert_sets=False)
 
 
-def to_dict(o, reuse_instances: bool = ..., convert_sets: bool = ...) -> Any:
+def to_dict(o, reuse_instances: bool = ..., convert_sets: bool = ..., type_check: TypeCheck = Coerce) -> Any:
     """
     Serialize object into dictionary.
 
@@ -371,7 +404,7 @@ def to_dict(o, reuse_instances: bool = ..., convert_sets: bool = ...) -> Any:
     >>> to_dict(lst)
     [{'i': 10, 's': 'foo', 'f': 100.0, 'b': True}, {'i': 20, 's': 'foo', 'f': 100.0, 'b': True}]
     """
-    return to_obj(o, named=True, reuse_instances=reuse_instances, convert_sets=convert_sets)
+    return to_obj(o, named=True, reuse_instances=reuse_instances, convert_sets=convert_sets, type_check=type_check)
 
 
 @dataclass
@@ -614,9 +647,9 @@ convert_sets=convert_sets), foo[2],)"
             res = self.primitive(arg)
         elif is_union(arg.type):
             res = self.union_func(arg)
-        elif arg.type in StrSerializableTypes:
+        elif is_str_serializable(arg.type):
             res = f"{arg.varname} if reuse_instances else {self.string(arg)}"
-        elif arg.type in DateTimeTypes:
+        elif is_datetime(arg.type):
             res = f"{arg.varname} if reuse_instances else {arg.varname}.isoformat()"
         elif is_none(arg.type):
             res = "None"

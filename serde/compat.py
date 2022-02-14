@@ -2,11 +2,17 @@
 Module for compatibility.
 """
 import dataclasses
+import datetime
+import decimal
 import enum
+import functools
+import ipaddress
 import itertools
+import pathlib
 import sys
 import types
 import typing
+import uuid
 from dataclasses import is_dataclass
 from typing import Any, ClassVar, Dict, Generic, Iterator, List, Optional, Set, Tuple, Type, TypeVar, Union
 
@@ -14,6 +20,10 @@ import typing_inspect
 
 if sys.version_info[:2] == (3, 7):
     import typing_extensions
+
+    Literal = typing_extensions.Literal
+else:
+    Literal = typing.Literal
 
 try:
     if sys.version_info[:2] <= (3, 8):
@@ -51,6 +61,28 @@ except ImportError:
 __all__: List = []
 
 T = TypeVar('T')
+
+
+StrSerializableTypes = (
+    decimal.Decimal,
+    pathlib.Path,
+    pathlib.PosixPath,
+    pathlib.WindowsPath,
+    pathlib.PurePath,
+    pathlib.PurePosixPath,
+    pathlib.PureWindowsPath,
+    uuid.UUID,
+    ipaddress.IPv4Address,
+    ipaddress.IPv6Address,
+    ipaddress.IPv4Network,
+    ipaddress.IPv6Network,
+    ipaddress.IPv4Interface,
+    ipaddress.IPv6Interface,
+)
+""" List of standard types (de)serializable to str """
+
+DateTimeTypes = (datetime.date, datetime.time, datetime.datetime)
+""" List of datetime types """
 
 
 class SerdeError(Exception):
@@ -94,7 +126,7 @@ def get_args(typ):
         return typing_inspect.get_args(typ) or get_np_args(typ)
 
 
-def typename(typ) -> str:
+def typename(typ, with_typing_module: bool = False) -> str:
     """
     >>> from typing import List, Dict, Set, Any
     >>> typename(int)
@@ -117,61 +149,63 @@ def typename(typ) -> str:
     >>> typename(Any)
     'Any'
     """
+    mod = "typing." if with_typing_module else ""
+    thisfunc = functools.partial(typename, with_typing_module=with_typing_module)
     if is_opt(typ):
         args = type_args(typ)
         if args:
-            return f'Optional[{typename(type_args(typ)[0])}]'
+            return f'{mod}Optional[{thisfunc(type_args(typ)[0])}]'
         else:
-            return 'Optional'
+            return f'{mod}Optional'
     elif is_union(typ):
         args = union_args(typ)
         if args:
-            return f'Union[{", ".join([typename(e) for e in args])}]'
+            return f'{mod}Union[{", ".join([thisfunc(e) for e in args])}]'
         else:
-            return 'Union'
+            return f'{mod}Union'
     elif is_list(typ):
         # Workaround for python 3.7.
         # get_args for the bare List returns parameter T.
         if typ is List:
-            return 'List'
+            return f'{mod}List'
 
         args = type_args(typ)
         if args:
-            et = typename(args[0])
-            return f'List[{et}]'
+            et = thisfunc(args[0])
+            return f'{mod}List[{et}]'
         else:
-            return 'List'
+            return f'{mod}List'
     elif is_set(typ):
         # Workaround for python 3.7.
         # get_args for the bare Set returns parameter T.
         if typ is Set:
-            return 'Set'
+            return f'{mod}Set'
 
         args = type_args(typ)
         if args:
-            et = typename(args[0])
-            return f'Set[{et}]'
+            et = thisfunc(args[0])
+            return f'{mod}Set[{et}]'
         else:
-            return 'Set'
+            return f'{mod}Set'
     elif is_dict(typ):
         # Workaround for python 3.7.
         # get_args for the bare Dict returns parameter K, V.
         if typ is Dict:
-            return 'Dict'
+            return f'{mod}Dict'
 
         args = type_args(typ)
         if args and len(args) == 2:
-            kt = typename(args[0])
-            vt = typename(args[1])
-            return f'Dict[{kt}, {vt}]'
+            kt = thisfunc(args[0])
+            vt = thisfunc(args[1])
+            return f'{mod}Dict[{kt}, {vt}]'
         else:
-            return 'Dict'
+            return f'{mod}Dict'
     elif is_tuple(typ):
         args = type_args(typ)
         if args:
-            return f'Tuple[{", ".join([typename(e) for e in args])}]'
+            return f'{mod}Tuple[{", ".join([thisfunc(e) for e in args])}]'
         else:
-            return 'Tuple'
+            return f'{mod}Tuple'
     elif is_generic(typ):
         return get_origin(typ).__name__
     elif is_literal(typ):
@@ -180,7 +214,7 @@ def typename(typ) -> str:
             raise TypeError("Literal type requires at least one literal argument")
         return f'Literal[{", ".join(repr(e) for e in args)}]'
     elif typ is Any:
-        return 'Any'
+        return f'{mod}Any'
     else:
         name = getattr(typ, '_name', None)
         if name:
@@ -568,11 +602,18 @@ def is_primitive(typ) -> bool:
     try:
         return any(issubclass(typ, ty) for ty in PRIMITIVES)
     except TypeError:
-        inner = getattr(typ, '__supertype__', None)
-        if inner:
-            return is_primitive(inner)
-        else:
-            return any(isinstance(typ, ty) for ty in PRIMITIVES)
+        return is_new_type_primitive(typ)
+
+
+def is_new_type_primitive(typ) -> bool:
+    """
+    Test if the type is a NewType of primitives.
+    """
+    inner = getattr(typ, '__supertype__', None)
+    if inner:
+        return is_primitive(inner)
+    else:
+        return any(isinstance(typ, ty) for ty in PRIMITIVES)
 
 
 def is_generic(typ) -> bool:
@@ -607,6 +648,35 @@ def is_literal(typ) -> bool:
     if sys.version_info[:2] == (3, 7):
         return origin is typing_extensions.Literal
     return origin is typing.Literal
+
+
+def is_any(typ) -> bool:
+    """
+    Test if the type is `typing.Any`.
+    """
+    return typ is Any
+
+
+def is_str_serializable(typ) -> bool:
+    """
+    Test if the type is serializable to `str`.
+    """
+    return typ in StrSerializableTypes
+
+
+def is_datetime(typ) -> bool:
+    """
+    Test if the type is any of the datetime types..
+    """
+    return typ in DateTimeTypes
+
+
+def is_str_serializable_instance(obj) -> bool:
+    return isinstance(obj, StrSerializableTypes)
+
+
+def is_datetime_instance(obj) -> bool:
+    return isinstance(obj, DateTimeTypes)
 
 
 def find_generic_arg(cls, field) -> int:

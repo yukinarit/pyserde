@@ -13,7 +13,7 @@ PY39 = sys.version_info[:3] >= (3, 9, 0)
 class Foo:
     l: List[str]
     t: Tuple[str, bool]
-    d: Dict[str, List[str]]
+    d: Dict[str, List[int]]
 
 
 # For python >= 3.9, you can use [PEP585](https://www.python.org/dev/peps/pep-0585/)
@@ -31,10 +31,10 @@ if PY39:
 def main():
     cls = Foo if not PY39 else FooPy39
 
-    h = cls([1, 2], ('foo', True), {'bar': [10, 20]})
+    h = cls(["1", "2"], ('foo', True), {'bar': [10, 20]})
     print(f"Into Json: {to_json(h)}")
 
-    s = '{"l": [1, 2], "t": ["foo", true], "d": {"bar": [10, 20]}}'
+    s = '{"l": ["1", "2"], "t": ["foo", true], "d": {"bar": [10, 20]}}'
     print(f"From Json: {from_json(cls, s)}")
 
 

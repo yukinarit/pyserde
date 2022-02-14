@@ -51,8 +51,10 @@ from dataclasses import dataclass
 from .compat import SerdeError, SerdeSkip
 from .core import (
     AdjacentTagging,
+    Coerce,
     ExternalTagging,
     InternalTagging,
+    Strict,
     Untagged,
     field,
     init,
@@ -69,6 +71,9 @@ __all__ = (
     "ExternalTagging",
     "InternalTagging",
     "Untagged",
+    "NoCheck",
+    "Strict",
+    "Coerce",
     "field",
     "default_deserializer",
     "deserialize",

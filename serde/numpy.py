@@ -10,6 +10,14 @@ def fullname(klass):
     return module + '.' + klass.__qualname__
 
 
+def is_numpy_type(typ) -> bool:
+    return is_bare_numpy_array(typ) or is_numpy_scalar(typ) or is_numpy_array(typ)
+
+
+def is_numpy_available() -> bool:
+    return encode_numpy is not None
+
+
 try:
     import numpy as np
     import numpy.typing as npt

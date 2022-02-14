@@ -7,6 +7,7 @@
 - [Features](features/summary.md)
     - [Attributes](features/attributes.md)
     - [Decorators](features/decorators.md)
+    - [TypeCheck](features/type-check.md)
     - [Union Representation](features/union.md)
     - [Python 3.10 Union operator](features/union-operator.md)
     - [Python 3.9 type hinting](features/python3.9-type-hinting.md)

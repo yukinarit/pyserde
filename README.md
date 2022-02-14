@@ -65,6 +65,7 @@ Foo(i=10, s='foo', f=100.0, b=True)
         - [`numpy`](https://github.com/numpy/numpy) types
 - [Attributes](docs/features/attributes.md)
 - [Decorators](docs/features/decorators.md)
+- [TypeCheck](docs/features/type-check.md)
 - [Union Representation](docs/features/union.md)
 - [Python 3.10 Union operator](docs/features/union-operator.md)
 - [Python 3.9 type hinting](docs/features/python3.9-type-hinting.md)

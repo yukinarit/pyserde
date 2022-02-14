@@ -13,6 +13,7 @@ from typing import Any, Callable, Dict, List, Optional, Type, TypeVar
 import jinja2
 
 from .compat import (
+    Literal,
     SerdeError,
     SerdeSkip,
     UserError,
@@ -21,19 +22,23 @@ from .compat import (
     get_origin,
     has_default,
     has_default_factory,
+    is_any,
     is_bare_dict,
     is_bare_list,
     is_bare_set,
     is_bare_tuple,
+    is_datetime,
     is_dict,
     is_enum,
     is_generic,
     is_list,
     is_literal,
+    is_new_type_primitive,
     is_none,
     is_opt,
     is_primitive,
     is_set,
+    is_str_serializable,
     is_tuple,
     is_union,
     iter_literals,
@@ -46,19 +51,28 @@ from .core import (
     FROM_DICT,
     FROM_ITER,
     SERDE_SCOPE,
+    TYPE_CHECK,
     UNION_DE_PREFIX,
-    DateTimeTypes,
+    Coerce,
     DefaultTagging,
     Field,
+    NoCheck,
     SerdeScope,
-    StrSerializableTypes,
+    Strict,
     Tagging,
+    TypeCheck,
     add_func,
     ensure,
     fields,
+    is_dict_instance,
+    is_instance,
+    is_list_instance,
+    is_set_instance,
+    is_tuple_instance,
     literal_func_name,
     logger,
     raise_unsupported_type,
+    render_type_check,
     union_func_name,
 )
 from .numpy import (
@@ -214,8 +228,10 @@ def deserialize(
         g['typename'] = typename  # used in union functions
         g['ensure'] = ensure
         g['typing'] = typing
+        g['Literal'] = Literal
         g['from_obj'] = from_obj
         g['get_generic_arg'] = get_generic_arg
+        g['is_instance'] = is_instance
         if deserialize:
             g['serde_custom_class_deserializer'] = functools.partial(
                 serde_custom_class_deserializer, custom=deserializer
@@ -223,7 +239,7 @@ def deserialize(
 
         # Collect types used in the generated code.
         for typ in iter_types(cls):
-            if typ is cls or (is_primitive(typ) and not is_enum(typ)):
+            if typ is cls or (is_primitive(typ) and not is_enum(typ) and not is_new_type_primitive(typ)):
                 continue
             if is_generic(typ):
                 g[typename(typ)] = get_origin(typ)
@@ -254,6 +270,7 @@ def deserialize(
 
         add_func(scope, FROM_ITER, render_from_iter(cls, deserializer), g)
         add_func(scope, FROM_DICT, render_from_dict(cls, rename_all, deserializer), g)
+        add_func(scope, TYPE_CHECK, render_type_check(cls), g)
 
         logger.debug(f'{typename(cls)}: {SERDE_SCOPE} {scope}')
 
@@ -298,11 +315,16 @@ class Deserializer(metaclass=abc.ABCMeta):
         raise NotImplementedError
 
 
-def from_obj(c: Type, o: Any, named: bool, reuse_instances: bool):
+def from_obj(c: Type, o: Any, named: bool, reuse_instances: bool, type_check: TypeCheck = Coerce):
     """
     Deserialize from an object into an instance of the type specified as arg `c`.
     `c` can be either primitive type, `List`, `Tuple`, `Dict` or `deserialize` class.
+
+    When `type_check`=True, pyserde checks if deserialized field values are equal to the
+    types declared.
     """
+    strict = type_check.is_strict()
+
     if is_generic(c):
         # Store subscripted generic type such as Foo[Bar] in "maybe_generic",
         # and store origin type such as Foo in "c". Since subscripted generics
@@ -313,19 +335,16 @@ def from_obj(c: Type, o: Any, named: bool, reuse_instances: bool):
     else:
         maybe_generic = c
     try:
-        thisfunc = functools.partial(from_obj, named=named, reuse_instances=reuse_instances)
+        thisfunc = functools.partial(from_obj, named=named, reuse_instances=reuse_instances, type_check=type_check)
         if o is None:
             return None
         if is_deserializable(c):
             serde_scope: SerdeScope = getattr(c, SERDE_SCOPE)
-            if named:
-                return serde_scope.funcs[FROM_DICT](
-                    cls=c, maybe_generic=maybe_generic, data=o, reuse_instances=reuse_instances
-                )
-            else:
-                return serde_scope.funcs[FROM_ITER](
-                    cls=c, maybe_generic=maybe_generic, data=o, reuse_instances=reuse_instances
-                )
+            func_name = FROM_DICT if named else FROM_ITER
+            res = serde_scope.funcs[func_name](c, maybe_generic=maybe_generic, data=o, reuse_instances=reuse_instances)
+            if strict:
+                serde_scope.funcs[TYPE_CHECK](res)
+            return res
         elif is_opt(c):
             if o is None:
                 return None
@@ -344,27 +363,46 @@ def from_obj(c: Type, o: Any, named: bool, reuse_instances: bool):
             if is_bare_list(c):
                 return [e for e in o]
             else:
-                return [thisfunc(type_args(c)[0], e) for e in o]
+                res = [thisfunc(type_args(c)[0], e, type_check=type_check) for e in o]
+                if strict:
+                    if not is_list_instance(res, c):
+                        raise SerdeError(f"Failed to deserialize into {typename(c)}")
+                return res
         elif is_set(c):
             if is_bare_set(c):
                 return set(e for e in o)
             else:
-                return set(thisfunc(type_args(c)[0], e) for e in o)
+                res = set(thisfunc(type_args(c)[0], e, type_check=NoCheck) for e in o)
+                if strict:
+                    if not is_set_instance(res, c):
+                        raise SerdeError(f"Failed to deserialize into {typename(c)}")
+                return res
         elif is_tuple(c):
             if is_bare_tuple(c):
                 return tuple(e for e in o)
             else:
-                return tuple(thisfunc(type_args(c)[i], e) for i, e in enumerate(o))
+                res = tuple(thisfunc(type_args(c)[i], e) for i, e in enumerate(o))
+                if strict:
+                    if not is_tuple_instance(res, c):
+                        raise SerdeError(f"Failed to deserialize into {typename(c)}")
+                return res
         elif is_dict(c):
             if is_bare_dict(c):
                 return {k: v for k, v in o.items()}
             else:
-                return {thisfunc(type_args(c)[0], k): thisfunc(type_args(c)[1], v) for k, v in o.items()}
+                res = {
+                    thisfunc(type_args(c)[0], k, type_check=NoCheck): thisfunc(type_args(c)[1], v, type_check=NoCheck)
+                    for k, v in o.items()
+                }
+                if strict:
+                    if not is_dict_instance(res, c):
+                        raise SerdeError(f"Failed to deserialize into {typename(c)}")
+                return res
         elif is_numpy_array(c):
             return deserialize_numpy_array_direct(c, o)
-        elif c in DateTimeTypes:
+        elif is_datetime(c):
             return c.fromisoformat(o)
-        elif c is Any:
+        elif is_any(c):
             return o
 
         return c(o)
@@ -376,7 +414,7 @@ def from_obj(c: Type, o: Any, named: bool, reuse_instances: bool):
         raise SerdeError(e)
 
 
-def from_dict(cls, o, reuse_instances: bool = ...):
+def from_dict(cls, o, reuse_instances: bool = ..., type_check: TypeCheck = Coerce):
     """
     Deserialize dictionary into object.
 
@@ -396,10 +434,10 @@ def from_dict(cls, o, reuse_instances: bool = ...):
     >>> from_dict(List[Foo], lst)
     [Foo(i=10, s='foo', f=100.0, b=True), Foo(i=20, s='foo', f=100.0, b=True)]
     """
-    return from_obj(cls, o, named=True, reuse_instances=reuse_instances)
+    return from_obj(cls, o, named=True, reuse_instances=reuse_instances, type_check=type_check)
 
 
-def from_tuple(cls, o, reuse_instances: bool = ...):
+def from_tuple(cls, o, reuse_instances: bool = ..., type_check: TypeCheck = Coerce):
     """
     Deserialize tuple into object.
 
@@ -419,7 +457,7 @@ def from_tuple(cls, o, reuse_instances: bool = ...):
     >>> from_tuple(List[Foo], lst)
     [Foo(i=10, s='foo', f=100.0, b=True), Foo(i=20, s='foo', f=100.0, b=True)]
     """
-    return from_obj(cls, o, named=False, reuse_instances=reuse_instances)
+    return from_obj(cls, o, named=False, reuse_instances=reuse_instances, type_check=type_check)
 
 
 @dataclass
@@ -543,9 +581,9 @@ class Renderer:
             res = self.primitive(arg)
         elif is_union(arg.type):
             res = self.union_func(arg)
-        elif arg.type in StrSerializableTypes:
+        elif is_str_serializable(arg.type):
             res = f"({self.c_tor_with_check(arg)}) if reuse_instances else {self.c_tor(arg)}"
-        elif arg.type in DateTimeTypes:
+        elif is_datetime(arg.type):
             from_iso = f"{typename(arg.type)}.fromisoformat({arg.data})"
             res = f"({arg.data} if isinstance({arg.data}, {typename(arg.type)}) else {from_iso}) \
                     if reuse_instances else {from_iso}"
@@ -555,7 +593,10 @@ class Renderer:
             res = arg.data
         elif isinstance(arg.type, TypeVar):
             index = find_generic_arg(self.cls, arg.type)
-            res = f"from_obj(get_generic_arg(maybe_generic, {index}), {arg.data}, named={not arg.iterbased}, reuse_instances=reuse_instances)"
+            res = (
+                f"from_obj(get_generic_arg(maybe_generic, {index}), "
+                f" {arg.data}, named={not arg.iterbased}, reuse_instances=reuse_instances)"
+            )
         elif is_generic(arg.type):
             arg.type = get_origin(arg.type)
             res = self.render(arg)
