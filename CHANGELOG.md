@@ -1,3 +1,16 @@
+## `0.7.0` (2022-02-14)
+
+* fix: Optional in custom class deserializer ([181b2f1](https://github.com/yukinarit/pyserde/commit/181b2f1))
+* fix: raise SerdeError from serde's APIs ([76b0aee](https://github.com/yukinarit/pyserde/commit/76b0aee))
+  * pyserde (de)serialize method used to raise various Exceptions such as KeyError. pyserde always raises SerdeError since v0.7.0
+* core: using black formatting only if debug is enabled ([e596a84](https://github.com/yukinarit/pyserde/commit/e596a84))
+* feat: Add _make_serialize and _make_deserialize ([a71c5d5](https://github.com/yukinarit/pyserde/commit/a71c5d5))
+* feat: Implement Union tagging system ([c884dc4](https://github.com/yukinarit/pyserde/commit/c884dc4))
+    * This will change the default tagging for dataclasses with Union from `Untagged` to `ExternalTagging`. **This may break the existing code**, so please be aware if you use dataclasses with Union. For more information, check [the documentation](docs/features/union.md)
+* build: Update mypy to workaround typed_ast error ([0ea33a7](https://github.com/yukinarit/pyserde/commit/0ea33a7))
+
+This release had contributions from 1 person: [@tardyp](https://github.com/tardyp). Thank you so much! :tada: :joy:
+
 ## `0.6.0` (2021-12-20)
 
 * feat: Add @serde decorator ([523dc9c](https://github.com/yukinarit/pyserde/commit/523dc9c))
