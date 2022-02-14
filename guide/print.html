@@ -668,7 +668,25 @@ poetry install
 poetry run python bench.py --full
 </code></pre>
 <p>You can check <a href="https://github.com/yukinarit/pyserde/blob/master/bench/bench.py">the benchmarking code</a> for more information.</p>
-<div style="break-before: page; page-break-before: always;"></div><h2 id="060-2021-12-20"><a class="header" href="#060-2021-12-20"><code>0.6.0</code> (2021-12-20)</a></h2>
+<div style="break-before: page; page-break-before: always;"></div><h2 id="070-2022-02-14"><a class="header" href="#070-2022-02-14"><code>0.7.0</code> (2022-02-14)</a></h2>
+<ul>
+<li>fix: Optional in custom class deserializer (<a href="https://github.com/yukinarit/pyserde/commit/181b2f1">181b2f1</a>)</li>
+<li>fix: raise SerdeError from serde's APIs (<a href="https://github.com/yukinarit/pyserde/commit/76b0aee">76b0aee</a>)
+<ul>
+<li>pyserde (de)serialize method used to raise various Exceptions such as KeyError. pyserde always raises SerdeError since v0.7.0</li>
+</ul>
+</li>
+<li>core: using black formatting only if debug is enabled (<a href="https://github.com/yukinarit/pyserde/commit/e596a84">e596a84</a>)</li>
+<li>feat: Add _make_serialize and _make_deserialize (<a href="https://github.com/yukinarit/pyserde/commit/a71c5d5">a71c5d5</a>)</li>
+<li>feat: Implement Union tagging system (<a href="https://github.com/yukinarit/pyserde/commit/c884dc4">c884dc4</a>)
+<ul>
+<li>This will change the default tagging for dataclasses with Union from <code>Untagged</code> to <code>ExternalTagging</code>. <strong>This may break the existing code</strong>, so please be aware if you use dataclasses with Union. For more information, check <a href="docs/features/union.html">the documentation</a></li>
+</ul>
+</li>
+<li>build: Update mypy to workaround typed_ast error (<a href="https://github.com/yukinarit/pyserde/commit/0ea33a7">0ea33a7</a>)</li>
+</ul>
+<p>This release had contributions from 1 person: <a href="https://github.com/tardyp">@tardyp</a>. Thank you so much! :tada: :joy:</p>
+<h2 id="060-2021-12-20"><a class="header" href="#060-2021-12-20"><code>0.6.0</code> (2021-12-20)</a></h2>
 <ul>
 <li>feat: Add @serde decorator (<a href="https://github.com/yukinarit/pyserde/commit/523dc9c">523dc9c</a>)</li>
 <li>feat: Add serde field function (<a href="https://github.com/yukinarit/pyserde/commit/488bf00">488bf00</a>)</li>
