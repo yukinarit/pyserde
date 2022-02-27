@@ -8,13 +8,14 @@ import copy
 import dataclasses
 import functools
 from dataclasses import dataclass, is_dataclass
-from typing import Any, Callable, Dict, Iterator, List, Optional, Type
+from typing import Any, Callable, Dict, Iterator, List, Optional, Type, TypeVar
 
 import jinja2
 
 from .compat import (
     SerdeError,
     SerdeSkip,
+    get_origin,
     is_bare_dict,
     is_bare_list,
     is_bare_opt,
@@ -22,6 +23,7 @@ from .compat import (
     is_bare_tuple,
     is_dict,
     is_enum,
+    is_generic,
     is_list,
     is_none,
     is_opt,
@@ -596,8 +598,11 @@ convert_sets=convert_sets), foo[2],)"
             res = f"{arg.varname} if reuse_instances else {arg.varname}.isoformat()"
         elif is_none(arg.type):
             res = "None"
-        elif arg.type is Any:
+        elif arg.type is Any or isinstance(arg.type, TypeVar):
             res = f"to_obj({arg.varname}, True, False, False)"
+        elif is_generic(arg.type):
+            arg.type = get_origin(arg.type)
+            res = self.render(arg)
         else:
             res = f"raise_unsupported_type({arg.varname})"
 

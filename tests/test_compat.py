@@ -1,9 +1,14 @@
 import sys
 from dataclasses import dataclass
-from typing import Dict, List, NewType, Optional, Set, Tuple, Union
+from typing import Dict, Generic, List, NewType, Optional, Set, Tuple, TypeVar, Union
+
+import serde
+
+T = TypeVar('T')
 
 from serde.compat import (
     is_dict,
+    is_generic,
     is_list,
     is_opt,
     is_primitive,
@@ -54,7 +59,17 @@ def test_types():
 
 
 def test_typename():
+    @serde.serde
+    class Bar(Generic[T]):
+        v: T
+
+    @serde.serde
+    class Foo(Generic[T]):
+        nested: Bar[T]
+
     assert typename(Optional) == "Optional"
+    assert typename(Foo[int]) == "Foo"
+    assert typename(Foo) == "Foo"
 
 
 def test_iter_types():
@@ -188,3 +203,23 @@ def test_is_instance():
     # Nested containers
     assert is_instance([({"a": "b"}, 10, [True])], List[Tuple[Dict[str, str], int, List[bool]]])
     assert not is_instance([({"a": "b"}, 10, ["wrong-type"])], List[Tuple[Dict[str, str], int, List[bool]]])
+
+
+@serde.serde
+class GenericFoo(Generic[T]):
+    t: T
+
+
+def test_is_generic():
+    assert not is_generic(int)
+    assert not is_generic(List[int])
+    assert not is_generic(List)
+    assert not is_generic(GenericFoo)
+    assert is_generic(GenericFoo[int])
+    assert is_generic(GenericFoo[List[int]])
+    assert not is_generic(Optional[int])
+    assert not is_generic(Optional[List[int]])
+    assert serde.is_serializable(GenericFoo)
+    assert not serde.is_serializable(GenericFoo[List[int]])
+    assert serde.is_deserializable(GenericFoo)
+    assert not serde.is_deserializable(GenericFoo[List[int]])

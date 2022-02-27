@@ -7,7 +7,7 @@ import itertools
 import sys
 import typing
 from dataclasses import is_dataclass
-from typing import Any, Dict, Iterator, List, Optional, Set, Tuple, Type, TypeVar, Union
+from typing import Any, Dict, Generic, Iterator, List, Optional, Set, Tuple, Type, TypeVar, Union
 
 import typing_inspect
 
@@ -111,6 +111,8 @@ def typename(typ) -> str:
             return f'Tuple[{", ".join([typename(e) for e in args])}]'
         else:
             return 'Tuple'
+    elif is_generic(typ):
+        return get_origin(typ).__name__
     elif typ is Any:
         return 'Any'
     else:
@@ -449,6 +451,75 @@ def is_primitive(typ) -> bool:
             return is_primitive(inner)
         else:
             return any(isinstance(typ, ty) for ty in PRIMITIVES)
+
+
+def is_generic(typ) -> bool:
+    """
+    Test if the type is derived from `typing.Generic`.
+
+    >>> T = typing.TypeVar('T')
+    >>> class GenericFoo(typing.Generic[T]):
+    ...     pass
+    >>> is_generic(GenericFoo[int])
+    True
+    >>> is_generic(GenericFoo)
+    False
+    """
+    origin = get_origin(typ)
+    return origin is not None and Generic in getattr(origin, "__bases__", ())
+
+
+def find_generic_arg(cls, field) -> int:
+    """
+    Find a type in generic parameters.
+
+    >>> T = typing.TypeVar('T')
+    >>> U = typing.TypeVar('U')
+    >>> V = typing.TypeVar('V')
+    >>> class GenericFoo(typing.Generic[T, U]):
+    ...     pass
+    >>> find_generic_arg(GenericFoo, T)
+    0
+    >>> find_generic_arg(GenericFoo, U)
+    1
+    >>> find_generic_arg(GenericFoo, V)
+    -1
+    """
+    bases = getattr(cls, "__orig_bases__", ())
+    if not bases:
+        raise Exception(f"\"__orig_bases__\" property was not found: {cls}")
+
+    for base in bases:
+        for n, arg in enumerate(get_args(base)):
+            if arg.__name__ == field.__name__:
+                return n
+
+    if not bases:
+        raise Exception(f"Generic field not found in class: {bases}")
+
+    return -1
+
+
+def get_generic_arg(typ, index):
+    """
+    Get generic type argument by index.
+
+    >>> T = typing.TypeVar('T')
+    >>> U = typing.TypeVar('U')
+    >>> class GenericFoo(typing.Generic[T, U]):
+    ...     pass
+    >>> get_generic_arg(GenericFoo[int, str], 0).__name__
+    'int'
+    >>> get_generic_arg(GenericFoo[int, str], 1).__name__
+    'str'
+    """
+    if not is_generic(typ):
+        return typing.Any
+    else:
+        args = get_args(typ)
+        if index + 1 > len(args):
+            return typing.Any
+        return args[index]
 
 
 def has_default(field) -> bool:

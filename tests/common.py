@@ -6,11 +6,11 @@ import os
 import pathlib
 import sys
 import uuid
-from typing import Any, Dict, List, NewType, Optional, Set, Tuple
+from typing import Any, Dict, Generic, List, NewType, Optional, Set, Tuple, TypeVar
 
 import more_itertools
 
-from serde import from_dict, from_tuple, to_dict, to_tuple
+from serde import from_dict, from_tuple, serde, to_dict, to_tuple
 from serde.json import from_json, to_json
 from serde.msgpack import from_msgpack, to_msgpack
 from serde.toml import from_toml, to_toml
@@ -30,6 +30,17 @@ format_yaml: List = [(to_yaml, from_yaml)]
 format_toml: List = [(to_toml, from_toml)]
 
 all_formats: List = format_dict + format_tuple + format_json + format_msgpack + format_yaml + format_toml
+
+T = TypeVar('T')
+
+U = TypeVar('U')
+
+
+@serde
+class GenericClass(Generic[T, U]):
+    a: T
+    b: U
+
 
 types: List = [
     (10, int),  # Primitive
@@ -57,6 +68,7 @@ types: List = [
     (None, Optional[data.Pri]),
     (10, NewType('Int', int)),  # NewType
     ({'a': 1}, Any),  # Any
+    (GenericClass[str, int]('foo', 10), GenericClass[str, int]),  # Generic
     (pathlib.Path('/tmp/foo'), pathlib.Path),  # Extended types
     (pathlib.Path('/tmp/foo'), Optional[pathlib.Path]),
     (None, Optional[pathlib.Path]),

@@ -19,6 +19,7 @@ import stringcase
 from .compat import (
     SerdeError,
     dataclass_fields,
+    get_origin,
     has_default,
     has_default_factory,
     is_bare_dict,
@@ -26,6 +27,7 @@ from .compat import (
     is_bare_set,
     is_bare_tuple,
     is_dict,
+    is_generic,
     is_list,
     is_opt,
     is_set,
@@ -238,6 +240,8 @@ def is_instance(obj: Any, typ: Type) -> bool:
             # for speed reasons we just check the type of the 1st element
             return is_instance(k, ktyp) and is_instance(v, vtyp)
         return False
+    elif is_generic(typ):
+        return is_instance(obj, get_origin(typ))
     else:
         return isinstance(obj, typ)
 
