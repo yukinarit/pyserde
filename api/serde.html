@@ -168,17 +168,11 @@ serde    </h1>
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">dataclasses</span>
-<span class="kn">import</span> <span class="nn">sys</span>
 
 <span class="kn">from</span> <span class="nn">.compat</span> <span class="kn">import</span> <span class="n">SerdeError</span><span class="p">,</span> <span class="n">SerdeSkip</span>  <span class="c1"># noqa</span>
 <span class="kn">from</span> <span class="nn">.core</span> <span class="kn">import</span> <span class="n">AdjacentTagging</span><span class="p">,</span> <span class="n">ExternalTagging</span><span class="p">,</span> <span class="n">InternalTagging</span><span class="p">,</span> <span class="n">Untagged</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="n">init</span><span class="p">,</span> <span class="n">logger</span>  <span class="c1"># noqa</span>
 <span class="kn">from</span> <span class="nn">.de</span> <span class="kn">import</span> <span class="n">default_deserializer</span><span class="p">,</span> <span class="n">deserialize</span><span class="p">,</span> <span class="n">from_dict</span><span class="p">,</span> <span class="n">from_tuple</span><span class="p">,</span> <span class="n">is_deserializable</span>  <span class="c1"># noqa</span>
 <span class="kn">from</span> <span class="nn">.se</span> <span class="kn">import</span> <span class="n">asdict</span><span class="p">,</span> <span class="n">astuple</span><span class="p">,</span> <span class="n">default_serializer</span><span class="p">,</span> <span class="n">is_serializable</span><span class="p">,</span> <span class="n">serialize</span><span class="p">,</span> <span class="n">to_dict</span><span class="p">,</span> <span class="n">to_tuple</span>  <span class="c1"># noqa</span>
-
-<span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">version_info</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">6</span><span class="p">):</span>
-    <span class="kn">import</span> <span class="nn">backports.datetime_fromisoformat</span>
-
-    <span class="n">backports</span><span class="o">.</span><span class="n">datetime_fromisoformat</span><span class="o">.</span><span class="n">MonkeyPatch</span><span class="o">.</span><span class="n">patch_fromisoformat</span><span class="p">()</span>
 
 
 <span class="k">def</span> <span class="nf">serde</span><span class="p">(</span><span class="n">_cls</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
