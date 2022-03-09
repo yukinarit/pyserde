@@ -5,6 +5,6 @@ description = "WebAPI example package for pyserde"
 authors = ["yukinarit <yukinarit84@gmail.com>"]
 
 [tool.poetry.dependencies]
-python = "^3.6.1"
+python = "^3.7.0"
 pyserde = {path = "../../"}
 flask = "~=1.1"

@@ -42,17 +42,11 @@ The following modules provides functionalities for supported data formats.
 """
 
 import dataclasses
-import sys
 
 from .compat import SerdeError, SerdeSkip  # noqa
 from .core import AdjacentTagging, ExternalTagging, InternalTagging, Untagged, field, init, logger  # noqa
 from .de import default_deserializer, deserialize, from_dict, from_tuple, is_deserializable  # noqa
 from .se import asdict, astuple, default_serializer, is_serializable, serialize, to_dict, to_tuple  # noqa
-
-if sys.version_info[:2] == (3, 6):
-    import backports.datetime_fromisoformat
-
-    backports.datetime_fromisoformat.MonkeyPatch.patch_fromisoformat()
 
 
 def serde(_cls=None, **kwargs):
