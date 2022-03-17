@@ -109,6 +109,15 @@
                     <a class="function" href="#is_primitive">is_primitive</a>
             </li>
             <li>
+                    <a class="function" href="#is_generic">is_generic</a>
+            </li>
+            <li>
+                    <a class="function" href="#find_generic_arg">find_generic_arg</a>
+            </li>
+            <li>
+                    <a class="function" href="#get_generic_arg">get_generic_arg</a>
+            </li>
+            <li>
                     <a class="function" href="#has_default">has_default</a>
             </li>
             <li>
@@ -145,7 +154,7 @@
 <span class="kn">import</span> <span class="nn">sys</span>
 <span class="kn">import</span> <span class="nn">typing</span>
 <span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">is_dataclass</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Iterator</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Set</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Type</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Generic</span><span class="p">,</span> <span class="n">Iterator</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Set</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Type</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">,</span> <span class="n">Union</span>
 
 <span class="kn">import</span> <span class="nn">typing_inspect</span>
 
@@ -249,6 +258,8 @@
             <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;Tuple[</span><span class="si">{</span><span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">typename</span><span class="p">(</span><span class="n">e</span><span class="p">)</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">args</span><span class="p">])</span><span class="si">}</span><span class="s1">]&#39;</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="s1">&#39;Tuple&#39;</span>
+    <span class="k">elif</span> <span class="n">is_generic</span><span class="p">(</span><span class="n">typ</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">get_origin</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span>
     <span class="k">elif</span> <span class="n">typ</span> <span class="ow">is</span> <span class="n">Any</span><span class="p">:</span>
         <span class="k">return</span> <span class="s1">&#39;Any&#39;</span>
     <span class="k">else</span><span class="p">:</span>
@@ -589,6 +600,75 @@
             <span class="k">return</span> <span class="nb">any</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="n">ty</span><span class="p">)</span> <span class="k">for</span> <span class="n">ty</span> <span class="ow">in</span> <span class="n">PRIMITIVES</span><span class="p">)</span>
 
 
+<span class="k">def</span> <span class="nf">is_generic</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Test if the type is derived from `typing.Generic`.</span>
+
+<span class="sd">    &gt;&gt;&gt; T = typing.TypeVar(&#39;T&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; class GenericFoo(typing.Generic[T]):</span>
+<span class="sd">    ...     pass</span>
+<span class="sd">    &gt;&gt;&gt; is_generic(GenericFoo[int])</span>
+<span class="sd">    True</span>
+<span class="sd">    &gt;&gt;&gt; is_generic(GenericFoo)</span>
+<span class="sd">    False</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">origin</span> <span class="o">=</span> <span class="n">get_origin</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">origin</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">Generic</span> <span class="ow">in</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">origin</span><span class="p">,</span> <span class="s2">&quot;__bases__&quot;</span><span class="p">,</span> <span class="p">())</span>
+
+
+<span class="k">def</span> <span class="nf">find_generic_arg</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">field</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Find a type in generic parameters.</span>
+
+<span class="sd">    &gt;&gt;&gt; T = typing.TypeVar(&#39;T&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; U = typing.TypeVar(&#39;U&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; V = typing.TypeVar(&#39;V&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; class GenericFoo(typing.Generic[T, U]):</span>
+<span class="sd">    ...     pass</span>
+<span class="sd">    &gt;&gt;&gt; find_generic_arg(GenericFoo, T)</span>
+<span class="sd">    0</span>
+<span class="sd">    &gt;&gt;&gt; find_generic_arg(GenericFoo, U)</span>
+<span class="sd">    1</span>
+<span class="sd">    &gt;&gt;&gt; find_generic_arg(GenericFoo, V)</span>
+<span class="sd">    -1</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">bases</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s2">&quot;__orig_bases__&quot;</span><span class="p">,</span> <span class="p">())</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">bases</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\&quot;</span><span class="s2">__orig_bases__</span><span class="se">\&quot;</span><span class="s2"> property was not found: </span><span class="si">{</span><span class="bp">cls</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">base</span> <span class="ow">in</span> <span class="n">bases</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">arg</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">get_args</span><span class="p">(</span><span class="n">base</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="n">arg</span><span class="o">.</span><span class="vm">__name__</span> <span class="o">==</span> <span class="n">field</span><span class="o">.</span><span class="vm">__name__</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">n</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">bases</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Generic field not found in class: </span><span class="si">{</span><span class="n">bases</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="o">-</span><span class="mi">1</span>
+
+
+<span class="k">def</span> <span class="nf">get_generic_arg</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get generic type argument by index.</span>
+
+<span class="sd">    &gt;&gt;&gt; T = typing.TypeVar(&#39;T&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; U = typing.TypeVar(&#39;U&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; class GenericFoo(typing.Generic[T, U]):</span>
+<span class="sd">    ...     pass</span>
+<span class="sd">    &gt;&gt;&gt; get_generic_arg(GenericFoo[int, str], 0).__name__</span>
+<span class="sd">    &#39;int&#39;</span>
+<span class="sd">    &gt;&gt;&gt; get_generic_arg(GenericFoo[int, str], 1).__name__</span>
+<span class="sd">    &#39;str&#39;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">is_generic</span><span class="p">(</span><span class="n">typ</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">args</span> <span class="o">=</span> <span class="n">get_args</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">index</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span>
+        <span class="k">return</span> <span class="n">args</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+
+
 <span class="k">def</span> <span class="nf">has_default</span><span class="p">(</span><span class="n">field</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Test if the field has default value.</span>
@@ -828,6 +908,8 @@
             <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;Tuple[</span><span class="si">{</span><span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">typename</span><span class="p">(</span><span class="n">e</span><span class="p">)</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">args</span><span class="p">])</span><span class="si">}</span><span class="s1">]&#39;</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="s1">&#39;Tuple&#39;</span>
+    <span class="k">elif</span> <span class="n">is_generic</span><span class="p">(</span><span class="n">typ</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">get_origin</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span>
     <span class="k">elif</span> <span class="n">typ</span> <span class="ow">is</span> <span class="n">Any</span><span class="p">:</span>
         <span class="k">return</span> <span class="s1">&#39;Any&#39;</span>
     <span class="k">else</span><span class="p">:</span>
@@ -1588,6 +1670,158 @@ but</code>typing._specialform<code>doesn't exist for python 3.6. Use</code>Any` 
 <span class="gp">... </span>    <span class="k">pass</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">is_primitive</span><span class="p">(</span><span class="n">CustomInt</span><span class="p">)</span>
 <span class="go">True</span>
+</code></pre></div>
+</div>
+
+
+                </section>
+                <section id="is_generic">
+                            <div class="attr function"><a class="headerlink" href="#is_generic">#&nbsp;&nbsp</a>
+
+        
+            <span class="def">def</span>
+            <span class="name">is_generic</span><span class="signature">(typ) -&gt; bool</span>:
+    </div>
+
+                <details>
+            <summary>View Source</summary>
+            <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">is_generic</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Test if the type is derived from `typing.Generic`.</span>
+
+<span class="sd">    &gt;&gt;&gt; T = typing.TypeVar(&#39;T&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; class GenericFoo(typing.Generic[T]):</span>
+<span class="sd">    ...     pass</span>
+<span class="sd">    &gt;&gt;&gt; is_generic(GenericFoo[int])</span>
+<span class="sd">    True</span>
+<span class="sd">    &gt;&gt;&gt; is_generic(GenericFoo)</span>
+<span class="sd">    False</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">origin</span> <span class="o">=</span> <span class="n">get_origin</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">origin</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">Generic</span> <span class="ow">in</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">origin</span><span class="p">,</span> <span class="s2">&quot;__bases__&quot;</span><span class="p">,</span> <span class="p">())</span>
+</pre></div>
+
+        </details>
+
+            <div class="docstring"><p>Test if the type is derived from <code>typing.Generic</code>.</p>
+
+<div class="codehilite"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">T</span> <span class="o">=</span> <span class="n">typing</span><span class="o">.</span><span class="n">TypeVar</span><span class="p">(</span><span class="s1">&#39;T&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">class</span> <span class="nc">GenericFoo</span><span class="p">(</span><span class="n">typing</span><span class="o">.</span><span class="n">Generic</span><span class="p">[</span><span class="n">T</span><span class="p">]):</span>
+<span class="gp">... </span>    <span class="k">pass</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">is_generic</span><span class="p">(</span><span class="n">GenericFoo</span><span class="p">[</span><span class="nb">int</span><span class="p">])</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">is_generic</span><span class="p">(</span><span class="n">GenericFoo</span><span class="p">)</span>
+<span class="go">False</span>
+</code></pre></div>
+</div>
+
+
+                </section>
+                <section id="find_generic_arg">
+                            <div class="attr function"><a class="headerlink" href="#find_generic_arg">#&nbsp;&nbsp</a>
+
+        
+            <span class="def">def</span>
+            <span class="name">find_generic_arg</span><span class="signature">(cls, field) -&gt; int</span>:
+    </div>
+
+                <details>
+            <summary>View Source</summary>
+            <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">find_generic_arg</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">field</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Find a type in generic parameters.</span>
+
+<span class="sd">    &gt;&gt;&gt; T = typing.TypeVar(&#39;T&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; U = typing.TypeVar(&#39;U&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; V = typing.TypeVar(&#39;V&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; class GenericFoo(typing.Generic[T, U]):</span>
+<span class="sd">    ...     pass</span>
+<span class="sd">    &gt;&gt;&gt; find_generic_arg(GenericFoo, T)</span>
+<span class="sd">    0</span>
+<span class="sd">    &gt;&gt;&gt; find_generic_arg(GenericFoo, U)</span>
+<span class="sd">    1</span>
+<span class="sd">    &gt;&gt;&gt; find_generic_arg(GenericFoo, V)</span>
+<span class="sd">    -1</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">bases</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s2">&quot;__orig_bases__&quot;</span><span class="p">,</span> <span class="p">())</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">bases</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\&quot;</span><span class="s2">__orig_bases__</span><span class="se">\&quot;</span><span class="s2"> property was not found: </span><span class="si">{</span><span class="bp">cls</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">base</span> <span class="ow">in</span> <span class="n">bases</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">arg</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">get_args</span><span class="p">(</span><span class="n">base</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="n">arg</span><span class="o">.</span><span class="vm">__name__</span> <span class="o">==</span> <span class="n">field</span><span class="o">.</span><span class="vm">__name__</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">n</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">bases</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Generic field not found in class: </span><span class="si">{</span><span class="n">bases</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="o">-</span><span class="mi">1</span>
+</pre></div>
+
+        </details>
+
+            <div class="docstring"><p>Find a type in generic parameters.</p>
+
+<div class="codehilite"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">T</span> <span class="o">=</span> <span class="n">typing</span><span class="o">.</span><span class="n">TypeVar</span><span class="p">(</span><span class="s1">&#39;T&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">U</span> <span class="o">=</span> <span class="n">typing</span><span class="o">.</span><span class="n">TypeVar</span><span class="p">(</span><span class="s1">&#39;U&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">V</span> <span class="o">=</span> <span class="n">typing</span><span class="o">.</span><span class="n">TypeVar</span><span class="p">(</span><span class="s1">&#39;V&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">class</span> <span class="nc">GenericFoo</span><span class="p">(</span><span class="n">typing</span><span class="o">.</span><span class="n">Generic</span><span class="p">[</span><span class="n">T</span><span class="p">,</span> <span class="n">U</span><span class="p">]):</span>
+<span class="gp">... </span>    <span class="k">pass</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">find_generic_arg</span><span class="p">(</span><span class="n">GenericFoo</span><span class="p">,</span> <span class="n">T</span><span class="p">)</span>
+<span class="go">0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">find_generic_arg</span><span class="p">(</span><span class="n">GenericFoo</span><span class="p">,</span> <span class="n">U</span><span class="p">)</span>
+<span class="go">1</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">find_generic_arg</span><span class="p">(</span><span class="n">GenericFoo</span><span class="p">,</span> <span class="n">V</span><span class="p">)</span>
+<span class="go">-1</span>
+</code></pre></div>
+</div>
+
+
+                </section>
+                <section id="get_generic_arg">
+                            <div class="attr function"><a class="headerlink" href="#get_generic_arg">#&nbsp;&nbsp</a>
+
+        
+            <span class="def">def</span>
+            <span class="name">get_generic_arg</span><span class="signature">(typ, index)</span>:
+    </div>
+
+                <details>
+            <summary>View Source</summary>
+            <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">get_generic_arg</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get generic type argument by index.</span>
+
+<span class="sd">    &gt;&gt;&gt; T = typing.TypeVar(&#39;T&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; U = typing.TypeVar(&#39;U&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; class GenericFoo(typing.Generic[T, U]):</span>
+<span class="sd">    ...     pass</span>
+<span class="sd">    &gt;&gt;&gt; get_generic_arg(GenericFoo[int, str], 0).__name__</span>
+<span class="sd">    &#39;int&#39;</span>
+<span class="sd">    &gt;&gt;&gt; get_generic_arg(GenericFoo[int, str], 1).__name__</span>
+<span class="sd">    &#39;str&#39;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">is_generic</span><span class="p">(</span><span class="n">typ</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">args</span> <span class="o">=</span> <span class="n">get_args</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">index</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span>
+        <span class="k">return</span> <span class="n">args</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+</pre></div>
+
+        </details>
+
+            <div class="docstring"><p>Get generic type argument by index.</p>
+
+<div class="codehilite"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">T</span> <span class="o">=</span> <span class="n">typing</span><span class="o">.</span><span class="n">TypeVar</span><span class="p">(</span><span class="s1">&#39;T&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">U</span> <span class="o">=</span> <span class="n">typing</span><span class="o">.</span><span class="n">TypeVar</span><span class="p">(</span><span class="s1">&#39;U&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">class</span> <span class="nc">GenericFoo</span><span class="p">(</span><span class="n">typing</span><span class="o">.</span><span class="n">Generic</span><span class="p">[</span><span class="n">T</span><span class="p">,</span> <span class="n">U</span><span class="p">]):</span>
+<span class="gp">... </span>    <span class="k">pass</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">get_generic_arg</span><span class="p">(</span><span class="n">GenericFoo</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span>
+<span class="go">&#39;int&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">get_generic_arg</span><span class="p">(</span><span class="n">GenericFoo</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span>
+<span class="go">&#39;str&#39;</span>
 </code></pre></div>
 </div>
 

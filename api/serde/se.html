@@ -75,13 +75,14 @@ associated with serialization.</p>
 <span class="kn">import</span> <span class="nn">dataclasses</span>
 <span class="kn">import</span> <span class="nn">functools</span>
 <span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">dataclass</span><span class="p">,</span> <span class="n">is_dataclass</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Iterator</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Type</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Iterator</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Type</span><span class="p">,</span> <span class="n">TypeVar</span>
 
 <span class="kn">import</span> <span class="nn">jinja2</span>
 
 <span class="kn">from</span> <span class="nn">.compat</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">SerdeError</span><span class="p">,</span>
     <span class="n">SerdeSkip</span><span class="p">,</span>
+    <span class="n">get_origin</span><span class="p">,</span>
     <span class="n">is_bare_dict</span><span class="p">,</span>
     <span class="n">is_bare_list</span><span class="p">,</span>
     <span class="n">is_bare_opt</span><span class="p">,</span>
@@ -89,6 +90,7 @@ associated with serialization.</p>
     <span class="n">is_bare_tuple</span><span class="p">,</span>
     <span class="n">is_dict</span><span class="p">,</span>
     <span class="n">is_enum</span><span class="p">,</span>
+    <span class="n">is_generic</span><span class="p">,</span>
     <span class="n">is_list</span><span class="p">,</span>
     <span class="n">is_none</span><span class="p">,</span>
     <span class="n">is_opt</span><span class="p">,</span>
@@ -663,8 +665,11 @@ associated with serialization.</p>
             <span class="n">res</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">arg</span><span class="o">.</span><span class="n">varname</span><span class="si">}</span><span class="s2"> if reuse_instances else </span><span class="si">{</span><span class="n">arg</span><span class="o">.</span><span class="n">varname</span><span class="si">}</span><span class="s2">.isoformat()&quot;</span>
         <span class="k">elif</span> <span class="n">is_none</span><span class="p">(</span><span class="n">arg</span><span class="o">.</span><span class="n">type</span><span class="p">):</span>
             <span class="n">res</span> <span class="o">=</span> <span class="s2">&quot;None&quot;</span>
-        <span class="k">elif</span> <span class="n">arg</span><span class="o">.</span><span class="n">type</span> <span class="ow">is</span> <span class="n">Any</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="n">arg</span><span class="o">.</span><span class="n">type</span> <span class="ow">is</span> <span class="n">Any</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">arg</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">):</span>
             <span class="n">res</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;to_obj(</span><span class="si">{</span><span class="n">arg</span><span class="o">.</span><span class="n">varname</span><span class="si">}</span><span class="s2">, True, False, False)&quot;</span>
+        <span class="k">elif</span> <span class="n">is_generic</span><span class="p">(</span><span class="n">arg</span><span class="o">.</span><span class="n">type</span><span class="p">):</span>
+            <span class="n">arg</span><span class="o">.</span><span class="n">type</span> <span class="o">=</span> <span class="n">get_origin</span><span class="p">(</span><span class="n">arg</span><span class="o">.</span><span class="n">type</span><span class="p">)</span>
+            <span class="n">res</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">res</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;raise_unsupported_type(</span><span class="si">{</span><span class="n">arg</span><span class="o">.</span><span class="n">varname</span><span class="si">}</span><span class="s2">)&quot;</span>
 

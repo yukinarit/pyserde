@@ -73,14 +73,18 @@ associated with deserialization.</p>
 <span class="kn">import</span> <span class="nn">abc</span>
 <span class="kn">import</span> <span class="nn">dataclasses</span>
 <span class="kn">import</span> <span class="nn">functools</span>
+<span class="kn">import</span> <span class="nn">typing</span>
 <span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">dataclass</span><span class="p">,</span> <span class="n">is_dataclass</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Type</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Type</span><span class="p">,</span> <span class="n">TypeVar</span>
 
 <span class="kn">import</span> <span class="nn">jinja2</span>
 
 <span class="kn">from</span> <span class="nn">.compat</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">SerdeError</span><span class="p">,</span>
     <span class="n">SerdeSkip</span><span class="p">,</span>
+    <span class="n">find_generic_arg</span><span class="p">,</span>
+    <span class="n">get_generic_arg</span><span class="p">,</span>
+    <span class="n">get_origin</span><span class="p">,</span>
     <span class="n">has_default</span><span class="p">,</span>
     <span class="n">has_default_factory</span><span class="p">,</span>
     <span class="n">is_bare_dict</span><span class="p">,</span>
@@ -89,6 +93,7 @@ associated with deserialization.</p>
     <span class="n">is_bare_tuple</span><span class="p">,</span>
     <span class="n">is_dict</span><span class="p">,</span>
     <span class="n">is_enum</span><span class="p">,</span>
+    <span class="n">is_generic</span><span class="p">,</span>
     <span class="n">is_list</span><span class="p">,</span>
     <span class="n">is_none</span><span class="p">,</span>
     <span class="n">is_opt</span><span class="p">,</span>
@@ -263,6 +268,9 @@ associated with deserialization.</p>
         <span class="n">g</span><span class="p">[</span><span class="s1">&#39;raise_unsupported_type&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">raise_unsupported_type</span>
         <span class="n">g</span><span class="p">[</span><span class="s1">&#39;typename&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">typename</span>  <span class="c1"># used in union functions</span>
         <span class="n">g</span><span class="p">[</span><span class="s1">&#39;ensure&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ensure</span>
+        <span class="n">g</span><span class="p">[</span><span class="s1">&#39;typing&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">typing</span>
+        <span class="n">g</span><span class="p">[</span><span class="s1">&#39;from_obj&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">from_obj</span>
+        <span class="n">g</span><span class="p">[</span><span class="s1">&#39;get_generic_arg&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">get_generic_arg</span>
         <span class="k">if</span> <span class="n">deserialize</span><span class="p">:</span>
             <span class="n">g</span><span class="p">[</span><span class="s1">&#39;serde_custom_class_deserializer&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">functools</span><span class="o">.</span><span class="n">partial</span><span class="p">(</span>
                 <span class="n">serde_custom_class_deserializer</span><span class="p">,</span> <span class="n">custom</span><span class="o">=</span><span class="n">deserializer</span>
@@ -272,7 +280,10 @@ associated with deserialization.</p>
         <span class="k">for</span> <span class="n">typ</span> <span class="ow">in</span> <span class="n">iter_types</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">typ</span> <span class="ow">is</span> <span class="bp">cls</span> <span class="ow">or</span> <span class="p">(</span><span class="n">is_primitive</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">is_enum</span><span class="p">(</span><span class="n">typ</span><span class="p">)):</span>
                 <span class="k">continue</span>
-            <span class="n">g</span><span class="p">[</span><span class="n">typename</span><span class="p">(</span><span class="n">typ</span><span class="p">)]</span> <span class="o">=</span> <span class="n">typ</span>
+            <span class="k">if</span> <span class="n">is_generic</span><span class="p">(</span><span class="n">typ</span><span class="p">):</span>
+                <span class="n">g</span><span class="p">[</span><span class="n">typename</span><span class="p">(</span><span class="n">typ</span><span class="p">)]</span> <span class="o">=</span> <span class="n">get_origin</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">g</span><span class="p">[</span><span class="n">typename</span><span class="p">(</span><span class="n">typ</span><span class="p">)]</span> <span class="o">=</span> <span class="n">typ</span>
 
         <span class="c1"># render all union functions</span>
         <span class="k">for</span> <span class="n">union</span> <span class="ow">in</span> <span class="n">iter_unions</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
@@ -341,6 +352,15 @@ associated with deserialization.</p>
 <span class="sd">    Deserialize from an object into an instance of the type specified as arg `c`.</span>
 <span class="sd">    `c` can be either primitive type, `List`, `Tuple`, `Dict` or `deserialize` class.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">is_generic</span><span class="p">(</span><span class="n">c</span><span class="p">):</span>
+        <span class="c1"># Store subscripted generic type such as Foo[Bar] in &quot;maybe_generic&quot;,</span>
+        <span class="c1"># and store origin type such as Foo in &quot;c&quot;. Since subscripted generics</span>
+        <span class="c1"># are not a subclass of &quot;type&quot;, use &quot;c&quot; for type inspection, and pass</span>
+        <span class="c1"># &quot;maybe_generic&quot; in deserialize functions.</span>
+        <span class="n">maybe_generic</span> <span class="o">=</span> <span class="n">c</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="n">get_origin</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">maybe_generic</span> <span class="o">=</span> <span class="n">c</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">thisfunc</span> <span class="o">=</span> <span class="n">functools</span><span class="o">.</span><span class="n">partial</span><span class="p">(</span><span class="n">from_obj</span><span class="p">,</span> <span class="n">named</span><span class="o">=</span><span class="n">named</span><span class="p">,</span> <span class="n">reuse_instances</span><span class="o">=</span><span class="n">reuse_instances</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">o</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -348,9 +368,13 @@ associated with deserialization.</p>
         <span class="k">if</span> <span class="n">is_deserializable</span><span class="p">(</span><span class="n">c</span><span class="p">):</span>
             <span class="n">serde_scope</span><span class="p">:</span> <span class="n">SerdeScope</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">SERDE_SCOPE</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">named</span><span class="p">:</span>
-                <span class="k">return</span> <span class="n">serde_scope</span><span class="o">.</span><span class="n">funcs</span><span class="p">[</span><span class="n">FROM_DICT</span><span class="p">](</span><span class="n">o</span><span class="p">,</span> <span class="n">reuse_instances</span><span class="o">=</span><span class="n">reuse_instances</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">serde_scope</span><span class="o">.</span><span class="n">funcs</span><span class="p">[</span><span class="n">FROM_DICT</span><span class="p">](</span>
+                    <span class="bp">cls</span><span class="o">=</span><span class="n">c</span><span class="p">,</span> <span class="n">maybe_generic</span><span class="o">=</span><span class="n">maybe_generic</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">o</span><span class="p">,</span> <span class="n">reuse_instances</span><span class="o">=</span><span class="n">reuse_instances</span>
+                <span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="k">return</span> <span class="n">serde_scope</span><span class="o">.</span><span class="n">funcs</span><span class="p">[</span><span class="n">FROM_ITER</span><span class="p">](</span><span class="n">o</span><span class="p">,</span> <span class="n">reuse_instances</span><span class="o">=</span><span class="n">reuse_instances</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">serde_scope</span><span class="o">.</span><span class="n">funcs</span><span class="p">[</span><span class="n">FROM_ITER</span><span class="p">](</span>
+                    <span class="bp">cls</span><span class="o">=</span><span class="n">c</span><span class="p">,</span> <span class="n">maybe_generic</span><span class="o">=</span><span class="n">maybe_generic</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">o</span><span class="p">,</span> <span class="n">reuse_instances</span><span class="o">=</span><span class="n">reuse_instances</span>
+                <span class="p">)</span>
         <span class="k">elif</span> <span class="n">is_opt</span><span class="p">(</span><span class="n">c</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">o</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="k">return</span> <span class="kc">None</span>
@@ -529,6 +553,7 @@ associated with deserialization.</p>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">func</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="bp">cls</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Type</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">custom</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">DeserializeFunc</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># Custom class level deserializer.</span>
 
     <span class="k">def</span> <span class="nf">render</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">arg</span><span class="p">:</span> <span class="n">DeField</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
@@ -565,6 +590,12 @@ associated with deserialization.</p>
             <span class="n">res</span> <span class="o">=</span> <span class="s2">&quot;None&quot;</span>
         <span class="k">elif</span> <span class="n">arg</span><span class="o">.</span><span class="n">type</span> <span class="ow">is</span> <span class="n">Any</span><span class="p">:</span>
             <span class="n">res</span> <span class="o">=</span> <span class="n">arg</span><span class="o">.</span><span class="n">data</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">arg</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">):</span>
+            <span class="n">index</span> <span class="o">=</span> <span class="n">find_generic_arg</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cls</span><span class="p">,</span> <span class="n">arg</span><span class="o">.</span><span class="n">type</span><span class="p">)</span>
+            <span class="n">res</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;from_obj(get_generic_arg(maybe_generic, </span><span class="si">{</span><span class="n">index</span><span class="si">}</span><span class="s2">), </span><span class="si">{</span><span class="n">arg</span><span class="o">.</span><span class="n">data</span><span class="si">}</span><span class="s2">, named=</span><span class="si">{</span><span class="ow">not</span> <span class="n">arg</span><span class="o">.</span><span class="n">iterbased</span><span class="si">}</span><span class="s2">, reuse_instances=reuse_instances)&quot;</span>
+        <span class="k">elif</span> <span class="n">is_generic</span><span class="p">(</span><span class="n">arg</span><span class="o">.</span><span class="n">type</span><span class="p">):</span>
+            <span class="n">arg</span><span class="o">.</span><span class="n">type</span> <span class="o">=</span> <span class="n">get_origin</span><span class="p">(</span><span class="n">arg</span><span class="o">.</span><span class="n">type</span><span class="p">)</span>
+            <span class="n">res</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;raise_unsupported_type(</span><span class="si">{</span><span class="n">arg</span><span class="o">.</span><span class="n">data</span><span class="si">}</span><span class="s2">)&quot;</span>
 
@@ -607,7 +638,7 @@ associated with deserialization.</p>
                 <span class="n">var</span> <span class="o">=</span> <span class="n">arg</span><span class="o">.</span><span class="n">datavar</span>
 
         <span class="n">opts</span> <span class="o">=</span> <span class="s2">&quot;reuse_instances=reuse_instances&quot;</span>
-        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">typename</span><span class="p">(</span><span class="n">arg</span><span class="o">.</span><span class="n">type</span><span class="p">)</span><span class="si">}</span><span class="s2">.</span><span class="si">{</span><span class="n">SERDE_SCOPE</span><span class="si">}</span><span class="s2">.funcs[&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">func</span><span class="si">}</span><span class="s2">&#39;](</span><span class="si">{</span><span class="n">var</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">opts</span><span class="si">}</span><span class="s2">)&quot;</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">typename</span><span class="p">(</span><span class="n">arg</span><span class="o">.</span><span class="n">type</span><span class="p">)</span><span class="si">}</span><span class="s2">.</span><span class="si">{</span><span class="n">SERDE_SCOPE</span><span class="si">}</span><span class="s2">.funcs[&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">func</span><span class="si">}</span><span class="s2">&#39;](data=</span><span class="si">{</span><span class="n">var</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">opts</span><span class="si">}</span><span class="s2">)&quot;</span>
 
     <span class="k">def</span> <span class="nf">opt</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">arg</span><span class="p">:</span> <span class="n">DeField</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -627,7 +658,7 @@ associated with deserialization.</p>
 <span class="sd">        ... class Foo:</span>
 <span class="sd">        ...     o: Optional[List[int]]</span>
 <span class="sd">        &gt;&gt;&gt; Renderer(&#39;foo&#39;).render(DeField(Optional[Foo], &#39;f&#39;, datavar=&#39;data&#39;))</span>
-<span class="sd">        &#39;(Foo.__serde__.funcs[\\&#39;foo\\&#39;](data[&quot;f&quot;], reuse_instances=reuse_instances)) \</span>
+<span class="sd">        &#39;(Foo.__serde__.funcs[\\&#39;foo\\&#39;](data=data[&quot;f&quot;], reuse_instances=reuse_instances)) \</span>
 <span class="sd">if data.get(&quot;f&quot;) is not None else None&#39;</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">value</span> <span class="o">=</span> <span class="n">arg</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
@@ -681,12 +712,12 @@ associated with deserialization.</p>
 <span class="sd">        ... class Foo: pass</span>
 <span class="sd">        &gt;&gt;&gt; Renderer(&#39;foo&#39;).render(DeField(Tuple[str, int, List[int], Foo], &#39;d&#39;, datavar=&#39;data&#39;))</span>
 <span class="sd">        &#39;(data[&quot;d&quot;][0], data[&quot;d&quot;][1], [v for v in data[&quot;d&quot;][2]], \</span>
-<span class="sd">Foo.__serde__.funcs[\\&#39;foo\\&#39;](data[&quot;d&quot;][3], reuse_instances=reuse_instances),)&#39;</span>
+<span class="sd">Foo.__serde__.funcs[\\&#39;foo\\&#39;](data=data[&quot;d&quot;][3], reuse_instances=reuse_instances),)&#39;</span>
 
 <span class="sd">        &gt;&gt;&gt; field = DeField(Tuple[str, int, List[int], Foo], &#39;d&#39;, datavar=&#39;data&#39;, index=0, iterbased=True)</span>
 <span class="sd">        &gt;&gt;&gt; Renderer(&#39;foo&#39;).render(field)</span>
 <span class="sd">        &quot;(data[0][0], data[0][1], [v for v in data[0][2]], \</span>
-<span class="sd">Foo.__serde__.funcs[&#39;foo&#39;](data[0][3], reuse_instances=reuse_instances),)&quot;</span>
+<span class="sd">Foo.__serde__.funcs[&#39;foo&#39;](data=data[0][3], reuse_instances=reuse_instances),)&quot;</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">is_bare_tuple</span><span class="p">(</span><span class="n">arg</span><span class="o">.</span><span class="n">type</span><span class="p">):</span>
             <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;tuple(</span><span class="si">{</span><span class="n">arg</span><span class="o">.</span><span class="n">data</span><span class="si">}</span><span class="s1">)&#39;</span>
@@ -708,8 +739,8 @@ associated with deserialization.</p>
 <span class="sd">        &gt;&gt;&gt; @deserialize</span>
 <span class="sd">        ... class Foo: pass</span>
 <span class="sd">        &gt;&gt;&gt; Renderer(&#39;foo&#39;).render(DeField(Dict[Foo, List[Foo]], &#39;f&#39;, datavar=&#39;data&#39;))</span>
-<span class="sd">        &#39;{Foo.__serde__.funcs[\\&#39;foo\\&#39;](k, reuse_instances=reuse_instances): \</span>
-<span class="sd">[Foo.__serde__.funcs[\\&#39;foo\\&#39;](v, reuse_instances=reuse_instances) for v in v] for k, v in data[&quot;f&quot;].items()}&#39;</span>
+<span class="sd">        &#39;{Foo.__serde__.funcs[\\&#39;foo\\&#39;](data=k, reuse_instances=reuse_instances): \</span>
+<span class="sd">[Foo.__serde__.funcs[\\&#39;foo\\&#39;](data=v, reuse_instances=reuse_instances) for v in v] for k, v in data[&quot;f&quot;].items()}&#39;</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">is_bare_dict</span><span class="p">(</span><span class="n">arg</span><span class="o">.</span><span class="n">type</span><span class="p">):</span>
             <span class="k">return</span> <span class="n">arg</span><span class="o">.</span><span class="n">data</span>
@@ -746,7 +777,7 @@ associated with deserialization.</p>
 
     <span class="k">def</span> <span class="nf">union_func</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">arg</span><span class="p">:</span> <span class="n">DeField</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
         <span class="n">func_name</span> <span class="o">=</span> <span class="n">union_func_name</span><span class="p">(</span><span class="n">UNION_DE_PREFIX</span><span class="p">,</span> <span class="n">type_args</span><span class="p">(</span><span class="n">arg</span><span class="o">.</span><span class="n">type</span><span class="p">))</span>
-        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;serde_scope.funcs[&#39;</span><span class="si">{</span><span class="n">func_name</span><span class="si">}</span><span class="s2">&#39;](</span><span class="si">{</span><span class="n">arg</span><span class="o">.</span><span class="n">data</span><span class="si">}</span><span class="s2">, reuse_instances)&quot;</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;serde_scope.funcs[&#39;</span><span class="si">{</span><span class="n">func_name</span><span class="si">}</span><span class="s2">&#39;](cls=cls, data=</span><span class="si">{</span><span class="n">arg</span><span class="o">.</span><span class="n">data</span><span class="si">}</span><span class="s2">, reuse_instances=reuse_instances)&quot;</span>
 
     <span class="k">def</span> <span class="nf">default</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">arg</span><span class="p">:</span> <span class="n">DeField</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
         <span class="n">exists</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;&quot;</span><span class="si">{</span><span class="n">arg</span><span class="o">.</span><span class="n">conv_name</span><span class="p">()</span><span class="si">}</span><span class="s1">&quot; in </span><span class="si">{</span><span class="n">arg</span><span class="o">.</span><span class="n">datavar</span><span class="si">}</span><span class="s1">&#39;</span>
@@ -773,7 +804,7 @@ associated with deserialization.</p>
 
 <span class="k">def</span> <span class="nf">render_from_iter</span><span class="p">(</span><span class="bp">cls</span><span class="p">:</span> <span class="n">Type</span><span class="p">,</span> <span class="n">custom</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">DeserializeFunc</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
     <span class="n">template</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
-<span class="s2">def {{func}}(data, reuse_instances = {{serde_scope.reuse_instances_default}}):</span>
+<span class="s2">def {{func}}(cls=cls, maybe_generic=None, data=None, reuse_instances = {{serde_scope.reuse_instances_default}}):</span>
 <span class="s2">  if reuse_instances is Ellipsis:</span>
 <span class="s2">    reuse_instances = {{serde_scope.reuse_instances_default}}</span>
 
@@ -787,7 +818,7 @@ associated with deserialization.</p>
 <span class="s2">  )</span>
 <span class="s2">    &quot;&quot;&quot;</span>
 
-    <span class="n">renderer</span> <span class="o">=</span> <span class="n">Renderer</span><span class="p">(</span><span class="n">FROM_ITER</span><span class="p">,</span> <span class="n">custom</span><span class="p">)</span>
+    <span class="n">renderer</span> <span class="o">=</span> <span class="n">Renderer</span><span class="p">(</span><span class="n">FROM_ITER</span><span class="p">,</span> <span class="bp">cls</span><span class="o">=</span><span class="bp">cls</span><span class="p">,</span> <span class="n">custom</span><span class="o">=</span><span class="n">custom</span><span class="p">)</span>
     <span class="n">env</span> <span class="o">=</span> <span class="n">jinja2</span><span class="o">.</span><span class="n">Environment</span><span class="p">(</span><span class="n">loader</span><span class="o">=</span><span class="n">jinja2</span><span class="o">.</span><span class="n">DictLoader</span><span class="p">({</span><span class="s1">&#39;iter&#39;</span><span class="p">:</span> <span class="n">template</span><span class="p">}))</span>
     <span class="n">env</span><span class="o">.</span><span class="n">filters</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;rvalue&#39;</span><span class="p">:</span> <span class="n">renderer</span><span class="o">.</span><span class="n">render</span><span class="p">})</span>
     <span class="n">env</span><span class="o">.</span><span class="n">filters</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;arg&#39;</span><span class="p">:</span> <span class="n">to_iter_arg</span><span class="p">})</span>
@@ -796,21 +827,22 @@ associated with deserialization.</p>
 
 <span class="k">def</span> <span class="nf">render_from_dict</span><span class="p">(</span><span class="bp">cls</span><span class="p">:</span> <span class="n">Type</span><span class="p">,</span> <span class="n">rename_all</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">custom</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">DeserializeFunc</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
     <span class="n">template</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
-<span class="s2">def {{func}}(data, reuse_instances = {{serde_scope.reuse_instances_default}}):</span>
+<span class="s2">def {{func}}(cls=cls, maybe_generic=None, data=None, reuse_instances = {{serde_scope.reuse_instances_default}}):</span>
 <span class="s2">  if reuse_instances is Ellipsis:</span>
 <span class="s2">    reuse_instances = {{serde_scope.reuse_instances_default}}</span>
 
 <span class="s2">  if data is None:</span>
 <span class="s2">    return None</span>
 
-<span class="s2">  return cls(</span>
+<span class="s2">  rv = cls(</span>
 <span class="s2">  {</span><span class="si">% f</span><span class="s2">or f in fields %}</span>
 <span class="s2">  {{f|arg(loop.index-1)|rvalue}},</span>
 <span class="s2">  {</span><span class="si">% e</span><span class="s2">ndfor %}</span>
 <span class="s2">  )</span>
+<span class="s2">  return rv</span>
 <span class="s2">    &quot;&quot;&quot;</span>
 
-    <span class="n">renderer</span> <span class="o">=</span> <span class="n">Renderer</span><span class="p">(</span><span class="n">FROM_DICT</span><span class="p">,</span> <span class="n">custom</span><span class="p">)</span>
+    <span class="n">renderer</span> <span class="o">=</span> <span class="n">Renderer</span><span class="p">(</span><span class="n">FROM_DICT</span><span class="p">,</span> <span class="bp">cls</span><span class="o">=</span><span class="bp">cls</span><span class="p">,</span> <span class="n">custom</span><span class="o">=</span><span class="n">custom</span><span class="p">)</span>
     <span class="n">env</span> <span class="o">=</span> <span class="n">jinja2</span><span class="o">.</span><span class="n">Environment</span><span class="p">(</span><span class="n">loader</span><span class="o">=</span><span class="n">jinja2</span><span class="o">.</span><span class="n">DictLoader</span><span class="p">({</span><span class="s1">&#39;dict&#39;</span><span class="p">:</span> <span class="n">template</span><span class="p">}))</span>
     <span class="n">env</span><span class="o">.</span><span class="n">filters</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;rvalue&#39;</span><span class="p">:</span> <span class="n">renderer</span><span class="o">.</span><span class="n">render</span><span class="p">})</span>
     <span class="n">env</span><span class="o">.</span><span class="n">filters</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;arg&#39;</span><span class="p">:</span> <span class="n">functools</span><span class="o">.</span><span class="n">partial</span><span class="p">(</span><span class="n">to_arg</span><span class="p">,</span> <span class="n">rename_all</span><span class="o">=</span><span class="n">rename_all</span><span class="p">)})</span>
@@ -819,7 +851,7 @@ associated with deserialization.</p>
 
 <span class="k">def</span> <span class="nf">render_union_func</span><span class="p">(</span><span class="bp">cls</span><span class="p">:</span> <span class="n">Type</span><span class="p">,</span> <span class="n">union_args</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Type</span><span class="p">],</span> <span class="n">tagging</span><span class="p">:</span> <span class="n">Tagging</span> <span class="o">=</span> <span class="n">DefaultTagging</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
     <span class="n">template</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
-<span class="s2">def {{func}}(data, reuse_instances):</span>
+<span class="s2">def {{func}}(cls=cls, maybe_generic=None, data=None, reuse_instances = {{serde_scope.reuse_instances_default}}):</span>
 <span class="s2">  errors = []</span>
 <span class="s2">  {</span><span class="si">% f</span><span class="s2">or t in union_args %}</span>
 <span class="s2">  try:</span>
@@ -856,7 +888,7 @@ associated with deserialization.</p>
 <span class="s2">    &quot;&quot;&quot;</span>
     <span class="n">union_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Union[</span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">typename</span><span class="p">(</span><span class="n">a</span><span class="p">)</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">union_args</span><span class="p">])</span><span class="si">}</span><span class="s2">]&quot;</span>
 
-    <span class="n">renderer</span> <span class="o">=</span> <span class="n">Renderer</span><span class="p">(</span><span class="n">FROM_DICT</span><span class="p">)</span>
+    <span class="n">renderer</span> <span class="o">=</span> <span class="n">Renderer</span><span class="p">(</span><span class="n">FROM_DICT</span><span class="p">,</span> <span class="bp">cls</span><span class="o">=</span><span class="bp">cls</span><span class="p">)</span>
     <span class="n">env</span> <span class="o">=</span> <span class="n">jinja2</span><span class="o">.</span><span class="n">Environment</span><span class="p">(</span><span class="n">loader</span><span class="o">=</span><span class="n">jinja2</span><span class="o">.</span><span class="n">DictLoader</span><span class="p">({</span><span class="s1">&#39;dict&#39;</span><span class="p">:</span> <span class="n">template</span><span class="p">}))</span>
     <span class="n">env</span><span class="o">.</span><span class="n">filters</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
         <span class="p">{</span><span class="s1">&#39;arg&#39;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">DeField</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">datavar</span><span class="o">=</span><span class="s2">&quot;fake_dict&quot;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;fake_key&quot;</span><span class="p">)}</span>
@@ -984,6 +1016,9 @@ associated with deserialization.</p>
         <span class="n">g</span><span class="p">[</span><span class="s1">&#39;raise_unsupported_type&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">raise_unsupported_type</span>
         <span class="n">g</span><span class="p">[</span><span class="s1">&#39;typename&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">typename</span>  <span class="c1"># used in union functions</span>
         <span class="n">g</span><span class="p">[</span><span class="s1">&#39;ensure&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ensure</span>
+        <span class="n">g</span><span class="p">[</span><span class="s1">&#39;typing&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">typing</span>
+        <span class="n">g</span><span class="p">[</span><span class="s1">&#39;from_obj&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">from_obj</span>
+        <span class="n">g</span><span class="p">[</span><span class="s1">&#39;get_generic_arg&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">get_generic_arg</span>
         <span class="k">if</span> <span class="n">deserialize</span><span class="p">:</span>
             <span class="n">g</span><span class="p">[</span><span class="s1">&#39;serde_custom_class_deserializer&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">functools</span><span class="o">.</span><span class="n">partial</span><span class="p">(</span>
                 <span class="n">serde_custom_class_deserializer</span><span class="p">,</span> <span class="n">custom</span><span class="o">=</span><span class="n">deserializer</span>
@@ -993,7 +1028,10 @@ associated with deserialization.</p>
         <span class="k">for</span> <span class="n">typ</span> <span class="ow">in</span> <span class="n">iter_types</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">typ</span> <span class="ow">is</span> <span class="bp">cls</span> <span class="ow">or</span> <span class="p">(</span><span class="n">is_primitive</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">is_enum</span><span class="p">(</span><span class="n">typ</span><span class="p">)):</span>
                 <span class="k">continue</span>
-            <span class="n">g</span><span class="p">[</span><span class="n">typename</span><span class="p">(</span><span class="n">typ</span><span class="p">)]</span> <span class="o">=</span> <span class="n">typ</span>
+            <span class="k">if</span> <span class="n">is_generic</span><span class="p">(</span><span class="n">typ</span><span class="p">):</span>
+                <span class="n">g</span><span class="p">[</span><span class="n">typename</span><span class="p">(</span><span class="n">typ</span><span class="p">)]</span> <span class="o">=</span> <span class="n">get_origin</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">g</span><span class="p">[</span><span class="n">typename</span><span class="p">(</span><span class="n">typ</span><span class="p">)]</span> <span class="o">=</span> <span class="n">typ</span>
 
         <span class="c1"># render all union functions</span>
         <span class="k">for</span> <span class="n">union</span> <span class="ow">in</span> <span class="n">iter_unions</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
