@@ -1,14 +1,14 @@
 import logging
 from dataclasses import dataclass
 from ipaddress import IPv4Address
-from typing import Dict, List, Optional, Tuple, Union
+from typing import Dict, Generic, List, Optional, Tuple, TypeVar, Union
 from uuid import UUID
 
 import pytest
 
-from serde import SerdeError, from_dict
+from serde import SerdeError, from_dict, from_tuple
 from serde import init as serde_init
-from serde import logger, serde, to_dict
+from serde import logger, serde, to_dict, to_tuple
 from serde.json import from_json, to_json
 
 logging.basicConfig(level=logging.WARNING)
@@ -325,6 +325,44 @@ def test_union_with_union_in_nested_tuple():
     a_int_dict = {"v": (1,)}
     assert to_dict(a_int) == a_int_dict
     assert from_dict(A, a_int_dict) == a_int
+
+
+def test_generic_union():
+    T = TypeVar('T')
+    U = TypeVar('U')
+
+    @serde
+    class Foo(Generic[T]):
+        v: T
+
+    @serde
+    class Bar(Generic[U]):
+        v: U
+
+    @serde
+    class A:
+        v: Union[Foo[int], Bar[str]]
+
+    a = A(Foo[int](10))
+    assert a == from_dict(A, to_dict(a))
+    assert a == from_tuple(A, to_tuple(a))
+
+    a = A(Foo[str]("foo"))
+    assert a == from_dict(A, to_dict(a))
+    assert a == from_tuple(A, to_tuple(a))
+
+    @serde
+    class B(Generic[T, U]):
+        v: Union[Foo[T], Bar[U]]
+
+    b = B[int, str](Foo[int](10))
+    assert b == from_dict(B[int, str], to_dict(b))
+    assert b == from_tuple(B[int, str], to_tuple(b))
+
+    b = B[Foo[int], Bar[str]](Foo(Foo(10)))
+    assert {'v': {'v': {'v': 10}}} == to_dict(b)
+    # TODO Nested union generic still doesn't work
+    # assert b == from_dict(B[Foo[int], Bar[str]], to_dict(b))
 
 
 def test_external_tagging():

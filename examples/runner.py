@@ -8,6 +8,7 @@ import default
 import env
 import flatten
 import forward_reference
+import generics
 import jsonfile
 import newtype
 import rename
@@ -47,6 +48,8 @@ def run_all():
     run(forward_reference)
     run(type_decimal)
     run(type_datetime)
+    run(union_tagging)
+    run(generics)
     if not PY36:
         run(lazy_type_evaluation)
 

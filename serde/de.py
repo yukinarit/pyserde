@@ -6,14 +6,18 @@ associated with deserialization.
 import abc
 import dataclasses
 import functools
+import typing
 from dataclasses import dataclass, is_dataclass
-from typing import Any, Callable, Dict, List, Optional, Type
+from typing import Any, Callable, Dict, List, Optional, Type, TypeVar
 
 import jinja2
 
 from .compat import (
     SerdeError,
     SerdeSkip,
+    find_generic_arg,
+    get_generic_arg,
+    get_origin,
     has_default,
     has_default_factory,
     is_bare_dict,
@@ -22,6 +26,7 @@ from .compat import (
     is_bare_tuple,
     is_dict,
     is_enum,
+    is_generic,
     is_list,
     is_none,
     is_opt,
@@ -196,6 +201,9 @@ def deserialize(
         g['raise_unsupported_type'] = raise_unsupported_type
         g['typename'] = typename  # used in union functions
         g['ensure'] = ensure
+        g['typing'] = typing
+        g['from_obj'] = from_obj
+        g['get_generic_arg'] = get_generic_arg
         if deserialize:
             g['serde_custom_class_deserializer'] = functools.partial(
                 serde_custom_class_deserializer, custom=deserializer
@@ -205,7 +213,10 @@ def deserialize(
         for typ in iter_types(cls):
             if typ is cls or (is_primitive(typ) and not is_enum(typ)):
                 continue
-            g[typename(typ)] = typ
+            if is_generic(typ):
+                g[typename(typ)] = get_origin(typ)
+            else:
+                g[typename(typ)] = typ
 
         # render all union functions
         for union in iter_unions(cls):
@@ -274,6 +285,15 @@ def from_obj(c: Type, o: Any, named: bool, reuse_instances: bool):
     Deserialize from an object into an instance of the type specified as arg `c`.
     `c` can be either primitive type, `List`, `Tuple`, `Dict` or `deserialize` class.
     """
+    if is_generic(c):
+        # Store subscripted generic type such as Foo[Bar] in "maybe_generic",
+        # and store origin type such as Foo in "c". Since subscripted generics
+        # are not a subclass of "type", use "c" for type inspection, and pass
+        # "maybe_generic" in deserialize functions.
+        maybe_generic = c
+        c = get_origin(c)
+    else:
+        maybe_generic = c
     try:
         thisfunc = functools.partial(from_obj, named=named, reuse_instances=reuse_instances)
         if o is None:
@@ -281,9 +301,13 @@ def from_obj(c: Type, o: Any, named: bool, reuse_instances: bool):
         if is_deserializable(c):
             serde_scope: SerdeScope = getattr(c, SERDE_SCOPE)
             if named:
-                return serde_scope.funcs[FROM_DICT](o, reuse_instances=reuse_instances)
+                return serde_scope.funcs[FROM_DICT](
+                    cls=c, maybe_generic=maybe_generic, data=o, reuse_instances=reuse_instances
+                )
             else:
-                return serde_scope.funcs[FROM_ITER](o, reuse_instances=reuse_instances)
+                return serde_scope.funcs[FROM_ITER](
+                    cls=c, maybe_generic=maybe_generic, data=o, reuse_instances=reuse_instances
+                )
         elif is_opt(c):
             if o is None:
                 return None
@@ -462,6 +486,7 @@ class Renderer:
     """
 
     func: str
+    cls: Optional[Type] = None
     custom: Optional[DeserializeFunc] = None  # Custom class level deserializer.
 
     def render(self, arg: DeField) -> str:
@@ -498,6 +523,12 @@ class Renderer:
             res = "None"
         elif arg.type is Any:
             res = arg.data
+        elif isinstance(arg.type, TypeVar):
+            index = find_generic_arg(self.cls, arg.type)
+            res = f"from_obj(get_generic_arg(maybe_generic, {index}), {arg.data}, named={not arg.iterbased}, reuse_instances=reuse_instances)"
+        elif is_generic(arg.type):
+            arg.type = get_origin(arg.type)
+            res = self.render(arg)
         else:
             return f"raise_unsupported_type({arg.data})"
 
@@ -540,7 +571,7 @@ class Renderer:
                 var = arg.datavar
 
         opts = "reuse_instances=reuse_instances"
-        return f"{typename(arg.type)}.{SERDE_SCOPE}.funcs['{self.func}']({var}, {opts})"
+        return f"{typename(arg.type)}.{SERDE_SCOPE}.funcs['{self.func}'](data={var}, {opts})"
 
     def opt(self, arg: DeField) -> str:
         """
@@ -560,7 +591,7 @@ class Renderer:
         ... class Foo:
         ...     o: Optional[List[int]]
         >>> Renderer('foo').render(DeField(Optional[Foo], 'f', datavar='data'))
-        '(Foo.__serde__.funcs[\\'foo\\'](data["f"], reuse_instances=reuse_instances)) \
+        '(Foo.__serde__.funcs[\\'foo\\'](data=data["f"], reuse_instances=reuse_instances)) \
 if data.get("f") is not None else None'
         """
         value = arg[0]
@@ -614,12 +645,12 @@ if data.get("f") is not None else None'
         ... class Foo: pass
         >>> Renderer('foo').render(DeField(Tuple[str, int, List[int], Foo], 'd', datavar='data'))
         '(data["d"][0], data["d"][1], [v for v in data["d"][2]], \
-Foo.__serde__.funcs[\\'foo\\'](data["d"][3], reuse_instances=reuse_instances),)'
+Foo.__serde__.funcs[\\'foo\\'](data=data["d"][3], reuse_instances=reuse_instances),)'
 
         >>> field = DeField(Tuple[str, int, List[int], Foo], 'd', datavar='data', index=0, iterbased=True)
         >>> Renderer('foo').render(field)
         "(data[0][0], data[0][1], [v for v in data[0][2]], \
-Foo.__serde__.funcs['foo'](data[0][3], reuse_instances=reuse_instances),)"
+Foo.__serde__.funcs['foo'](data=data[0][3], reuse_instances=reuse_instances),)"
         """
         if is_bare_tuple(arg.type):
             return f'tuple({arg.data})'
@@ -641,8 +672,8 @@ Foo.__serde__.funcs['foo'](data[0][3], reuse_instances=reuse_instances),)"
         >>> @deserialize
         ... class Foo: pass
         >>> Renderer('foo').render(DeField(Dict[Foo, List[Foo]], 'f', datavar='data'))
-        '{Foo.__serde__.funcs[\\'foo\\'](k, reuse_instances=reuse_instances): \
-[Foo.__serde__.funcs[\\'foo\\'](v, reuse_instances=reuse_instances) for v in v] for k, v in data["f"].items()}'
+        '{Foo.__serde__.funcs[\\'foo\\'](data=k, reuse_instances=reuse_instances): \
+[Foo.__serde__.funcs[\\'foo\\'](data=v, reuse_instances=reuse_instances) for v in v] for k, v in data["f"].items()}'
         """
         if is_bare_dict(arg.type):
             return arg.data
@@ -679,7 +710,7 @@ Foo.__serde__.funcs['foo'](data[0][3], reuse_instances=reuse_instances),)"
 
     def union_func(self, arg: DeField) -> str:
         func_name = union_func_name(UNION_DE_PREFIX, type_args(arg.type))
-        return f"serde_scope.funcs['{func_name}']({arg.data}, reuse_instances)"
+        return f"serde_scope.funcs['{func_name}'](cls=cls, data={arg.data}, reuse_instances=reuse_instances)"
 
     def default(self, arg: DeField, code: str) -> str:
         exists = f'"{arg.conv_name()}" in {arg.datavar}'
@@ -706,7 +737,7 @@ def to_iter_arg(f: DeField, *args, **kwargs) -> DeField:
 
 def render_from_iter(cls: Type, custom: Optional[DeserializeFunc] = None) -> str:
     template = """
-def {{func}}(data, reuse_instances = {{serde_scope.reuse_instances_default}}):
+def {{func}}(cls=cls, maybe_generic=None, data=None, reuse_instances = {{serde_scope.reuse_instances_default}}):
   if reuse_instances is Ellipsis:
     reuse_instances = {{serde_scope.reuse_instances_default}}
 
@@ -720,7 +751,7 @@ def {{func}}(data, reuse_instances = {{serde_scope.reuse_instances_default}}):
   )
     """
 
-    renderer = Renderer(FROM_ITER, custom)
+    renderer = Renderer(FROM_ITER, cls=cls, custom=custom)
     env = jinja2.Environment(loader=jinja2.DictLoader({'iter': template}))
     env.filters.update({'rvalue': renderer.render})
     env.filters.update({'arg': to_iter_arg})
@@ -729,21 +760,22 @@ def {{func}}(data, reuse_instances = {{serde_scope.reuse_instances_default}}):
 
 def render_from_dict(cls: Type, rename_all: Optional[str] = None, custom: Optional[DeserializeFunc] = None) -> str:
     template = """
-def {{func}}(data, reuse_instances = {{serde_scope.reuse_instances_default}}):
+def {{func}}(cls=cls, maybe_generic=None, data=None, reuse_instances = {{serde_scope.reuse_instances_default}}):
   if reuse_instances is Ellipsis:
     reuse_instances = {{serde_scope.reuse_instances_default}}
 
   if data is None:
     return None
 
-  return cls(
+  rv = cls(
   {% for f in fields %}
   {{f|arg(loop.index-1)|rvalue}},
   {% endfor %}
   )
+  return rv
     """
 
-    renderer = Renderer(FROM_DICT, custom)
+    renderer = Renderer(FROM_DICT, cls=cls, custom=custom)
     env = jinja2.Environment(loader=jinja2.DictLoader({'dict': template}))
     env.filters.update({'rvalue': renderer.render})
     env.filters.update({'arg': functools.partial(to_arg, rename_all=rename_all)})
@@ -752,7 +784,7 @@ def {{func}}(data, reuse_instances = {{serde_scope.reuse_instances_default}}):
 
 def render_union_func(cls: Type, union_args: List[Type], tagging: Tagging = DefaultTagging) -> str:
     template = """
-def {{func}}(data, reuse_instances):
+def {{func}}(cls=cls, maybe_generic=None, data=None, reuse_instances = {{serde_scope.reuse_instances_default}}):
   errors = []
   {% for t in union_args %}
   try:
@@ -789,7 +821,7 @@ def {{func}}(data, reuse_instances):
     """
     union_name = f"Union[{', '.join([typename(a) for a in union_args])}]"
 
-    renderer = Renderer(FROM_DICT)
+    renderer = Renderer(FROM_DICT, cls=cls)
     env = jinja2.Environment(loader=jinja2.DictLoader({'dict': template}))
     env.filters.update(
         {'arg': lambda x: DeField(x, datavar="fake_dict", name="fake_key")}

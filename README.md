@@ -52,6 +52,7 @@ Foo(i=10, s='foo', f=100.0, b=True)
     - User defined class with [`@dataclass`](https://docs.python.org/3/library/dataclasses.html)
     - [`typing.NewType`](https://docs.python.org/3/library/typing.html#newtype) for primitive types
     - [`typing.Any`](https://docs.python.org/3/library/typing.html#the-any-type)
+    - [`typing.Generic`](https://docs.python.org/3/library/typing.html#user-defined-generic-types)
     - [`Enum`](https://docs.python.org/3/library/enum.html#enum.Enum) and [`IntEnum`](https://docs.python.org/3/library/enum.html#enum.IntEnum)
     - Standard library
         - [`pathlib.Path`](https://docs.python.org/3/library/pathlib.html)
