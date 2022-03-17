@@ -1,3 +1,12 @@
+## `0.7.1`  (2022-03-17)
+
+* ci: Run tests on pull_request only ([015cb41](https://github.com/yukinarit/pyserde/commit/015cb41))
+* feat: Support typing.Generic ([e9f2bdb](https://github.com/yukinarit/pyserde/commit/e9f2bdb))
+* build: Drop python 3.6 and pypy ([279f1a4](https://github.com/yukinarit/pyserde/commit/279f1a4))
+* docs: Fix typo in docs introduction ([03f24da](https://github.com/yukinarit/pyserde/commit/03f24da))
+
+This release had contributions from 1 person: [@chagui](https://github.com/chagui). Thank you so much! :tada: :joy:
+
 ## `0.7.0` (2022-02-14)
 
 * fix: Optional in custom class deserializer ([181b2f1](https://github.com/yukinarit/pyserde/commit/181b2f1))
@@ -6,7 +15,7 @@
 * core: using black formatting only if debug is enabled ([e596a84](https://github.com/yukinarit/pyserde/commit/e596a84))
 * feat: Add _make_serialize and _make_deserialize ([a71c5d5](https://github.com/yukinarit/pyserde/commit/a71c5d5))
 * feat: Implement Union tagging system ([c884dc4](https://github.com/yukinarit/pyserde/commit/c884dc4))
-    * This will change the default tagging for dataclasses with Union from `Untagged` to `ExternalTagging`. **This may break the existing code**, so please be aware if you use dataclasses with Union. For more information, check [the documentation](docs/features/union.md)
+  * This will change the default tagging for dataclasses with Union from `Untagged` to `ExternalTagging`. **This may break the existing code**, so please be aware if you use dataclasses with Union. For more information, check [the documentation](docs/features/union.md)
 * build: Update mypy to workaround typed_ast error ([0ea33a7](https://github.com/yukinarit/pyserde/commit/0ea33a7))
 
 This release had contributions from 1 person: [@tardyp](https://github.com/tardyp). Thank you so much! :tada: :joy:
