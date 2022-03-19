@@ -5,6 +5,7 @@ import dataclasses
 import enum
 import itertools
 import sys
+import types
 import typing
 from dataclasses import is_dataclass
 from typing import Any, Dict, Generic, Iterator, List, Optional, Set, Tuple, Type, TypeVar, Union
@@ -262,8 +263,21 @@ def iter_unions(cls: Type) -> Iterator[Type]:
 def is_union(typ) -> bool:
     """
     Test if the type is `typing.Union`.
+
+    >>> is_union(Union[int, str])
+    True
     """
-    return typing_inspect.is_union_type(typ) and not is_opt(typ)
+
+    is_union_type = False
+    if sys.version_info[:2] >= (3, 10):
+        try:
+            is_union_type = isinstance(typ, types.UnionType) and not is_opt(typ)
+        except Exception:
+            pass
+
+    typing_union = typing_inspect.is_union_type(typ) and not is_opt(typ)
+
+    return is_union_type or typing_union
 
 
 def is_opt(typ) -> bool:

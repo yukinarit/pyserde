@@ -1,4 +1,5 @@
 import logging
+import sys
 from dataclasses import dataclass
 from ipaddress import IPv4Address
 from typing import Dict, Generic, List, Optional, Tuple, TypeVar, Union
@@ -17,14 +18,28 @@ logger.setLevel(logging.DEBUG)
 serde_init(True)
 
 
-@serde
-@dataclass(unsafe_hash=True)
-class PriUnion:
-    """
-    Union Primitives.
-    """
+if sys.version_info[:3] >= (3, 10, 0):
 
-    v: Union[int, str, float, bool]
+    @serde
+    @dataclass(unsafe_hash=True)
+    class PriUnion:
+        """
+        Union Primitives.
+        """
+
+        v: int | str | float | bool
+
+
+else:
+
+    @serde
+    @dataclass(unsafe_hash=True)
+    class PriUnion:
+        """
+        Union Primitives.
+        """
+
+        v: Union[int, str, float, bool]
 
 
 @serde
