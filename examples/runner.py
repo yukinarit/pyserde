@@ -10,6 +10,7 @@ import flatten
 import forward_reference
 import generics
 import jsonfile
+import lazy_type_evaluation
 import newtype
 import rename
 import rename_all
@@ -22,10 +23,7 @@ import union
 import union_tagging
 import yamlfile
 
-PY36 = sys.version_info[:3] < (3, 7, 0)
-
-if not PY36:
-    import lazy_type_evaluation
+PY310 = sys.version_info[:3] >= (3, 10, 0)
 
 
 def run_all():
@@ -50,8 +48,11 @@ def run_all():
     run(type_datetime)
     run(union_tagging)
     run(generics)
-    if not PY36:
-        run(lazy_type_evaluation)
+    run(lazy_type_evaluation)
+    if PY310:
+        import union_operator
+
+        run(union_operator)
 
 
 def run(module):
