@@ -1,5 +1,6 @@
 import sys
 from dataclasses import dataclass
+from datetime import datetime
 from typing import Dict, Generic, List, NewType, Optional, Set, Tuple, TypeVar, Union
 
 import serde
@@ -67,9 +68,18 @@ def test_typename():
     class Foo(Generic[T]):
         nested: Bar[T]
 
-    assert typename(Optional) == "Optional"
     assert typename(Foo[int]) == "Foo"
     assert typename(Foo) == "Foo"
+    assert typename(List[int]) == "List[int]"
+    assert typename(Optional) == "Optional"
+    assert typename(List) == "List"
+    assert typename(List[int]) == "List[int]"
+    assert typename(Tuple) == "Tuple"
+    assert typename(Tuple[int, str]) == "Tuple[int, str]"
+    assert typename(Dict) == "Dict"
+    assert typename(Dict[str, Foo]) == "Dict[str, Foo]"
+    assert typename(Set) == "Set"
+    assert typename(Set[int]) == "Set[int]"
 
 
 def test_iter_types():
@@ -78,6 +88,17 @@ def test_iter_types():
     assert [List, str] == list(iter_types(List[str]))
     assert [Tuple, int, str, bool, float] == list(iter_types(Tuple[int, str, bool, float]))
     assert [PriOpt, Optional, int, Optional, str, Optional, float, Optional, bool] == list(iter_types(PriOpt))
+
+    @serde.serde
+    class Foo:
+        a: int
+        b: datetime
+        c: datetime
+        d: Optional[str] = None
+        e: Union[str, int] = 10
+        f: List[int] = serde.field(default_factory=list)
+
+    assert [Foo, int, datetime, datetime, Optional, str, Union, str, int, List, int] == list(iter_types(Foo))
 
 
 def test_iter_unions():

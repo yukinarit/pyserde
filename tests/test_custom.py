@@ -2,7 +2,7 @@
 Tests for custom serializer/deserializer.
 """
 from datetime import datetime
-from typing import Optional, Union
+from typing import List, Optional, Union
 
 import pytest
 
@@ -81,14 +81,15 @@ def test_custom_class_serializer():
         c: datetime
         d: Optional[str] = None
         e: Union[str, int] = 10
+        f: List[int] = field(default_factory=list)
 
     dt = datetime(2021, 1, 1, 0, 0, 0)
-    f = Foo(10, dt, dt)
+    f = Foo(10, dt, dt, f=[1, 2, 3])
 
-    assert to_json(f) == '{"a": 10, "b": "01/01/21", "c": "01/01/21", "d": null, "e": 10}'
+    assert to_json(f) == '{"a": 10, "b": "01/01/21", "c": "01/01/21", "d": null, "e": 10, "f": [1, 2, 3]}'
     assert f == from_json(Foo, to_json(f))
 
-    assert to_tuple(f) == (10, '01/01/21', '01/01/21', None, 10)
+    assert to_tuple(f) == (10, '01/01/21', '01/01/21', None, 10, [1, 2, 3])
     assert f == from_tuple(Foo, to_tuple(f))
 
     def fallback(_, __):

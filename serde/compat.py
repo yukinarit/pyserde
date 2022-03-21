@@ -121,6 +121,11 @@ def typename(typ) -> str:
         else:
             return 'Union'
     elif is_list(typ):
+        # Workaround for python 3.7.
+        # get_args for the bare List returns parameter T.
+        if typ is List:
+            return 'List'
+
         args = type_args(typ)
         if args:
             et = typename(args[0])
@@ -128,6 +133,11 @@ def typename(typ) -> str:
         else:
             return 'List'
     elif is_set(typ):
+        # Workaround for python 3.7.
+        # get_args for the bare Set returns parameter T.
+        if typ is Set:
+            return 'Set'
+
         args = type_args(typ)
         if args:
             et = typename(args[0])
@@ -135,6 +145,11 @@ def typename(typ) -> str:
         else:
             return 'Set'
     elif is_dict(typ):
+        # Workaround for python 3.7.
+        # get_args for the bare Dict returns parameter K, V.
+        if typ is Dict:
+            return 'Dict'
+
         args = type_args(typ)
         if args and len(args) == 2:
             kt = typename(args[0])
