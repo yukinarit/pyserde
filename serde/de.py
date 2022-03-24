@@ -57,6 +57,7 @@ from .core import (
     raise_unsupported_type,
     union_func_name,
 )
+from .numpy import deserialize_numpy_array, deserialize_numpy_scalar, is_numpy_array, is_numpy_scalar
 
 __all__: List = ['deserialize', 'is_deserializable', 'from_dict', 'from_tuple']
 
@@ -488,6 +489,7 @@ class Renderer:
     func: str
     cls: Optional[Type] = None
     custom: Optional[DeserializeFunc] = None  # Custom class level deserializer.
+    import_numpy: bool = False
 
     def render(self, arg: DeField) -> str:
         """
@@ -509,7 +511,7 @@ class Renderer:
             res = self.tuple(arg)
         elif is_enum(arg.type):
             res = self.enum(arg)
-        elif is_primitive(arg.type):
+        elif is_primitive(arg.type) and not is_numpy_scalar(arg.type):
             res = self.primitive(arg)
         elif is_union(arg.type):
             res = self.union_func(arg)
@@ -529,6 +531,12 @@ class Renderer:
         elif is_generic(arg.type):
             arg.type = get_origin(arg.type)
             res = self.render(arg)
+        elif is_numpy_scalar(arg.type):
+            self.import_numpy = True
+            res = deserialize_numpy_scalar(arg)
+        elif is_numpy_array(arg.type):
+            self.import_numpy = True
+            res = deserialize_numpy_array(arg)
         else:
             return f"raise_unsupported_type({arg.data})"
 
@@ -755,7 +763,12 @@ def {{func}}(cls=cls, maybe_generic=None, data=None, reuse_instances = {{serde_s
     env = jinja2.Environment(loader=jinja2.DictLoader({'iter': template}))
     env.filters.update({'rvalue': renderer.render})
     env.filters.update({'arg': to_iter_arg})
-    return env.get_template('iter').render(func=FROM_ITER, serde_scope=getattr(cls, SERDE_SCOPE), fields=defields(cls))
+    res = env.get_template('iter').render(func=FROM_ITER, serde_scope=getattr(cls, SERDE_SCOPE), fields=defields(cls))
+
+    if renderer.import_numpy:
+        res = "import numpy\n" + res
+
+    return res
 
 
 def render_from_dict(cls: Type, rename_all: Optional[str] = None, custom: Optional[DeserializeFunc] = None) -> str:
@@ -779,7 +792,12 @@ def {{func}}(cls=cls, maybe_generic=None, data=None, reuse_instances = {{serde_s
     env = jinja2.Environment(loader=jinja2.DictLoader({'dict': template}))
     env.filters.update({'rvalue': renderer.render})
     env.filters.update({'arg': functools.partial(to_arg, rename_all=rename_all)})
-    return env.get_template('dict').render(func=FROM_DICT, serde_scope=getattr(cls, SERDE_SCOPE), fields=defields(cls))
+    res = env.get_template('dict').render(func=FROM_DICT, serde_scope=getattr(cls, SERDE_SCOPE), fields=defields(cls))
+
+    if renderer.import_numpy:
+        res = "import numpy\n" + res
+
+    return res
 
 
 def render_union_func(cls: Type, union_args: List[Type], tagging: Tagging = DefaultTagging) -> str:
