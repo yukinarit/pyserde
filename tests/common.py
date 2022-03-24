@@ -13,6 +13,8 @@ import more_itertools
 from serde import from_dict, from_tuple, serde, to_dict, to_tuple
 from serde.json import from_json, to_json
 from serde.msgpack import from_msgpack, to_msgpack
+from serde.orjson import from_json as from_orjson
+from serde.orjson import to_json as to_orjson
 from serde.toml import from_toml, to_toml
 from serde.yaml import from_yaml, to_yaml
 from tests import data
@@ -23,13 +25,17 @@ format_tuple: List = [(to_tuple, from_tuple)]
 
 format_json: List = [(to_json, from_json)]
 
+format_orjson: List = [(to_orjson, from_orjson)]
+
 format_msgpack: List = [(to_msgpack, from_msgpack)]
 
 format_yaml: List = [(to_yaml, from_yaml)]
 
 format_toml: List = [(to_toml, from_toml)]
 
-all_formats: List = format_dict + format_tuple + format_json + format_msgpack + format_yaml + format_toml
+all_formats: List = (
+    format_dict + format_tuple + format_json + format_orjson + format_msgpack + format_yaml + format_toml
+)
 
 T = TypeVar('T')
 

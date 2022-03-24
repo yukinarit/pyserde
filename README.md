@@ -40,7 +40,7 @@ Foo(i=10, s='foo', f=100.0, b=True)
 - Supported data formats
     - dict
     - tuple
-    - JSON
+    - JSON (via `json` or `orjson` packages)
 	- Yaml
 	- Toml
 	- MsgPack

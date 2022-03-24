@@ -104,7 +104,7 @@ def _make_deserialize(
     rename_all: Optional[str] = None,
     reuse_instances_default: bool = True,
     convert_sets_default: bool = False,
-    serializer: Optional[DeserializeFunc] = None,
+    deserializer: Optional[DeserializeFunc] = None,
     **kwargs,
 ):
     """
@@ -117,6 +117,7 @@ def _make_deserialize(
         rename_all=rename_all,
         reuse_instances_default=reuse_instances_default,
         convert_sets_default=convert_sets_default,
+        deserializer=deserializer,
         **kwargs,
     )
     return C

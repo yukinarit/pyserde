@@ -137,7 +137,7 @@ DictLiterals = Dict[str, Literals]
 @pytest.mark.parametrize("se,de", all_formats)
 def test_dict(se, de, opt):
 
-    if se in (serde.json.to_json, serde.msgpack.to_msgpack, serde.toml.to_toml):
+    if se in (serde.json.to_json, serde.msgpack.to_msgpack, serde.toml.to_toml, serde.orjson.to_json):
         # JSON, Msgpack, Toml don't allow non string key.
         p = LitStrDict({"1": 2}, {"foo": "bar"}, {"True": True}, {"foo": True})
         assert p == de(LitStrDict, se(p))
@@ -182,6 +182,12 @@ def test_json():
     p = Literals(1, "foo", True, "bar")
     s = '{"i": 1, "s": "foo", "b": true, "m": "bar"}'
     assert s == serde.json.to_json(p)
+
+
+def test_orjson():
+    p = Literals(1, "foo", True, "bar")
+    s = b'{"i":1,"s":"foo","b":true,"m":"bar"}'
+    assert s == serde.orjson.to_json(p)
 
 
 def test_msgpack():

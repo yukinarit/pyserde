@@ -53,7 +53,7 @@ try:
             return False
 
     def serialize_numpy_scalar(arg) -> str:
-        return f"{arg.varname}.item()"
+        return f"{arg.varname}.item() if convert_numpy else {arg.varname}"
 
     def deserialize_numpy_scalar(arg):
         return f"{fullname(arg.type)}({arg.data})"
@@ -65,7 +65,7 @@ try:
         return typ is np.ndarray
 
     def serialize_numpy_array(arg) -> str:
-        return f"{arg.varname}.tolist()"
+        return f"{arg.varname}.tolist() if convert_numpy else {arg.varname}"
 
     def serialize_numpy_datetime(arg) -> str:
         return f"{arg.varname}.item().isoformat()"
@@ -83,6 +83,8 @@ try:
 
         dtype = get_args(get_args(typ)[1])[0]
         return np.array(arg, dtype=dtype)
+
+    HAVE_NUMPY = True
 
 except ImportError:
     encode_numpy = None
@@ -113,3 +115,5 @@ except ImportError:
 
     def deserialize_numpy_array_direct(typ, arg):
         return arg
+
+    HAVE_NUMPY = False

@@ -104,6 +104,7 @@ def _make_serialize(
     rename_all: Optional[str] = None,
     reuse_instances_default: bool = True,
     convert_sets_default: bool = False,
+    convert_numpy_default: bool = True,
     serializer: Optional[SerializeFunc] = None,
     **kwargs,
 ):
@@ -117,6 +118,8 @@ def _make_serialize(
         rename_all=rename_all,
         reuse_instances_default=reuse_instances_default,
         convert_sets_default=convert_sets_default,
+        convert_numpy_default=convert_numpy_default,
+        serializer=serializer,
         **kwargs,
     )
     return C
@@ -127,6 +130,7 @@ def serialize(
     rename_all: Optional[str] = None,
     reuse_instances_default: bool = True,
     convert_sets_default: bool = False,
+    convert_numpy_default: bool = True,
     serializer: Optional[SerializeFunc] = None,
     tagging: Tagging = DefaultTagging,
     **kwargs,
@@ -203,7 +207,10 @@ def serialize(
         scope: SerdeScope = getattr(cls, SERDE_SCOPE, None)
         if scope is None or scope.cls is not cls:
             scope = SerdeScope(
-                cls, reuse_instances_default=reuse_instances_default, convert_sets_default=convert_sets_default
+                cls,
+                reuse_instances_default=reuse_instances_default,
+                convert_sets_default=convert_sets_default,
+                convert_numpy_default=convert_numpy_default,
             )
             setattr(cls, SERDE_SCOPE, scope)
 
@@ -272,17 +279,23 @@ def is_serializable(instance_or_class: Any) -> bool:
     return hasattr(instance_or_class, SERDE_SCOPE)
 
 
-def to_obj(o, named: bool, reuse_instances: bool, convert_sets: bool):
+def to_obj(o, named: bool, reuse_instances: bool, convert_sets: bool, convert_numpy: bool):
     try:
-        thisfunc = functools.partial(to_obj, named=named, reuse_instances=reuse_instances, convert_sets=convert_sets)
+        thisfunc = functools.partial(
+            to_obj, named=named, reuse_instances=reuse_instances, convert_sets=convert_sets, convert_numpy=convert_numpy
+        )
         if o is None:
             return None
         if is_serializable(o):
             serde_scope: SerdeScope = getattr(o, SERDE_SCOPE)
             if named:
-                return serde_scope.funcs[TO_DICT](o, reuse_instances=reuse_instances, convert_sets=convert_sets)
+                return serde_scope.funcs[TO_DICT](
+                    o, reuse_instances=reuse_instances, convert_sets=convert_sets, convert_numpy=convert_numpy
+                )
             else:
-                return serde_scope.funcs[TO_ITER](o, reuse_instances=reuse_instances, convert_sets=convert_sets)
+                return serde_scope.funcs[TO_ITER](
+                    o, reuse_instances=reuse_instances, convert_sets=convert_sets, convert_numpy=convert_numpy
+                )
         elif is_dataclass(o):
             if named:
                 return dataclasses.asdict(o)
@@ -311,10 +324,10 @@ def astuple(v):
     """
     Serialize object into tuple.
     """
-    return to_tuple(v, reuse_instances=False, convert_sets=False)
+    return to_tuple(v, reuse_instances=False, convert_sets=False, convert_numpy=True)
 
 
-def to_tuple(o, reuse_instances: bool = ..., convert_sets: bool = ...) -> Any:
+def to_tuple(o, reuse_instances: bool = ..., convert_sets: bool = ..., convert_numpy: bool = ...) -> Any:
     """
     Serialize object into tuple.
 
@@ -334,17 +347,19 @@ def to_tuple(o, reuse_instances: bool = ..., convert_sets: bool = ...) -> Any:
     >>> to_tuple(lst)
     [(10, 'foo', 100.0, True), (20, 'foo', 100.0, True)]
     """
-    return to_obj(o, named=False, reuse_instances=reuse_instances, convert_sets=convert_sets)
+    return to_obj(
+        o, named=False, reuse_instances=reuse_instances, convert_sets=convert_sets, convert_numpy=convert_numpy
+    )
 
 
 def asdict(v):
     """
     Serialize object into dictionary.
     """
-    return to_dict(v, reuse_instances=False, convert_sets=False)
+    return to_dict(v, reuse_instances=False, convert_sets=False, convert_numpy=True)
 
 
-def to_dict(o, reuse_instances: bool = ..., convert_sets: bool = ...) -> Any:
+def to_dict(o, reuse_instances: bool = ..., convert_sets: bool = ..., convert_numpy: bool = ...) -> Any:
     """
     Serialize object into dictionary.
 
@@ -364,7 +379,9 @@ def to_dict(o, reuse_instances: bool = ..., convert_sets: bool = ...) -> Any:
     >>> to_dict(lst)
     [{'i': 10, 's': 'foo', 'f': 100.0, 'b': True}, {'i': 20, 's': 'foo', 'f': 100.0, 'b': True}]
     """
-    return to_obj(o, named=True, reuse_instances=reuse_instances, convert_sets=convert_sets)
+    return to_obj(
+        o, named=True, reuse_instances=reuse_instances, convert_sets=convert_sets, convert_numpy=convert_numpy
+    )
 
 
 @dataclass
@@ -406,11 +423,14 @@ def sefields(cls: Type) -> Iterator[SeField]:
 def render_to_tuple(cls: Type, custom: Optional[SerializeFunc] = None) -> str:
     template = """
 def {{func}}(obj, reuse_instances = {{serde_scope.reuse_instances_default}},
-             convert_sets = {{serde_scope.convert_sets_default}}):
+             convert_sets = {{serde_scope.convert_sets_default}},
+             convert_numpy = {{serde_scope.convert_numpy_default}}):
   if reuse_instances is Ellipsis:
     reuse_instances = {{serde_scope.reuse_instances_default}}
   if convert_sets is Ellipsis:
     convert_sets = {{serde_scope.convert_sets_default}}
+  if convert_numpy is Ellipsis:
+    convert_numpy = {{serde_scope.convert_numpy_default}}
 
   if not is_dataclass(obj):
     return copy.deepcopy(obj)
@@ -433,11 +453,14 @@ def {{func}}(obj, reuse_instances = {{serde_scope.reuse_instances_default}},
 def render_to_dict(cls: Type, case: Optional[str] = None, custom: Optional[SerializeFunc] = None) -> str:
     template = """
 def {{func}}(obj, reuse_instances = {{serde_scope.reuse_instances_default}},
-             convert_sets = {{serde_scope.convert_sets_default}}):
+             convert_sets = {{serde_scope.convert_sets_default}},
+             convert_numpy = {{serde_scope.convert_numpy_default}}):
   if reuse_instances is Ellipsis:
     reuse_instances = {{serde_scope.reuse_instances_default}}
   if convert_sets is Ellipsis:
     convert_sets = {{serde_scope.convert_sets_default}}
+  if convert_numpy is Ellipsis:
+    convert_numpy = {{serde_scope.convert_numpy_default}}
 
   if not is_dataclass(obj):
     return copy.deepcopy(obj)
@@ -470,7 +493,7 @@ def render_union_func(cls: Type, union_args: List[Type], tagging: Tagging = Defa
     Render function that serializes a field with union type.
     """
     template = """
-def {{func}}(obj, reuse_instances, convert_sets):
+def {{func}}(obj, reuse_instances, convert_sets, convert_numpy):
   union_args = serde_scope.union_se_args['{{func}}']
 
   {% for t in union_args %}
@@ -563,23 +586,23 @@ class Renderer:
         ... class Foo:
         ...    val: int
         >>> Renderer(TO_ITER).render(SeField(Foo, 'foo'))
-        "foo.__serde__.funcs['to_iter'](foo, reuse_instances=reuse_instances, convert_sets=convert_sets)"
+        "foo.__serde__.funcs['to_iter'](foo, reuse_instances=reuse_instances, convert_sets=convert_sets, convert_numpy=convert_numpy)"
 
         >>> Renderer(TO_ITER).render(SeField(List[Foo], 'foo'))
-        "[v.__serde__.funcs['to_iter'](v, reuse_instances=reuse_instances, convert_sets=convert_sets) for v in foo]"
+        "[v.__serde__.funcs['to_iter'](v, reuse_instances=reuse_instances, convert_sets=convert_sets, convert_numpy=convert_numpy) for v in foo]"
 
         >>> Renderer(TO_ITER).render(SeField(Dict[str, Foo], 'foo'))
         "{k: v.__serde__.funcs['to_iter'](v, reuse_instances=reuse_instances, \
-convert_sets=convert_sets) for k, v in foo.items()}"
+convert_sets=convert_sets, convert_numpy=convert_numpy) for k, v in foo.items()}"
 
         >>> Renderer(TO_ITER).render(SeField(Dict[Foo, Foo], 'foo'))
         "{k.__serde__.funcs['to_iter'](k, reuse_instances=reuse_instances, \
-convert_sets=convert_sets): v.__serde__.funcs['to_iter'](v, reuse_instances=reuse_instances, \
-convert_sets=convert_sets) for k, v in foo.items()}"
+convert_sets=convert_sets, convert_numpy=convert_numpy): v.__serde__.funcs['to_iter'](v, reuse_instances=reuse_instances, \
+convert_sets=convert_sets, convert_numpy=convert_numpy) for k, v in foo.items()}"
 
         >>> Renderer(TO_ITER).render(SeField(Tuple[str, Foo, int], 'foo'))
         "(foo[0], foo[1].__serde__.funcs['to_iter'](foo[1], reuse_instances=reuse_instances, \
-convert_sets=convert_sets), foo[2],)"
+convert_sets=convert_sets, convert_numpy=convert_numpy), foo[2],)"
         """
         if arg.serializer and arg.serializer.inner is not default_serializer:
             res = self.custom_field_serializer(arg)
@@ -614,7 +637,7 @@ convert_sets=convert_sets), foo[2],)"
         elif is_none(arg.type):
             res = "None"
         elif arg.type is Any or isinstance(arg.type, TypeVar):
-            res = f"to_obj({arg.varname}, True, False, False)"
+            res = f"to_obj({arg.varname}, True, False, False, True)"
         elif is_generic(arg.type):
             arg.type = get_origin(arg.type)
             res = self.render(arg)
@@ -649,7 +672,7 @@ convert_sets=convert_sets), foo[2],)"
         else:
             return (
                 f"{arg.varname}.{SERDE_SCOPE}.funcs['{self.func}']({arg.varname},"
-                " reuse_instances=reuse_instances, convert_sets=convert_sets)"
+                " reuse_instances=reuse_instances, convert_sets=convert_sets, convert_numpy=convert_numpy)"
             )
 
     def opt(self, arg: SeField) -> str:
@@ -729,7 +752,7 @@ convert_sets=convert_sets), foo[2],)"
 
     def union_func(self, arg: SeField) -> str:
         func_name = union_func_name(UNION_SE_PREFIX, type_args(arg.type))
-        return f"serde_scope.funcs['{func_name}']({arg.varname}, reuse_instances, convert_sets)"
+        return f"serde_scope.funcs['{func_name}']({arg.varname}, reuse_instances, convert_sets, convert_numpy)"
 
     def literal(self, arg: SeField) -> str:
         return f"{arg.varname}"

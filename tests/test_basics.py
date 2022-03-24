@@ -162,7 +162,7 @@ def test_list(se, de, opt):
 def test_dict(se, de, opt):
     from .data import PriDict
 
-    if se in (serde.json.to_json, serde.msgpack.to_msgpack, serde.toml.to_toml):
+    if se in (serde.json.to_json, serde.msgpack.to_msgpack, serde.toml.to_toml, serde.orjson.to_json):
         # JSON, Msgpack, Toml don't allow non string key.
         p = PriDict({'10': 10}, {'foo': 'bar'}, {'100.0': 100.0}, {'True': False})
         assert p == de(PriDict, se(p))
@@ -374,6 +374,16 @@ def test_json():
     assert '{"foo": 10, "fuga": 10}' == serde.json.to_json({'foo': 10, 'fuga': 10})
 
 
+def test_orjson():
+    p = data.Pri(10, 'foo', 100.0, True)
+    s = b'{"i":10,"s":"foo","f":100.0,"b":true}'
+    assert s == serde.orjson.to_json(p)
+
+    assert b'10' == serde.orjson.to_json(10)
+    assert b'[10,20,30]' == serde.orjson.to_json([10, 20, 30])
+    assert b'{"foo":10,"fuga":10}' == serde.orjson.to_json({'foo': 10, 'fuga': 10})
+
+
 def test_msgpack():
     p = data.Pri(10, 'foo', 100.0, True)
     d = b'\x84\xa1i\n\xa1s\xa3foo\xa1f\xcb@Y\x00\x00\x00\x00\x00\x00\xa1b\xc3'
@@ -395,7 +405,11 @@ def test_rename(se, de):
         class_name: str = serde.field(rename='class')
 
     f = Foo(class_name='foo')
-    assert f == de(Foo, se(f))
+
+    if se == serde.orjson.to_json:
+        assert f == de(Foo, se(f, direct=False))
+    else:
+        assert f == de(Foo, se(f))
 
 
 @pytest.mark.parametrize('se,de', format_msgpack)

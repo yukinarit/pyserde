@@ -110,6 +110,10 @@ class SerdeScope:
     """ Default values for to_dict & from_dict arguments """
 
     convert_sets_default: bool = False
+    """ Convert sets to lists """
+
+    convert_numpy_default: bool = True
+    """ Convert numpy types to python types """
 
     def __repr__(self) -> str:
         res: List[str] = []

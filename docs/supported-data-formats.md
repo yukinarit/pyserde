@@ -50,6 +50,42 @@ Call `to_json` to serialize `Foo` object into JSON string and `from_json` to des
 Foo(i=10, s='foo', f=100.0, b=True)
 ```
 
+### Orjson
+
+Orjson is a fast alternative to the standard json library.  It is implemented as separate sub-module because it's behavior is slightly different than the standard library.
+
+```python
+>>> from serde.orjson import to_json, from_json
+
+>>> to_json(Foo(i=10, s='foo', f=100.0, b=True))   # Note: produces a byte object
+b'{"i":10,"s":"foo","f":100.0,"b":true}'
+
+>>> to_json(Foo(i=10, s='foo', f=100.0, b=True)).decode("utf-8")
+'{"i":10,"s":"foo","f":100.0,"b":true}'
+
+>>> from_json(Foo, '{"i": 10, "s": "foo", "f": 100.0, "b": true}')
+Foo(i=10, s='foo', f=100.0, b=True)
+
+>>> from_json(Foo, b'{"i": 10, "s": "foo", "f": 100.0, "b": true}')
+Foo(i=10, s='foo', f=100.0, b=True)
+```
+
+#### Orjson Limitations
+
+* By default, dataclass objects are passed directly to orjson for serialization.  However, `orjson` does not recognize [`serde.field`](https://yukinarit.github.io/pyserde/guide/features/attributes.html#serdefield) attributes.  If you use these, you can have `pyserde` encode them for you:
+
+```python
+from serde import field, serde
+from serde.orjson import to_json
+
+@serde
+class Foo:
+    class_name: str = field(rename='class')
+
+s = to_json(Foo("MyFoo"))               # b'{"class_name":"MyFoo"}'
+t = to_json(Foo("MyFoo"), direct=False) # b'{"class":"MyFoo"}
+```
+
 ## Yaml
 
 Call `to_yaml` to serialize `Foo` object into Yaml string and `from_yaml` to deserialize Yaml string into `Foo` object. For more information, please visit [serde.yaml](https://yukinarit.github.io/pyserde/api/serde/yaml.html) module.

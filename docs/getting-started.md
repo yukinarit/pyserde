@@ -51,6 +51,8 @@ Next, import pyserde (de)serialize API. For JSON:
 
 ```python
 from serde.json import from_json, to_json
+# OR:
+# from serde.orjson import from_json, to_json
 ```
 
 Similarly, you can use other data formats.
