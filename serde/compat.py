@@ -8,9 +8,23 @@ import sys
 import types
 import typing
 from dataclasses import is_dataclass
-from typing import Any, Dict, Generic, Iterator, List, Optional, Set, Tuple, Type, TypeVar, Union
+from typing import Any, ClassVar, Dict, Generic, Iterator, List, Optional, Set, Tuple, Type, TypeVar, Union
 
 import typing_inspect
+
+try:
+    import numpy.typing as npt
+
+    def get_np_origin(tp):
+        if isinstance(tp, npt._generic_alias._GenericAlias) and tp.__origin__ is not ClassVar:
+            return tp.__origin__
+        return None
+
+except ImportError:
+
+    def get_np_origin(tp):
+        return None
+
 
 __all__: List = []
 
@@ -34,9 +48,9 @@ def get_origin(typ):
     Provide `get_origin` that works in all python versions.
     """
     try:
-        return typing.get_origin(typ)  # python>=3.8 typing module has get_origin.
+        return typing.get_origin(typ) or get_np_origin(typ)  # python>=3.8 typing module has get_origin.
     except AttributeError:
-        return typing_inspect.get_origin(typ)
+        return typing_inspect.get_origin(typ) or get_np_origin(typ)
 
 
 def get_args(typ):

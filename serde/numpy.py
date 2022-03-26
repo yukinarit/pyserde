@@ -1,4 +1,6 @@
-import typing
+from typing import Any, Callable, Optional
+
+from serde.compat import get_origin
 
 
 def fullname(klass):
@@ -11,6 +13,15 @@ def fullname(klass):
 try:
     import numpy as np
     import numpy.typing as npt
+
+    encode_numpy: Optional[Callable[[Any], Any]]
+
+    def encode_numpy(obj: Any):
+        if isinstance(obj, np.ndarray):
+            return obj.tolist()
+        if isinstance(obj, np.generic):
+            return obj.item()
+        raise TypeError(f"Object of type {fullname(type(obj))} is not serializable")
 
     def is_bare_numpy_array(typ) -> bool:
         """
@@ -41,10 +52,10 @@ try:
 
     def is_numpy_array(typ) -> bool:
         try:
-            origin = typing.get_origin(typ)
+            origin = get_origin(typ)
             if origin is not None:
                 typ = origin
-            return issubclass(typ, np.ndarray)
+            return typ is np.ndarray
         except TypeError:
             return False
 
@@ -59,6 +70,7 @@ try:
         return f"numpy.array({arg.data}, dtype={dtype})"
 
 except ImportError:
+    encode_numpy = None
 
     def is_numpy_scalar(typ) -> bool:
         return False
