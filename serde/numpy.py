@@ -51,13 +51,10 @@ try:
         return f"{fullname(arg.type)}({arg.data})"
 
     def is_numpy_array(typ) -> bool:
-        try:
-            origin = get_origin(typ)
-            if origin is not None:
-                typ = origin
-            return typ is np.ndarray
-        except TypeError:
-            return False
+        origin = get_origin(typ)
+        if origin is not None:
+            typ = origin
+        return typ is np.ndarray
 
     def serialize_numpy_array(arg) -> str:
         return f"{arg.varname}.tolist()"
