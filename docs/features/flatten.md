@@ -4,11 +4,13 @@ You can flatten the fields of the nested structure.
 
 ```python
 @serde
+@dataclass
 class Bar:
     c: float
     d: bool
 
 @serde
+@dataclass
 class Foo:
     a: int
     b: str

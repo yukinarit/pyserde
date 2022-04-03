@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from datetime import datetime
 
 from serde import field, serde
@@ -5,6 +6,7 @@ from serde.json import from_json, to_json
 
 
 @serde
+@dataclass
 class Foo:
     dt1: datetime
     dt2: datetime = field(

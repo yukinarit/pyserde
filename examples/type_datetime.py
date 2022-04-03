@@ -1,10 +1,12 @@
 import datetime
+from dataclasses import dataclass
 
 from serde import serde
 from serde.json import from_json, to_json
 
 
 @serde
+@dataclass
 class Foo:
     d: datetime.date
     t: datetime.time

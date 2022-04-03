@@ -476,12 +476,15 @@ def test_skip_if_default(se, de):
 
 @pytest.mark.parametrize('se,de', format_msgpack)
 def test_inheritance(se, de):
+    from dataclasses import dataclass
+
     @serde.serde
     class Base:
         a: int
         b: str
 
     @serde.serde
+    @dataclass
     class Derived(Base):
         c: float
 
@@ -490,6 +493,22 @@ def test_inheritance(se, de):
 
     derived = Derived(10, "foo", 100.0)
     assert derived == de(Derived, se(derived))
+
+
+@pytest.mark.parametrize('se,de', format_msgpack)
+def test_duplicate_decorators(se, de):
+    from dataclasses import dataclass
+
+    @serde.serde
+    @serde.serde
+    @dataclass
+    @dataclass
+    class Foo:
+        a: int
+        b: str
+
+    foo = Foo(10, "foo")
+    assert foo == de(Foo, se(foo))
 
 
 @pytest.mark.parametrize('se,de', format_msgpack)

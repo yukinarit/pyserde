@@ -6,6 +6,7 @@ If you conditionally skip some fields, you can pass function or lambda in `skip_
 
 ```python
 @serde
+@dataclass
 class World:
     player: str
     buddy: str = field(default='', skip_if=lambda v: v == 'Pikachu')

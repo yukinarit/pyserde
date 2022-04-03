@@ -1,6 +1,7 @@
+from dataclasses import field
 from typing import Dict
 
-from serde import field, serde
+from serde import serde
 from serde.json import from_json, to_json
 
 

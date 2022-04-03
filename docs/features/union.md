@@ -8,14 +8,17 @@ This is the default Union representation for pyserde<0.7. Given these dataclasse
 
 ```python
 @serde
+@dataclass
 class Bar:
     b: int
 
 @serde
+@dataclass
 class Baz:
     b: int
 
 @serde(tagging=Untagged)
+@dataclass
 class Foo:
     a: Union[Bar, Baz]
 ```
@@ -28,6 +31,7 @@ This is the default Union representation since 0.7. A class declaration with `Ex
 
 ```
 @serde(tagging=ExternalTagging)
+@dataclass
 class Foo:
     a: Union[Bar, Baz]
 ```
@@ -36,6 +40,7 @@ class Foo:
 >
 > ```python
 > @serde(tagging=ExternalTagging)
+> @dataclass
 > class Foo:
 >    a: Union[List[int], Set[int]]
 > ```
@@ -46,6 +51,7 @@ A class declaration with `InternalTagging` looks like below. If you serialize `F
 
 ```python
 @serde(tagging=InternalTagging("type"))
+@dataclass
 class Foo:
     a: Union[Bar, Baz]
 ```
@@ -56,6 +62,7 @@ A class declaration with `AdjacentTagging` looks like below. If you serialize `F
 
 ```python
 @serde(tagging=AdjacentTagging("type", "content"))
+@dataclass
 class Foo:
     a: Union[Bar, Baz]
 ```

@@ -8,6 +8,7 @@ Usage:
     $ poetry run python skip.py
 """
 
+from dataclasses import dataclass
 from typing import Dict, List
 
 from serde import field, serde
@@ -15,6 +16,7 @@ from serde.json import to_json
 
 
 @serde
+@dataclass
 class Resource:
     name: str
     hash: str
@@ -22,6 +24,7 @@ class Resource:
 
 
 @serde
+@dataclass
 class World:
     player: str
     enemies: List[str] = field(default_factory=list, skip_if_false=True)

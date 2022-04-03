@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from datetime import datetime
 
 from serde import SerdeSkip, default_deserializer, default_serializer, field, serde
@@ -28,6 +29,7 @@ def deserializer(cls, o):
 
 
 @serde(serializer=serializer, deserializer=deserializer)
+@dataclass
 class Foo:
     i: int
     dt1: datetime

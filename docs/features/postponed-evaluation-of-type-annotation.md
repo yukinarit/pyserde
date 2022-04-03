@@ -5,8 +5,10 @@
 ```python
 from __future__ import annotations
 from serde import serde
+from dataclasses import dataclass
 
 @serde
+@dataclass
 class Foo:
     i: int
     s: str

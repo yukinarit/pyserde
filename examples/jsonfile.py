@@ -7,6 +7,7 @@ Usage:
     $ poetry install
     $ poetry run python jsonfile.py
 """
+from dataclasses import dataclass
 from typing import List, Optional
 
 import requests
@@ -16,6 +17,7 @@ from serde.json import from_json
 
 
 @serde
+@dataclass
 class Slide:
     title: str
     type: str
@@ -23,6 +25,7 @@ class Slide:
 
 
 @serde
+@dataclass
 class Slideshow:
     author: str
     date: str
@@ -31,6 +34,7 @@ class Slideshow:
 
 
 @serde
+@dataclass
 class Data:
     slideshow: Slideshow
 

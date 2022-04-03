@@ -5,6 +5,7 @@ Currently `dict, `tuple`, `JSON`, `Yaml`, `Toml` and `MsgPack` are supported.
 ```python
 
 @serde
+@dataclass
 class Foo:
     i: int
     s: str

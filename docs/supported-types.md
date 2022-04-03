@@ -19,10 +19,12 @@
 You can write pretty complex class like this:
 ```python
 @serde
+@dataclass
 class bar:
     i: int
 
 @serde
+@dataclass
 class Foo:
     i: int
     l: List[str]

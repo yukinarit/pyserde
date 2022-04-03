@@ -18,12 +18,14 @@ Or all at once:
 pip install "pyserde[all]"
 ```
 
-Define your class with pyserde's `@serialize` and `@deserialize` decorators. Be careful that module name is `serde`, not `pyserde`. `pyserde` depends on `dataclasses` module. If you are new to dataclass, I would recommend to read [dataclasses documentation](https://docs.python.org/3/library/dataclasses.html) first.
+Define your class with pyserde's `@serde` decorators. Be careful that module name is `serde`, not `pyserde`. `pyserde` depends on `dataclasses` module. If you are new to dataclass, I would recommend to read [dataclasses documentation](https://docs.python.org/3/library/dataclasses.html) first.
 
 ```python
+from dataclasses import dataclass
 from serde import serde
 
 @serde
+@dataclass
 class Foo:
     i: int
     s: str
@@ -37,9 +39,11 @@ pyserde generates methods necessary for (de)serialization by `@serde` when a cla
 >
 > e.g. If you don't need deserialization functionality, you can add `@serialize` decorator only. But, calling deserialize API e.g. `from_json` for `Foo` will raise an error.
 > ```python
+> from dataclasses import dataclass
 > from serde import serialize
 >
 > @serialize
+> @dataclass
 > class Foo:
 >     i: int
 >     s: str

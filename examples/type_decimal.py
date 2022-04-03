@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from decimal import Decimal
 
 from serde import serde
@@ -5,6 +6,7 @@ from serde.json import from_json, to_json
 
 
 @serde
+@dataclass
 class Foo:
     v: Decimal
 
