@@ -9,8 +9,6 @@ repository = "https://github.com/yukinarit/pyserde"
 homepage = "https://github.com/yukinarit/pyserde"
 packages = [
     { include = "serde" },
-    { include = "tests" },
-    { include = "examples" },
 ]
 classifiers=[
         "Development Status :: 4 - Beta",
