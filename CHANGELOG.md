@@ -1,3 +1,11 @@
+## `0.7.2` (2022-04-11)
+
+* Don't package tests and examples ([af829ae](https://github.com/yukinarit/pyserde/commit/af829ae)), closes [#214](https://github.com/yukinarit/pyserde/issues/214)
+* ci: Use pypy-3.8 ([316b98e](https://github.com/yukinarit/pyserde/commit/316b98e))
+* feat: Support PEP604 Union operator ([17419d2](https://github.com/yukinarit/pyserde/commit/17419d2))
+
+This release had contributions from 1 person: [@gitpushdashf](https://github.com/gitpushdashf). Thank you so much! :tada: :joy:
+
 ## `0.7.1`  (2022-03-17)
 
 * ci: Run tests on pull_request only ([015cb41](https://github.com/yukinarit/pyserde/commit/015cb41))
