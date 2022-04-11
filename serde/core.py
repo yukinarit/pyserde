@@ -610,3 +610,40 @@ DefaultTagging = ExternalTagging
 def ensure(expr, description):
     if not expr:
         raise Exception(description)
+
+
+def should_impl_dataclass(cls):
+    """
+    Test if class doesn't have @dataclass.
+
+    `dataclasses.is_dataclass` returns True even Derived class doesn't actually @dataclass.
+    >>> @dataclasses.dataclass
+    ... class Base:
+    ...     a: int
+    >>> class Derived(Base):
+    ...     b: int
+    >>> dataclasses.is_dataclass(Derived)
+    True
+
+    This function tells the class actually have @dataclass or not.
+    >>> should_impl_dataclass(Base)
+    False
+    >>> should_impl_dataclass(Derived)
+    True
+    """
+    if not dataclasses.is_dataclass(cls):
+        return True
+
+    annotations = getattr(cls, "__annotations__", {})
+    if not annotations:
+        return False
+
+    if len(annotations) != len(dataclasses.fields(cls)):
+        return True
+
+    field_names = [field.name for field in dataclass_fields(cls)]
+    for field_name in annotations:
+        if field_name not in field_names:
+            return True
+
+    return False
