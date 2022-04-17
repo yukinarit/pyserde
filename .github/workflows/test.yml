@@ -27,6 +27,7 @@ jobs:
     #     key: ${{ matrix.os }}-${{ env.pythonLocation }}-${{ hashFiles('**/Pipfile') }}
     - name: Install dependencies
       run: |
+        apt-get install pypy-dev
         pip install poetry
         make setup
     - name: Run tests
