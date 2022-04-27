@@ -82,6 +82,14 @@ def test_simple(se, de, opt):
         assert type(de_value) == typ
         assert type(de_value).dtype == field.type.dtype
 
+    @serde.serde(**opt)
+    class NumpyDate:
+        d: np.datetime64
+
+    date_test = NumpyDate(np.datetime64(10, "Y"))
+
+    assert de(NumpyDate, se(date_test)) == date_test
+
 
 @pytest.mark.parametrize("opt", opt_case, ids=opt_case_ids())
 @pytest.mark.parametrize("se,de", format_json + format_msgpack)
@@ -138,7 +146,10 @@ def test_encode_numpy(se, de, opt):
         np.array([np.bool_(i) for i in [True, False]]),
     )
 
-    assert de(MisTyped, se(test2)) == expected
+    assert de(MisTyped, se(test3)) == expected
+
+    np_datetime = np.datetime64("2022-04-27")
+    assert de(np.datetime64, se(np_datetime)) == np_datetime
 
     for value in [np.int32(1), np.int64(1), np.bool_(False), np.bool_(True), int(1), False, True]:
         typ = type(value)

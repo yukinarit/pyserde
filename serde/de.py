@@ -519,7 +519,13 @@ class Renderer:
             res = self.tuple(arg)
         elif is_enum(arg.type):
             res = self.enum(arg)
-        elif is_primitive(arg.type) and not is_numpy_scalar(arg.type):
+        elif is_numpy_scalar(arg.type):
+            self.import_numpy = True
+            res = deserialize_numpy_scalar(arg)
+        elif is_numpy_array(arg.type):
+            self.import_numpy = True
+            res = deserialize_numpy_array(arg)
+        elif is_primitive(arg.type):
             res = self.primitive(arg)
         elif is_union(arg.type):
             res = self.union_func(arg)
@@ -539,12 +545,6 @@ class Renderer:
         elif is_generic(arg.type):
             arg.type = get_origin(arg.type)
             res = self.render(arg)
-        elif is_numpy_scalar(arg.type):
-            self.import_numpy = True
-            res = deserialize_numpy_scalar(arg)
-        elif is_numpy_array(arg.type):
-            self.import_numpy = True
-            res = deserialize_numpy_array(arg)
         else:
             return f"raise_unsupported_type({arg.data})"
 

@@ -19,6 +19,8 @@ try:
     def encode_numpy(obj: Any):
         if isinstance(obj, np.ndarray):
             return obj.tolist()
+        if isinstance(obj, np.datetime64):
+            return obj.item().isoformat()
         if isinstance(obj, np.generic):
             return obj.item()
         raise TypeError(f"Object of type {fullname(type(obj))} is not serializable")
@@ -44,6 +46,12 @@ try:
         except TypeError:
             return False
 
+    def is_numpy_datetime(typ) -> bool:
+        try:
+            return issubclass(typ, np.datetime64)
+        except TypeError:
+            return False
+
     def serialize_numpy_scalar(arg) -> str:
         return f"{arg.varname}.item()"
 
@@ -58,6 +66,9 @@ try:
 
     def serialize_numpy_array(arg) -> str:
         return f"{arg.varname}.tolist()"
+
+    def serialize_numpy_datetime(arg) -> str:
+        return f"{arg.varname}.item().isoformat()"
 
     def deserialize_numpy_array(arg) -> str:
         if is_bare_numpy_array(arg.type):
@@ -79,6 +90,9 @@ except ImportError:
     def is_numpy_scalar(typ) -> bool:
         return False
 
+    def is_numpy_datetime(typ) -> bool:
+        return False
+
     def serialize_numpy_scalar(arg) -> str:
         return ""
 
@@ -89,6 +103,9 @@ except ImportError:
         return False
 
     def serialize_numpy_array(arg) -> str:
+        return ""
+
+    def serialize_numpy_datetime(arg) -> str:
         return ""
 
     def deserialize_numpy_array(arg) -> str:
