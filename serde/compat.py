@@ -15,15 +15,25 @@ import typing_inspect
 try:
     import numpy.typing as npt
 
+    # Note: these functions are only needed on Python 3.8 or earlier
     def get_np_origin(tp):
         if isinstance(tp, npt._generic_alias._GenericAlias) and tp.__origin__ is not ClassVar:
             return tp.__origin__
         return None
 
+    def get_np_args(tp):
+        if isinstance(tp, npt._generic_alias._GenericAlias) and tp.__origin__ is not ClassVar:
+            return tp.__args__
+
+        return ()
+
 except ImportError:
 
     def get_np_origin(tp):
         return None
+
+    def get_np_args(tp):
+        return ()
 
 
 __all__: List = []
@@ -58,9 +68,9 @@ def get_args(typ):
     Provide `get_args` that works in all python versions.
     """
     try:
-        return typing.get_args(typ)  # python>=3.8 typing module has get_args.
+        return typing.get_args(typ) or get_np_args(typ)  # python>=3.8 typing module has get_args.
     except AttributeError:
-        return typing_inspect.get_args(typ)
+        return typing_inspect.get_args(typ) or get_np_args(typ)
 
 
 def typename(typ) -> str:

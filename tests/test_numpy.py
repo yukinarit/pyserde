@@ -140,6 +140,33 @@ def test_encode_numpy(se, de, opt):
 
     assert de(MisTyped, se(test2)) == expected
 
+    for value in [np.int32(1), np.int64(1), np.bool_(False), np.bool_(True), int(1), False, True]:
+        typ = type(value)
+        de_value = de(typ, se(value))
+        assert de_value == value
+        assert type(de_value) == typ
+
+        # test bare numpy array deserialization
+        arr = np.array([0, 1, 2], dtype=typ)
+        de_arr = de(np.ndarray, se(arr))
+        assert (de_arr == arr).all()
+
+        # test arrays with dtype=type(value)
+        arr_typ = npt.NDArray[typ]
+
+        de_arr = de(arr_typ, se(arr))
+        assert (de_arr == arr).all()
+        assert de_arr.dtype == arr.dtype == typ
+
+    class BadClass:
+        def __init__(self, x):
+            self.x = x
+
+    b = BadClass(1)
+
+    with pytest.raises(TypeError):
+        se(b)
+
 
 @pytest.mark.parametrize("se,de", format_json + format_msgpack)
 def test_encode_numpy_with_no_default_encoder(se, de):

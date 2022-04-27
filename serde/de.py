@@ -57,7 +57,13 @@ from .core import (
     raise_unsupported_type,
     union_func_name,
 )
-from .numpy import deserialize_numpy_array, deserialize_numpy_scalar, is_numpy_array, is_numpy_scalar
+from .numpy import (
+    deserialize_numpy_array,
+    deserialize_numpy_array_direct,
+    deserialize_numpy_scalar,
+    is_numpy_array,
+    is_numpy_scalar,
+)
 
 __all__: List = ['deserialize', 'is_deserializable', 'from_dict', 'from_tuple']
 
@@ -343,6 +349,8 @@ def from_obj(c: Type, o: Any, named: bool, reuse_instances: bool):
                 return {k: v for k, v in o.items()}
             else:
                 return {thisfunc(type_args(c)[0], k): thisfunc(type_args(c)[1], v) for k, v in o.items()}
+        elif is_numpy_array(c):
+            return deserialize_numpy_array_direct(c, o)
         elif c in DateTimeTypes:
             return c.fromisoformat(o)
         elif c is Any:

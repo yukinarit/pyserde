@@ -1,6 +1,6 @@
 from typing import Any, Callable, Optional
 
-from serde.compat import get_origin
+from serde.compat import get_args, get_origin
 
 
 def fullname(klass):
@@ -66,6 +66,13 @@ try:
         dtype = fullname(arg[1][0].type)
         return f"numpy.array({arg.data}, dtype={dtype})"
 
+    def deserialize_numpy_array_direct(typ, arg):
+        if is_bare_numpy_array(typ):
+            return np.array(arg)
+
+        dtype = get_args(get_args(typ)[1])[0]
+        return np.array(arg, dtype=dtype)
+
 except ImportError:
     encode_numpy = None
 
@@ -86,3 +93,6 @@ except ImportError:
 
     def deserialize_numpy_array(arg) -> str:
         return ""
+
+    def deserialize_numpy_array_direct(typ, arg):
+        return arg
