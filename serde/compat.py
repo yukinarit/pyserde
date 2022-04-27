@@ -13,19 +13,28 @@ from typing import Any, ClassVar, Dict, Generic, Iterator, List, Optional, Set, 
 import typing_inspect
 
 try:
-    import numpy.typing as npt
+    if sys.version_info[:2] <= (3, 8):
+        import numpy.typing as npt
 
-    # Note: these functions are only needed on Python 3.8 or earlier
-    def get_np_origin(tp):
-        if isinstance(tp, npt._generic_alias._GenericAlias) and tp.__origin__ is not ClassVar:
-            return tp.__origin__
-        return None
+        # Note: these functions are only needed on Python 3.8 or earlier
+        def get_np_origin(tp):
+            if isinstance(tp, npt._generic_alias._GenericAlias) and tp.__origin__ is not ClassVar:
+                return tp.__origin__
+            return None
 
-    def get_np_args(tp):
-        if isinstance(tp, npt._generic_alias._GenericAlias) and tp.__origin__ is not ClassVar:
-            return tp.__args__
+        def get_np_args(tp):
+            if isinstance(tp, npt._generic_alias._GenericAlias) and tp.__origin__ is not ClassVar:
+                return tp.__args__
 
-        return ()
+            return ()
+
+    else:
+
+        def get_np_origin(tp):
+            return None
+
+        def get_np_args(tp):
+            return ()
 
 except ImportError:
 
