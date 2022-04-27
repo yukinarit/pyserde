@@ -9,6 +9,7 @@ import msgpack
 from .compat import T
 from .core import SerdeError
 from .de import Deserializer, from_dict, from_tuple
+from .numpy import encode_numpy
 from .se import Serializer, to_dict, to_tuple
 
 __all__ = ["from_msgpack", "to_msgpack"]
@@ -17,6 +18,8 @@ __all__ = ["from_msgpack", "to_msgpack"]
 class MsgPackSerializer(Serializer):
     @classmethod
     def serialize(cls, obj, use_bin_type: bool = True, ext_type_code: int = None, **opts) -> bytes:
+        if "default" not in opts:
+            opts["default"] = encode_numpy
         if ext_type_code is not None:
             obj_bytes = msgpack.packb(obj, use_bin_type=use_bin_type, **opts)
             obj_or_ext = msgpack.ExtType(ext_type_code, obj_bytes)

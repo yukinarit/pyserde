@@ -55,6 +55,7 @@ from .core import (
     raise_unsupported_type,
     union_func_name,
 )
+from .numpy import is_numpy_array, is_numpy_scalar, serialize_numpy_array, serialize_numpy_scalar
 
 __all__ = ["serialize", "is_serializable", "to_dict", "to_tuple"]
 
@@ -588,7 +589,7 @@ convert_sets=convert_sets), foo[2],)"
             res = self.tuple(arg)
         elif is_enum(arg.type):
             res = self.enum(arg)
-        elif is_primitive(arg.type):
+        elif is_primitive(arg.type) and not is_numpy_scalar(arg.type):
             res = self.primitive(arg)
         elif is_union(arg.type):
             res = self.union_func(arg)
@@ -603,6 +604,10 @@ convert_sets=convert_sets), foo[2],)"
         elif is_generic(arg.type):
             arg.type = get_origin(arg.type)
             res = self.render(arg)
+        elif is_numpy_scalar(arg.type):
+            res = serialize_numpy_scalar(arg)
+        elif is_numpy_array(arg.type):
+            res = serialize_numpy_array(arg)
         else:
             res = f"raise_unsupported_type({arg.varname})"
 

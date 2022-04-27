@@ -30,11 +30,23 @@ jinja2 = "*"
 msgpack = { version = "*", markers = "extra == 'msgpack' or extra == 'all'", optional = true }
 toml = { version = "*", markers = "extra == 'toml' or extra == 'all'", optional = true }
 pyyaml = { version = "*", markers = "extra == 'yaml' or extra == 'all'", optional = true }
+numpy = [
+    { version = "~1.21.0", markers = "python_version ~= '3.7.0' and (extra == 'numpy' or extra == 'all')", optional = true },
+    { version = ">1.21.0", markers = "python_version ~= '3.8.0' and (extra == 'numpy' or extra == 'all')", optional = true },
+    { version = ">1.21.0", markers = "python_version ~= '3.9.0' and (extra == 'numpy' or extra == 'all')", optional = true },
+    { version = ">1.22.0", markers = "python_version ~= '3.10' and (extra == 'numpy' or extra == 'all')", optional = true },
+]
 
 [tool.poetry.dev-dependencies]
 pyyaml = "*"
 toml = "*"
 msgpack = "*"
+numpy = [
+    { version = "~1.21.0", markers = "python_version ~= '3.7.0'" },
+    { version = ">1.21.0", markers = "python_version ~= '3.8.0'" },
+    { version = ">1.21.0", markers = "python_version ~= '3.9.0'" },
+    { version = ">1.22.0", markers = "python_version ~= '3.10'" },
+]
 flake8 = "*"
 pytest = "*"
 pytest-cov = "*"
@@ -49,10 +61,12 @@ pytest-xdist = "^2.3.0"
 
 [tool.poetry.extras]
 msgpack = ["msgpack"]
+numpy = ["numpy"]
 toml = ["toml"]
 yaml = ["pyyaml"]
-all = ["msgpack", "toml", "pyyaml"]
+all = ["msgpack", "toml", "pyyaml", "numpy"]
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
+

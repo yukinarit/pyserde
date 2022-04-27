@@ -29,7 +29,6 @@ if sys.version_info[:3] >= (3, 10, 0):
 
         v: int | str | float | bool
 
-
 else:
 
     @serde

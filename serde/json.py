@@ -6,6 +6,7 @@ from typing import Any, Type
 
 from .compat import T
 from .de import Deserializer, from_dict
+from .numpy import encode_numpy
 from .se import Serializer, to_dict
 
 __all__ = ["from_json", "to_json"]
@@ -14,6 +15,8 @@ __all__ = ["from_json", "to_json"]
 class JsonSerializer(Serializer):
     @classmethod
     def serialize(cls, obj: Any, **opts) -> str:
+        if "default" not in opts:
+            opts["default"] = encode_numpy
         return json.dumps(obj, **opts)
 
 
