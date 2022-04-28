@@ -25,6 +25,7 @@ from .compat import (
     is_enum,
     is_generic,
     is_list,
+    is_literal,
     is_none,
     is_opt,
     is_primitive,
@@ -617,6 +618,8 @@ convert_sets=convert_sets), foo[2],)"
         elif is_generic(arg.type):
             arg.type = get_origin(arg.type)
             res = self.render(arg)
+        elif is_literal(arg.type):
+            res = self.literal(arg)
         else:
             res = f"raise_unsupported_type({arg.varname})"
 
@@ -727,6 +730,9 @@ convert_sets=convert_sets), foo[2],)"
     def union_func(self, arg: SeField) -> str:
         func_name = union_func_name(UNION_SE_PREFIX, type_args(arg.type))
         return f"serde_scope.funcs['{func_name}']({arg.varname}, reuse_instances, convert_sets)"
+
+    def literal(self, arg: SeField) -> str:
+        return f"{arg.varname}"
 
 
 def enum_value(cls, e):

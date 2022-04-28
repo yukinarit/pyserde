@@ -55,6 +55,8 @@ TO_DICT = 'to_dict'
 UNION_SE_PREFIX = "union_se"
 UNION_DE_PREFIX = "union_de"
 
+LITERAL_DE_PREFIX = "literal_de"
+
 SETTINGS = dict(debug=False)
 
 StrSerializableTypes = (
@@ -537,6 +539,21 @@ def union_func_name(prefix: str, union_args: List[Type]) -> str:
     'union_se_int_List_str__IPv4Address'
     """
     return re.sub(r"[ ,\[\]]+", "_", f"{prefix}_{'_'.join([typename(e) for e in union_args])}")
+
+
+def literal_func_name(literal_args: List[Any]) -> str:
+    """
+    Generate a function name with all literals and corresponding types specified with Literal[...]
+
+
+    * `literal_args`: arguments of a Literal
+
+    >>> literal_func_name(["r", "w", "a", "x", "r+", "w+", "a+", "x+"])
+    'literal_de_r_str_w_str_a_str_x_str_r__str_w__str_a__str_x__str'
+    """
+    return re.sub(
+        r"[^A-Za-z0-9]", "_", f"{LITERAL_DE_PREFIX}_{'_'.join(f'{a}_{typename(type(a))}' for a in literal_args)}"
+    )
 
 
 @dataclass

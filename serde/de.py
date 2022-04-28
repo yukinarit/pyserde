@@ -28,12 +28,14 @@ from .compat import (
     is_enum,
     is_generic,
     is_list,
+    is_literal,
     is_none,
     is_opt,
     is_primitive,
     is_set,
     is_tuple,
     is_union,
+    iter_literals,
     iter_types,
     iter_unions,
     type_args,
@@ -53,6 +55,7 @@ from .core import (
     add_func,
     ensure,
     fields,
+    literal_func_name,
     logger,
     raise_unsupported_type,
     union_func_name,
@@ -231,6 +234,11 @@ def deserialize(
             add_func(
                 scope, union_func_name(UNION_DE_PREFIX, union_args), render_union_func(cls, union_args, tagging), g
             )
+
+        # render literal functions
+        for literal in iter_literals(cls):
+            literal_args = type_args(literal)
+            add_func(scope, literal_func_name(literal_args), render_literal_func(cls, literal_args), g)
 
         # Collect default values and default factories used in the generated code.
         for f in defields(cls):
@@ -545,6 +553,8 @@ class Renderer:
         elif is_generic(arg.type):
             arg.type = get_origin(arg.type)
             res = self.render(arg)
+        elif is_literal(arg.type):
+            res = self.literal(arg)
         else:
             return f"raise_unsupported_type({arg.data})"
 
@@ -728,6 +738,10 @@ Foo.__serde__.funcs['foo'](data=data[0][3], reuse_instances=reuse_instances),)"
         func_name = union_func_name(UNION_DE_PREFIX, type_args(arg.type))
         return f"serde_scope.funcs['{func_name}'](cls=cls, data={arg.data}, reuse_instances=reuse_instances)"
 
+    def literal(self, arg: DeField) -> str:
+        func_name = literal_func_name(type_args(arg.type))
+        return f"serde_scope.funcs['{func_name}'](cls=cls, data={arg.data}, reuse_instances=reuse_instances)"
+
     def default(self, arg: DeField, code: str) -> str:
         exists = f'"{arg.conv_name()}" in {arg.datavar}'
         if has_default(arg):
@@ -861,6 +875,28 @@ def {{func}}(cls=cls, maybe_generic=None, data=None, reuse_instances = {{serde_s
         serde_scope=getattr(cls, SERDE_SCOPE),
         union_args=union_args,
         union_name=union_name,
+        tagging=tagging,
+        is_taggable=Tagging.is_taggable,
+    )
+
+
+def render_literal_func(cls: Type, literal_args: List[Any], tagging: Tagging = DefaultTagging) -> str:
+    template = """
+def {{func}}(cls=cls, maybe_generic=None, data=None, reuse_instances = {{serde_scope.reuse_instances_default}}):
+  if data in ({%- for v in literal_args -%}{{v|repr}},{%- endfor -%}):
+    return data
+  raise SerdeError("Can not deserialize " + repr(data) + " as {{literal_name}}.")
+    """
+    literal_name = f"Literal[{', '.join([repr(a) for a in literal_args])}]"
+
+    env = jinja2.Environment(loader=jinja2.DictLoader({'dict': template}))
+    env.filters.update({'repr': repr})
+    env.filters.update({'type': type})
+    return env.get_template('dict').render(
+        func=literal_func_name(literal_args),
+        serde_scope=getattr(cls, SERDE_SCOPE),
+        literal_args=literal_args,
+        literal_name=literal_name,
         tagging=tagging,
         is_taggable=Tagging.is_taggable,
     )
