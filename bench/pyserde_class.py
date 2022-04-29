@@ -3,15 +3,20 @@ import serde.json
 import data
 from dataclasses import dataclass, field
 from typing import List, Type, Union
-from tests.data import Pri
 from functools import partial
 from runner import Size, Runner
 
-Small = Pri
+
+@serde.serde
+@dataclass(unsafe_hash=True)
+class Small:
+    i: int
+    s: str
+    f: float
+    b: bool
 
 
-@serde.serialize
-@serde.deserialize
+@serde.serde
 @dataclass
 class Medium:
     inner: List[Small] = field(default_factory=list)
