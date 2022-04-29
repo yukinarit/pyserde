@@ -57,7 +57,13 @@ from .core import (
     raise_unsupported_type,
     union_func_name,
 )
-from .numpy import deserialize_numpy_array, deserialize_numpy_scalar, is_numpy_array, is_numpy_scalar
+from .numpy import (
+    deserialize_numpy_array,
+    deserialize_numpy_array_direct,
+    deserialize_numpy_scalar,
+    is_numpy_array,
+    is_numpy_scalar,
+)
 
 __all__: List = ['deserialize', 'is_deserializable', 'from_dict', 'from_tuple']
 
@@ -343,6 +349,8 @@ def from_obj(c: Type, o: Any, named: bool, reuse_instances: bool):
                 return {k: v for k, v in o.items()}
             else:
                 return {thisfunc(type_args(c)[0], k): thisfunc(type_args(c)[1], v) for k, v in o.items()}
+        elif is_numpy_array(c):
+            return deserialize_numpy_array_direct(c, o)
         elif c in DateTimeTypes:
             return c.fromisoformat(o)
         elif c is Any:
@@ -511,7 +519,13 @@ class Renderer:
             res = self.tuple(arg)
         elif is_enum(arg.type):
             res = self.enum(arg)
-        elif is_primitive(arg.type) and not is_numpy_scalar(arg.type):
+        elif is_numpy_scalar(arg.type):
+            self.import_numpy = True
+            res = deserialize_numpy_scalar(arg)
+        elif is_numpy_array(arg.type):
+            self.import_numpy = True
+            res = deserialize_numpy_array(arg)
+        elif is_primitive(arg.type):
             res = self.primitive(arg)
         elif is_union(arg.type):
             res = self.union_func(arg)
@@ -531,12 +545,6 @@ class Renderer:
         elif is_generic(arg.type):
             arg.type = get_origin(arg.type)
             res = self.render(arg)
-        elif is_numpy_scalar(arg.type):
-            self.import_numpy = True
-            res = deserialize_numpy_scalar(arg)
-        elif is_numpy_array(arg.type):
-            self.import_numpy = True
-            res = deserialize_numpy_array(arg)
         else:
             return f"raise_unsupported_type({arg.data})"
 

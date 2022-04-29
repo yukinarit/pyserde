@@ -25,7 +25,7 @@ examples:
 	pushd examples && $(POETRY) run $(PYTHON) runner.py && popd
 
 coverage:
-	$(POETRY) run pytest tests --doctest-modules serde -v -nauto --cov=serde --cov-report term --cov-report xml
+	$(POETRY) run pytest tests --doctest-modules serde -v -nauto --cov=serde --cov-report term --cov-report xml --cov-report html
 
 pep8:
 	$(POETRY) run flake8
