@@ -7,6 +7,7 @@
 * User defined class with [`@dataclass`](https://docs.python.org/3/library/dataclasses.html)
 * [`typing.NewType`](https://docs.python.org/3/library/typing.html#newtype) for primitive types
 * [`typing.Any`](https://docs.python.org/3/library/typing.html#the-any-type)
+* [`typing.Literal`](https://docs.python.org/3/library/typing.html#typing.Literal)
 * [`Enum`](https://docs.python.org/3/library/enum.html#enum.Enum) and [`IntEnum`](https://docs.python.org/3/library/enum.html#enum.IntEnum)
 * Standard library
     * [`pathlib.Path`](https://docs.python.org/3/library/pathlib.html)

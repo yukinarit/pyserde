@@ -12,6 +12,9 @@ from typing import Any, ClassVar, Dict, Generic, Iterator, List, Optional, Set, 
 
 import typing_inspect
 
+if sys.version_info[:2] == (3, 7):
+    import typing_extensions
+
 try:
     if sys.version_info[:2] <= (3, 8):
         import numpy.typing as npt
@@ -147,6 +150,11 @@ def typename(typ) -> str:
             return 'Tuple'
     elif is_generic(typ):
         return get_origin(typ).__name__
+    elif is_literal(typ):
+        args = type_args(typ)
+        if not args:
+            raise TypeError("Literal type requires at least one literal argument")
+        return f'Literal[{", ".join(repr(e) for e in args)}]'
     elif typ is Any:
         return 'Any'
     else:
@@ -291,6 +299,36 @@ def iter_unions(cls: Type) -> Iterator[Type]:
         if arg and len(arg) >= 2:
             yield from iter_unions(arg[0])
             yield from iter_unions(arg[1])
+
+
+def iter_literals(cls: Type) -> Iterator[Type]:
+    """
+    Iterate over all literals that are used in the dataclass
+    """
+    if is_literal(cls):
+        yield cls
+    if is_union(cls):
+        for arg in type_args(cls):
+            yield from iter_literals(arg)
+    if is_dataclass(cls):
+        for f in dataclass_fields(cls):
+            yield from iter_literals(f.type)
+    elif is_opt(cls):
+        arg = type_args(cls)
+        if arg:
+            yield from iter_literals(arg[0])
+    elif is_list(cls) or is_set(cls):
+        arg = type_args(cls)
+        if arg:
+            yield from iter_literals(arg[0])
+    elif is_tuple(cls):
+        for arg in type_args(cls):
+            yield from iter_literals(arg)
+    elif is_dict(cls):
+        arg = type_args(cls)
+        if arg and len(arg) >= 2:
+            yield from iter_literals(arg[0])
+            yield from iter_literals(arg[1])
 
 
 def is_union(typ) -> bool:
@@ -514,6 +552,24 @@ def is_generic(typ) -> bool:
     """
     origin = get_origin(typ)
     return origin is not None and Generic in getattr(origin, "__bases__", ())
+
+
+def is_literal(typ) -> bool:
+    """
+    Test if the type is derived from `typing.Literal`.
+
+    >>> T = typing.TypeVar('T')
+    >>> class GenericFoo(typing.Generic[T]):
+    ...     pass
+    >>> is_generic(GenericFoo[int])
+    True
+    >>> is_generic(GenericFoo)
+    False
+    """
+    origin = get_origin(typ)
+    if sys.version_info[:2] == (3, 7):
+        return origin is typing_extensions.Literal
+    return origin is typing.Literal
 
 
 def find_generic_arg(cls, field) -> int:

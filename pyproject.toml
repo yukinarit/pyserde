@@ -25,6 +25,7 @@ classifiers=[
 [tool.poetry.dependencies]
 python = "^3.7.0"
 typing_inspect = ">=0.4.0"
+typing_extensions = { version = "*", markers = "python_version ~= '3.7.0'" }
 stringcase = "*"
 jinja2 = "*"
 msgpack = { version = "*", markers = "extra == 'msgpack' or extra == 'all'", optional = true }
