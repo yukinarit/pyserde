@@ -1,3 +1,37 @@
+## `0.7.3` (2022-05-10)
+
+Thanks to the great contribution by [@kmsquire](https://github.com/kmsquire), pyserde supports some numpy types!
+
+```python
+@serde
+class NPFoo:
+    i: np.int32
+    j: np.int64
+    f: np.float32
+    g: np.float64
+    h: np.bool_
+    u: np.ndarray
+    v: npt.NDArray
+    w: npt.NDArray[np.int32]
+    x: npt.NDArray[np.int64]
+    y: npt.NDArray[np.float32]
+    z: npt.NDArray[np.float64]
+```
+
+* feat: Remove try-catch from is_numpy_array() (unnecessary) ([731876f](https://github.com/yukinarit/pyserde/commit/731876f))
+* feat: Support Literal[...] type annotation ([e50c958](https://github.com/yukinarit/pyserde/commit/e50c958))
+* feat: Support numpy types ([78eb22e](https://github.com/yukinarit/pyserde/commit/78eb22e))
+* feat(compat): Only define np_get_origin() for python 3.8 or earlier ([02c5af2](https://github.com/yukinarit/pyserde/commit/02c5af2))
+* feat(numpy): Support serialization of numpy.datetime64 ([5e521cf](https://github.com/yukinarit/pyserde/commit/5e521cf))
+* Don't import tests module from pyserde package ([d664426](https://github.com/yukinarit/pyserde/commit/d664426))
+* fix: Recognized numpy arrays on Python 3.7, 3.8 ([a0fa36f](https://github.com/yukinarit/pyserde/commit/a0fa36f))
+* fix(numpy): Fix direct numpy array deserialization ([8f9f71c](https://github.com/yukinarit/pyserde/commit/8f9f71c))
+* ci: Remove pypy-3.8 until a numpy wheel is released for it ([61b6130](https://github.com/yukinarit/pyserde/commit/61b6130))
+* chore: Update black, fix test_union formatting ([4a708fd](https://github.com/yukinarit/pyserde/commit/4a708fd))
+* chore: Update numpy version specification based on numpy compatibility with python ([1fa5e07](https://github.com/yukinarit/pyserde/commit/1fa5e07))
+
+This release had contributions from 2 people: [@kmsquire](https://github.com/kmsquire) and [@chagui](https://github.com/chagui). Thank you so much! :tada: :joy:
+
 ## `0.7.2` (2022-04-11)
 
 * Don't package tests and examples ([af829ae](https://github.com/yukinarit/pyserde/commit/af829ae)), closes [#214](https://github.com/yukinarit/pyserde/issues/214)
