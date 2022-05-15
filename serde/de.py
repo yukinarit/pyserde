@@ -562,7 +562,9 @@ class Renderer:
             res = self.default(arg, res)
 
         if self.custom and not arg.deserializer:
-            return self.custom_class_deserializer(arg, res)
+            # Rerender the code for default deserializer.
+            default = Renderer(self.func, self.cls, None).render(arg)
+            return self.custom_class_deserializer(arg, default)
         else:
             return res
 
