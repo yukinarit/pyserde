@@ -148,7 +148,37 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h2 id="072-2022-04-11"><a class="header" href="#072-2022-04-11"><code>0.7.2</code> (2022-04-11)</a></h2>
+                        <h2 id="073-2022-05-10"><a class="header" href="#073-2022-05-10"><code>0.7.3</code> (2022-05-10)</a></h2>
+<p>Thanks to the great contribution by <a href="https://github.com/kmsquire">@kmsquire</a>, pyserde supports some numpy types!</p>
+<pre><code class="language-python">@serde
+class NPFoo:
+    i: np.int32
+    j: np.int64
+    f: np.float32
+    g: np.float64
+    h: np.bool_
+    u: np.ndarray
+    v: npt.NDArray
+    w: npt.NDArray[np.int32]
+    x: npt.NDArray[np.int64]
+    y: npt.NDArray[np.float32]
+    z: npt.NDArray[np.float64]
+</code></pre>
+<ul>
+<li>feat: Remove try-catch from is_numpy_array() (unnecessary) (<a href="https://github.com/yukinarit/pyserde/commit/731876f">731876f</a>)</li>
+<li>feat: Support Literal[...] type annotation (<a href="https://github.com/yukinarit/pyserde/commit/e50c958">e50c958</a>)</li>
+<li>feat: Support numpy types (<a href="https://github.com/yukinarit/pyserde/commit/78eb22e">78eb22e</a>)</li>
+<li>feat(compat): Only define np_get_origin() for python 3.8 or earlier (<a href="https://github.com/yukinarit/pyserde/commit/02c5af2">02c5af2</a>)</li>
+<li>feat(numpy): Support serialization of numpy.datetime64 (<a href="https://github.com/yukinarit/pyserde/commit/5e521cf">5e521cf</a>)</li>
+<li>Don't import tests module from pyserde package (<a href="https://github.com/yukinarit/pyserde/commit/d664426">d664426</a>)</li>
+<li>fix: Recognized numpy arrays on Python 3.7, 3.8 (<a href="https://github.com/yukinarit/pyserde/commit/a0fa36f">a0fa36f</a>)</li>
+<li>fix(numpy): Fix direct numpy array deserialization (<a href="https://github.com/yukinarit/pyserde/commit/8f9f71c">8f9f71c</a>)</li>
+<li>ci: Remove pypy-3.8 until a numpy wheel is released for it (<a href="https://github.com/yukinarit/pyserde/commit/61b6130">61b6130</a>)</li>
+<li>chore: Update black, fix test_union formatting (<a href="https://github.com/yukinarit/pyserde/commit/4a708fd">4a708fd</a>)</li>
+<li>chore: Update numpy version specification based on numpy compatibility with python (<a href="https://github.com/yukinarit/pyserde/commit/1fa5e07">1fa5e07</a>)</li>
+</ul>
+<p>This release had contributions from 2 people: <a href="https://github.com/kmsquire">@kmsquire</a> and <a href="https://github.com/chagui">@chagui</a>. Thank you so much! :tada: :joy:</p>
+<h2 id="072-2022-04-11"><a class="header" href="#072-2022-04-11"><code>0.7.2</code> (2022-04-11)</a></h2>
 <ul>
 <li>Don't package tests and examples (<a href="https://github.com/yukinarit/pyserde/commit/af829ae">af829ae</a>), closes <a href="https://github.com/yukinarit/pyserde/issues/214">#214</a></li>
 <li>ci: Use pypy-3.8 (<a href="https://github.com/yukinarit/pyserde/commit/316b98e">316b98e</a>)</li>

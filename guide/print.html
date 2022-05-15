@@ -294,7 +294,7 @@ Foo(i=10, s='foo', f=100.0, b=True)
 <pre><code class="language-python">&gt;&gt;&gt; from serde.json import to_json, from_json
 
 &gt;&gt;&gt; to_json(Foo(i=10, s='foo', f=100.0, b=True))
-{&quot;i&quot;: 10, &quot;s&quot;: &quot;foo&quot;, &quot;f&quot;: 100.0, &quot;b&quot;: true}
+'{&quot;i&quot;: 10, &quot;s&quot;: &quot;foo&quot;, &quot;f&quot;: 100.0, &quot;b&quot;: true}'
 
 &gt;&gt;&gt; from_json(Foo, '{&quot;i&quot;: 10, &quot;s&quot;: &quot;foo&quot;, &quot;f&quot;: 100.0, &quot;b&quot;: true}')
 Foo(i=10, s='foo', f=100.0, b=True)
@@ -336,6 +336,72 @@ b'\x84\xa1i\n\xa1s\xa3foo\xa1f\xcb@Y\x00\x00\x00\x00\x00\x00\xa1b\xc3'
 &gt;&gt;&gt; from_msgpack(Foo, b'\x84\xa1i\n\xa1s\xa3foo\xa1f\xcb@Y\x00\x00\x00\x00\x00\x00\xa1b\xc3')
 Foo(i=10, s='foo', f=100.0, b=True)
 </code></pre>
+<h2 id="numpy"><a class="header" href="#numpy">Numpy</a></h2>
+<p>All of the above (de)serialization methods can transparently handle most numpy
+types with the &quot;numpy&quot; extras package.</p>
+<pre><code class="language-python">import numpy as np
+import numpy.typing as npt
+
+@serde
+class NPFoo:
+    i: np.int32
+    j: np.int64
+    f: np.float32
+    g: np.float64
+    h: np.bool_
+    u: np.ndarray
+    v: npt.NDArray
+    w: npt.NDArray[np.int32]
+    x: npt.NDArray[np.int64]
+    y: npt.NDArray[np.float32]
+    z: npt.NDArray[np.float64]
+
+npfoo = NPFoo(
+    np.int32(1),
+    np.int64(2),
+    np.float32(3.0),
+    np.float64(4.0),
+    np.bool_(False),
+    np.array([1, 2]),
+    np.array([3, 4]),
+    np.array([np.int32(i) for i in [1, 2]]),
+    np.array([np.int64(i) for i in [3, 4]]),
+    np.array([np.float32(i) for i in [5.0, 6.0]]),
+    np.array([np.float64(i) for i in [7.0, 8.0]]),
+)
+</code></pre>
+<pre><code class="language-python">&gt;&gt;&gt; from serde.json import to_json, from_json
+
+&gt;&gt;&gt; to_json(npfoo)
+'{&quot;i&quot;: 1, &quot;j&quot;: 2, &quot;f&quot;: 3.0, &quot;g&quot;: 4.0, &quot;h&quot;: false, &quot;u&quot;: [1, 2], &quot;v&quot;: [3, 4], &quot;w&quot;: [1, 2], &quot;x&quot;: [3, 4], &quot;y&quot;: [5.0, 6.0], &quot;z&quot;: [7.0, 8.0]}'
+
+&gt;&gt;&gt; from_json(NPFoo, to_json(npfoo))
+NPFoo(i=1, j=2, f=3.0, g=4.0, h=False, u=array([1, 2]), v=array([3, 4]), w=array([1, 2], dtype=int32), x=array([3, 4]), y=array([5., 6.], dtype=float32), z=array([7., 8.]))
+
+&gt;&gt;&gt; from serde.yaml import from_yaml, to_yaml
+
+&gt;&gt;&gt; to_yaml(npfoo)
+'f: 3.0\ng: 4.0\nh: false\ni: 1\nj: 2\nu:\n- 1\n- 2\nv:\n- 3\n- 4\nw:\n- 1\n- 2\nx:\n- 3\n- 4\ny:\n- 5.0\n- 6.0\nz:\n- 7.0\n- 8.0\n'
+
+&gt;&gt;&gt; from_yaml(NPFoo, to_yaml(npfoo))
+NPFoo(i=1, j=2, f=3.0, g=4.0, h=False, u=array([1, 2]), v=array([3, 4]), w=array([1, 2], dtype=int32), x=array([3, 4]), y=array([5., 6.], dtype=float32), z=array([7., 8.]))
+
+&gt;&gt;&gt; from serde.toml import from_toml, to_toml
+
+&gt;&gt;&gt; to_toml(npfoo)
+'i = 1\nj = 2\nf = 3.0\ng = 4.0\nh = false\nu = [ 1, 2,]\nv = [ 3, 4,]\nw = [ 1, 2,]\nx = [ 3, 4,]\ny = [ 5.0, 6.0,]\nz = [ 7.0, 8.0,]\n'
+
+&gt;&gt;&gt; from_toml(NPFoo, to_toml(npfoo))
+NPFoo(i=1, j=2, f=3.0, g=4.0, h=False, u=array([1, 2]), v=array([3, 4]), w=array([1, 2], dtype=int32), x=array([3, 4]), y=array([5., 6.], dtype=float32), z=array([7., 8.]))
+
+&gt;&gt;&gt; from serde.msgpack import from_msgpack, to_msgpack
+
+&gt;&gt;&gt; to_msgpack(npfoo)
+b'\x8b\xa1i\x01\xa1j\x02\xa1f\xcb@\x08\x00\x00\x00\x00\x00\x00\xa1g\xcb@\x10\x00\x00\x00\x00\x00\x00\xa1h\xc2\xa1u\x92\x01\x02\xa1v\x92\x03\x04\xa1w\x92\x01\x02\xa1x\x92\x03\x04\xa1y\x92\xcb@\x14\x00\x00\x00\x00\x00\x00\xcb@\x18\x00\x00\x00\x00\x00\x00\xa1z\x92\xcb@\x1c\x00\x00\x00\x00\x00\x00\xcb@ \x00\x00\x00\x00\x00\x00'
+
+&gt;&gt;&gt; from_msgpack(NPFoo, to_msgpack(npfoo))
+NPFoo(i=1, j=2, f=3.0, g=4.0, h=False, u=array([1, 2]), v=array([3, 4]), w=array([1, 2], dtype=int32), x=array([3, 4]), y=array([5., 6.], dtype=float32), z=array([7., 8.]))
+</code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="supported-types"><a class="header" href="#supported-types">Supported types</a></h1>
 <ul>
 <li>Primitives (int, float, str, bool)</li>
@@ -345,6 +411,7 @@ Foo(i=10, s='foo', f=100.0, b=True)
 <li>User defined class with <a href="https://docs.python.org/3/library/dataclasses.html"><code>@dataclass</code></a></li>
 <li><a href="https://docs.python.org/3/library/typing.html#newtype"><code>typing.NewType</code></a> for primitive types</li>
 <li><a href="https://docs.python.org/3/library/typing.html#the-any-type"><code>typing.Any</code></a></li>
+<li><a href="https://docs.python.org/3/library/typing.html#typing.Literal"><code>typing.Literal</code></a></li>
 <li><a href="https://docs.python.org/3/library/enum.html#enum.Enum"><code>Enum</code></a> and <a href="https://docs.python.org/3/library/enum.html#enum.IntEnum"><code>IntEnum</code></a></li>
 <li>Standard library
 <ul>
@@ -692,7 +759,37 @@ poetry install
 poetry run python bench.py --full
 </code></pre>
 <p>You can check <a href="https://github.com/yukinarit/pyserde/blob/master/bench/bench.py">the benchmarking code</a> for more information.</p>
-<div style="break-before: page; page-break-before: always;"></div><h2 id="072-2022-04-11"><a class="header" href="#072-2022-04-11"><code>0.7.2</code> (2022-04-11)</a></h2>
+<div style="break-before: page; page-break-before: always;"></div><h2 id="073-2022-05-10"><a class="header" href="#073-2022-05-10"><code>0.7.3</code> (2022-05-10)</a></h2>
+<p>Thanks to the great contribution by <a href="https://github.com/kmsquire">@kmsquire</a>, pyserde supports some numpy types!</p>
+<pre><code class="language-python">@serde
+class NPFoo:
+    i: np.int32
+    j: np.int64
+    f: np.float32
+    g: np.float64
+    h: np.bool_
+    u: np.ndarray
+    v: npt.NDArray
+    w: npt.NDArray[np.int32]
+    x: npt.NDArray[np.int64]
+    y: npt.NDArray[np.float32]
+    z: npt.NDArray[np.float64]
+</code></pre>
+<ul>
+<li>feat: Remove try-catch from is_numpy_array() (unnecessary) (<a href="https://github.com/yukinarit/pyserde/commit/731876f">731876f</a>)</li>
+<li>feat: Support Literal[...] type annotation (<a href="https://github.com/yukinarit/pyserde/commit/e50c958">e50c958</a>)</li>
+<li>feat: Support numpy types (<a href="https://github.com/yukinarit/pyserde/commit/78eb22e">78eb22e</a>)</li>
+<li>feat(compat): Only define np_get_origin() for python 3.8 or earlier (<a href="https://github.com/yukinarit/pyserde/commit/02c5af2">02c5af2</a>)</li>
+<li>feat(numpy): Support serialization of numpy.datetime64 (<a href="https://github.com/yukinarit/pyserde/commit/5e521cf">5e521cf</a>)</li>
+<li>Don't import tests module from pyserde package (<a href="https://github.com/yukinarit/pyserde/commit/d664426">d664426</a>)</li>
+<li>fix: Recognized numpy arrays on Python 3.7, 3.8 (<a href="https://github.com/yukinarit/pyserde/commit/a0fa36f">a0fa36f</a>)</li>
+<li>fix(numpy): Fix direct numpy array deserialization (<a href="https://github.com/yukinarit/pyserde/commit/8f9f71c">8f9f71c</a>)</li>
+<li>ci: Remove pypy-3.8 until a numpy wheel is released for it (<a href="https://github.com/yukinarit/pyserde/commit/61b6130">61b6130</a>)</li>
+<li>chore: Update black, fix test_union formatting (<a href="https://github.com/yukinarit/pyserde/commit/4a708fd">4a708fd</a>)</li>
+<li>chore: Update numpy version specification based on numpy compatibility with python (<a href="https://github.com/yukinarit/pyserde/commit/1fa5e07">1fa5e07</a>)</li>
+</ul>
+<p>This release had contributions from 2 people: <a href="https://github.com/kmsquire">@kmsquire</a> and <a href="https://github.com/chagui">@chagui</a>. Thank you so much! :tada: :joy:</p>
+<h2 id="072-2022-04-11"><a class="header" href="#072-2022-04-11"><code>0.7.2</code> (2022-04-11)</a></h2>
 <ul>
 <li>Don't package tests and examples (<a href="https://github.com/yukinarit/pyserde/commit/af829ae">af829ae</a>), closes <a href="https://github.com/yukinarit/pyserde/issues/214">#214</a></li>
 <li>ci: Use pypy-3.8 (<a href="https://github.com/yukinarit/pyserde/commit/316b98e">316b98e</a>)</li>
