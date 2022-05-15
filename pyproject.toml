@@ -54,7 +54,8 @@ pytest-cov = "*"
 pytest-watch = "*"
 pytest-flake8 = "*"
 coverage = "==4.5.4"
-pdoc = { version = "~=8" }
+pdoc = "~=11"
+pygments = "<=2.11.2"
 mypy = { version = "==0.931", markers = "platform_python_implementation!='PyPy'" }
 more-itertools = "~=8.6.0"
 pre-commit = "==v2.10.1"
