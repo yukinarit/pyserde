@@ -61,6 +61,8 @@ Foo(i=10, s='foo', f=100.0, b=True)
         - [`uuid.UUID`](https://docs.python.org/3/library/uuid.html)
         - [`datetime.date`](https://docs.python.org/3/library/datetime.html#date-objects), [`datetime.time`](https://docs.python.org/3/library/datetime.html#time-objects), [`datetime.datetime`](https://docs.python.org/3/library/datetime.html#datetime-objects)
         - [`ipaddress`](https://docs.python.org/3/library/ipaddress.html)
+    - PyPI library
+        - [`numpy`](https://github.com/numpy/numpy) types
 - [Attributes](docs/features/attributes.md)
 - [Decorators](docs/features/decorators.md)
 - [Union Representation](docs/features/union.md)

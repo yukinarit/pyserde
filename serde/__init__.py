@@ -1,10 +1,11 @@
 """
 `pyserde` is a yet another serialization library on top of
-[dataclasses](https://docs.python.org/3/library/dataclasses.html).
+[dataclasses](https://docs.python.org/3/library/dataclasses.html),
+inspired by [serde-rs](https://github.com/serde-rs/serde).
 
 ## Overview
 
-Declare a class with pyserde's `@serialize` and `@deserialize` decorators.
+Declare a class with `@dataclasses.dataclass` and pyserde's `@serde` decorators.
 
 >>> from serde import serde
 >>>
@@ -33,13 +34,16 @@ The following modules provide the core functionalities of `pyserde`.
 * `serde.se`: All about serialization.
 * `serde.de`: All about deserialization.
 * `serde.core`: Core module used by `serde.se` and `serde.de`.
-* `serde.compat`: Provides compatibility layer which handles typing.
+* `serde.compat`: Compatibility layer which handles mostly typing.
 
-The following modules provides functionalities for supported data formats.
+The following modules (de)serialize functions.
 * `serde.json`: Serialize and Deserialize in JSON.
 * `serde.msgpack`: Serialize and Deserialize in MsgPack.
 * `serde.yaml`: Serialize and Deserialize in YAML.
 * `serde.toml`: Serialize and Deserialize in TOML.
+
+Other modules
+* `serde.inspect`: Prints generated code by pyserde.
 """
 
 from dataclasses import dataclass

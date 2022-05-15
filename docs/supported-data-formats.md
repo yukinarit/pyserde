@@ -1,6 +1,6 @@
 # Supported data formats
 
-Currently `dict, `tuple`, `JSON`, `Yaml`, `Toml` and `MsgPack` are supported.
+Currently `dict`, `tuple`, `JSON`, `Yaml`, `Toml` and `MsgPack` are supported.
 
 ```python
 
