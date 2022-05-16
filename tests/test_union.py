@@ -63,66 +63,66 @@ class ContUnion:
 
 def test_union():
     v = PriUnion(10)
-    s = '{"v": 10}'
+    s = '{"v":10}'
     assert s == to_json(v)
     assert v == from_json(PriUnion, s)
 
     v = PriUnion(10.0)
-    s = '{"v": 10.0}'
+    s = '{"v":10.0}'
     assert s == to_json(v)
     assert v == from_json(PriUnion, s)
 
     v = PriUnion('foo')
-    s = '{"v": "foo"}'
+    s = '{"v":"foo"}'
     assert s == to_json(v)
     assert v == from_json(PriUnion, s)
 
     v = PriUnion(True)
-    s = '{"v": true}'
+    s = '{"v":true}'
     assert s == to_json(v)
     assert v == from_json(PriUnion, s)
 
 
 def test_union_optional():
     v = PriOptUnion(10)
-    s = '{"v": 10}'
+    s = '{"v":10}'
     assert s == to_json(v)
     assert v == from_json(PriOptUnion, s)
 
     v = PriOptUnion(None)
-    s = '{"v": null}'
+    s = '{"v":null}'
     assert s == to_json(v)
     assert v == from_json(PriOptUnion, s)
 
     v = PriOptUnion("foo")
-    s = '{"v": "foo"}'
+    s = '{"v":"foo"}'
     assert s == to_json(v)
     assert v == from_json(PriOptUnion, s)
 
     v = PriOptUnion(10.0)
-    s = '{"v": 10.0}'
+    s = '{"v":10.0}'
     assert s == to_json(v)
     assert v == from_json(PriOptUnion, s)
 
     v = PriOptUnion(False)
-    s = '{"v": false}'
+    s = '{"v":false}'
     assert s == to_json(v)
     assert v == from_json(PriOptUnion, s)
 
 
 def test_union_containers():
     v = ContUnion([1, 2, 3])
-    s = '{"v": [1, 2, 3]}'
+    s = '{"v":[1,2,3]}'
     assert s == to_json(v)
     assert v == from_json(ContUnion, s)
 
     v = ContUnion(['1', '2', '3'])
-    s = '{"v": ["1", "2", "3"]}'
+    s = '{"v":["1","2","3"]}'
     assert s == to_json(v)
     assert v == from_json(ContUnion, s)
 
     v = ContUnion({'a': 1, 'b': 2, 'c': 3})
-    s = '{"v": {"a": 1, "b": 2, "c": 3}}'
+    s = '{"v":{"a":1,"b":2,"c":3}}'
     assert s == to_json(v)
     # Note: this only works because Dict[str, int] comes first in Union otherwise a List would win
     assert v == from_json(ContUnion, s)
@@ -134,19 +134,19 @@ def test_union_with_complex_types():
         v: Union[int, IPv4Address, UUID]
 
     a_int = A(1)
-    a_int_json = '{"v": 1}'
+    a_int_json = '{"v":1}'
     assert to_json(a_int) == a_int_json
     assert from_json(A, a_int_json) == a_int
     assert a_int == from_dict(A, to_dict(a_int))
 
     a_ip = A(IPv4Address("127.0.0.1"))
-    a_ip_json = '{"v": "127.0.0.1"}'
+    a_ip_json = '{"v":"127.0.0.1"}'
     assert to_json(a_ip) == a_ip_json
     assert from_json(A, a_ip_json) == a_ip
     assert a_ip == from_dict(A, to_dict(a_ip))
 
     a_uid = A(UUID("a317958e-4cbb-4213-9f23-eaff1563c472"))
-    a_uid_json = '{"v": "a317958e-4cbb-4213-9f23-eaff1563c472"}'
+    a_uid_json = '{"v":"a317958e-4cbb-4213-9f23-eaff1563c472"}'
     assert to_json(a_uid) == a_uid_json
     assert from_json(A, a_uid_json) == a_uid
     assert a_uid == from_dict(A, to_dict(a_uid))

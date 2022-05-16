@@ -44,7 +44,7 @@ Call `to_json` to serialize `Foo` object into JSON string and `from_json` to des
 >>> from serde.json import to_json, from_json
 
 >>> to_json(Foo(i=10, s='foo', f=100.0, b=True))
-'{"i": 10, "s": "foo", "f": 100.0, "b": true}'
+'{"i":10,"s":"foo","f":100.0,"b":true}'
 
 >>> from_json(Foo, '{"i": 10, "s": "foo", "f": 100.0, "b": true}')
 Foo(i=10, s='foo', f=100.0, b=True)

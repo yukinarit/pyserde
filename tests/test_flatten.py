@@ -25,7 +25,7 @@ def test_flatten_simple():
         bar: Bar = field(flatten=True)
 
     f = Foo(a=10, b='foo', bar=Bar(c=100.0, d=True))
-    s = '{"a": 10, "b": "foo", "c": 100.0, "d": true}'
+    s = '{"a":10,"b":"foo","c":100.0,"d":true}'
     assert to_json(f) == s
     assert from_json(Foo, s) == f
 

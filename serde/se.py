@@ -94,7 +94,7 @@ class Serializer(metaclass=abc.ABCMeta):
 
     @abc.abstractclassmethod
     def serialize(cls, obj, **opts):
-        pass
+        raise NotImplementedError
 
 
 def _make_serialize(
@@ -146,7 +146,7 @@ def serialize(
     ...     b: bool
     >>>
     >>> to_json(Foo(i=10, s='foo', f=100.0, b=True))
-    '{"i": 10, "s": "foo", "f": 100.0, "b": true}'
+    '{"i":10,"s":"foo","f":100.0,"b":true}'
 
     #### Class Attributes
 
@@ -162,7 +162,7 @@ def serialize(
     ...     str_field: str
     >>>
     >>> to_json(Foo(int_field=10, str_field='foo'))
-    '{"intField": 10, "strField": "foo"}'
+    '{"intField":10,"strField":"foo"}'
 
     * `serializer` takes a custom class-level serialize function. The function applies to the all the fields
     in the class.
@@ -185,7 +185,7 @@ def serialize(
     This custom serializer serializes `datetime` object into the string in `MM/DD/YY` format.
 
     >>> to_json(Foo(10, datetime(2021, 1, 1, 0, 0, 0)))
-    '{"i": 10, "dt": "01/01/21"}'
+    '{"i":10,"dt":"01/01/21"}'
     """
 
     def wrap(cls: Type):
@@ -203,23 +203,25 @@ def serialize(
         scope: SerdeScope = getattr(cls, SERDE_SCOPE, None)
         if scope is None or scope.cls is not cls:
             scope = SerdeScope(
-                cls, reuse_instances_default=reuse_instances_default, convert_sets_default=convert_sets_default
+                cls,
+                reuse_instances_default=reuse_instances_default,
+                convert_sets_default=convert_sets_default,
             )
             setattr(cls, SERDE_SCOPE, scope)
 
         # Set some globals for all generated functions
-        g['cls'] = cls
-        g['copy'] = copy
-        g['serde_scope'] = scope
-        g['SerdeError'] = SerdeError
-        g['raise_unsupported_type'] = raise_unsupported_type
-        g['enum_value'] = enum_value
-        g['is_dataclass'] = is_dataclass
-        g['typename'] = typename  # used in union functions
-        g['is_instance'] = is_instance  # used in union functions
-        g['to_obj'] = to_obj
+        g["cls"] = cls
+        g["copy"] = copy
+        g["serde_scope"] = scope
+        g["SerdeError"] = SerdeError
+        g["raise_unsupported_type"] = raise_unsupported_type
+        g["enum_value"] = enum_value
+        g["is_dataclass"] = is_dataclass
+        g["typename"] = typename  # used in union functions
+        g["is_instance"] = is_instance  # used in union functions
+        g["to_obj"] = to_obj
         if serialize:
-            g['serde_custom_class_serializer'] = functools.partial(serde_custom_class_serializer, custom=serializer)
+            g["serde_custom_class_serializer"] = functools.partial(serde_custom_class_serializer, custom=serializer)
 
         # Collect types used in the generated code.
         for typ in iter_types(cls):
@@ -243,7 +245,7 @@ def serialize(
         add_func(scope, TO_ITER, render_to_tuple(cls, serializer), g)
         add_func(scope, TO_DICT, render_to_dict(cls, rename_all, serializer), g)
 
-        logger.debug(f'{typename(cls)}: {SERDE_SCOPE} {scope}')
+        logger.debug(f"{typename(cls)}: {SERDE_SCOPE} {scope}")
 
         return cls
 
@@ -274,7 +276,12 @@ def is_serializable(instance_or_class: Any) -> bool:
 
 def to_obj(o, named: bool, reuse_instances: bool, convert_sets: bool):
     try:
-        thisfunc = functools.partial(to_obj, named=named, reuse_instances=reuse_instances, convert_sets=convert_sets)
+        thisfunc = functools.partial(
+            to_obj,
+            named=named,
+            reuse_instances=reuse_instances,
+            convert_sets=convert_sets,
+        )
         if o is None:
             return None
         if is_serializable(o):
@@ -373,7 +380,7 @@ class SeField(Field):
     Field class for serialization.
     """
 
-    parent: Optional['SeField'] = None
+    parent: Optional["SeField"] = None
 
     @property
     def varname(self) -> str:
@@ -382,13 +389,13 @@ class SeField(Field):
         """
         var = self.parent.varname if self.parent else None
         if var:
-            return f'{var}.{self.name}'
+            return f"{var}.{self.name}"
         else:
             if self.name is None:
-                raise SerdeError('Field name is None.')
+                raise SerdeError("Field name is None.")
             return self.name
 
-    def __getitem__(self, n) -> 'SeField':
+    def __getitem__(self, n) -> "SeField":
         typ = type_args(self.type)[n]
         return SeField(typ, name=None)
 
@@ -398,7 +405,7 @@ def sefields(cls: Type) -> Iterator[SeField]:
     Iterate fields for serialization.
     """
     for f in fields(SeField, cls):
-        f.parent = SeField(None, 'obj')  # type: ignore
+        f.parent = SeField(None, "obj")  # type: ignore
         assert isinstance(f, SeField)
         yield f
 
@@ -425,9 +432,9 @@ def {{func}}(obj, reuse_instances = {{serde_scope.reuse_instances_default}},
     """
 
     renderer = Renderer(TO_ITER, custom)
-    env = jinja2.Environment(loader=jinja2.DictLoader({'iter': template}))
-    env.filters.update({'rvalue': renderer.render})
-    return env.get_template('iter').render(func=TO_ITER, serde_scope=getattr(cls, SERDE_SCOPE), fields=sefields(cls))
+    env = jinja2.Environment(loader=jinja2.DictLoader({"iter": template}))
+    env.filters.update({"rvalue": renderer.render})
+    return env.get_template("iter").render(func=TO_ITER, serde_scope=getattr(cls, SERDE_SCOPE), fields=sefields(cls))
 
 
 def render_to_dict(cls: Type, case: Optional[str] = None, custom: Optional[SerializeFunc] = None) -> str:
@@ -458,11 +465,11 @@ def {{func}}(obj, reuse_instances = {{serde_scope.reuse_instances_default}},
     """
     renderer = Renderer(TO_DICT, custom)
     lrenderer = LRenderer(case)
-    env = jinja2.Environment(loader=jinja2.DictLoader({'dict': template}))
-    env.filters.update({'rvalue': renderer.render})
-    env.filters.update({'lvalue': lrenderer.render})
-    env.filters.update({'case': functools.partial(conv, case=case)})
-    return env.get_template('dict').render(func=TO_DICT, serde_scope=getattr(cls, SERDE_SCOPE), fields=sefields(cls))
+    env = jinja2.Environment(loader=jinja2.DictLoader({"dict": template}))
+    env.filters.update({"rvalue": renderer.render})
+    env.filters.update({"lvalue": lrenderer.render})
+    env.filters.update({"case": functools.partial(conv, case=case)})
+    return env.get_template("dict").render(func=TO_DICT, serde_scope=getattr(cls, SERDE_SCOPE), fields=sefields(cls))
 
 
 def render_union_func(cls: Type, union_args: List[Type], tagging: Tagging = DefaultTagging) -> str:
@@ -497,11 +504,11 @@ def {{func}}(obj, reuse_instances, convert_sets):
     union_name = f"Union[{', '.join([typename(a) for a in union_args])}]"
 
     renderer = Renderer(TO_DICT)
-    env = jinja2.Environment(loader=jinja2.DictLoader({'dict': template}))
-    env.filters.update({'arg': lambda x: SeField(x, "obj")})
-    env.filters.update({'rvalue': renderer.render})
-    env.filters.update({'typename': typename})
-    return env.get_template('dict').render(
+    env = jinja2.Environment(loader=jinja2.DictLoader({"dict": template}))
+    env.filters.update({"arg": lambda x: SeField(x, "obj")})
+    env.filters.update({"rvalue": renderer.render})
+    env.filters.update({"typename": typename})
+    return env.get_template("dict").render(
         func=union_func_name(UNION_SE_PREFIX, union_args),
         serde_scope=getattr(cls, SERDE_SCOPE),
         union_args=union_args,
@@ -625,7 +632,7 @@ convert_sets=convert_sets), foo[2],)"
 
         # Custom field serializer overrides custom class serializer.
         if self.custom and not arg.serializer:
-            return f'serde_custom_class_serializer({typename(arg.type)}, {arg.varname}, default=lambda: {res})'
+            return f"serde_custom_class_serializer({typename(arg.type)}, {arg.varname}, default=lambda: {res})"
         else:
             return res
 
@@ -657,11 +664,11 @@ convert_sets=convert_sets), foo[2],)"
         Render rvalue for optional.
         """
         if is_bare_opt(arg.type):
-            return f'{arg.varname} if {arg.varname} is not None else None'
+            return f"{arg.varname} if {arg.varname} is not None else None"
         else:
             inner = arg[0]
             inner.name = arg.varname
-            return f'({self.render(inner)}) if {arg.varname} is not None else None'
+            return f"({self.render(inner)}) if {arg.varname} is not None else None"
 
     def list(self, arg: SeField) -> str:
         """
@@ -671,21 +678,21 @@ convert_sets=convert_sets), foo[2],)"
             return arg.varname
         else:
             earg = arg[0]
-            earg.name = 'v'
-            return f'[{self.render(earg)} for v in {arg.varname}]'
+            earg.name = "v"
+            return f"[{self.render(earg)} for v in {arg.varname}]"
 
     def set(self, arg: SeField) -> str:
         """
         Render rvalue for set.
         """
         if is_bare_set(arg.type):
-            return f'list({arg.varname}) if convert_sets else {arg.varname}'
+            return f"list({arg.varname}) if convert_sets else {arg.varname}"
         else:
             earg = arg[0]
-            earg.name = 'v'
+            earg.name = "v"
             return (
-                f'[{self.render(earg)} for v in {arg.varname}] '
-                f'if convert_sets else set({self.render(earg)} for v in {arg.varname})'
+                f"[{self.render(earg)} for v in {arg.varname}] "
+                f"if convert_sets else set({self.render(earg)} for v in {arg.varname})"
             )
 
     def tuple(self, arg: SeField) -> str:
@@ -698,7 +705,7 @@ convert_sets=convert_sets), foo[2],)"
             rvalues = []
             for i, _ in enumerate(type_args(arg.type)):
                 r = arg[i]
-                r.name = f'{arg.varname}[{i}]'
+                r.name = f"{arg.varname}[{i}]"
                 rvalues.append(self.render(r))
             return f"({', '.join(rvalues)},)"  # trailing , is required for single element tuples
 
@@ -710,19 +717,19 @@ convert_sets=convert_sets), foo[2],)"
             return arg.varname
         else:
             karg = arg[0]
-            karg.name = 'k'
+            karg.name = "k"
             varg = arg[1]
-            varg.name = 'v'
-            return f'{{{self.render(karg)}: {self.render(varg)} for k, v in {arg.varname}.items()}}'
+            varg.name = "v"
+            return f"{{{self.render(karg)}: {self.render(varg)} for k, v in {arg.varname}.items()}}"
 
     def enum(self, arg: SeField) -> str:
-        return f'enum_value({typename(arg.type)}, {arg.varname})'
+        return f"enum_value({typename(arg.type)}, {arg.varname})"
 
     def primitive(self, arg: SeField) -> str:
         """
         Render rvalue for primitives.
         """
-        return f'{arg.varname}'
+        return f"{arg.varname}"
 
     def string(self, arg: SeField) -> str:
         return f"str({arg.varname})"

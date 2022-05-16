@@ -26,7 +26,7 @@ You can serialize `Foo` object into JSON.
 
 ```python
 >>> to_json(Foo(i=10, s='foo', f=100.0, b=True))
-{"i": 10, "s": "foo", "f": 100.0, "b": true}
+'{"i":10,"s":"foo","f":100.0,"b":true}'
 ```
 
 You can deserialize JSON into `Foo` object.

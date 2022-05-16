@@ -34,6 +34,11 @@ jobs:
       run: |
         make test
         make examples
+    - name: Run orjson tests
+      run: |
+        pip install orjson
+        make test
+        make examples
 
   check_formatting:
     name: Check formatting

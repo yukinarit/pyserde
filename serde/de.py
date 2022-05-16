@@ -293,6 +293,7 @@ class Deserializer(metaclass=abc.ABCMeta):
         into an object. `serde.msgpack.MsgPackDeserializer` takes msgpack bytes and
         deserialize into an object.
         """
+        raise NotImplementedError
 
 
 def from_obj(c: Type, o: Any, named: bool, reuse_instances: bool):

@@ -184,10 +184,10 @@ def test_encode_numpy_with_no_default_encoder(se, de):
     log.info(f"Running test with se={se.__name__} de={de.__name__} with no default encoder")
 
     with pytest.raises(TypeError):
-        se(np.int32(1), default=None)
+        se(np.int32(1), default=None, option=None)
 
     with pytest.raises(TypeError):
-        se(np.array([1, 2, 3]), default=None)
+        se(np.array([1, 2, 3]), default=None, option=None)
 
     @serde.serde
     class MisTypedNoDefaultEncoder:
@@ -208,7 +208,7 @@ def test_encode_numpy_with_no_default_encoder(se, de):
     )
 
     with pytest.raises(TypeError):
-        se(test1, default=None)
+        se(test1, default=None, option=None)
 
     test2 = MisTypedNoDefaultEncoder(
         np.int64(1),
@@ -220,7 +220,7 @@ def test_encode_numpy_with_no_default_encoder(se, de):
     )
 
     with pytest.raises(TypeError):
-        se(test2, default=None)
+        se(test2, default=None, option=None)
 
 
 def test_numpy_misc():
