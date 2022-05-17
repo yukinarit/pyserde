@@ -354,16 +354,16 @@ def is_union(typ) -> bool:
     True
     """
 
-    is_union_type = False
+    # Python 3.10 Union operator e.g. str | int
     if sys.version_info[:2] >= (3, 10):
         try:
-            is_union_type = isinstance(typ, types.UnionType) and not is_opt(typ)
+            if isinstance(typ, types.UnionType):
+                return True
         except Exception:
             pass
 
-    typing_union = typing_inspect.is_union_type(typ) and not is_opt(typ)
-
-    return is_union_type or typing_union
+    # typing.Union
+    return typing_inspect.is_union_type(typ)
 
 
 def is_opt(typ) -> bool:
@@ -377,9 +377,22 @@ def is_opt(typ) -> bool:
     >>> is_opt(None.__class__)
     False
     """
+
+    # Python 3.10 Union operator e.g. str | None
+    is_union_type = False
+    if sys.version_info[:2] >= (3, 10):
+        try:
+            if isinstance(typ, types.UnionType):
+                is_union_type = True
+        except Exception:
+            pass
+
+    # typing.Optional
+    is_typing_union = typing_inspect.is_optional_type(typ)
+
     args = type_args(typ)
     if args:
-        return typing_inspect.is_optional_type(typ) and len(args) == 2 and not is_none(args[0]) and is_none(args[1])
+        return (is_union_type or is_typing_union) and len(args) == 2 and not is_none(args[0]) and is_none(args[1])
     else:
         return typ is Optional
 

@@ -37,10 +37,10 @@ def test_types():
     assert is_dict(Dict[str, int])
     assert is_dict(Dict)
     assert is_opt(Optional[int])
+    assert is_opt(Union[int, None])
     assert is_union(Union[int, str])
     assert is_union(Union[Optional[int], Optional[str]])
-    assert is_opt(Optional[int])
-    assert not is_union(Optional[int])
+    assert is_union(Optional[int])
     assert not is_opt(Union[Optional[int], Optional[str]])
     assert is_union(Union[Optional[int], Optional[str]])
 
@@ -57,6 +57,11 @@ def test_types():
         assert is_set(set[int])
         assert is_tuple(tuple[int, int, int])
         assert is_dict(dict[str, int])
+
+    if sys.version_info[:3] >= (3, 10, 0):
+        assert is_union(str | int)
+        assert is_union(str | None)
+        assert is_opt(str | None)
 
 
 def test_typename():

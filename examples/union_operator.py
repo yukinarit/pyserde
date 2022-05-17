@@ -17,6 +17,7 @@ class Foo:
     a: int | str
     b: dict[str, int] | list[int]
     c: Bar | Baz
+    d: str | None = None  # Should be treated as Optional
 
 
 def main():
