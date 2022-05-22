@@ -4,9 +4,6 @@ from datetime import datetime
 from typing import Dict, Generic, List, NewType, Optional, Set, Tuple, TypeVar, Union
 
 import serde
-
-T = TypeVar('T')
-
 from serde.compat import (
     is_dict,
     is_generic,
@@ -25,6 +22,8 @@ from serde.compat import (
 from serde.core import is_instance
 
 from .data import Bool, Float, Int, Pri, PriOpt, Str
+
+T = TypeVar('T')
 
 
 def test_types():
