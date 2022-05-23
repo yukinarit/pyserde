@@ -181,7 +181,7 @@ Foo(i=10, s='foo', f=100.0, b=True)
 <pre><code class="language-python">&gt;&gt;&gt; from serde.json import to_json, from_json
 
 &gt;&gt;&gt; to_json(Foo(i=10, s='foo', f=100.0, b=True))
-'{&quot;i&quot;: 10, &quot;s&quot;: &quot;foo&quot;, &quot;f&quot;: 100.0, &quot;b&quot;: true}'
+'{&quot;i&quot;:10,&quot;s&quot;:&quot;foo&quot;,&quot;f&quot;:100.0,&quot;b&quot;:true}'
 
 &gt;&gt;&gt; from_json(Foo, '{&quot;i&quot;: 10, &quot;s&quot;: &quot;foo&quot;, &quot;f&quot;: 100.0, &quot;b&quot;: true}')
 Foo(i=10, s='foo', f=100.0, b=True)
