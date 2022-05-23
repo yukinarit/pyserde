@@ -26,7 +26,9 @@ except ImportError:
         if "default" not in opts:
             opts["default"] = encode_numpy
         # compact output
-        return json.dumps(obj, ensure_ascii=False, separators=(",", ":"), **opts)
+        ensure_ascii = opts.pop("ensure_ascii", False)
+        separators = opts.pop("separators", (",", ":"))
+        return json.dumps(obj, ensure_ascii=ensure_ascii, separators=separators, **opts)
 
     def json_loads(s, **opts):
         return json.loads(s, **opts)
