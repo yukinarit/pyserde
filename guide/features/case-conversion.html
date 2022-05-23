@@ -151,6 +151,7 @@
                         <h1 id="case-conversion"><a class="header" href="#case-conversion">Case Conversion</a></h1>
 <p>Converting <code>snake_case</code> fields into supported case styles e.g. <code>camelCase</code> and <code>kebab-case</code>.</p>
 <pre><code class="language-python">@serde(rename_all = 'camelcase')
+@dataclass
 class Foo:
     int_field: int
     str_field: str

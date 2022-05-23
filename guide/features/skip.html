@@ -151,6 +151,7 @@
                         <h1 id="skip"><a class="header" href="#skip">Skip</a></h1>
 <p>You can skip serialization for a certain field, you can use <code>serde_skip</code>.</p>
 <pre><code class="language-python">@serde
+@dataclass
 class Resource:
     name: str
     hash: str

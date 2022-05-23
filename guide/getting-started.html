@@ -158,10 +158,12 @@
 <p>Or all at once:</p>
 <pre><code class="language-sh">pip install &quot;pyserde[all]&quot;
 </code></pre>
-<p>Define your class with pyserde's <code>@serialize</code> and <code>@deserialize</code> decorators. Be careful that module name is <code>serde</code>, not <code>pyserde</code>. <code>pyserde</code> depends on <code>dataclasses</code> module. If you are new to dataclass, I would recommend to read <a href="https://docs.python.org/3/library/dataclasses.html">dataclasses documentation</a> first.</p>
-<pre><code class="language-python">from serde import serde
+<p>Define your class with pyserde's <code>@serde</code> decorators. Be careful that module name is <code>serde</code>, not <code>pyserde</code>. <code>pyserde</code> depends on <code>dataclasses</code> module. If you are new to dataclass, I would recommend to read <a href="https://docs.python.org/3/library/dataclasses.html">dataclasses documentation</a> first.</p>
+<pre><code class="language-python">from dataclasses import dataclass
+from serde import serde
 
 @serde
+@dataclass
 class Foo:
     i: int
     s: str
@@ -172,9 +174,11 @@ class Foo:
 <blockquote>
 <p><strong>Note:</strong> If you need only either serialization or deserialization functionality, you can use <code>@serialize</code> or <code>@deserialize</code> instead of <code>@serde</code> decorator.</p>
 <p>e.g. If you don't need deserialization functionality, you can add <code>@serialize</code> decorator only. But, calling deserialize API e.g. <code>from_json</code> for <code>Foo</code> will raise an error.</p>
-<pre><code class="language-python">from serde import serialize
+<pre><code class="language-python">from dataclasses import dataclass
+from serde import serialize
 
 @serialize
+@dataclass
 class Foo:
     i: int
     s: str

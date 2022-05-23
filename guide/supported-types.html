@@ -171,10 +171,12 @@
 </ul>
 <p>You can write pretty complex class like this:</p>
 <pre><code class="language-python">@serde
+@dataclass
 class bar:
     i: int
 
 @serde
+@dataclass
 class Foo:
     i: int
     l: List[str]

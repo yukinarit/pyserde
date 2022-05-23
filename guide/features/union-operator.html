@@ -150,21 +150,25 @@
                     <main>
                         <h1 id="pep604-union-operator"><a class="header" href="#pep604-union-operator">PEP604 Union operator</a></h1>
 <p>For python &gt;= 3.10, you can use <a href="https://www.python.org/dev/peps/pep-0604/">PEP604</a> Union operator <code>X | Y</code>.</p>
-<pre><code class="language-python">from serde import serde
+<pre><code class="language-python">from dataclasses import dataclass
+from serde import serde
 from serde.json import from_json, to_json
 
 
 @serde
+@dataclass
 class Bar:
     v: int
 
 
 @serde
+@dataclass
 class Baz:
     v: float
 
 
 @serde
+@dataclass
 class Foo:
     a: int | str
     b: dict[str, int] | list[int]

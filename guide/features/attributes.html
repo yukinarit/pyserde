@@ -156,9 +156,11 @@
 <p>Field attributes are options to customize (de)serialization behaviour specific to field. <code>pyserde</code> provides two way to specify field attributes. </p>
 <h3 id="serdefield"><a class="header" href="#serdefield"><code>serde.field</code></a></h3>
 <p>You can specify field attributes as keyword argument in <code>serde.field</code>. See <a href="https://yukinarit.github.io/pyserde/api/serde/core.html#Field">serde.core.Field</a> for available field attributes. This is recommended way since pyserde v0.6. Use <code>dataclasses.field</code> below if you are using pyserde &lt; v0.6.</p>
-<pre><code class="language-python">from serde import field, serde
+<pre><code class="language-python">from dataclasses import dataclass
+from serde import field, serde
 
 @serde
+@dataclass
 class Foo:
     class_name: str = field(rename='class')
 </code></pre>

@@ -152,6 +152,7 @@
 <h2 id="skip_if"><a class="header" href="#skip_if"><code>skip_if</code></a></h2>
 <p>If you conditionally skip some fields, you can pass function or lambda in <code>skip_if</code>.</p>
 <pre><code class="language-python">@serde
+@dataclass
 class World:
     player: str
     buddy: str = field(default='', skip_if=lambda v: v == 'Pikachu')

@@ -220,10 +220,12 @@ Foo(i=10, s='foo', f=100.0, b=True)
 <p>Or all at once:</p>
 <pre><code class="language-sh">pip install &quot;pyserde[all]&quot;
 </code></pre>
-<p>Define your class with pyserde's <code>@serialize</code> and <code>@deserialize</code> decorators. Be careful that module name is <code>serde</code>, not <code>pyserde</code>. <code>pyserde</code> depends on <code>dataclasses</code> module. If you are new to dataclass, I would recommend to read <a href="https://docs.python.org/3/library/dataclasses.html">dataclasses documentation</a> first.</p>
-<pre><code class="language-python">from serde import serde
+<p>Define your class with pyserde's <code>@serde</code> decorators. Be careful that module name is <code>serde</code>, not <code>pyserde</code>. <code>pyserde</code> depends on <code>dataclasses</code> module. If you are new to dataclass, I would recommend to read <a href="https://docs.python.org/3/library/dataclasses.html">dataclasses documentation</a> first.</p>
+<pre><code class="language-python">from dataclasses import dataclass
+from serde import serde
 
 @serde
+@dataclass
 class Foo:
     i: int
     s: str
@@ -234,9 +236,11 @@ class Foo:
 <blockquote>
 <p><strong>Note:</strong> If you need only either serialization or deserialization functionality, you can use <code>@serialize</code> or <code>@deserialize</code> instead of <code>@serde</code> decorator.</p>
 <p>e.g. If you don't need deserialization functionality, you can add <code>@serialize</code> decorator only. But, calling deserialize API e.g. <code>from_json</code> for <code>Foo</code> will raise an error.</p>
-<pre><code class="language-python">from serde import serialize
+<pre><code class="language-python">from dataclasses import dataclass
+from serde import serialize
 
 @serialize
+@dataclass
 class Foo:
     i: int
     s: str
@@ -265,6 +269,7 @@ print(from_json(Foo, s))
 <p>Currently <code>dict, </code>tuple<code>, </code>JSON<code>, </code>Yaml<code>, </code>Toml<code>and</code>MsgPack` are supported.</p>
 <pre><code class="language-python">
 @serde
+@dataclass
 class Foo:
     i: int
     s: str
@@ -425,10 +430,12 @@ NPFoo(i=1, j=2, f=3.0, g=4.0, h=False, u=array([1, 2]), v=array([3, 4]), w=array
 </ul>
 <p>You can write pretty complex class like this:</p>
 <pre><code class="language-python">@serde
+@dataclass
 class bar:
     i: int
 
 @serde
+@dataclass
 class Foo:
     i: int
     l: List[str]
@@ -445,9 +452,11 @@ class Foo:
 <p>Field attributes are options to customize (de)serialization behaviour specific to field. <code>pyserde</code> provides two way to specify field attributes. </p>
 <h3 id="serdefield"><a class="header" href="#serdefield"><code>serde.field</code></a></h3>
 <p>You can specify field attributes as keyword argument in <code>serde.field</code>. See <a href="https://yukinarit.github.io/pyserde/api/serde/core.html#Field">serde.core.Field</a> for available field attributes. This is recommended way since pyserde v0.6. Use <code>dataclasses.field</code> below if you are using pyserde &lt; v0.6.</p>
-<pre><code class="language-python">from serde import field, serde
+<pre><code class="language-python">from dataclasses import dataclass
+from serde import field, serde
 
 @serde
+@dataclass
 class Foo:
     class_name: str = field(rename='class')
 </code></pre>
@@ -464,12 +473,14 @@ class Foo:
 <h2 id="serde"><a class="header" href="#serde"><code>@serde</code></a></h2>
 <p>@serde is a shortcut of @serialize and @deserialize decorators. This code</p>
 <pre><code class="language-python">@serde
+@dataclass
 class Foo:
     ...
 </code></pre>
 <p>is equivalent to the following code.</p>
 <pre><code class="language-python">@deserialize
 @serialize
+@dataclass
 class Foo:
     ...
 </code></pre>
@@ -484,17 +495,18 @@ class Foo:
 </li>
 </ul>
 <pre><code class="language-python">@serde(serializer=serializer, deserializer=deserializer)
+@dataclass
 class Foo:
     ...
 </code></pre>
-<ul>
-<li>If you want to have extra attributes to the dataclass decorator, you can have both <code>@dataclass</code> and <code>@serde</code> decorators</li>
-</ul>
+<blockquote>
+<p><strong>Note:</strong> <code>@serde</code> actually works without @dataclass decorator, because it detects and add @dataclass to the declared class automatically. However, mypy will produce <code>Too many arguments</code> or <code>Unexpected keyword argument</code> error. This is due to the current mypy limitation. See the following documentation for more information.
+https://mypy.readthedocs.io/en/stable/additional_features.html#caveats-known-issues</p>
 <pre><code class="language-python">@serde
-@dataclass(unsafe_hash=True)
 class Foo:
     ...
 </code></pre>
+</blockquote>
 <h2 id="serializedeserialize"><a class="header" href="#serializedeserialize"><code>@serialize</code>/<code>@deserialize</code></a></h2>
 <p><code>@serialize</code> and <code>@deserialize</code> are used by <code>@serde</code> under the hood. It's recommended to use the decorators in such cases:</p>
 <ul>
@@ -511,14 +523,17 @@ class Foo:
 <h2 id="untagged"><a class="header" href="#untagged"><code>Untagged</code></a></h2>
 <p>This is the default Union representation for pyserde&lt;0.7. Given these dataclasses,</p>
 <pre><code class="language-python">@serde
+@dataclass
 class Bar:
     b: int
 
 @serde
+@dataclass
 class Baz:
     b: int
 
 @serde(tagging=Untagged)
+@dataclass
 class Foo:
     a: Union[Bar, Baz]
 </code></pre>
@@ -526,12 +541,14 @@ class Foo:
 <h2 id="externaltagging"><a class="header" href="#externaltagging"><code>ExternalTagging</code></a></h2>
 <p>This is the default Union representation since 0.7. A class declaration with <code>ExternalTagging</code> looks like below. If you serialize <code>Foo(Baz(10))</code> into dict, you get <code>{&quot;a&quot;: {&quot;Baz&quot;: {&quot;b&quot;: 10}}}</code> and you can deserialize it back to <code>Foo(Baz(10))</code>. </p>
 <pre><code>@serde(tagging=ExternalTagging)
+@dataclass
 class Foo:
     a: Union[Bar, Baz]
 </code></pre>
 <blockquote>
 <p><strong>NOTE:</strong> Non dataclass objects are alreays (de)serialized with <code>Ungagged</code> regardless of <code>tagging</code> attribute because there is no information which can be used for tag. The drawback of <code>Untagged</code> is pyserde can't correctly deserialize certain types. For example, <code>Foo({1, 2, 3})</code> of below class is serialized into <code>{&quot;a&quot;: [1, 2, 3]}</code>, but you get <code>Foo([1, 2, 3])</code> by deserializing.</p>
 <pre><code class="language-python">@serde(tagging=ExternalTagging)
+@dataclass
 class Foo:
    a: Union[List[int], Set[int]]
 </code></pre>
@@ -539,32 +556,38 @@ class Foo:
 <h2 id="internaltagging"><a class="header" href="#internaltagging"><code>InternalTagging</code></a></h2>
 <p>A class declaration with <code>InternalTagging</code> looks like below. If you serialize <code>Foo(Baz(10))</code> into dict, you will get <code>{&quot;a&quot;: {&quot;type&quot;: &quot;Baz&quot;, &quot;b&quot;: 10}}</code> and you can deserialize it back to <code>Foo(Baz(10))</code>. <code>type</code> tag is encoded inside the <code>Baz</code>'s dictionary.</p>
 <pre><code class="language-python">@serde(tagging=InternalTagging(&quot;type&quot;))
+@dataclass
 class Foo:
     a: Union[Bar, Baz]
 </code></pre>
 <h2 id="adjacenttagging"><a class="header" href="#adjacenttagging"><code>AdjacentTagging</code></a></h2>
 <p>A class declaration with <code>AdjacentTagging</code> looks like below. If you serialize <code>Foo(Baz(10))</code> into dict, you will get <code>{&quot;a&quot;: {&quot;type&quot;: &quot;Baz&quot;, &quot;content&quot;: {&quot;b&quot;: 10}}}</code> and you can deserialize it back to <code>Foo(Baz(10))</code>. <code>type</code> tag is encoded inside <code>Baz</code>'s dictionary and <code>Baz</code>s fields are encoded inside <code>content</code>.</p>
 <pre><code class="language-python">@serde(tagging=AdjacentTagging(&quot;type&quot;, &quot;content&quot;))
+@dataclass
 class Foo:
     a: Union[Bar, Baz]
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="pep604-union-operator"><a class="header" href="#pep604-union-operator">PEP604 Union operator</a></h1>
 <p>For python &gt;= 3.10, you can use <a href="https://www.python.org/dev/peps/pep-0604/">PEP604</a> Union operator <code>X | Y</code>.</p>
-<pre><code class="language-python">from serde import serde
+<pre><code class="language-python">from dataclasses import dataclass
+from serde import serde
 from serde.json import from_json, to_json
 
 
 @serde
+@dataclass
 class Bar:
     v: int
 
 
 @serde
+@dataclass
 class Baz:
     v: float
 
 
 @serde
+@dataclass
 class Foo:
     a: int | str
     b: dict[str, int] | list[int]
@@ -573,6 +596,7 @@ class Foo:
 <div style="break-before: page; page-break-before: always;"></div><h1 id="python-39-type-hinting"><a class="header" href="#python-39-type-hinting">Python 3.9 type hinting</a></h1>
 <p>For python &gt;= 3.9, you can use <a href="https://www.python.org/dev/peps/pep-0585/">PEP585</a> style type annotations for standard collections.</p>
 <pre><code class="language-python">@serde
+@dataclass
 class Foo:
     i: int
     l: list[str]
@@ -586,8 +610,10 @@ class Foo:
 <p><a href="https://www.python.org/dev/peps/pep-0563/">PEP563</a> Postponed evaluation of type annotation is supported.</p>
 <pre><code class="language-python">from __future__ import annotations
 from serde import serde
+from dataclasses import dataclass
 
 @serde
+@dataclass
 class Foo:
     i: int
     s: str
@@ -600,12 +626,14 @@ class Foo:
 <p>For complete example, please see <a href="https://github.com/yukinarit/pyserde/blob/master/examples/lazy_type_evaluation.py">examples/lazy_type_evaluation.py</a></p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="forward-reference"><a class="header" href="#forward-reference">Forward reference</a></h1>
 <p>You can use a forward reference in annotations.</p>
-<pre><code class="language-python">class Foo:
+<pre><code class="language-python">@dataclass
+class Foo:
     i: int
     s: str
     bar: 'Bar'  # Specify type annotation in string.
 
 @serde
+@dataclass
 class Bar:
     f: float
     b: bool
@@ -617,6 +645,7 @@ serde(Foo)
 <div style="break-before: page; page-break-before: always;"></div><h1 id="case-conversion"><a class="header" href="#case-conversion">Case Conversion</a></h1>
 <p>Converting <code>snake_case</code> fields into supported case styles e.g. <code>camelCase</code> and <code>kebab-case</code>.</p>
 <pre><code class="language-python">@serde(rename_all = 'camelcase')
+@dataclass
 class Foo:
     int_field: int
     str_field: str
@@ -630,6 +659,7 @@ print(to_json(f))
 <div style="break-before: page; page-break-before: always;"></div><h1 id="rename"><a class="header" href="#rename">Rename</a></h1>
 <p>In case you want to use a keyword as field such as <code>class</code>, you can use <code>serde_rename</code> field attribute.</p>
 <pre><code class="language-python">@serde
+@dataclass
 class Foo:
     class_name: str = field(metadata={'serde_rename': 'class'})
 
@@ -642,6 +672,7 @@ print(to_json(Foo(class_name='Foo')))
 <div style="break-before: page; page-break-before: always;"></div><h1 id="skip"><a class="header" href="#skip">Skip</a></h1>
 <p>You can skip serialization for a certain field, you can use <code>serde_skip</code>.</p>
 <pre><code class="language-python">@serde
+@dataclass
 class Resource:
     name: str
     hash: str
@@ -660,6 +691,7 @@ print(to_json(resources))
 <h2 id="skip_if"><a class="header" href="#skip_if"><code>skip_if</code></a></h2>
 <p>If you conditionally skip some fields, you can pass function or lambda in <code>skip_if</code>.</p>
 <pre><code class="language-python">@serde
+@dataclass
 class World:
     player: str
     buddy: str = field(default='', skip_if=lambda v: v == 'Pikachu')
@@ -681,16 +713,18 @@ print(to_json(world))
 <p>For complete example, please see <a href="https://github.com/yukinarit/pyserde/blob/master/examples/skip.py">examples/skip.py</a></p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="custom-field-deserializer"><a class="header" href="#custom-field-deserializer">Custom field (de)serializer</a></h1>
 <p>If you want to provide a custom function to override the default (de)serialization behaviour of a field, you can pass your functions to <code>serializer</code> and <code>deserializer</code> in <code>serde.field</code>.</p>
-<pre><code class="language-python">from serde import serde, field
+<pre><code class="language-python">from dataclasses import dataclass
+from serde import serde, field
 
 @serde
+@dataclass
 class Foo:
     dt1: datetime
     dt2: datetime = field(
         serializer=lambda x: x.strftime('%d/%m/%y'), deserializer=lambda x: datetime.strptime(x, '%d/%m/%y')
     )
 </code></pre>
-<p><code>dt1</code> in the example will serialized into <code>2021-01-01T00:00:00</code> because the pyserde's default (de)serializier for datetime is ISO 8601. <code>dt2</code> field in the example will be serialized into <code>01/01/21</code> by the custom field serializer.</p>
+<p><code>dt1</code> in the example will serialized into <code>2021-01-01T00:00:00</code> because the pyserde's default (de)serializer for datetime is ISO 8601. <code>dt2</code> field in the example will be serialized into <code>01/01/21</code> by the custom field serializer.</p>
 <p>For complete example, please see <a href="https://github.com/yukinarit/pyserde/blob/master/examples/custom_field_serializer.py">examples/custom_field_serializer.py</a></p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="custom-class-deserializer"><a class="header" href="#custom-class-deserializer">Custom class (de)serializer</a></h1>
 <p>If you want to provide (de)serializer at class level, you can pass your functions to <code>serializer</code> and <code>deserializer</code> class attributes.</p>
@@ -707,6 +741,7 @@ def deserializer(cls, o):
         raise SerdeSkip()
 
 @serde(serializer=serializer, deserializer=deserializer)
+@dataclass
 class Foo:
     i: int
     dt1: datetime
@@ -716,11 +751,13 @@ class Foo:
 <div style="break-before: page; page-break-before: always;"></div><h1 id="flatten"><a class="header" href="#flatten">Flatten</a></h1>
 <p>You can flatten the fields of the nested structure.</p>
 <pre><code class="language-python">@serde
+@dataclass
 class Bar:
     c: float
     d: bool
 
 @serde
+@dataclass
 class Foo:
     a: int
     b: str

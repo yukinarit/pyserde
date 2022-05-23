@@ -151,6 +151,7 @@
                         <h1 id="rename"><a class="header" href="#rename">Rename</a></h1>
 <p>In case you want to use a keyword as field such as <code>class</code>, you can use <code>serde_rename</code> field attribute.</p>
 <pre><code class="language-python">@serde
+@dataclass
 class Foo:
     class_name: str = field(metadata={'serde_rename': 'class'})
 

@@ -152,12 +152,14 @@
 <h2 id="serde"><a class="header" href="#serde"><code>@serde</code></a></h2>
 <p>@serde is a shortcut of @serialize and @deserialize decorators. This code</p>
 <pre><code class="language-python">@serde
+@dataclass
 class Foo:
     ...
 </code></pre>
 <p>is equivalent to the following code.</p>
 <pre><code class="language-python">@deserialize
 @serialize
+@dataclass
 class Foo:
     ...
 </code></pre>
@@ -172,17 +174,18 @@ class Foo:
 </li>
 </ul>
 <pre><code class="language-python">@serde(serializer=serializer, deserializer=deserializer)
+@dataclass
 class Foo:
     ...
 </code></pre>
-<ul>
-<li>If you want to have extra attributes to the dataclass decorator, you can have both <code>@dataclass</code> and <code>@serde</code> decorators</li>
-</ul>
+<blockquote>
+<p><strong>Note:</strong> <code>@serde</code> actually works without @dataclass decorator, because it detects and add @dataclass to the declared class automatically. However, mypy will produce <code>Too many arguments</code> or <code>Unexpected keyword argument</code> error. This is due to the current mypy limitation. See the following documentation for more information.
+https://mypy.readthedocs.io/en/stable/additional_features.html#caveats-known-issues</p>
 <pre><code class="language-python">@serde
-@dataclass(unsafe_hash=True)
 class Foo:
     ...
 </code></pre>
+</blockquote>
 <h2 id="serializedeserialize"><a class="header" href="#serializedeserialize"><code>@serialize</code>/<code>@deserialize</code></a></h2>
 <p><code>@serialize</code> and <code>@deserialize</code> are used by <code>@serde</code> under the hood. It's recommended to use the decorators in such cases:</p>
 <ul>

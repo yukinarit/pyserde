@@ -150,12 +150,14 @@
                     <main>
                         <h1 id="forward-reference"><a class="header" href="#forward-reference">Forward reference</a></h1>
 <p>You can use a forward reference in annotations.</p>
-<pre><code class="language-python">class Foo:
+<pre><code class="language-python">@dataclass
+class Foo:
     i: int
     s: str
     bar: 'Bar'  # Specify type annotation in string.
 
 @serde
+@dataclass
 class Bar:
     f: float
     b: bool
