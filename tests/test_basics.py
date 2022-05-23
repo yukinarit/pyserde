@@ -366,12 +366,13 @@ def test_dict_pri(se, de):
 
 def test_json():
     p = data.Pri(10, 'foo', 100.0, True)
-    s = '{"i": 10, "s": "foo", "f": 100.0, "b": true}'
+    s = '{"i":10,"s":"foo","f":100.0,"b":true}'
     assert s == serde.json.to_json(p)
 
+    assert '"😊"' == serde.json.to_json('😊')
     assert '10' == serde.json.to_json(10)
-    assert '[10, 20, 30]' == serde.json.to_json([10, 20, 30])
-    assert '{"foo": 10, "fuga": 10}' == serde.json.to_json({'foo': 10, 'fuga': 10})
+    assert '[10,20,30]' == serde.json.to_json([10, 20, 30])
+    assert '{"foo":10,"fuga":10}' == serde.json.to_json({'foo': 10, 'fuga': 10})
 
 
 def test_msgpack():

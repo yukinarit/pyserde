@@ -112,7 +112,7 @@ def test_convert_sets_option():
 
     a_json = to_json(a)
     # sets are unordered so the list order is not stable
-    assert a_json == '{"v": ["a", "b"]}' or a_json == '{"v": ["b", "a"]}'
+    assert a_json == '{"v":["a","b"]}' or a_json == '{"v":["b","a"]}'
 
     a_msgpack = to_msgpack(a)
     # sets are unordered so the list order is not stable

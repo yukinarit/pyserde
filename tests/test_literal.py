@@ -180,7 +180,7 @@ def test_dict_literals(se, de):
 
 def test_json():
     p = Literals(1, "foo", True, "bar")
-    s = '{"i": 1, "s": "foo", "b": true, "m": "bar"}'
+    s = '{"i":1,"s":"foo","b":true,"m":"bar"}'
     assert s == serde.json.to_json(p)
 
 

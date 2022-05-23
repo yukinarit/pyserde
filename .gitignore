@@ -10,10 +10,12 @@ __pycache__
 htmlcov
 Pipfile.lock
 coverage.xml
+.coverage
 html/
 pip-wheel-metadata
 .DS_Store
 venv/
+.venv/
 .idea/
 out/
 docs/CHANGELOG.md

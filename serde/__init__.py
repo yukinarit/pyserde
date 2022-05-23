@@ -19,7 +19,7 @@ You can serialize `Foo` object into JSON.
 
 >>> from serde.json import to_json
 >>> to_json(Foo(i=10, s='foo', f=100.0, b=True))
-'{"i": 10, "s": "foo", "f": 100.0, "b": true}'
+'{"i":10,"s":"foo","f":100.0,"b":true}'
 
 You can deserialize JSON into `Foo` object.
 >>> from serde.json import from_json
@@ -43,10 +43,35 @@ The following modules provides functionalities for supported data formats.
 
 import dataclasses
 
-from .compat import SerdeError, SerdeSkip  # noqa
-from .core import AdjacentTagging, ExternalTagging, InternalTagging, Untagged, field, init, logger  # noqa
-from .de import default_deserializer, deserialize, from_dict, from_tuple, is_deserializable  # noqa
-from .se import asdict, astuple, default_serializer, is_serializable, serialize, to_dict, to_tuple  # noqa
+from .compat import SerdeError, SerdeSkip
+from .core import AdjacentTagging, ExternalTagging, InternalTagging, Untagged, field, init, logger
+from .de import default_deserializer, deserialize, from_dict, from_tuple, is_deserializable
+from .se import asdict, astuple, default_serializer, is_serializable, serialize, to_dict, to_tuple
+
+__all__ = (
+    "SerdeError",
+    "SerdeSkip",
+    "AdjacentTagging",
+    "ExternalTagging",
+    "InternalTagging",
+    "Untagged",
+    "field",
+    "init",
+    "logger",
+    "default_deserializer",
+    "deserialize",
+    "from_dict",
+    "from_tuple",
+    "is_deserializable",
+    "asdict",
+    "astuple",
+    "default_serializer",
+    "is_serializable",
+    "serialize",
+    "to_dict",
+    "to_tuple",
+    "serde",
+)
 
 
 def serde(_cls=None, **kwargs):
