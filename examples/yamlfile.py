@@ -7,6 +7,7 @@ Usage:
     $ poetry install
     $ poetry run python yamlfile.py
 """
+from dataclasses import dataclass
 from typing import Dict, List, Optional, Union
 
 from serde import Untagged, serde
@@ -14,6 +15,7 @@ from serde.yaml import from_yaml
 
 
 @serde(rename_all='camelcase')
+@dataclass
 class Info:
     title: str
     description: str
@@ -21,6 +23,7 @@ class Info:
 
 
 @serde(rename_all='camelcase')
+@dataclass
 class Parameter:
     name: str
     # not yet supported.
@@ -30,11 +33,13 @@ class Parameter:
 
 
 @serde(rename_all='camelcase')
+@dataclass
 class Response:
     description: str
 
 
 @serde(rename_all='camelcase', tagging=Untagged)
+@dataclass
 class Path:
     description: str
     operation_id: str
@@ -43,18 +48,21 @@ class Path:
 
 
 @serde(rename_all='camelcase')
+@dataclass
 class Prop:
     type: str
     format: Optional[str]
 
 
 @serde(rename_all='camelcase')
+@dataclass
 class Definition:
     required: Optional[List[str]]
     properties: Dict[str, Prop]
 
 
 @serde(rename_all='camelcase')
+@dataclass
 class Swagger:
     swagger: int
     info: Info

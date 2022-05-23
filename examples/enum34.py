@@ -1,4 +1,5 @@
 import enum
+from dataclasses import dataclass
 
 import imported
 
@@ -24,6 +25,7 @@ class IE(enum.IntEnum):
 
 
 @serde
+@dataclass
 class Foo:
     v0: IE
     v1: IE = IE.V1  # Default enum value.

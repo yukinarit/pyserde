@@ -9,6 +9,7 @@ Declare a class with pyserde's `@serialize` and `@deserialize` decorators.
 >>> from serde import serde
 >>>
 >>> @serde
+... @dataclass
 ... class Foo:
 ...     i: int
 ...     s: str
@@ -41,10 +42,19 @@ The following modules provides functionalities for supported data formats.
 * `serde.toml`: Serialize and Deserialize in TOML.
 """
 
-import dataclasses
+from dataclasses import dataclass
 
 from .compat import SerdeError, SerdeSkip
-from .core import AdjacentTagging, ExternalTagging, InternalTagging, Untagged, field, init, logger
+from .core import (
+    AdjacentTagging,
+    ExternalTagging,
+    InternalTagging,
+    Untagged,
+    field,
+    init,
+    logger,
+    should_impl_dataclass,
+)
 from .de import default_deserializer, deserialize, from_dict, from_tuple, is_deserializable
 from .se import asdict, astuple, default_serializer, is_serializable, serialize, to_dict, to_tuple
 
@@ -75,8 +85,13 @@ __all__ = (
 
 
 def serde(_cls=None, **kwargs):
+    """
+    serde decorator. Keyword arguments are passed in `serialize` and `deserialize`.
+    """
+
     def wrap(cls):
-        dataclasses.dataclass(cls)
+        if should_impl_dataclass(cls):
+            dataclass(cls)
         serialize(cls, **kwargs)
         deserialize(cls, **kwargs)
         return cls

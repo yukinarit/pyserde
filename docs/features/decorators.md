@@ -5,6 +5,7 @@
 @serde is a shortcut of @serialize and @deserialize decorators. This code
 ```python
 @serde
+@dataclass
 class Foo:
     ...
 ```
@@ -14,6 +15,7 @@ is equivalent to the following code.
 ```python
 @deserialize
 @serialize
+@dataclass
 class Foo:
     ...
 ```
@@ -26,18 +28,21 @@ class Foo:
 
 ```python
 @serde(serializer=serializer, deserializer=deserializer)
+@dataclass
 class Foo:
     ...
 ```
 
-* If you want to have extra attributes to the dataclass decorator, you can have both `@dataclass` and `@serde` decorators
+> **Note:** `@serde` actually works without @dataclass decorator, because it detects and add @dataclass to the declared class automatically. However, mypy will produce `Too many arguments` or `Unexpected keyword argument` error. This is due to the current mypy limitation. See the following documentation for more information.
+https://mypy.readthedocs.io/en/stable/additional_features.html#caveats-known-issues
+>
+>
+> ```python
+> @serde
+> class Foo:
+>     ...
+> ```
 
-```python
-@serde
-@dataclass(unsafe_hash=True)
-class Foo:
-    ...
-```
 
 ## `@serialize`/`@deserialize`
 

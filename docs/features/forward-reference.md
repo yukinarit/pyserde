@@ -3,12 +3,14 @@
 You can use a forward reference in annotations.
 
 ```python
+@dataclass
 class Foo:
     i: int
     s: str
     bar: 'Bar'  # Specify type annotation in string.
 
 @serde
+@dataclass
 class Bar:
     f: float
     b: bool

@@ -4,6 +4,7 @@ In case you want to use a keyword as field such as `class`, you can use `serde_r
 
 ```python
 @serde
+@dataclass
 class Foo:
     class_name: str = field(metadata={'serde_rename': 'class'})
 

@@ -1,4 +1,5 @@
 import sys
+from dataclasses import dataclass
 from typing import Dict, List, Tuple
 
 from serde import serde
@@ -8,6 +9,7 @@ PY39 = sys.version_info[:3] >= (3, 9, 0)
 
 
 @serde
+@dataclass
 class Foo:
     l: List[str]
     t: Tuple[str, bool]
@@ -19,6 +21,7 @@ class Foo:
 if PY39:
 
     @serde
+    @dataclass
     class FooPy39:
         l: list[str]
         t: tuple[str, bool]

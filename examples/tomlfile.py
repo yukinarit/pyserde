@@ -7,6 +7,7 @@ Usage:
     $ poetry install
     $ poetry run python tomlfile.py
 """
+from dataclasses import dataclass
 from typing import Dict, List, Optional, Union
 
 from serde import Untagged, serde
@@ -14,6 +15,7 @@ from serde.toml import from_toml
 
 
 @serde
+@dataclass
 class Source:
     url: str
     verify_ssl: bool
@@ -21,11 +23,13 @@ class Source:
 
 
 @serde
+@dataclass
 class Requires:
     python_version: str
 
 
 @serde
+@dataclass
 class Package:
     path: Optional[str] = None
     version: Optional[str] = None
@@ -33,6 +37,7 @@ class Package:
 
 
 @serde(tagging=Untagged)
+@dataclass
 class Pipfile:
     source: List[Source]
     requires: Optional[Requires]

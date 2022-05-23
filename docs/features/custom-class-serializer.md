@@ -16,6 +16,7 @@ def deserializer(cls, o):
         raise SerdeSkip()
 
 @serde(serializer=serializer, deserializer=deserializer)
+@dataclass
 class Foo:
     i: int
     dt1: datetime

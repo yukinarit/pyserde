@@ -4,6 +4,7 @@ Converting `snake_case` fields into supported case styles e.g. `camelCase` and `
 
 ```python
 @serde(rename_all = 'camelcase')
+@dataclass
 class Foo:
     int_field: int
     str_field: str

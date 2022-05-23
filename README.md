@@ -15,6 +15,7 @@ Declare a class with pyserde's `@serde` decorator.
 
 ```python
 @serde
+@dataclass
 class Foo:
     i: int
     s: str

@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from typing import Any
 
 from serde import serde
@@ -5,11 +6,13 @@ from serde.json import from_json, to_json
 
 
 @serde
+@dataclass
 class Bar:
     v: float
 
 
 @serde
+@dataclass
 class Foo:
     a: Any
     b: Any

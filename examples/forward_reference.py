@@ -1,7 +1,10 @@
+from dataclasses import dataclass
+
 from serde import serde
 from serde.json import from_json, to_json
 
 
+@dataclass
 class Foo:
     i: int
     s: str
@@ -9,6 +12,7 @@ class Foo:
 
 
 @serde
+@dataclass
 class Bar:
     f: float
     b: bool
