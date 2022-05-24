@@ -18,6 +18,8 @@
         <input id="togglestate" type="checkbox" aria-hidden="true" tabindex="-1">
         <div>
 
+            <input type="search" placeholder="Search..." role="searchbox" aria-label="search"
+                   pattern=".+" required>
 
         <h2>Contents</h2>
         <ul>
@@ -26,6 +28,19 @@
 </ul>
 
 
+        <h2>Submodules</h2>
+        <ul>
+                <li><a href="serde/compat.html">compat</a></li>
+                <li><a href="serde/core.html">core</a></li>
+                <li><a href="serde/de.html">de</a></li>
+                <li><a href="serde/inspect.html">inspect</a></li>
+                <li><a href="serde/json.html">json</a></li>
+                <li><a href="serde/msgpack.html">msgpack</a></li>
+                <li><a href="serde/numpy.html">numpy</a></li>
+                <li><a href="serde/se.html">se</a></li>
+                <li><a href="serde/toml.html">toml</a></li>
+                <li><a href="serde/yaml.html">yaml</a></li>
+        </ul>
 
         <h2>API Documentation</h2>
             <ul class="memberlist">
@@ -55,12 +70,6 @@
             </li>
             <li>
                     <a class="function" href="#field">field</a>
-            </li>
-            <li>
-                    <a class="function" href="#init">init</a>
-            </li>
-            <li>
-                    <a class="variable" href="#logger">logger</a>
             </li>
             <li>
                     <a class="function" href="#default_deserializer">default_deserializer</a>
@@ -138,14 +147,14 @@ serde    </h1>
 
 <p>You can serialize <code>Foo</code> object into JSON.</p>
 
-<div class="pdoc-code codehilite"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">serde.json</span> <span class="kn">import</span> <span class="n">to_json</span>
+<div class="pdoc-code codehilite"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn"><a href="serde/json.html">serde.json</a></span> <span class="kn">import</span> <span class="n">to_json</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">to_json</span><span class="p">(</span><span class="n">Foo</span><span class="p">(</span><span class="n">i</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="s1">&#39;foo&#39;</span><span class="p">,</span> <span class="n">f</span><span class="o">=</span><span class="mf">100.0</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
 <span class="go">&#39;{&quot;i&quot;:10,&quot;s&quot;:&quot;foo&quot;,&quot;f&quot;:100.0,&quot;b&quot;:true}&#39;</span>
 </code></pre></div>
 
 <p>You can deserialize JSON into <code>Foo</code> object.</p>
 
-<div class="pdoc-code codehilite"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">serde.json</span> <span class="kn">import</span> <span class="n">from_json</span>
+<div class="pdoc-code codehilite"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn"><a href="serde/json.html">serde.json</a></span> <span class="kn">import</span> <span class="n">from_json</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">from_json</span><span class="p">(</span><span class="n">Foo</span><span class="p">,</span> <span class="s1">&#39;{&quot;i&quot;: 10, &quot;s&quot;: &quot;foo&quot;, &quot;f&quot;: 100.0, &quot;b&quot;: true}&#39;</span><span class="p">)</span>
 <span class="go">Foo(i=10, s=&#39;foo&#39;, f=100.0, b=True)</span>
 </code></pre></div>
@@ -155,19 +164,19 @@ serde    </h1>
 <p>The following modules provide the core functionalities of <code>pyserde</code>.</p>
 
 <ul>
-<li><code>serde.se</code>: All about serialization.</li>
-<li><code>serde.de</code>: All about deserialization.</li>
-<li><code>serde.core</code>: Core module used by <code>serde.se</code> and <code>serde.de</code>.</li>
-<li><code>serde.compat</code>: Provides compatibility layer which handles typing.</li>
+<li><code><a href="serde/se.html">serde.se</a></code>: All about serialization.</li>
+<li><code><a href="serde/de.html">serde.de</a></code>: All about deserialization.</li>
+<li><code><a href="serde/core.html">serde.core</a></code>: Core module used by <code><a href="serde/se.html">serde.se</a></code> and <code><a href="serde/de.html">serde.de</a></code>.</li>
+<li><code><a href="serde/compat.html">serde.compat</a></code>: Provides compatibility layer which handles typing.</li>
 </ul>
 
 <p>The following modules provides functionalities for supported data formats.</p>
 
 <ul>
-<li><code>serde.json</code>: Serialize and Deserialize in JSON.</li>
-<li><code>serde.msgpack</code>: Serialize and Deserialize in MsgPack.</li>
-<li><code>serde.yaml</code>: Serialize and Deserialize in YAML.</li>
-<li><code>serde.toml</code>: Serialize and Deserialize in TOML.</li>
+<li><code><a href="serde/json.html">serde.json</a></code>: Serialize and Deserialize in JSON.</li>
+<li><code><a href="serde/msgpack.html">serde.msgpack</a></code>: Serialize and Deserialize in MsgPack.</li>
+<li><code><a href="serde/yaml.html">serde.yaml</a></code>: Serialize and Deserialize in YAML.</li>
+<li><code><a href="serde/toml.html">serde.toml</a></code>: Serialize and Deserialize in TOML.</li>
 </ul>
 </div>
 
@@ -243,40 +252,48 @@ serde    </h1>
 </span><span id="L-66"><a href="#L-66"><span class="linenos"> 66</span></a>    <span class="s2">&quot;InternalTagging&quot;</span><span class="p">,</span>
 </span><span id="L-67"><a href="#L-67"><span class="linenos"> 67</span></a>    <span class="s2">&quot;Untagged&quot;</span><span class="p">,</span>
 </span><span id="L-68"><a href="#L-68"><span class="linenos"> 68</span></a>    <span class="s2">&quot;field&quot;</span><span class="p">,</span>
-</span><span id="L-69"><a href="#L-69"><span class="linenos"> 69</span></a>    <span class="s2">&quot;init&quot;</span><span class="p">,</span>
-</span><span id="L-70"><a href="#L-70"><span class="linenos"> 70</span></a>    <span class="s2">&quot;logger&quot;</span><span class="p">,</span>
-</span><span id="L-71"><a href="#L-71"><span class="linenos"> 71</span></a>    <span class="s2">&quot;default_deserializer&quot;</span><span class="p">,</span>
-</span><span id="L-72"><a href="#L-72"><span class="linenos"> 72</span></a>    <span class="s2">&quot;deserialize&quot;</span><span class="p">,</span>
-</span><span id="L-73"><a href="#L-73"><span class="linenos"> 73</span></a>    <span class="s2">&quot;from_dict&quot;</span><span class="p">,</span>
-</span><span id="L-74"><a href="#L-74"><span class="linenos"> 74</span></a>    <span class="s2">&quot;from_tuple&quot;</span><span class="p">,</span>
-</span><span id="L-75"><a href="#L-75"><span class="linenos"> 75</span></a>    <span class="s2">&quot;is_deserializable&quot;</span><span class="p">,</span>
-</span><span id="L-76"><a href="#L-76"><span class="linenos"> 76</span></a>    <span class="s2">&quot;asdict&quot;</span><span class="p">,</span>
-</span><span id="L-77"><a href="#L-77"><span class="linenos"> 77</span></a>    <span class="s2">&quot;astuple&quot;</span><span class="p">,</span>
-</span><span id="L-78"><a href="#L-78"><span class="linenos"> 78</span></a>    <span class="s2">&quot;default_serializer&quot;</span><span class="p">,</span>
-</span><span id="L-79"><a href="#L-79"><span class="linenos"> 79</span></a>    <span class="s2">&quot;is_serializable&quot;</span><span class="p">,</span>
-</span><span id="L-80"><a href="#L-80"><span class="linenos"> 80</span></a>    <span class="s2">&quot;serialize&quot;</span><span class="p">,</span>
-</span><span id="L-81"><a href="#L-81"><span class="linenos"> 81</span></a>    <span class="s2">&quot;to_dict&quot;</span><span class="p">,</span>
-</span><span id="L-82"><a href="#L-82"><span class="linenos"> 82</span></a>    <span class="s2">&quot;to_tuple&quot;</span><span class="p">,</span>
-</span><span id="L-83"><a href="#L-83"><span class="linenos"> 83</span></a>    <span class="s2">&quot;serde&quot;</span><span class="p">,</span>
-</span><span id="L-84"><a href="#L-84"><span class="linenos"> 84</span></a><span class="p">)</span>
-</span><span id="L-85"><a href="#L-85"><span class="linenos"> 85</span></a>
-</span><span id="L-86"><a href="#L-86"><span class="linenos"> 86</span></a>
-</span><span id="L-87"><a href="#L-87"><span class="linenos"> 87</span></a><span class="k">def</span> <span class="nf">serde</span><span class="p">(</span><span class="n">_cls</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-</span><span id="L-88"><a href="#L-88"><span class="linenos"> 88</span></a>    <span class="sd">&quot;&quot;&quot;</span>
-</span><span id="L-89"><a href="#L-89"><span class="linenos"> 89</span></a><span class="sd">    serde decorator. Keyword arguments are passed in `serialize` and `deserialize`.</span>
-</span><span id="L-90"><a href="#L-90"><span class="linenos"> 90</span></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="L-91"><a href="#L-91"><span class="linenos"> 91</span></a>
-</span><span id="L-92"><a href="#L-92"><span class="linenos"> 92</span></a>    <span class="k">def</span> <span class="nf">wrap</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
-</span><span id="L-93"><a href="#L-93"><span class="linenos"> 93</span></a>        <span class="k">if</span> <span class="n">should_impl_dataclass</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
-</span><span id="L-94"><a href="#L-94"><span class="linenos"> 94</span></a>            <span class="n">dataclass</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
-</span><span id="L-95"><a href="#L-95"><span class="linenos"> 95</span></a>        <span class="n">serialize</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-</span><span id="L-96"><a href="#L-96"><span class="linenos"> 96</span></a>        <span class="n">deserialize</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-</span><span id="L-97"><a href="#L-97"><span class="linenos"> 97</span></a>        <span class="k">return</span> <span class="bp">cls</span>
-</span><span id="L-98"><a href="#L-98"><span class="linenos"> 98</span></a>
-</span><span id="L-99"><a href="#L-99"><span class="linenos"> 99</span></a>    <span class="k">if</span> <span class="n">_cls</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-</span><span id="L-100"><a href="#L-100"><span class="linenos">100</span></a>        <span class="k">return</span> <span class="n">wrap</span>  <span class="c1"># type: ignore</span>
-</span><span id="L-101"><a href="#L-101"><span class="linenos">101</span></a>
-</span><span id="L-102"><a href="#L-102"><span class="linenos">102</span></a>    <span class="k">return</span> <span class="n">wrap</span><span class="p">(</span><span class="n">_cls</span><span class="p">)</span>
+</span><span id="L-69"><a href="#L-69"><span class="linenos"> 69</span></a>    <span class="s2">&quot;default_deserializer&quot;</span><span class="p">,</span>
+</span><span id="L-70"><a href="#L-70"><span class="linenos"> 70</span></a>    <span class="s2">&quot;deserialize&quot;</span><span class="p">,</span>
+</span><span id="L-71"><a href="#L-71"><span class="linenos"> 71</span></a>    <span class="s2">&quot;from_dict&quot;</span><span class="p">,</span>
+</span><span id="L-72"><a href="#L-72"><span class="linenos"> 72</span></a>    <span class="s2">&quot;from_tuple&quot;</span><span class="p">,</span>
+</span><span id="L-73"><a href="#L-73"><span class="linenos"> 73</span></a>    <span class="s2">&quot;is_deserializable&quot;</span><span class="p">,</span>
+</span><span id="L-74"><a href="#L-74"><span class="linenos"> 74</span></a>    <span class="s2">&quot;asdict&quot;</span><span class="p">,</span>
+</span><span id="L-75"><a href="#L-75"><span class="linenos"> 75</span></a>    <span class="s2">&quot;astuple&quot;</span><span class="p">,</span>
+</span><span id="L-76"><a href="#L-76"><span class="linenos"> 76</span></a>    <span class="s2">&quot;default_serializer&quot;</span><span class="p">,</span>
+</span><span id="L-77"><a href="#L-77"><span class="linenos"> 77</span></a>    <span class="s2">&quot;is_serializable&quot;</span><span class="p">,</span>
+</span><span id="L-78"><a href="#L-78"><span class="linenos"> 78</span></a>    <span class="s2">&quot;serialize&quot;</span><span class="p">,</span>
+</span><span id="L-79"><a href="#L-79"><span class="linenos"> 79</span></a>    <span class="s2">&quot;to_dict&quot;</span><span class="p">,</span>
+</span><span id="L-80"><a href="#L-80"><span class="linenos"> 80</span></a>    <span class="s2">&quot;to_tuple&quot;</span><span class="p">,</span>
+</span><span id="L-81"><a href="#L-81"><span class="linenos"> 81</span></a>    <span class="s2">&quot;serde&quot;</span><span class="p">,</span>
+</span><span id="L-82"><a href="#L-82"><span class="linenos"> 82</span></a>    <span class="s2">&quot;compat&quot;</span><span class="p">,</span>
+</span><span id="L-83"><a href="#L-83"><span class="linenos"> 83</span></a>    <span class="s2">&quot;core&quot;</span><span class="p">,</span>
+</span><span id="L-84"><a href="#L-84"><span class="linenos"> 84</span></a>    <span class="s2">&quot;de&quot;</span><span class="p">,</span>
+</span><span id="L-85"><a href="#L-85"><span class="linenos"> 85</span></a>    <span class="s2">&quot;inspect&quot;</span><span class="p">,</span>
+</span><span id="L-86"><a href="#L-86"><span class="linenos"> 86</span></a>    <span class="s2">&quot;json&quot;</span><span class="p">,</span>
+</span><span id="L-87"><a href="#L-87"><span class="linenos"> 87</span></a>    <span class="s2">&quot;msgpack&quot;</span><span class="p">,</span>
+</span><span id="L-88"><a href="#L-88"><span class="linenos"> 88</span></a>    <span class="s2">&quot;numpy&quot;</span><span class="p">,</span>
+</span><span id="L-89"><a href="#L-89"><span class="linenos"> 89</span></a>    <span class="s2">&quot;se&quot;</span><span class="p">,</span>
+</span><span id="L-90"><a href="#L-90"><span class="linenos"> 90</span></a>    <span class="s2">&quot;toml&quot;</span><span class="p">,</span>
+</span><span id="L-91"><a href="#L-91"><span class="linenos"> 91</span></a>    <span class="s2">&quot;yaml&quot;</span><span class="p">,</span>
+</span><span id="L-92"><a href="#L-92"><span class="linenos"> 92</span></a><span class="p">)</span>
+</span><span id="L-93"><a href="#L-93"><span class="linenos"> 93</span></a>
+</span><span id="L-94"><a href="#L-94"><span class="linenos"> 94</span></a>
+</span><span id="L-95"><a href="#L-95"><span class="linenos"> 95</span></a><span class="k">def</span> <span class="nf">serde</span><span class="p">(</span><span class="n">_cls</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+</span><span id="L-96"><a href="#L-96"><span class="linenos"> 96</span></a>    <span class="sd">&quot;&quot;&quot;</span>
+</span><span id="L-97"><a href="#L-97"><span class="linenos"> 97</span></a><span class="sd">    serde decorator. Keyword arguments are passed in `serialize` and `deserialize`.</span>
+</span><span id="L-98"><a href="#L-98"><span class="linenos"> 98</span></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="L-99"><a href="#L-99"><span class="linenos"> 99</span></a>
+</span><span id="L-100"><a href="#L-100"><span class="linenos">100</span></a>    <span class="k">def</span> <span class="nf">wrap</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+</span><span id="L-101"><a href="#L-101"><span class="linenos">101</span></a>        <span class="k">if</span> <span class="n">should_impl_dataclass</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+</span><span id="L-102"><a href="#L-102"><span class="linenos">102</span></a>            <span class="n">dataclass</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
+</span><span id="L-103"><a href="#L-103"><span class="linenos">103</span></a>        <span class="n">serialize</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+</span><span id="L-104"><a href="#L-104"><span class="linenos">104</span></a>        <span class="n">deserialize</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+</span><span id="L-105"><a href="#L-105"><span class="linenos">105</span></a>        <span class="k">return</span> <span class="bp">cls</span>
+</span><span id="L-106"><a href="#L-106"><span class="linenos">106</span></a>
+</span><span id="L-107"><a href="#L-107"><span class="linenos">107</span></a>    <span class="k">if</span> <span class="n">_cls</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="L-108"><a href="#L-108"><span class="linenos">108</span></a>        <span class="k">return</span> <span class="n">wrap</span>  <span class="c1"># type: ignore</span>
+</span><span id="L-109"><a href="#L-109"><span class="linenos">109</span></a>
+</span><span id="L-110"><a href="#L-110"><span class="linenos">110</span></a>    <span class="k">return</span> <span class="n">wrap</span><span class="p">(</span><span class="n">_cls</span><span class="p">)</span>
 </span></pre></div>
 
 
@@ -453,36 +470,6 @@ serde    </h1>
             <div class="docstring"><p>Declare a field with parameters.</p>
 </div>
 
-
-                </section>
-                <section id="init">
-                            <input id="init-view-source" class="view-source-toggle-state" type="checkbox" aria-hidden="true" tabindex="-1">
-<div class="attr function">
-            
-        <span class="def">def</span>
-        <span class="name">init</span><span class="signature pdoc-code condensed">(<span class="param"><span class="n">debug</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span></span>)</span>
-
-                <label class="view-source-button" for="init-view-source"><span>View Source</span></label>
-
-    </div>
-    <a class="headerlink" href="#init"></a>
-            <div class="pdoc-code codehilite"><pre><span></span><span id="init-85"><a href="#init-85"><span class="linenos">85</span></a><span class="k">def</span> <span class="nf">init</span><span class="p">(</span><span class="n">debug</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
-</span><span id="init-86"><a href="#init-86"><span class="linenos">86</span></a>    <span class="n">SETTINGS</span><span class="p">[</span><span class="s1">&#39;debug&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">debug</span>
-</span></pre></div>
-
-
-    
-
-                </section>
-                <section id="logger">
-                    <div class="attr variable">
-            <span class="name">logger</span><span class="default_value"> = &lt;Logger serde (WARNING)&gt;</span>
-
-        
-    </div>
-    <a class="headerlink" href="#logger"></a>
-    
-    
 
                 </section>
                 <section id="default_deserializer">
@@ -666,7 +653,7 @@ at the class but you want to override a field with the default deserializer.</p>
             <div class="docstring"><p>A dataclass with this decorator is deserializable from any of the data formats supported by pyserde.</p>
 
 <div class="pdoc-code codehilite"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">serde</span> <span class="kn">import</span> <span class="n">deserialize</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">serde.json</span> <span class="kn">import</span> <span class="n">from_json</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn"><a href="serde/json.html">serde.json</a></span> <span class="kn">import</span> <span class="n">from_json</span>
 <span class="go">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nd">@deserialize</span>
 <span class="gp">... </span><span class="k">class</span> <span class="nc">Foo</span><span class="p">:</span>
@@ -1160,7 +1147,7 @@ at the class but you want to override a field with the default serializer.</p>
 
 <div class="pdoc-code codehilite"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">serde</span> <span class="kn">import</span> <span class="n">serialize</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">serde.json</span> <span class="kn">import</span> <span class="n">to_json</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn"><a href="serde/json.html">serde.json</a></span> <span class="kn">import</span> <span class="n">to_json</span>
 <span class="go">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nd">@serialize</span>
 <span class="gp">... </span><span class="k">class</span> <span class="nc">Foo</span><span class="p">:</span>
@@ -1350,22 +1337,22 @@ for a certain field, raise <code><a href="#SerdeSkip">serde.SerdeSkip</a></code>
 
     </div>
     <a class="headerlink" href="#serde"></a>
-            <div class="pdoc-code codehilite"><pre><span></span><span id="serde-88"><a href="#serde-88"><span class="linenos"> 88</span></a><span class="k">def</span> <span class="nf">serde</span><span class="p">(</span><span class="n">_cls</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-</span><span id="serde-89"><a href="#serde-89"><span class="linenos"> 89</span></a>    <span class="sd">&quot;&quot;&quot;</span>
-</span><span id="serde-90"><a href="#serde-90"><span class="linenos"> 90</span></a><span class="sd">    serde decorator. Keyword arguments are passed in `serialize` and `deserialize`.</span>
-</span><span id="serde-91"><a href="#serde-91"><span class="linenos"> 91</span></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="serde-92"><a href="#serde-92"><span class="linenos"> 92</span></a>
-</span><span id="serde-93"><a href="#serde-93"><span class="linenos"> 93</span></a>    <span class="k">def</span> <span class="nf">wrap</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
-</span><span id="serde-94"><a href="#serde-94"><span class="linenos"> 94</span></a>        <span class="k">if</span> <span class="n">should_impl_dataclass</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
-</span><span id="serde-95"><a href="#serde-95"><span class="linenos"> 95</span></a>            <span class="n">dataclass</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
-</span><span id="serde-96"><a href="#serde-96"><span class="linenos"> 96</span></a>        <span class="n">serialize</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-</span><span id="serde-97"><a href="#serde-97"><span class="linenos"> 97</span></a>        <span class="n">deserialize</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-</span><span id="serde-98"><a href="#serde-98"><span class="linenos"> 98</span></a>        <span class="k">return</span> <span class="bp">cls</span>
-</span><span id="serde-99"><a href="#serde-99"><span class="linenos"> 99</span></a>
-</span><span id="serde-100"><a href="#serde-100"><span class="linenos">100</span></a>    <span class="k">if</span> <span class="n">_cls</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-</span><span id="serde-101"><a href="#serde-101"><span class="linenos">101</span></a>        <span class="k">return</span> <span class="n">wrap</span>  <span class="c1"># type: ignore</span>
-</span><span id="serde-102"><a href="#serde-102"><span class="linenos">102</span></a>
-</span><span id="serde-103"><a href="#serde-103"><span class="linenos">103</span></a>    <span class="k">return</span> <span class="n">wrap</span><span class="p">(</span><span class="n">_cls</span><span class="p">)</span>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="serde-96"><a href="#serde-96"><span class="linenos"> 96</span></a><span class="k">def</span> <span class="nf">serde</span><span class="p">(</span><span class="n">_cls</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+</span><span id="serde-97"><a href="#serde-97"><span class="linenos"> 97</span></a>    <span class="sd">&quot;&quot;&quot;</span>
+</span><span id="serde-98"><a href="#serde-98"><span class="linenos"> 98</span></a><span class="sd">    serde decorator. Keyword arguments are passed in `serialize` and `deserialize`.</span>
+</span><span id="serde-99"><a href="#serde-99"><span class="linenos"> 99</span></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="serde-100"><a href="#serde-100"><span class="linenos">100</span></a>
+</span><span id="serde-101"><a href="#serde-101"><span class="linenos">101</span></a>    <span class="k">def</span> <span class="nf">wrap</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+</span><span id="serde-102"><a href="#serde-102"><span class="linenos">102</span></a>        <span class="k">if</span> <span class="n">should_impl_dataclass</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+</span><span id="serde-103"><a href="#serde-103"><span class="linenos">103</span></a>            <span class="n">dataclass</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
+</span><span id="serde-104"><a href="#serde-104"><span class="linenos">104</span></a>        <span class="n">serialize</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+</span><span id="serde-105"><a href="#serde-105"><span class="linenos">105</span></a>        <span class="n">deserialize</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+</span><span id="serde-106"><a href="#serde-106"><span class="linenos">106</span></a>        <span class="k">return</span> <span class="bp">cls</span>
+</span><span id="serde-107"><a href="#serde-107"><span class="linenos">107</span></a>
+</span><span id="serde-108"><a href="#serde-108"><span class="linenos">108</span></a>    <span class="k">if</span> <span class="n">_cls</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="serde-109"><a href="#serde-109"><span class="linenos">109</span></a>        <span class="k">return</span> <span class="n">wrap</span>  <span class="c1"># type: ignore</span>
+</span><span id="serde-110"><a href="#serde-110"><span class="linenos">110</span></a>
+</span><span id="serde-111"><a href="#serde-111"><span class="linenos">111</span></a>    <span class="k">return</span> <span class="n">wrap</span><span class="p">(</span><span class="n">_cls</span><span class="p">)</span>
 </span></pre></div>
 
 
@@ -1375,5 +1362,182 @@ for a certain field, raise <code><a href="#SerdeSkip">serde.SerdeSkip</a></code>
 
                 </section>
     </main>
-</body>
+<script>
+    function escapeHTML(html) {
+        return document.createElement('div').appendChild(document.createTextNode(html)).parentNode.innerHTML;
+    }
+
+    const originalContent = document.querySelector("main.pdoc");
+    let currentContent = originalContent;
+
+    function setContent(innerHTML) {
+        let elem;
+        if (innerHTML) {
+            elem = document.createElement("main");
+            elem.classList.add("pdoc");
+            elem.innerHTML = innerHTML;
+        } else {
+            elem = originalContent;
+        }
+        if (currentContent !== elem) {
+            currentContent.replaceWith(elem);
+            currentContent = elem;
+        }
+    }
+
+    function getSearchTerm() {
+        return (new URL(window.location)).searchParams.get("search");
+    }
+
+    const searchBox = document.querySelector(".pdoc input[type=search]");
+    searchBox.addEventListener("input", function () {
+        let url = new URL(window.location);
+        if (searchBox.value.trim()) {
+            url.hash = "";
+            url.searchParams.set("search", searchBox.value);
+        } else {
+            url.searchParams.delete("search");
+        }
+        history.replaceState("", "", url.toString());
+        onInput();
+    });
+    window.addEventListener("popstate", onInput);
+
+
+    let search, searchErr;
+
+    async function initialize() {
+        try {
+            search = await new Promise((resolve, reject) => {
+                const script = document.createElement("script");
+                script.type = "text/javascript";
+                script.async = true;
+                script.onload = () => resolve(window.pdocSearch);
+                script.onerror = (e) => reject(e);
+                script.src = "search.js";
+                document.getElementsByTagName("head")[0].appendChild(script);
+            });
+        } catch (e) {
+            console.error("Cannot fetch pdoc search index");
+            searchErr = "Cannot fetch search index.";
+        }
+        onInput();
+
+        document.querySelector("nav.pdoc").addEventListener("click", e => {
+            if (e.target.hash) {
+                searchBox.value = "";
+                searchBox.dispatchEvent(new Event("input"));
+            }
+        });
+    }
+
+    function onInput() {
+        setContent((() => {
+            const term = getSearchTerm();
+            if (!term) {
+                return null
+            }
+            if (searchErr) {
+                return `<h3>Error: ${searchErr}</h3>`
+            }
+            if (!search) {
+                return "<h3>Searching...</h3>"
+            }
+
+            window.scrollTo({top: 0, left: 0, behavior: 'auto'});
+
+            const results = search(term);
+
+            let html;
+            if (results.length === 0) {
+                html = `No search results for '${escapeHTML(term)}'.`
+            } else {
+                html = `<h4>${results.length} search result${results.length > 1 ? "s" : ""} for '${escapeHTML(term)}'.</h4>`;
+            }
+            for (let result of results.slice(0, 10)) {
+                let doc = result.doc;
+                let url = `${doc.modulename.replaceAll(".", "/")}.html`;
+                if (doc.qualname) {
+                    url += `#${doc.qualname}`;
+                }
+
+                let heading;
+                switch (result.doc.type) {
+                    case "function":
+                        heading = `<span class="def">${doc.funcdef}</span> <span class="name">${doc.fullname}</span><span class="signature">${doc.signature}:</span>`;
+                        break;
+                    case "class":
+                        heading = `<span class="def">class</span> <span class="name">${doc.fullname}</span>`;
+                        if (doc.bases)
+                            heading += `<wbr>(<span class="base">${doc.bases}</span>)`;
+                        heading += `:`;
+                        break;
+                    case "variable":
+                        heading = `<span class="name">${doc.fullname}</span>`;
+                        if (doc.annotation)
+                            heading += `<span class="annotation">${doc.annotation}</span>`;
+                        if (doc.default_value)
+                            heading += `<span class="default_value">${doc.default_value}</span>`;
+                        break;
+                    default:
+                        heading = `<span class="name">${doc.fullname}</span>`;
+                        break;
+                }
+                html += `
+                        <section class="search-result">
+                        <a href="${url}" class="attr ${doc.type}">${heading}</a>
+                        <div class="docstring">${doc.doc}</div>
+                        </section>
+                    `;
+
+            }
+            return html;
+        })());
+    }
+
+    if (getSearchTerm()) {
+        initialize();
+        searchBox.value = getSearchTerm();
+        onInput();
+    } else {
+        searchBox.addEventListener("focus", initialize, {once: true});
+    }
+
+    searchBox.addEventListener("keydown", e => {
+        if (["ArrowDown", "ArrowUp", "Enter"].includes(e.key)) {
+            let focused = currentContent.querySelector(".search-result.focused");
+            if (!focused) {
+                currentContent.querySelector(".search-result").classList.add("focused");
+            } else if (
+                e.key === "ArrowDown"
+                && focused.nextElementSibling
+                && focused.nextElementSibling.classList.contains("search-result")
+            ) {
+                focused.classList.remove("focused");
+                focused.nextElementSibling.classList.add("focused");
+                focused.nextElementSibling.scrollIntoView({
+                    behavior: "smooth",
+                    block: "nearest",
+                    inline: "nearest"
+                });
+            } else if (
+                e.key === "ArrowUp"
+                && focused.previousElementSibling
+                && focused.previousElementSibling.classList.contains("search-result")
+            ) {
+                focused.classList.remove("focused");
+                focused.previousElementSibling.classList.add("focused");
+                focused.previousElementSibling.scrollIntoView({
+                    behavior: "smooth",
+                    block: "nearest",
+                    inline: "nearest"
+                });
+            } else if (
+                e.key === "Enter"
+            ) {
+                focused.querySelector("a").click();
+            }
+        }
+    });
+</script></body>
 </html>
