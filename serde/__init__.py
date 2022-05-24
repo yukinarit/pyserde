@@ -66,8 +66,6 @@ __all__ = (
     "InternalTagging",
     "Untagged",
     "field",
-    "init",
-    "logger",
     "default_deserializer",
     "deserialize",
     "from_dict",
@@ -81,6 +79,16 @@ __all__ = (
     "to_dict",
     "to_tuple",
     "serde",
+    "compat",
+    "core",
+    "de",
+    "inspect",
+    "json",
+    "msgpack",
+    "numpy",
+    "se",
+    "toml",
+    "yaml",
 )
 
 
