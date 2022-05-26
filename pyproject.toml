@@ -37,6 +37,7 @@ numpy = [
     { version = ">1.21.0", markers = "python_version ~= '3.9.0' and (extra == 'numpy' or extra == 'all')", optional = true },
     { version = ">1.22.0", markers = "python_version ~= '3.10' and (extra == 'numpy' or extra == 'all')", optional = true },
 ]
+orjson = { version = "*", markers = "extra == 'orjson' or extra == 'all'", optional = true }
 
 [tool.poetry.dev-dependencies]
 pyyaml = "*"
@@ -65,9 +66,9 @@ msgpack = ["msgpack"]
 numpy = ["numpy"]
 toml = ["toml"]
 yaml = ["pyyaml"]
-all = ["msgpack", "toml", "pyyaml", "numpy"]
+orjson = ["orjson"]
+all = ["msgpack", "toml", "pyyaml", "numpy", "orjson"]
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
-
