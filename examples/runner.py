@@ -11,6 +11,7 @@ import forward_reference
 import generics
 import jsonfile
 import lazy_type_evaluation
+import literal
 import newtype
 import rename
 import rename_all
@@ -49,6 +50,7 @@ def run_all():
     run(union_tagging)
     run(generics)
     run(lazy_type_evaluation)
+    run(literal)
     if PY310:
         import union_operator
 

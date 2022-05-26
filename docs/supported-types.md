@@ -15,6 +15,8 @@
     * [`uuid.UUID`](https://docs.python.org/3/library/uuid.html)
     * [`datetime.date`](https://docs.python.org/3/library/datetime.html#date-objects), [`datetime.time`](https://docs.python.org/3/library/datetime.html#time-objects), [`datetime.datetime`](https://docs.python.org/3/library/datetime.html#datetime-objects)
     * [`ipaddress`](https://docs.python.org/3/library/ipaddress.html)
+* PyPI library
+    * [`numpy`](https://github.com/numpy/numpy) types
 
 You can write pretty complex class like this:
 ```python

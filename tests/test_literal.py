@@ -130,7 +130,9 @@ PRI = Literals(1, "foo", True, 2)
 DictLiterals = Dict[str, Literals]
 
 
-#### Tests
+"""
+Tests
+"""
 
 
 @pytest.mark.parametrize("opt", opt_case, ids=opt_case_ids())
