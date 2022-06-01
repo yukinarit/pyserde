@@ -1,3 +1,39 @@
+##  `0.8.0` (2022-05-31)
+
+
+Thanks to the contribution by [@kigawas](https://github.com/kigawas), pyserde can optionally use [orjson](supports://github.com/ijl/orjson) as JSON serializer!
+```
+pip install pyserde[orjson]
+```
+If orjson is installed in the system, pyserde automatically use orjson in [to_json](https://yukinarit.github.io/pyserde/api/serde/json.html#to_json)/[from_json](https://yukinarit.github.io/pyserde/api/serde/json.html#from_json).
+
+**NOTE:** In order to align the JSON (de)serializer to orjson, a few parameters are passed in `json.dumps` internally. This would lead to a breaking change in some cases. If you need the same behaviour as in pyserde<0.8, please explicitely pass those parameters in `serde.json.to_json`. 🙇‍♂️
+```python
+to_json(obj, ensure_ascii=True, separators=(", ", ": "))
+```
+
+Other noteble chage is we have `@dataclass` decorator back in the all example and test code in the repository as shown below. It's because we found mypy isn't able to deduce the type correctly without `@dataclass` decorator.  If you are not mypy user, you can still declare a class with only `@serde` decorator. 👍 For more information, please read [the docs](https://yukinarit.github.io/pyserde/guide/features/decorators.html).
+
+```python
+@serde
+@dataclass  # <-- Recommended to add @dataclass if you are mypy user.
+class Foo:
+    i: int
+    s: str
+    f: float
+    b: bool
+```
+
+* build: Add "orjson" extras ([ea70ec1](https://github.com/yukinarit/pyserde/commit/ea70ec1))
+* orjson support ([2744675](https://github.com/yukinarit/pyserde/commit/2744675))
+* Update json.py ([2d67b65](https://github.com/yukinarit/pyserde/commit/2d67b65))
+* feat: Support class declaration w/wo dataclass ([a35f909](https://github.com/yukinarit/pyserde/commit/a35f909))
+* fix: Add dataclass decorator for all example code ([60567ab](https://github.com/yukinarit/pyserde/commit/60567ab))
+* fix: Treat <type>|None as Optional ([5555452](https://github.com/yukinarit/pyserde/commit/5555452))
+* Fix the default deserializer for custom class deserializer ([6c2245b](https://github.com/yukinarit/pyserde/commit/6c2245b))
+
+This release had contributions from 1 person: [@kigawas](https://github.com/kigawas). Thank you so much! :tada: :joy:
+
 ## `0.7.3` (2022-05-10)
 
 Thanks to the great contribution by [@kmsquire](https://github.com/kmsquire), pyserde supports some numpy types!
