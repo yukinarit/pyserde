@@ -148,7 +148,34 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h2 id="073-2022-05-10"><a class="header" href="#073-2022-05-10"><code>0.7.3</code> (2022-05-10)</a></h2>
+                        <h2 id="080-2022-05-31"><a class="header" href="#080-2022-05-31"><code>0.8.0</code> (2022-05-31)</a></h2>
+<p>Thanks to the contribution by <a href="https://github.com/kigawas">@kigawas</a>, pyserde can optionally use <a href="supports://github.com/ijl/orjson">orjson</a> as JSON serializer!</p>
+<pre><code>pip install pyserde[orjson]
+</code></pre>
+<p>If orjson is installed in the system, pyserde automatically use orjson in <a href="https://yukinarit.github.io/pyserde/api/serde/json.html#to_json">to_json</a>/<a href="https://yukinarit.github.io/pyserde/api/serde/json.html#from_json">from_json</a>.</p>
+<p><strong>NOTE:</strong> In order to align the JSON (de)serializer to orjson, a few parameters are passed in <code>json.dumps</code> internally. This would lead to a breaking change in some cases. If you need the same behaviour as in pyserde&lt;0.8, please explicitely pass those parameters in <code>serde.json.to_json</code>. 🙇‍♂️</p>
+<pre><code class="language-python">to_json(obj, ensure_ascii=True, separators=(&quot;, &quot;, &quot;: &quot;))
+</code></pre>
+<p>Other noteble chage is we have <code>@dataclass</code> decorator back in the all example and test code in the repository as shown below. It's because we found mypy isn't able to deduce the type correctly without <code>@dataclass</code> decorator.  If you are not mypy user, you can still declare a class with only <code>@serde</code> decorator. 👍 For more information, please read <a href="https://yukinarit.github.io/pyserde/guide/features/decorators.html">the docs</a>.</p>
+<pre><code class="language-python">@serde
+@dataclass  # &lt;-- Recommended to add @dataclass if you are mypy user.
+class Foo:
+    i: int
+    s: str
+    f: float
+    b: bool
+</code></pre>
+<ul>
+<li>build: Add &quot;orjson&quot; extras (<a href="https://github.com/yukinarit/pyserde/commit/ea70ec1">ea70ec1</a>)</li>
+<li>orjson support (<a href="https://github.com/yukinarit/pyserde/commit/2744675">2744675</a>)</li>
+<li>Update json.py (<a href="https://github.com/yukinarit/pyserde/commit/2d67b65">2d67b65</a>)</li>
+<li>feat: Support class declaration w/wo dataclass (<a href="https://github.com/yukinarit/pyserde/commit/a35f909">a35f909</a>)</li>
+<li>fix: Add dataclass decorator for all example code (<a href="https://github.com/yukinarit/pyserde/commit/60567ab">60567ab</a>)</li>
+<li>fix: Treat <type>|None as Optional (<a href="https://github.com/yukinarit/pyserde/commit/5555452">5555452</a>)</li>
+<li>Fix the default deserializer for custom class deserializer (<a href="https://github.com/yukinarit/pyserde/commit/6c2245b">6c2245b</a>)</li>
+</ul>
+<p>This release had contributions from 1 person: <a href="https://github.com/kigawas">@kigawas</a>. Thank you so much! :tada: :joy:</p>
+<h2 id="073-2022-05-10"><a class="header" href="#073-2022-05-10"><code>0.7.3</code> (2022-05-10)</a></h2>
 <p>Thanks to the great contribution by <a href="https://github.com/kmsquire">@kmsquire</a>, pyserde supports some numpy types!</p>
 <pre><code class="language-python">@serde
 class NPFoo:
