@@ -22,6 +22,7 @@ import type_datetime
 import type_decimal
 import union
 import union_tagging
+import user_exception
 import yamlfile
 
 PY310 = sys.version_info[:3] >= (3, 10, 0)
@@ -51,6 +52,7 @@ def run_all():
     run(generics)
     run(lazy_type_evaluation)
     run(literal)
+    run(user_exception)
     if PY310:
         import union_operator
 

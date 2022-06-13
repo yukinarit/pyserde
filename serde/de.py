@@ -15,6 +15,7 @@ import jinja2
 from .compat import (
     SerdeError,
     SerdeSkip,
+    UserError,
     find_generic_arg,
     get_generic_arg,
     get_origin,
@@ -208,6 +209,7 @@ def deserialize(
         g['cls'] = cls
         g['serde_scope'] = scope
         g['SerdeError'] = SerdeError
+        g['UserError'] = UserError
         g['raise_unsupported_type'] = raise_unsupported_type
         g['typename'] = typename  # used in union functions
         g['ensure'] = ensure
@@ -366,6 +368,9 @@ def from_obj(c: Type, o: Any, named: bool, reuse_instances: bool):
             return o
 
         return c(o)
+
+    except UserError as e:
+        raise e.inner
 
     except Exception as e:
         raise SerdeError(e)
@@ -777,11 +782,18 @@ def {{func}}(cls=cls, maybe_generic=None, data=None, reuse_instances = {{serde_s
   if data is None:
     return None
 
-  return cls(
   {% for f in fields %}
-  {{f|arg(loop.index-1)|rvalue}},
+  __{{f.name}} = {{f|arg(loop.index-1)|rvalue}}
   {% endfor %}
-  )
+
+  try:
+    return cls(
+      {% for f in fields %}
+      __{{f.name}},
+      {% endfor %}
+    )
+  except Exception as e:
+    raise UserError(e)
     """
 
     renderer = Renderer(FROM_ITER, cls=cls, custom=custom)
@@ -805,11 +817,19 @@ def {{func}}(cls=cls, maybe_generic=None, data=None, reuse_instances = {{serde_s
   if data is None:
     return None
 
-  rv = cls(
   {% for f in fields %}
-  {{f|arg(loop.index-1)|rvalue}},
+  __{{f.name}} = {{f|arg(loop.index-1)|rvalue}}
   {% endfor %}
-  )
+
+  try:
+    rv = cls(
+    {% for f in fields %}
+    __{{f.name}},
+    {% endfor %}
+    )
+  except Exception as e:
+    raise UserError(e)
+
   return rv
     """
 
