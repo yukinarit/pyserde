@@ -59,6 +59,15 @@ class SerdeError(Exception):
     """
 
 
+@dataclasses.dataclass
+class UserError(Exception):
+    """
+    Error from user code e.g. __post_init__.
+    """
+
+    inner: Exception
+
+
 class SerdeSkip(Exception):
     """
     Skip a field in custom (de)serializer.

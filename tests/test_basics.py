@@ -657,3 +657,23 @@ def test_exception_to_from_obj():
 
     with pytest.raises(serde.SerdeError):
         serde.from_dict(Foo, {})
+
+
+def test_user_error():
+    class MyException(Exception):
+        pass
+
+    @serde.serde
+    @dataclasses.dataclass
+    class Foo:
+        v: int
+
+        def __post_init__(self):
+            if self.v == 10:
+                raise MyException("Invalid value")
+
+    with pytest.raises(MyException):
+        serde.from_dict(Foo, {"v": 10})
+
+    with pytest.raises(serde.SerdeError):
+        serde.from_dict(Foo, {})

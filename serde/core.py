@@ -12,7 +12,7 @@ import pathlib
 import re
 import uuid
 from dataclasses import dataclass
-from typing import Any, Callable, Dict, Iterator, List, Mapping, Optional, Type, TypeVar, Union
+from typing import Any, Callable, Dict, List, Mapping, Optional, Type, TypeVar, Union
 
 import stringcase
 
@@ -502,11 +502,11 @@ class Field:
 F = TypeVar('F', bound=Field)
 
 
-def fields(field_cls: Type[F], cls: Type) -> Iterator[F]:
+def fields(field_cls: Type[F], cls: Type) -> List[F]:
     """
     Iterate fields of the dataclass and returns `serde.core.Field`.
     """
-    return iter(field_cls.from_dataclass(f) for f in dataclass_fields(cls))
+    return [field_cls.from_dataclass(f) for f in dataclass_fields(cls)]
 
 
 def conv(f: Field, case: Optional[str] = None) -> str:
