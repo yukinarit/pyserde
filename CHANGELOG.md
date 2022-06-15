@@ -1,5 +1,8 @@
-##  `0.8.0` (2022-05-31)
+## `0.8.1` (2022-06-14)
 
+* feat: Don't wrap user exception in SerdeError ([161cffd](https://github.com/yukinarit/pyserde/commit/161cffd))
+
+## `0.8.0` (2022-05-31)
 
 Thanks to the contribution by [@kigawas](https://github.com/kigawas), pyserde can optionally use [orjson](supports://github.com/ijl/orjson) as JSON serializer!
 ```
