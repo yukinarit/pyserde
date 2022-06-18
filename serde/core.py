@@ -14,7 +14,7 @@ import uuid
 from dataclasses import dataclass
 from typing import Any, Callable, Dict, List, Mapping, Optional, Type, TypeVar, Union
 
-import stringcase
+import casefy
 
 from .compat import (
     SerdeError,
@@ -515,9 +515,9 @@ def conv(f: Field, case: Optional[str] = None) -> str:
     """
     name = f.name
     if case:
-        casef = getattr(stringcase, case, None)
+        casef = getattr(casefy, case, None)
         if not casef:
-            raise SerdeError(f"Unkown case type: {f.case}. Pass the name of case supported by 'stringcase' package.")
+            raise SerdeError(f"Unkown case type: {f.case}. Pass the name of case supported by 'casefy' package.")
         name = casef(name)
     if f.rename:
         name = f.rename
