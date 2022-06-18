@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pyserde"
-version = "0.8.1"
+version = "0.8.2"
 description = "Yet another serialization library on top of dataclasses"
 authors = ["yukinarit <yukinarit84@gmail.com>"]
 license = "MIT"

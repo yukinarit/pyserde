@@ -1,3 +1,9 @@
+## `0.8.2` (2022-06-18)
+
+* chore: Replace stringcase with casfey ([1f8a17d](https://github.com/yukinarit/pyserde/commit/1f8a17d)), closes [#240](https://github.com/yukinarit/pyserde/issues/240)
+
+This release had contributions from 1 person: [@gitpushdashf](https://github.com/gitpushdashf). Thank you so much! :tada: :joy:
+
 ## `0.8.1` (2022-06-14)
 
 * feat: Don't wrap user exception in SerdeError ([161cffd](https://github.com/yukinarit/pyserde/commit/161cffd))
