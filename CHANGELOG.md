@@ -1,3 +1,7 @@
+## `0.8.3`  (2022-06-28)
+
+* fix: Use numpy<1.23.0 for python 3.7 and 3.8 ([3045521](https://github.com/yukinarit/pyserde/commit/3045521))
+
 ## `0.8.2` (2022-06-18)
 
 * chore: Replace stringcase with casfey ([1f8a17d](https://github.com/yukinarit/pyserde/commit/1f8a17d)), closes [#240](https://github.com/yukinarit/pyserde/issues/240)
