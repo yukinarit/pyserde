@@ -60,6 +60,7 @@ mypy = { version = "==0.931", markers = "platform_python_implementation!='PyPy'"
 more-itertools = "~=8.6.0"
 pre-commit = "==v2.10.1"
 pytest-xdist = "^2.3.0"
+types-PyYAML = "^6.0.9"
 
 [tool.poetry.extras]
 msgpack = ["msgpack"]
