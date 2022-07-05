@@ -1,7 +1,7 @@
 """
 Serialize and Deserialize in JSON format.
 """
-from typing import Any, Optional, Type, Union
+from typing import Any, Type, Union
 
 from .compat import T
 from .core import Coerce, TypeCheck
@@ -66,7 +66,7 @@ def to_json(obj: Any, se: Type[Serializer] = JsonSerializer, type_check: TypeChe
 
 def from_json(
     c: Type[T], s: Union[str, bytes], de: Type[Deserializer] = JsonDeserializer, type_check: TypeCheck = Coerce, **opts
-) -> Optional[T]:
+) -> T:
     """
     Deserialize from JSON into the object. [orjson](https://github.com/ijl/orjson) will be used if installed.
 
