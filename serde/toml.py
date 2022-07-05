@@ -1,9 +1,10 @@
 """
-Serialize and Deserialize in TOML format. This module depends on [toml](https://pypi.org/project/toml/) package.
+Serialize and Deserialize in TOML format. This module depends on [tomli](https://github.com/hukkin/tomli) and [tomli-w](https://github.com/hukkin/tomli-w) packages.
 """
 from typing import Type
 
-import toml
+import tomli
+import tomli_w
 
 from .compat import T
 from .core import Coerce, TypeCheck
@@ -16,13 +17,13 @@ __all__ = ["from_toml", "to_toml"]
 class TomlSerializer(Serializer):
     @classmethod
     def serialize(cls, obj, **opts) -> str:
-        return toml.dumps(obj, **opts)
+        return tomli_w.dumps(obj, **opts)
 
 
 class TomlDeserializer(Deserializer):
     @classmethod
     def deserialize(cls, s, **opts):
-        return toml.loads(s, **opts)
+        return tomli.loads(s, **opts)
 
 
 def to_toml(obj, se: Type[Serializer] = TomlSerializer, type_check: TypeCheck = Coerce, **opts) -> str:
@@ -30,7 +31,7 @@ def to_toml(obj, se: Type[Serializer] = TomlSerializer, type_check: TypeCheck = 
     Serialize the object into TOML.
 
     You can pass any serializable `obj`. If you supply keyword arguments other than `se`,
-    they will be passed in `toml.dumps` function.
+    they will be passed in `toml_w.dumps` function.
 
     If you want to use the other toml package, you can subclass `TomlSerializer` and implement your own logic.
     """
