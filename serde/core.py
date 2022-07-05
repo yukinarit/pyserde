@@ -2,19 +2,15 @@
 pyserde core module.
 """
 import dataclasses
-import datetime
-import decimal
 import enum
 import functools
-import ipaddress
 import logging
-import pathlib
 import re
-import uuid
 from dataclasses import dataclass
 from typing import Any, Callable, Dict, List, Mapping, Optional, Type, TypeVar, Union
 
 import casefy
+import jinja2
 
 from .compat import (
     SerdeError,
@@ -29,6 +25,8 @@ from .compat import (
     is_dict,
     is_generic,
     is_list,
+    is_literal,
+    is_new_type_primitive,
     is_opt,
     is_set,
     is_tuple,
@@ -36,6 +34,7 @@ from .compat import (
     type_args,
     typename,
 )
+from .numpy import is_numpy_available, is_numpy_type
 
 __all__ = ["SerdeScope", "gen", "add_func", "Func", "Field", "fields", "FlattenOpts", "conv", "union_func_name"]
 
@@ -50,6 +49,7 @@ FROM_ITER = 'from_iter'
 FROM_DICT = 'from_dict'
 TO_ITER = 'to_iter'
 TO_DICT = 'to_dict'
+TYPE_CHECK = 'typecheck'
 
 # prefixes used to distinguish the direction of a union function
 UNION_SE_PREFIX = "union_se"
@@ -58,27 +58,6 @@ UNION_DE_PREFIX = "union_de"
 LITERAL_DE_PREFIX = "literal_de"
 
 SETTINGS = dict(debug=False)
-
-StrSerializableTypes = (
-    decimal.Decimal,
-    pathlib.Path,
-    pathlib.PosixPath,
-    pathlib.WindowsPath,
-    pathlib.PurePath,
-    pathlib.PurePosixPath,
-    pathlib.PureWindowsPath,
-    uuid.UUID,
-    ipaddress.IPv4Address,
-    ipaddress.IPv6Address,
-    ipaddress.IPv4Network,
-    ipaddress.IPv6Network,
-    ipaddress.IPv4Interface,
-    ipaddress.IPv6Interface,
-)
-""" List of standard types (de)serializable to str """
-
-DateTimeTypes = (datetime.date, datetime.time, datetime.datetime)
-""" List of datetime types """
 
 
 def init(debug: bool = False):
@@ -196,56 +175,101 @@ def add_func(serde_scope: SerdeScope, func_name: str, func_code: str, globals: D
 
 
 def is_instance(obj: Any, typ: Type) -> bool:
-    if is_opt(typ):
-        if obj is None:
-            return True
-        opt_arg = type_args(typ)[0]
-        return is_instance(obj, opt_arg)
-    elif is_union(typ):
-        for arg in type_args(typ):
-            if is_instance(obj, arg):
-                return True
-        return False
-    elif is_list(typ):
-        if not isinstance(obj, list):
-            return False
-        if len(obj) == 0 or is_bare_list(typ):
-            return True
-        list_arg = type_args(typ)[0]
-        # for speed reasons we just check the type of the 1st element
-        return is_instance(obj[0], list_arg)
-    elif is_set(typ):
-        if not isinstance(obj, set):
-            return False
-        if len(obj) == 0 or is_bare_set(typ):
-            return True
-        set_arg = type_args(typ)[0]
-        # for speed reasons we just check the type of the 1st element
-        return is_instance(next(iter(obj)), set_arg)
-    elif is_tuple(typ):
-        if not isinstance(obj, tuple):
-            return False
-        if len(obj) == 0 or is_bare_tuple(typ):
-            return True
-        for i, arg in enumerate(type_args(typ)):
-            if not is_instance(obj[i], arg):
+    """
+    Type check function that works like `isinstance` but it accepts
+    Subscripted Generics e.g. `List[int]`.
+    """
+    if dataclasses.is_dataclass(typ):
+        serde_scope: Optional[SerdeScope] = getattr(typ, SERDE_SCOPE, None)
+        if serde_scope:
+            try:
+                serde_scope.funcs[TYPE_CHECK](obj)
+            except Exception:
                 return False
-        return True
+        return isinstance(obj, typ)
+    elif is_opt(typ):
+        return is_opt_instance(obj, typ)
+    elif is_union(typ):
+        return is_union_instance(obj, typ)
+    elif is_list(typ):
+        return is_list_instance(obj, typ)
+    elif is_set(typ):
+        return is_set_instance(obj, typ)
+    elif is_tuple(typ):
+        return is_tuple_instance(obj, typ)
     elif is_dict(typ):
-        if not isinstance(obj, dict):
-            return False
-        if len(obj) == 0 or is_bare_dict(typ):
-            return True
-        ktyp = type_args(typ)[0]
-        vtyp = type_args(typ)[1]
-        for k, v in obj.items():
-            # for speed reasons we just check the type of the 1st element
-            return is_instance(k, ktyp) and is_instance(v, vtyp)
-        return False
+        return is_dict_instance(obj, typ)
     elif is_generic(typ):
-        return is_instance(obj, get_origin(typ))
+        return is_generic_instance(obj, typ)
+    elif is_literal(typ):
+        return True  # TODO
+    elif is_new_type_primitive(typ):
+        inner = getattr(typ, '__supertype__')
+        return isinstance(obj, inner)
     else:
         return isinstance(obj, typ)
+
+
+def is_opt_instance(obj: Any, typ: Type) -> bool:
+    if obj is None:
+        return True
+    opt_arg = type_args(typ)[0]
+    return is_instance(obj, opt_arg)
+
+
+def is_union_instance(obj: Any, typ: Type) -> bool:
+    for arg in type_args(typ):
+        if is_instance(obj, arg):
+            return True
+    return False
+
+
+def is_list_instance(obj: Any, typ: Type) -> bool:
+    if not isinstance(obj, list):
+        return False
+    if len(obj) == 0 or is_bare_list(typ):
+        return True
+    list_arg = type_args(typ)[0]
+    # for speed reasons we just check the type of the 1st element
+    return is_instance(obj[0], list_arg)
+
+
+def is_set_instance(obj: Any, typ: Type) -> bool:
+    if not isinstance(obj, set):
+        return False
+    if len(obj) == 0 or is_bare_set(typ):
+        return True
+    set_arg = type_args(typ)[0]
+    # for speed reasons we just check the type of the 1st element
+    return is_instance(next(iter(obj)), set_arg)
+
+
+def is_tuple_instance(obj: Any, typ: Type) -> bool:
+    if not isinstance(obj, tuple):
+        return False
+    if len(obj) == 0 or is_bare_tuple(typ):
+        return True
+    for i, arg in enumerate(type_args(typ)):
+        if not is_instance(obj[i], arg):
+            return False
+    return True
+
+
+def is_dict_instance(obj: Any, typ: Type) -> bool:
+    if not isinstance(obj, dict):
+        return False
+    if len(obj) == 0 or is_bare_dict(typ):
+        return True
+    ktyp = type_args(typ)[0]
+    vtyp = type_args(typ)[1]
+    for k, v in obj.items():
+        # for speed reasons we just check the type of the 1st element
+        return is_instance(k, ktyp) and is_instance(v, vtyp)
+    return False
+
+
+def is_generic_instance(obj: Any, typ: Type) -> bool:
+    return is_instance(obj, get_origin(typ))
 
 
 @dataclass
@@ -647,3 +671,82 @@ def should_impl_dataclass(cls):
             return True
 
     return False
+
+
+def render_type_check(cls: Type) -> str:
+    import serde.compat
+
+    template = """
+def typecheck(self):
+  {% for f in fields -%}
+
+  {% if ((is_numpy_available() and is_numpy_type(f.type)) or
+         compat.is_enum(f.type) or
+         compat.is_literal(f.type)) %}
+
+  {% elif is_dataclass(f.type) %}
+  self.{{f.name}}.__serde__.funcs['{{type_check_func}}'](self.{{f.name}})
+
+  {% elif (compat.is_set(f.type) or
+           compat.is_list(f.type) or
+           compat.is_dict(f.type) or
+           compat.is_tuple(f.type) or
+           compat.is_primitive(f.type) or
+           compat.is_str_serializable(f.type) or
+           compat.is_datetime(f.type)) %}
+  if not is_instance(self.{{f.name}}, {{f.type|typename}}):
+    raise SerdeError(f"{{cls|typename}}.{{f.name}} is not instance of {{f.type|typename}}")
+
+  {% endif %}
+  {% endfor %}
+
+  return
+    """
+
+    env = jinja2.Environment(loader=jinja2.DictLoader({'check': template}))
+    env.filters.update({'typename': functools.partial(typename, with_typing_module=True)})
+    return env.get_template('check').render(
+        cls=cls,
+        fields=dataclasses.fields(cls),
+        compat=serde.compat,
+        is_dataclass=dataclasses.is_dataclass,
+        type_check_func=TYPE_CHECK,
+        is_instance=is_instance,
+        is_numpy_available=is_numpy_available,
+        is_numpy_type=is_numpy_type,
+    )
+
+
+@dataclass
+class TypeCheck:
+    """
+    Specify type check flavors.
+    """
+
+    class Kind(enum.Enum):
+        NoCheck = enum.auto()
+        """ No check performed """
+
+        Coerce = enum.auto()
+        """ Value is coerced into the declared type """
+        Strict = enum.auto()
+        """ Value are strictly checked against the declared type """
+
+    kind: Kind
+
+    def is_strict(self) -> bool:
+        return self.kind == self.Kind.Strict
+
+    def is_coerce(self) -> bool:
+        return self.kind == self.Kind.Coerce
+
+    def __call__(self, **kwargs) -> 'TypeCheck':
+        # TODO
+        return self
+
+
+NoCheck = TypeCheck(kind=TypeCheck.Kind.NoCheck)
+
+Coerce = TypeCheck(kind=TypeCheck.Kind.Coerce)
+
+Strict = TypeCheck(kind=TypeCheck.Kind.Strict)

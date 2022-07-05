@@ -6,6 +6,7 @@ from typing import Type
 import toml
 
 from .compat import T
+from .core import Coerce, TypeCheck
 from .de import Deserializer, from_dict
 from .se import Serializer, to_dict
 
@@ -24,7 +25,7 @@ class TomlDeserializer(Deserializer):
         return toml.loads(s, **opts)
 
 
-def to_toml(obj, se: Type[Serializer] = TomlSerializer, **opts) -> str:
+def to_toml(obj, se: Type[Serializer] = TomlSerializer, type_check: TypeCheck = Coerce, **opts) -> str:
     """
     Serialize the object into TOML.
 
@@ -33,10 +34,12 @@ def to_toml(obj, se: Type[Serializer] = TomlSerializer, **opts) -> str:
 
     If you want to use the other toml package, you can subclass `TomlSerializer` and implement your own logic.
     """
-    return se.serialize(to_dict(obj, reuse_instances=False), **opts)
+    return se.serialize(to_dict(obj, reuse_instances=False, type_check=type_check), **opts)
 
 
-def from_toml(c: Type[T], s: str, de: Type[Deserializer] = TomlDeserializer, **opts) -> T:
+def from_toml(
+    c: Type[T], s: str, de: Type[Deserializer] = TomlDeserializer, type_check: TypeCheck = Coerce, **opts
+) -> T:
     """
     Deserialize from TOML into the object.
 
@@ -45,4 +48,4 @@ def from_toml(c: Type[T], s: str, de: Type[Deserializer] = TomlDeserializer, **o
 
     If you want to use the other toml package, you can subclass `TomlDeserializer` and implement your own logic.
     """
-    return from_dict(c, de.deserialize(s, **opts), reuse_instances=False)
+    return from_dict(c, de.deserialize(s, **opts), reuse_instances=False, type_check=type_check)

@@ -18,7 +18,7 @@ serde.init(True)
 
 @pytest.mark.parametrize("opt", opt_case, ids=opt_case_ids())
 @pytest.mark.parametrize("se,de", all_formats)
-def test_simple(se, de, opt):
+def test_numpy_simple(se, de, opt):
     log.info(f"Running test with se={se.__name__} de={de.__name__} opts={opt}")
 
     @serde.serde(**opt)

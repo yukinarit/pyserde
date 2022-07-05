@@ -90,10 +90,10 @@ class PriDict:
     Dict containing primitives.
     """
 
-    i: Dict[int, int]
+    i: Dict[str, int]
     s: Dict[str, str]
-    f: Dict[float, float]
-    b: Dict[bool, bool]
+    f: Dict[str, float]
+    b: Dict[str, bool]
 
 
 @serde
