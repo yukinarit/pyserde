@@ -31,11 +31,14 @@ log = logging.getLogger('test')
 serde.init(True)
 
 
-@pytest.mark.parametrize('t,T', types, ids=type_ids())
+@pytest.mark.parametrize('t,T,f', types, ids=type_ids())
 @pytest.mark.parametrize('opt', opt_case, ids=opt_case_ids())
 @pytest.mark.parametrize('se,de', all_formats)
-def test_simple(se, de, opt, t, T):
+def test_simple(se, de, opt, t, T, f):
     log.info(f'Running test with se={se.__name__} de={de.__name__} opts={opt}')
+
+    if f(se, de, opt):
+        return
 
     @serde.serde(**opt)
     class C:
@@ -63,10 +66,10 @@ def test_simple(se, de, opt, t, T):
         assert t == de(T, se(t, type_check=Strict), type_check=Strict)
 
 
-@pytest.mark.parametrize('t,T', types, ids=type_ids())
+@pytest.mark.parametrize('t,T,filter', types, ids=type_ids())
 @pytest.mark.parametrize('opt', opt_case, ids=opt_case_ids())
 @pytest.mark.parametrize('se,de', (format_dict + format_tuple))
-def test_simple_with_reuse_instances(se, de, opt, t, T):
+def test_simple_with_reuse_instances(se, de, opt, t, T, filter):
     log.info(f'Running test with se={se.__name__} de={de.__name__} opts={opt} while reusing instances')
 
     @serde.serde(**opt)
@@ -334,18 +337,19 @@ def test_default(se, de):
     assert p == from_dict(PriDefault, {'i': 10, 's': 'foo', 'f': 100.0, 'b': True})
     assert p == from_tuple(PriDefault, (10, 'foo', 100.0, True))
 
-    o = OptDefault()
-    assert o == de(OptDefault, se(o))
+    if se is not serde.toml.to_toml:
+        o = OptDefault()
+        assert o == de(OptDefault, se(o))
+        o = OptDefault()
+        assert o == from_dict(OptDefault, {})
+        assert o == from_dict(OptDefault, {"n": None})
+        assert o == from_dict(OptDefault, {"n": None, "i": 10})
+        assert o == from_tuple(OptDefault, (None, 10))
 
-    o = OptDefault()
-    assert o == from_dict(OptDefault, {})
-    assert o == from_dict(OptDefault, {"n": None})
-    assert o == from_dict(OptDefault, {"n": None, "i": 10})
-    assert o == from_tuple(OptDefault, (None, 10))
-
-    o = OptDefault(n=None, i=None)
-    assert o == from_dict(OptDefault, {"n": None, "i": None})
-    assert o == from_tuple(OptDefault, (None, None))
+    if se is not serde.toml.to_toml:
+        o = OptDefault(n=None, i=None)
+        assert o == from_dict(OptDefault, {"n": None, "i": None})
+        assert o == from_tuple(OptDefault, (None, None))
 
     assert 10 == dataclasses.fields(PriDefault)[0].default
     assert 'foo' == dataclasses.fields(PriDefault)[1].default
@@ -394,6 +398,32 @@ def test_msgpack_unnamed():
     d = b'\x94\n\xa3foo\xcb@Y\x00\x00\x00\x00\x00\x00\xc3'
     assert d == serde.msgpack.to_msgpack(p, named=False)
     assert p == serde.msgpack.from_msgpack(data.Pri, d, named=False)
+
+
+def test_toml():
+    @serde.serde
+    @dataclasses.dataclass
+    class Foo:
+        v: Optional[int]
+
+    f = Foo(10)
+    assert "v = 10\n" == serde.toml.to_toml(f)
+    assert f == serde.toml.from_toml(Foo, "v = 10\n")
+
+    # TODO: Should raise SerdeError
+    with pytest.raises(TypeError):
+        f = Foo(None)
+        serde.toml.to_toml(f)
+
+    @serde.serde
+    @dataclasses.dataclass
+    class Foo:
+        v: Set[int]
+
+    # TODO: Should raise SerdeError
+    with pytest.raises(TypeError):
+        f = Foo({1, 2, 3})
+        serde.toml.to_toml(f)
 
 
 @pytest.mark.parametrize('se,de', all_formats)

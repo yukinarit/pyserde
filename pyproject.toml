@@ -29,7 +29,8 @@ typing_extensions = { version = "*", markers = "python_version ~= '3.7.0'" }
 casefy = "*"
 jinja2 = "*"
 msgpack = { version = "*", markers = "extra == 'msgpack' or extra == 'all'", optional = true }
-toml = { version = "*", markers = "extra == 'toml' or extra == 'all'", optional = true }
+tomli = { version = "*", markers = "extra == 'toml' or extra == 'all'", optional = true }
+tomli-w = { version = "*", markers = "extra == 'toml' or extra == 'all'", optional = true }
 pyyaml = { version = "*", markers = "extra == 'yaml' or extra == 'all'", optional = true }
 numpy = [
     { version = "~1.21.0,<1.23.0", markers = "python_version ~= '3.7.0' and (extra == 'numpy' or extra == 'all')", optional = true },
@@ -41,7 +42,8 @@ orjson = { version = "*", markers = "extra == 'orjson' or extra == 'all'", optio
 
 [tool.poetry.dev-dependencies]
 pyyaml = "*"
-toml = "*"
+tomli = "*"
+tomli-w = "*"
 msgpack = "*"
 numpy = [
     { version = "~1.21.0", markers = "python_version ~= '3.7.0'" },
@@ -60,14 +62,15 @@ mypy = { version = "==0.931", markers = "platform_python_implementation!='PyPy'"
 more-itertools = "~=8.6.0"
 pre-commit = "==v2.10.1"
 pytest-xdist = "^2.3.0"
+types-PyYAML = "^6.0.9"
 
 [tool.poetry.extras]
 msgpack = ["msgpack"]
 numpy = ["numpy"]
-toml = ["toml"]
+toml = ["tomli", "tomli-w"]
 yaml = ["pyyaml"]
 orjson = ["orjson"]
-all = ["msgpack", "toml", "pyyaml", "numpy", "orjson"]
+all = ["msgpack", "tomli", "tomli-w", "pyyaml", "numpy", "orjson"]
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
