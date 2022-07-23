@@ -68,7 +68,7 @@ class LitUnion:
     Union of literals
     """
 
-    v: Union[int, Literal["foo", "bar"]]
+    v: Union[int, Literal["foo", "bar", "*"]]
 
 
 def test_union():
@@ -151,6 +151,11 @@ def test_union_with_literal():
 
     v = LitUnion("bar")
     s = '{"v":"bar"}'
+    assert s == to_json(v)
+    assert v == from_json(LitUnion, s)
+
+    v = LitUnion("*")
+    s = '{"v":"*"}'
     assert s == to_json(v)
     assert v == from_json(LitUnion, s)
 
