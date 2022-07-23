@@ -3,6 +3,12 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import Dict, Generic, List, NewType, Optional, Set, Tuple, TypeVar, Union
 
+if sys.version_info[:2] == (3, 7):
+    from typing_extensions import Literal
+else:
+    from typing import Literal
+
+
 import serde
 from serde.compat import (
     is_dict,
@@ -84,6 +90,7 @@ def test_typename():
     assert typename(Dict[str, Foo]) == "Dict[str, Foo]"
     assert typename(Set) == "Set"
     assert typename(Set[int]) == "Set[int]"
+    assert typename(Literal[1, 1.0, "Hey"]) == "Literal[1, 1.0, Hey]"
 
 
 def test_iter_types():

@@ -2,7 +2,7 @@ import logging
 import sys
 from dataclasses import dataclass
 from ipaddress import IPv4Address
-from typing import Dict, Generic, List, Optional, Tuple, TypeVar, Union
+from typing import Dict, Generic, List, Literal, Optional, Tuple, TypeVar, Union
 from uuid import UUID
 
 import pytest
@@ -59,6 +59,16 @@ class ContUnion:
     """
 
     v: Union[Dict[str, int], List[int], List[str]]
+
+
+@serde
+@dataclass(unsafe_hash=True)
+class LitUnion:
+    """
+    Union of literals
+    """
+
+    v: Union[int, Literal["foo", "bar"]]
 
 
 def test_union():
@@ -126,6 +136,28 @@ def test_union_containers():
     assert s == to_json(v)
     # Note: this only works because Dict[str, int] comes first in Union otherwise a List would win
     assert v == from_json(ContUnion, s)
+
+
+def test_union_with_literal():
+    v = LitUnion(10)
+    s = '{"v":10}'
+    assert s == to_json(v)
+    assert v == from_json(LitUnion, s)
+
+    v = LitUnion("foo")
+    s = '{"v":"foo"}'
+    assert s == to_json(v)
+    assert v == from_json(LitUnion, s)
+
+    v = LitUnion("bar")
+    s = '{"v":"bar"}'
+    assert s == to_json(v)
+    assert v == from_json(LitUnion, s)
+
+    s = '{"v":"boo"}'
+
+    with pytest.raises(SerdeError):
+        from_json(LitUnion, s)
 
 
 def test_union_with_complex_types():
