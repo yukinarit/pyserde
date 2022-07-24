@@ -2,7 +2,7 @@ import logging
 import sys
 from dataclasses import dataclass
 from ipaddress import IPv4Address
-from typing import Dict, Generic, List, Literal, Optional, Tuple, TypeVar, Union
+from typing import Dict, Generic, List, Optional, Tuple, TypeVar, Union
 from uuid import UUID
 
 import pytest
@@ -10,6 +10,7 @@ import pytest
 from serde import SerdeError, from_dict, from_tuple
 from serde import init as serde_init
 from serde import logger, serde, to_dict, to_tuple
+from serde.compat import Literal
 from serde.json import from_json, to_json
 
 logging.basicConfig(level=logging.WARNING)

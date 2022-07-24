@@ -3,14 +3,9 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import Dict, Generic, List, NewType, Optional, Set, Tuple, TypeVar, Union
 
-if sys.version_info[:2] == (3, 7):
-    from typing_extensions import Literal
-else:
-    from typing import Literal
-
-
 import serde
 from serde.compat import (
+    Literal,
     is_dict,
     is_generic,
     is_list,
