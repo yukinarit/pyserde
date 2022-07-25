@@ -27,19 +27,28 @@ else:
 
 try:
     if sys.version_info[:2] <= (3, 8):
-        import numpy.typing as npt
+        import numpy as np
 
-        # Note: these functions are only needed on Python 3.8 or earlier
+        def __is_nptype(tp):
+            return getattr(tp, "__origin__", None) in (np.ndarray, np.dtype)
+
+        # If the given type is NDArray or _DType, returns __origin__ or __args__.
+        # This should work since the only GenericAliases that current NumPy (1.23)
+        # exposes are 'NDArray' and '_DType'.
+        # Note: these functions are only needed on Python 3.8 or earlier.
+        # On Python >= 3.9, numpy.ndarray[...] and numpy.dtype[...] are instances of
+        # the builtin genericalias class.
         def get_np_origin(tp):
-            if isinstance(tp, npt._generic_alias._GenericAlias) and tp.__origin__ is not ClassVar:
+            if __is_nptype(tp):
                 return tp.__origin__
-            return None
+            else:
+                return None
 
         def get_np_args(tp):
-            if isinstance(tp, npt._generic_alias._GenericAlias) and tp.__origin__ is not ClassVar:
+            if __is_nptype(tp):
                 return tp.__args__
-
-            return ()
+            else:
+                return ()
 
     else:
 
