@@ -212,7 +212,7 @@ def typename(typ, with_typing_module: bool = False) -> str:
         args = type_args(typ)
         if not args:
             raise TypeError("Literal type requires at least one literal argument")
-        return f'Literal[{", ".join(repr(e) for e in args)}]'
+        return f'Literal[{", ".join(str(e) for e in args)}]'
     elif typ is Any:
         return f'{mod}Any'
     else:

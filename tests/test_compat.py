@@ -5,6 +5,7 @@ from typing import Dict, Generic, List, NewType, Optional, Set, Tuple, TypeVar, 
 
 import serde
 from serde.compat import (
+    Literal,
     is_dict,
     is_generic,
     is_list,
@@ -84,6 +85,7 @@ def test_typename():
     assert typename(Dict[str, Foo]) == "Dict[str, Foo]"
     assert typename(Set) == "Set"
     assert typename(Set[int]) == "Set[int]"
+    assert typename(Literal[1, 1.0, "Hey"]) == "Literal[1, 1.0, Hey]"
 
 
 def test_iter_types():

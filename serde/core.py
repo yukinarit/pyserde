@@ -562,7 +562,7 @@ def union_func_name(prefix: str, union_args: List[Type]) -> str:
     >>> union_func_name("union_se", [int, List[str], IPv4Address])
     'union_se_int_List_str__IPv4Address'
     """
-    return re.sub(r"[ ,\[\]]+", "_", f"{prefix}_{'_'.join([typename(e) for e in union_args])}")
+    return re.sub(r"[^A-Za-z0-9]", "_", f"{prefix}_{'_'.join([typename(e) for e in union_args])}")
 
 
 def literal_func_name(literal_args: List[Any]) -> str:
