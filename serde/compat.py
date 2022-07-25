@@ -36,8 +36,8 @@ try:
         # This should work since the only GenericAliases that current NumPy (1.23)
         # exposes are 'NDArray' and '_DType'.
         # Note: these functions are only needed on Python 3.8 or earlier.
-        # On Python >= 3.9, numpy.ndarray[...] and numpy.dtype[...] are used as
-        # typing.GenericAlias.
+        # On Python >= 3.9, numpy.ndarray[...] and numpy.dtype[...] are instances of
+        # the builtin genericalias class.
         def get_np_origin(tp):
             if __is_nptype(tp):
                 return tp.__origin__
