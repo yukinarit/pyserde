@@ -6,7 +6,7 @@ from typing import Type
 import tomli
 import tomli_w
 
-from .compat import T
+from .compat import T, DateTimeTypes
 from .core import Coerce, TypeCheck
 from .de import Deserializer, from_dict
 from .se import Serializer, to_dict
@@ -35,7 +35,10 @@ def to_toml(obj, se: Type[Serializer] = TomlSerializer, type_check: TypeCheck = 
 
     If you want to use the other toml package, you can subclass `TomlSerializer` and implement your own logic.
     """
-    return se.serialize(to_dict(obj, reuse_instances=False, type_check=type_check), **opts)
+    return se.serialize(
+        to_dict(obj, reuse_instances=False, type_check=type_check, preserved_datetime_types=DateTimeTypes),
+        **opts,
+    )
 
 
 def from_toml(
@@ -49,4 +52,10 @@ def from_toml(
 
     If you want to use the other toml package, you can subclass `TomlDeserializer` and implement your own logic.
     """
-    return from_dict(c, de.deserialize(s, **opts), reuse_instances=False, type_check=type_check)
+    return from_dict(
+        c,
+        de.deserialize(s, **opts),
+        reuse_instances=False,
+        preserved_datetime_types=DateTimeTypes,
+        type_check=type_check,
+    )

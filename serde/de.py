@@ -8,7 +8,7 @@ import dataclasses
 import functools
 import typing
 from dataclasses import dataclass, is_dataclass
-from typing import Any, Callable, Dict, List, Optional, Type, TypeVar
+from typing import Any, Callable, Dict, List, Optional, Type, TypeVar, Tuple
 
 import jinja2
 
@@ -58,7 +58,6 @@ from .core import (
     Field,
     NoCheck,
     SerdeScope,
-    Strict,
     Tagging,
     TypeCheck,
     add_func,
@@ -315,13 +314,24 @@ class Deserializer(metaclass=abc.ABCMeta):
         raise NotImplementedError
 
 
-def from_obj(c: Type, o: Any, named: bool, reuse_instances: bool, type_check: TypeCheck = Coerce):
+def from_obj(
+    c: Type,
+    o: Any,
+    named: bool,
+    reuse_instances: bool,
+    preserved_datetime_types: Tuple[type, ...] = (),
+    type_check: TypeCheck = Coerce,
+):
     """
     Deserialize from an object into an instance of the type specified as arg `c`.
     `c` can be either primitive type, `List`, `Tuple`, `Dict` or `deserialize` class.
 
     When `type_check`=True, pyserde checks if deserialized field values are equal to the
     types declared.
+
+    `preserved_datetime_types` determines the deserialization behavior of datetime types.
+    If a type (e.g., `datetime.date`) is supported by deseriazation function (e.g., `tomli.load`),
+    leave the type as is instead of converting it to a string.
     """
     strict = type_check.is_strict()
 
@@ -335,13 +345,25 @@ def from_obj(c: Type, o: Any, named: bool, reuse_instances: bool, type_check: Ty
     else:
         maybe_generic = c
     try:
-        thisfunc = functools.partial(from_obj, named=named, reuse_instances=reuse_instances, type_check=type_check)
+        thisfunc = functools.partial(
+            from_obj,
+            named=named,
+            reuse_instances=reuse_instances,
+            preserved_datetime_types=preserved_datetime_types,
+            type_check=type_check,
+        )
         if o is None:
             return None
         if is_deserializable(c):
             serde_scope: SerdeScope = getattr(c, SERDE_SCOPE)
             func_name = FROM_DICT if named else FROM_ITER
-            res = serde_scope.funcs[func_name](c, maybe_generic=maybe_generic, data=o, reuse_instances=reuse_instances)
+            res = serde_scope.funcs[func_name](
+                c,
+                maybe_generic=maybe_generic,
+                data=o,
+                reuse_instances=reuse_instances,
+                preserved_datetime_types=preserved_datetime_types,
+            )
             if strict:
                 serde_scope.funcs[TYPE_CHECK](res)
             return res
@@ -401,7 +423,11 @@ def from_obj(c: Type, o: Any, named: bool, reuse_instances: bool, type_check: Ty
         elif is_numpy_array(c):
             return deserialize_numpy_array_direct(c, o)
         elif is_datetime(c):
-            return c.fromisoformat(o)
+            if c in preserved_datetime_types:
+                # This datetime type is natively supported by the deserializer
+                return o
+            else:
+                return c.fromisoformat(o)
         elif is_any(c):
             return o
 
@@ -414,7 +440,13 @@ def from_obj(c: Type, o: Any, named: bool, reuse_instances: bool, type_check: Ty
         raise SerdeError(e)
 
 
-def from_dict(cls, o, reuse_instances: bool = ..., type_check: TypeCheck = Coerce):
+def from_dict(
+    cls,
+    o,
+    reuse_instances: bool = ...,
+    preserved_datetime_types: Tuple[type, ...] = (),
+    type_check: TypeCheck = Coerce,
+):
     """
     Deserialize dictionary into object.
 
@@ -434,10 +466,22 @@ def from_dict(cls, o, reuse_instances: bool = ..., type_check: TypeCheck = Coerc
     >>> from_dict(List[Foo], lst)
     [Foo(i=10, s='foo', f=100.0, b=True), Foo(i=20, s='foo', f=100.0, b=True)]
     """
-    return from_obj(cls, o, named=True, reuse_instances=reuse_instances, type_check=type_check)
+    return from_obj(
+        cls,
+        o,
+        named=True,
+        reuse_instances=reuse_instances,
+        preserved_datetime_types=preserved_datetime_types,
+        type_check=type_check,
+    )
 
 
-def from_tuple(cls, o, reuse_instances: bool = ..., type_check: TypeCheck = Coerce):
+def from_tuple(
+    cls,
+    o,
+    reuse_instances: bool = ...,
+    preserved_datetime_types: Tuple[type, ...] = (),
+    type_check: TypeCheck = Coerce):
     """
     Deserialize tuple into object.
 
@@ -457,7 +501,14 @@ def from_tuple(cls, o, reuse_instances: bool = ..., type_check: TypeCheck = Coer
     >>> from_tuple(List[Foo], lst)
     [Foo(i=10, s='foo', f=100.0, b=True), Foo(i=20, s='foo', f=100.0, b=True)]
     """
-    return from_obj(cls, o, named=False, reuse_instances=reuse_instances, type_check=type_check)
+    return from_obj(
+        cls,
+        o,
+        named=False,
+        reuse_instances=reuse_instances,
+        preserved_datetime_types=preserved_datetime_types,
+        type_check=type_check,
+    )
 
 
 @dataclass
@@ -584,9 +635,10 @@ class Renderer:
         elif is_str_serializable(arg.type):
             res = f"({self.c_tor_with_check(arg)}) if reuse_instances else {self.c_tor(arg)}"
         elif is_datetime(arg.type):
-            from_iso = f"{typename(arg.type)}.fromisoformat({arg.data})"
-            res = f"({arg.data} if isinstance({arg.data}, {typename(arg.type)}) else {from_iso}) \
-                    if reuse_instances else {from_iso}"
+            type_name = typename(arg.type)
+            res = f"""({arg.data}
+            if (reuse_instances and isinstance({arg.data}, {type_name})) or {type_name} in preserved_datetime_types
+            else {type_name}.fromisoformat({arg.data}))"""
         elif is_none(arg.type):
             res = "None"
         elif arg.type is Any:
@@ -816,7 +868,13 @@ def to_iter_arg(f: DeField, *args, **kwargs) -> DeField:
 
 def render_from_iter(cls: Type, custom: Optional[DeserializeFunc] = None) -> str:
     template = """
-def {{func}}(cls=cls, maybe_generic=None, data=None, reuse_instances = {{serde_scope.reuse_instances_default}}):
+def {{func}}(
+    cls=cls,
+    maybe_generic=None,
+    data=None,
+    reuse_instances = {{serde_scope.reuse_instances_default}},
+    preserved_datetime_types = (),
+):
   if reuse_instances is Ellipsis:
     reuse_instances = {{serde_scope.reuse_instances_default}}
 
@@ -851,7 +909,13 @@ def {{func}}(cls=cls, maybe_generic=None, data=None, reuse_instances = {{serde_s
 
 def render_from_dict(cls: Type, rename_all: Optional[str] = None, custom: Optional[DeserializeFunc] = None) -> str:
     template = """
-def {{func}}(cls=cls, maybe_generic=None, data=None, reuse_instances = {{serde_scope.reuse_instances_default}}):
+def {{func}}(
+    cls=cls,
+    maybe_generic=None,
+    data=None,
+    reuse_instances = {{serde_scope.reuse_instances_default}},
+    preserved_datetime_types = (),
+):
   if reuse_instances is Ellipsis:
     reuse_instances = {{serde_scope.reuse_instances_default}}
 
@@ -888,7 +952,13 @@ def {{func}}(cls=cls, maybe_generic=None, data=None, reuse_instances = {{serde_s
 
 def render_union_func(cls: Type, union_args: List[Type], tagging: Tagging = DefaultTagging) -> str:
     template = """
-def {{func}}(cls=cls, maybe_generic=None, data=None, reuse_instances = {{serde_scope.reuse_instances_default}}):
+def {{func}}(
+    cls=cls,
+    maybe_generic=None,
+    data=None,
+    reuse_instances = {{serde_scope.reuse_instances_default}},
+    preserved_datetime_types = (),
+):
   errors = []
   {% for t in union_args %}
   try:

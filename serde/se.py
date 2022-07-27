@@ -9,11 +9,12 @@ import dataclasses
 import functools
 import typing
 from dataclasses import dataclass, is_dataclass
-from typing import Any, Callable, Dict, Iterator, List, Optional, Type, TypeVar
+from typing import Any, Callable, Dict, Iterator, List, Optional, Type, TypeVar, Tuple
 
 import jinja2
 
 from .compat import (
+    DateTimeTypes,
     Literal,
     SerdeError,
     SerdeSkip,
@@ -291,7 +292,15 @@ def is_serializable(instance_or_class: Any) -> bool:
     return hasattr(instance_or_class, SERDE_SCOPE)
 
 
-def to_obj(o, named: bool, reuse_instances: bool, convert_sets: bool, c: Type = None, type_check: TypeCheck = Coerce):
+def to_obj(
+    o,
+    named: bool,
+    reuse_instances: bool,
+    convert_sets: bool,
+    c: Type = None,
+    preserved_datetime_types: Tuple[type, ...] = (),
+    type_check: TypeCheck = Coerce,
+):
     strict = type_check.is_strict()
 
     try:
@@ -300,6 +309,7 @@ def to_obj(o, named: bool, reuse_instances: bool, convert_sets: bool, c: Type = 
             named=named,
             reuse_instances=reuse_instances,
             convert_sets=convert_sets,
+            preserved_datetime_types=preserved_datetime_types,
         )
         if o is None:
             return None
@@ -308,7 +318,12 @@ def to_obj(o, named: bool, reuse_instances: bool, convert_sets: bool, c: Type = 
             func_name = TO_DICT if named else TO_ITER
             if strict:
                 serde_scope.funcs[TYPE_CHECK](o)
-            return serde_scope.funcs[func_name](o, reuse_instances=reuse_instances, convert_sets=convert_sets)
+            return serde_scope.funcs[func_name](
+                o,
+                reuse_instances=reuse_instances,
+                convert_sets=convert_sets,
+                preserved_datetime_types=preserved_datetime_types,
+            )
         elif is_dataclass(o):
             if strict:
                 serde_scope.funcs[TYPE_CHECK](o)
@@ -339,7 +354,11 @@ def to_obj(o, named: bool, reuse_instances: bool, convert_sets: bool, c: Type = 
         elif is_str_serializable_instance(o):
             return str(o)
         elif is_datetime_instance(o):
-            return o.isoformat()
+            if isinstance(o, preserved_datetime_types):
+                # This datetime type is natively supported by the serializer
+                return o
+            else:
+                return o.isoformat()
 
         return o
 
@@ -351,10 +370,21 @@ def astuple(v):
     """
     Serialize object into tuple.
     """
-    return to_tuple(v, reuse_instances=False, convert_sets=False)
+    return to_tuple(
+        v,
+        reuse_instances=False,
+        convert_sets=False,
+        preserved_datetime_types=DateTimeTypes,
+    )
 
 
-def to_tuple(o, reuse_instances: bool = ..., convert_sets: bool = ..., type_check: TypeCheck = Coerce) -> Any:
+def to_tuple(
+    o,
+    reuse_instances: bool = ...,
+    convert_sets: bool = ...,
+    preserved_datetime_types: Tuple[type, ...] = (),
+    type_check: TypeCheck = Coerce,
+) -> Any:
     """
     Serialize object into tuple.
 
@@ -374,17 +404,35 @@ def to_tuple(o, reuse_instances: bool = ..., convert_sets: bool = ..., type_chec
     >>> to_tuple(lst)
     [(10, 'foo', 100.0, True), (20, 'foo', 100.0, True)]
     """
-    return to_obj(o, named=False, reuse_instances=reuse_instances, convert_sets=convert_sets, type_check=type_check)
+    return to_obj(
+        o,
+        named=False,
+        reuse_instances=reuse_instances,
+        convert_sets=convert_sets,
+        preserved_datetime_types=preserved_datetime_types,
+        type_check=type_check,
+    )
 
 
 def asdict(v):
     """
     Serialize object into dictionary.
     """
-    return to_dict(v, reuse_instances=False, convert_sets=False)
+    return to_dict(
+        v,
+        reuse_instances=False,
+        convert_sets=False,
+        preserved_datetime_types=DateTimeTypes,
+    )
 
 
-def to_dict(o, reuse_instances: bool = ..., convert_sets: bool = ..., type_check: TypeCheck = Coerce) -> Any:
+def to_dict(
+    o,
+    reuse_instances: bool = ...,
+    convert_sets: bool = ...,
+    preserved_datetime_types: Tuple[type, ...] = (),
+    type_check: TypeCheck = Coerce,
+) -> Any:
     """
     Serialize object into dictionary.
 
@@ -404,7 +452,14 @@ def to_dict(o, reuse_instances: bool = ..., convert_sets: bool = ..., type_check
     >>> to_dict(lst)
     [{'i': 10, 's': 'foo', 'f': 100.0, 'b': True}, {'i': 20, 's': 'foo', 'f': 100.0, 'b': True}]
     """
-    return to_obj(o, named=True, reuse_instances=reuse_instances, convert_sets=convert_sets, type_check=type_check)
+    return to_obj(
+        o,
+        named=True,
+        reuse_instances=reuse_instances,
+        convert_sets=convert_sets,
+        type_check=type_check,
+        preserved_datetime_types=preserved_datetime_types,
+    )
 
 
 @dataclass
@@ -445,8 +500,12 @@ def sefields(cls: Type) -> Iterator[SeField]:
 
 def render_to_tuple(cls: Type, custom: Optional[SerializeFunc] = None) -> str:
     template = """
-def {{func}}(obj, reuse_instances = {{serde_scope.reuse_instances_default}},
-             convert_sets = {{serde_scope.convert_sets_default}}):
+def {{func}}(
+    obj,
+    reuse_instances = {{serde_scope.reuse_instances_default}},
+    convert_sets = {{serde_scope.convert_sets_default}},
+    preserved_datetime_types = (),
+):
   if reuse_instances is Ellipsis:
     reuse_instances = {{serde_scope.reuse_instances_default}}
   if convert_sets is Ellipsis:
@@ -472,8 +531,12 @@ def {{func}}(obj, reuse_instances = {{serde_scope.reuse_instances_default}},
 
 def render_to_dict(cls: Type, case: Optional[str] = None, custom: Optional[SerializeFunc] = None) -> str:
     template = """
-def {{func}}(obj, reuse_instances = {{serde_scope.reuse_instances_default}},
-             convert_sets = {{serde_scope.convert_sets_default}}):
+def {{func}}(
+    obj,
+    reuse_instances = {{serde_scope.reuse_instances_default}},
+    convert_sets = {{serde_scope.convert_sets_default}},
+    preserved_datetime_types = (),
+):
   if reuse_instances is Ellipsis:
     reuse_instances = {{serde_scope.reuse_instances_default}}
   if convert_sets is Ellipsis:
@@ -510,7 +573,7 @@ def render_union_func(cls: Type, union_args: List[Type], tagging: Tagging = Defa
     Render function that serializes a field with union type.
     """
     template = """
-def {{func}}(obj, reuse_instances, convert_sets):
+def {{func}}(obj, reuse_instances, convert_sets, preserved_datetime_types):
   union_args = serde_scope.union_se_args['{{func}}']
 
   {% for t in union_args %}
@@ -650,7 +713,11 @@ convert_sets=convert_sets), foo[2],)"
         elif is_str_serializable(arg.type):
             res = f"{arg.varname} if reuse_instances else {self.string(arg)}"
         elif is_datetime(arg.type):
-            res = f"{arg.varname} if reuse_instances else {arg.varname}.isoformat()"
+            # Some serealizers (e.g., toml) can handle datetime types directly.
+            # So, we don't convert such types if given in preserved_datetime_types.
+            res = f"""({arg.varname}
+            if reuse_instances or isinstance({arg.varname}, preserved_datetime_types)
+            else {arg.varname}.isoformat())"""
         elif is_none(arg.type):
             res = "None"
         elif arg.type is Any or isinstance(arg.type, TypeVar):
@@ -769,7 +836,9 @@ convert_sets=convert_sets), foo[2],)"
 
     def union_func(self, arg: SeField) -> str:
         func_name = union_func_name(UNION_SE_PREFIX, type_args(arg.type))
-        return f"serde_scope.funcs['{func_name}']({arg.varname}, reuse_instances, convert_sets)"
+        return (
+            f"serde_scope.funcs['{func_name}']({arg.varname}, reuse_instances, convert_sets, preserved_datetime_types)"
+        )
 
     def literal(self, arg: SeField) -> str:
         return f"{arg.varname}"

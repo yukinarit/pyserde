@@ -1,6 +1,7 @@
 """
 Serialize and Deserialize in YAML format. This module depends on [pyyaml](https://pypi.org/project/PyYAML/) package.
 """
+from datetime import date, datetime
 from typing import Type
 
 import yaml
@@ -11,6 +12,8 @@ from .de import Deserializer, from_dict
 from .se import Serializer, to_dict
 
 __all__ = ["from_yaml", "to_yaml"]
+
+_YamlDateTimeTypes = date, datetime
 
 
 class YamlSerializer(Serializer):
@@ -34,7 +37,10 @@ def to_yaml(obj, se: Type[Serializer] = YamlSerializer, type_check: TypeCheck = 
 
     If you want to use the other yaml package, you can subclass `YamlSerializer` and implement your own logic.
     """
-    return se.serialize(to_dict(obj, reuse_instances=False, type_check=type_check), **opts)
+    return se.serialize(
+        to_dict(obj, reuse_instances=False, preserved_datetime_types=_YamlDateTimeTypes, type_check=type_check),
+        **opts,
+    )
 
 
 def from_yaml(
@@ -46,4 +52,10 @@ def from_yaml(
 
     If you want to use the other yaml package, you can subclass `YamlDeserializer` and implement your own logic.
     """
-    return from_dict(c, de.deserialize(s, **opts), reuse_instances=False, type_check=type_check)
+    return from_dict(
+        c,
+        de.deserialize(s, **opts),
+        reuse_instances=False,
+        preserved_datetime_types=_YamlDateTimeTypes,
+        type_check=type_check,
+    )
