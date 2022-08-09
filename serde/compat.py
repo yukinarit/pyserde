@@ -225,6 +225,11 @@ def typename(typ, with_typing_module: bool = False) -> str:
     elif typ is Any:
         return f'{mod}Any'
     else:
+        # Get super type for NewType
+        inner = getattr(typ, '__supertype__', None)
+        if inner:
+            return typename(typ.__supertype__)
+
         name = getattr(typ, '_name', None)
         if name:
             return name
