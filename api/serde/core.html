@@ -929,6 +929,18 @@
 </span><span id="L-750"><a href="#L-750"><span class="linenos">750</span></a><span class="n">Coerce</span> <span class="o">=</span> <span class="n">TypeCheck</span><span class="p">(</span><span class="n">kind</span><span class="o">=</span><span class="n">TypeCheck</span><span class="o">.</span><span class="n">Kind</span><span class="o">.</span><span class="n">Coerce</span><span class="p">)</span>
 </span><span id="L-751"><a href="#L-751"><span class="linenos">751</span></a>
 </span><span id="L-752"><a href="#L-752"><span class="linenos">752</span></a><span class="n">Strict</span> <span class="o">=</span> <span class="n">TypeCheck</span><span class="p">(</span><span class="n">kind</span><span class="o">=</span><span class="n">TypeCheck</span><span class="o">.</span><span class="n">Kind</span><span class="o">.</span><span class="n">Strict</span><span class="p">)</span>
+</span><span id="L-753"><a href="#L-753"><span class="linenos">753</span></a>
+</span><span id="L-754"><a href="#L-754"><span class="linenos">754</span></a>
+</span><span id="L-755"><a href="#L-755"><span class="linenos">755</span></a><span class="k">def</span> <span class="nf">coerce</span><span class="p">(</span><span class="n">typ</span><span class="p">:</span> <span class="n">Type</span><span class="p">,</span> <span class="n">obj</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">type_check</span><span class="p">:</span> <span class="n">TypeCheck</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+</span><span id="L-756"><a href="#L-756"><span class="linenos">756</span></a>    <span class="k">return</span> <span class="n">typ</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span> <span class="k">if</span> <span class="n">is_coercible</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">type_check</span><span class="p">)</span> <span class="k">else</span> <span class="n">obj</span>
+</span><span id="L-757"><a href="#L-757"><span class="linenos">757</span></a>
+</span><span id="L-758"><a href="#L-758"><span class="linenos">758</span></a>
+</span><span id="L-759"><a href="#L-759"><span class="linenos">759</span></a><span class="k">def</span> <span class="nf">is_coercible</span><span class="p">(</span><span class="n">typ</span><span class="p">:</span> <span class="n">Type</span><span class="p">,</span> <span class="n">obj</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">type_check</span><span class="p">:</span> <span class="n">TypeCheck</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+</span><span id="L-760"><a href="#L-760"><span class="linenos">760</span></a>    <span class="k">if</span> <span class="ow">not</span> <span class="n">type_check</span><span class="o">.</span><span class="n">is_coerce</span><span class="p">():</span>
+</span><span id="L-761"><a href="#L-761"><span class="linenos">761</span></a>        <span class="k">return</span> <span class="kc">False</span>
+</span><span id="L-762"><a href="#L-762"><span class="linenos">762</span></a>    <span class="k">if</span> <span class="n">obj</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="L-763"><a href="#L-763"><span class="linenos">763</span></a>        <span class="k">return</span> <span class="kc">False</span>
+</span><span id="L-764"><a href="#L-764"><span class="linenos">764</span></a>    <span class="k">return</span> <span class="kc">True</span>
 </span></pre></div>
 
 
