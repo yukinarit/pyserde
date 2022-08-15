@@ -752,13 +752,11 @@ Coerce = TypeCheck(kind=TypeCheck.Kind.Coerce)
 Strict = TypeCheck(kind=TypeCheck.Kind.Strict)
 
 
-def coerce(typ: Type, obj: Any, type_check: TypeCheck) -> Any:
-    return typ(obj) if is_coercible(typ, obj, type_check) else obj
+def coerce(typ: Type, obj: Any) -> Any:
+    return typ(obj) if is_coercible(typ, obj) else obj
 
 
-def is_coercible(typ: Type, obj: Any, type_check: TypeCheck) -> bool:
-    if not type_check.is_coerce():
-        return False
+def is_coercible(typ: Type, obj: Any) -> bool:
     if obj is None:
         return False
     return True
