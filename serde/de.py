@@ -53,7 +53,6 @@ from .core import (
     SERDE_SCOPE,
     TYPE_CHECK,
     UNION_DE_PREFIX,
-    Coerce,
     DefaultTagging,
     Field,
     NoCheck,
@@ -64,11 +63,7 @@ from .core import (
     coerce,
     ensure,
     fields,
-    is_dict_instance,
     is_instance,
-    is_list_instance,
-    is_set_instance,
-    is_tuple_instance,
     literal_func_name,
     logger,
     raise_unsupported_type,
@@ -143,7 +138,7 @@ def deserialize(
     reuse_instances_default: bool = True,
     deserializer: Optional[DeserializeFunc] = None,
     tagging: Tagging = DefaultTagging,
-    type_check: TypeCheck = Coerce,
+    type_check: TypeCheck = NoCheck,
     **kwargs,
 ):
     """
@@ -215,7 +210,7 @@ def deserialize(
         # Create a scope storage used by serde.
         # Each class should get own scope. Child classes can not share scope with parent class.
         # That's why we need the "scope.cls is not cls" check.
-        scope: SerdeScope = getattr(cls, SERDE_SCOPE, None)
+        scope: Optional[SerdeScope] = getattr(cls, SERDE_SCOPE, None)
         if scope is None or scope.cls is not cls:
             scope = SerdeScope(cls, reuse_instances_default=reuse_instances_default)
             setattr(cls, SERDE_SCOPE, scope)
@@ -234,7 +229,7 @@ def deserialize(
         g['get_generic_arg'] = get_generic_arg
         g['is_instance'] = is_instance
         g['TypeCheck'] = TypeCheck
-        g['Coerce'] = Coerce
+        g['NoCheck'] = NoCheck
         g['coerce'] = coerce
         if deserialize:
             g['serde_custom_class_deserializer'] = functools.partial(
@@ -804,7 +799,7 @@ def to_iter_arg(f: DeField, *args, **kwargs) -> DeField:
     return f
 
 
-def render_from_iter(cls: Type, custom: Optional[DeserializeFunc] = None, type_check: TypeCheck = Coerce) -> str:
+def render_from_iter(cls: Type, custom: Optional[DeserializeFunc] = None, type_check: TypeCheck = NoCheck) -> str:
     template = """
 def {{func}}(cls=cls, maybe_generic=None, data=None, reuse_instances = {{serde_scope.reuse_instances_default}}):
   if reuse_instances is Ellipsis:
@@ -843,7 +838,7 @@ def render_from_dict(
     cls: Type,
     rename_all: Optional[str] = None,
     custom: Optional[DeserializeFunc] = None,
-    type_check: TypeCheck = Coerce,
+    type_check: TypeCheck = NoCheck,
 ) -> str:
     template = """
 def {{func}}(cls=cls, maybe_generic=None, data=None,
@@ -867,6 +862,10 @@ def {{func}}(cls=cls, maybe_generic=None, data=None,
   except Exception as e:
     raise UserError(e)
 
+  {% if type_check.is_strict() %}
+  rv.__serde__.funcs['typecheck'](rv)
+  {% endif %}
+
   return rv
     """
 
@@ -874,7 +873,9 @@ def {{func}}(cls=cls, maybe_generic=None, data=None,
     env = jinja2.Environment(loader=jinja2.DictLoader({'dict': template}))
     env.filters.update({'rvalue': renderer.render})
     env.filters.update({'arg': functools.partial(to_arg, rename_all=rename_all)})
-    res = env.get_template('dict').render(func=FROM_DICT, serde_scope=getattr(cls, SERDE_SCOPE), fields=defields(cls))
+    res = env.get_template('dict').render(
+        func=FROM_DICT, serde_scope=getattr(cls, SERDE_SCOPE), fields=defields(cls), type_check=type_check
+    )
 
     if renderer.import_numpy:
         res = "import numpy\n" + res

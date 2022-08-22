@@ -677,7 +677,7 @@ def render_type_check(cls: Type) -> str:
     import serde.compat
 
     template = """
-def typecheck(self):
+def {{type_check_func}}(self):
   {% for f in fields -%}
 
   {% if ((is_numpy_available() and is_numpy_type(f.type)) or

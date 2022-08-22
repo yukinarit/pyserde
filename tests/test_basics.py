@@ -768,25 +768,23 @@ test_cases = [
 ]
 
 
-"""
 @pytest.mark.parametrize('T,data,exc', test_cases)
 def test_type_check(T, data, exc):
-    @serde.serde
+    @serde.serde(type_check=Strict)
     class C:
         a: T
 
     if exc:
         with pytest.raises(serde.SerdeError):
-            d = serde.to_dict(C(data), type_check=Strict)
-            serde.from_dict(C, d, type_check=Strict)
+            d = serde.to_dict(C(data))
+            serde.from_dict(C, d)
     else:
-        d = serde.to_dict(C(data), type_check=Strict)
-        serde.from_dict(C, d, type_check=Strict)
-"""
+        d = serde.to_dict(C(data))
+        serde.from_dict(C, d)
 
 
 def test_uncoercible():
-    @serde.serde
+    @serde.serde(type_check=serde.Coerce)
     class Foo:
         i: int
 
@@ -798,14 +796,22 @@ def test_uncoercible():
 
 
 def test_coerce():
+    @serde.serde(type_check=serde.Coerce)
+    @dataclasses.dataclass
+    class Foo:
+        i: int
+        s: str
+        f: float
+        b: bool
+
     d = {"i": "10", "s": 100, "f": 1000, "b": "True"}
-    p = serde.from_dict(data.Pri, d)
+    p = serde.from_dict(Foo, d)
     assert p.i == 10
     assert p.s == "100"
     assert p.f == 1000.0
     assert p.b
 
-    p = data.Pri("10", 100, 1000, "True")
+    p = Foo("10", 100, 1000, "True")
     d = serde.to_dict(p)
     assert d["i"] == 10
     assert d["s"] == "100"
@@ -815,15 +821,43 @@ def test_coerce():
     # Couldn't coerce
     with pytest.raises(serde.SerdeError):
         d = {"i": "foo", "s": 100, "f": "bar", "b": "True"}
-        p = serde.from_dict(data.Pri, d)
+        p = serde.from_dict(Foo, d)
+
+    @serde.serde(type_check=serde.Coerce)
+    @dataclasses.dataclass
+    class Int:
+        i: int
+
+    @serde.serde(type_check=serde.Coerce)
+    @dataclasses.dataclass
+    class Str:
+        s: str
+
+    @serde.serde(type_check=serde.Coerce)
+    @dataclasses.dataclass
+    class Float:
+        f: float
+
+    @serde.serde(type_check=serde.Coerce)
+    @dataclasses.dataclass
+    class Bool:
+        b: bool
+
+    @serde.serde(type_check=serde.Coerce)
+    @serde.dataclass
+    class Nested:
+        i: data.Int
+        s: data.Str
+        f: data.Float
+        b: data.Bool
 
     # Nested structure
-    p = data.NestedPri(data.Int("10"), data.Str(100), data.Float(1000), data.Bool("True"))
+    p = Nested(Int("10"), Str(100), Float(1000), Bool("True"))
     d = serde.to_dict(p)
     assert d["i"]["i"] == 10
     assert d["s"]["s"] == "100"
     assert d["f"]["f"] == 1000.0
     assert d["b"]["b"]
 
-    d = {"i": "10", "s": 100, "f": 1000, "b": "True"}
-    p = serde.from_dict(data.Pri, d)
+    d = {"i": {"i": "10"}, "s": {"s": 100}, "f": {"f": 1000}, "b": {"b": "True"}}
+    p = serde.from_dict(Nested, d)

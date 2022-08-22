@@ -50,9 +50,9 @@ from .core import (
     TO_ITER,
     TYPE_CHECK,
     UNION_SE_PREFIX,
-    Coerce,
     DefaultTagging,
     Field,
+    NoCheck,
     SerdeScope,
     Tagging,
     TypeCheck,
@@ -60,11 +60,7 @@ from .core import (
     coerce,
     conv,
     fields,
-    is_dict_instance,
     is_instance,
-    is_list_instance,
-    is_set_instance,
-    is_tuple_instance,
     logger,
     raise_unsupported_type,
     render_type_check,
@@ -143,7 +139,7 @@ def serialize(
     convert_sets_default: bool = False,
     serializer: Optional[SerializeFunc] = None,
     tagging: Tagging = DefaultTagging,
-    type_check: TypeCheck = Coerce,
+    type_check: TypeCheck = NoCheck,
     **kwargs,
 ):
     """
@@ -215,7 +211,7 @@ def serialize(
         # Create a scope storage used by serde.
         # Each class should get own scope. Child classes can not share scope with parent class.
         # That's why we need the "scope.cls is not cls" check.
-        scope: SerdeScope = getattr(cls, SERDE_SCOPE, None)
+        scope: Optional[SerdeScope] = getattr(cls, SERDE_SCOPE, None)
         if scope is None or scope.cls is not cls:
             scope = SerdeScope(
                 cls,
@@ -238,7 +234,7 @@ def serialize(
         g["typing"] = typing
         g["Literal"] = Literal
         g["TypeCheck"] = TypeCheck
-        g["Coerce"] = Coerce
+        g["NoCheck"] = NoCheck
         g["coerce"] = coerce
         if serialize:
             g["serde_custom_class_serializer"] = functools.partial(serde_custom_class_serializer, custom=serializer)
@@ -429,7 +425,7 @@ def sefields(cls: Type) -> Iterator[SeField]:
         yield f
 
 
-def render_to_tuple(cls: Type, custom: Optional[SerializeFunc] = None, type_check: TypeCheck = Coerce) -> str:
+def render_to_tuple(cls: Type, custom: Optional[SerializeFunc] = None, type_check: TypeCheck = NoCheck) -> str:
     template = """
 def {{func}}(obj, reuse_instances = {{serde_scope.reuse_instances_default}},
              convert_sets = {{serde_scope.convert_sets_default}}):
@@ -440,6 +436,10 @@ def {{func}}(obj, reuse_instances = {{serde_scope.reuse_instances_default}},
 
   if not is_dataclass(obj):
     return copy.deepcopy(obj)
+
+  {% if type_check.is_strict() %}
+  obj.__serde__.funcs['typecheck'](obj)
+  {% endif %}
 
   return (
   {% for f in fields -%}
@@ -453,11 +453,13 @@ def {{func}}(obj, reuse_instances = {{serde_scope.reuse_instances_default}},
     renderer = Renderer(TO_ITER, custom, suppress_coerce=(not type_check.is_coerce()))
     env = jinja2.Environment(loader=jinja2.DictLoader({"iter": template}))
     env.filters.update({"rvalue": renderer.render})
-    return env.get_template("iter").render(func=TO_ITER, serde_scope=getattr(cls, SERDE_SCOPE), fields=sefields(cls))
+    return env.get_template("iter").render(
+        func=TO_ITER, serde_scope=getattr(cls, SERDE_SCOPE), fields=sefields(cls), type_check=type_check
+    )
 
 
 def render_to_dict(
-    cls: Type, case: Optional[str] = None, custom: Optional[SerializeFunc] = None, type_check: TypeCheck = Coerce
+    cls: Type, case: Optional[str] = None, custom: Optional[SerializeFunc] = None, type_check: TypeCheck = NoCheck
 ) -> str:
     template = """
 def {{func}}(obj, reuse_instances = {{serde_scope.reuse_instances_default}},
@@ -469,6 +471,10 @@ def {{func}}(obj, reuse_instances = {{serde_scope.reuse_instances_default}},
 
   if not is_dataclass(obj):
     return copy.deepcopy(obj)
+
+  {% if type_check.is_strict() %}
+  obj.__serde__.funcs['typecheck'](obj)
+  {% endif %}
 
   res = {}
   {% for f in fields -%}
@@ -490,7 +496,9 @@ def {{func}}(obj, reuse_instances = {{serde_scope.reuse_instances_default}},
     env.filters.update({"rvalue": renderer.render})
     env.filters.update({"lvalue": lrenderer.render})
     env.filters.update({"case": functools.partial(conv, case=case)})
-    return env.get_template("dict").render(func=TO_DICT, serde_scope=getattr(cls, SERDE_SCOPE), fields=sefields(cls))
+    return env.get_template("dict").render(
+        func=TO_DICT, serde_scope=getattr(cls, SERDE_SCOPE), fields=sefields(cls), type_check=type_check
+    )
 
 
 def render_union_func(cls: Type, union_args: List[Type], tagging: Tagging = DefaultTagging) -> str:
