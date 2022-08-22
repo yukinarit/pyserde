@@ -50,9 +50,9 @@ from .core import (
     TO_ITER,
     TYPE_CHECK,
     UNION_SE_PREFIX,
-    Coerce,
     DefaultTagging,
     Field,
+    NoCheck,
     SerdeScope,
     Tagging,
     TypeCheck,
@@ -60,11 +60,7 @@ from .core import (
     coerce,
     conv,
     fields,
-    is_dict_instance,
     is_instance,
-    is_list_instance,
-    is_set_instance,
-    is_tuple_instance,
     logger,
     raise_unsupported_type,
     render_type_check,
@@ -143,6 +139,7 @@ def serialize(
     convert_sets_default: bool = False,
     serializer: Optional[SerializeFunc] = None,
     tagging: Tagging = DefaultTagging,
+    type_check: TypeCheck = NoCheck,
     **kwargs,
 ):
     """
@@ -214,7 +211,7 @@ def serialize(
         # Create a scope storage used by serde.
         # Each class should get own scope. Child classes can not share scope with parent class.
         # That's why we need the "scope.cls is not cls" check.
-        scope: SerdeScope = getattr(cls, SERDE_SCOPE, None)
+        scope: Optional[SerdeScope] = getattr(cls, SERDE_SCOPE, None)
         if scope is None or scope.cls is not cls:
             scope = SerdeScope(
                 cls,
@@ -237,7 +234,7 @@ def serialize(
         g["typing"] = typing
         g["Literal"] = Literal
         g["TypeCheck"] = TypeCheck
-        g["Coerce"] = Coerce
+        g["NoCheck"] = NoCheck
         g["coerce"] = coerce
         if serialize:
             g["serde_custom_class_serializer"] = functools.partial(serde_custom_class_serializer, custom=serializer)
@@ -261,8 +258,8 @@ def serialize(
             if f.serializer:
                 g[f.serializer.name] = f.serializer
 
-        add_func(scope, TO_ITER, render_to_tuple(cls, serializer), g)
-        add_func(scope, TO_DICT, render_to_dict(cls, rename_all, serializer), g)
+        add_func(scope, TO_ITER, render_to_tuple(cls, serializer, type_check), g)
+        add_func(scope, TO_DICT, render_to_dict(cls, rename_all, serializer, type_check), g)
         add_func(scope, TYPE_CHECK, render_type_check(cls), g)
 
         logger.debug(f"{typename(cls)}: {SERDE_SCOPE} {scope}")
@@ -294,9 +291,7 @@ def is_serializable(instance_or_class: Any) -> bool:
     return hasattr(instance_or_class, SERDE_SCOPE)
 
 
-def to_obj(o, named: bool, reuse_instances: bool, convert_sets: bool, c: Type = None, type_check: TypeCheck = Coerce):
-    strict = type_check.is_strict()
-
+def to_obj(o, named: bool, reuse_instances: bool, convert_sets: bool, c: Type = None):
     try:
         thisfunc = functools.partial(
             to_obj,
@@ -309,37 +304,19 @@ def to_obj(o, named: bool, reuse_instances: bool, convert_sets: bool, c: Type = 
         if is_serializable(o):
             serde_scope: SerdeScope = getattr(o, SERDE_SCOPE)
             func_name = TO_DICT if named else TO_ITER
-            if strict:
-                serde_scope.funcs[TYPE_CHECK](o)
-            return serde_scope.funcs[func_name](
-                o, reuse_instances=reuse_instances, convert_sets=convert_sets, type_check=type_check
-            )
+            return serde_scope.funcs[func_name](o, reuse_instances=reuse_instances, convert_sets=convert_sets)
         elif is_dataclass(o):
-            if strict:
-                serde_scope.funcs[TYPE_CHECK](o)
             if named:
                 return dataclasses.asdict(o)
             else:
                 return dataclasses.astuple(o)
         elif isinstance(o, list):
-            if strict and c:
-                if is_list_instance(o, c):
-                    raise SerdeError(f"Failed to deserialize into {typename(c)}")
             return [thisfunc(e) for e in o]
         elif isinstance(o, tuple):
-            if strict and c:
-                if is_tuple_instance(o, c):
-                    raise SerdeError(f"Failed to deserialize into {typename(c)}")
             return tuple(thisfunc(e) for e in o)
         elif isinstance(o, set):
-            if strict and c:
-                if is_set_instance(o, c):
-                    raise SerdeError(f"Failed to deserialize into {typename(c)}")
             return [thisfunc(e) for e in o]
         elif isinstance(o, dict):
-            if strict and c:
-                if is_dict_instance(o, c):
-                    raise SerdeError(f"Failed to deserialize into {typename(c)}")
             return {k: thisfunc(v) for k, v in o.items()}
         elif is_str_serializable_instance(o):
             return str(o)
@@ -359,7 +336,7 @@ def astuple(v):
     return to_tuple(v, reuse_instances=False, convert_sets=False)
 
 
-def to_tuple(o, reuse_instances: bool = ..., convert_sets: bool = ..., type_check: TypeCheck = Coerce) -> Any:
+def to_tuple(o, reuse_instances: bool = ..., convert_sets: bool = ...) -> Any:
     """
     Serialize object into tuple.
 
@@ -379,7 +356,7 @@ def to_tuple(o, reuse_instances: bool = ..., convert_sets: bool = ..., type_chec
     >>> to_tuple(lst)
     [(10, 'foo', 100.0, True), (20, 'foo', 100.0, True)]
     """
-    return to_obj(o, named=False, reuse_instances=reuse_instances, convert_sets=convert_sets, type_check=type_check)
+    return to_obj(o, named=False, reuse_instances=reuse_instances, convert_sets=convert_sets)
 
 
 def asdict(v):
@@ -389,7 +366,7 @@ def asdict(v):
     return to_dict(v, reuse_instances=False, convert_sets=False)
 
 
-def to_dict(o, reuse_instances: bool = ..., convert_sets: bool = ..., type_check: TypeCheck = Coerce) -> Any:
+def to_dict(o, reuse_instances: bool = ..., convert_sets: bool = ...) -> Any:
     """
     Serialize object into dictionary.
 
@@ -409,7 +386,7 @@ def to_dict(o, reuse_instances: bool = ..., convert_sets: bool = ..., type_check
     >>> to_dict(lst)
     [{'i': 10, 's': 'foo', 'f': 100.0, 'b': True}, {'i': 20, 's': 'foo', 'f': 100.0, 'b': True}]
     """
-    return to_obj(o, named=True, reuse_instances=reuse_instances, convert_sets=convert_sets, type_check=type_check)
+    return to_obj(o, named=True, reuse_instances=reuse_instances, convert_sets=convert_sets)
 
 
 @dataclass
@@ -448,11 +425,10 @@ def sefields(cls: Type) -> Iterator[SeField]:
         yield f
 
 
-def render_to_tuple(cls: Type, custom: Optional[SerializeFunc] = None) -> str:
+def render_to_tuple(cls: Type, custom: Optional[SerializeFunc] = None, type_check: TypeCheck = NoCheck) -> str:
     template = """
 def {{func}}(obj, reuse_instances = {{serde_scope.reuse_instances_default}},
-             convert_sets = {{serde_scope.convert_sets_default}},
-             type_check: TypeCheck=Coerce):
+             convert_sets = {{serde_scope.convert_sets_default}}):
   if reuse_instances is Ellipsis:
     reuse_instances = {{serde_scope.reuse_instances_default}}
   if convert_sets is Ellipsis:
@@ -460,6 +436,10 @@ def {{func}}(obj, reuse_instances = {{serde_scope.reuse_instances_default}},
 
   if not is_dataclass(obj):
     return copy.deepcopy(obj)
+
+  {% if type_check.is_strict() %}
+  obj.__serde__.funcs['typecheck'](obj)
+  {% endif %}
 
   return (
   {% for f in fields -%}
@@ -470,17 +450,20 @@ def {{func}}(obj, reuse_instances = {{serde_scope.reuse_instances_default}},
   )
     """
 
-    renderer = Renderer(TO_ITER, custom)
+    renderer = Renderer(TO_ITER, custom, suppress_coerce=(not type_check.is_coerce()))
     env = jinja2.Environment(loader=jinja2.DictLoader({"iter": template}))
     env.filters.update({"rvalue": renderer.render})
-    return env.get_template("iter").render(func=TO_ITER, serde_scope=getattr(cls, SERDE_SCOPE), fields=sefields(cls))
+    return env.get_template("iter").render(
+        func=TO_ITER, serde_scope=getattr(cls, SERDE_SCOPE), fields=sefields(cls), type_check=type_check
+    )
 
 
-def render_to_dict(cls: Type, case: Optional[str] = None, custom: Optional[SerializeFunc] = None) -> str:
+def render_to_dict(
+    cls: Type, case: Optional[str] = None, custom: Optional[SerializeFunc] = None, type_check: TypeCheck = NoCheck
+) -> str:
     template = """
 def {{func}}(obj, reuse_instances = {{serde_scope.reuse_instances_default}},
-             convert_sets = {{serde_scope.convert_sets_default}},
-             type_check: TypeCheck = Coerce):
+             convert_sets = {{serde_scope.convert_sets_default}}):
   if reuse_instances is Ellipsis:
     reuse_instances = {{serde_scope.reuse_instances_default}}
   if convert_sets is Ellipsis:
@@ -488,6 +471,10 @@ def {{func}}(obj, reuse_instances = {{serde_scope.reuse_instances_default}},
 
   if not is_dataclass(obj):
     return copy.deepcopy(obj)
+
+  {% if type_check.is_strict() %}
+  obj.__serde__.funcs['typecheck'](obj)
+  {% endif %}
 
   res = {}
   {% for f in fields -%}
@@ -503,13 +490,15 @@ def {{func}}(obj, reuse_instances = {{serde_scope.reuse_instances_default}},
   {% endfor -%}
   return res
     """
-    renderer = Renderer(TO_DICT, custom)
+    renderer = Renderer(TO_DICT, custom, suppress_coerce=(not type_check.is_coerce()))
     lrenderer = LRenderer(case)
     env = jinja2.Environment(loader=jinja2.DictLoader({"dict": template}))
     env.filters.update({"rvalue": renderer.render})
     env.filters.update({"lvalue": lrenderer.render})
     env.filters.update({"case": functools.partial(conv, case=case)})
-    return env.get_template("dict").render(func=TO_DICT, serde_scope=getattr(cls, SERDE_SCOPE), fields=sefields(cls))
+    return env.get_template("dict").render(
+        func=TO_DICT, serde_scope=getattr(cls, SERDE_SCOPE), fields=sefields(cls), type_check=type_check
+    )
 
 
 def render_union_func(cls: Type, union_args: List[Type], tagging: Tagging = DefaultTagging) -> str:
@@ -517,7 +506,7 @@ def render_union_func(cls: Type, union_args: List[Type], tagging: Tagging = Defa
     Render function that serializes a field with union type.
     """
     template = """
-def {{func}}(obj, reuse_instances, convert_sets, type_check: TypeCheck=Coerce):
+def {{func}}(obj, reuse_instances, convert_sets):
   union_args = serde_scope.union_se_args['{{func}}']
 
   {% for t in union_args %}
@@ -594,6 +583,7 @@ class Renderer:
     func: str
     custom: Optional[SerializeFunc] = None  # Custom class level serializer.
     suppress_coerce: bool = False
+    """ Suppress type coercing because generated union serializer has its own type checking """
 
     def render(self, arg: SeField) -> str:
         """
@@ -601,10 +591,10 @@ class Renderer:
 
         >>> from typing import Tuple
         >>> Renderer(TO_ITER).render(SeField(int, 'i'))
-        'coerce(int, i, type_check)'
+        'coerce(int, i)'
 
         >>> Renderer(TO_ITER).render(SeField(List[int], 'l'))
-        '[coerce(int, v, type_check) for v in l]'
+        '[coerce(int, v) for v in l]'
 
         >>> @serialize
         ... @dataclass(unsafe_hash=True)
@@ -617,7 +607,7 @@ class Renderer:
         "[v.__serde__.funcs['to_iter'](v, reuse_instances=reuse_instances, convert_sets=convert_sets) for v in foo]"
 
         >>> Renderer(TO_ITER).render(SeField(Dict[str, Foo], 'foo'))
-        "{coerce(str, k, type_check): v.__serde__.funcs['to_iter'](v, reuse_instances=reuse_instances, \
+        "{coerce(str, k): v.__serde__.funcs['to_iter'](v, reuse_instances=reuse_instances, \
 convert_sets=convert_sets) for k, v in foo.items()}"
 
         >>> Renderer(TO_ITER).render(SeField(Dict[Foo, Foo], 'foo'))
@@ -626,8 +616,8 @@ convert_sets=convert_sets): v.__serde__.funcs['to_iter'](v, reuse_instances=reus
 convert_sets=convert_sets) for k, v in foo.items()}"
 
         >>> Renderer(TO_ITER).render(SeField(Tuple[str, Foo, int], 'foo'))
-        "(coerce(str, foo[0], type_check), foo[1].__serde__.funcs['to_iter'](foo[1], reuse_instances=reuse_instances, \
-convert_sets=convert_sets), coerce(int, foo[2], type_check),)"
+        "(coerce(str, foo[0]), foo[1].__serde__.funcs['to_iter'](foo[1], reuse_instances=reuse_instances, \
+convert_sets=convert_sets), coerce(int, foo[2]),)"
         """
         if arg.serializer and arg.serializer.inner is not default_serializer:
             res = self.custom_field_serializer(arg)
@@ -775,7 +765,7 @@ convert_sets=convert_sets), coerce(int, foo[2], type_check),)"
         if self.suppress_coerce:
             return var
         else:
-            return f'coerce({typ}, {var}, type_check)'
+            return f'coerce({typ}, {var})'
 
     def string(self, arg: SeField) -> str:
         return f"str({arg.varname})"

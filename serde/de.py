@@ -53,7 +53,6 @@ from .core import (
     SERDE_SCOPE,
     TYPE_CHECK,
     UNION_DE_PREFIX,
-    Coerce,
     DefaultTagging,
     Field,
     NoCheck,
@@ -64,11 +63,7 @@ from .core import (
     coerce,
     ensure,
     fields,
-    is_dict_instance,
     is_instance,
-    is_list_instance,
-    is_set_instance,
-    is_tuple_instance,
     literal_func_name,
     logger,
     raise_unsupported_type,
@@ -143,6 +138,7 @@ def deserialize(
     reuse_instances_default: bool = True,
     deserializer: Optional[DeserializeFunc] = None,
     tagging: Tagging = DefaultTagging,
+    type_check: TypeCheck = NoCheck,
     **kwargs,
 ):
     """
@@ -214,7 +210,7 @@ def deserialize(
         # Create a scope storage used by serde.
         # Each class should get own scope. Child classes can not share scope with parent class.
         # That's why we need the "scope.cls is not cls" check.
-        scope: SerdeScope = getattr(cls, SERDE_SCOPE, None)
+        scope: Optional[SerdeScope] = getattr(cls, SERDE_SCOPE, None)
         if scope is None or scope.cls is not cls:
             scope = SerdeScope(cls, reuse_instances_default=reuse_instances_default)
             setattr(cls, SERDE_SCOPE, scope)
@@ -233,7 +229,7 @@ def deserialize(
         g['get_generic_arg'] = get_generic_arg
         g['is_instance'] = is_instance
         g['TypeCheck'] = TypeCheck
-        g['Coerce'] = Coerce
+        g['NoCheck'] = NoCheck
         g['coerce'] = coerce
         if deserialize:
             g['serde_custom_class_deserializer'] = functools.partial(
@@ -271,8 +267,8 @@ def deserialize(
             if f.deserializer:
                 g[f.deserializer.name] = f.deserializer
 
-        add_func(scope, FROM_ITER, render_from_iter(cls, deserializer), g)
-        add_func(scope, FROM_DICT, render_from_dict(cls, rename_all, deserializer), g)
+        add_func(scope, FROM_ITER, render_from_iter(cls, deserializer, type_check), g)
+        add_func(scope, FROM_DICT, render_from_dict(cls, rename_all, deserializer, type_check), g)
         add_func(scope, TYPE_CHECK, render_type_check(cls), g)
 
         logger.debug(f'{typename(cls)}: {SERDE_SCOPE} {scope}')
@@ -318,16 +314,11 @@ class Deserializer(metaclass=abc.ABCMeta):
         raise NotImplementedError
 
 
-def from_obj(c: Type, o: Any, named: bool, reuse_instances: bool, type_check: TypeCheck = Coerce):
+def from_obj(c: Type, o: Any, named: bool, reuse_instances: bool):
     """
     Deserialize from an object into an instance of the type specified as arg `c`.
     `c` can be either primitive type, `List`, `Tuple`, `Dict` or `deserialize` class.
-
-    When `type_check`=True, pyserde checks if deserialized field values are equal to the
-    types declared.
     """
-    strict = type_check.is_strict()
-
     if is_generic(c):
         # Store subscripted generic type such as Foo[Bar] in "maybe_generic",
         # and store origin type such as Foo in "c". Since subscripted generics
@@ -338,17 +329,13 @@ def from_obj(c: Type, o: Any, named: bool, reuse_instances: bool, type_check: Ty
     else:
         maybe_generic = c
     try:
-        thisfunc = functools.partial(from_obj, named=named, reuse_instances=reuse_instances, type_check=type_check)
+        thisfunc = functools.partial(from_obj, named=named, reuse_instances=reuse_instances)
         if o is None:
             return None
         if is_deserializable(c):
             serde_scope: SerdeScope = getattr(c, SERDE_SCOPE)
             func_name = FROM_DICT if named else FROM_ITER
-            res = serde_scope.funcs[func_name](
-                c, maybe_generic=maybe_generic, data=o, reuse_instances=reuse_instances, type_check=type_check
-            )
-            if strict:
-                serde_scope.funcs[TYPE_CHECK](res)
+            res = serde_scope.funcs[func_name](c, maybe_generic=maybe_generic, data=o, reuse_instances=reuse_instances)
             return res
         elif is_opt(c):
             if o is None:
@@ -368,40 +355,25 @@ def from_obj(c: Type, o: Any, named: bool, reuse_instances: bool, type_check: Ty
             if is_bare_list(c):
                 return [e for e in o]
             else:
-                res = [thisfunc(type_args(c)[0], e, type_check=type_check) for e in o]
-                if strict:
-                    if not is_list_instance(res, c):
-                        raise SerdeError(f"Failed to deserialize into {typename(c)}")
+                res = [thisfunc(type_args(c)[0], e) for e in o]
                 return res
         elif is_set(c):
             if is_bare_set(c):
                 return set(e for e in o)
             else:
-                res = set(thisfunc(type_args(c)[0], e, type_check=NoCheck) for e in o)
-                if strict:
-                    if not is_set_instance(res, c):
-                        raise SerdeError(f"Failed to deserialize into {typename(c)}")
+                res = set(thisfunc(type_args(c)[0], e) for e in o)
                 return res
         elif is_tuple(c):
             if is_bare_tuple(c):
                 return tuple(e for e in o)
             else:
                 res = tuple(thisfunc(type_args(c)[i], e) for i, e in enumerate(o))
-                if strict:
-                    if not is_tuple_instance(res, c):
-                        raise SerdeError(f"Failed to deserialize into {typename(c)}")
                 return res
         elif is_dict(c):
             if is_bare_dict(c):
                 return {k: v for k, v in o.items()}
             else:
-                res = {
-                    thisfunc(type_args(c)[0], k, type_check=NoCheck): thisfunc(type_args(c)[1], v, type_check=NoCheck)
-                    for k, v in o.items()
-                }
-                if strict:
-                    if not is_dict_instance(res, c):
-                        raise SerdeError(f"Failed to deserialize into {typename(c)}")
+                res = {thisfunc(type_args(c)[0], k): thisfunc(type_args(c)[1], v) for k, v in o.items()}
                 return res
         elif is_numpy_array(c):
             return deserialize_numpy_array_direct(c, o)
@@ -419,7 +391,7 @@ def from_obj(c: Type, o: Any, named: bool, reuse_instances: bool, type_check: Ty
         raise SerdeError(e)
 
 
-def from_dict(cls, o, reuse_instances: bool = ..., type_check: TypeCheck = Coerce):
+def from_dict(cls, o, reuse_instances: bool = ...):
     """
     Deserialize dictionary into object.
 
@@ -439,10 +411,10 @@ def from_dict(cls, o, reuse_instances: bool = ..., type_check: TypeCheck = Coerc
     >>> from_dict(List[Foo], lst)
     [Foo(i=10, s='foo', f=100.0, b=True), Foo(i=20, s='foo', f=100.0, b=True)]
     """
-    return from_obj(cls, o, named=True, reuse_instances=reuse_instances, type_check=type_check)
+    return from_obj(cls, o, named=True, reuse_instances=reuse_instances)
 
 
-def from_tuple(cls, o, reuse_instances: bool = ..., type_check: TypeCheck = Coerce):
+def from_tuple(cls, o, reuse_instances: bool = ...):
     """
     Deserialize tuple into object.
 
@@ -462,7 +434,7 @@ def from_tuple(cls, o, reuse_instances: bool = ..., type_check: TypeCheck = Coer
     >>> from_tuple(List[Foo], lst)
     [Foo(i=10, s='foo', f=100.0, b=True), Foo(i=20, s='foo', f=100.0, b=True)]
     """
-    return from_obj(cls, o, named=False, reuse_instances=reuse_instances, type_check=type_check)
+    return from_obj(cls, o, named=False, reuse_instances=reuse_instances)
 
 
 @dataclass
@@ -616,7 +588,7 @@ class Renderer:
 
         if self.custom and not arg.deserializer:
             # Rerender the code for default deserializer.
-            default = Renderer(self.func, self.cls, None).render(arg)
+            default = Renderer(self.func, self.cls, None, suppress_coerce=self.suppress_coerce).render(arg)
             return self.custom_class_deserializer(arg, default)
         else:
             return res
@@ -660,13 +632,13 @@ class Renderer:
 
         >>> from typing import List
         >>> Renderer('foo').render(DeField(Optional[int], 'o', datavar='data'))
-        '(coerce(int, data["o"], type_check)) if data.get("o") is not None else None'
+        '(coerce(int, data["o"])) if data.get("o") is not None else None'
 
         >>> Renderer('foo').render(DeField(Optional[List[int]], 'o', datavar='data'))
-        '([coerce(int, v, type_check) for v in data["o"]]) if data.get("o") is not None else None'
+        '([coerce(int, v) for v in data["o"]]) if data.get("o") is not None else None'
 
         >>> Renderer('foo').render(DeField(Optional[List[int]], 'o', datavar='data'))
-        '([coerce(int, v, type_check) for v in data["o"]]) if data.get("o") is not None else None'
+        '([coerce(int, v) for v in data["o"]]) if data.get("o") is not None else None'
 
         >>> @deserialize
         ... class Foo:
@@ -691,10 +663,10 @@ if data.get("f") is not None else None'
 
         >>> from typing import List
         >>> Renderer('foo').render(DeField(List[int], 'l', datavar='data'))
-        '[coerce(int, v, type_check) for v in data["l"]]'
+        '[coerce(int, v) for v in data["l"]]'
 
         >>> Renderer('foo').render(DeField(List[List[int]], 'l', datavar='data'))
-        '[[coerce(int, v, type_check) for v in v] for v in data["l"]]'
+        '[[coerce(int, v) for v in v] for v in data["l"]]'
         """
         if is_bare_list(arg.type):
             return f'list({arg.data})'
@@ -707,10 +679,10 @@ if data.get("f") is not None else None'
 
         >>> from typing import Set
         >>> Renderer('foo').render(DeField(Set[int], 'l', datavar='data'))
-        'set(coerce(int, v, type_check) for v in data["l"])'
+        'set(coerce(int, v) for v in data["l"])'
 
         >>> Renderer('foo').render(DeField(Set[Set[int]], 'l', datavar='data'))
-        'set(set(coerce(int, v, type_check) for v in v) for v in data["l"])'
+        'set(set(coerce(int, v) for v in v) for v in data["l"])'
         """
         if is_bare_set(arg.type):
             return f'set({arg.data})'
@@ -725,14 +697,14 @@ if data.get("f") is not None else None'
         >>> @deserialize
         ... class Foo: pass
         >>> Renderer('foo').render(DeField(Tuple[str, int, List[int], Foo], 'd', datavar='data'))
-        '(coerce(str, data["d"][0], type_check), coerce(int, data["d"][1], type_check), \
-[coerce(int, v, type_check) for v in data["d"][2]], \
+        '(coerce(str, data["d"][0]), coerce(int, data["d"][1]), \
+[coerce(int, v) for v in data["d"][2]], \
 Foo.__serde__.funcs[\\'foo\\'](data=data["d"][3], reuse_instances=reuse_instances),)'
 
         >>> field = DeField(Tuple[str, int, List[int], Foo], 'd', datavar='data', index=0, iterbased=True)
         >>> Renderer('foo').render(field)
-        "(coerce(str, data[0][0], type_check), coerce(int, data[0][1], type_check), \
-[coerce(int, v, type_check) for v in data[0][2]], Foo.__serde__.funcs['foo'](data=data[0][3], \
+        "(coerce(str, data[0][0]), coerce(int, data[0][1]), \
+[coerce(int, v) for v in data[0][2]], Foo.__serde__.funcs['foo'](data=data[0][3], \
 reuse_instances=reuse_instances),)"
         """
         if is_bare_tuple(arg.type):
@@ -750,7 +722,7 @@ reuse_instances=reuse_instances),)"
 
         >>> from typing import List
         >>> Renderer('foo').render(DeField(Dict[str, int], 'd', datavar='data'))
-        '{coerce(str, k, type_check): coerce(int, v, type_check) for k, v in data["d"].items()}'
+        '{coerce(str, k): coerce(int, v) for k, v in data["d"].items()}'
 
         >>> @deserialize
         ... class Foo: pass
@@ -773,20 +745,20 @@ reuse_instances=reuse_instances),)"
         Render rvalue for primitives.
 
         >>> Renderer('foo').render(DeField(int, 'i', datavar='data'))
-        'coerce(int, data["i"], type_check)'
+        'coerce(int, data["i"])'
 
         >>> Renderer('foo').render(DeField(int, 'int_field', datavar='data', case='camelcase'))
-        'coerce(int, data["intField"], type_check)'
+        'coerce(int, data["intField"])'
 
         >>> Renderer('foo').render(DeField(int, 'i', datavar='data', index=1, iterbased=True))
-        'coerce(int, data[1], type_check)'
+        'coerce(int, data[1])'
         """
         typ = typename(arg.type)
         dat = arg.data
         if self.suppress_coerce:
             return dat
         else:
-            return f'coerce({typ}, {dat}, type_check)'
+            return f'coerce({typ}, {dat})'
 
     def c_tor(self, arg: DeField) -> str:
         return f"{typename(arg.type)}({arg.data})"
@@ -827,10 +799,9 @@ def to_iter_arg(f: DeField, *args, **kwargs) -> DeField:
     return f
 
 
-def render_from_iter(cls: Type, custom: Optional[DeserializeFunc] = None) -> str:
+def render_from_iter(cls: Type, custom: Optional[DeserializeFunc] = None, type_check: TypeCheck = NoCheck) -> str:
     template = """
-def {{func}}(cls=cls, maybe_generic=None, data=None, reuse_instances = {{serde_scope.reuse_instances_default}},
-             type_check: TypeCheck=Coerce):
+def {{func}}(cls=cls, maybe_generic=None, data=None, reuse_instances = {{serde_scope.reuse_instances_default}}):
   if reuse_instances is Ellipsis:
     reuse_instances = {{serde_scope.reuse_instances_default}}
 
@@ -851,7 +822,7 @@ def {{func}}(cls=cls, maybe_generic=None, data=None, reuse_instances = {{serde_s
     raise UserError(e)
     """
 
-    renderer = Renderer(FROM_ITER, cls=cls, custom=custom)
+    renderer = Renderer(FROM_ITER, cls=cls, custom=custom, suppress_coerce=(not type_check.is_coerce()))
     env = jinja2.Environment(loader=jinja2.DictLoader({'iter': template}))
     env.filters.update({'rvalue': renderer.render})
     env.filters.update({'arg': to_iter_arg})
@@ -863,11 +834,15 @@ def {{func}}(cls=cls, maybe_generic=None, data=None, reuse_instances = {{serde_s
     return res
 
 
-def render_from_dict(cls: Type, rename_all: Optional[str] = None, custom: Optional[DeserializeFunc] = None) -> str:
+def render_from_dict(
+    cls: Type,
+    rename_all: Optional[str] = None,
+    custom: Optional[DeserializeFunc] = None,
+    type_check: TypeCheck = NoCheck,
+) -> str:
     template = """
 def {{func}}(cls=cls, maybe_generic=None, data=None,
-             reuse_instances = {{serde_scope.reuse_instances_default}},
-             type_check: TypeCheck = Coerce):
+             reuse_instances = {{serde_scope.reuse_instances_default}}):
   if reuse_instances is Ellipsis:
     reuse_instances = {{serde_scope.reuse_instances_default}}
 
@@ -887,14 +862,20 @@ def {{func}}(cls=cls, maybe_generic=None, data=None,
   except Exception as e:
     raise UserError(e)
 
+  {% if type_check.is_strict() %}
+  rv.__serde__.funcs['typecheck'](rv)
+  {% endif %}
+
   return rv
     """
 
-    renderer = Renderer(FROM_DICT, cls=cls, custom=custom)
+    renderer = Renderer(FROM_DICT, cls=cls, custom=custom, suppress_coerce=(not type_check.is_coerce()))
     env = jinja2.Environment(loader=jinja2.DictLoader({'dict': template}))
     env.filters.update({'rvalue': renderer.render})
     env.filters.update({'arg': functools.partial(to_arg, rename_all=rename_all)})
-    res = env.get_template('dict').render(func=FROM_DICT, serde_scope=getattr(cls, SERDE_SCOPE), fields=defields(cls))
+    res = env.get_template('dict').render(
+        func=FROM_DICT, serde_scope=getattr(cls, SERDE_SCOPE), fields=defields(cls), type_check=type_check
+    )
 
     if renderer.import_numpy:
         res = "import numpy\n" + res
@@ -904,8 +885,7 @@ def {{func}}(cls=cls, maybe_generic=None, data=None,
 
 def render_union_func(cls: Type, union_args: List[Type], tagging: Tagging = DefaultTagging) -> str:
     template = """
-def {{func}}(cls=cls, maybe_generic=None, data=None, reuse_instances = {{serde_scope.reuse_instances_default}},
-             type_check: TypeCheck=Coerce):
+def {{func}}(cls=cls, maybe_generic=None, data=None, reuse_instances = {{serde_scope.reuse_instances_default}}):
   errors = []
   {% for t in union_args %}
   try:
