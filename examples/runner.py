@@ -18,6 +18,7 @@ import rename_all
 import simple
 import skip
 import tomlfile
+import type_check_coerce
 import type_check_strict
 import type_datetime
 import type_decimal
@@ -53,8 +54,9 @@ def run_all():
     run(generics)
     run(lazy_type_evaluation)
     run(literal)
-    run(user_exception)
     run(type_check_strict)
+    run(type_check_coerce)
+    run(user_exception)
     if PY310:
         import union_operator
 
