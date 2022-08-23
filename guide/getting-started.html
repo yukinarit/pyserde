@@ -172,7 +172,7 @@ class Foo:
 </code></pre>
 <p>pyserde generates methods necessary for (de)serialization by <code>@serde</code> when a class is loaded into python interpreter. The code generation occurs only once and there is no overhead when you use the generated methods. Now your class is serializable and deserializable in the data formats supported by pyserde.</p>
 <blockquote>
-<p><strong>Note:</strong> If you need only either serialization or deserialization functionality, you can use <code>@serialize</code> or <code>@deserialize</code> instead of <code>@serde</code> decorator.</p>
+<p><strong>NOTE:</strong> If you need only either serialization or deserialization functionality, you can use <code>@serialize</code> or <code>@deserialize</code> instead of <code>@serde</code> decorator.</p>
 <p>e.g. If you don't need deserialization functionality, you can add <code>@serialize</code> decorator only. But, calling deserialize API e.g. <code>from_json</code> for <code>Foo</code> will raise an error.</p>
 <pre><code class="language-python">from dataclasses import dataclass
 from serde import serialize

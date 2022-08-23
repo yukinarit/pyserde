@@ -235,7 +235,7 @@ class Foo:
 </code></pre>
 <p>pyserde generates methods necessary for (de)serialization by <code>@serde</code> when a class is loaded into python interpreter. The code generation occurs only once and there is no overhead when you use the generated methods. Now your class is serializable and deserializable in the data formats supported by pyserde.</p>
 <blockquote>
-<p><strong>Note:</strong> If you need only either serialization or deserialization functionality, you can use <code>@serialize</code> or <code>@deserialize</code> instead of <code>@serde</code> decorator.</p>
+<p><strong>NOTE:</strong> If you need only either serialization or deserialization functionality, you can use <code>@serialize</code> or <code>@deserialize</code> instead of <code>@serde</code> decorator.</p>
 <p>e.g. If you don't need deserialization functionality, you can add <code>@serialize</code> decorator only. But, calling deserialize API e.g. <code>from_json</code> for <code>Foo</code> will raise an error.</p>
 <pre><code class="language-python">from dataclasses import dataclass
 from serde import serialize
@@ -525,7 +525,7 @@ class Foo:
     ...
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="type-checking"><a class="header" href="#type-checking">Type Checking</a></h1>
-<p>This is one of the most awaited features. <code>pyserde</code> v0.9 adds the experimental type checkers. As this feature is still experimental, the type checking is not perfect. Also, <a href="https://github.com/tbsexton">@tbsexton</a> is looking into more beautiful solution, the entire backend of type checker may be replaced by <a href="https://github.com/beartype/beartype">beartype</a> in the future.</p>
+<p>This is one of the most awaited features. <code>pyserde</code> v0.9 adds the experimental type checkers. As this feature is still experimental, the type checking is not perfect. Also, <a href="https://github.com/tbsexton">@tbsexton</a> is looking into <a href="https://github.com/yukinarit/pyserde/issues/237#issuecomment-1191714102">more beautiful solution</a>, the entire backend of type checker may be replaced by <a href="https://github.com/beartype/beartype">beartype</a> in the future.</p>
 <h3 id="nocheck"><a class="header" href="#nocheck"><code>NoCheck</code></a></h3>
 <p>This is the default behavior until pyserde v0.8.3 and v0.9.x. No type coercion or checks are run. Even if a user puts a wrong value, pyserde doesn't complain anything.</p>
 <pre><code class="language-python">@serde
@@ -561,6 +561,25 @@ foo = Foo(10)
 # SerdeError will be raised in this case because of the type mismatch.
 print(to_json(foo))
 </code></pre>
+<blockquote>
+<p><strong>NOTE:</strong> Since pyserde is a serialization framework, it provides type checks or coercing only during (de)serialization. For example, pyserde doesn't complain even if incompatible value is assigned in the object below.</p>
+<pre><code class="language-python">@serde(type_check=Strict)
+@dataclass
+class Foo
+    s: str
+
+f = Foo(100) # pyserde doesn't raise an error
+</code></pre>
+<p>If you want to detect runtime type errors, I recommend to use <a href="https://github.com/beartype/beartype">beartype</a>.</p>
+<pre><code class="language-python">@beartype
+@serde(type_check=Strict)
+@dataclass
+class Foo
+    s: str
+
+f = Foo(100) # beartype raises an error
+</code></pre>
+</blockquote>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="union-representation"><a class="header" href="#union-representation">Union Representation</a></h1>
 <p><code>pyserde</code>&gt;=0.7 offers attributes to control how Union is (de)serialized. This concept is the very same as the one in <a href="https://serde.rs/enum-representations.html">serde-rs</a>. Note these representations only apply to the dataclass, non dataclass objects are (de)serialized with <code>Untagged</code> always.</p>
 <h2 id="untagged"><a class="header" href="#untagged"><code>Untagged</code></a></h2>

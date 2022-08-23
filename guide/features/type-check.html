@@ -149,7 +149,7 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="type-checking"><a class="header" href="#type-checking">Type Checking</a></h1>
-<p>This is one of the most awaited features. <code>pyserde</code> v0.9 adds the experimental type checkers. As this feature is still experimental, the type checking is not perfect. Also, <a href="https://github.com/tbsexton">@tbsexton</a> is looking into more beautiful solution, the entire backend of type checker may be replaced by <a href="https://github.com/beartype/beartype">beartype</a> in the future.</p>
+<p>This is one of the most awaited features. <code>pyserde</code> v0.9 adds the experimental type checkers. As this feature is still experimental, the type checking is not perfect. Also, <a href="https://github.com/tbsexton">@tbsexton</a> is looking into <a href="https://github.com/yukinarit/pyserde/issues/237#issuecomment-1191714102">more beautiful solution</a>, the entire backend of type checker may be replaced by <a href="https://github.com/beartype/beartype">beartype</a> in the future.</p>
 <h3 id="nocheck"><a class="header" href="#nocheck"><code>NoCheck</code></a></h3>
 <p>This is the default behavior until pyserde v0.8.3 and v0.9.x. No type coercion or checks are run. Even if a user puts a wrong value, pyserde doesn't complain anything.</p>
 <pre><code class="language-python">@serde
@@ -185,6 +185,25 @@ foo = Foo(10)
 # SerdeError will be raised in this case because of the type mismatch.
 print(to_json(foo))
 </code></pre>
+<blockquote>
+<p><strong>NOTE:</strong> Since pyserde is a serialization framework, it provides type checks or coercing only during (de)serialization. For example, pyserde doesn't complain even if incompatible value is assigned in the object below.</p>
+<pre><code class="language-python">@serde(type_check=Strict)
+@dataclass
+class Foo
+    s: str
+
+f = Foo(100) # pyserde doesn't raise an error
+</code></pre>
+<p>If you want to detect runtime type errors, I recommend to use <a href="https://github.com/beartype/beartype">beartype</a>.</p>
+<pre><code class="language-python">@beartype
+@serde(type_check=Strict)
+@dataclass
+class Foo
+    s: str
+
+f = Foo(100) # beartype raises an error
+</code></pre>
+</blockquote>
 
                     </main>
 
