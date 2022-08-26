@@ -860,7 +860,50 @@ poetry install
 poetry run python bench.py --full
 </code></pre>
 <p>You can check <a href="https://github.com/yukinarit/pyserde/blob/master/bench/bench.py">the benchmarking code</a> for more information.</p>
-<div style="break-before: page; page-break-before: always;"></div><h2 id="083--2022-06-28"><a class="header" href="#083--2022-06-28"><code>0.8.3</code>  (2022-06-28)</a></h2>
+<div style="break-before: page; page-break-before: always;"></div><h2 id="090-2022-08-26"><a class="header" href="#090-2022-08-26"><code>0.9.0</code> (2022-08-26)</a></h2>
+<p><code>pyserde</code> v0.9 adds one of the most awaited features, the type checking functionality 🎉 If you add <code>Coerce</code> or <code>Strict</code> in <code>serde</code> decorator, <code>pyserde</code> will do type coercing or type checking based on the declared types.</p>
+<h5 id="coerce-1"><a class="header" href="#coerce-1"><code>Coerce</code></a></h5>
+<p>Type coercing automatically converts a value into the declared type during (de)serialization. If the value is incompatible e.g. value is &quot;foo&quot; and type is int, pyserde raises an <code>SerdeError</code>.</p>
+<pre><code class="language-python">@serde(type_check=Coerce)
+@dataclass
+class Foo
+    s: str
+
+foo = Foo(10)
+# pyserde automatically coerce the int value 10 into &quot;10&quot;.
+# {&quot;s&quot;: &quot;10&quot;} will be printed.
+print(to_json(foo))
+</code></pre>
+<h5 id="strict-1"><a class="header" href="#strict-1"><code>Strict</code></a></h5>
+<p>Strict type checking is to check every value against the declared type during (de)serialization. We plan to make <code>Strict</code> a default type checker in the future release.</p>
+<pre><code class="language-python">@serde(type_check=Strict)
+@dataclass
+class Foo
+    s: str
+
+foo = Foo(10)
+# pyserde checks the value 10 is instance of `str`.
+# SerdeError will be raised in this case because of the type mismatch.
+print(to_json(foo))
+</code></pre>
+<ul>
+<li>refactor: Change default type_check from Coerce to NoCheck (<a href="https://github.com/yukinarit/pyserde/commit/23ea180">23ea180</a>)</li>
+<li>refactor: Change to pass &quot;type_check&quot; parameter in decorator (<a href="https://github.com/yukinarit/pyserde/commit/fbe8dc8">fbe8dc8</a>)</li>
+<li>feat: Add type coercion feature make it default (<a href="https://github.com/yukinarit/pyserde/commit/dabb777">dabb777</a>)</li>
+<li>feat: Implement strict type checking (<a href="https://github.com/yukinarit/pyserde/commit/0273b9a">0273b9a</a>)</li>
+</ul>
+<p>Another notable change is switching toml library from <a href="https://pypi.org/project/toml/">toml</a> to <a href="https://pypi.org/project/tomli/">tomli</a>. tomli is used in a handful of major products e.g. <code>pip</code> and <code>pytest</code> and <a href="https://peps.python.org/pep-0680/">will be the part of Python standard library in Python 3.11</a>.</p>
+<ul>
+<li>feat: Switch toml library to tomli (<a href="https://github.com/yukinarit/pyserde/commit/11b4df6">11b4df6</a>)</li>
+<li>Better documentation about generic alias (<a href="https://github.com/yukinarit/pyserde/commit/fd4e5a5">fd4e5a5</a>)</li>
+<li>Ensure union_func_name produces a valid function name (<a href="https://github.com/yukinarit/pyserde/commit/eddf250">eddf250</a>)</li>
+<li>Import 'Literal' from serde.compat (<a href="https://github.com/yukinarit/pyserde/commit/a7450c1">a7450c1</a>)</li>
+<li>Support NumPy 1.23 in Python 3.7/3.8 (<a href="https://github.com/yukinarit/pyserde/commit/3309a73">3309a73</a>)</li>
+<li>Use str instead of repr in typename, fixing Union[Literal[&quot;str&quot;], ...] (<a href="https://github.com/yukinarit/pyserde/commit/b3905ef">b3905ef</a>)</li>
+<li>fix: from_json return returns T not Optional[T] (<a href="https://github.com/yukinarit/pyserde/commit/9e50fb7">9e50fb7</a>)</li>
+</ul>
+<p>This release had contributions from 1 person: <a href="https://github.com/kngwyu">@kngwyu</a>. Thank you so much! :tada: :joy:</p>
+<h2 id="083-2022-06-28"><a class="header" href="#083-2022-06-28"><code>0.8.3</code> (2022-06-28)</a></h2>
 <ul>
 <li>fix: Use numpy&lt;1.23.0 for python 3.7 and 3.8 (<a href="https://github.com/yukinarit/pyserde/commit/3045521">3045521</a>)</li>
 </ul>
