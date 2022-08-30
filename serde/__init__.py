@@ -47,23 +47,27 @@ Other modules
 """
 
 from dataclasses import dataclass
+from typing import Callable, Optional, Type, overload
 
-from .compat import SerdeError, SerdeSkip
+from .compat import SerdeError, SerdeSkip, T
 from .core import (
     AdjacentTagging,
     Coerce,
+    DefaultTagging,
     ExternalTagging,
     InternalTagging,
     NoCheck,
     Strict,
+    Tagging,
+    TypeCheck,
     Untagged,
     field,
     init,
     logger,
     should_impl_dataclass,
 )
-from .de import default_deserializer, deserialize, from_dict, from_tuple, is_deserializable
-from .se import asdict, astuple, default_serializer, is_serializable, serialize, to_dict, to_tuple
+from .de import DeserializeFunc, default_deserializer, deserialize, from_dict, from_tuple, is_deserializable
+from .se import SerializeFunc, asdict, astuple, default_serializer, is_serializable, serialize, to_dict, to_tuple
 
 __all__ = (
     "SerdeError",
@@ -102,7 +106,30 @@ __all__ = (
 )
 
 
-def serde(_cls=None, **kwargs):
+@overload
+def serde(
+    _cls: Type[T],
+) -> Type[T]:
+    ...
+
+
+@overload
+def serde(
+    rename_all: Optional[str] = None,
+    reuse_instances_default: bool = True,
+    convert_sets_default: bool = False,
+    serializer: Optional[SerializeFunc] = None,
+    deserializer: Optional[DeserializeFunc] = None,
+    tagging: Tagging = DefaultTagging,
+    type_check: TypeCheck = NoCheck,
+) -> Callable[[Type[T]], Type[T]]:
+    ...
+
+
+def serde(
+    _cls=None,
+    **kwargs,
+):  # type: ignore
     """
     serde decorator. Keyword arguments are passed in `serialize` and `deserialize`.
     """

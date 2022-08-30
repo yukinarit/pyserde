@@ -123,7 +123,6 @@ def _make_serialize(
     C = dataclasses.make_dataclass(cls_name, fields, *args, **kwargs)
     C = serialize(
         C,
-        *args,
         rename_all=rename_all,
         reuse_instances_default=reuse_instances_default,
         convert_sets_default=convert_sets_default,

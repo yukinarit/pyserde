@@ -123,7 +123,6 @@ def _make_deserialize(
     C = dataclasses.make_dataclass(cls_name, fields, *args, **kwargs)
     C = deserialize(
         C,
-        *args,
         rename_all=rename_all,
         reuse_instances_default=reuse_instances_default,
         convert_sets_default=convert_sets_default,
@@ -136,6 +135,7 @@ def deserialize(
     _cls=None,
     rename_all: Optional[str] = None,
     reuse_instances_default: bool = True,
+    convert_sets_default: bool = False,
     deserializer: Optional[DeserializeFunc] = None,
     tagging: Tagging = DefaultTagging,
     type_check: TypeCheck = NoCheck,
