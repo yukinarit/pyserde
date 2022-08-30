@@ -1,7 +1,9 @@
 """
 Serialize and Deserialize in JSON format.
 """
-from typing import Any, Type, Union
+from typing import Any, Union
+
+from typing_extensions import Type
 
 from .compat import T
 from .de import Deserializer, from_dict

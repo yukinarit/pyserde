@@ -12,6 +12,7 @@ from dataclasses import dataclass, is_dataclass
 from typing import Any, Callable, Dict, Iterator, List, Optional, Type, TypeVar
 
 import jinja2
+from typing_extensions import Type
 
 from .compat import (
     Literal,
@@ -78,17 +79,17 @@ from .numpy import (
 __all__ = ["serialize", "is_serializable", "to_dict", "to_tuple"]
 
 # Interface of Custom serialize function.
-SerializeFunc = Callable[[Type, Any], Any]
+SerializeFunc = Callable[[Type[Any], Any], Any]
 
 
-def default_serializer(_cls: Type, obj):
+def default_serializer(_cls: Type[Any], obj):
     """
     Marker function to tell serde to use the default serializer. It's used when custom serializer is specified
     at the class but you want to override a field with the default serializer.
     """
 
 
-def serde_custom_class_serializer(cls: Type, obj, custom: SerializeFunc, default: Callable):
+def serde_custom_class_serializer(cls: Type[Any], obj: Any, custom: SerializeFunc, default: Callable):
     try:
         return custom(cls, obj)
     except SerdeSkip:
@@ -198,7 +199,7 @@ def serialize(
     '{"i":10,"dt":"01/01/21"}'
     """
 
-    def wrap(cls: Type):
+    def wrap(cls: Type[Any]):
         tagging.check()
 
         # If no `dataclass` found in the class, dataclassify it automatically.
@@ -290,7 +291,7 @@ def is_serializable(instance_or_class: Any) -> bool:
     return hasattr(instance_or_class, SERDE_SCOPE)
 
 
-def to_obj(o, named: bool, reuse_instances: bool, convert_sets: bool, c: Type = None):
+def to_obj(o, named: bool, reuse_instances: bool, convert_sets: bool, c: Optional[Type[Any]] = None):
     try:
         thisfunc = functools.partial(
             to_obj,
@@ -358,7 +359,7 @@ def to_tuple(o, reuse_instances: bool = ..., convert_sets: bool = ...) -> Any:
     return to_obj(o, named=False, reuse_instances=reuse_instances, convert_sets=convert_sets)
 
 
-def asdict(v):
+def asdict(v: Any) -> Dict[str, Any]:
     """
     Serialize object into dictionary.
     """
@@ -414,7 +415,7 @@ class SeField(Field):
         return SeField(typ, name=None)
 
 
-def sefields(cls: Type) -> Iterator[SeField]:
+def sefields(cls: Type[Any]) -> Iterator[SeField]:
     """
     Iterate fields for serialization.
     """
@@ -424,7 +425,7 @@ def sefields(cls: Type) -> Iterator[SeField]:
         yield f
 
 
-def render_to_tuple(cls: Type, custom: Optional[SerializeFunc] = None, type_check: TypeCheck = NoCheck) -> str:
+def render_to_tuple(cls: Type[Any], custom: Optional[SerializeFunc] = None, type_check: TypeCheck = NoCheck) -> str:
     template = """
 def {{func}}(obj, reuse_instances = {{serde_scope.reuse_instances_default}},
              convert_sets = {{serde_scope.convert_sets_default}}):
@@ -458,7 +459,7 @@ def {{func}}(obj, reuse_instances = {{serde_scope.reuse_instances_default}},
 
 
 def render_to_dict(
-    cls: Type, case: Optional[str] = None, custom: Optional[SerializeFunc] = None, type_check: TypeCheck = NoCheck
+    cls: Type[Any], case: Optional[str] = None, custom: Optional[SerializeFunc] = None, type_check: TypeCheck = NoCheck
 ) -> str:
     template = """
 def {{func}}(obj, reuse_instances = {{serde_scope.reuse_instances_default}},
@@ -500,7 +501,7 @@ def {{func}}(obj, reuse_instances = {{serde_scope.reuse_instances_default}},
     )
 
 
-def render_union_func(cls: Type, union_args: List[Type], tagging: Tagging = DefaultTagging) -> str:
+def render_union_func(cls: Type[Any], union_args: List[Type[Any]], tagging: Tagging = DefaultTagging) -> str:
     """
     Render function that serializes a field with union type.
     """

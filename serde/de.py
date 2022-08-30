@@ -8,9 +8,10 @@ import dataclasses
 import functools
 import typing
 from dataclasses import dataclass, is_dataclass
-from typing import Any, Callable, Dict, List, Optional, Type, TypeVar
+from typing import Any, Callable, Dict, List, Optional, TypeVar
 
 import jinja2
+from typing_extensions import Type
 
 from .compat import (
     Literal,
