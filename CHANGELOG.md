@@ -1,3 +1,7 @@
+# `0.9.1` (2022-08-30)
+
+* fix: Call to untyped function "serde" in typed context ([84c5f07](https://github.com/yukinarit/pyserde/commit/84c5f07))
+
 ## `0.9.0` (2022-08-26)
 
 `pyserde` v0.9 adds one of the most awaited features, the type checking functionality 🎉 If you add `Coerce` or `Strict` in `serde` decorator, `pyserde` will do type coercing or type checking based on the declared types.
