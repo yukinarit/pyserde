@@ -860,7 +860,11 @@ poetry install
 poetry run python bench.py --full
 </code></pre>
 <p>You can check <a href="https://github.com/yukinarit/pyserde/blob/master/bench/bench.py">the benchmarking code</a> for more information.</p>
-<div style="break-before: page; page-break-before: always;"></div><h2 id="090-2022-08-26"><a class="header" href="#090-2022-08-26"><code>0.9.0</code> (2022-08-26)</a></h2>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="091-2022-08-30"><a class="header" href="#091-2022-08-30"><code>0.9.1</code> (2022-08-30)</a></h1>
+<ul>
+<li>fix: Call to untyped function &quot;serde&quot; in typed context (<a href="https://github.com/yukinarit/pyserde/commit/84c5f07">84c5f07</a>)</li>
+</ul>
+<h2 id="090-2022-08-26"><a class="header" href="#090-2022-08-26"><code>0.9.0</code> (2022-08-26)</a></h2>
 <p><code>pyserde</code> v0.9 adds one of the most awaited features, the type checking functionality 🎉 If you add <code>Coerce</code> or <code>Strict</code> in <code>serde</code> decorator, <code>pyserde</code> will do type coercing or type checking based on the declared types.</p>
 <h5 id="coerce-1"><a class="header" href="#coerce-1"><code>Coerce</code></a></h5>
 <p>Type coercing automatically converts a value into the declared type during (de)serialization. If the value is incompatible e.g. value is &quot;foo&quot; and type is int, pyserde raises an <code>SerdeError</code>.</p>
