@@ -648,14 +648,11 @@ class Renderer:
 if data.get("f") is not None else None'
         """
         value = arg[0]
-        if has_default(arg):
-            return self.render(value)
+        if arg.iterbased:
+            exists = f'{arg.data} is not None'
         else:
-            if arg.iterbased:
-                exists = f'{arg.data} is not None'
-            else:
-                exists = f'{arg.datavar}.get("{arg.conv_name()}") is not None'
-            return f'({self.render(value)}) if {exists} else None'
+            exists = f'{arg.datavar}.get("{arg.conv_name()}") is not None'
+        return f'({self.render(value)}) if {exists} else None'
 
     def list(self, arg: DeField) -> str:
         """

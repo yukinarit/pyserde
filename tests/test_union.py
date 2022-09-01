@@ -225,6 +225,29 @@ def test_optional_union_with_complex_types():
     assert a_none == from_dict(A, to_dict(a_none, reuse_instances=True), reuse_instances=True)
 
 
+def test_optional_complex_type_with_default():
+    for T, default in [
+        (IPv4Address, IPv4Address("127.0.0.1")),
+        (UUID, UUID("9c244009-c60d-452b-a378-b8afdc0c2d90")),
+    ]:
+
+        @serde
+        class A:
+            id: Optional[T] = None
+
+        a = A(default)
+        assert a == from_dict(A, to_dict(a, reuse_instances=False), reuse_instances=False)
+        assert a == from_dict(A, to_dict(a, reuse_instances=True), reuse_instances=True)
+
+        a_none = A(None)
+        assert a_none == from_dict(A, to_dict(a_none, reuse_instances=False), reuse_instances=False)
+        assert a_none == from_dict(A, to_dict(a_none, reuse_instances=True), reuse_instances=True)
+
+        a_default = A()
+        assert a_default == from_dict(A, to_dict(a_default, reuse_instances=False), reuse_instances=False)
+        assert a_default == from_dict(A, to_dict(a_default, reuse_instances=True), reuse_instances=True)
+
+
 def test_union_with_complex_types_in_containers():
     @serde
     class A:
