@@ -2,12 +2,13 @@
 pyserde core module.
 """
 import dataclasses
+import datetime
 import enum
 import functools
 import logging
 import re
 from dataclasses import dataclass
-from typing import Any, Callable, Dict, List, Mapping, Optional, Type, TypeVar, Union
+from typing import Any, Callable, Container, Dict, List, Mapping, Optional, Type, TypeVar, Union
 
 import casefy
 import jinja2
@@ -36,7 +37,18 @@ from .compat import (
 )
 from .numpy import is_numpy_available, is_numpy_type
 
-__all__ = ["SerdeScope", "gen", "add_func", "Func", "Field", "fields", "FlattenOpts", "conv", "union_func_name"]
+__all__ = [
+    "PreservedTypes",
+    "SerdeScope",
+    "gen",
+    "add_func",
+    "Func",
+    "Field",
+    "fields",
+    "FlattenOpts",
+    "conv",
+    "union_func_name",
+]
 
 logger = logging.getLogger('serde')
 
@@ -64,6 +76,34 @@ def init(debug: bool = False):
     SETTINGS['debug'] = debug
 
 
+class PreservedTypes(enum.Flag):
+    """
+    A set of types that pyserde don't try to convert to another premitive types.
+    Pyserde tries to convert some types (e.g., `set` and `datetime.time`) to other
+    primitive types depening on file formats. This flag controls such behavior by
+    specifying which types should not be converted. Currently, `set` and three `datetime`
+    types can be specified.
+    """
+    NOTHING = 0
+    SET = enum.auto()
+    DATE = enum.auto()
+    TIME = enum.auto()
+    DATETIME = enum.auto()
+    ALL = SET | DATE | DATETIME | TIME
+
+    def __contains__(self, typ: type) -> bool:
+        if typ is set:
+            return bool(self & PreservedTypes.SET)
+        elif typ is datetime.date:
+            return bool(self & PreservedTypes.DATE)
+        elif typ is datetime.time:
+            return bool(self & PreservedTypes.TIME)
+        elif typ is datetime.datetime:
+            return bool(self & PreservedTypes.DATETIME)
+        else:
+            return False
+
+
 @dataclass
 class SerdeScope:
     """
@@ -88,7 +128,11 @@ class SerdeScope:
     reuse_instances_default: bool = True
     """ Default values for to_dict & from_dict arguments """
 
-    convert_sets_default: bool = False
+    preserved_types_default: PreservedTypes = PreservedTypes.NOTHING
+    """
+    A flag of types that are not converted to other types by serde before serialized
+    or after deserialized.
+    """
 
     def __repr__(self) -> str:
         res: List[str] = []
