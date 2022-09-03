@@ -7,10 +7,11 @@ import functools
 import logging
 import re
 from dataclasses import dataclass
-from typing import Any, Callable, Dict, List, Mapping, Optional, Type, TypeVar, Union
+from typing import Any, Callable, Dict, List, Mapping, Optional, TypeVar, Union
 
 import casefy
 import jinja2
+from typing_extensions import Type
 
 from .compat import (
     SerdeError,
