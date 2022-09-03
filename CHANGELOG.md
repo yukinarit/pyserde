@@ -1,4 +1,11 @@
-# `0.9.1` (2022-08-30)
+## `0.9.2` (2022-09-03)
+
+* chore: Bump allowed version of numpy to >1.21.0 on Python 3.7 ([beb2a8b](https://github.com/yukinarit/pyserde/commit/beb2a8b))
+* fix: Fix deserialization of optional complex types with default=None ([2b3b7ae](https://github.com/yukinarit/pyserde/commit/2b3b7ae))
+
+This release had contributions from 1 person: [@kmsquire](https://github.com/kmsquire). Thank you so much! :tada: :joy:
+
+## `0.9.1` (2022-08-30)
 
 * fix: Call to untyped function "serde" in typed context ([84c5f07](https://github.com/yukinarit/pyserde/commit/84c5f07))
 
