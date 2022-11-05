@@ -624,7 +624,7 @@ class Renderer:
             else:
                 var = arg.datavar
 
-        opts = "reuse_instances=reuse_instances"
+        opts = "maybe_generic=maybe_generic, reuse_instances=reuse_instances"
         return f"{typename(arg.type)}.{SERDE_SCOPE}.funcs['{self.func}'](data={var}, {opts})"
 
     def opt(self, arg: DeField) -> str:
@@ -645,8 +645,8 @@ class Renderer:
         ... class Foo:
         ...     o: Optional[List[int]]
         >>> Renderer('foo').render(DeField(Optional[Foo], 'f', datavar='data'))
-        '(Foo.__serde__.funcs[\\'foo\\'](data=data["f"], reuse_instances=reuse_instances)) \
-if data.get("f") is not None else None'
+        '(Foo.__serde__.funcs[\\'foo\\'](data=data["f"], maybe_generic=maybe_generic, \
+reuse_instances=reuse_instances)) if data.get("f") is not None else None'
         """
         value = arg[0]
         if arg.iterbased:
@@ -697,13 +697,13 @@ if data.get("f") is not None else None'
         >>> Renderer('foo').render(DeField(Tuple[str, int, List[int], Foo], 'd', datavar='data'))
         '(coerce(str, data["d"][0]), coerce(int, data["d"][1]), \
 [coerce(int, v) for v in data["d"][2]], \
-Foo.__serde__.funcs[\\'foo\\'](data=data["d"][3], reuse_instances=reuse_instances),)'
+Foo.__serde__.funcs[\\'foo\\'](data=data["d"][3], maybe_generic=maybe_generic, reuse_instances=reuse_instances),)'
 
         >>> field = DeField(Tuple[str, int, List[int], Foo], 'd', datavar='data', index=0, iterbased=True)
         >>> Renderer('foo').render(field)
         "(coerce(str, data[0][0]), coerce(int, data[0][1]), \
 [coerce(int, v) for v in data[0][2]], Foo.__serde__.funcs['foo'](data=data[0][3], \
-reuse_instances=reuse_instances),)"
+maybe_generic=maybe_generic, reuse_instances=reuse_instances),)"
         """
         if is_bare_tuple(arg.type):
             return f'tuple({arg.data})'
@@ -725,8 +725,9 @@ reuse_instances=reuse_instances),)"
         >>> @deserialize
         ... class Foo: pass
         >>> Renderer('foo').render(DeField(Dict[Foo, List[Foo]], 'f', datavar='data'))
-        '{Foo.__serde__.funcs[\\'foo\\'](data=k, reuse_instances=reuse_instances): \
-[Foo.__serde__.funcs[\\'foo\\'](data=v, reuse_instances=reuse_instances) for v in v] for k, v in data["f"].items()}'
+        '{Foo.__serde__.funcs[\\'foo\\'](data=k, maybe_generic=maybe_generic, reuse_instances=reuse_instances): \
+[Foo.__serde__.funcs[\\'foo\\'](data=v, maybe_generic=maybe_generic, reuse_instances=reuse_instances) for v in v] \
+for k, v in data["f"].items()}'
         """
         if is_bare_dict(arg.type):
             return arg.data
