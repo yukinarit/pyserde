@@ -861,7 +861,20 @@ poetry install
 poetry run python bench.py --full
 </code></pre>
 <p>You can check <a href="https://github.com/yukinarit/pyserde/blob/master/bench/bench.py">the benchmarking code</a> for more information.</p>
-<div style="break-before: page; page-break-before: always;"></div><h2 id="092-2022-09-03"><a class="header" href="#092-2022-09-03"><code>0.9.2</code> (2022-09-03)</a></h2>
+<div style="break-before: page; page-break-before: always;"></div><h2 id="093-2022-11-10"><a class="header" href="#093-2022-11-10"><code>0.9.3</code> (2022-11-10)</a></h2>
+<p>Thanks to <a href="https://peps.python.org/pep-0681/">PEP681 @dataclass_transform</a>, <code>@dataclass</code> decorator is no longer mandatory if you use a PEP681 supported type checker such as <a href="https://github.com/microsoft/pyright">pyright</a>. If you are a mypy user, you still need <code>@dataclass</code> decorator.</p>
+<pre><code class="language-python">@serde
+#@dataclass &lt;= No longer needed.
+class Foo:
+    i: int
+</code></pre>
+<ul>
+<li>ci: Build with python 3.11 on CI (<a href="https://github.com/yukinarit/pyserde/commit/a8def55">a8def55</a>)</li>
+<li>feat: pep681 (<a href="https://github.com/yukinarit/pyserde/commit/4ec2bf8">4ec2bf8</a>)</li>
+<li>fix: Mypy type errors (<a href="https://github.com/yukinarit/pyserde/commit/3ac1510">3ac1510</a>)</li>
+<li>fix: Support nested generic dataclasses (<a href="https://github.com/yukinarit/pyserde/commit/3562139">3562139</a>)</li>
+</ul>
+<h2 id="092-2022-09-03"><a class="header" href="#092-2022-09-03"><code>0.9.2</code> (2022-09-03)</a></h2>
 <ul>
 <li>chore: Bump allowed version of numpy to &gt;1.21.0 on Python 3.7 (<a href="https://github.com/yukinarit/pyserde/commit/beb2a8b">beb2a8b</a>)</li>
 <li>fix: Fix deserialization of optional complex types with default=None (<a href="https://github.com/yukinarit/pyserde/commit/2b3b7ae">2b3b7ae</a>)</li>
