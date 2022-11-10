@@ -9,6 +9,7 @@ import env
 import flatten
 import forward_reference
 import generics
+import generics_nested
 import jsonfile
 import lazy_type_evaluation
 import literal
@@ -53,6 +54,7 @@ def run_all():
     run(type_datetime)
     run(union_tagging)
     run(generics)
+    run(generics_nested)
     run(lazy_type_evaluation)
     run(literal)
     run(type_check_strict)
