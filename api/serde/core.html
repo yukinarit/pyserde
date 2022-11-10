@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="generator" content="pdoc 12.1.0"/>
+    <meta name="generator" content="pdoc 12.2.2"/>
     <title>serde.core API documentation</title>
 
     <style>/*! * Bootstrap Reboot v5.0.0 (https://getbootstrap.com/) * Copyright 2011-2021 The Bootstrap Authors * Copyright 2011-2021 Twitter, Inc. * Licensed under MIT (https://github.com/twbs/bootstrap/blob/main/LICENSE) * Forked from Normalize.css, licensed MIT (https://github.com/necolas/normalize.css/blob/master/LICENSE.md) */*,::after,::before{box-sizing:border-box}@media (prefers-reduced-motion:no-preference){:root{scroll-behavior:smooth}}body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans","Liberation Sans",sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";font-size:1rem;font-weight:400;line-height:1.5;color:#212529;background-color:#fff;-webkit-text-size-adjust:100%;-webkit-tap-highlight-color:transparent}hr{margin:1rem 0;color:inherit;background-color:currentColor;border:0;opacity:.25}hr:not([size]){height:1px}h1,h2,h3,h4,h5,h6{margin-top:0;margin-bottom:.5rem;font-weight:500;line-height:1.2}h1{font-size:calc(1.375rem + 1.5vw)}@media (min-width:1200px){h1{font-size:2.5rem}}h2{font-size:calc(1.325rem + .9vw)}@media (min-width:1200px){h2{font-size:2rem}}h3{font-size:calc(1.3rem + .6vw)}@media (min-width:1200px){h3{font-size:1.75rem}}h4{font-size:calc(1.275rem + .3vw)}@media (min-width:1200px){h4{font-size:1.5rem}}h5{font-size:1.25rem}h6{font-size:1rem}p{margin-top:0;margin-bottom:1rem}abbr[data-bs-original-title],abbr[title]{-webkit-text-decoration:underline dotted;text-decoration:underline dotted;cursor:help;-webkit-text-decoration-skip-ink:none;text-decoration-skip-ink:none}address{margin-bottom:1rem;font-style:normal;line-height:inherit}ol,ul{padding-left:2rem}dl,ol,ul{margin-top:0;margin-bottom:1rem}ol ol,ol ul,ul ol,ul ul{margin-bottom:0}dt{font-weight:700}dd{margin-bottom:.5rem;margin-left:0}blockquote{margin:0 0 1rem}b,strong{font-weight:bolder}small{font-size:.875em}mark{padding:.2em;background-color:#fcf8e3}sub,sup{position:relative;font-size:.75em;line-height:0;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}a{color:#0d6efd;text-decoration:underline}a:hover{color:#0a58ca}a:not([href]):not([class]),a:not([href]):not([class]):hover{color:inherit;text-decoration:none}code,kbd,pre,samp{font-family:SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;font-size:1em;direction:ltr;unicode-bidi:bidi-override}pre{display:block;margin-top:0;margin-bottom:1rem;overflow:auto;font-size:.875em}pre code{font-size:inherit;color:inherit;word-break:normal}code{font-size:.875em;color:#d63384;word-wrap:break-word}a>code{color:inherit}kbd{padding:.2rem .4rem;font-size:.875em;color:#fff;background-color:#212529;border-radius:.2rem}kbd kbd{padding:0;font-size:1em;font-weight:700}figure{margin:0 0 1rem}img,svg{vertical-align:middle}table{caption-side:bottom;border-collapse:collapse}caption{padding-top:.5rem;padding-bottom:.5rem;color:#6c757d;text-align:left}th{text-align:inherit;text-align:-webkit-match-parent}tbody,td,tfoot,th,thead,tr{border-color:inherit;border-style:solid;border-width:0}label{display:inline-block}button{border-radius:0}button:focus:not(:focus-visible){outline:0}button,input,optgroup,select,textarea{margin:0;font-family:inherit;font-size:inherit;line-height:inherit}button,select{text-transform:none}[role=button]{cursor:pointer}select{word-wrap:normal}select:disabled{opacity:1}[list]::-webkit-calendar-picker-indicator{display:none}[type=button],[type=reset],[type=submit],button{-webkit-appearance:button}[type=button]:not(:disabled),[type=reset]:not(:disabled),[type=submit]:not(:disabled),button:not(:disabled){cursor:pointer}::-moz-focus-inner{padding:0;border-style:none}textarea{resize:vertical}fieldset{min-width:0;padding:0;margin:0;border:0}legend{float:left;width:100%;padding:0;margin-bottom:.5rem;font-size:calc(1.275rem + .3vw);line-height:inherit}@media (min-width:1200px){legend{font-size:1.5rem}}legend+*{clear:left}::-webkit-datetime-edit-day-field,::-webkit-datetime-edit-fields-wrapper,::-webkit-datetime-edit-hour-field,::-webkit-datetime-edit-minute,::-webkit-datetime-edit-month-field,::-webkit-datetime-edit-text,::-webkit-datetime-edit-year-field{padding:0}::-webkit-inner-spin-button{height:auto}[type=search]{outline-offset:-2px;-webkit-appearance:textfield}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-color-swatch-wrapper{padding:0}::file-selector-button{font:inherit}::-webkit-file-upload-button{font:inherit;-webkit-appearance:button}output{display:inline-block}iframe{border:0}summary{display:list-item;cursor:pointer}progress{vertical-align:baseline}[hidden]{display:none!important}</style>
@@ -54,9 +54,6 @@
                         <li>
                                 <a class="variable" href="#SerdeScope.reuse_instances_default">reuse_instances_default</a>
                         </li>
-                        <li>
-                                <a class="variable" href="#SerdeScope.convert_sets_default">convert_sets_default</a>
-                        </li>
                 </ul>
 
             </li>
@@ -89,33 +86,6 @@
                             <ul class="memberlist">
                         <li>
                                 <a class="function" href="#Field.__init__">Field</a>
-                        </li>
-                        <li>
-                                <a class="variable" href="#Field.case">case</a>
-                        </li>
-                        <li>
-                                <a class="variable" href="#Field.rename">rename</a>
-                        </li>
-                        <li>
-                                <a class="variable" href="#Field.skip">skip</a>
-                        </li>
-                        <li>
-                                <a class="variable" href="#Field.skip_if">skip_if</a>
-                        </li>
-                        <li>
-                                <a class="variable" href="#Field.skip_if_false">skip_if_false</a>
-                        </li>
-                        <li>
-                                <a class="variable" href="#Field.skip_if_default">skip_if_default</a>
-                        </li>
-                        <li>
-                                <a class="variable" href="#Field.serializer">serializer</a>
-                        </li>
-                        <li>
-                                <a class="variable" href="#Field.deserializer">deserializer</a>
-                        </li>
-                        <li>
-                                <a class="variable" href="#Field.flatten">flatten</a>
                         </li>
                         <li>
                                 <a class="function" href="#Field.from_dataclass">from_dataclass</a>
@@ -173,9 +143,9 @@
                         <div class="docstring"><p>pyserde core module.</p>
 </div>
 
-                        <input id="core-view-source" class="view-source-toggle-state" type="checkbox" aria-hidden="true" tabindex="-1">
+                        <input id="mod-core-view-source" class="view-source-toggle-state" type="checkbox" aria-hidden="true" tabindex="-1">
 
-                        <label class="view-source-button" for="core-view-source"><span>View Source</span></label>
+                        <label class="view-source-button" for="mod-core-view-source"><span>View Source</span></label>
 
                         <div class="pdoc-code codehilite"><pre><span></span><span id="L-1"><a href="#L-1"><span class="linenos">  1</span></a><span class="sd">&quot;&quot;&quot;</span>
 </span><span id="L-2"><a href="#L-2"><span class="linenos">  2</span></a><span class="sd">pyserde core module.</span>
@@ -1123,17 +1093,6 @@
 
 
                             </div>
-                            <div id="SerdeScope.convert_sets_default" class="classattr">
-                                <div class="attr variable">
-            <span class="name">convert_sets_default</span><span class="annotation">: bool</span><span class="default_value"> = False</span>
-
-        
-    </div>
-    <a class="headerlink" href="#SerdeScope.convert_sets_default"></a>
-    
-    
-
-                            </div>
                 </section>
                 <section id="gen">
                             <input id="gen-view-source" class="view-source-toggle-state" type="checkbox" aria-hidden="true" tabindex="-1">
@@ -1505,48 +1464,54 @@ of <code>dataclasses.field</code>. dataclasses metadata is a container where use
 
 <p>pyserde's field attributes have <code><a href="../serde.html">serde</a></code> prefix to avoid conflicts with other libraries.</p>
 
-<div class="pdoc-code codehilite"><pre><span></span><code><span class="nd">@deserialize</span>
+<div class="pdoc-code codehilite">
+<pre><span></span><code><span class="nd">@deserialize</span>
 <span class="nd">@serialize</span>
 <span class="nd">@dataclass</span>
 <span class="k">class</span> <span class="nc">Foo</span><span class="p">:</span>
     <span class="n">i</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">metadata</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;serde_&lt;ATTRIBUTE_NAME&gt;&quot;</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">ATTRIBUTE_VALUE</span><span class="o">&gt;</span><span class="p">})</span>
-</code></pre></div>
+</code></pre>
+</div>
 
 <ul>
-<li><p><code><a href="#Field.case">case</a></code> is an actual case name determined in regard with <code>rename_all</code> class attribute.
+<li><p><code>case</code> is an actual case name determined in regard with <code>rename_all</code> class attribute.
 This attribute is currently internal use only.</p></li>
-<li><p><code><a href="#Field.rename">rename</a></code> (Attribute name: <code>serde_rename</code>) is used to rename field name during (de)serialization. This attribute is
+<li><p><code>rename</code> (Attribute name: <code>serde_rename</code>) is used to rename field name during (de)serialization. This attribute is
 convenient when you want to use a python keyword in field name. For example, this code renames <code>id</code> to <code>ID</code>.</p></li>
 </ul>
 
-<div class="pdoc-code codehilite"><pre><span></span><code><span class="nd">@serialize</span>
+<div class="pdoc-code codehilite">
+<pre><span></span><code><span class="nd">@serialize</span>
 <span class="nd">@dataclass</span>
 <span class="k">class</span> <span class="nc">Foo</span><span class="p">:</span>
     <span class="nb">id</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">metadata</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;serde_rename&quot;</span><span class="p">:</span> <span class="s2">&quot;ID&quot;</span><span class="p">})</span>
-</code></pre></div>
+</code></pre>
+</div>
 
 <ul>
-<li><p><code><a href="#Field.skip">skip</a></code> (Attribute name: <code>serde_skip</code>) is used to skip (de)serialization for a field.</p></li>
-<li><p><code><a href="#Field.skip_if">skip_if</a></code> (Attribute name: <code>serde_skip_if</code>) skips (de)serialization if the callable evaluates to <code>True</code>.</p></li>
-<li><p><code><a href="#Field.skip_if_false">skip_if_false</a></code> (Attribute name: <code>serde_skip_if_false</code>) skips (de)serialization if the field value evaluates
+<li><p><code>skip</code> (Attribute name: <code>serde_skip</code>) is used to skip (de)serialization for a field.</p></li>
+<li><p><code>skip_if</code> (Attribute name: <code>serde_skip_if</code>) skips (de)serialization if the callable evaluates to <code>True</code>.</p></li>
+<li><p><code>skip_if_false</code> (Attribute name: <code>serde_skip_if_false</code>) skips (de)serialization if the field value evaluates
 to <code>False</code>. For example, this code skip (de)serialize <code>v</code> if <code>v</code> is empty.</p></li>
-<li><p><code><a href="#Field.skip_if_default">skip_if_default</a></code> (Attribute name: <code>serde_skip_if_default</code>) skips (de)serialization if the field value is equal
+<li><p><code>skip_if_default</code> (Attribute name: <code>serde_skip_if_default</code>) skips (de)serialization if the field value is equal
 to the default value</p></li>
 </ul>
 
-<div class="pdoc-code codehilite"><pre><span></span><code><span class="nd">@deserialize</span>
+<div class="pdoc-code codehilite">
+<pre><span></span><code><span class="nd">@deserialize</span>
 <span class="nd">@serialize</span>
 <span class="nd">@dataclass</span>
 <span class="k">class</span> <span class="nc">Foo</span><span class="p">:</span>
     <span class="n">v</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">metadata</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;serde_skip_if_false&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">})</span>
-</code></pre></div>
+</code></pre>
+</div>
 
 <ul>
-<li><p><code><a href="#Field.serializer">serializer</a></code> (Attribute name: <code>serde_serializer</code>) takes a custom function to override the default serialization
+<li><p><code>serializer</code> (Attribute name: <code>serde_serializer</code>) takes a custom function to override the default serialization
 behaviour of a field.</p></li>
-<li><p><code><a href="#Field.deserializer">deserializer</a></code> (Attribute name: <code>serde_deserializer</code>) takes a custom function to override the default
+<li><p><code>deserializer</code> (Attribute name: <code>serde_deserializer</code>) takes a custom function to override the default
 deserialization behaviour of a field.</p></li>
-<li><p><code><a href="#Field.flatten">flatten</a></code> (Attribute name: <code>serde_flatten</code>) flattens the fields of the nested dataclass.</p></li>
+<li><p><code>flatten</code> (Attribute name: <code>serde_flatten</code>) flattens the fields of the nested dataclass.</p></li>
 </ul>
 </div>
 
@@ -1559,105 +1524,6 @@ deserialization behaviour of a field.</p></li>
         
     </div>
     <a class="headerlink" href="#Field.__init__"></a>
-    
-    
-
-                            </div>
-                            <div id="Field.case" class="classattr">
-                                <div class="attr variable">
-            <span class="name">case</span><span class="annotation">: Optional[str]</span><span class="default_value"> = None</span>
-
-        
-    </div>
-    <a class="headerlink" href="#Field.case"></a>
-    
-    
-
-                            </div>
-                            <div id="Field.rename" class="classattr">
-                                <div class="attr variable">
-            <span class="name">rename</span><span class="annotation">: Optional[str]</span><span class="default_value"> = None</span>
-
-        
-    </div>
-    <a class="headerlink" href="#Field.rename"></a>
-    
-    
-
-                            </div>
-                            <div id="Field.skip" class="classattr">
-                                <div class="attr variable">
-            <span class="name">skip</span><span class="annotation">: Optional[bool]</span><span class="default_value"> = None</span>
-
-        
-    </div>
-    <a class="headerlink" href="#Field.skip"></a>
-    
-    
-
-                            </div>
-                            <div id="Field.skip_if" class="classattr">
-                                <div class="attr variable">
-            <span class="name">skip_if</span><span class="annotation">: Optional[<a href="#Func">serde.core.Func</a>]</span><span class="default_value"> = None</span>
-
-        
-    </div>
-    <a class="headerlink" href="#Field.skip_if"></a>
-    
-    
-
-                            </div>
-                            <div id="Field.skip_if_false" class="classattr">
-                                <div class="attr variable">
-            <span class="name">skip_if_false</span><span class="annotation">: Optional[bool]</span><span class="default_value"> = None</span>
-
-        
-    </div>
-    <a class="headerlink" href="#Field.skip_if_false"></a>
-    
-    
-
-                            </div>
-                            <div id="Field.skip_if_default" class="classattr">
-                                <div class="attr variable">
-            <span class="name">skip_if_default</span><span class="annotation">: Optional[bool]</span><span class="default_value"> = None</span>
-
-        
-    </div>
-    <a class="headerlink" href="#Field.skip_if_default"></a>
-    
-    
-
-                            </div>
-                            <div id="Field.serializer" class="classattr">
-                                <div class="attr variable">
-            <span class="name">serializer</span><span class="annotation">: Optional[<a href="#Func">serde.core.Func</a>]</span><span class="default_value"> = None</span>
-
-        
-    </div>
-    <a class="headerlink" href="#Field.serializer"></a>
-    
-    
-
-                            </div>
-                            <div id="Field.deserializer" class="classattr">
-                                <div class="attr variable">
-            <span class="name">deserializer</span><span class="annotation">: Optional[<a href="#Func">serde.core.Func</a>]</span><span class="default_value"> = None</span>
-
-        
-    </div>
-    <a class="headerlink" href="#Field.deserializer"></a>
-    
-    
-
-                            </div>
-                            <div id="Field.flatten" class="classattr">
-                                <div class="attr variable">
-            <span class="name">flatten</span><span class="annotation">: Optional[<a href="#FlattenOpts">serde.core.FlattenOpts</a>]</span><span class="default_value"> = None</span>
-
-        
-    </div>
-    <a class="headerlink" href="#Field.flatten"></a>
     
     
 
@@ -1810,7 +1676,7 @@ deserialization behaviour of a field.</p></li>
 </span></pre></div>
 
 
-            <div class="docstring"><p>Get an actual field name which <code><a href="#Field.rename">rename</a></code> and <code>rename_all</code> conversions
+            <div class="docstring"><p>Get an actual field name which <code>rename</code> and <code>rename_all</code> conversions
 are made. Use <code>name</code> property to get a field name before conversion.</p>
 </div>
 
@@ -1965,11 +1831,13 @@ are made. Use <code>name</code> property to get a field name before conversion.<
 <li><code>union_args</code>: type arguments of a Union</li>
 </ul>
 
-<div class="pdoc-code codehilite"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">ipaddress</span> <span class="kn">import</span> <span class="n">IPv4Address</span>
+<div class="pdoc-code codehilite">
+<pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">ipaddress</span> <span class="kn">import</span> <span class="n">IPv4Address</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">union_func_name</span><span class="p">(</span><span class="s2">&quot;union_se&quot;</span><span class="p">,</span> <span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">IPv4Address</span><span class="p">])</span>
 <span class="go">&#39;union_se_int_List_str__IPv4Address&#39;</span>
-</code></pre></div>
+</code></pre>
+</div>
 </div>
 
 
@@ -2075,7 +1943,7 @@ are made. Use <code>name</code> property to get a field name before conversion.<
                 }
 
                 let heading;
-                switch (result.doc.type) {
+                switch (result.doc.kind) {
                     case "function":
                         if (doc.fullname.endsWith(".__init__")) {
                             heading = `<span class="name">${doc.fullname.replace(/\.__init__$/, "")}</span>${doc.signature}`;
@@ -2102,7 +1970,7 @@ are made. Use <code>name</code> property to get a field name before conversion.<
                 }
                 html += `
                         <section class="search-result">
-                        <a href="${url}" class="attr ${doc.type}">${heading}</a>
+                        <a href="${url}" class="attr ${doc.kind}">${heading}</a>
                         <div class="docstring">${doc.doc}</div>
                         </section>
                     `;

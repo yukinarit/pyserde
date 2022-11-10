@@ -512,6 +512,7 @@ https://mypy.readthedocs.io/en/stable/additional_features.html#caveats-known-iss
 class Foo:
     ...
 </code></pre>
+<p>But if you're a PEP681 compliant type checker (e.g. pyright) user, you don't get the type error because pyserde supports <a href="https://peps.python.org/pep-0681/">PEP681 dataclass_transform</a></p>
 </blockquote>
 <h2 id="serializedeserialize"><a class="header" href="#serializedeserialize"><code>@serialize</code>/<code>@deserialize</code></a></h2>
 <p><code>@serialize</code> and <code>@deserialize</code> are used by <code>@serde</code> under the hood. It's recommended to use the decorators in such cases:</p>
