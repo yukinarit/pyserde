@@ -77,4 +77,3 @@ print(from_json(Foo, s))
 ```
 
 That's it! pyserde offers many more features. If you're interested, please read the rest of the documentation.
-

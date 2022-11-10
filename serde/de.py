@@ -11,7 +11,7 @@ from dataclasses import dataclass, is_dataclass
 from typing import Any, Callable, Dict, List, Optional, TypeVar
 
 import jinja2
-from typing_extensions import Type
+from typing_extensions import Type, dataclass_transform
 
 from .compat import (
     Literal,
@@ -132,6 +132,7 @@ def _make_deserialize(
     return C
 
 
+@dataclass_transform()
 def deserialize(
     _cls=None,
     rename_all: Optional[str] = None,
