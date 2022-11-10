@@ -49,6 +49,8 @@ Other modules
 from dataclasses import dataclass
 from typing import Callable, Optional, Type, overload
 
+from typing_extensions import dataclass_transform
+
 from .compat import SerdeError, SerdeSkip, T
 from .core import (
     AdjacentTagging,
@@ -126,6 +128,7 @@ def serde(
     ...
 
 
+@dataclass_transform()
 def serde(
     _cls=None,
     **kwargs,

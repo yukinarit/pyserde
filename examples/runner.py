@@ -13,6 +13,7 @@ import jsonfile
 import lazy_type_evaluation
 import literal
 import newtype
+import pep681
 import rename
 import rename_all
 import simple
@@ -57,6 +58,7 @@ def run_all():
     run(type_check_strict)
     run(type_check_coerce)
     run(user_exception)
+    run(pep681)
     if PY310:
         import union_operator
 
