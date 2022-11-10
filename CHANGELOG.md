@@ -1,3 +1,19 @@
+## `0.9.3` (2022-11-10)
+
+Thanks to [PEP681 @dataclass_transform](https://peps.python.org/pep-0681/), `@dataclass` decorator is no longer mandatory if you use a PEP681 supported type checker such as [pyright](https://github.com/microsoft/pyright). If you are a mypy user, you still need `@dataclass` decorator.
+
+```python
+@serde
+#@dataclass <= No longer needed.
+class Foo:
+    i: int
+```
+
+* ci: Build with python 3.11 on CI ([a8def55](https://github.com/yukinarit/pyserde/commit/a8def55))
+* feat: pep681 ([4ec2bf8](https://github.com/yukinarit/pyserde/commit/4ec2bf8))
+* fix: Mypy type errors ([3ac1510](https://github.com/yukinarit/pyserde/commit/3ac1510))
+* fix: Support nested generic dataclasses ([3562139](https://github.com/yukinarit/pyserde/commit/3562139))
+
 ## `0.9.2` (2022-09-03)
 
 * chore: Bump allowed version of numpy to >1.21.0 on Python 3.7 ([beb2a8b](https://github.com/yukinarit/pyserde/commit/beb2a8b))
