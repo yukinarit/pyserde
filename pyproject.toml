@@ -42,7 +42,7 @@ orjson = { version = "*", markers = "extra == 'orjson' or extra == 'all'", optio
 
 [tool.poetry.dev-dependencies]
 pyyaml = "*"
-tomli = "*"
+tomli = { version = "*", markers = "python_version <= '3.11.0'" }
 tomli-w = "*"
 msgpack = "*"
 numpy = [

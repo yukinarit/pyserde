@@ -1,9 +1,9 @@
 """
-Serialize and Deserialize in TOML format. This module depends on [tomli](https://github.com/hukkin/tomli) and [tomli-w](https://github.com/hukkin/tomli-w) packages.
+Serialize and Deserialize in TOML format. This module depends on [tomli](https://github.com/hukkin/tomli) (for python<=3.10) and [tomli-w](https://github.com/hukkin/tomli-w) packages.
 """
+import sys
 from typing import Type
 
-import tomli
 import tomli_w
 
 from .compat import T
@@ -11,6 +11,12 @@ from .de import Deserializer, from_dict
 from .se import Serializer, to_dict
 
 __all__ = ["from_toml", "to_toml"]
+
+
+if sys.version_info[:2] >= (3, 11):
+    import tomllib
+else:
+    import tomli as tomllib
 
 
 class TomlSerializer(Serializer):
@@ -22,7 +28,7 @@ class TomlSerializer(Serializer):
 class TomlDeserializer(Deserializer):
     @classmethod
     def deserialize(cls, s, **opts):
-        return tomli.loads(s, **opts)
+        return tomllib.loads(s, **opts)
 
 
 def to_toml(obj, se: Type[Serializer] = TomlSerializer, **opts) -> str:
