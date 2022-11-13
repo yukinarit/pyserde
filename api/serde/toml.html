@@ -53,7 +53,7 @@
                     <h1 class="modulename">
 <a href="./../serde.html">serde</a><wbr>.toml    </h1>
 
-                        <div class="docstring"><p>Serialize and Deserialize in TOML format. This module depends on <a href="https://github.com/hukkin/tomli">tomli</a> and <a href="https://github.com/hukkin/tomli-w">tomli-w</a> packages.</p>
+                        <div class="docstring"><p>Serialize and Deserialize in TOML format. This module depends on <a href="https://github.com/hukkin/tomli">tomli</a> (for python&lt;=3.10) and <a href="https://github.com/hukkin/tomli-w">tomli-w</a> packages.</p>
 </div>
 
                         <input id="mod-toml-view-source" class="view-source-toggle-state" type="checkbox" aria-hidden="true" tabindex="-1">
@@ -61,11 +61,11 @@
                         <label class="view-source-button" for="mod-toml-view-source"><span>View Source</span></label>
 
                         <div class="pdoc-code codehilite"><pre><span></span><span id="L-1"><a href="#L-1"><span class="linenos"> 1</span></a><span class="sd">&quot;&quot;&quot;</span>
-</span><span id="L-2"><a href="#L-2"><span class="linenos"> 2</span></a><span class="sd">Serialize and Deserialize in TOML format. This module depends on [tomli](https://github.com/hukkin/tomli) and [tomli-w](https://github.com/hukkin/tomli-w) packages.</span>
+</span><span id="L-2"><a href="#L-2"><span class="linenos"> 2</span></a><span class="sd">Serialize and Deserialize in TOML format. This module depends on [tomli](https://github.com/hukkin/tomli) (for python&lt;=3.10) and [tomli-w](https://github.com/hukkin/tomli-w) packages.</span>
 </span><span id="L-3"><a href="#L-3"><span class="linenos"> 3</span></a><span class="sd">&quot;&quot;&quot;</span>
-</span><span id="L-4"><a href="#L-4"><span class="linenos"> 4</span></a><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Type</span>
-</span><span id="L-5"><a href="#L-5"><span class="linenos"> 5</span></a>
-</span><span id="L-6"><a href="#L-6"><span class="linenos"> 6</span></a><span class="kn">import</span> <span class="nn">tomli</span>
+</span><span id="L-4"><a href="#L-4"><span class="linenos"> 4</span></a><span class="kn">import</span> <span class="nn">sys</span>
+</span><span id="L-5"><a href="#L-5"><span class="linenos"> 5</span></a><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Type</span>
+</span><span id="L-6"><a href="#L-6"><span class="linenos"> 6</span></a>
 </span><span id="L-7"><a href="#L-7"><span class="linenos"> 7</span></a><span class="kn">import</span> <span class="nn">tomli_w</span>
 </span><span id="L-8"><a href="#L-8"><span class="linenos"> 8</span></a>
 </span><span id="L-9"><a href="#L-9"><span class="linenos"> 9</span></a><span class="kn">from</span> <span class="nn">.compat</span> <span class="kn">import</span> <span class="n">T</span>
@@ -75,40 +75,46 @@
 </span><span id="L-13"><a href="#L-13"><span class="linenos">13</span></a><span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;from_toml&quot;</span><span class="p">,</span> <span class="s2">&quot;to_toml&quot;</span><span class="p">]</span>
 </span><span id="L-14"><a href="#L-14"><span class="linenos">14</span></a>
 </span><span id="L-15"><a href="#L-15"><span class="linenos">15</span></a>
-</span><span id="L-16"><a href="#L-16"><span class="linenos">16</span></a><span class="k">class</span> <span class="nc">TomlSerializer</span><span class="p">(</span><span class="n">Serializer</span><span class="p">):</span>
-</span><span id="L-17"><a href="#L-17"><span class="linenos">17</span></a>    <span class="nd">@classmethod</span>
-</span><span id="L-18"><a href="#L-18"><span class="linenos">18</span></a>    <span class="k">def</span> <span class="nf">serialize</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="o">**</span><span class="n">opts</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-</span><span id="L-19"><a href="#L-19"><span class="linenos">19</span></a>        <span class="k">return</span> <span class="n">tomli_w</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="o">**</span><span class="n">opts</span><span class="p">)</span>
+</span><span id="L-16"><a href="#L-16"><span class="linenos">16</span></a><span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">version_info</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">11</span><span class="p">):</span>
+</span><span id="L-17"><a href="#L-17"><span class="linenos">17</span></a>    <span class="kn">import</span> <span class="nn">tomllib</span>
+</span><span id="L-18"><a href="#L-18"><span class="linenos">18</span></a><span class="k">else</span><span class="p">:</span>
+</span><span id="L-19"><a href="#L-19"><span class="linenos">19</span></a>    <span class="kn">import</span> <span class="nn">tomli</span> <span class="k">as</span> <span class="nn">tomllib</span>
 </span><span id="L-20"><a href="#L-20"><span class="linenos">20</span></a>
 </span><span id="L-21"><a href="#L-21"><span class="linenos">21</span></a>
-</span><span id="L-22"><a href="#L-22"><span class="linenos">22</span></a><span class="k">class</span> <span class="nc">TomlDeserializer</span><span class="p">(</span><span class="n">Deserializer</span><span class="p">):</span>
+</span><span id="L-22"><a href="#L-22"><span class="linenos">22</span></a><span class="k">class</span> <span class="nc">TomlSerializer</span><span class="p">(</span><span class="n">Serializer</span><span class="p">):</span>
 </span><span id="L-23"><a href="#L-23"><span class="linenos">23</span></a>    <span class="nd">@classmethod</span>
-</span><span id="L-24"><a href="#L-24"><span class="linenos">24</span></a>    <span class="k">def</span> <span class="nf">deserialize</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="o">**</span><span class="n">opts</span><span class="p">):</span>
-</span><span id="L-25"><a href="#L-25"><span class="linenos">25</span></a>        <span class="k">return</span> <span class="n">tomli</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="o">**</span><span class="n">opts</span><span class="p">)</span>
+</span><span id="L-24"><a href="#L-24"><span class="linenos">24</span></a>    <span class="k">def</span> <span class="nf">serialize</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="o">**</span><span class="n">opts</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+</span><span id="L-25"><a href="#L-25"><span class="linenos">25</span></a>        <span class="k">return</span> <span class="n">tomli_w</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="o">**</span><span class="n">opts</span><span class="p">)</span>
 </span><span id="L-26"><a href="#L-26"><span class="linenos">26</span></a>
 </span><span id="L-27"><a href="#L-27"><span class="linenos">27</span></a>
-</span><span id="L-28"><a href="#L-28"><span class="linenos">28</span></a><span class="k">def</span> <span class="nf">to_toml</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">se</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">Serializer</span><span class="p">]</span> <span class="o">=</span> <span class="n">TomlSerializer</span><span class="p">,</span> <span class="o">**</span><span class="n">opts</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-</span><span id="L-29"><a href="#L-29"><span class="linenos">29</span></a>    <span class="sd">&quot;&quot;&quot;</span>
-</span><span id="L-30"><a href="#L-30"><span class="linenos">30</span></a><span class="sd">    Serialize the object into TOML.</span>
-</span><span id="L-31"><a href="#L-31"><span class="linenos">31</span></a>
-</span><span id="L-32"><a href="#L-32"><span class="linenos">32</span></a><span class="sd">    You can pass any serializable `obj`. If you supply keyword arguments other than `se`,</span>
-</span><span id="L-33"><a href="#L-33"><span class="linenos">33</span></a><span class="sd">    they will be passed in `toml_w.dumps` function.</span>
-</span><span id="L-34"><a href="#L-34"><span class="linenos">34</span></a>
-</span><span id="L-35"><a href="#L-35"><span class="linenos">35</span></a><span class="sd">    If you want to use the other toml package, you can subclass `TomlSerializer` and implement your own logic.</span>
-</span><span id="L-36"><a href="#L-36"><span class="linenos">36</span></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="L-37"><a href="#L-37"><span class="linenos">37</span></a>    <span class="k">return</span> <span class="n">se</span><span class="o">.</span><span class="n">serialize</span><span class="p">(</span><span class="n">to_dict</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">reuse_instances</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span> <span class="o">**</span><span class="n">opts</span><span class="p">)</span>
-</span><span id="L-38"><a href="#L-38"><span class="linenos">38</span></a>
-</span><span id="L-39"><a href="#L-39"><span class="linenos">39</span></a>
-</span><span id="L-40"><a href="#L-40"><span class="linenos">40</span></a><span class="k">def</span> <span class="nf">from_toml</span><span class="p">(</span><span class="n">c</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">T</span><span class="p">],</span> <span class="n">s</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">de</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">Deserializer</span><span class="p">]</span> <span class="o">=</span> <span class="n">TomlDeserializer</span><span class="p">,</span> <span class="o">**</span><span class="n">opts</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">T</span><span class="p">:</span>
-</span><span id="L-41"><a href="#L-41"><span class="linenos">41</span></a>    <span class="sd">&quot;&quot;&quot;</span>
-</span><span id="L-42"><a href="#L-42"><span class="linenos">42</span></a><span class="sd">    Deserialize from TOML into the object.</span>
-</span><span id="L-43"><a href="#L-43"><span class="linenos">43</span></a>
-</span><span id="L-44"><a href="#L-44"><span class="linenos">44</span></a><span class="sd">    `c` is a class obejct and `s` is TOML string. If you supply keyword arguments other than `de`,</span>
-</span><span id="L-45"><a href="#L-45"><span class="linenos">45</span></a><span class="sd">    they will be passed in `toml.loads` function.</span>
-</span><span id="L-46"><a href="#L-46"><span class="linenos">46</span></a>
-</span><span id="L-47"><a href="#L-47"><span class="linenos">47</span></a><span class="sd">    If you want to use the other toml package, you can subclass `TomlDeserializer` and implement your own logic.</span>
-</span><span id="L-48"><a href="#L-48"><span class="linenos">48</span></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="L-49"><a href="#L-49"><span class="linenos">49</span></a>    <span class="k">return</span> <span class="n">from_dict</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">de</span><span class="o">.</span><span class="n">deserialize</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="o">**</span><span class="n">opts</span><span class="p">),</span> <span class="n">reuse_instances</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</span><span id="L-28"><a href="#L-28"><span class="linenos">28</span></a><span class="k">class</span> <span class="nc">TomlDeserializer</span><span class="p">(</span><span class="n">Deserializer</span><span class="p">):</span>
+</span><span id="L-29"><a href="#L-29"><span class="linenos">29</span></a>    <span class="nd">@classmethod</span>
+</span><span id="L-30"><a href="#L-30"><span class="linenos">30</span></a>    <span class="k">def</span> <span class="nf">deserialize</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="o">**</span><span class="n">opts</span><span class="p">):</span>
+</span><span id="L-31"><a href="#L-31"><span class="linenos">31</span></a>        <span class="k">return</span> <span class="n">tomllib</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="o">**</span><span class="n">opts</span><span class="p">)</span>
+</span><span id="L-32"><a href="#L-32"><span class="linenos">32</span></a>
+</span><span id="L-33"><a href="#L-33"><span class="linenos">33</span></a>
+</span><span id="L-34"><a href="#L-34"><span class="linenos">34</span></a><span class="k">def</span> <span class="nf">to_toml</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">se</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">Serializer</span><span class="p">]</span> <span class="o">=</span> <span class="n">TomlSerializer</span><span class="p">,</span> <span class="o">**</span><span class="n">opts</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+</span><span id="L-35"><a href="#L-35"><span class="linenos">35</span></a>    <span class="sd">&quot;&quot;&quot;</span>
+</span><span id="L-36"><a href="#L-36"><span class="linenos">36</span></a><span class="sd">    Serialize the object into TOML.</span>
+</span><span id="L-37"><a href="#L-37"><span class="linenos">37</span></a>
+</span><span id="L-38"><a href="#L-38"><span class="linenos">38</span></a><span class="sd">    You can pass any serializable `obj`. If you supply keyword arguments other than `se`,</span>
+</span><span id="L-39"><a href="#L-39"><span class="linenos">39</span></a><span class="sd">    they will be passed in `toml_w.dumps` function.</span>
+</span><span id="L-40"><a href="#L-40"><span class="linenos">40</span></a>
+</span><span id="L-41"><a href="#L-41"><span class="linenos">41</span></a><span class="sd">    If you want to use the other toml package, you can subclass `TomlSerializer` and implement your own logic.</span>
+</span><span id="L-42"><a href="#L-42"><span class="linenos">42</span></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="L-43"><a href="#L-43"><span class="linenos">43</span></a>    <span class="k">return</span> <span class="n">se</span><span class="o">.</span><span class="n">serialize</span><span class="p">(</span><span class="n">to_dict</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">reuse_instances</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span> <span class="o">**</span><span class="n">opts</span><span class="p">)</span>
+</span><span id="L-44"><a href="#L-44"><span class="linenos">44</span></a>
+</span><span id="L-45"><a href="#L-45"><span class="linenos">45</span></a>
+</span><span id="L-46"><a href="#L-46"><span class="linenos">46</span></a><span class="k">def</span> <span class="nf">from_toml</span><span class="p">(</span><span class="n">c</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">T</span><span class="p">],</span> <span class="n">s</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">de</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">Deserializer</span><span class="p">]</span> <span class="o">=</span> <span class="n">TomlDeserializer</span><span class="p">,</span> <span class="o">**</span><span class="n">opts</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">T</span><span class="p">:</span>
+</span><span id="L-47"><a href="#L-47"><span class="linenos">47</span></a>    <span class="sd">&quot;&quot;&quot;</span>
+</span><span id="L-48"><a href="#L-48"><span class="linenos">48</span></a><span class="sd">    Deserialize from TOML into the object.</span>
+</span><span id="L-49"><a href="#L-49"><span class="linenos">49</span></a>
+</span><span id="L-50"><a href="#L-50"><span class="linenos">50</span></a><span class="sd">    `c` is a class obejct and `s` is TOML string. If you supply keyword arguments other than `de`,</span>
+</span><span id="L-51"><a href="#L-51"><span class="linenos">51</span></a><span class="sd">    they will be passed in `toml.loads` function.</span>
+</span><span id="L-52"><a href="#L-52"><span class="linenos">52</span></a>
+</span><span id="L-53"><a href="#L-53"><span class="linenos">53</span></a><span class="sd">    If you want to use the other toml package, you can subclass `TomlDeserializer` and implement your own logic.</span>
+</span><span id="L-54"><a href="#L-54"><span class="linenos">54</span></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="L-55"><a href="#L-55"><span class="linenos">55</span></a>    <span class="k">return</span> <span class="n">from_dict</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">de</span><span class="o">.</span><span class="n">deserialize</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="o">**</span><span class="n">opts</span><span class="p">),</span> <span class="n">reuse_instances</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 </span></pre></div>
 
 
@@ -124,16 +130,16 @@
 
     </div>
     <a class="headerlink" href="#from_toml"></a>
-            <div class="pdoc-code codehilite"><pre><span></span><span id="from_toml-41"><a href="#from_toml-41"><span class="linenos">41</span></a><span class="k">def</span> <span class="nf">from_toml</span><span class="p">(</span><span class="n">c</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">T</span><span class="p">],</span> <span class="n">s</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">de</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">Deserializer</span><span class="p">]</span> <span class="o">=</span> <span class="n">TomlDeserializer</span><span class="p">,</span> <span class="o">**</span><span class="n">opts</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">T</span><span class="p">:</span>
-</span><span id="from_toml-42"><a href="#from_toml-42"><span class="linenos">42</span></a>    <span class="sd">&quot;&quot;&quot;</span>
-</span><span id="from_toml-43"><a href="#from_toml-43"><span class="linenos">43</span></a><span class="sd">    Deserialize from TOML into the object.</span>
-</span><span id="from_toml-44"><a href="#from_toml-44"><span class="linenos">44</span></a>
-</span><span id="from_toml-45"><a href="#from_toml-45"><span class="linenos">45</span></a><span class="sd">    `c` is a class obejct and `s` is TOML string. If you supply keyword arguments other than `de`,</span>
-</span><span id="from_toml-46"><a href="#from_toml-46"><span class="linenos">46</span></a><span class="sd">    they will be passed in `toml.loads` function.</span>
-</span><span id="from_toml-47"><a href="#from_toml-47"><span class="linenos">47</span></a>
-</span><span id="from_toml-48"><a href="#from_toml-48"><span class="linenos">48</span></a><span class="sd">    If you want to use the other toml package, you can subclass `TomlDeserializer` and implement your own logic.</span>
-</span><span id="from_toml-49"><a href="#from_toml-49"><span class="linenos">49</span></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="from_toml-50"><a href="#from_toml-50"><span class="linenos">50</span></a>    <span class="k">return</span> <span class="n">from_dict</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">de</span><span class="o">.</span><span class="n">deserialize</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="o">**</span><span class="n">opts</span><span class="p">),</span> <span class="n">reuse_instances</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="from_toml-47"><a href="#from_toml-47"><span class="linenos">47</span></a><span class="k">def</span> <span class="nf">from_toml</span><span class="p">(</span><span class="n">c</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">T</span><span class="p">],</span> <span class="n">s</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">de</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">Deserializer</span><span class="p">]</span> <span class="o">=</span> <span class="n">TomlDeserializer</span><span class="p">,</span> <span class="o">**</span><span class="n">opts</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">T</span><span class="p">:</span>
+</span><span id="from_toml-48"><a href="#from_toml-48"><span class="linenos">48</span></a>    <span class="sd">&quot;&quot;&quot;</span>
+</span><span id="from_toml-49"><a href="#from_toml-49"><span class="linenos">49</span></a><span class="sd">    Deserialize from TOML into the object.</span>
+</span><span id="from_toml-50"><a href="#from_toml-50"><span class="linenos">50</span></a>
+</span><span id="from_toml-51"><a href="#from_toml-51"><span class="linenos">51</span></a><span class="sd">    `c` is a class obejct and `s` is TOML string. If you supply keyword arguments other than `de`,</span>
+</span><span id="from_toml-52"><a href="#from_toml-52"><span class="linenos">52</span></a><span class="sd">    they will be passed in `toml.loads` function.</span>
+</span><span id="from_toml-53"><a href="#from_toml-53"><span class="linenos">53</span></a>
+</span><span id="from_toml-54"><a href="#from_toml-54"><span class="linenos">54</span></a><span class="sd">    If you want to use the other toml package, you can subclass `TomlDeserializer` and implement your own logic.</span>
+</span><span id="from_toml-55"><a href="#from_toml-55"><span class="linenos">55</span></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="from_toml-56"><a href="#from_toml-56"><span class="linenos">56</span></a>    <span class="k">return</span> <span class="n">from_dict</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">de</span><span class="o">.</span><span class="n">deserialize</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="o">**</span><span class="n">opts</span><span class="p">),</span> <span class="n">reuse_instances</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 </span></pre></div>
 
 
@@ -158,16 +164,16 @@ they will be passed in <code>toml.loads</code> function.</p>
 
     </div>
     <a class="headerlink" href="#to_toml"></a>
-            <div class="pdoc-code codehilite"><pre><span></span><span id="to_toml-29"><a href="#to_toml-29"><span class="linenos">29</span></a><span class="k">def</span> <span class="nf">to_toml</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">se</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">Serializer</span><span class="p">]</span> <span class="o">=</span> <span class="n">TomlSerializer</span><span class="p">,</span> <span class="o">**</span><span class="n">opts</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-</span><span id="to_toml-30"><a href="#to_toml-30"><span class="linenos">30</span></a>    <span class="sd">&quot;&quot;&quot;</span>
-</span><span id="to_toml-31"><a href="#to_toml-31"><span class="linenos">31</span></a><span class="sd">    Serialize the object into TOML.</span>
-</span><span id="to_toml-32"><a href="#to_toml-32"><span class="linenos">32</span></a>
-</span><span id="to_toml-33"><a href="#to_toml-33"><span class="linenos">33</span></a><span class="sd">    You can pass any serializable `obj`. If you supply keyword arguments other than `se`,</span>
-</span><span id="to_toml-34"><a href="#to_toml-34"><span class="linenos">34</span></a><span class="sd">    they will be passed in `toml_w.dumps` function.</span>
-</span><span id="to_toml-35"><a href="#to_toml-35"><span class="linenos">35</span></a>
-</span><span id="to_toml-36"><a href="#to_toml-36"><span class="linenos">36</span></a><span class="sd">    If you want to use the other toml package, you can subclass `TomlSerializer` and implement your own logic.</span>
-</span><span id="to_toml-37"><a href="#to_toml-37"><span class="linenos">37</span></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="to_toml-38"><a href="#to_toml-38"><span class="linenos">38</span></a>    <span class="k">return</span> <span class="n">se</span><span class="o">.</span><span class="n">serialize</span><span class="p">(</span><span class="n">to_dict</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">reuse_instances</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span> <span class="o">**</span><span class="n">opts</span><span class="p">)</span>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="to_toml-35"><a href="#to_toml-35"><span class="linenos">35</span></a><span class="k">def</span> <span class="nf">to_toml</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">se</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">Serializer</span><span class="p">]</span> <span class="o">=</span> <span class="n">TomlSerializer</span><span class="p">,</span> <span class="o">**</span><span class="n">opts</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+</span><span id="to_toml-36"><a href="#to_toml-36"><span class="linenos">36</span></a>    <span class="sd">&quot;&quot;&quot;</span>
+</span><span id="to_toml-37"><a href="#to_toml-37"><span class="linenos">37</span></a><span class="sd">    Serialize the object into TOML.</span>
+</span><span id="to_toml-38"><a href="#to_toml-38"><span class="linenos">38</span></a>
+</span><span id="to_toml-39"><a href="#to_toml-39"><span class="linenos">39</span></a><span class="sd">    You can pass any serializable `obj`. If you supply keyword arguments other than `se`,</span>
+</span><span id="to_toml-40"><a href="#to_toml-40"><span class="linenos">40</span></a><span class="sd">    they will be passed in `toml_w.dumps` function.</span>
+</span><span id="to_toml-41"><a href="#to_toml-41"><span class="linenos">41</span></a>
+</span><span id="to_toml-42"><a href="#to_toml-42"><span class="linenos">42</span></a><span class="sd">    If you want to use the other toml package, you can subclass `TomlSerializer` and implement your own logic.</span>
+</span><span id="to_toml-43"><a href="#to_toml-43"><span class="linenos">43</span></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="to_toml-44"><a href="#to_toml-44"><span class="linenos">44</span></a>    <span class="k">return</span> <span class="n">se</span><span class="o">.</span><span class="n">serialize</span><span class="p">(</span><span class="n">to_dict</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">reuse_instances</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span> <span class="o">**</span><span class="n">opts</span><span class="p">)</span>
 </span></pre></div>
 
 
