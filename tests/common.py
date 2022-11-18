@@ -74,6 +74,7 @@ types: List = [
     param(set(), Set[int], toml_not_supported),
     param((1, 1), Tuple[int, int]),
     param((1, 1), Tuple),
+    param((1, 1), Tuple[int, ...]),
     param({'a': 1}, Dict[str, int]),
     param({'a': 1}, Dict),
     param({'a': 1}, dict),

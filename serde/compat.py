@@ -227,6 +227,8 @@ def typename(typ: Type[Any], with_typing_module: bool = False) -> str:
         return f'Literal[{", ".join(str(e) for e in args)}]'
     elif typ is Any:
         return f'{mod}Any'
+    elif typ is Ellipsis:
+        return '...'
     else:
         # Get super type for NewType
         inner = getattr(typ, '__supertype__', None)

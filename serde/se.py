@@ -652,7 +652,7 @@ convert_sets=convert_sets), coerce(int, foo[2]),)"
             res = f"{arg.varname} if reuse_instances else {arg.varname}.isoformat()"
         elif is_none(arg.type):
             res = "None"
-        elif arg.type is Any or isinstance(arg.type, TypeVar):
+        elif arg.type is Any or arg.type is Ellipsis or isinstance(arg.type, TypeVar):
             res = f"to_obj({arg.varname}, True, False, False)"
         elif is_generic(arg.type):
             arg.type = get_origin(arg.type)

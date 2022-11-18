@@ -5,6 +5,7 @@ import collection
 import custom_class_serializer
 import custom_field_serializer
 import default
+import ellipsis
 import env
 import flatten
 import forward_reference
@@ -61,6 +62,7 @@ def run_all():
     run(type_check_coerce)
     run(user_exception)
     run(pep681)
+    run(ellipsis)
     if PY310:
         import union_operator
 

@@ -207,6 +207,8 @@ def is_instance(obj: Any, typ: Type) -> bool:
     elif is_new_type_primitive(typ):
         inner = getattr(typ, '__supertype__')
         return isinstance(obj, inner)
+    elif typ is Ellipsis:
+        return True
     else:
         return isinstance(obj, typ)
 
