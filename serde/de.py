@@ -381,7 +381,7 @@ def from_obj(c: Type, o: Any, named: bool, reuse_instances: bool):
             return deserialize_numpy_array_direct(c, o)
         elif is_datetime(c):
             return c.fromisoformat(o)
-        elif is_any(c):
+        elif is_any(c) or c is Ellipsis:
             return o
 
         return c(o)
@@ -569,7 +569,7 @@ class Renderer:
                     if reuse_instances else {from_iso}"
         elif is_none(arg.type):
             res = "None"
-        elif arg.type is Any:
+        elif arg.type is Any or arg.type is Ellipsis:
             res = arg.data
         elif isinstance(arg.type, TypeVar):
             index = find_generic_arg(self.cls, arg.type)
