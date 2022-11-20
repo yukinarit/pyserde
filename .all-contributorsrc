@@ -99,6 +99,15 @@
       "contributions": [
         "doc"
       ]
+    },
+    {
+      "login": "tardyp",
+      "name": "Pierre Tardy",
+      "avatar_url": "https://avatars.githubusercontent.com/u/109859?v=4",
+      "profile": "https://github.com/tardyp",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,
