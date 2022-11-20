@@ -36,6 +36,15 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "kmsquire",
+      "name": "Kevin Squire",
+      "avatar_url": "https://avatars.githubusercontent.com/u/223250?v=4",
+      "profile": "https://github.com/kmsquire",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,
