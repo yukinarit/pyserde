@@ -1,3 +1,16 @@
+## `0.9.4` (2022-11-20)
+
+Variable lengh tuple is supported.
+```python
+@serde
+@dataclass
+class Foo:
+    v: Tuple[int, ...]
+```
+
+* feat: Support variable length tuples ([74dd3d4](https://github.com/yukinarit/pyserde/commit/74dd3d4))
+* feat: Use tomllib for Python >= 3.11 ([b8943b5](https://github.com/yukinarit/pyserde/commit/b8943b5))
+
 ## `0.9.3` (2022-11-10)
 
 Thanks to [PEP681 @dataclass_transform](https://peps.python.org/pep-0681/), `@dataclass` decorator is no longer mandatory if you use a PEP681 supported type checker such as [pyright](https://github.com/microsoft/pyright). If you are a mypy user, you still need `@dataclass` decorator.
