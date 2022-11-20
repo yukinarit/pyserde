@@ -1,0 +1,151 @@
+{
+  "projectName": "pyserde",
+  "projectOwner": "yukinarit",
+  "repoType": "github",
+  "repoHost": "https://github.com",
+  "files": [
+    "README.md"
+  ],
+  "imageSize": 100,
+  "commit": true,
+  "commitConvention": "angular",
+  "contributors": [
+    {
+      "login": "yukinarit",
+      "name": "yukinarit",
+      "avatar_url": "https://avatars.githubusercontent.com/u/2347533?v=4",
+      "profile": "https://github.com/yukinarit",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "alexmisk",
+      "name": "Alexander Miskaryan",
+      "avatar_url": "https://avatars.githubusercontent.com/u/4103218?v=4",
+      "profile": "https://github.com/alexmisk",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "ydylla",
+      "name": "ydylla",
+      "avatar_url": "https://avatars.githubusercontent.com/u/17772145?v=4",
+      "profile": "https://github.com/ydylla",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "kmsquire",
+      "name": "Kevin Squire",
+      "avatar_url": "https://avatars.githubusercontent.com/u/223250?v=4",
+      "profile": "https://github.com/kmsquire",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "YushiOMOTE",
+      "name": "Yushi OMOTE",
+      "avatar_url": "https://avatars.githubusercontent.com/u/3733915?v=4",
+      "profile": "http://yushiomote.org/",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "kngwyu",
+      "name": "Yuji Kanagawa",
+      "avatar_url": "https://avatars.githubusercontent.com/u/16046705?v=4",
+      "profile": "https://kngwyu.github.io/",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "kigawas",
+      "name": "Weiliang Li",
+      "avatar_url": "https://avatars.githubusercontent.com/u/4182346?v=4",
+      "profile": "https://kigawas.me/",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "mauvealerts",
+      "name": "Mauve",
+      "avatar_url": "https://avatars.githubusercontent.com/u/51870303?v=4",
+      "profile": "https://github.com/mauvealerts",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "adsharma",
+      "name": "adsharma",
+      "avatar_url": "https://avatars.githubusercontent.com/u/658691?v=4",
+      "profile": "https://github.com/adsharma",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "chagui",
+      "name": "Guilhem C.",
+      "avatar_url": "https://avatars.githubusercontent.com/u/1234128?v=4",
+      "profile": "https://github.com/chagui",
+      "contributions": [
+        "doc"
+      ]
+    },
+    {
+      "login": "tardyp",
+      "name": "Pierre Tardy",
+      "avatar_url": "https://avatars.githubusercontent.com/u/109859?v=4",
+      "profile": "https://github.com/tardyp",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "rnestler",
+      "name": "Raphael Nestler",
+      "avatar_url": "https://avatars.githubusercontent.com/u/1435346?v=4",
+      "profile": "https://blog.rnstlr.ch/",
+      "contributions": [
+        "doc"
+      ]
+    },
+    {
+      "login": "pranavvp10",
+      "name": "Pranav V P",
+      "avatar_url": "https://avatars.githubusercontent.com/u/52486224?v=4",
+      "profile": "https://pranavvp10.github.io/",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "andreymal",
+      "name": "andreymal",
+      "avatar_url": "https://avatars.githubusercontent.com/u/3236464?v=4",
+      "profile": "https://andreymal.org/",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "jfuechsl",
+      "name": "Johann Fuechsl",
+      "avatar_url": "https://avatars.githubusercontent.com/u/1097068?v=4",
+      "profile": "https://github.com/jfuechsl",
+      "contributions": [
+        "code"
+      ]
+    }
+  ],
+  "contributorsPerLine": 7,
+  "linkToUsage": true
+}
