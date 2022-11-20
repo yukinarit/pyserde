@@ -99,6 +99,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
     </tr>
     <tr>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/mauvealerts"><img src="https://avatars.githubusercontent.com/u/51870303?v=4?s=100" width="100px;" alt="Mauve"/><br /><sub><b>Mauve</b></sub></a><br /><a href="https://github.com/yukinarit/pyserde/commits?author=mauvealerts" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/adsharma"><img src="https://avatars.githubusercontent.com/u/658691?v=4?s=100" width="100px;" alt="adsharma"/><br /><sub><b>adsharma</b></sub></a><br /><a href="https://github.com/yukinarit/pyserde/commits?author=adsharma" title="Code">💻</a></td>
     </tr>
   </tbody>
   <tfoot>
