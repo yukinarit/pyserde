@@ -861,7 +861,18 @@ poetry install
 poetry run python bench.py --full
 </code></pre>
 <p>You can check <a href="https://github.com/yukinarit/pyserde/blob/master/bench/bench.py">the benchmarking code</a> for more information.</p>
-<div style="break-before: page; page-break-before: always;"></div><h2 id="093-2022-11-10"><a class="header" href="#093-2022-11-10"><code>0.9.3</code> (2022-11-10)</a></h2>
+<div style="break-before: page; page-break-before: always;"></div><h2 id="094-2022-11-20"><a class="header" href="#094-2022-11-20"><code>0.9.4</code> (2022-11-20)</a></h2>
+<p>Variable lengh tuple is supported.</p>
+<pre><code class="language-python">@serde
+@dataclass
+class Foo:
+    v: Tuple[int, ...]
+</code></pre>
+<ul>
+<li>feat: Support variable length tuples (<a href="https://github.com/yukinarit/pyserde/commit/74dd3d4">74dd3d4</a>)</li>
+<li>feat: Use tomllib for Python &gt;= 3.11 (<a href="https://github.com/yukinarit/pyserde/commit/b8943b5">b8943b5</a>)</li>
+</ul>
+<h2 id="093-2022-11-10"><a class="header" href="#093-2022-11-10"><code>0.9.3</code> (2022-11-10)</a></h2>
 <p>Thanks to <a href="https://peps.python.org/pep-0681/">PEP681 @dataclass_transform</a>, <code>@dataclass</code> decorator is no longer mandatory if you use a PEP681 supported type checker such as <a href="https://github.com/microsoft/pyright">pyright</a>. If you are a mypy user, you still need <code>@dataclass</code> decorator.</p>
 <pre><code class="language-python">@serde
 #@dataclass &lt;= No longer needed.
