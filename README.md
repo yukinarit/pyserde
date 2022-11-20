@@ -104,6 +104,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/tardyp"><img src="https://avatars.githubusercontent.com/u/109859?v=4?s=100" width="100px;" alt="Pierre Tardy"/><br /><sub><b>Pierre Tardy</b></sub></a><br /><a href="https://github.com/yukinarit/pyserde/commits?author=tardyp" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://blog.rnstlr.ch/"><img src="https://avatars.githubusercontent.com/u/1435346?v=4?s=100" width="100px;" alt="Raphael Nestler"/><br /><sub><b>Raphael Nestler</b></sub></a><br /><a href="https://github.com/yukinarit/pyserde/commits?author=rnestler" title="Documentation">📖</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://pranavvp10.github.io/"><img src="https://avatars.githubusercontent.com/u/52486224?v=4?s=100" width="100px;" alt="Pranav V P"/><br /><sub><b>Pranav V P</b></sub></a><br /><a href="https://github.com/yukinarit/pyserde/commits?author=pranavvp10" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://andreymal.org/"><img src="https://avatars.githubusercontent.com/u/3236464?v=4?s=100" width="100px;" alt="andreymal"/><br /><sub><b>andreymal</b></sub></a><br /><a href="https://github.com/yukinarit/pyserde/commits?author=andreymal" title="Code">💻</a></td>
     </tr>
   </tbody>
   <tfoot>
