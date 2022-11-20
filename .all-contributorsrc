@@ -72,6 +72,15 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "mauvealerts",
+      "name": "Mauve",
+      "avatar_url": "https://avatars.githubusercontent.com/u/51870303?v=4",
+      "profile": "https://github.com/mauvealerts",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,
