@@ -108,6 +108,15 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "rnestler",
+      "name": "Raphael Nestler",
+      "avatar_url": "https://avatars.githubusercontent.com/u/1435346?v=4",
+      "profile": "https://blog.rnstlr.ch/",
+      "contributions": [
+        "doc"
+      ]
     }
   ],
   "contributorsPerLine": 7,
