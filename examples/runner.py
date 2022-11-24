@@ -1,6 +1,7 @@
 import sys
 
 import any
+import class_var
 import collection
 import custom_class_serializer
 import custom_field_serializer
@@ -11,6 +12,7 @@ import flatten
 import forward_reference
 import generics
 import generics_nested
+import init_var
 import jsonfile
 import lazy_type_evaluation
 import literal
@@ -63,6 +65,8 @@ def run_all():
     run(user_exception)
     run(pep681)
     run(ellipsis)
+    run(init_var)
+    run(class_var)
     if PY310:
         import union_operator
 
