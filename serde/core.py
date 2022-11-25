@@ -321,6 +321,7 @@ class FlattenOpts:
 def field(
     *args,
     rename: Optional[str] = None,
+    alias: Optional[List[str]] = None,
     skip: Optional[bool] = None,
     skip_if: Optional[Callable] = None,
     skip_if_false: Optional[bool] = None,
@@ -339,6 +340,8 @@ def field(
 
     if rename is not None:
         metadata["serde_rename"] = rename
+    if alias is not None:
+        metadata["serde_alias"] = alias
     if skip is not None:
         metadata["serde_skip"] = skip
     if skip_if is not None:
@@ -432,6 +435,7 @@ class Field:
     compare: Any = field(default_factory=dataclasses._MISSING_TYPE)
     metadata: Mapping[str, Any] = field(default_factory=dict)
     case: Optional[str] = None
+    alias: List[str] = field(default_factory=list)
     rename: Optional[str] = None
     skip: Optional[bool] = None
     skip_if: Optional[Func] = None
@@ -486,6 +490,7 @@ class Field:
             compare=f.compare,
             metadata=f.metadata,
             rename=f.metadata.get('serde_rename'),
+            alias=f.metadata.get('serde_alias', []),
             skip=f.metadata.get('serde_skip'),
             skip_if=skip_if or skip_if_false_func or skip_if_default_func,
             serializer=serializer,

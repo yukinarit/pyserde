@@ -15,6 +15,7 @@
     - [Forward reference](features/forward-reference.md)
     - [Case Conversion](features/case-conversion.md)
     - [Rename](features/rename.md)
+    - [Alias](features/alias.md)
     - [Skip](features/skip.md)
     - [Conditional Skip](features/conditional-skip.md)
     - [Custom field (de)serializer](features/custom-field-serializer.md)

@@ -1,5 +1,6 @@
 import sys
 
+import alias
 import any
 import class_var
 import collection
@@ -67,6 +68,7 @@ def run_all():
     run(ellipsis)
     run(init_var)
     run(class_var)
+    run(alias)
     if PY310:
         import union_operator
 
