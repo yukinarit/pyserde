@@ -79,7 +79,7 @@ from .numpy import (
     is_numpy_scalar,
 )
 
-__all__: List = ['deserialize', 'is_deserializable', 'from_dict', 'from_tuple']
+__all__ = ['deserialize', 'is_deserializable', 'from_dict', 'from_tuple']
 
 # Interface of Custom deserialize function.
 DeserializeFunc = Callable[[Type, Any], Any]
@@ -106,6 +106,15 @@ def default_deserializer(_cls: Type, obj):
     Marker function to tell serde to use the default deserializer. It's used when custom deserializer is specified
     at the class but you want to override a field with the default deserializer.
     """
+
+
+def _get_by_aliases(d: Dict[str, str], aliases: List[str]):
+    if not aliases:
+        raise KeyError("Tried all aliases, but key not found")
+    if aliases[0] in d:
+        return d[aliases[0]]
+    else:
+        return _get_by_aliases(d, aliases[1:])
 
 
 def _make_deserialize(
@@ -233,6 +242,7 @@ def deserialize(
         g['TypeCheck'] = TypeCheck
         g['NoCheck'] = NoCheck
         g['coerce'] = coerce
+        g['_get_by_aliases'] = _get_by_aliases
         if deserialize:
             g['serde_custom_class_deserializer'] = functools.partial(
                 serde_custom_class_deserializer, custom=deserializer
@@ -755,6 +765,9 @@ for k, v in data["f"].items()}'
         """
         typ = typename(arg.type)
         dat = arg.data
+        if arg.alias:
+            aliases = map(lambda s: f'"{s}"', [arg.name, *arg.alias])
+            dat = f"_get_by_aliases(data, [{','.join(aliases)}])"
         if self.suppress_coerce:
             return dat
         else:

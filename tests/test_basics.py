@@ -454,6 +454,50 @@ def test_rename_formats(se, de):
     assert f == de(Foo, se(f))
 
 
+@pytest.mark.parametrize('se,de', (format_dict + format_json + format_yaml + format_toml))
+def test_alias(se, de):
+    @serde.serde
+    class Foo:
+        a: str = serde.field(alias=["b", "c", "d"])
+
+    f = Foo(a='foo')
+    assert f == de(Foo, se(f))
+
+
+def test_conflicting_alias():
+    @serde.serde
+    class Foo:
+        a: int = serde.field(alias=["b", "c", "d"])
+        b: int
+        c: int
+        d: int
+
+    f = Foo(a=1, b=2, c=3, d=4)
+    assert '{"a":1,"b":2,"c":3,"d":4}' == serde.json.to_json(f)
+    ff = serde.json.from_json(Foo, '{"a":1,"b":2,"c":3,"d":4}')
+    assert ff.a == 1
+    assert ff.b == 2
+    assert ff.c == 3
+    assert ff.d == 4
+
+    ff = serde.json.from_json(Foo, '{"b":2,"c":3,"d":4}')
+    assert ff.a == 2
+    assert ff.b == 2
+    assert ff.c == 3
+    assert ff.d == 4
+
+
+def test_rename_and_alias():
+    @serde.serde
+    class Foo:
+        a: int = serde.field(rename="z", alias=["b", "c", "d"])
+
+    f = Foo(a=1)
+    assert '{"z":1}' == serde.json.to_json(f)
+    ff = serde.json.from_json(Foo, '{"b":10}')
+    assert ff.a == 10
+
+
 @pytest.mark.parametrize('se,de', (format_dict + format_json + format_msgpack + format_yaml + format_toml))
 def test_skip_if(se, de):
     @serde.serde

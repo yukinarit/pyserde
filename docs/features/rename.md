@@ -1,12 +1,12 @@
 # Rename
 
-In case you want to use a keyword as field such as `class`, you can use `serde_rename` field attribute.
+In case you want to use a keyword as field such as `class`, you can use `rename` field attribute. If you want to have multiple aliases, you can use [alias](alias.md).
 
 ```python
 @serde
 @dataclass
 class Foo:
-    class_name: str = field(metadata={'serde_rename': 'class'})
+    class_name: str = field(rename='class')
 
 print(to_json(Foo(class_name='Foo')))
 ```
