@@ -17,6 +17,7 @@ from .common import (
     format_dict,
     format_json,
     format_msgpack,
+    format_pickle,
     format_tuple,
     format_yaml,
     opt_case,

@@ -13,6 +13,7 @@ import more_itertools
 from serde import from_dict, from_tuple, serde, to_dict, to_tuple
 from serde.json import from_json, to_json
 from serde.msgpack import from_msgpack, to_msgpack
+from serde.pickle import from_pickle, to_pickle
 from serde.toml import from_toml, to_toml
 from serde.yaml import from_yaml, to_yaml
 from tests import data
@@ -29,7 +30,11 @@ format_yaml: List = [(to_yaml, from_yaml)]
 
 format_toml: List = [(to_toml, from_toml)]
 
-all_formats: List = format_dict + format_tuple + format_json + format_msgpack + format_yaml + format_toml
+format_pickle: List = [(to_pickle, from_pickle)]
+
+all_formats: List = (
+    format_dict + format_tuple + format_json + format_msgpack + format_yaml + format_toml + format_pickle
+)
 
 T = TypeVar('T')
 

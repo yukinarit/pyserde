@@ -17,6 +17,7 @@ from .common import (
     format_dict,
     format_json,
     format_msgpack,
+    format_pickle,
     format_toml,
     format_tuple,
     format_yaml,
@@ -354,7 +355,9 @@ def test_default(se, de):
     assert True is dataclasses.fields(PriDefault)[3].default
 
 
-@pytest.mark.parametrize('se,de', (format_dict + format_tuple + format_json + format_msgpack + format_yaml))
+@pytest.mark.parametrize(
+    'se,de', (format_dict + format_tuple + format_json + format_msgpack + format_yaml + format_pickle)
+)
 def test_list_pri(se, de):
     p = [data.PRI, data.PRI]
     assert p == de(data.ListPri, se(p))
@@ -363,7 +366,9 @@ def test_list_pri(se, de):
     assert p == de(data.ListPri, se(p))
 
 
-@pytest.mark.parametrize('se,de', (format_dict + format_tuple + format_json + format_msgpack + format_yaml))
+@pytest.mark.parametrize(
+    'se,de', (format_dict + format_tuple + format_json + format_msgpack + format_yaml + format_pickle)
+)
 def test_dict_pri(se, de):
     p = {'1': data.PRI, '2': data.PRI}
     assert p == de(data.DictPri, se(p))
@@ -444,7 +449,7 @@ def test_rename_msgpack(se, de):
     assert f == de(Foo, se(f, named=False), named=False)
 
 
-@pytest.mark.parametrize('se,de', (format_dict + format_json + format_yaml + format_toml))
+@pytest.mark.parametrize('se,de', (format_dict + format_json + format_yaml + format_toml + format_pickle))
 def test_rename_formats(se, de):
     @serde.serde(rename_all='camelcase')
     class Foo:
@@ -454,7 +459,7 @@ def test_rename_formats(se, de):
     assert f == de(Foo, se(f))
 
 
-@pytest.mark.parametrize('se,de', (format_dict + format_json + format_yaml + format_toml))
+@pytest.mark.parametrize('se,de', (format_dict + format_json + format_yaml + format_toml + format_pickle))
 def test_alias(se, de):
     @serde.serde
     class Foo:
@@ -498,7 +503,9 @@ def test_rename_and_alias():
     assert ff.a == 10
 
 
-@pytest.mark.parametrize('se,de', (format_dict + format_json + format_msgpack + format_yaml + format_toml))
+@pytest.mark.parametrize(
+    'se,de', (format_dict + format_json + format_msgpack + format_yaml + format_toml + format_pickle)
+)
 def test_skip_if(se, de):
     @serde.serde
     class Foo:
@@ -524,7 +531,9 @@ def test_skip_if_false(se, de):
     assert f == de(Foo, se(f))
 
 
-@pytest.mark.parametrize('se,de', (format_dict + format_json + format_msgpack + format_yaml + format_toml))
+@pytest.mark.parametrize(
+    'se,de', (format_dict + format_json + format_msgpack + format_yaml + format_toml + format_pickle)
+)
 def test_skip_if_overrides_skip_if_false(se, de):
     @serde.serde
     class Foo:
