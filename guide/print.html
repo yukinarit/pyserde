@@ -871,7 +871,19 @@ poetry install
 poetry run python bench.py --full
 </code></pre>
 <p>You can check <a href="https://github.com/yukinarit/pyserde/blob/master/bench/bench.py">the benchmarking code</a> for more information.</p>
-<div style="break-before: page; page-break-before: always;"></div><h2 id="094-2022-11-20"><a class="header" href="#094-2022-11-20"><code>0.9.4</code> (2022-11-20)</a></h2>
+<div style="break-before: page; page-break-before: always;"></div><h2 id="095-2022-11-26"><a class="header" href="#095-2022-11-26"><code>0.9.5</code> (2022-11-26)</a></h2>
+<p><code>alias</code> field attribute was implemented.</p>
+<pre><code class="language-python">@serde
+@dataclass
+class Foo:
+    a: int = field(alias=[&quot;b&quot;, &quot;c&quot;, &quot;d&quot;])
+</code></pre>
+<ul>
+<li>feat: Implement alias (<a href="https://github.com/yukinarit/pyserde/commit/36cbc6e">36cbc6e</a>)</li>
+<li>test: Add InitVar and ClassVar examples (<a href="https://github.com/yukinarit/pyserde/commit/f5171fa">f5171fa</a>)</li>
+<li>build: Add python 3.11 to pyproject.toml (<a href="https://github.com/yukinarit/pyserde/commit/4ea7504">4ea7504</a>)</li>
+</ul>
+<h2 id="094-2022-11-20"><a class="header" href="#094-2022-11-20"><code>0.9.4</code> (2022-11-20)</a></h2>
 <p>Variable lengh tuple is supported.</p>
 <pre><code class="language-python">@serde
 @dataclass
