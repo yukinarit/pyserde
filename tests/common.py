@@ -6,7 +6,7 @@ import os
 import pathlib
 import sys
 import uuid
-from typing import Any, Callable, Dict, Generic, List, NewType, Optional, Set, Tuple, TypeVar
+from typing import Any, Callable, Dict, FrozenSet, Generic, List, NewType, Optional, Set, Tuple, TypeVar
 
 import more_itertools
 
@@ -77,6 +77,7 @@ types: List = [
     param({1, 2}, Set, toml_not_supported),
     param({1, 2}, set, toml_not_supported),
     param(set(), Set[int], toml_not_supported),
+    param({1, 2}, FrozenSet[int], toml_not_supported),
     param((1, 1), Tuple[int, int]),
     param((1, 1), Tuple),
     param((1, 1), Tuple[int, ...]),

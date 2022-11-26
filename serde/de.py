@@ -31,6 +31,7 @@ from .compat import (
     is_datetime,
     is_dict,
     is_enum,
+    is_frozen_set,
     is_generic,
     is_list,
     is_literal,
@@ -372,6 +373,9 @@ def from_obj(c: Type, o: Any, named: bool, reuse_instances: bool):
         elif is_set(c):
             if is_bare_set(c):
                 return set(e for e in o)
+            elif is_frozen_set(c):
+                res = frozenset(thisfunc(type_args(c)[0], e) for e in o)
+                return res
             else:
                 res = set(thisfunc(type_args(c)[0], e) for e in o)
                 return res
@@ -695,6 +699,8 @@ reuse_instances=reuse_instances)) if data.get("f") is not None else None'
         """
         if is_bare_set(arg.type):
             return f'set({arg.data})'
+        elif is_frozen_set(arg.type):
+            return f'frozenset({self.render(arg[0])} for v in {arg.data})'
         else:
             return f'set({self.render(arg[0])} for v in {arg.data})'
 

@@ -4,7 +4,7 @@ import enum
 import logging
 import pathlib
 import uuid
-from typing import Dict, List, Optional, Set, Tuple, Union
+from typing import Dict, FrozenSet, List, Optional, Set, Tuple, Union
 
 import pytest
 
@@ -914,3 +914,21 @@ def test_coerce():
 
     d = {"i": {"i": "10"}, "s": {"s": 100}, "f": {"f": 1000}, "b": {"b": "True"}}
     p = serde.from_dict(Nested, d)
+
+
+def test_frozenset() -> None:
+    @serde.serde
+    @dataclasses.dataclass
+    class Foo:
+        d: FrozenSet[int]
+
+    f = Foo(frozenset({1, 1, 2}))
+    assert '{"d":[1,2]}' == serde.json.to_json(f)
+
+    ff = serde.json.from_json(Foo, '{"d":[1,2]}')
+    assert f == ff
+    assert isinstance(f.d, frozenset)
+    assert isinstance(ff.d, frozenset)
+
+    fs = serde.json.from_json(FrozenSet[int], '[1,2]')
+    assert fs == frozenset([1, 2])
