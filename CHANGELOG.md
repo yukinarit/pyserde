@@ -1,3 +1,18 @@
+## `0.9.5` (2022-11-26)
+
+`alias` field attribute was implemented.
+
+```python
+@serde
+@dataclass
+class Foo:
+    a: int = field(alias=["b", "c", "d"])
+```
+
+* feat: Implement alias ([36cbc6e](https://github.com/yukinarit/pyserde/commit/36cbc6e))
+* test: Add InitVar and ClassVar examples ([f5171fa](https://github.com/yukinarit/pyserde/commit/f5171fa))
+* build: Add python 3.11 to pyproject.toml ([4ea7504](https://github.com/yukinarit/pyserde/commit/4ea7504))
+
 ## `0.9.4` (2022-11-20)
 
 Variable lengh tuple is supported.
