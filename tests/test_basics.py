@@ -4,7 +4,7 @@ import enum
 import logging
 import pathlib
 import uuid
-from typing import Dict, FrozenSet, List, Optional, Set, Tuple, Union
+from typing import DefaultDict, Dict, FrozenSet, List, Optional, Set, Tuple, Union
 
 import pytest
 
@@ -932,3 +932,32 @@ def test_frozenset() -> None:
 
     fs = serde.json.from_json(FrozenSet[int], '[1,2]')
     assert fs == frozenset([1, 2])
+
+
+def test_defaultdict() -> None:
+    from collections import defaultdict
+
+    @serde.serde
+    @dataclasses.dataclass
+    class Foo:
+        v: DefaultDict[str, List[int]]
+
+    f = Foo(defaultdict(list, {"k": [1, 2]}))
+    assert '{"v":{"k":[1,2]}}' == serde.json.to_json(f)
+
+    ff = serde.json.from_json(Foo, '{"v":{"k":[1,2]}}')
+    assert f == ff
+    assert isinstance(f.v, defaultdict)
+    assert isinstance(ff.v, defaultdict)
+
+    dd = serde.json.from_json(DefaultDict[str, List[int]], '{"k":[1,2]}')
+    assert isinstance(dd, defaultdict)
+    assert dd == defaultdict(list, {"k": [1, 2]})
+
+
+def test_defaultdict_invalid_value_type() -> None:
+    with pytest.raises(Exception):
+        serde.json.from_json(DefaultDict[str, ...], '{"k":[1,2]}')
+
+    with pytest.raises(Exception):
+        serde.json.from_json(DefaultDict, '{"k":[1,2]}')

@@ -13,8 +13,9 @@ import sys
 import types
 import typing
 import uuid
+from collections import defaultdict
 from dataclasses import is_dataclass
-from typing import Any, Dict, FrozenSet, Generic, Iterator, List, Optional, Set, Tuple, TypeVar, Union
+from typing import Any, DefaultDict, Dict, FrozenSet, Generic, Iterator, List, Optional, Set, Tuple, TypeVar, Union
 
 import typing_inspect
 from typing_extensions import Type
@@ -580,11 +581,13 @@ def is_dict(typ: Type[Any]) -> bool:
     True
     >>> is_dict(Dict)
     True
+    >>> is_dict(DefaultDict[int, int])
+    True
     """
     try:
-        return issubclass(get_origin(typ), dict)  # type: ignore
+        return issubclass(get_origin(typ), (dict, defaultdict))  # type: ignore
     except TypeError:
-        return typ in (Dict, dict)
+        return typ in (Dict, dict, DefaultDict, defaultdict)
 
 
 def is_bare_dict(typ: Type[Any]) -> bool:
@@ -598,6 +601,22 @@ def is_bare_dict(typ: Type[Any]) -> bool:
     True
     """
     return typ in (Dict, dict)
+
+
+def is_default_dict(typ: Type[Any]) -> bool:
+    """
+    Test if the type is `typing.DefaultDict`.
+
+    >>> from typing import Dict
+    >>> is_default_dict(DefaultDict[int, int])
+    True
+    >>> is_default_dict(Dict[int, int])
+    False
+    """
+    try:
+        return issubclass(get_origin(typ), defaultdict)  # type: ignore
+    except TypeError:
+        return typ in (DefaultDict, defaultdict)
 
 
 def is_none(typ: Type[Any]) -> bool:

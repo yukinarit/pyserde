@@ -7,10 +7,12 @@ import collection
 import custom_class_serializer
 import custom_field_serializer
 import default
+import default_dict
 import ellipsis
 import env
 import flatten
 import forward_reference
+import frozen_set
 import generics
 import generics_nested
 import init_var
@@ -39,9 +41,11 @@ PY310 = sys.version_info[:3] >= (3, 10, 0)
 def run_all():
     run(any)
     run(simple)
+    run(frozen_set)
     run(newtype)
     run(collection)
     run(default)
+    run(default_dict)
     run(env)
     run(flatten)
     run(jsonfile)
