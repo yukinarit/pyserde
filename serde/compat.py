@@ -14,7 +14,7 @@ import types
 import typing
 import uuid
 from dataclasses import is_dataclass
-from typing import Any, Dict, Generic, Iterator, List, Optional, Set, Tuple, TypeVar, Union
+from typing import Any, Dict, FrozenSet, Generic, Iterator, List, Optional, Set, Tuple, TypeVar, Union
 
 import typing_inspect
 from typing_extensions import Type
@@ -526,18 +526,20 @@ def is_bare_tuple(typ: Type[Any]) -> bool:
 
 def is_set(typ: Type[Any]) -> bool:
     """
-    Test if the type is `typing.Set`.
+    Test if the type is `typing.Set` or `typing.FrozenSet`.
 
     >>> from typing import Set
     >>> is_set(Set[int])
     True
     >>> is_set(Set)
     True
+    >>> is_set(FrozenSet[int])
+    True
     """
     try:
-        return issubclass(get_origin(typ), set)  # type: ignore
+        return issubclass(get_origin(typ), (set, frozenset))  # type: ignore
     except TypeError:
-        return typ in (Set, set)
+        return typ in (Set, set, FrozenSet, frozenset)
 
 
 def is_bare_set(typ: Type[Any]) -> bool:
@@ -551,6 +553,22 @@ def is_bare_set(typ: Type[Any]) -> bool:
     True
     """
     return typ in (Set, set)
+
+
+def is_frozen_set(typ: Type[Any]) -> bool:
+    """
+    Test if the type is `typing.FrozenSet`.
+
+    >>> from typing import Set
+    >>> is_frozen_set(FrozenSet[int])
+    True
+    >>> is_frozen_set(Set)
+    False
+    """
+    try:
+        return issubclass(get_origin(typ), frozenset)  # type: ignore
+    except TypeError:
+        return typ in (FrozenSet, frozenset)
 
 
 def is_dict(typ: Type[Any]) -> bool:
