@@ -49,7 +49,7 @@ Foo(i=10, s='foo', f=100.0, b=True)
     - Primitives (`int`, `float`, `str`, `bool`)
     - Containers
         - `List`, `Set`, `Tuple`, `Dict`
-        - `FrozenSet`
+        - [`FrozenSet`](https://docs.python.org/3/library/stdtypes.html#frozenset), [`DefaultDict`](https://docs.python.org/3/library/collections.html#collections.defaultdict)
     - [`typing.Optional`](https://docs.python.org/3/library/typing.html#typing.Optional)
     - [`typing.Union`](https://docs.python.org/3/library/typing.html#typing.Union)
     - User defined class with [`@dataclass`](https://docs.python.org/3/library/dataclasses.html)

@@ -1,3 +1,4 @@
+import collections
 import datetime
 import decimal
 import ipaddress
@@ -6,7 +7,7 @@ import os
 import pathlib
 import sys
 import uuid
-from typing import Any, Callable, Dict, FrozenSet, Generic, List, NewType, Optional, Set, Tuple, TypeVar
+from typing import Any, Callable, DefaultDict, Dict, FrozenSet, Generic, List, NewType, Optional, Set, Tuple, TypeVar
 
 import more_itertools
 
@@ -85,6 +86,9 @@ types: List = [
     param({'a': 1}, Dict),
     param({'a': 1}, dict),
     param({}, Dict[str, int]),
+    param({'a': 1}, Dict[str, int]),
+    param({'a': 1}, DefaultDict[str, int]),
+    param({'a': [1]}, DefaultDict[str, List[int]]),
     param(data.Pri(10, 'foo', 100.0, True), data.Pri),  # dataclass
     param(data.Pri(10, 'foo', 100.0, True), Optional[data.Pri]),
     param(None, Optional[data.Pri], toml_not_supported),

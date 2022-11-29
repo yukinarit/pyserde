@@ -4,6 +4,7 @@ associated with deserialization.
 """
 
 import abc
+import collections
 import dataclasses
 import functools
 import typing
@@ -29,6 +30,7 @@ from .compat import (
     is_bare_set,
     is_bare_tuple,
     is_datetime,
+    is_default_dict,
     is_dict,
     is_enum,
     is_frozen_set,
@@ -236,6 +238,7 @@ def deserialize(
         g['typename'] = typename  # used in union functions
         g['ensure'] = ensure
         g['typing'] = typing
+        g['collections'] = collections
         g['Literal'] = Literal
         g['from_obj'] = from_obj
         g['get_generic_arg'] = get_generic_arg
@@ -388,9 +391,17 @@ def from_obj(c: Type, o: Any, named: bool, reuse_instances: bool):
         elif is_dict(c):
             if is_bare_dict(c):
                 return {k: v for k, v in o.items()}
+            elif is_default_dict(c):
+                f = DeField(c, "")
+                v = f.value_field()
+                origin = get_origin(v.type)
+                res = collections.defaultdict(
+                    origin if origin else v.type,
+                    {thisfunc(type_args(c)[0], k): thisfunc(type_args(c)[1], v) for k, v in o.items()},
+                )
             else:
                 res = {thisfunc(type_args(c)[0], k): thisfunc(type_args(c)[1], v) for k, v in o.items()}
-                return res
+            return res
         elif is_numpy_array(c):
             return deserialize_numpy_array_direct(c, o)
         elif is_datetime(c):
@@ -748,6 +759,19 @@ for k, v in data["f"].items()}'
         """
         if is_bare_dict(arg.type):
             return arg.data
+        elif is_default_dict(arg.type):
+            k = arg.key_field()
+            v = arg.value_field()
+            origin = get_origin(v.type)
+            if origin:
+                # When the callable type is of generic type e.g List.
+                # Get origin type "list" from "List[X]".
+                callable = origin.__name__
+            else:
+                # When the callable type is non generic type e.g int, Foo.
+                callable = v.type.__name__
+            return f'collections.defaultdict({callable}, \
+                    {{{self.render(k)}: {self.render(v)} for k, v in {arg.data}.items()}})'
         else:
             k = arg.key_field()
             v = arg.value_field()
