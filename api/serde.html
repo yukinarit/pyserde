@@ -39,6 +39,7 @@
                 <li><a href="serde/numpy.html">numpy</a></li>
                 <li><a href="serde/se.html">se</a></li>
                 <li><a href="serde/toml.html">toml</a></li>
+                <li><a href="serde/pickle.html">pickle</a></li>
                 <li><a href="serde/yaml.html">yaml</a></li>
         </ul>
 
@@ -193,6 +194,7 @@ inspired by <a href="https://github.com/serde-rs/serde">serde-rs</a>.</p>
 <li><code><a href="serde/msgpack.html">serde.msgpack</a></code>: Serialize and Deserialize in MsgPack.</li>
 <li><code><a href="serde/yaml.html">serde.yaml</a></code>: Serialize and Deserialize in YAML.</li>
 <li><code><a href="serde/toml.html">serde.toml</a></code>: Serialize and Deserialize in TOML.</li>
+<li><code><a href="serde/pickle.html">serde.pickle</a></code>: Serialize and Deserialize in Pickle.</li>
 </ul>
 
 <p>Other modules</p>
@@ -249,113 +251,115 @@ inspired by <a href="https://github.com/serde-rs/serde">serde-rs</a>.</p>
 </span><span id="L-41"><a href="#L-41"><span class="linenos"> 41</span></a><span class="sd">* `serde.msgpack`: Serialize and Deserialize in MsgPack.</span>
 </span><span id="L-42"><a href="#L-42"><span class="linenos"> 42</span></a><span class="sd">* `serde.yaml`: Serialize and Deserialize in YAML.</span>
 </span><span id="L-43"><a href="#L-43"><span class="linenos"> 43</span></a><span class="sd">* `serde.toml`: Serialize and Deserialize in TOML.</span>
-</span><span id="L-44"><a href="#L-44"><span class="linenos"> 44</span></a>
-</span><span id="L-45"><a href="#L-45"><span class="linenos"> 45</span></a><span class="sd">Other modules</span>
-</span><span id="L-46"><a href="#L-46"><span class="linenos"> 46</span></a><span class="sd">* `serde.inspect`: Prints generated code by pyserde.</span>
-</span><span id="L-47"><a href="#L-47"><span class="linenos"> 47</span></a><span class="sd">&quot;&quot;&quot;</span>
-</span><span id="L-48"><a href="#L-48"><span class="linenos"> 48</span></a>
-</span><span id="L-49"><a href="#L-49"><span class="linenos"> 49</span></a><span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">dataclass</span>
-</span><span id="L-50"><a href="#L-50"><span class="linenos"> 50</span></a><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Type</span><span class="p">,</span> <span class="n">overload</span>
-</span><span id="L-51"><a href="#L-51"><span class="linenos"> 51</span></a>
-</span><span id="L-52"><a href="#L-52"><span class="linenos"> 52</span></a><span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">dataclass_transform</span>
-</span><span id="L-53"><a href="#L-53"><span class="linenos"> 53</span></a>
-</span><span id="L-54"><a href="#L-54"><span class="linenos"> 54</span></a><span class="kn">from</span> <span class="nn">.compat</span> <span class="kn">import</span> <span class="n">SerdeError</span><span class="p">,</span> <span class="n">SerdeSkip</span><span class="p">,</span> <span class="n">T</span>
-</span><span id="L-55"><a href="#L-55"><span class="linenos"> 55</span></a><span class="kn">from</span> <span class="nn">.core</span> <span class="kn">import</span> <span class="p">(</span>
-</span><span id="L-56"><a href="#L-56"><span class="linenos"> 56</span></a>    <span class="n">AdjacentTagging</span><span class="p">,</span>
-</span><span id="L-57"><a href="#L-57"><span class="linenos"> 57</span></a>    <span class="n">Coerce</span><span class="p">,</span>
-</span><span id="L-58"><a href="#L-58"><span class="linenos"> 58</span></a>    <span class="n">DefaultTagging</span><span class="p">,</span>
-</span><span id="L-59"><a href="#L-59"><span class="linenos"> 59</span></a>    <span class="n">ExternalTagging</span><span class="p">,</span>
-</span><span id="L-60"><a href="#L-60"><span class="linenos"> 60</span></a>    <span class="n">InternalTagging</span><span class="p">,</span>
-</span><span id="L-61"><a href="#L-61"><span class="linenos"> 61</span></a>    <span class="n">NoCheck</span><span class="p">,</span>
-</span><span id="L-62"><a href="#L-62"><span class="linenos"> 62</span></a>    <span class="n">Strict</span><span class="p">,</span>
-</span><span id="L-63"><a href="#L-63"><span class="linenos"> 63</span></a>    <span class="n">Tagging</span><span class="p">,</span>
-</span><span id="L-64"><a href="#L-64"><span class="linenos"> 64</span></a>    <span class="n">TypeCheck</span><span class="p">,</span>
-</span><span id="L-65"><a href="#L-65"><span class="linenos"> 65</span></a>    <span class="n">Untagged</span><span class="p">,</span>
-</span><span id="L-66"><a href="#L-66"><span class="linenos"> 66</span></a>    <span class="n">field</span><span class="p">,</span>
-</span><span id="L-67"><a href="#L-67"><span class="linenos"> 67</span></a>    <span class="n">init</span><span class="p">,</span>
-</span><span id="L-68"><a href="#L-68"><span class="linenos"> 68</span></a>    <span class="n">logger</span><span class="p">,</span>
-</span><span id="L-69"><a href="#L-69"><span class="linenos"> 69</span></a>    <span class="n">should_impl_dataclass</span><span class="p">,</span>
-</span><span id="L-70"><a href="#L-70"><span class="linenos"> 70</span></a><span class="p">)</span>
-</span><span id="L-71"><a href="#L-71"><span class="linenos"> 71</span></a><span class="kn">from</span> <span class="nn">.de</span> <span class="kn">import</span> <span class="n">DeserializeFunc</span><span class="p">,</span> <span class="n">default_deserializer</span><span class="p">,</span> <span class="n">deserialize</span><span class="p">,</span> <span class="n">from_dict</span><span class="p">,</span> <span class="n">from_tuple</span><span class="p">,</span> <span class="n">is_deserializable</span>
-</span><span id="L-72"><a href="#L-72"><span class="linenos"> 72</span></a><span class="kn">from</span> <span class="nn">.se</span> <span class="kn">import</span> <span class="n">SerializeFunc</span><span class="p">,</span> <span class="n">asdict</span><span class="p">,</span> <span class="n">astuple</span><span class="p">,</span> <span class="n">default_serializer</span><span class="p">,</span> <span class="n">is_serializable</span><span class="p">,</span> <span class="n">serialize</span><span class="p">,</span> <span class="n">to_dict</span><span class="p">,</span> <span class="n">to_tuple</span>
-</span><span id="L-73"><a href="#L-73"><span class="linenos"> 73</span></a>
-</span><span id="L-74"><a href="#L-74"><span class="linenos"> 74</span></a><span class="n">__all__</span> <span class="o">=</span> <span class="p">(</span>
-</span><span id="L-75"><a href="#L-75"><span class="linenos"> 75</span></a>    <span class="s2">&quot;SerdeError&quot;</span><span class="p">,</span>
-</span><span id="L-76"><a href="#L-76"><span class="linenos"> 76</span></a>    <span class="s2">&quot;SerdeSkip&quot;</span><span class="p">,</span>
-</span><span id="L-77"><a href="#L-77"><span class="linenos"> 77</span></a>    <span class="s2">&quot;AdjacentTagging&quot;</span><span class="p">,</span>
-</span><span id="L-78"><a href="#L-78"><span class="linenos"> 78</span></a>    <span class="s2">&quot;ExternalTagging&quot;</span><span class="p">,</span>
-</span><span id="L-79"><a href="#L-79"><span class="linenos"> 79</span></a>    <span class="s2">&quot;InternalTagging&quot;</span><span class="p">,</span>
-</span><span id="L-80"><a href="#L-80"><span class="linenos"> 80</span></a>    <span class="s2">&quot;Untagged&quot;</span><span class="p">,</span>
-</span><span id="L-81"><a href="#L-81"><span class="linenos"> 81</span></a>    <span class="s2">&quot;NoCheck&quot;</span><span class="p">,</span>
-</span><span id="L-82"><a href="#L-82"><span class="linenos"> 82</span></a>    <span class="s2">&quot;Strict&quot;</span><span class="p">,</span>
-</span><span id="L-83"><a href="#L-83"><span class="linenos"> 83</span></a>    <span class="s2">&quot;Coerce&quot;</span><span class="p">,</span>
-</span><span id="L-84"><a href="#L-84"><span class="linenos"> 84</span></a>    <span class="s2">&quot;field&quot;</span><span class="p">,</span>
-</span><span id="L-85"><a href="#L-85"><span class="linenos"> 85</span></a>    <span class="s2">&quot;default_deserializer&quot;</span><span class="p">,</span>
-</span><span id="L-86"><a href="#L-86"><span class="linenos"> 86</span></a>    <span class="s2">&quot;deserialize&quot;</span><span class="p">,</span>
-</span><span id="L-87"><a href="#L-87"><span class="linenos"> 87</span></a>    <span class="s2">&quot;from_dict&quot;</span><span class="p">,</span>
-</span><span id="L-88"><a href="#L-88"><span class="linenos"> 88</span></a>    <span class="s2">&quot;from_tuple&quot;</span><span class="p">,</span>
-</span><span id="L-89"><a href="#L-89"><span class="linenos"> 89</span></a>    <span class="s2">&quot;is_deserializable&quot;</span><span class="p">,</span>
-</span><span id="L-90"><a href="#L-90"><span class="linenos"> 90</span></a>    <span class="s2">&quot;asdict&quot;</span><span class="p">,</span>
-</span><span id="L-91"><a href="#L-91"><span class="linenos"> 91</span></a>    <span class="s2">&quot;astuple&quot;</span><span class="p">,</span>
-</span><span id="L-92"><a href="#L-92"><span class="linenos"> 92</span></a>    <span class="s2">&quot;default_serializer&quot;</span><span class="p">,</span>
-</span><span id="L-93"><a href="#L-93"><span class="linenos"> 93</span></a>    <span class="s2">&quot;is_serializable&quot;</span><span class="p">,</span>
-</span><span id="L-94"><a href="#L-94"><span class="linenos"> 94</span></a>    <span class="s2">&quot;serialize&quot;</span><span class="p">,</span>
-</span><span id="L-95"><a href="#L-95"><span class="linenos"> 95</span></a>    <span class="s2">&quot;to_dict&quot;</span><span class="p">,</span>
-</span><span id="L-96"><a href="#L-96"><span class="linenos"> 96</span></a>    <span class="s2">&quot;to_tuple&quot;</span><span class="p">,</span>
-</span><span id="L-97"><a href="#L-97"><span class="linenos"> 97</span></a>    <span class="s2">&quot;serde&quot;</span><span class="p">,</span>
-</span><span id="L-98"><a href="#L-98"><span class="linenos"> 98</span></a>    <span class="s2">&quot;compat&quot;</span><span class="p">,</span>
-</span><span id="L-99"><a href="#L-99"><span class="linenos"> 99</span></a>    <span class="s2">&quot;core&quot;</span><span class="p">,</span>
-</span><span id="L-100"><a href="#L-100"><span class="linenos">100</span></a>    <span class="s2">&quot;de&quot;</span><span class="p">,</span>
-</span><span id="L-101"><a href="#L-101"><span class="linenos">101</span></a>    <span class="s2">&quot;inspect&quot;</span><span class="p">,</span>
-</span><span id="L-102"><a href="#L-102"><span class="linenos">102</span></a>    <span class="s2">&quot;json&quot;</span><span class="p">,</span>
-</span><span id="L-103"><a href="#L-103"><span class="linenos">103</span></a>    <span class="s2">&quot;msgpack&quot;</span><span class="p">,</span>
-</span><span id="L-104"><a href="#L-104"><span class="linenos">104</span></a>    <span class="s2">&quot;numpy&quot;</span><span class="p">,</span>
-</span><span id="L-105"><a href="#L-105"><span class="linenos">105</span></a>    <span class="s2">&quot;se&quot;</span><span class="p">,</span>
-</span><span id="L-106"><a href="#L-106"><span class="linenos">106</span></a>    <span class="s2">&quot;toml&quot;</span><span class="p">,</span>
-</span><span id="L-107"><a href="#L-107"><span class="linenos">107</span></a>    <span class="s2">&quot;yaml&quot;</span><span class="p">,</span>
-</span><span id="L-108"><a href="#L-108"><span class="linenos">108</span></a><span class="p">)</span>
-</span><span id="L-109"><a href="#L-109"><span class="linenos">109</span></a>
-</span><span id="L-110"><a href="#L-110"><span class="linenos">110</span></a>
-</span><span id="L-111"><a href="#L-111"><span class="linenos">111</span></a><span class="nd">@overload</span>
-</span><span id="L-112"><a href="#L-112"><span class="linenos">112</span></a><span class="k">def</span> <span class="nf">serde</span><span class="p">(</span>
-</span><span id="L-113"><a href="#L-113"><span class="linenos">113</span></a>    <span class="n">_cls</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">T</span><span class="p">],</span>
-</span><span id="L-114"><a href="#L-114"><span class="linenos">114</span></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Type</span><span class="p">[</span><span class="n">T</span><span class="p">]:</span>
-</span><span id="L-115"><a href="#L-115"><span class="linenos">115</span></a>    <span class="o">...</span>
-</span><span id="L-116"><a href="#L-116"><span class="linenos">116</span></a>
-</span><span id="L-117"><a href="#L-117"><span class="linenos">117</span></a>
-</span><span id="L-118"><a href="#L-118"><span class="linenos">118</span></a><span class="nd">@overload</span>
-</span><span id="L-119"><a href="#L-119"><span class="linenos">119</span></a><span class="k">def</span> <span class="nf">serde</span><span class="p">(</span>
-</span><span id="L-120"><a href="#L-120"><span class="linenos">120</span></a>    <span class="n">rename_all</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-</span><span id="L-121"><a href="#L-121"><span class="linenos">121</span></a>    <span class="n">reuse_instances_default</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-</span><span id="L-122"><a href="#L-122"><span class="linenos">122</span></a>    <span class="n">convert_sets_default</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-</span><span id="L-123"><a href="#L-123"><span class="linenos">123</span></a>    <span class="n">serializer</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">SerializeFunc</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-</span><span id="L-124"><a href="#L-124"><span class="linenos">124</span></a>    <span class="n">deserializer</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">DeserializeFunc</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-</span><span id="L-125"><a href="#L-125"><span class="linenos">125</span></a>    <span class="n">tagging</span><span class="p">:</span> <span class="n">Tagging</span> <span class="o">=</span> <span class="n">DefaultTagging</span><span class="p">,</span>
-</span><span id="L-126"><a href="#L-126"><span class="linenos">126</span></a>    <span class="n">type_check</span><span class="p">:</span> <span class="n">TypeCheck</span> <span class="o">=</span> <span class="n">NoCheck</span><span class="p">,</span>
-</span><span id="L-127"><a href="#L-127"><span class="linenos">127</span></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Type</span><span class="p">[</span><span class="n">T</span><span class="p">]],</span> <span class="n">Type</span><span class="p">[</span><span class="n">T</span><span class="p">]]:</span>
-</span><span id="L-128"><a href="#L-128"><span class="linenos">128</span></a>    <span class="o">...</span>
-</span><span id="L-129"><a href="#L-129"><span class="linenos">129</span></a>
-</span><span id="L-130"><a href="#L-130"><span class="linenos">130</span></a>
-</span><span id="L-131"><a href="#L-131"><span class="linenos">131</span></a><span class="nd">@dataclass_transform</span><span class="p">()</span>
-</span><span id="L-132"><a href="#L-132"><span class="linenos">132</span></a><span class="k">def</span> <span class="nf">serde</span><span class="p">(</span>
-</span><span id="L-133"><a href="#L-133"><span class="linenos">133</span></a>    <span class="n">_cls</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-</span><span id="L-134"><a href="#L-134"><span class="linenos">134</span></a>    <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
-</span><span id="L-135"><a href="#L-135"><span class="linenos">135</span></a><span class="p">):</span>  <span class="c1"># type: ignore</span>
-</span><span id="L-136"><a href="#L-136"><span class="linenos">136</span></a>    <span class="sd">&quot;&quot;&quot;</span>
-</span><span id="L-137"><a href="#L-137"><span class="linenos">137</span></a><span class="sd">    serde decorator. Keyword arguments are passed in `serialize` and `deserialize`.</span>
-</span><span id="L-138"><a href="#L-138"><span class="linenos">138</span></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="L-139"><a href="#L-139"><span class="linenos">139</span></a>
-</span><span id="L-140"><a href="#L-140"><span class="linenos">140</span></a>    <span class="k">def</span> <span class="nf">wrap</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
-</span><span id="L-141"><a href="#L-141"><span class="linenos">141</span></a>        <span class="k">if</span> <span class="n">should_impl_dataclass</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
-</span><span id="L-142"><a href="#L-142"><span class="linenos">142</span></a>            <span class="n">dataclass</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
-</span><span id="L-143"><a href="#L-143"><span class="linenos">143</span></a>        <span class="n">serialize</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-</span><span id="L-144"><a href="#L-144"><span class="linenos">144</span></a>        <span class="n">deserialize</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-</span><span id="L-145"><a href="#L-145"><span class="linenos">145</span></a>        <span class="k">return</span> <span class="bp">cls</span>
-</span><span id="L-146"><a href="#L-146"><span class="linenos">146</span></a>
-</span><span id="L-147"><a href="#L-147"><span class="linenos">147</span></a>    <span class="k">if</span> <span class="n">_cls</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-</span><span id="L-148"><a href="#L-148"><span class="linenos">148</span></a>        <span class="k">return</span> <span class="n">wrap</span>  <span class="c1"># type: ignore</span>
-</span><span id="L-149"><a href="#L-149"><span class="linenos">149</span></a>
-</span><span id="L-150"><a href="#L-150"><span class="linenos">150</span></a>    <span class="k">return</span> <span class="n">wrap</span><span class="p">(</span><span class="n">_cls</span><span class="p">)</span>
+</span><span id="L-44"><a href="#L-44"><span class="linenos"> 44</span></a><span class="sd">* `serde.pickle`: Serialize and Deserialize in Pickle.</span>
+</span><span id="L-45"><a href="#L-45"><span class="linenos"> 45</span></a>
+</span><span id="L-46"><a href="#L-46"><span class="linenos"> 46</span></a><span class="sd">Other modules</span>
+</span><span id="L-47"><a href="#L-47"><span class="linenos"> 47</span></a><span class="sd">* `serde.inspect`: Prints generated code by pyserde.</span>
+</span><span id="L-48"><a href="#L-48"><span class="linenos"> 48</span></a><span class="sd">&quot;&quot;&quot;</span>
+</span><span id="L-49"><a href="#L-49"><span class="linenos"> 49</span></a>
+</span><span id="L-50"><a href="#L-50"><span class="linenos"> 50</span></a><span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">dataclass</span>
+</span><span id="L-51"><a href="#L-51"><span class="linenos"> 51</span></a><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Type</span><span class="p">,</span> <span class="n">overload</span>
+</span><span id="L-52"><a href="#L-52"><span class="linenos"> 52</span></a>
+</span><span id="L-53"><a href="#L-53"><span class="linenos"> 53</span></a><span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">dataclass_transform</span>
+</span><span id="L-54"><a href="#L-54"><span class="linenos"> 54</span></a>
+</span><span id="L-55"><a href="#L-55"><span class="linenos"> 55</span></a><span class="kn">from</span> <span class="nn">.compat</span> <span class="kn">import</span> <span class="n">SerdeError</span><span class="p">,</span> <span class="n">SerdeSkip</span><span class="p">,</span> <span class="n">T</span>
+</span><span id="L-56"><a href="#L-56"><span class="linenos"> 56</span></a><span class="kn">from</span> <span class="nn">.core</span> <span class="kn">import</span> <span class="p">(</span>
+</span><span id="L-57"><a href="#L-57"><span class="linenos"> 57</span></a>    <span class="n">AdjacentTagging</span><span class="p">,</span>
+</span><span id="L-58"><a href="#L-58"><span class="linenos"> 58</span></a>    <span class="n">Coerce</span><span class="p">,</span>
+</span><span id="L-59"><a href="#L-59"><span class="linenos"> 59</span></a>    <span class="n">DefaultTagging</span><span class="p">,</span>
+</span><span id="L-60"><a href="#L-60"><span class="linenos"> 60</span></a>    <span class="n">ExternalTagging</span><span class="p">,</span>
+</span><span id="L-61"><a href="#L-61"><span class="linenos"> 61</span></a>    <span class="n">InternalTagging</span><span class="p">,</span>
+</span><span id="L-62"><a href="#L-62"><span class="linenos"> 62</span></a>    <span class="n">NoCheck</span><span class="p">,</span>
+</span><span id="L-63"><a href="#L-63"><span class="linenos"> 63</span></a>    <span class="n">Strict</span><span class="p">,</span>
+</span><span id="L-64"><a href="#L-64"><span class="linenos"> 64</span></a>    <span class="n">Tagging</span><span class="p">,</span>
+</span><span id="L-65"><a href="#L-65"><span class="linenos"> 65</span></a>    <span class="n">TypeCheck</span><span class="p">,</span>
+</span><span id="L-66"><a href="#L-66"><span class="linenos"> 66</span></a>    <span class="n">Untagged</span><span class="p">,</span>
+</span><span id="L-67"><a href="#L-67"><span class="linenos"> 67</span></a>    <span class="n">field</span><span class="p">,</span>
+</span><span id="L-68"><a href="#L-68"><span class="linenos"> 68</span></a>    <span class="n">init</span><span class="p">,</span>
+</span><span id="L-69"><a href="#L-69"><span class="linenos"> 69</span></a>    <span class="n">logger</span><span class="p">,</span>
+</span><span id="L-70"><a href="#L-70"><span class="linenos"> 70</span></a>    <span class="n">should_impl_dataclass</span><span class="p">,</span>
+</span><span id="L-71"><a href="#L-71"><span class="linenos"> 71</span></a><span class="p">)</span>
+</span><span id="L-72"><a href="#L-72"><span class="linenos"> 72</span></a><span class="kn">from</span> <span class="nn">.de</span> <span class="kn">import</span> <span class="n">DeserializeFunc</span><span class="p">,</span> <span class="n">default_deserializer</span><span class="p">,</span> <span class="n">deserialize</span><span class="p">,</span> <span class="n">from_dict</span><span class="p">,</span> <span class="n">from_tuple</span><span class="p">,</span> <span class="n">is_deserializable</span>
+</span><span id="L-73"><a href="#L-73"><span class="linenos"> 73</span></a><span class="kn">from</span> <span class="nn">.se</span> <span class="kn">import</span> <span class="n">SerializeFunc</span><span class="p">,</span> <span class="n">asdict</span><span class="p">,</span> <span class="n">astuple</span><span class="p">,</span> <span class="n">default_serializer</span><span class="p">,</span> <span class="n">is_serializable</span><span class="p">,</span> <span class="n">serialize</span><span class="p">,</span> <span class="n">to_dict</span><span class="p">,</span> <span class="n">to_tuple</span>
+</span><span id="L-74"><a href="#L-74"><span class="linenos"> 74</span></a>
+</span><span id="L-75"><a href="#L-75"><span class="linenos"> 75</span></a><span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
+</span><span id="L-76"><a href="#L-76"><span class="linenos"> 76</span></a>    <span class="s2">&quot;SerdeError&quot;</span><span class="p">,</span>
+</span><span id="L-77"><a href="#L-77"><span class="linenos"> 77</span></a>    <span class="s2">&quot;SerdeSkip&quot;</span><span class="p">,</span>
+</span><span id="L-78"><a href="#L-78"><span class="linenos"> 78</span></a>    <span class="s2">&quot;AdjacentTagging&quot;</span><span class="p">,</span>
+</span><span id="L-79"><a href="#L-79"><span class="linenos"> 79</span></a>    <span class="s2">&quot;ExternalTagging&quot;</span><span class="p">,</span>
+</span><span id="L-80"><a href="#L-80"><span class="linenos"> 80</span></a>    <span class="s2">&quot;InternalTagging&quot;</span><span class="p">,</span>
+</span><span id="L-81"><a href="#L-81"><span class="linenos"> 81</span></a>    <span class="s2">&quot;Untagged&quot;</span><span class="p">,</span>
+</span><span id="L-82"><a href="#L-82"><span class="linenos"> 82</span></a>    <span class="s2">&quot;NoCheck&quot;</span><span class="p">,</span>
+</span><span id="L-83"><a href="#L-83"><span class="linenos"> 83</span></a>    <span class="s2">&quot;Strict&quot;</span><span class="p">,</span>
+</span><span id="L-84"><a href="#L-84"><span class="linenos"> 84</span></a>    <span class="s2">&quot;Coerce&quot;</span><span class="p">,</span>
+</span><span id="L-85"><a href="#L-85"><span class="linenos"> 85</span></a>    <span class="s2">&quot;field&quot;</span><span class="p">,</span>
+</span><span id="L-86"><a href="#L-86"><span class="linenos"> 86</span></a>    <span class="s2">&quot;default_deserializer&quot;</span><span class="p">,</span>
+</span><span id="L-87"><a href="#L-87"><span class="linenos"> 87</span></a>    <span class="s2">&quot;deserialize&quot;</span><span class="p">,</span>
+</span><span id="L-88"><a href="#L-88"><span class="linenos"> 88</span></a>    <span class="s2">&quot;from_dict&quot;</span><span class="p">,</span>
+</span><span id="L-89"><a href="#L-89"><span class="linenos"> 89</span></a>    <span class="s2">&quot;from_tuple&quot;</span><span class="p">,</span>
+</span><span id="L-90"><a href="#L-90"><span class="linenos"> 90</span></a>    <span class="s2">&quot;is_deserializable&quot;</span><span class="p">,</span>
+</span><span id="L-91"><a href="#L-91"><span class="linenos"> 91</span></a>    <span class="s2">&quot;asdict&quot;</span><span class="p">,</span>
+</span><span id="L-92"><a href="#L-92"><span class="linenos"> 92</span></a>    <span class="s2">&quot;astuple&quot;</span><span class="p">,</span>
+</span><span id="L-93"><a href="#L-93"><span class="linenos"> 93</span></a>    <span class="s2">&quot;default_serializer&quot;</span><span class="p">,</span>
+</span><span id="L-94"><a href="#L-94"><span class="linenos"> 94</span></a>    <span class="s2">&quot;is_serializable&quot;</span><span class="p">,</span>
+</span><span id="L-95"><a href="#L-95"><span class="linenos"> 95</span></a>    <span class="s2">&quot;serialize&quot;</span><span class="p">,</span>
+</span><span id="L-96"><a href="#L-96"><span class="linenos"> 96</span></a>    <span class="s2">&quot;to_dict&quot;</span><span class="p">,</span>
+</span><span id="L-97"><a href="#L-97"><span class="linenos"> 97</span></a>    <span class="s2">&quot;to_tuple&quot;</span><span class="p">,</span>
+</span><span id="L-98"><a href="#L-98"><span class="linenos"> 98</span></a>    <span class="s2">&quot;serde&quot;</span><span class="p">,</span>
+</span><span id="L-99"><a href="#L-99"><span class="linenos"> 99</span></a>    <span class="s2">&quot;compat&quot;</span><span class="p">,</span>
+</span><span id="L-100"><a href="#L-100"><span class="linenos">100</span></a>    <span class="s2">&quot;core&quot;</span><span class="p">,</span>
+</span><span id="L-101"><a href="#L-101"><span class="linenos">101</span></a>    <span class="s2">&quot;de&quot;</span><span class="p">,</span>
+</span><span id="L-102"><a href="#L-102"><span class="linenos">102</span></a>    <span class="s2">&quot;inspect&quot;</span><span class="p">,</span>
+</span><span id="L-103"><a href="#L-103"><span class="linenos">103</span></a>    <span class="s2">&quot;json&quot;</span><span class="p">,</span>
+</span><span id="L-104"><a href="#L-104"><span class="linenos">104</span></a>    <span class="s2">&quot;msgpack&quot;</span><span class="p">,</span>
+</span><span id="L-105"><a href="#L-105"><span class="linenos">105</span></a>    <span class="s2">&quot;numpy&quot;</span><span class="p">,</span>
+</span><span id="L-106"><a href="#L-106"><span class="linenos">106</span></a>    <span class="s2">&quot;se&quot;</span><span class="p">,</span>
+</span><span id="L-107"><a href="#L-107"><span class="linenos">107</span></a>    <span class="s2">&quot;toml&quot;</span><span class="p">,</span>
+</span><span id="L-108"><a href="#L-108"><span class="linenos">108</span></a>    <span class="s2">&quot;pickle&quot;</span><span class="p">,</span>
+</span><span id="L-109"><a href="#L-109"><span class="linenos">109</span></a>    <span class="s2">&quot;yaml&quot;</span><span class="p">,</span>
+</span><span id="L-110"><a href="#L-110"><span class="linenos">110</span></a><span class="p">]</span>
+</span><span id="L-111"><a href="#L-111"><span class="linenos">111</span></a>
+</span><span id="L-112"><a href="#L-112"><span class="linenos">112</span></a>
+</span><span id="L-113"><a href="#L-113"><span class="linenos">113</span></a><span class="nd">@overload</span>
+</span><span id="L-114"><a href="#L-114"><span class="linenos">114</span></a><span class="k">def</span> <span class="nf">serde</span><span class="p">(</span>
+</span><span id="L-115"><a href="#L-115"><span class="linenos">115</span></a>    <span class="n">_cls</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">T</span><span class="p">],</span>
+</span><span id="L-116"><a href="#L-116"><span class="linenos">116</span></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Type</span><span class="p">[</span><span class="n">T</span><span class="p">]:</span>
+</span><span id="L-117"><a href="#L-117"><span class="linenos">117</span></a>    <span class="o">...</span>
+</span><span id="L-118"><a href="#L-118"><span class="linenos">118</span></a>
+</span><span id="L-119"><a href="#L-119"><span class="linenos">119</span></a>
+</span><span id="L-120"><a href="#L-120"><span class="linenos">120</span></a><span class="nd">@overload</span>
+</span><span id="L-121"><a href="#L-121"><span class="linenos">121</span></a><span class="k">def</span> <span class="nf">serde</span><span class="p">(</span>
+</span><span id="L-122"><a href="#L-122"><span class="linenos">122</span></a>    <span class="n">rename_all</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="L-123"><a href="#L-123"><span class="linenos">123</span></a>    <span class="n">reuse_instances_default</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+</span><span id="L-124"><a href="#L-124"><span class="linenos">124</span></a>    <span class="n">convert_sets_default</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+</span><span id="L-125"><a href="#L-125"><span class="linenos">125</span></a>    <span class="n">serializer</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">SerializeFunc</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="L-126"><a href="#L-126"><span class="linenos">126</span></a>    <span class="n">deserializer</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">DeserializeFunc</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="L-127"><a href="#L-127"><span class="linenos">127</span></a>    <span class="n">tagging</span><span class="p">:</span> <span class="n">Tagging</span> <span class="o">=</span> <span class="n">DefaultTagging</span><span class="p">,</span>
+</span><span id="L-128"><a href="#L-128"><span class="linenos">128</span></a>    <span class="n">type_check</span><span class="p">:</span> <span class="n">TypeCheck</span> <span class="o">=</span> <span class="n">NoCheck</span><span class="p">,</span>
+</span><span id="L-129"><a href="#L-129"><span class="linenos">129</span></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Type</span><span class="p">[</span><span class="n">T</span><span class="p">]],</span> <span class="n">Type</span><span class="p">[</span><span class="n">T</span><span class="p">]]:</span>
+</span><span id="L-130"><a href="#L-130"><span class="linenos">130</span></a>    <span class="o">...</span>
+</span><span id="L-131"><a href="#L-131"><span class="linenos">131</span></a>
+</span><span id="L-132"><a href="#L-132"><span class="linenos">132</span></a>
+</span><span id="L-133"><a href="#L-133"><span class="linenos">133</span></a><span class="nd">@dataclass_transform</span><span class="p">()</span>
+</span><span id="L-134"><a href="#L-134"><span class="linenos">134</span></a><span class="k">def</span> <span class="nf">serde</span><span class="p">(</span>
+</span><span id="L-135"><a href="#L-135"><span class="linenos">135</span></a>    <span class="n">_cls</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+</span><span id="L-136"><a href="#L-136"><span class="linenos">136</span></a>    <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+</span><span id="L-137"><a href="#L-137"><span class="linenos">137</span></a><span class="p">):</span>  <span class="c1"># type: ignore</span>
+</span><span id="L-138"><a href="#L-138"><span class="linenos">138</span></a>    <span class="sd">&quot;&quot;&quot;</span>
+</span><span id="L-139"><a href="#L-139"><span class="linenos">139</span></a><span class="sd">    serde decorator. Keyword arguments are passed in `serialize` and `deserialize`.</span>
+</span><span id="L-140"><a href="#L-140"><span class="linenos">140</span></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="L-141"><a href="#L-141"><span class="linenos">141</span></a>
+</span><span id="L-142"><a href="#L-142"><span class="linenos">142</span></a>    <span class="k">def</span> <span class="nf">wrap</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+</span><span id="L-143"><a href="#L-143"><span class="linenos">143</span></a>        <span class="k">if</span> <span class="n">should_impl_dataclass</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+</span><span id="L-144"><a href="#L-144"><span class="linenos">144</span></a>            <span class="n">dataclass</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
+</span><span id="L-145"><a href="#L-145"><span class="linenos">145</span></a>        <span class="n">serialize</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+</span><span id="L-146"><a href="#L-146"><span class="linenos">146</span></a>        <span class="n">deserialize</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+</span><span id="L-147"><a href="#L-147"><span class="linenos">147</span></a>        <span class="k">return</span> <span class="bp">cls</span>
+</span><span id="L-148"><a href="#L-148"><span class="linenos">148</span></a>
+</span><span id="L-149"><a href="#L-149"><span class="linenos">149</span></a>    <span class="k">if</span> <span class="n">_cls</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="L-150"><a href="#L-150"><span class="linenos">150</span></a>        <span class="k">return</span> <span class="n">wrap</span>  <span class="c1"># type: ignore</span>
+</span><span id="L-151"><a href="#L-151"><span class="linenos">151</span></a>
+</span><span id="L-152"><a href="#L-152"><span class="linenos">152</span></a>    <span class="k">return</span> <span class="n">wrap</span><span class="p">(</span><span class="n">_cls</span><span class="p">)</span>
 </span></pre></div>
 
 
@@ -1500,26 +1504,26 @@ for a certain field, raise <code><a href="#SerdeSkip">serde.SerdeSkip</a></code>
 
     </div>
     <a class="headerlink" href="#serde"></a>
-            <div class="pdoc-code codehilite"><pre><span></span><span id="serde-132"><a href="#serde-132"><span class="linenos">132</span></a><span class="nd">@dataclass_transform</span><span class="p">()</span>
-</span><span id="serde-133"><a href="#serde-133"><span class="linenos">133</span></a><span class="k">def</span> <span class="nf">serde</span><span class="p">(</span>
-</span><span id="serde-134"><a href="#serde-134"><span class="linenos">134</span></a>    <span class="n">_cls</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-</span><span id="serde-135"><a href="#serde-135"><span class="linenos">135</span></a>    <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
-</span><span id="serde-136"><a href="#serde-136"><span class="linenos">136</span></a><span class="p">):</span>  <span class="c1"># type: ignore</span>
-</span><span id="serde-137"><a href="#serde-137"><span class="linenos">137</span></a>    <span class="sd">&quot;&quot;&quot;</span>
-</span><span id="serde-138"><a href="#serde-138"><span class="linenos">138</span></a><span class="sd">    serde decorator. Keyword arguments are passed in `serialize` and `deserialize`.</span>
-</span><span id="serde-139"><a href="#serde-139"><span class="linenos">139</span></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="serde-140"><a href="#serde-140"><span class="linenos">140</span></a>
-</span><span id="serde-141"><a href="#serde-141"><span class="linenos">141</span></a>    <span class="k">def</span> <span class="nf">wrap</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
-</span><span id="serde-142"><a href="#serde-142"><span class="linenos">142</span></a>        <span class="k">if</span> <span class="n">should_impl_dataclass</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
-</span><span id="serde-143"><a href="#serde-143"><span class="linenos">143</span></a>            <span class="n">dataclass</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
-</span><span id="serde-144"><a href="#serde-144"><span class="linenos">144</span></a>        <span class="n">serialize</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-</span><span id="serde-145"><a href="#serde-145"><span class="linenos">145</span></a>        <span class="n">deserialize</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-</span><span id="serde-146"><a href="#serde-146"><span class="linenos">146</span></a>        <span class="k">return</span> <span class="bp">cls</span>
-</span><span id="serde-147"><a href="#serde-147"><span class="linenos">147</span></a>
-</span><span id="serde-148"><a href="#serde-148"><span class="linenos">148</span></a>    <span class="k">if</span> <span class="n">_cls</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-</span><span id="serde-149"><a href="#serde-149"><span class="linenos">149</span></a>        <span class="k">return</span> <span class="n">wrap</span>  <span class="c1"># type: ignore</span>
-</span><span id="serde-150"><a href="#serde-150"><span class="linenos">150</span></a>
-</span><span id="serde-151"><a href="#serde-151"><span class="linenos">151</span></a>    <span class="k">return</span> <span class="n">wrap</span><span class="p">(</span><span class="n">_cls</span><span class="p">)</span>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="serde-134"><a href="#serde-134"><span class="linenos">134</span></a><span class="nd">@dataclass_transform</span><span class="p">()</span>
+</span><span id="serde-135"><a href="#serde-135"><span class="linenos">135</span></a><span class="k">def</span> <span class="nf">serde</span><span class="p">(</span>
+</span><span id="serde-136"><a href="#serde-136"><span class="linenos">136</span></a>    <span class="n">_cls</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+</span><span id="serde-137"><a href="#serde-137"><span class="linenos">137</span></a>    <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+</span><span id="serde-138"><a href="#serde-138"><span class="linenos">138</span></a><span class="p">):</span>  <span class="c1"># type: ignore</span>
+</span><span id="serde-139"><a href="#serde-139"><span class="linenos">139</span></a>    <span class="sd">&quot;&quot;&quot;</span>
+</span><span id="serde-140"><a href="#serde-140"><span class="linenos">140</span></a><span class="sd">    serde decorator. Keyword arguments are passed in `serialize` and `deserialize`.</span>
+</span><span id="serde-141"><a href="#serde-141"><span class="linenos">141</span></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="serde-142"><a href="#serde-142"><span class="linenos">142</span></a>
+</span><span id="serde-143"><a href="#serde-143"><span class="linenos">143</span></a>    <span class="k">def</span> <span class="nf">wrap</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+</span><span id="serde-144"><a href="#serde-144"><span class="linenos">144</span></a>        <span class="k">if</span> <span class="n">should_impl_dataclass</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+</span><span id="serde-145"><a href="#serde-145"><span class="linenos">145</span></a>            <span class="n">dataclass</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
+</span><span id="serde-146"><a href="#serde-146"><span class="linenos">146</span></a>        <span class="n">serialize</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+</span><span id="serde-147"><a href="#serde-147"><span class="linenos">147</span></a>        <span class="n">deserialize</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+</span><span id="serde-148"><a href="#serde-148"><span class="linenos">148</span></a>        <span class="k">return</span> <span class="bp">cls</span>
+</span><span id="serde-149"><a href="#serde-149"><span class="linenos">149</span></a>
+</span><span id="serde-150"><a href="#serde-150"><span class="linenos">150</span></a>    <span class="k">if</span> <span class="n">_cls</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="serde-151"><a href="#serde-151"><span class="linenos">151</span></a>        <span class="k">return</span> <span class="n">wrap</span>  <span class="c1"># type: ignore</span>
+</span><span id="serde-152"><a href="#serde-152"><span class="linenos">152</span></a>
+</span><span id="serde-153"><a href="#serde-153"><span class="linenos">153</span></a>    <span class="k">return</span> <span class="n">wrap</span><span class="p">(</span><span class="n">_cls</span><span class="p">)</span>
 </span></pre></div>
 
 
