@@ -1,6 +1,6 @@
 # Supported data formats
 
-Currently `dict`, `tuple`, `JSON`, `Yaml`, `Toml` and `MsgPack` are supported.
+Currently `dict`, `tuple`, `JSON`, `Yaml`, `Toml`, `MsgPack` and `Pickle` are supported.
 
 ```python
 
@@ -99,6 +99,10 @@ b'\x84\xa1i\n\xa1s\xa3foo\xa1f\xcb@Y\x00\x00\x00\x00\x00\x00\xa1b\xc3'
 >>> from_msgpack(Foo, b'\x84\xa1i\n\xa1s\xa3foo\xa1f\xcb@Y\x00\x00\x00\x00\x00\x00\xa1b\xc3')
 Foo(i=10, s='foo', f=100.0, b=True)
 ```
+
+## Pickle
+
+Call `to_pickle` to serialize `Foo` object into Pickle and `from_pickle` to deserialize Pickle into `Foo` object. For more information, please visit [serde.pickle](https://yukinarit.github.io/pyserde/api/serde/pickle.html) module.
 
 ## Numpy
 
