@@ -41,6 +41,7 @@ The following modules (de)serialize functions.
 * `serde.msgpack`: Serialize and Deserialize in MsgPack.
 * `serde.yaml`: Serialize and Deserialize in YAML.
 * `serde.toml`: Serialize and Deserialize in TOML.
+* `serde.pickle`: Serialize and Deserialize in Pickle.
 
 Other modules
 * `serde.inspect`: Prints generated code by pyserde.
@@ -71,7 +72,7 @@ from .core import (
 from .de import DeserializeFunc, default_deserializer, deserialize, from_dict, from_tuple, is_deserializable
 from .se import SerializeFunc, asdict, astuple, default_serializer, is_serializable, serialize, to_dict, to_tuple
 
-__all__ = (
+__all__ = [
     "SerdeError",
     "SerdeSkip",
     "AdjacentTagging",
@@ -104,8 +105,9 @@ __all__ = (
     "numpy",
     "se",
     "toml",
+    "pickle",
     "yaml",
-)
+]
 
 
 @overload

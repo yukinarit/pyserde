@@ -45,6 +45,7 @@ Foo(i=10, s='foo', f=100.0, b=True)
 	- Yaml
 	- Toml
 	- MsgPack
+    - Pickle
 - Supported types
     - Primitives (`int`, `float`, `str`, `bool`)
     - Containers
