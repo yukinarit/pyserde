@@ -485,6 +485,9 @@ class DeField(Field):
             'skip': self.skip,
             'skip_if': self.skip_if,
             'skip_if_false': self.skip_if_false,
+            'flatten': self.flatten,
+            'alias': self.alias,
+            'parent': self.parent,
         }
         if is_list(self.type) or is_dict(self.type) or is_set(self.type):
             return InnerField(typ, 'v', datavar='v', **opts)
@@ -651,7 +654,13 @@ class Renderer:
                 var = arg.datavar
 
         opts = "maybe_generic=maybe_generic, reuse_instances=reuse_instances"
-        return f"{typename(arg.type)}.{SERDE_SCOPE}.funcs['{self.func}'](data={var}, {opts})"
+
+        if arg.is_self_referencing():
+            class_name = "cls"
+        else:
+            class_name = typename(arg.type)
+
+        return f"{class_name}.{SERDE_SCOPE}.funcs['{self.func}'](data={var}, {opts})"
 
     def opt(self, arg: DeField) -> str:
         """

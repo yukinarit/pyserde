@@ -21,6 +21,7 @@ import lazy_type_evaluation
 import literal
 import newtype
 import pep681
+import recursive
 import rename
 import rename_all
 import simple
@@ -73,6 +74,7 @@ def run_all():
     run(init_var)
     run(class_var)
     run(alias)
+    run(recursive)
     if PY310:
         import union_operator
 

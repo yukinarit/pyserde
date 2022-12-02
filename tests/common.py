@@ -1,4 +1,3 @@
-import collections
 import datetime
 import decimal
 import ipaddress
@@ -92,6 +91,7 @@ types: List = [
     param(data.Pri(10, 'foo', 100.0, True), data.Pri),  # dataclass
     param(data.Pri(10, 'foo', 100.0, True), Optional[data.Pri]),
     param(None, Optional[data.Pri], toml_not_supported),
+    param(data.Recur(data.Recur(None, None, None), None, None), data.Recur, toml_not_supported),
     param(10, NewType('Int', int)),  # NewType
     param({'a': 1}, Any),  # Any
     param(GenericClass[str, int]('foo', 10), GenericClass[str, int]),  # Generic
