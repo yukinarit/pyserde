@@ -1,3 +1,24 @@
+## `0.9.6` (2022-12-05)
+
+* Recursive dataclasses are supported in [#290](https://github.com/yukinarit/pyserde/pull/290)
+    ```python
+    @dataclass
+    class Recur:
+        f: Optional['Recur']
+
+    serde(Recur)
+    ```
+* `typing.FrozenSet` and `typing.DefaultDict` are supported in [#285](https://github.com/yukinarit/pyserde/pull/285),[#286](https://github.com/yukinarit/pyserde/pull/286)
+    ```python
+    @serde
+    @dataclass
+    class Foo:
+        a: FrozenSet[int]
+        b: DefaultDict[str, List[int]]
+	```
+* Pickle serializer and deserializer support is added in [#284](https://github.com/yukinarit/pyserde/pull/284). Thanks [@DoeringChristian](https://github.com/DoeringChristian)!
+
+
 ## `0.9.5` (2022-11-26)
 
 `alias` field attribute was implemented.
