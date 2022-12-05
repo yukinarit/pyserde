@@ -147,7 +147,27 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h2 id="095-2022-11-26"><a class="header" href="#095-2022-11-26"><code>0.9.5</code> (2022-11-26)</a></h2>
+                        <h2 id="096-2022-12-05"><a class="header" href="#096-2022-12-05"><code>0.9.6</code> (2022-12-05)</a></h2>
+<ul>
+<li>Recursive dataclasses are supported in <a href="https://github.com/yukinarit/pyserde/pull/290">#290</a>
+<pre><code class="language-python">@dataclass
+class Recur:
+    f: Optional['Recur']
+
+serde(Recur)
+</code></pre>
+</li>
+<li><code>typing.FrozenSet</code> and <code>typing.DefaultDict</code> are supported in <a href="https://github.com/yukinarit/pyserde/pull/285">#285</a>,<a href="https://github.com/yukinarit/pyserde/pull/286">#286</a>
+<pre><code class="language-python">@serde
+@dataclass
+class Foo:
+    a: FrozenSet[int]
+    b: DefaultDict[str, List[int]]
+</code></pre>
+</li>
+<li>Pickle serializer and deserializer support is added in <a href="https://github.com/yukinarit/pyserde/pull/284">#284</a>. Thanks <a href="https://github.com/DoeringChristian">@DoeringChristian</a>!</li>
+</ul>
+<h2 id="095-2022-11-26"><a class="header" href="#095-2022-11-26"><code>0.9.5</code> (2022-11-26)</a></h2>
 <p><code>alias</code> field attribute was implemented.</p>
 <pre><code class="language-python">@serde
 @dataclass
