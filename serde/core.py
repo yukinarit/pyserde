@@ -444,9 +444,10 @@ class Field:
     serializer: Optional[Func] = None  # Custom field serializer.
     deserializer: Optional[Func] = None  # Custom field deserializer.
     flatten: Optional[FlattenOpts] = None
+    parent: Optional[Type] = None
 
     @classmethod
-    def from_dataclass(cls, f: dataclasses.Field) -> 'Field':
+    def from_dataclass(cls, f: dataclasses.Field, parent: Optional[Type] = None) -> 'Field':
         """
         Create `Field` object from `dataclasses.Field`.
         """
@@ -496,6 +497,7 @@ class Field:
             serializer=serializer,
             deserializer=deserializer,
             flatten=flatten,
+            parent=parent,
         )
 
     def to_dataclass(self) -> dataclasses.Field:
@@ -512,6 +514,13 @@ class Field:
         f.name = self.name
         f.type = self.type
         return f
+
+    def is_self_referencing(self) -> bool:
+        if self.type is None:
+            return False
+        if self.parent is None:
+            return False
+        return self.type == self.parent
 
     @staticmethod
     def mangle(field: dataclasses.Field, name: str) -> str:
@@ -538,7 +547,7 @@ def fields(field_cls: Type[F], cls: Type) -> List[F]:
     """
     Iterate fields of the dataclass and returns `serde.core.Field`.
     """
-    return [field_cls.from_dataclass(f) for f in dataclass_fields(cls)]
+    return [field_cls.from_dataclass(f, parent=cls) for f in dataclass_fields(cls)]
 
 
 def conv(f: Field, case: Optional[str] = None) -> str:

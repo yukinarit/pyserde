@@ -304,109 +304,140 @@ def dataclass_fields(cls: Type[Any]) -> Iterator[dataclasses.Field]:
     return iter(raw_fields)
 
 
-def iter_types(cls: Type) -> Iterator[Union[Type, typing.Any]]:
+TypeLike = Union[Type[Any], typing.Any]
+
+
+def iter_types(cls: TypeLike) -> List[TypeLike]:
     """
     Iterate field types recursively.
 
     The correct return type is `Iterator[Union[Type, typing._specialform]],
     but `typing._specialform` doesn't exist for python 3.6. Use `Any` instead.
     """
-    if is_dataclass(cls):
-        yield cls
-        for f in dataclass_fields(cls):
-            yield from iter_types(f.type)
-    elif isinstance(cls, str):
-        yield cls
-    elif is_opt(cls):
-        yield Optional
-        arg = type_args(cls)
-        if arg:
-            yield from iter_types(arg[0])
-    elif is_union(cls):
-        yield Union
-        for arg in type_args(cls):
-            yield from iter_types(arg)
-    elif is_list(cls) or is_set(cls):
-        yield List
-        arg = type_args(cls)
-        if arg:
-            yield from iter_types(arg[0])
-    elif is_set(cls):
-        yield Set
-        arg = type_args(cls)
-        if arg:
-            yield from iter_types(arg[0])
-    elif is_tuple(cls):
-        yield Tuple
-        for arg in type_args(cls):
-            yield from iter_types(arg)
-    elif is_dict(cls):
-        yield Dict
-        arg = type_args(cls)
-        if arg and len(arg) >= 2:
-            yield from iter_types(arg[0])
-            yield from iter_types(arg[1])
-    else:
-        yield cls
+    lst: Set[TypeLike] = set()
+
+    def recursive(cls: TypeLike) -> None:
+        if cls in lst:
+            return
+
+        if is_dataclass(cls):
+            lst.add(cls)
+            for f in dataclass_fields(cls):
+                recursive(f.type)
+        elif isinstance(cls, str):
+            lst.add(cls)
+        elif is_opt(cls):
+            lst.add(Optional)
+            arg = type_args(cls)
+            if arg:
+                recursive(arg[0])
+        elif is_union(cls):
+            lst.add(Union)
+            for arg in type_args(cls):
+                recursive(arg)
+        elif is_list(cls) or is_set(cls):
+            lst.add(List)
+            arg = type_args(cls)
+            if arg:
+                recursive(arg[0])
+        elif is_set(cls):
+            lst.add(Set)
+            arg = type_args(cls)
+            if arg:
+                recursive(arg[0])
+        elif is_tuple(cls):
+            lst.add(Tuple)
+            for arg in type_args(cls):
+                recursive(arg)
+        elif is_dict(cls):
+            lst.add(Dict)
+            arg = type_args(cls)
+            if arg and len(arg) >= 2:
+                recursive(arg[0])
+                recursive(arg[1])
+        else:
+            lst.add(cls)
+
+    recursive(cls)
+    return list(lst)
 
 
-def iter_unions(cls: Type) -> Iterator[Type]:
+def iter_unions(cls: TypeLike) -> List[TypeLike]:
     """
     Iterate over all unions that are used in the dataclass
     """
-    if is_union(cls):
-        yield cls
-        for arg in type_args(cls):
-            yield from iter_unions(arg)
-    if is_dataclass(cls):
-        for f in dataclass_fields(cls):
-            yield from iter_unions(f.type)
-    elif is_opt(cls):
-        arg = type_args(cls)
-        if arg:
-            yield from iter_unions(arg[0])
-    elif is_list(cls) or is_set(cls):
-        arg = type_args(cls)
-        if arg:
-            yield from iter_unions(arg[0])
-    elif is_tuple(cls):
-        for arg in type_args(cls):
-            yield from iter_unions(arg)
-    elif is_dict(cls):
-        arg = type_args(cls)
-        if arg and len(arg) >= 2:
-            yield from iter_unions(arg[0])
-            yield from iter_unions(arg[1])
+    lst: Set[TypeLike] = set()
+
+    def recursive(cls: TypeLike) -> None:
+        if cls in lst:
+            return
+
+        if is_union(cls):
+            lst.add(cls)
+            for arg in type_args(cls):
+                recursive(arg)
+        if is_dataclass(cls):
+            for f in dataclass_fields(cls):
+                recursive(f.type)
+        elif is_opt(cls):
+            arg = type_args(cls)
+            if arg:
+                recursive(arg[0])
+        elif is_list(cls) or is_set(cls):
+            arg = type_args(cls)
+            if arg:
+                recursive(arg[0])
+        elif is_tuple(cls):
+            for arg in type_args(cls):
+                recursive(arg)
+        elif is_dict(cls):
+            arg = type_args(cls)
+            if arg and len(arg) >= 2:
+                recursive(arg[0])
+                recursive(arg[1])
+
+    recursive(cls)
+    return list(lst)
 
 
-def iter_literals(cls: Type) -> Iterator[Type]:
+def iter_literals(cls: TypeLike) -> List[TypeLike]:
     """
     Iterate over all literals that are used in the dataclass
     """
-    if is_literal(cls):
-        yield cls
-    if is_union(cls):
-        for arg in type_args(cls):
-            yield from iter_literals(arg)
-    if is_dataclass(cls):
-        for f in dataclass_fields(cls):
-            yield from iter_literals(f.type)
-    elif is_opt(cls):
-        arg = type_args(cls)
-        if arg:
-            yield from iter_literals(arg[0])
-    elif is_list(cls) or is_set(cls):
-        arg = type_args(cls)
-        if arg:
-            yield from iter_literals(arg[0])
-    elif is_tuple(cls):
-        for arg in type_args(cls):
-            yield from iter_literals(arg)
-    elif is_dict(cls):
-        arg = type_args(cls)
-        if arg and len(arg) >= 2:
-            yield from iter_literals(arg[0])
-            yield from iter_literals(arg[1])
+    lst: Set[TypeLike] = set()
+
+    def recursive(cls: TypeLike) -> None:
+        if cls in lst:
+            return
+
+        if is_literal(cls):
+            lst.add(cls)
+        if is_union(cls):
+            for arg in type_args(cls):
+                recursive(arg)
+        if is_dataclass(cls):
+            lst.add(cls)
+            for f in dataclass_fields(cls):
+                recursive(f.type)
+        elif is_opt(cls):
+            arg = type_args(cls)
+            if arg:
+                recursive(arg[0])
+        elif is_list(cls) or is_set(cls):
+            arg = type_args(cls)
+            if arg:
+                recursive(arg[0])
+        elif is_tuple(cls):
+            for arg in type_args(cls):
+                recursive(arg)
+        elif is_dict(cls):
+            arg = type_args(cls)
+            if arg and len(arg) >= 2:
+                recursive(arg[0])
+                recursive(arg[1])
+
+    recursive(cls)
+    return list(lst)
 
 
 def is_union(typ) -> bool:

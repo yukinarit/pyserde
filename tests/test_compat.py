@@ -91,12 +91,12 @@ def test_typename():
 
 
 def test_iter_types():
-    assert [Pri, int, str, float, bool] == list(iter_types(Pri))
-    assert [Dict, str, Pri, int, str, float, bool] == list(iter_types(Dict[str, Pri]))
-    assert [List, str] == list(iter_types(List[str]))
-    assert [Tuple, int, str, bool, float] == list(iter_types(Tuple[int, str, bool, float]))
-    assert [Tuple, int, Ellipsis] == list(iter_types(Tuple[int, ...]))
-    assert [PriOpt, Optional, int, Optional, str, Optional, float, Optional, bool] == list(iter_types(PriOpt))
+    assert set([Pri, int, str, float, bool]) == set(iter_types(Pri))
+    assert set([Dict, str, Pri, int, float, bool]) == set(iter_types(Dict[str, Pri]))
+    assert set([List, str]) == set(iter_types(List[str]))
+    assert set([Tuple, int, str, bool, float]) == set(iter_types(Tuple[int, str, bool, float]))
+    assert set([Tuple, int, Ellipsis]) == set(iter_types(Tuple[int, ...]))
+    assert set([PriOpt, Optional, int, str, float, bool]) == set(iter_types(PriOpt))
 
     @serde.serde
     class Foo:
@@ -107,7 +107,7 @@ def test_iter_types():
         e: Union[str, int] = 10
         f: List[int] = serde.field(default_factory=list)
 
-    assert [Foo, int, datetime, datetime, Optional, str, Union, str, int, List, int] == list(iter_types(Foo))
+    assert set([Foo, datetime, Optional, str, Union, List, int]) == set(iter_types(Foo))
 
 
 def test_iter_unions():
@@ -124,7 +124,7 @@ def test_iter_unions():
         b: Dict[str, List[Union[float, int]]]
         C: Dict[Union[bool, str], Union[float, int]]
 
-    assert [Union[int, str], Union[float, int], Union[bool, str], Union[float, int]] == list(iter_unions(A))
+    assert set([Union[int, str], Union[float, int], Union[bool, str], Union[float, int]]) == set(iter_unions(A))
 
 
 def test_type_args():

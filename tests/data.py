@@ -226,6 +226,16 @@ class EnumInClass:
     i: imported.IE = imported.IE.V1
 
 
+@dataclass(unsafe_hash=True)
+class Recur:
+    a: Optional['Recur']
+    b: Optional[List['Recur']]
+    c: Optional[Dict[str, 'Recur']]
+
+
+serde(Recur)
+
+
 ListPri = List[Pri]
 
 DictPri = Dict[str, Pri]
