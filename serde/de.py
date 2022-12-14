@@ -7,9 +7,16 @@ import abc
 import collections
 import dataclasses
 import functools
+import sys
 import typing
 from dataclasses import dataclass, is_dataclass
-from typing import Any, Callable, Dict, List, Optional, TypeVar, get_args
+from typing import Any, Callable, Dict, List, Optional, TypeVar
+
+if sys.version_info[1] < 8:
+    # get_args was added in python 3.8
+    from typing_utils import get_args
+else:
+    from typing import get_args
 
 import jinja2
 from typing_extensions import Type, dataclass_transform
