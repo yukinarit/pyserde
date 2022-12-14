@@ -54,6 +54,16 @@ class PriOptUnion:
 
 @serde
 @dataclass(unsafe_hash=True)
+class OptionalUnion:
+    """
+    Union Primitives.
+    """
+
+    v: Optional[Union[int, str]]
+
+
+@serde
+@dataclass(unsafe_hash=True)
 class ContUnion:
     """
     Union Containers.
@@ -119,6 +129,9 @@ def test_union_optional():
     s = '{"v":false}'
     assert s == to_json(v)
     assert v == from_json(PriOptUnion, s)
+
+    assert PriOptUnion(None) == from_json(PriOptUnion, '{}')
+    assert OptionalUnion(None) == from_json(OptionalUnion, '{}')
 
 
 def test_union_containers():

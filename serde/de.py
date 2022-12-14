@@ -9,7 +9,7 @@ import dataclasses
 import functools
 import typing
 from dataclasses import dataclass, is_dataclass
-from typing import Any, Callable, Dict, List, Optional, TypeVar
+from typing import Any, Callable, Dict, List, Optional, TypeVar, get_args
 
 import jinja2
 from typing_extensions import Type, dataclass_transform
@@ -515,6 +515,8 @@ class DeField(Field):
     def data(self) -> str:
         if self.iterbased:
             return f'{self.datavar}[{self.index}]'
+        elif is_union(self.type) and type(None) in get_args(self.type):
+            return f'{self.datavar}.get("{self.conv_name()}")'
         else:
             return f'{self.datavar}["{self.conv_name()}"]'
 
