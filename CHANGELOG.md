@@ -1,3 +1,18 @@
+## `0.9.7` (2022-12-15)
+
+A bug for optional unions was fixed, Thanks [@soaxelbrooke](https://github.com/soaxelbrooke)!
+```python
+@serde
+@dataclass(frozen=True)
+class Bar:
+    request: Optional[Union[str, int]]
+```
+
+* docs: add @soaxelbrooke as a contributor ([063e705](https://github.com/yukinarit/pyserde/commit/063e705))
+* Add support for optional unions ([075949b](https://github.com/yukinarit/pyserde/commit/075949b))
+* Add typing-utils for compatibility with python ver < 3.8 ([620b9f6](https://github.com/yukinarit/pyserde/commit/620b9f6))
+* Rely on compay.get_args instead of adding dependency ([d93f894](https://github.com/yukinarit/pyserde/commit/d93f894))
+
 ## `0.9.6` (2022-12-05)
 
 * Recursive dataclasses are supported in [#290](https://github.com/yukinarit/pyserde/pull/290)
