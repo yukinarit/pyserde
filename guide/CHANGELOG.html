@@ -147,7 +147,20 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h2 id="096-2022-12-05"><a class="header" href="#096-2022-12-05"><code>0.9.6</code> (2022-12-05)</a></h2>
+                        <h2 id="097-2022-12-15"><a class="header" href="#097-2022-12-15"><code>0.9.7</code> (2022-12-15)</a></h2>
+<p>A bug for optional unions was fixed, Thanks <a href="https://github.com/soaxelbrooke">@soaxelbrooke</a>!</p>
+<pre><code class="language-python">@serde
+@dataclass(frozen=True)
+class Bar:
+    request: Optional[Union[str, int]]
+</code></pre>
+<ul>
+<li>docs: add @soaxelbrooke as a contributor (<a href="https://github.com/yukinarit/pyserde/commit/063e705">063e705</a>)</li>
+<li>Add support for optional unions (<a href="https://github.com/yukinarit/pyserde/commit/075949b">075949b</a>)</li>
+<li>Add typing-utils for compatibility with python ver &lt; 3.8 (<a href="https://github.com/yukinarit/pyserde/commit/620b9f6">620b9f6</a>)</li>
+<li>Rely on compay.get_args instead of adding dependency (<a href="https://github.com/yukinarit/pyserde/commit/d93f894">d93f894</a>)</li>
+</ul>
+<h2 id="096-2022-12-05"><a class="header" href="#096-2022-12-05"><code>0.9.6</code> (2022-12-05)</a></h2>
 <ul>
 <li>Recursive dataclasses are supported in <a href="https://github.com/yukinarit/pyserde/pull/290">#290</a>
 <pre><code class="language-python">@dataclass
