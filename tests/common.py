@@ -6,13 +6,14 @@ import os
 import pathlib
 import sys
 import uuid
-from typing import Any, Callable, Dict, Generic, List, NewType, Optional, Set, Tuple, TypeVar
+from typing import Any, Callable, DefaultDict, Dict, FrozenSet, Generic, List, NewType, Optional, Set, Tuple, TypeVar
 
 import more_itertools
 
 from serde import from_dict, from_tuple, serde, to_dict, to_tuple
 from serde.json import from_json, to_json
 from serde.msgpack import from_msgpack, to_msgpack
+from serde.pickle import from_pickle, to_pickle
 from serde.toml import from_toml, to_toml
 from serde.yaml import from_yaml, to_yaml
 from tests import data
@@ -29,7 +30,11 @@ format_yaml: List = [(to_yaml, from_yaml)]
 
 format_toml: List = [(to_toml, from_toml)]
 
-all_formats: List = format_dict + format_tuple + format_json + format_msgpack + format_yaml + format_toml
+format_pickle: List = [(to_pickle, from_pickle)]
+
+all_formats: List = (
+    format_dict + format_tuple + format_json + format_msgpack + format_yaml + format_toml + format_pickle
+)
 
 T = TypeVar('T')
 
@@ -72,15 +77,21 @@ types: List = [
     param({1, 2}, Set, toml_not_supported),
     param({1, 2}, set, toml_not_supported),
     param(set(), Set[int], toml_not_supported),
+    param({1, 2}, FrozenSet[int], toml_not_supported),
     param((1, 1), Tuple[int, int]),
     param((1, 1), Tuple),
+    param((1, 1), Tuple[int, ...]),
     param({'a': 1}, Dict[str, int]),
     param({'a': 1}, Dict),
     param({'a': 1}, dict),
     param({}, Dict[str, int]),
+    param({'a': 1}, Dict[str, int]),
+    param({'a': 1}, DefaultDict[str, int]),
+    param({'a': [1]}, DefaultDict[str, List[int]]),
     param(data.Pri(10, 'foo', 100.0, True), data.Pri),  # dataclass
     param(data.Pri(10, 'foo', 100.0, True), Optional[data.Pri]),
     param(None, Optional[data.Pri], toml_not_supported),
+    param(data.Recur(data.Recur(None, None, None), None, None), data.Recur, toml_not_supported),
     param(10, NewType('Int', int)),  # NewType
     param({'a': 1}, Any),  # Any
     param(GenericClass[str, int]('foo', 10), GenericClass[str, int]),  # Generic

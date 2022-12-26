@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pyserde"
-version = "0.8.3"
+version = "0.9.7"
 description = "Yet another serialization library on top of dataclasses"
 authors = ["yukinarit <yukinarit84@gmail.com>"]
 license = "MIT"
@@ -18,6 +18,7 @@ classifiers=[
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
         "Programming Language :: Python :: Implementation :: CPython",
 		"Programming Language :: Python :: Implementation :: PyPy",
     ]
@@ -25,7 +26,7 @@ classifiers=[
 [tool.poetry.dependencies]
 python = "^3.7.0"
 typing_inspect = ">=0.4.0"
-typing_extensions = { version = "*", markers = "python_version ~= '3.7.0'" }
+typing_extensions = { version = ">=4.1.0", markers = "python_version ~= '3.7.0'" }
 casefy = "*"
 jinja2 = "*"
 msgpack = { version = "*", markers = "extra == 'msgpack' or extra == 'all'", optional = true }
@@ -33,8 +34,8 @@ tomli = { version = "*", markers = "extra == 'toml' or extra == 'all'", optional
 tomli-w = { version = "*", markers = "extra == 'toml' or extra == 'all'", optional = true }
 pyyaml = { version = "*", markers = "extra == 'yaml' or extra == 'all'", optional = true }
 numpy = [
-    { version = "~1.21.0,<1.23.0", markers = "python_version ~= '3.7.0' and (extra == 'numpy' or extra == 'all')", optional = true },
-    { version = ">1.21.0,<1.23.0", markers = "python_version ~= '3.8.0' and (extra == 'numpy' or extra == 'all')", optional = true },
+    { version = ">1.21.0", markers = "python_version ~= '3.7.0' and (extra == 'numpy' or extra == 'all')", optional = true },
+    { version = ">1.21.0", markers = "python_version ~= '3.8.0' and (extra == 'numpy' or extra == 'all')", optional = true },
     { version = ">1.21.0", markers = "python_version ~= '3.9.0' and (extra == 'numpy' or extra == 'all')", optional = true },
     { version = ">1.22.0", markers = "python_version ~= '3.10' and (extra == 'numpy' or extra == 'all')", optional = true },
 ]
@@ -42,11 +43,11 @@ orjson = { version = "*", markers = "extra == 'orjson' or extra == 'all'", optio
 
 [tool.poetry.dev-dependencies]
 pyyaml = "*"
-tomli = "*"
+tomli = { version = "*", markers = "python_version <= '3.11.0'" }
 tomli-w = "*"
 msgpack = "*"
 numpy = [
-    { version = "~1.21.0", markers = "python_version ~= '3.7.0'" },
+    { version = ">1.21.0", markers = "python_version ~= '3.7.0'" },
     { version = ">1.21.0", markers = "python_version ~= '3.8.0'" },
     { version = ">1.21.0", markers = "python_version ~= '3.9.0'" },
     { version = ">1.22.0", markers = "python_version ~= '3.10'" },

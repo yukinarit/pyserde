@@ -12,6 +12,7 @@ from dataclasses import dataclass, is_dataclass
 from typing import Any, Callable,Dict, Iterator, List, Optional, Type, TypeVar
 
 import jinja2
+from typing_extensions import Type, dataclass_transform
 
 from .compat import (
     Literal,
@@ -50,21 +51,18 @@ from .core import (
     TO_ITER,
     TYPE_CHECK,
     UNION_SE_PREFIX,
-    Coerce,
     DefaultTagging,
     Field,
     PreservedTypes,
+    NoCheck,
     SerdeScope,
     Tagging,
     TypeCheck,
     add_func,
+    coerce,
     conv,
     fields,
-    is_dict_instance,
     is_instance,
-    is_list_instance,
-    is_set_instance,
-    is_tuple_instance,
     logger,
     raise_unsupported_type,
     render_type_check,
@@ -82,17 +80,17 @@ from .numpy import (
 __all__ = ["serialize", "is_serializable", "to_dict", "to_tuple"]
 
 # Interface of Custom serialize function.
-SerializeFunc = Callable[[Type, Any], Any]
+SerializeFunc = Callable[[Type[Any], Any], Any]
 
 
-def default_serializer(_cls: Type, obj):
+def default_serializer(_cls: Type[Any], obj):
     """
     Marker function to tell serde to use the default serializer. It's used when custom serializer is specified
     at the class but you want to override a field with the default serializer.
     """
 
 
-def serde_custom_class_serializer(cls: Type, obj, custom: SerializeFunc, default: Callable):
+def serde_custom_class_serializer(cls: Type[Any], obj: Any, custom: SerializeFunc, default: Callable):
     try:
         return custom(cls, obj)
     except SerdeSkip:
@@ -127,7 +125,6 @@ def _make_serialize(
     C = dataclasses.make_dataclass(cls_name, fields, *args, **kwargs)
     C = serialize(
         C,
-        *args,
         rename_all=rename_all,
         reuse_instances_default=reuse_instances_default,
         preserved_types_default=preserved_types_default,
@@ -136,6 +133,7 @@ def _make_serialize(
     return C
 
 
+@dataclass_transform()
 def serialize(
     _cls=None,
     rename_all: Optional[str] = None,
@@ -143,6 +141,7 @@ def serialize(
     preserved_types_default: PreservedTypes = PreservedTypes.NOTHING,
     serializer: Optional[SerializeFunc] = None,
     tagging: Tagging = DefaultTagging,
+    type_check: TypeCheck = NoCheck,
     **kwargs,
 ):
     """
@@ -202,7 +201,7 @@ def serialize(
     '{"i":10,"dt":"01/01/21"}'
     """
 
-    def wrap(cls: Type):
+    def wrap(cls: Type[Any]):
         tagging.check()
 
         # If no `dataclass` found in the class, dataclassify it automatically.
@@ -214,7 +213,7 @@ def serialize(
         # Create a scope storage used by serde.
         # Each class should get own scope. Child classes can not share scope with parent class.
         # That's why we need the "scope.cls is not cls" check.
-        scope: SerdeScope = getattr(cls, SERDE_SCOPE, None)
+        scope: Optional[SerdeScope] = getattr(cls, SERDE_SCOPE, None)
         if scope is None or scope.cls is not cls:
             scope = SerdeScope(
                 cls,
@@ -236,6 +235,9 @@ def serialize(
         g["to_obj"] = to_obj
         g["typing"] = typing
         g["Literal"] = Literal
+        g["TypeCheck"] = TypeCheck
+        g["NoCheck"] = NoCheck
+        g["coerce"] = coerce
         if serialize:
             g["serde_custom_class_serializer"] = functools.partial(serde_custom_class_serializer, custom=serializer)
 
@@ -258,8 +260,8 @@ def serialize(
             if f.serializer:
                 g[f.serializer.name] = f.serializer
 
-        add_func(scope, TO_ITER, render_to_tuple(cls, serializer), g)
-        add_func(scope, TO_DICT, render_to_dict(cls, rename_all, serializer), g)
+        add_func(scope, TO_ITER, render_to_tuple(cls, serializer, type_check), g)
+        add_func(scope, TO_DICT, render_to_dict(cls, rename_all, serializer, type_check), g)
         add_func(scope, TYPE_CHECK, render_type_check(cls), g)
 
         logger.debug(f"{typename(cls)}: {SERDE_SCOPE} {scope}")
@@ -296,11 +298,8 @@ def to_obj(
     named: bool,
     reuse_instances: bool,
     preserved_types: PreservedTypes,
-    c: Type = None,
-    type_check: TypeCheck = Coerce,
+    c: Optional[Type[Any]] = None
 ):
-    strict = type_check.is_strict()
-
     try:
         thisfunc = functools.partial(
             to_obj,
@@ -313,39 +312,23 @@ def to_obj(
         if is_serializable(o):
             serde_scope: SerdeScope = getattr(o, SERDE_SCOPE)
             func_name = TO_DICT if named else TO_ITER
-            if strict:
-                serde_scope.funcs[TYPE_CHECK](o)
             return serde_scope.funcs[func_name](
                 o,
                 reuse_instances=reuse_instances,
                 preserved_types=preserved_types,
             )
         elif is_dataclass(o):
-            if strict:
-                serde_scope.funcs[TYPE_CHECK](o)
             if named:
                 return dataclasses.asdict(o)
             else:
                 return dataclasses.astuple(o)
         elif isinstance(o, list):
-            if strict and c:
-                if is_list_instance(o, c):
-                    raise SerdeError(f"Failed to deserialize into {typename(c)}")
             return [thisfunc(e) for e in o]
         elif isinstance(o, tuple):
-            if strict and c:
-                if is_tuple_instance(o, c):
-                    raise SerdeError(f"Failed to deserialize into {typename(c)}")
             return tuple(thisfunc(e) for e in o)
         elif isinstance(o, set):
-            if strict and c:
-                if is_set_instance(o, c):
-                    raise SerdeError(f"Failed to deserialize into {typename(c)}")
             return [thisfunc(e) for e in o]
         elif isinstance(o, dict):
-            if strict and c:
-                if is_dict_instance(o, c):
-                    raise SerdeError(f"Failed to deserialize into {typename(c)}")
             return {k: thisfunc(v) for k, v in o.items()}
         elif is_str_serializable_instance(o):
             return str(o)
@@ -377,7 +360,6 @@ def to_tuple(
     o,
     reuse_instances: bool = ...,
     preserved_types: PreservedTypes = ...,
-    type_check: TypeCheck = Coerce,
 ) -> Any:
     """
     Serialize object into tuple.
@@ -403,11 +385,10 @@ def to_tuple(
         named=False,
         reuse_instances=reuse_instances,
         preserved_types=preserved_types,
-        type_check=type_check,
     )
 
 
-def asdict(v):
+def asdict(v: Any) -> Dict[str, Any]:
     """
     Serialize object into dictionary.
     """
@@ -422,7 +403,6 @@ def to_dict(
     o,
     reuse_instances: bool = ...,
     preserved_types: PreservedTypes = ...,
-    type_check: TypeCheck = Coerce,
 ) -> Any:
     """
     Serialize object into dictionary.
@@ -448,7 +428,6 @@ def to_dict(
         named=True,
         reuse_instances=reuse_instances,
         preserved_types=preserved_types,
-        type_check=type_check,
     )
 
 
@@ -478,7 +457,7 @@ class SeField(Field):
         return SeField(typ, name=None)
 
 
-def sefields(cls: Type) -> Iterator[SeField]:
+def sefields(cls: Type[Any]) -> Iterator[SeField]:
     """
     Iterate fields for serialization.
     """
@@ -487,7 +466,9 @@ def sefields(cls: Type) -> Iterator[SeField]:
         assert isinstance(f, SeField)
         yield f
 
-_FUNCTION_HEADER = """
+
+def render_to_tuple(cls: Type[Any], custom: Optional[SerializeFunc] = None, type_check: TypeCheck = NoCheck) -> str:
+    template = """
 def {{func}}(
     obj,
     reuse_instances = {{serde_scope.reuse_instances_default}},
@@ -497,13 +478,11 @@ def {{func}}(
     reuse_instances = {{serde_scope.reuse_instances_default}}
   if preserved_types is Ellipsis:
     preserved_types = {{serde_scope.preserved_types_default}}
-"""
-
-def render_to_tuple(cls: Type, custom: Optional[SerializeFunc] = None) -> str:
-    template = _FUNCTION_HEADER + """
   if not is_dataclass(obj):
     return copy.deepcopy(obj)
-
+  {% if type_check.is_strict() %}
+  obj.__serde__.funcs['typecheck'](obj)
+  {% endif %}
   return (
   {% for f in fields -%}
   {% if not f.skip|default(False) %}
@@ -513,16 +492,34 @@ def render_to_tuple(cls: Type, custom: Optional[SerializeFunc] = None) -> str:
   )
     """
 
-    renderer = Renderer(TO_ITER, custom)
+    renderer = Renderer(TO_ITER, custom, suppress_coerce=(not type_check.is_coerce()))
     env = jinja2.Environment(loader=jinja2.DictLoader({"iter": template}))
     env.filters.update({"rvalue": renderer.render})
-    return env.get_template("iter").render(func=TO_ITER, serde_scope=getattr(cls, SERDE_SCOPE), fields=sefields(cls))
+    return env.get_template("iter").render(
+        func=TO_ITER, serde_scope=getattr(cls, SERDE_SCOPE), fields=sefields(cls), type_check=type_check
+    )
 
 
-def render_to_dict(cls: Type, case: Optional[str] = None, custom: Optional[SerializeFunc] = None) -> str:
-    template = _FUNCTION_HEADER + """
+def render_to_dict(
+    cls: Type[Any], case: Optional[str] = None, custom: Optional[SerializeFunc] = None, type_check: TypeCheck = NoCheck
+) -> str:
+    template = """
+def {{func}}(
+    obj,
+    reuse_instances = {{serde_scope.reuse_instances_default}},
+    preserved_types = {{serde_scope.preserved_types_default}},
+):
+  if reuse_instances is Ellipsis:
+    reuse_instances = {{serde_scope.reuse_instances_default}}
+  if convert_sets is Ellipsis:
+    convert_sets = {{serde_scope.convert_sets_default}}
+
   if not is_dataclass(obj):
     return copy.deepcopy(obj)
+
+  {% if type_check.is_strict() %}
+  obj.__serde__.funcs['typecheck'](obj)
+  {% endif %}
 
   res = {}
   {% for f in fields -%}
@@ -538,20 +535,27 @@ def render_to_dict(cls: Type, case: Optional[str] = None, custom: Optional[Seria
   {% endfor -%}
   return res
     """
-    renderer = Renderer(TO_DICT, custom)
+    renderer = Renderer(TO_DICT, custom, suppress_coerce=(not type_check.is_coerce()))
     lrenderer = LRenderer(case)
     env = jinja2.Environment(loader=jinja2.DictLoader({"dict": template}))
     env.filters.update({"rvalue": renderer.render})
     env.filters.update({"lvalue": lrenderer.render})
     env.filters.update({"case": functools.partial(conv, case=case)})
-    return env.get_template("dict").render(func=TO_DICT, serde_scope=getattr(cls, SERDE_SCOPE), fields=sefields(cls))
+    return env.get_template("dict").render(
+        func=TO_DICT, serde_scope=getattr(cls, SERDE_SCOPE), fields=sefields(cls), type_check=type_check
+    )
 
 
-def render_union_func(cls: Type, union_args: List[Type], tagging: Tagging = DefaultTagging) -> str:
+def render_union_func(cls: Type[Any], union_args: List[Type[Any]], tagging: Tagging = DefaultTagging) -> str:
     """
     Render function that serializes a field with union type.
     """
-    template = _FUNCTION_HEADER + """
+    template = """
+def {{func}}(
+    obj,
+    reuse_instances = {{serde_scope.reuse_instances_default}},
+    preserved_types = {{serde_scope.preserved_types_default}},
+):
   union_args = serde_scope.union_se_args['{{func}}']
 
   {% for t in union_args %}
@@ -577,7 +581,7 @@ def render_union_func(cls: Type, union_args: List[Type], tagging: Tagging = Defa
     """
     union_name = f"Union[{', '.join([typename(a) for a in union_args])}]"
 
-    renderer = Renderer(TO_DICT)
+    renderer = Renderer(TO_DICT, suppress_coerce=True)
     env = jinja2.Environment(loader=jinja2.DictLoader({"dict": template}))
     env.filters.update({"arg": lambda x: SeField(x, "obj")})
     env.filters.update({"rvalue": renderer.render})
@@ -627,6 +631,8 @@ class Renderer:
 
     func: str
     custom: Optional[SerializeFunc] = None  # Custom class level serializer.
+    suppress_coerce: bool = False
+    """ Suppress type coercing because generated union serializer has its own type checking """
 
     def render(self, arg: SeField) -> str:
         """
@@ -634,10 +640,10 @@ class Renderer:
 
         >>> from typing import Tuple
         >>> Renderer(TO_ITER).render(SeField(int, 'i'))
-        'i'
+        'coerce(int, i)'
 
         >>> Renderer(TO_ITER).render(SeField(List[int], 'l'))
-        '[v for v in l]'
+        '[coerce(int, v) for v in l]'
 
         >>> @serialize
         ... @dataclass(unsafe_hash=True)
@@ -650,7 +656,7 @@ class Renderer:
         "[v.__serde__.funcs['to_iter'](v, reuse_instances=reuse_instances, convert_sets=convert_sets) for v in foo]"
 
         >>> Renderer(TO_ITER).render(SeField(Dict[str, Foo], 'foo'))
-        "{k: v.__serde__.funcs['to_iter'](v, reuse_instances=reuse_instances, \
+        "{coerce(str, k): v.__serde__.funcs['to_iter'](v, reuse_instances=reuse_instances, \
 convert_sets=convert_sets) for k, v in foo.items()}"
 
         >>> Renderer(TO_ITER).render(SeField(Dict[Foo, Foo], 'foo'))
@@ -659,8 +665,8 @@ convert_sets=convert_sets): v.__serde__.funcs['to_iter'](v, reuse_instances=reus
 convert_sets=convert_sets) for k, v in foo.items()}"
 
         >>> Renderer(TO_ITER).render(SeField(Tuple[str, Foo, int], 'foo'))
-        "(foo[0], foo[1].__serde__.funcs['to_iter'](foo[1], reuse_instances=reuse_instances, \
-convert_sets=convert_sets), foo[2],)"
+        "(coerce(str, foo[0]), foo[1].__serde__.funcs['to_iter'](foo[1], reuse_instances=reuse_instances, \
+convert_sets=convert_sets), coerce(int, foo[2]),)"
         """
         if arg.serializer and arg.serializer.inner is not default_serializer:
             res = self.custom_field_serializer(arg)
@@ -698,7 +704,7 @@ convert_sets=convert_sets), foo[2],)"
             else {arg.varname}.isoformat())"""
         elif is_none(arg.type):
             res = "None"
-        elif arg.type is Any or isinstance(arg.type, TypeVar):
+        elif arg.type is Any or arg.type is Ellipsis or isinstance(arg.type, TypeVar):
             res = f"to_obj({arg.varname}, True, False, False)"
         elif is_generic(arg.type):
             arg.type = get_origin(arg.type)
@@ -807,7 +813,12 @@ convert_sets=convert_sets), foo[2],)"
         """
         Render rvalue for primitives.
         """
-        return f"{arg.varname}"
+        typ = typename(arg.type)
+        var = arg.varname
+        if self.suppress_coerce:
+            return var
+        else:
+            return f'coerce({typ}, {var})'
 
     def string(self, arg: SeField) -> str:
         return f"str({arg.varname})"

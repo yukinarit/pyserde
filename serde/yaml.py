@@ -7,7 +7,6 @@ from typing import Type
 import yaml
 
 from .compat import T
-from .core import Coerce, TypeCheck
 from .de import Deserializer, from_dict
 from .se import Serializer, to_dict
 
@@ -28,7 +27,7 @@ class YamlDeserializer(Deserializer):
         return yaml.safe_load(s, **opts)
 
 
-def to_yaml(obj, se: Type[Serializer] = YamlSerializer, type_check: TypeCheck = Coerce, **opts) -> str:
+def to_yaml(obj, se: Type[Serializer] = YamlSerializer, **opts) -> str:
     """
     Serialize the object into YAML.
 
@@ -38,14 +37,12 @@ def to_yaml(obj, se: Type[Serializer] = YamlSerializer, type_check: TypeCheck = 
     If you want to use the other yaml package, you can subclass `YamlSerializer` and implement your own logic.
     """
     return se.serialize(
-        to_dict(obj, reuse_instances=False, preserved_datetime_types=_YamlDateTimeTypes, type_check=type_check),
+        to_dict(obj, reuse_instances=False, preserved_datetime_types=_YamlDateTimeTypes),
         **opts,
     )
 
 
-def from_yaml(
-    c: Type[T], s: str, de: Type[Deserializer] = YamlDeserializer, type_check: TypeCheck = Coerce, **opts
-) -> T:
+def from_yaml(c: Type[T], s: str, de: Type[Deserializer] = YamlDeserializer, **opts) -> T:
     """
     `c` is a class obejct and `s` is YAML string. If you supply keyword arguments other than `de`,
     they will be passed in `yaml.safe_load` function.
@@ -57,5 +54,4 @@ def from_yaml(
         de.deserialize(s, **opts),
         reuse_instances=False,
         preserved_datetime_types=_YamlDateTimeTypes,
-        type_check=type_check,
     )

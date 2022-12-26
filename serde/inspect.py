@@ -16,7 +16,8 @@ import importlib
 import logging
 import os
 import sys
-from typing import Type
+
+from typing_extensions import Type
 
 from .core import SERDE_SCOPE, SerdeScope, init, logger
 

@@ -1,4 +1,148 @@
-## `0.8.3`  (2022-06-28)
+## `0.9.7` (2022-12-15)
+
+A bug for optional unions was fixed, Thanks [@soaxelbrooke](https://github.com/soaxelbrooke)!
+```python
+@serde
+@dataclass(frozen=True)
+class Bar:
+    request: Optional[Union[str, int]]
+```
+
+* docs: add @soaxelbrooke as a contributor ([063e705](https://github.com/yukinarit/pyserde/commit/063e705))
+* Add support for optional unions ([075949b](https://github.com/yukinarit/pyserde/commit/075949b))
+* Add typing-utils for compatibility with python ver < 3.8 ([620b9f6](https://github.com/yukinarit/pyserde/commit/620b9f6))
+* Rely on compay.get_args instead of adding dependency ([d93f894](https://github.com/yukinarit/pyserde/commit/d93f894))
+
+## `0.9.6` (2022-12-05)
+
+* Recursive dataclasses are supported in [#290](https://github.com/yukinarit/pyserde/pull/290)
+    ```python
+    @dataclass
+    class Recur:
+        f: Optional['Recur']
+
+    serde(Recur)
+    ```
+* `typing.FrozenSet` and `typing.DefaultDict` are supported in [#285](https://github.com/yukinarit/pyserde/pull/285),[#286](https://github.com/yukinarit/pyserde/pull/286)
+    ```python
+    @serde
+    @dataclass
+    class Foo:
+        a: FrozenSet[int]
+        b: DefaultDict[str, List[int]]
+	```
+* Pickle serializer and deserializer support is added in [#284](https://github.com/yukinarit/pyserde/pull/284). Thanks [@DoeringChristian](https://github.com/DoeringChristian)!
+
+
+## `0.9.5` (2022-11-26)
+
+`alias` field attribute was implemented.
+
+```python
+@serde
+@dataclass
+class Foo:
+    a: int = field(alias=["b", "c", "d"])
+```
+
+* feat: Implement alias ([36cbc6e](https://github.com/yukinarit/pyserde/commit/36cbc6e))
+* test: Add InitVar and ClassVar examples ([f5171fa](https://github.com/yukinarit/pyserde/commit/f5171fa))
+* build: Add python 3.11 to pyproject.toml ([4ea7504](https://github.com/yukinarit/pyserde/commit/4ea7504))
+
+## `0.9.4` (2022-11-20)
+
+Variable lengh tuple is supported.
+```python
+@serde
+@dataclass
+class Foo:
+    v: Tuple[int, ...]
+```
+
+* feat: Support variable length tuples ([74dd3d4](https://github.com/yukinarit/pyserde/commit/74dd3d4))
+* feat: Use tomllib for Python >= 3.11 ([b8943b5](https://github.com/yukinarit/pyserde/commit/b8943b5))
+
+## `0.9.3` (2022-11-10)
+
+Thanks to [PEP681 @dataclass_transform](https://peps.python.org/pep-0681/), `@dataclass` decorator is no longer mandatory if you use a PEP681 supported type checker such as [pyright](https://github.com/microsoft/pyright). If you are a mypy user, you still need `@dataclass` decorator.
+
+```python
+@serde
+#@dataclass <= No longer needed.
+class Foo:
+    i: int
+```
+
+* ci: Build with python 3.11 on CI ([a8def55](https://github.com/yukinarit/pyserde/commit/a8def55))
+* feat: pep681 ([4ec2bf8](https://github.com/yukinarit/pyserde/commit/4ec2bf8))
+* fix: Mypy type errors ([3ac1510](https://github.com/yukinarit/pyserde/commit/3ac1510))
+* fix: Support nested generic dataclasses ([3562139](https://github.com/yukinarit/pyserde/commit/3562139))
+
+## `0.9.2` (2022-09-03)
+
+* chore: Bump allowed version of numpy to >1.21.0 on Python 3.7 ([beb2a8b](https://github.com/yukinarit/pyserde/commit/beb2a8b))
+* fix: Fix deserialization of optional complex types with default=None ([2b3b7ae](https://github.com/yukinarit/pyserde/commit/2b3b7ae))
+
+This release had contributions from 1 person: [@kmsquire](https://github.com/kmsquire). Thank you so much! :tada: :joy:
+
+## `0.9.1` (2022-08-30)
+
+* fix: Call to untyped function "serde" in typed context ([84c5f07](https://github.com/yukinarit/pyserde/commit/84c5f07))
+
+## `0.9.0` (2022-08-26)
+
+`pyserde` v0.9 adds one of the most awaited features, the type checking functionality 🎉 If you add `Coerce` or `Strict` in `serde` decorator, `pyserde` will do type coercing or type checking based on the declared types.
+
+##### `Coerce`
+
+Type coercing automatically converts a value into the declared type during (de)serialization. If the value is incompatible e.g. value is "foo" and type is int, pyserde raises an `SerdeError`.
+
+```python
+@serde(type_check=Coerce)
+@dataclass
+class Foo
+    s: str
+
+foo = Foo(10)
+# pyserde automatically coerce the int value 10 into "10".
+# {"s": "10"} will be printed.
+print(to_json(foo))
+```
+
+##### `Strict`
+
+Strict type checking is to check every value against the declared type during (de)serialization. We plan to make `Strict` a default type checker in the future release.
+
+```python
+@serde(type_check=Strict)
+@dataclass
+class Foo
+    s: str
+
+foo = Foo(10)
+# pyserde checks the value 10 is instance of `str`.
+# SerdeError will be raised in this case because of the type mismatch.
+print(to_json(foo))
+```
+
+* refactor: Change default type_check from Coerce to NoCheck ([23ea180](https://github.com/yukinarit/pyserde/commit/23ea180))
+* refactor: Change to pass "type_check" parameter in decorator ([fbe8dc8](https://github.com/yukinarit/pyserde/commit/fbe8dc8))
+* feat: Add type coercion feature make it default ([dabb777](https://github.com/yukinarit/pyserde/commit/dabb777))
+* feat: Implement strict type checking ([0273b9a](https://github.com/yukinarit/pyserde/commit/0273b9a))
+
+Another notable change is switching toml library from [toml](https://pypi.org/project/toml/) to [tomli](https://pypi.org/project/tomli/). tomli is used in a handful of major products e.g. `pip` and `pytest` and [will be the part of Python standard library in Python 3.11](https://peps.python.org/pep-0680/).
+
+* feat: Switch toml library to tomli ([11b4df6](https://github.com/yukinarit/pyserde/commit/11b4df6))
+* Better documentation about generic alias ([fd4e5a5](https://github.com/yukinarit/pyserde/commit/fd4e5a5))
+* Ensure union_func_name produces a valid function name ([eddf250](https://github.com/yukinarit/pyserde/commit/eddf250))
+* Import 'Literal' from serde.compat ([a7450c1](https://github.com/yukinarit/pyserde/commit/a7450c1))
+* Support NumPy 1.23 in Python 3.7/3.8 ([3309a73](https://github.com/yukinarit/pyserde/commit/3309a73))
+* Use str instead of repr in typename, fixing Union[Literal["str"], ...] ([b3905ef](https://github.com/yukinarit/pyserde/commit/b3905ef))
+* fix: from_json return returns T not Optional[T] ([9e50fb7](https://github.com/yukinarit/pyserde/commit/9e50fb7))
+
+This release had contributions from 1 person: [@kngwyu](https://github.com/kngwyu). Thank you so much! :tada: :joy:
+
+## `0.8.3` (2022-06-28)
 
 * fix: Use numpy<1.23.0 for python 3.7 and 3.8 ([3045521](https://github.com/yukinarit/pyserde/commit/3045521))
 

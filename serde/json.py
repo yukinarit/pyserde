@@ -1,10 +1,11 @@
 """
 Serialize and Deserialize in JSON format.
 """
-from typing import Any, Type, Union
+from typing import Any, Union
+
+from typing_extensions import Type
 
 from .compat import T
-from .core import Coerce, TypeCheck
 from .de import Deserializer, from_dict
 from .numpy import encode_numpy
 from .se import Serializer, to_dict
@@ -50,7 +51,7 @@ class JsonDeserializer(Deserializer):
         return json_loads(s, **opts)
 
 
-def to_json(obj: Any, se: Type[Serializer] = JsonSerializer, type_check: TypeCheck = Coerce, **opts) -> str:
+def to_json(obj: Any, se: Type[Serializer] = JsonSerializer, **opts) -> str:
     """
     Serialize the object into JSON str. [orjson](https://github.com/ijl/orjson) will be used if installed.
 
@@ -61,12 +62,10 @@ def to_json(obj: Any, se: Type[Serializer] = JsonSerializer, type_check: TypeChe
 
     If you want to use another json package, you can subclass `JsonSerializer` and implement your own logic.
     """
-    return se.serialize(to_dict(obj, reuse_instances=False, convert_sets=True, type_check=type_check), **opts)
+    return se.serialize(to_dict(obj, reuse_instances=False, convert_sets=True), **opts)
 
 
-def from_json(
-    c: Type[T], s: Union[str, bytes], de: Type[Deserializer] = JsonDeserializer, type_check: TypeCheck = Coerce, **opts
-) -> T:
+def from_json(c: Type[T], s: Union[str, bytes], de: Type[Deserializer] = JsonDeserializer, **opts) -> T:
     """
     Deserialize from JSON into the object. [orjson](https://github.com/ijl/orjson) will be used if installed.
 
@@ -75,4 +74,4 @@ def from_json(
 
     If you want to use another json package, you can subclass `JsonDeserializer` and implement your own logic.
     """
-    return from_dict(c, de.deserialize(s, **opts), reuse_instances=False, type_check=type_check)
+    return from_dict(c, de.deserialize(s, **opts), reuse_instances=False)

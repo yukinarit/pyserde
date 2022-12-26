@@ -35,7 +35,7 @@ class Foo:
 
 pyserde generates methods necessary for (de)serialization by `@serde` when a class is loaded into python interpreter. The code generation occurs only once and there is no overhead when you use the generated methods. Now your class is serializable and deserializable in the data formats supported by pyserde.
 
-> **Note:** If you need only either serialization or deserialization functionality, you can use `@serialize` or `@deserialize` instead of `@serde` decorator.
+> **NOTE:** If you need only either serialization or deserialization functionality, you can use `@serialize` or `@deserialize` instead of `@serde` decorator.
 >
 > e.g. If you don't need deserialization functionality, you can add `@serialize` decorator only. But, calling deserialize API e.g. `from_json` for `Foo` will raise an error.
 > ```python
@@ -77,4 +77,3 @@ print(from_json(Foo, s))
 ```
 
 That's it! pyserde offers many more features. If you're interested, please read the rest of the documentation.
-

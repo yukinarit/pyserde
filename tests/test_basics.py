@@ -4,7 +4,7 @@ import enum
 import logging
 import pathlib
 import uuid
-from typing import Dict, List, Optional, Set, Tuple, Union
+from typing import DefaultDict, Dict, FrozenSet, List, Optional, Set, Tuple, Union
 
 import pytest
 
@@ -17,6 +17,7 @@ from .common import (
     format_dict,
     format_json,
     format_msgpack,
+    format_pickle,
     format_toml,
     format_tuple,
     format_yaml,
@@ -47,7 +48,6 @@ def test_simple(se, de, opt, t, T, f):
 
     c = C(10, t)
     assert c == de(C, se(c))
-    assert c == de(C, se(c, type_check=Strict), type_check=Strict)
 
     @serde.serde(**opt)
     class Nested:
@@ -59,11 +59,9 @@ def test_simple(se, de, opt, t, T, f):
 
     c = C(Nested(t))
     assert c == de(C, se(c))
-    assert c == de(C, se(c, type_check=Strict), type_check=Strict)
 
     if se is not serde.toml.to_toml:
         assert t == de(T, se(t))
-        assert t == de(T, se(t, type_check=Strict), type_check=Strict)
 
 
 @pytest.mark.parametrize('t,T,filter', types, ids=type_ids())
@@ -337,7 +335,7 @@ def test_default(se, de):
     assert p == from_dict(PriDefault, {'i': 10, 's': 'foo', 'f': 100.0, 'b': True})
     assert p == from_tuple(PriDefault, (10, 'foo', 100.0, True))
 
-    if se is not serde.toml.to_toml:
+    if se is not serde.toml.to_toml:  # Toml doesn't support None.
         o = OptDefault()
         assert o == de(OptDefault, se(o))
         o = OptDefault()
@@ -357,7 +355,9 @@ def test_default(se, de):
     assert True is dataclasses.fields(PriDefault)[3].default
 
 
-@pytest.mark.parametrize('se,de', (format_dict + format_tuple + format_json + format_msgpack + format_yaml))
+@pytest.mark.parametrize(
+    'se,de', (format_dict + format_tuple + format_json + format_msgpack + format_yaml + format_pickle)
+)
 def test_list_pri(se, de):
     p = [data.PRI, data.PRI]
     assert p == de(data.ListPri, se(p))
@@ -366,7 +366,9 @@ def test_list_pri(se, de):
     assert p == de(data.ListPri, se(p))
 
 
-@pytest.mark.parametrize('se,de', (format_dict + format_tuple + format_json + format_msgpack + format_yaml))
+@pytest.mark.parametrize(
+    'se,de', (format_dict + format_tuple + format_json + format_msgpack + format_yaml + format_pickle)
+)
 def test_dict_pri(se, de):
     p = {'1': data.PRI, '2': data.PRI}
     assert p == de(data.DictPri, se(p))
@@ -447,7 +449,7 @@ def test_rename_msgpack(se, de):
     assert f == de(Foo, se(f, named=False), named=False)
 
 
-@pytest.mark.parametrize('se,de', (format_dict + format_json + format_yaml + format_toml))
+@pytest.mark.parametrize('se,de', (format_dict + format_json + format_yaml + format_toml + format_pickle))
 def test_rename_formats(se, de):
     @serde.serde(rename_all='camelcase')
     class Foo:
@@ -457,7 +459,53 @@ def test_rename_formats(se, de):
     assert f == de(Foo, se(f))
 
 
-@pytest.mark.parametrize('se,de', (format_dict + format_json + format_msgpack + format_yaml + format_toml))
+@pytest.mark.parametrize('se,de', (format_dict + format_json + format_yaml + format_toml + format_pickle))
+def test_alias(se, de):
+    @serde.serde
+    class Foo:
+        a: str = serde.field(alias=["b", "c", "d"])
+
+    f = Foo(a='foo')
+    assert f == de(Foo, se(f))
+
+
+def test_conflicting_alias():
+    @serde.serde
+    class Foo:
+        a: int = serde.field(alias=["b", "c", "d"])
+        b: int
+        c: int
+        d: int
+
+    f = Foo(a=1, b=2, c=3, d=4)
+    assert '{"a":1,"b":2,"c":3,"d":4}' == serde.json.to_json(f)
+    ff = serde.json.from_json(Foo, '{"a":1,"b":2,"c":3,"d":4}')
+    assert ff.a == 1
+    assert ff.b == 2
+    assert ff.c == 3
+    assert ff.d == 4
+
+    ff = serde.json.from_json(Foo, '{"b":2,"c":3,"d":4}')
+    assert ff.a == 2
+    assert ff.b == 2
+    assert ff.c == 3
+    assert ff.d == 4
+
+
+def test_rename_and_alias():
+    @serde.serde
+    class Foo:
+        a: int = serde.field(rename="z", alias=["b", "c", "d"])
+
+    f = Foo(a=1)
+    assert '{"z":1}' == serde.json.to_json(f)
+    ff = serde.json.from_json(Foo, '{"b":10}')
+    assert ff.a == 10
+
+
+@pytest.mark.parametrize(
+    'se,de', (format_dict + format_json + format_msgpack + format_yaml + format_toml + format_pickle)
+)
 def test_skip_if(se, de):
     @serde.serde
     class Foo:
@@ -483,7 +531,9 @@ def test_skip_if_false(se, de):
     assert f == de(Foo, se(f))
 
 
-@pytest.mark.parametrize('se,de', (format_dict + format_json + format_msgpack + format_yaml + format_toml))
+@pytest.mark.parametrize(
+    'se,de', (format_dict + format_json + format_msgpack + format_yaml + format_toml + format_pickle)
+)
 def test_skip_if_overrides_skip_if_false(se, de):
     @serde.serde
     class Foo:
@@ -754,7 +804,7 @@ test_cases = [
     (Dict[str, data.Int], {"foo": data.Int(1.0)}, True),  # type: ignore
     (Set[int], {10}, False),
     (Set[int], {10.0}, True),
-    (Set[int], [10], False),  # List is coerced into Set
+    (Set[int], [10], True),
     (Tuple[int], (10,), False),
     (Tuple[int], (10.0,), True),
     (Tuple[int, str], (10, "foo"), False),
@@ -767,20 +817,147 @@ test_cases = [
     (Union[int, data.Int], data.Int(10), False),
     (datetime.date, datetime.date.today(), False),
     (pathlib.Path, pathlib.Path(), False),
-    (pathlib.Path, "foo", False),  # str is coerced into Path
+    (pathlib.Path, "foo", True),
 ]
 
 
 @pytest.mark.parametrize('T,data,exc', test_cases)
 def test_type_check(T, data, exc):
-    @serde.serde
+    @serde.serde(type_check=Strict)
     class C:
         a: T
 
     if exc:
         with pytest.raises(serde.SerdeError):
             d = serde.to_dict(C(data))
-            serde.from_dict(C, d, type_check=Strict)
+            serde.from_dict(C, d)
     else:
         d = serde.to_dict(C(data))
-        serde.from_dict(C, d, type_check=Strict)
+        serde.from_dict(C, d)
+
+
+def test_uncoercible():
+    @serde.serde(type_check=serde.Coerce)
+    class Foo:
+        i: int
+
+    with pytest.raises(serde.SerdeError):
+        serde.to_dict(Foo("foo"))
+
+    with pytest.raises(serde.SerdeError):
+        serde.from_dict(Foo, {"i": "foo"})
+
+
+def test_coerce():
+    @serde.serde(type_check=serde.Coerce)
+    @dataclasses.dataclass
+    class Foo:
+        i: int
+        s: str
+        f: float
+        b: bool
+
+    d = {"i": "10", "s": 100, "f": 1000, "b": "True"}
+    p = serde.from_dict(Foo, d)
+    assert p.i == 10
+    assert p.s == "100"
+    assert p.f == 1000.0
+    assert p.b
+
+    p = Foo("10", 100, 1000, "True")
+    d = serde.to_dict(p)
+    assert d["i"] == 10
+    assert d["s"] == "100"
+    assert d["f"] == 1000.0
+    assert d["b"]
+
+    # Couldn't coerce
+    with pytest.raises(serde.SerdeError):
+        d = {"i": "foo", "s": 100, "f": "bar", "b": "True"}
+        p = serde.from_dict(Foo, d)
+
+    @serde.serde(type_check=serde.Coerce)
+    @dataclasses.dataclass
+    class Int:
+        i: int
+
+    @serde.serde(type_check=serde.Coerce)
+    @dataclasses.dataclass
+    class Str:
+        s: str
+
+    @serde.serde(type_check=serde.Coerce)
+    @dataclasses.dataclass
+    class Float:
+        f: float
+
+    @serde.serde(type_check=serde.Coerce)
+    @dataclasses.dataclass
+    class Bool:
+        b: bool
+
+    @serde.serde(type_check=serde.Coerce)
+    @serde.dataclass
+    class Nested:
+        i: data.Int
+        s: data.Str
+        f: data.Float
+        b: data.Bool
+
+    # Nested structure
+    p = Nested(Int("10"), Str(100), Float(1000), Bool("True"))
+    d = serde.to_dict(p)
+    assert d["i"]["i"] == 10
+    assert d["s"]["s"] == "100"
+    assert d["f"]["f"] == 1000.0
+    assert d["b"]["b"]
+
+    d = {"i": {"i": "10"}, "s": {"s": 100}, "f": {"f": 1000}, "b": {"b": "True"}}
+    p = serde.from_dict(Nested, d)
+
+
+def test_frozenset() -> None:
+    @serde.serde
+    @dataclasses.dataclass
+    class Foo:
+        d: FrozenSet[int]
+
+    f = Foo(frozenset({1, 1, 2}))
+    assert '{"d":[1,2]}' == serde.json.to_json(f)
+
+    ff = serde.json.from_json(Foo, '{"d":[1,2]}')
+    assert f == ff
+    assert isinstance(f.d, frozenset)
+    assert isinstance(ff.d, frozenset)
+
+    fs = serde.json.from_json(FrozenSet[int], '[1,2]')
+    assert fs == frozenset([1, 2])
+
+
+def test_defaultdict() -> None:
+    from collections import defaultdict
+
+    @serde.serde
+    @dataclasses.dataclass
+    class Foo:
+        v: DefaultDict[str, List[int]]
+
+    f = Foo(defaultdict(list, {"k": [1, 2]}))
+    assert '{"v":{"k":[1,2]}}' == serde.json.to_json(f)
+
+    ff = serde.json.from_json(Foo, '{"v":{"k":[1,2]}}')
+    assert f == ff
+    assert isinstance(f.v, defaultdict)
+    assert isinstance(ff.v, defaultdict)
+
+    dd = serde.json.from_json(DefaultDict[str, List[int]], '{"k":[1,2]}')
+    assert isinstance(dd, defaultdict)
+    assert dd == defaultdict(list, {"k": [1, 2]})
+
+
+def test_defaultdict_invalid_value_type() -> None:
+    with pytest.raises(Exception):
+        serde.json.from_json(DefaultDict[str, ...], '{"k":[1,2]}')
+
+    with pytest.raises(Exception):
+        serde.json.from_json(DefaultDict, '{"k":[1,2]}')

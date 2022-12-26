@@ -7,7 +7,7 @@ from typing import Any, Dict, Type
 import msgpack
 
 from .compat import T
-from .core import Coerce, SerdeError, TypeCheck
+from .core import SerdeError
 from .de import Deserializer, from_dict, from_tuple
 from .numpy import encode_numpy
 from .se import Serializer, to_dict, to_tuple
@@ -39,7 +39,6 @@ def to_msgpack(
     se: Type[Serializer] = MsgPackSerializer,
     named: bool = True,
     ext_dict: Dict[Type, int] = None,
-    type_check: TypeCheck = Coerce,
     **opts,
 ) -> bytes:
     """
@@ -63,7 +62,7 @@ def to_msgpack(
 
     to_func = to_dict if named else to_tuple
     return se.serialize(
-        to_func(obj, reuse_instances=False, convert_sets=True, type_check=type_check),
+        to_func(obj, reuse_instances=False, convert_sets=True),
         ext_type_code=ext_type_code,
         **opts,
     )
@@ -75,7 +74,6 @@ def from_msgpack(
     de: Type[Deserializer] = MsgPackDeserializer,
     named: bool = True,
     ext_dict: Dict[int, Type] = None,
-    type_check: TypeCheck = Coerce,
     **opts,
 ) -> Type[T]:
     """
@@ -92,7 +90,7 @@ def from_msgpack(
         ext_type = ext_dict.get(ext.code)
         if ext_type is None:
             raise SerdeError(f"Could not find type for code {ext.code} in ext_dict")
-        return from_msgpack(ext_type, ext.data, de, named, type_check=type_check, **opts)
+        return from_msgpack(ext_type, ext.data, de, named, **opts)
     else:
         from_func = from_dict if named else from_tuple
-        return from_func(c, de.deserialize(s, **opts), reuse_instances=False, type_check=type_check)
+        return from_func(c, de.deserialize(s, **opts), reuse_instances=False)

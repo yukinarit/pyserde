@@ -8,10 +8,11 @@ import functools
 import logging
 import re
 from dataclasses import dataclass
-from typing import Any, Callable, Container, Dict, List, Mapping, Optional, Type, TypeVar, Union
+from typing import Any, Callable, Dict, List, Mapping, Optional, TypeVar, Union
 
 import casefy
 import jinja2
+from typing_extensions import Type
 
 from .compat import (
     SerdeError,
@@ -250,6 +251,8 @@ def is_instance(obj: Any, typ: Type) -> bool:
     elif is_new_type_primitive(typ):
         inner = getattr(typ, '__supertype__')
         return isinstance(obj, inner)
+    elif typ is Ellipsis:
+        return True
     else:
         return isinstance(obj, typ)
 
@@ -362,6 +365,7 @@ class FlattenOpts:
 def field(
     *args,
     rename: Optional[str] = None,
+    alias: Optional[List[str]] = None,
     skip: Optional[bool] = None,
     skip_if: Optional[Callable] = None,
     skip_if_false: Optional[bool] = None,
@@ -380,6 +384,8 @@ def field(
 
     if rename is not None:
         metadata["serde_rename"] = rename
+    if alias is not None:
+        metadata["serde_alias"] = alias
     if skip is not None:
         metadata["serde_skip"] = skip
     if skip_if is not None:
@@ -473,6 +479,7 @@ class Field:
     compare: Any = field(default_factory=dataclasses._MISSING_TYPE)
     metadata: Mapping[str, Any] = field(default_factory=dict)
     case: Optional[str] = None
+    alias: List[str] = field(default_factory=list)
     rename: Optional[str] = None
     skip: Optional[bool] = None
     skip_if: Optional[Func] = None
@@ -481,9 +488,10 @@ class Field:
     serializer: Optional[Func] = None  # Custom field serializer.
     deserializer: Optional[Func] = None  # Custom field deserializer.
     flatten: Optional[FlattenOpts] = None
+    parent: Optional[Type] = None
 
     @classmethod
-    def from_dataclass(cls, f: dataclasses.Field) -> 'Field':
+    def from_dataclass(cls, f: dataclasses.Field, parent: Optional[Type] = None) -> 'Field':
         """
         Create `Field` object from `dataclasses.Field`.
         """
@@ -527,11 +535,13 @@ class Field:
             compare=f.compare,
             metadata=f.metadata,
             rename=f.metadata.get('serde_rename'),
+            alias=f.metadata.get('serde_alias', []),
             skip=f.metadata.get('serde_skip'),
             skip_if=skip_if or skip_if_false_func or skip_if_default_func,
             serializer=serializer,
             deserializer=deserializer,
             flatten=flatten,
+            parent=parent,
         )
 
     def to_dataclass(self) -> dataclasses.Field:
@@ -548,6 +558,13 @@ class Field:
         f.name = self.name
         f.type = self.type
         return f
+
+    def is_self_referencing(self) -> bool:
+        if self.type is None:
+            return False
+        if self.parent is None:
+            return False
+        return self.type == self.parent
 
     @staticmethod
     def mangle(field: dataclasses.Field, name: str) -> str:
@@ -574,7 +591,7 @@ def fields(field_cls: Type[F], cls: Type) -> List[F]:
     """
     Iterate fields of the dataclass and returns `serde.core.Field`.
     """
-    return [field_cls.from_dataclass(f) for f in dataclass_fields(cls)]
+    return [field_cls.from_dataclass(f, parent=cls) for f in dataclass_fields(cls)]
 
 
 def conv(f: Field, case: Optional[str] = None) -> str:
@@ -721,7 +738,7 @@ def render_type_check(cls: Type) -> str:
     import serde.compat
 
     template = """
-def typecheck(self):
+def {{type_check_func}}(self):
   {% for f in fields -%}
 
   {% if ((is_numpy_available() and is_numpy_type(f.type)) or
@@ -794,3 +811,13 @@ NoCheck = TypeCheck(kind=TypeCheck.Kind.NoCheck)
 Coerce = TypeCheck(kind=TypeCheck.Kind.Coerce)
 
 Strict = TypeCheck(kind=TypeCheck.Kind.Strict)
+
+
+def coerce(typ: Type, obj: Any) -> Any:
+    return typ(obj) if is_coercible(typ, obj) else obj
+
+
+def is_coercible(typ: Type, obj: Any) -> bool:
+    if obj is None:
+        return False
+    return True

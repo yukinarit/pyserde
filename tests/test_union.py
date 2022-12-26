@@ -54,6 +54,16 @@ class PriOptUnion:
 
 @serde
 @dataclass(unsafe_hash=True)
+class OptionalUnion:
+    """
+    Union Primitives.
+    """
+
+    v: Optional[Union[int, str]]
+
+
+@serde
+@dataclass(unsafe_hash=True)
 class ContUnion:
     """
     Union Containers.
@@ -119,6 +129,9 @@ def test_union_optional():
     s = '{"v":false}'
     assert s == to_json(v)
     assert v == from_json(PriOptUnion, s)
+
+    assert PriOptUnion(None) == from_json(PriOptUnion, '{}')
+    assert OptionalUnion(None) == from_json(OptionalUnion, '{}')
 
 
 def test_union_containers():
@@ -223,6 +236,29 @@ def test_optional_union_with_complex_types():
     a_none = A(None)
     assert a_none == from_dict(A, to_dict(a_none, reuse_instances=False), reuse_instances=False)
     assert a_none == from_dict(A, to_dict(a_none, reuse_instances=True), reuse_instances=True)
+
+
+def test_optional_complex_type_with_default():
+    for T, default in [
+        (IPv4Address, IPv4Address("127.0.0.1")),
+        (UUID, UUID("9c244009-c60d-452b-a378-b8afdc0c2d90")),
+    ]:
+
+        @serde
+        class A:
+            id: Optional[T] = None
+
+        a = A(default)
+        assert a == from_dict(A, to_dict(a, reuse_instances=False), reuse_instances=False)
+        assert a == from_dict(A, to_dict(a, reuse_instances=True), reuse_instances=True)
+
+        a_none = A(None)
+        assert a_none == from_dict(A, to_dict(a_none, reuse_instances=False), reuse_instances=False)
+        assert a_none == from_dict(A, to_dict(a_none, reuse_instances=True), reuse_instances=True)
+
+        a_default = A()
+        assert a_default == from_dict(A, to_dict(a_default, reuse_instances=False), reuse_instances=False)
+        assert a_default == from_dict(A, to_dict(a_default, reuse_instances=True), reuse_instances=True)
 
 
 def test_union_with_complex_types_in_containers():
