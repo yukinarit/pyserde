@@ -1,10 +1,11 @@
-import cattr
 import json
-import data
-from attrs_class import Small, Medium, SMALL, MEDIUM
-from typing import Union, Type
 from functools import partial
-from runner import Size, Runner
+from typing import Type, Union
+
+import cattr
+import data
+from attrs_class import MEDIUM, SMALL, Medium, Small
+from runner import Runner, Size
 
 
 def new(size: Size) -> Runner:

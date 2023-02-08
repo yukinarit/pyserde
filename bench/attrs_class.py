@@ -1,9 +1,10 @@
+import json
+from functools import partial
+from typing import List, Union
+
 import attr
 import data
-import json
-from typing import List, Union
-from functools import partial
-from runner import Size, Runner
+from runner import Runner, Size
 
 
 @attr.s(auto_attribs=True)

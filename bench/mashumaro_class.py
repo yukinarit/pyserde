@@ -1,9 +1,10 @@
-import mashumaro
-import data
 from dataclasses import dataclass, field
-from typing import List, Type, Union
 from functools import partial
-from runner import Size, Runner
+from typing import List, Type, Union
+
+import data
+import mashumaro
+from runner import Runner, Size
 
 
 @dataclass

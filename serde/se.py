@@ -12,7 +12,7 @@ from dataclasses import dataclass, is_dataclass
 from typing import Any, Callable, Dict, Iterator, List, Optional, Type, TypeVar
 
 import jinja2
-from typing_extensions import Type, dataclass_transform
+from typing_extensions import dataclass_transform
 
 from .compat import (
     Literal,

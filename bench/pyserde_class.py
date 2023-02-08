@@ -1,10 +1,12 @@
+from dataclasses import dataclass, field
+from functools import partial
+from typing import List, Type, Union
+
+import data
+from runner import Runner, Size
+
 import serde
 import serde.json
-import data
-from dataclasses import dataclass, field
-from typing import List, Type, Union
-from functools import partial
-from runner import Size, Runner
 
 
 @serde.serde
