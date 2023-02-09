@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="generator" content="pdoc 12.3.0"/>
+    <meta name="generator" content="pdoc 12.3.1"/>
     <title>serde.core API documentation</title>
 
     <style>/*! * Bootstrap Reboot v5.0.0 (https://getbootstrap.com/) * Copyright 2011-2021 The Bootstrap Authors * Copyright 2011-2021 Twitter, Inc. * Licensed under MIT (https://github.com/twbs/bootstrap/blob/main/LICENSE) * Forked from Normalize.css, licensed MIT (https://github.com/necolas/normalize.css/blob/master/LICENSE.md) */*,::after,::before{box-sizing:border-box}@media (prefers-reduced-motion:no-preference){:root{scroll-behavior:smooth}}body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans","Liberation Sans",sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";font-size:1rem;font-weight:400;line-height:1.5;color:#212529;background-color:#fff;-webkit-text-size-adjust:100%;-webkit-tap-highlight-color:transparent}hr{margin:1rem 0;color:inherit;background-color:currentColor;border:0;opacity:.25}hr:not([size]){height:1px}h1,h2,h3,h4,h5,h6{margin-top:0;margin-bottom:.5rem;font-weight:500;line-height:1.2}h1{font-size:calc(1.375rem + 1.5vw)}@media (min-width:1200px){h1{font-size:2.5rem}}h2{font-size:calc(1.325rem + .9vw)}@media (min-width:1200px){h2{font-size:2rem}}h3{font-size:calc(1.3rem + .6vw)}@media (min-width:1200px){h3{font-size:1.75rem}}h4{font-size:calc(1.275rem + .3vw)}@media (min-width:1200px){h4{font-size:1.5rem}}h5{font-size:1.25rem}h6{font-size:1rem}p{margin-top:0;margin-bottom:1rem}abbr[data-bs-original-title],abbr[title]{-webkit-text-decoration:underline dotted;text-decoration:underline dotted;cursor:help;-webkit-text-decoration-skip-ink:none;text-decoration-skip-ink:none}address{margin-bottom:1rem;font-style:normal;line-height:inherit}ol,ul{padding-left:2rem}dl,ol,ul{margin-top:0;margin-bottom:1rem}ol ol,ol ul,ul ol,ul ul{margin-bottom:0}dt{font-weight:700}dd{margin-bottom:.5rem;margin-left:0}blockquote{margin:0 0 1rem}b,strong{font-weight:bolder}small{font-size:.875em}mark{padding:.2em;background-color:#fcf8e3}sub,sup{position:relative;font-size:.75em;line-height:0;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}a{color:#0d6efd;text-decoration:underline}a:hover{color:#0a58ca}a:not([href]):not([class]),a:not([href]):not([class]):hover{color:inherit;text-decoration:none}code,kbd,pre,samp{font-family:SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;font-size:1em;direction:ltr;unicode-bidi:bidi-override}pre{display:block;margin-top:0;margin-bottom:1rem;overflow:auto;font-size:.875em}pre code{font-size:inherit;color:inherit;word-break:normal}code{font-size:.875em;color:#d63384;word-wrap:break-word}a>code{color:inherit}kbd{padding:.2rem .4rem;font-size:.875em;color:#fff;background-color:#212529;border-radius:.2rem}kbd kbd{padding:0;font-size:1em;font-weight:700}figure{margin:0 0 1rem}img,svg{vertical-align:middle}table{caption-side:bottom;border-collapse:collapse}caption{padding-top:.5rem;padding-bottom:.5rem;color:#6c757d;text-align:left}th{text-align:inherit;text-align:-webkit-match-parent}tbody,td,tfoot,th,thead,tr{border-color:inherit;border-style:solid;border-width:0}label{display:inline-block}button{border-radius:0}button:focus:not(:focus-visible){outline:0}button,input,optgroup,select,textarea{margin:0;font-family:inherit;font-size:inherit;line-height:inherit}button,select{text-transform:none}[role=button]{cursor:pointer}select{word-wrap:normal}select:disabled{opacity:1}[list]::-webkit-calendar-picker-indicator{display:none}[type=button],[type=reset],[type=submit],button{-webkit-appearance:button}[type=button]:not(:disabled),[type=reset]:not(:disabled),[type=submit]:not(:disabled),button:not(:disabled){cursor:pointer}::-moz-focus-inner{padding:0;border-style:none}textarea{resize:vertical}fieldset{min-width:0;padding:0;margin:0;border:0}legend{float:left;width:100%;padding:0;margin-bottom:.5rem;font-size:calc(1.275rem + .3vw);line-height:inherit}@media (min-width:1200px){legend{font-size:1.5rem}}legend+*{clear:left}::-webkit-datetime-edit-day-field,::-webkit-datetime-edit-fields-wrapper,::-webkit-datetime-edit-hour-field,::-webkit-datetime-edit-minute,::-webkit-datetime-edit-month-field,::-webkit-datetime-edit-text,::-webkit-datetime-edit-year-field{padding:0}::-webkit-inner-spin-button{height:auto}[type=search]{outline-offset:-2px;-webkit-appearance:textfield}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-color-swatch-wrapper{padding:0}::file-selector-button{font:inherit}::-webkit-file-upload-button{font:inherit;-webkit-appearance:button}output{display:inline-block}iframe{border:0}summary{display:list-item;cursor:pointer}progress{vertical-align:baseline}[hidden]{display:none!important}</style>
@@ -219,27 +219,27 @@
 </span><span id="L-67"><a href="#L-67"><span class="linenos"> 67</span></a>
 </span><span id="L-68"><a href="#L-68"><span class="linenos"> 68</span></a><span class="nd">@dataclass</span>
 </span><span id="L-69"><a href="#L-69"><span class="linenos"> 69</span></a><span class="k">class</span> <span class="nc">SerdeScope</span><span class="p">:</span>
-</span><span id="L-70"><a href="#L-70"><span class="linenos"> 70</span></a>    <span class="sd">&quot;&quot;&quot;</span>
+</span><span id="L-70"><a href="#L-70"><span class="linenos"> 70</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 </span><span id="L-71"><a href="#L-71"><span class="linenos"> 71</span></a><span class="sd">    Container to store types and functions used in code generation context.</span>
 </span><span id="L-72"><a href="#L-72"><span class="linenos"> 72</span></a><span class="sd">    &quot;&quot;&quot;</span>
 </span><span id="L-73"><a href="#L-73"><span class="linenos"> 73</span></a>
 </span><span id="L-74"><a href="#L-74"><span class="linenos"> 74</span></a>    <span class="bp">cls</span><span class="p">:</span> <span class="n">Type</span>
-</span><span id="L-75"><a href="#L-75"><span class="linenos"> 75</span></a>    <span class="sd">&quot;&quot;&quot; The exact class this scope is for (needed to distinguish scopes between inherited classes) &quot;&quot;&quot;</span>
+</span><span id="L-75"><a href="#L-75"><span class="linenos"> 75</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot; The exact class this scope is for (needed to distinguish scopes between inherited classes) &quot;&quot;&quot;</span>
 </span><span id="L-76"><a href="#L-76"><span class="linenos"> 76</span></a>
 </span><span id="L-77"><a href="#L-77"><span class="linenos"> 77</span></a>    <span class="n">funcs</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Callable</span><span class="p">]</span> <span class="o">=</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span>
-</span><span id="L-78"><a href="#L-78"><span class="linenos"> 78</span></a>    <span class="sd">&quot;&quot;&quot; Generated serialize and deserialize functions &quot;&quot;&quot;</span>
+</span><span id="L-78"><a href="#L-78"><span class="linenos"> 78</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot; Generated serialize and deserialize functions &quot;&quot;&quot;</span>
 </span><span id="L-79"><a href="#L-79"><span class="linenos"> 79</span></a>
 </span><span id="L-80"><a href="#L-80"><span class="linenos"> 80</span></a>    <span class="n">defaults</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Union</span><span class="p">[</span><span class="n">Callable</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span>
-</span><span id="L-81"><a href="#L-81"><span class="linenos"> 81</span></a>    <span class="sd">&quot;&quot;&quot; Default values of the dataclass fields (factories &amp; normal values) &quot;&quot;&quot;</span>
+</span><span id="L-81"><a href="#L-81"><span class="linenos"> 81</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot; Default values of the dataclass fields (factories &amp; normal values) &quot;&quot;&quot;</span>
 </span><span id="L-82"><a href="#L-82"><span class="linenos"> 82</span></a>
 </span><span id="L-83"><a href="#L-83"><span class="linenos"> 83</span></a>    <span class="n">code</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span>
-</span><span id="L-84"><a href="#L-84"><span class="linenos"> 84</span></a>    <span class="sd">&quot;&quot;&quot; Generated source code (only filled when debug is True) &quot;&quot;&quot;</span>
+</span><span id="L-84"><a href="#L-84"><span class="linenos"> 84</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot; Generated source code (only filled when debug is True) &quot;&quot;&quot;</span>
 </span><span id="L-85"><a href="#L-85"><span class="linenos"> 85</span></a>
 </span><span id="L-86"><a href="#L-86"><span class="linenos"> 86</span></a>    <span class="n">union_se_args</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Type</span><span class="p">]]</span> <span class="o">=</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span>
-</span><span id="L-87"><a href="#L-87"><span class="linenos"> 87</span></a>    <span class="sd">&quot;&quot;&quot; The union serializing functions need references to their types &quot;&quot;&quot;</span>
+</span><span id="L-87"><a href="#L-87"><span class="linenos"> 87</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot; The union serializing functions need references to their types &quot;&quot;&quot;</span>
 </span><span id="L-88"><a href="#L-88"><span class="linenos"> 88</span></a>
 </span><span id="L-89"><a href="#L-89"><span class="linenos"> 89</span></a>    <span class="n">reuse_instances_default</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
-</span><span id="L-90"><a href="#L-90"><span class="linenos"> 90</span></a>    <span class="sd">&quot;&quot;&quot; Default values for to_dict &amp; from_dict arguments &quot;&quot;&quot;</span>
+</span><span id="L-90"><a href="#L-90"><span class="linenos"> 90</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot; Default values for to_dict &amp; from_dict arguments &quot;&quot;&quot;</span>
 </span><span id="L-91"><a href="#L-91"><span class="linenos"> 91</span></a>
 </span><span id="L-92"><a href="#L-92"><span class="linenos"> 92</span></a>    <span class="n">convert_sets_default</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
 </span><span id="L-93"><a href="#L-93"><span class="linenos"> 93</span></a>
@@ -279,7 +279,7 @@
 </span><span id="L-127"><a href="#L-127"><span class="linenos">127</span></a>            <span class="n">res</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_justify</span><span class="p">(</span><span class="s1">&#39;Type list by used for union serialize functions&#39;</span><span class="p">))</span>
 </span><span id="L-128"><a href="#L-128"><span class="linenos">128</span></a>            <span class="n">res</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;--------------------------------------------------&#39;</span><span class="p">)</span>
 </span><span id="L-129"><a href="#L-129"><span class="linenos">129</span></a>            <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">lst</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">union_se_args</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-</span><span id="L-130"><a href="#L-130"><span class="linenos">130</span></a>                <span class="n">res</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s1">: </span><span class="si">{</span><span class="p">[</span><span class="n">v</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">lst</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+</span><span id="L-130"><a href="#L-130"><span class="linenos">130</span></a>                <span class="n">res</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s1">: </span><span class="si">{</span><span class="p">[</span><span class="n">v</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">v</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">lst</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 </span><span id="L-131"><a href="#L-131"><span class="linenos">131</span></a>            <span class="n">res</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
 </span><span id="L-132"><a href="#L-132"><span class="linenos">132</span></a>
 </span><span id="L-133"><a href="#L-133"><span class="linenos">133</span></a>        <span class="k">return</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">res</span><span class="p">)</span>
@@ -295,7 +295,7 @@
 </span><span id="L-143"><a href="#L-143"><span class="linenos">143</span></a>
 </span><span id="L-144"><a href="#L-144"><span class="linenos">144</span></a>
 </span><span id="L-145"><a href="#L-145"><span class="linenos">145</span></a><span class="k">def</span> <span class="nf">gen</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">globals</span><span class="p">:</span> <span class="n">Dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="nb">locals</span><span class="p">:</span> <span class="n">Dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-</span><span id="L-146"><a href="#L-146"><span class="linenos">146</span></a>    <span class="sd">&quot;&quot;&quot;</span>
+</span><span id="L-146"><a href="#L-146"><span class="linenos">146</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 </span><span id="L-147"><a href="#L-147"><span class="linenos">147</span></a><span class="sd">    A wrapper of builtin `exec` function.</span>
 </span><span id="L-148"><a href="#L-148"><span class="linenos">148</span></a><span class="sd">    &quot;&quot;&quot;</span>
 </span><span id="L-149"><a href="#L-149"><span class="linenos">149</span></a>    <span class="k">if</span> <span class="n">SETTINGS</span><span class="p">[</span><span class="s1">&#39;debug&#39;</span><span class="p">]:</span>
@@ -311,7 +311,7 @@
 </span><span id="L-159"><a href="#L-159"><span class="linenos">159</span></a>
 </span><span id="L-160"><a href="#L-160"><span class="linenos">160</span></a>
 </span><span id="L-161"><a href="#L-161"><span class="linenos">161</span></a><span class="k">def</span> <span class="nf">add_func</span><span class="p">(</span><span class="n">serde_scope</span><span class="p">:</span> <span class="n">SerdeScope</span><span class="p">,</span> <span class="n">func_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">func_code</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">globals</span><span class="p">:</span> <span class="n">Dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-</span><span id="L-162"><a href="#L-162"><span class="linenos">162</span></a>    <span class="sd">&quot;&quot;&quot;</span>
+</span><span id="L-162"><a href="#L-162"><span class="linenos">162</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 </span><span id="L-163"><a href="#L-163"><span class="linenos">163</span></a><span class="sd">    Generate a function and add it to a SerdeScope&#39;s `funcs` dictionary.</span>
 </span><span id="L-164"><a href="#L-164"><span class="linenos">164</span></a>
 </span><span id="L-165"><a href="#L-165"><span class="linenos">165</span></a><span class="sd">    * `serde_scope`: the SerdeScope instance to modify</span>
@@ -328,7 +328,7 @@
 </span><span id="L-176"><a href="#L-176"><span class="linenos">176</span></a>
 </span><span id="L-177"><a href="#L-177"><span class="linenos">177</span></a>
 </span><span id="L-178"><a href="#L-178"><span class="linenos">178</span></a><span class="k">def</span> <span class="nf">is_instance</span><span class="p">(</span><span class="n">obj</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">typ</span><span class="p">:</span> <span class="n">Type</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-</span><span id="L-179"><a href="#L-179"><span class="linenos">179</span></a>    <span class="sd">&quot;&quot;&quot;</span>
+</span><span id="L-179"><a href="#L-179"><span class="linenos">179</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 </span><span id="L-180"><a href="#L-180"><span class="linenos">180</span></a><span class="sd">    Type check function that works like `isinstance` but it accepts</span>
 </span><span id="L-181"><a href="#L-181"><span class="linenos">181</span></a><span class="sd">    Subscripted Generics e.g. `List[int]`.</span>
 </span><span id="L-182"><a href="#L-182"><span class="linenos">182</span></a><span class="sd">    &quot;&quot;&quot;</span>
@@ -429,7 +429,7 @@
 </span><span id="L-277"><a href="#L-277"><span class="linenos">277</span></a>
 </span><span id="L-278"><a href="#L-278"><span class="linenos">278</span></a><span class="nd">@dataclass</span>
 </span><span id="L-279"><a href="#L-279"><span class="linenos">279</span></a><span class="k">class</span> <span class="nc">Func</span><span class="p">:</span>
-</span><span id="L-280"><a href="#L-280"><span class="linenos">280</span></a>    <span class="sd">&quot;&quot;&quot;</span>
+</span><span id="L-280"><a href="#L-280"><span class="linenos">280</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 </span><span id="L-281"><a href="#L-281"><span class="linenos">281</span></a><span class="sd">    Function wrapper that provides `mangled` optional field.</span>
 </span><span id="L-282"><a href="#L-282"><span class="linenos">282</span></a>
 </span><span id="L-283"><a href="#L-283"><span class="linenos">283</span></a><span class="sd">    pyserde copies every function reference into global scope</span>
@@ -439,17 +439,17 @@
 </span><span id="L-287"><a href="#L-287"><span class="linenos">287</span></a><span class="sd">    &quot;&quot;&quot;</span>
 </span><span id="L-288"><a href="#L-288"><span class="linenos">288</span></a>
 </span><span id="L-289"><a href="#L-289"><span class="linenos">289</span></a>    <span class="n">inner</span><span class="p">:</span> <span class="n">Callable</span>
-</span><span id="L-290"><a href="#L-290"><span class="linenos">290</span></a>    <span class="sd">&quot;&quot;&quot; Function to wrap in &quot;&quot;&quot;</span>
+</span><span id="L-290"><a href="#L-290"><span class="linenos">290</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot; Function to wrap in &quot;&quot;&quot;</span>
 </span><span id="L-291"><a href="#L-291"><span class="linenos">291</span></a>
 </span><span id="L-292"><a href="#L-292"><span class="linenos">292</span></a>    <span class="n">mangeld</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
-</span><span id="L-293"><a href="#L-293"><span class="linenos">293</span></a>    <span class="sd">&quot;&quot;&quot; Mangled function name &quot;&quot;&quot;</span>
+</span><span id="L-293"><a href="#L-293"><span class="linenos">293</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot; Mangled function name &quot;&quot;&quot;</span>
 </span><span id="L-294"><a href="#L-294"><span class="linenos">294</span></a>
 </span><span id="L-295"><a href="#L-295"><span class="linenos">295</span></a>    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">v</span><span class="p">):</span>
 </span><span id="L-296"><a href="#L-296"><span class="linenos">296</span></a>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">inner</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
 </span><span id="L-297"><a href="#L-297"><span class="linenos">297</span></a>
 </span><span id="L-298"><a href="#L-298"><span class="linenos">298</span></a>    <span class="nd">@property</span>
 </span><span id="L-299"><a href="#L-299"><span class="linenos">299</span></a>    <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-</span><span id="L-300"><a href="#L-300"><span class="linenos">300</span></a>        <span class="sd">&quot;&quot;&quot;</span>
+</span><span id="L-300"><a href="#L-300"><span class="linenos">300</span></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 </span><span id="L-301"><a href="#L-301"><span class="linenos">301</span></a><span class="sd">        Mangled function name</span>
 </span><span id="L-302"><a href="#L-302"><span class="linenos">302</span></a><span class="sd">        &quot;&quot;&quot;</span>
 </span><span id="L-303"><a href="#L-303"><span class="linenos">303</span></a>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">mangeld</span>
@@ -465,7 +465,7 @@
 </span><span id="L-313"><a href="#L-313"><span class="linenos">313</span></a>
 </span><span id="L-314"><a href="#L-314"><span class="linenos">314</span></a><span class="nd">@dataclass</span>
 </span><span id="L-315"><a href="#L-315"><span class="linenos">315</span></a><span class="k">class</span> <span class="nc">FlattenOpts</span><span class="p">:</span>
-</span><span id="L-316"><a href="#L-316"><span class="linenos">316</span></a>    <span class="sd">&quot;&quot;&quot;</span>
+</span><span id="L-316"><a href="#L-316"><span class="linenos">316</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 </span><span id="L-317"><a href="#L-317"><span class="linenos">317</span></a><span class="sd">    Flatten options. Currently not used.</span>
 </span><span id="L-318"><a href="#L-318"><span class="linenos">318</span></a><span class="sd">    &quot;&quot;&quot;</span>
 </span><span id="L-319"><a href="#L-319"><span class="linenos">319</span></a>
@@ -484,7 +484,7 @@
 </span><span id="L-332"><a href="#L-332"><span class="linenos">332</span></a>    <span class="n">metadata</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
 </span><span id="L-333"><a href="#L-333"><span class="linenos">333</span></a>    <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
 </span><span id="L-334"><a href="#L-334"><span class="linenos">334</span></a><span class="p">):</span>
-</span><span id="L-335"><a href="#L-335"><span class="linenos">335</span></a>    <span class="sd">&quot;&quot;&quot;</span>
+</span><span id="L-335"><a href="#L-335"><span class="linenos">335</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 </span><span id="L-336"><a href="#L-336"><span class="linenos">336</span></a><span class="sd">    Declare a field with parameters.</span>
 </span><span id="L-337"><a href="#L-337"><span class="linenos">337</span></a><span class="sd">    &quot;&quot;&quot;</span>
 </span><span id="L-338"><a href="#L-338"><span class="linenos">338</span></a>    <span class="k">if</span> <span class="ow">not</span> <span class="n">metadata</span><span class="p">:</span>
@@ -514,7 +514,7 @@
 </span><span id="L-362"><a href="#L-362"><span class="linenos">362</span></a>
 </span><span id="L-363"><a href="#L-363"><span class="linenos">363</span></a><span class="nd">@dataclass</span>
 </span><span id="L-364"><a href="#L-364"><span class="linenos">364</span></a><span class="k">class</span> <span class="nc">Field</span><span class="p">:</span>
-</span><span id="L-365"><a href="#L-365"><span class="linenos">365</span></a>    <span class="sd">&quot;&quot;&quot;</span>
+</span><span id="L-365"><a href="#L-365"><span class="linenos">365</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 </span><span id="L-366"><a href="#L-366"><span class="linenos">366</span></a><span class="sd">    Field class is similar to `dataclasses.Field`. It provides pyserde specific options.</span>
 </span><span id="L-367"><a href="#L-367"><span class="linenos">367</span></a>
 </span><span id="L-368"><a href="#L-368"><span class="linenos">368</span></a>
@@ -600,7 +600,7 @@
 </span><span id="L-448"><a href="#L-448"><span class="linenos">448</span></a>
 </span><span id="L-449"><a href="#L-449"><span class="linenos">449</span></a>    <span class="nd">@classmethod</span>
 </span><span id="L-450"><a href="#L-450"><span class="linenos">450</span></a>    <span class="k">def</span> <span class="nf">from_dataclass</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">f</span><span class="p">:</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">Field</span><span class="p">,</span> <span class="n">parent</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Type</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Field&#39;</span><span class="p">:</span>
-</span><span id="L-451"><a href="#L-451"><span class="linenos">451</span></a>        <span class="sd">&quot;&quot;&quot;</span>
+</span><span id="L-451"><a href="#L-451"><span class="linenos">451</span></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 </span><span id="L-452"><a href="#L-452"><span class="linenos">452</span></a><span class="sd">        Create `Field` object from `dataclasses.Field`.</span>
 </span><span id="L-453"><a href="#L-453"><span class="linenos">453</span></a><span class="sd">        &quot;&quot;&quot;</span>
 </span><span id="L-454"><a href="#L-454"><span class="linenos">454</span></a>        <span class="n">skip_if_false_func</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Func</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
@@ -676,13 +676,13 @@
 </span><span id="L-524"><a href="#L-524"><span class="linenos">524</span></a>
 </span><span id="L-525"><a href="#L-525"><span class="linenos">525</span></a>    <span class="nd">@staticmethod</span>
 </span><span id="L-526"><a href="#L-526"><span class="linenos">526</span></a>    <span class="k">def</span> <span class="nf">mangle</span><span class="p">(</span><span class="n">field</span><span class="p">:</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">Field</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-</span><span id="L-527"><a href="#L-527"><span class="linenos">527</span></a>        <span class="sd">&quot;&quot;&quot;</span>
+</span><span id="L-527"><a href="#L-527"><span class="linenos">527</span></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 </span><span id="L-528"><a href="#L-528"><span class="linenos">528</span></a><span class="sd">        Get mangled name based on field name.</span>
 </span><span id="L-529"><a href="#L-529"><span class="linenos">529</span></a><span class="sd">        &quot;&quot;&quot;</span>
 </span><span id="L-530"><a href="#L-530"><span class="linenos">530</span></a>        <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">&#39;</span>
 </span><span id="L-531"><a href="#L-531"><span class="linenos">531</span></a>
 </span><span id="L-532"><a href="#L-532"><span class="linenos">532</span></a>    <span class="k">def</span> <span class="nf">conv_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">case</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-</span><span id="L-533"><a href="#L-533"><span class="linenos">533</span></a>        <span class="sd">&quot;&quot;&quot;</span>
+</span><span id="L-533"><a href="#L-533"><span class="linenos">533</span></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 </span><span id="L-534"><a href="#L-534"><span class="linenos">534</span></a><span class="sd">        Get an actual field name which `rename` and `rename_all` conversions</span>
 </span><span id="L-535"><a href="#L-535"><span class="linenos">535</span></a><span class="sd">        are made. Use `name` property to get a field name before conversion.</span>
 </span><span id="L-536"><a href="#L-536"><span class="linenos">536</span></a><span class="sd">        &quot;&quot;&quot;</span>
@@ -696,14 +696,14 @@
 </span><span id="L-544"><a href="#L-544"><span class="linenos">544</span></a>
 </span><span id="L-545"><a href="#L-545"><span class="linenos">545</span></a>
 </span><span id="L-546"><a href="#L-546"><span class="linenos">546</span></a><span class="k">def</span> <span class="nf">fields</span><span class="p">(</span><span class="n">field_cls</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">F</span><span class="p">],</span> <span class="bp">cls</span><span class="p">:</span> <span class="n">Type</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">F</span><span class="p">]:</span>
-</span><span id="L-547"><a href="#L-547"><span class="linenos">547</span></a>    <span class="sd">&quot;&quot;&quot;</span>
+</span><span id="L-547"><a href="#L-547"><span class="linenos">547</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 </span><span id="L-548"><a href="#L-548"><span class="linenos">548</span></a><span class="sd">    Iterate fields of the dataclass and returns `serde.core.Field`.</span>
 </span><span id="L-549"><a href="#L-549"><span class="linenos">549</span></a><span class="sd">    &quot;&quot;&quot;</span>
 </span><span id="L-550"><a href="#L-550"><span class="linenos">550</span></a>    <span class="k">return</span> <span class="p">[</span><span class="n">field_cls</span><span class="o">.</span><span class="n">from_dataclass</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">cls</span><span class="p">)</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">dataclass_fields</span><span class="p">(</span><span class="bp">cls</span><span class="p">)]</span>
 </span><span id="L-551"><a href="#L-551"><span class="linenos">551</span></a>
 </span><span id="L-552"><a href="#L-552"><span class="linenos">552</span></a>
 </span><span id="L-553"><a href="#L-553"><span class="linenos">553</span></a><span class="k">def</span> <span class="nf">conv</span><span class="p">(</span><span class="n">f</span><span class="p">:</span> <span class="n">Field</span><span class="p">,</span> <span class="n">case</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-</span><span id="L-554"><a href="#L-554"><span class="linenos">554</span></a>    <span class="sd">&quot;&quot;&quot;</span>
+</span><span id="L-554"><a href="#L-554"><span class="linenos">554</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 </span><span id="L-555"><a href="#L-555"><span class="linenos">555</span></a><span class="sd">    Convert field name.</span>
 </span><span id="L-556"><a href="#L-556"><span class="linenos">556</span></a><span class="sd">    &quot;&quot;&quot;</span>
 </span><span id="L-557"><a href="#L-557"><span class="linenos">557</span></a>    <span class="n">name</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">name</span>
@@ -720,7 +720,7 @@
 </span><span id="L-568"><a href="#L-568"><span class="linenos">568</span></a>
 </span><span id="L-569"><a href="#L-569"><span class="linenos">569</span></a>
 </span><span id="L-570"><a href="#L-570"><span class="linenos">570</span></a><span class="k">def</span> <span class="nf">union_func_name</span><span class="p">(</span><span class="n">prefix</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">union_args</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Type</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-</span><span id="L-571"><a href="#L-571"><span class="linenos">571</span></a>    <span class="sd">&quot;&quot;&quot;</span>
+</span><span id="L-571"><a href="#L-571"><span class="linenos">571</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 </span><span id="L-572"><a href="#L-572"><span class="linenos">572</span></a><span class="sd">    Generate a function name that contains all union types</span>
 </span><span id="L-573"><a href="#L-573"><span class="linenos">573</span></a>
 </span><span id="L-574"><a href="#L-574"><span class="linenos">574</span></a><span class="sd">    * `prefix` prefix to distinguish between serializing and deserializing</span>
@@ -731,11 +731,11 @@
 </span><span id="L-579"><a href="#L-579"><span class="linenos">579</span></a><span class="sd">    &gt;&gt;&gt; union_func_name(&quot;union_se&quot;, [int, List[str], IPv4Address])</span>
 </span><span id="L-580"><a href="#L-580"><span class="linenos">580</span></a><span class="sd">    &#39;union_se_int_List_str__IPv4Address&#39;</span>
 </span><span id="L-581"><a href="#L-581"><span class="linenos">581</span></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="L-582"><a href="#L-582"><span class="linenos">582</span></a>    <span class="k">return</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;[^A-Za-z0-9]&quot;</span><span class="p">,</span> <span class="s2">&quot;_&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">prefix</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="s1">&#39;_&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">typename</span><span class="p">(</span><span class="n">e</span><span class="p">)</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">union_args</span><span class="p">])</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span id="L-582"><a href="#L-582"><span class="linenos">582</span></a>    <span class="k">return</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;[^A-Za-z0-9]&quot;</span><span class="p">,</span> <span class="s2">&quot;_&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">prefix</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="s1">&#39;_&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">typename</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">e</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">union_args</span><span class="p">])</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 </span><span id="L-583"><a href="#L-583"><span class="linenos">583</span></a>
 </span><span id="L-584"><a href="#L-584"><span class="linenos">584</span></a>
 </span><span id="L-585"><a href="#L-585"><span class="linenos">585</span></a><span class="k">def</span> <span class="nf">literal_func_name</span><span class="p">(</span><span class="n">literal_args</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-</span><span id="L-586"><a href="#L-586"><span class="linenos">586</span></a>    <span class="sd">&quot;&quot;&quot;</span>
+</span><span id="L-586"><a href="#L-586"><span class="linenos">586</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 </span><span id="L-587"><a href="#L-587"><span class="linenos">587</span></a><span class="sd">    Generate a function name with all literals and corresponding types specified with Literal[...]</span>
 </span><span id="L-588"><a href="#L-588"><span class="linenos">588</span></a>
 </span><span id="L-589"><a href="#L-589"><span class="linenos">589</span></a>
@@ -745,13 +745,13 @@
 </span><span id="L-593"><a href="#L-593"><span class="linenos">593</span></a><span class="sd">    &#39;literal_de_r_str_w_str_a_str_x_str_r__str_w__str_a__str_x__str&#39;</span>
 </span><span id="L-594"><a href="#L-594"><span class="linenos">594</span></a><span class="sd">    &quot;&quot;&quot;</span>
 </span><span id="L-595"><a href="#L-595"><span class="linenos">595</span></a>    <span class="k">return</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span>
-</span><span id="L-596"><a href="#L-596"><span class="linenos">596</span></a>        <span class="sa">r</span><span class="s2">&quot;[^A-Za-z0-9]&quot;</span><span class="p">,</span> <span class="s2">&quot;_&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">LITERAL_DE_PREFIX</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="s1">&#39;_&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">a</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">typename</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">a</span><span class="p">))</span><span class="si">}</span><span class="s1">&#39;</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">literal_args</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span id="L-596"><a href="#L-596"><span class="linenos">596</span></a>        <span class="sa">r</span><span class="s2">&quot;[^A-Za-z0-9]&quot;</span><span class="p">,</span> <span class="s2">&quot;_&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">LITERAL_DE_PREFIX</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="s1">&#39;_&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">a</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">typename</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">a</span><span class="p">))</span><span class="si">}</span><span class="s1">&#39;</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">literal_args</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
 </span><span id="L-597"><a href="#L-597"><span class="linenos">597</span></a>    <span class="p">)</span>
 </span><span id="L-598"><a href="#L-598"><span class="linenos">598</span></a>
 </span><span id="L-599"><a href="#L-599"><span class="linenos">599</span></a>
 </span><span id="L-600"><a href="#L-600"><span class="linenos">600</span></a><span class="nd">@dataclass</span>
 </span><span id="L-601"><a href="#L-601"><span class="linenos">601</span></a><span class="k">class</span> <span class="nc">Tagging</span><span class="p">:</span>
-</span><span id="L-602"><a href="#L-602"><span class="linenos">602</span></a>    <span class="sd">&quot;&quot;&quot;</span>
+</span><span id="L-602"><a href="#L-602"><span class="linenos">602</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 </span><span id="L-603"><a href="#L-603"><span class="linenos">603</span></a><span class="sd">    Controls how union is (de)serialized. This is the same concept as in</span>
 </span><span id="L-604"><a href="#L-604"><span class="linenos">604</span></a><span class="sd">    https://serde.rs/enum-representations.html</span>
 </span><span id="L-605"><a href="#L-605"><span class="linenos">605</span></a><span class="sd">    &quot;&quot;&quot;</span>
@@ -806,7 +806,7 @@
 </span><span id="L-654"><a href="#L-654"><span class="linenos">654</span></a>
 </span><span id="L-655"><a href="#L-655"><span class="linenos">655</span></a>
 </span><span id="L-656"><a href="#L-656"><span class="linenos">656</span></a><span class="k">def</span> <span class="nf">should_impl_dataclass</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
-</span><span id="L-657"><a href="#L-657"><span class="linenos">657</span></a>    <span class="sd">&quot;&quot;&quot;</span>
+</span><span id="L-657"><a href="#L-657"><span class="linenos">657</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 </span><span id="L-658"><a href="#L-658"><span class="linenos">658</span></a><span class="sd">    Test if class doesn&#39;t have @dataclass.</span>
 </span><span id="L-659"><a href="#L-659"><span class="linenos">659</span></a>
 </span><span id="L-660"><a href="#L-660"><span class="linenos">660</span></a><span class="sd">    `dataclasses.is_dataclass` returns True even Derived class doesn&#39;t actually @dataclass.</span>
@@ -888,18 +888,18 @@
 </span><span id="L-736"><a href="#L-736"><span class="linenos">736</span></a>
 </span><span id="L-737"><a href="#L-737"><span class="linenos">737</span></a><span class="nd">@dataclass</span>
 </span><span id="L-738"><a href="#L-738"><span class="linenos">738</span></a><span class="k">class</span> <span class="nc">TypeCheck</span><span class="p">:</span>
-</span><span id="L-739"><a href="#L-739"><span class="linenos">739</span></a>    <span class="sd">&quot;&quot;&quot;</span>
+</span><span id="L-739"><a href="#L-739"><span class="linenos">739</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 </span><span id="L-740"><a href="#L-740"><span class="linenos">740</span></a><span class="sd">    Specify type check flavors.</span>
 </span><span id="L-741"><a href="#L-741"><span class="linenos">741</span></a><span class="sd">    &quot;&quot;&quot;</span>
 </span><span id="L-742"><a href="#L-742"><span class="linenos">742</span></a>
 </span><span id="L-743"><a href="#L-743"><span class="linenos">743</span></a>    <span class="k">class</span> <span class="nc">Kind</span><span class="p">(</span><span class="n">enum</span><span class="o">.</span><span class="n">Enum</span><span class="p">):</span>
 </span><span id="L-744"><a href="#L-744"><span class="linenos">744</span></a>        <span class="n">NoCheck</span> <span class="o">=</span> <span class="n">enum</span><span class="o">.</span><span class="n">auto</span><span class="p">()</span>
-</span><span id="L-745"><a href="#L-745"><span class="linenos">745</span></a>        <span class="sd">&quot;&quot;&quot; No check performed &quot;&quot;&quot;</span>
+</span><span id="L-745"><a href="#L-745"><span class="linenos">745</span></a><span class="w">        </span><span class="sd">&quot;&quot;&quot; No check performed &quot;&quot;&quot;</span>
 </span><span id="L-746"><a href="#L-746"><span class="linenos">746</span></a>
 </span><span id="L-747"><a href="#L-747"><span class="linenos">747</span></a>        <span class="n">Coerce</span> <span class="o">=</span> <span class="n">enum</span><span class="o">.</span><span class="n">auto</span><span class="p">()</span>
-</span><span id="L-748"><a href="#L-748"><span class="linenos">748</span></a>        <span class="sd">&quot;&quot;&quot; Value is coerced into the declared type &quot;&quot;&quot;</span>
+</span><span id="L-748"><a href="#L-748"><span class="linenos">748</span></a><span class="w">        </span><span class="sd">&quot;&quot;&quot; Value is coerced into the declared type &quot;&quot;&quot;</span>
 </span><span id="L-749"><a href="#L-749"><span class="linenos">749</span></a>        <span class="n">Strict</span> <span class="o">=</span> <span class="n">enum</span><span class="o">.</span><span class="n">auto</span><span class="p">()</span>
-</span><span id="L-750"><a href="#L-750"><span class="linenos">750</span></a>        <span class="sd">&quot;&quot;&quot; Value are strictly checked against the declared type &quot;&quot;&quot;</span>
+</span><span id="L-750"><a href="#L-750"><span class="linenos">750</span></a><span class="w">        </span><span class="sd">&quot;&quot;&quot; Value are strictly checked against the declared type &quot;&quot;&quot;</span>
 </span><span id="L-751"><a href="#L-751"><span class="linenos">751</span></a>
 </span><span id="L-752"><a href="#L-752"><span class="linenos">752</span></a>    <span class="n">kind</span><span class="p">:</span> <span class="n">Kind</span>
 </span><span id="L-753"><a href="#L-753"><span class="linenos">753</span></a>
@@ -947,27 +947,27 @@
     <a class="headerlink" href="#SerdeScope"></a>
             <div class="pdoc-code codehilite"><pre><span></span><span id="SerdeScope-69"><a href="#SerdeScope-69"><span class="linenos"> 69</span></a><span class="nd">@dataclass</span>
 </span><span id="SerdeScope-70"><a href="#SerdeScope-70"><span class="linenos"> 70</span></a><span class="k">class</span> <span class="nc">SerdeScope</span><span class="p">:</span>
-</span><span id="SerdeScope-71"><a href="#SerdeScope-71"><span class="linenos"> 71</span></a>    <span class="sd">&quot;&quot;&quot;</span>
+</span><span id="SerdeScope-71"><a href="#SerdeScope-71"><span class="linenos"> 71</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 </span><span id="SerdeScope-72"><a href="#SerdeScope-72"><span class="linenos"> 72</span></a><span class="sd">    Container to store types and functions used in code generation context.</span>
 </span><span id="SerdeScope-73"><a href="#SerdeScope-73"><span class="linenos"> 73</span></a><span class="sd">    &quot;&quot;&quot;</span>
 </span><span id="SerdeScope-74"><a href="#SerdeScope-74"><span class="linenos"> 74</span></a>
 </span><span id="SerdeScope-75"><a href="#SerdeScope-75"><span class="linenos"> 75</span></a>    <span class="bp">cls</span><span class="p">:</span> <span class="n">Type</span>
-</span><span id="SerdeScope-76"><a href="#SerdeScope-76"><span class="linenos"> 76</span></a>    <span class="sd">&quot;&quot;&quot; The exact class this scope is for (needed to distinguish scopes between inherited classes) &quot;&quot;&quot;</span>
+</span><span id="SerdeScope-76"><a href="#SerdeScope-76"><span class="linenos"> 76</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot; The exact class this scope is for (needed to distinguish scopes between inherited classes) &quot;&quot;&quot;</span>
 </span><span id="SerdeScope-77"><a href="#SerdeScope-77"><span class="linenos"> 77</span></a>
 </span><span id="SerdeScope-78"><a href="#SerdeScope-78"><span class="linenos"> 78</span></a>    <span class="n">funcs</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Callable</span><span class="p">]</span> <span class="o">=</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span>
-</span><span id="SerdeScope-79"><a href="#SerdeScope-79"><span class="linenos"> 79</span></a>    <span class="sd">&quot;&quot;&quot; Generated serialize and deserialize functions &quot;&quot;&quot;</span>
+</span><span id="SerdeScope-79"><a href="#SerdeScope-79"><span class="linenos"> 79</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot; Generated serialize and deserialize functions &quot;&quot;&quot;</span>
 </span><span id="SerdeScope-80"><a href="#SerdeScope-80"><span class="linenos"> 80</span></a>
 </span><span id="SerdeScope-81"><a href="#SerdeScope-81"><span class="linenos"> 81</span></a>    <span class="n">defaults</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Union</span><span class="p">[</span><span class="n">Callable</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span>
-</span><span id="SerdeScope-82"><a href="#SerdeScope-82"><span class="linenos"> 82</span></a>    <span class="sd">&quot;&quot;&quot; Default values of the dataclass fields (factories &amp; normal values) &quot;&quot;&quot;</span>
+</span><span id="SerdeScope-82"><a href="#SerdeScope-82"><span class="linenos"> 82</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot; Default values of the dataclass fields (factories &amp; normal values) &quot;&quot;&quot;</span>
 </span><span id="SerdeScope-83"><a href="#SerdeScope-83"><span class="linenos"> 83</span></a>
 </span><span id="SerdeScope-84"><a href="#SerdeScope-84"><span class="linenos"> 84</span></a>    <span class="n">code</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span>
-</span><span id="SerdeScope-85"><a href="#SerdeScope-85"><span class="linenos"> 85</span></a>    <span class="sd">&quot;&quot;&quot; Generated source code (only filled when debug is True) &quot;&quot;&quot;</span>
+</span><span id="SerdeScope-85"><a href="#SerdeScope-85"><span class="linenos"> 85</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot; Generated source code (only filled when debug is True) &quot;&quot;&quot;</span>
 </span><span id="SerdeScope-86"><a href="#SerdeScope-86"><span class="linenos"> 86</span></a>
 </span><span id="SerdeScope-87"><a href="#SerdeScope-87"><span class="linenos"> 87</span></a>    <span class="n">union_se_args</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Type</span><span class="p">]]</span> <span class="o">=</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span>
-</span><span id="SerdeScope-88"><a href="#SerdeScope-88"><span class="linenos"> 88</span></a>    <span class="sd">&quot;&quot;&quot; The union serializing functions need references to their types &quot;&quot;&quot;</span>
+</span><span id="SerdeScope-88"><a href="#SerdeScope-88"><span class="linenos"> 88</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot; The union serializing functions need references to their types &quot;&quot;&quot;</span>
 </span><span id="SerdeScope-89"><a href="#SerdeScope-89"><span class="linenos"> 89</span></a>
 </span><span id="SerdeScope-90"><a href="#SerdeScope-90"><span class="linenos"> 90</span></a>    <span class="n">reuse_instances_default</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
-</span><span id="SerdeScope-91"><a href="#SerdeScope-91"><span class="linenos"> 91</span></a>    <span class="sd">&quot;&quot;&quot; Default values for to_dict &amp; from_dict arguments &quot;&quot;&quot;</span>
+</span><span id="SerdeScope-91"><a href="#SerdeScope-91"><span class="linenos"> 91</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot; Default values for to_dict &amp; from_dict arguments &quot;&quot;&quot;</span>
 </span><span id="SerdeScope-92"><a href="#SerdeScope-92"><span class="linenos"> 92</span></a>
 </span><span id="SerdeScope-93"><a href="#SerdeScope-93"><span class="linenos"> 93</span></a>    <span class="n">convert_sets_default</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
 </span><span id="SerdeScope-94"><a href="#SerdeScope-94"><span class="linenos"> 94</span></a>
@@ -1007,7 +1007,7 @@
 </span><span id="SerdeScope-128"><a href="#SerdeScope-128"><span class="linenos">128</span></a>            <span class="n">res</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_justify</span><span class="p">(</span><span class="s1">&#39;Type list by used for union serialize functions&#39;</span><span class="p">))</span>
 </span><span id="SerdeScope-129"><a href="#SerdeScope-129"><span class="linenos">129</span></a>            <span class="n">res</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;--------------------------------------------------&#39;</span><span class="p">)</span>
 </span><span id="SerdeScope-130"><a href="#SerdeScope-130"><span class="linenos">130</span></a>            <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">lst</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">union_se_args</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-</span><span id="SerdeScope-131"><a href="#SerdeScope-131"><span class="linenos">131</span></a>                <span class="n">res</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s1">: </span><span class="si">{</span><span class="p">[</span><span class="n">v</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">lst</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+</span><span id="SerdeScope-131"><a href="#SerdeScope-131"><span class="linenos">131</span></a>                <span class="n">res</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s1">: </span><span class="si">{</span><span class="p">[</span><span class="n">v</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">v</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">lst</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 </span><span id="SerdeScope-132"><a href="#SerdeScope-132"><span class="linenos">132</span></a>            <span class="n">res</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
 </span><span id="SerdeScope-133"><a href="#SerdeScope-133"><span class="linenos">133</span></a>
 </span><span id="SerdeScope-134"><a href="#SerdeScope-134"><span class="linenos">134</span></a>        <span class="k">return</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">res</span><span class="p">)</span>
@@ -1125,7 +1125,7 @@
     </div>
     <a class="headerlink" href="#gen"></a>
             <div class="pdoc-code codehilite"><pre><span></span><span id="gen-146"><a href="#gen-146"><span class="linenos">146</span></a><span class="k">def</span> <span class="nf">gen</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">globals</span><span class="p">:</span> <span class="n">Dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="nb">locals</span><span class="p">:</span> <span class="n">Dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-</span><span id="gen-147"><a href="#gen-147"><span class="linenos">147</span></a>    <span class="sd">&quot;&quot;&quot;</span>
+</span><span id="gen-147"><a href="#gen-147"><span class="linenos">147</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 </span><span id="gen-148"><a href="#gen-148"><span class="linenos">148</span></a><span class="sd">    A wrapper of builtin `exec` function.</span>
 </span><span id="gen-149"><a href="#gen-149"><span class="linenos">149</span></a><span class="sd">    &quot;&quot;&quot;</span>
 </span><span id="gen-150"><a href="#gen-150"><span class="linenos">150</span></a>    <span class="k">if</span> <span class="n">SETTINGS</span><span class="p">[</span><span class="s1">&#39;debug&#39;</span><span class="p">]:</span>
@@ -1158,7 +1158,7 @@
     </div>
     <a class="headerlink" href="#add_func"></a>
             <div class="pdoc-code codehilite"><pre><span></span><span id="add_func-162"><a href="#add_func-162"><span class="linenos">162</span></a><span class="k">def</span> <span class="nf">add_func</span><span class="p">(</span><span class="n">serde_scope</span><span class="p">:</span> <span class="n">SerdeScope</span><span class="p">,</span> <span class="n">func_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">func_code</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">globals</span><span class="p">:</span> <span class="n">Dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-</span><span id="add_func-163"><a href="#add_func-163"><span class="linenos">163</span></a>    <span class="sd">&quot;&quot;&quot;</span>
+</span><span id="add_func-163"><a href="#add_func-163"><span class="linenos">163</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 </span><span id="add_func-164"><a href="#add_func-164"><span class="linenos">164</span></a><span class="sd">    Generate a function and add it to a SerdeScope&#39;s `funcs` dictionary.</span>
 </span><span id="add_func-165"><a href="#add_func-165"><span class="linenos">165</span></a>
 </span><span id="add_func-166"><a href="#add_func-166"><span class="linenos">166</span></a><span class="sd">    * `serde_scope`: the SerdeScope instance to modify</span>
@@ -1201,7 +1201,7 @@
     <a class="headerlink" href="#Func"></a>
             <div class="pdoc-code codehilite"><pre><span></span><span id="Func-279"><a href="#Func-279"><span class="linenos">279</span></a><span class="nd">@dataclass</span>
 </span><span id="Func-280"><a href="#Func-280"><span class="linenos">280</span></a><span class="k">class</span> <span class="nc">Func</span><span class="p">:</span>
-</span><span id="Func-281"><a href="#Func-281"><span class="linenos">281</span></a>    <span class="sd">&quot;&quot;&quot;</span>
+</span><span id="Func-281"><a href="#Func-281"><span class="linenos">281</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 </span><span id="Func-282"><a href="#Func-282"><span class="linenos">282</span></a><span class="sd">    Function wrapper that provides `mangled` optional field.</span>
 </span><span id="Func-283"><a href="#Func-283"><span class="linenos">283</span></a>
 </span><span id="Func-284"><a href="#Func-284"><span class="linenos">284</span></a><span class="sd">    pyserde copies every function reference into global scope</span>
@@ -1211,17 +1211,17 @@
 </span><span id="Func-288"><a href="#Func-288"><span class="linenos">288</span></a><span class="sd">    &quot;&quot;&quot;</span>
 </span><span id="Func-289"><a href="#Func-289"><span class="linenos">289</span></a>
 </span><span id="Func-290"><a href="#Func-290"><span class="linenos">290</span></a>    <span class="n">inner</span><span class="p">:</span> <span class="n">Callable</span>
-</span><span id="Func-291"><a href="#Func-291"><span class="linenos">291</span></a>    <span class="sd">&quot;&quot;&quot; Function to wrap in &quot;&quot;&quot;</span>
+</span><span id="Func-291"><a href="#Func-291"><span class="linenos">291</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot; Function to wrap in &quot;&quot;&quot;</span>
 </span><span id="Func-292"><a href="#Func-292"><span class="linenos">292</span></a>
 </span><span id="Func-293"><a href="#Func-293"><span class="linenos">293</span></a>    <span class="n">mangeld</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
-</span><span id="Func-294"><a href="#Func-294"><span class="linenos">294</span></a>    <span class="sd">&quot;&quot;&quot; Mangled function name &quot;&quot;&quot;</span>
+</span><span id="Func-294"><a href="#Func-294"><span class="linenos">294</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot; Mangled function name &quot;&quot;&quot;</span>
 </span><span id="Func-295"><a href="#Func-295"><span class="linenos">295</span></a>
 </span><span id="Func-296"><a href="#Func-296"><span class="linenos">296</span></a>    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">v</span><span class="p">):</span>
 </span><span id="Func-297"><a href="#Func-297"><span class="linenos">297</span></a>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">inner</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
 </span><span id="Func-298"><a href="#Func-298"><span class="linenos">298</span></a>
 </span><span id="Func-299"><a href="#Func-299"><span class="linenos">299</span></a>    <span class="nd">@property</span>
 </span><span id="Func-300"><a href="#Func-300"><span class="linenos">300</span></a>    <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-</span><span id="Func-301"><a href="#Func-301"><span class="linenos">301</span></a>        <span class="sd">&quot;&quot;&quot;</span>
+</span><span id="Func-301"><a href="#Func-301"><span class="linenos">301</span></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 </span><span id="Func-302"><a href="#Func-302"><span class="linenos">302</span></a><span class="sd">        Mangled function name</span>
 </span><span id="Func-303"><a href="#Func-303"><span class="linenos">303</span></a><span class="sd">        &quot;&quot;&quot;</span>
 </span><span id="Func-304"><a href="#Func-304"><span class="linenos">304</span></a>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">mangeld</span>
@@ -1303,7 +1303,7 @@ multiple fields receives <code>skip_if</code> attribute.</p>
     <a class="headerlink" href="#Field"></a>
             <div class="pdoc-code codehilite"><pre><span></span><span id="Field-364"><a href="#Field-364"><span class="linenos">364</span></a><span class="nd">@dataclass</span>
 </span><span id="Field-365"><a href="#Field-365"><span class="linenos">365</span></a><span class="k">class</span> <span class="nc">Field</span><span class="p">:</span>
-</span><span id="Field-366"><a href="#Field-366"><span class="linenos">366</span></a>    <span class="sd">&quot;&quot;&quot;</span>
+</span><span id="Field-366"><a href="#Field-366"><span class="linenos">366</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 </span><span id="Field-367"><a href="#Field-367"><span class="linenos">367</span></a><span class="sd">    Field class is similar to `dataclasses.Field`. It provides pyserde specific options.</span>
 </span><span id="Field-368"><a href="#Field-368"><span class="linenos">368</span></a>
 </span><span id="Field-369"><a href="#Field-369"><span class="linenos">369</span></a>
@@ -1389,7 +1389,7 @@ multiple fields receives <code>skip_if</code> attribute.</p>
 </span><span id="Field-449"><a href="#Field-449"><span class="linenos">449</span></a>
 </span><span id="Field-450"><a href="#Field-450"><span class="linenos">450</span></a>    <span class="nd">@classmethod</span>
 </span><span id="Field-451"><a href="#Field-451"><span class="linenos">451</span></a>    <span class="k">def</span> <span class="nf">from_dataclass</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">f</span><span class="p">:</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">Field</span><span class="p">,</span> <span class="n">parent</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Type</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Field&#39;</span><span class="p">:</span>
-</span><span id="Field-452"><a href="#Field-452"><span class="linenos">452</span></a>        <span class="sd">&quot;&quot;&quot;</span>
+</span><span id="Field-452"><a href="#Field-452"><span class="linenos">452</span></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 </span><span id="Field-453"><a href="#Field-453"><span class="linenos">453</span></a><span class="sd">        Create `Field` object from `dataclasses.Field`.</span>
 </span><span id="Field-454"><a href="#Field-454"><span class="linenos">454</span></a><span class="sd">        &quot;&quot;&quot;</span>
 </span><span id="Field-455"><a href="#Field-455"><span class="linenos">455</span></a>        <span class="n">skip_if_false_func</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Func</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
@@ -1465,13 +1465,13 @@ multiple fields receives <code>skip_if</code> attribute.</p>
 </span><span id="Field-525"><a href="#Field-525"><span class="linenos">525</span></a>
 </span><span id="Field-526"><a href="#Field-526"><span class="linenos">526</span></a>    <span class="nd">@staticmethod</span>
 </span><span id="Field-527"><a href="#Field-527"><span class="linenos">527</span></a>    <span class="k">def</span> <span class="nf">mangle</span><span class="p">(</span><span class="n">field</span><span class="p">:</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">Field</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-</span><span id="Field-528"><a href="#Field-528"><span class="linenos">528</span></a>        <span class="sd">&quot;&quot;&quot;</span>
+</span><span id="Field-528"><a href="#Field-528"><span class="linenos">528</span></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 </span><span id="Field-529"><a href="#Field-529"><span class="linenos">529</span></a><span class="sd">        Get mangled name based on field name.</span>
 </span><span id="Field-530"><a href="#Field-530"><span class="linenos">530</span></a><span class="sd">        &quot;&quot;&quot;</span>
 </span><span id="Field-531"><a href="#Field-531"><span class="linenos">531</span></a>        <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">&#39;</span>
 </span><span id="Field-532"><a href="#Field-532"><span class="linenos">532</span></a>
 </span><span id="Field-533"><a href="#Field-533"><span class="linenos">533</span></a>    <span class="k">def</span> <span class="nf">conv_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">case</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-</span><span id="Field-534"><a href="#Field-534"><span class="linenos">534</span></a>        <span class="sd">&quot;&quot;&quot;</span>
+</span><span id="Field-534"><a href="#Field-534"><span class="linenos">534</span></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 </span><span id="Field-535"><a href="#Field-535"><span class="linenos">535</span></a><span class="sd">        Get an actual field name which `rename` and `rename_all` conversions</span>
 </span><span id="Field-536"><a href="#Field-536"><span class="linenos">536</span></a><span class="sd">        are made. Use `name` property to get a field name before conversion.</span>
 </span><span id="Field-537"><a href="#Field-537"><span class="linenos">537</span></a><span class="sd">        &quot;&quot;&quot;</span>
@@ -1572,7 +1572,7 @@ deserialization behaviour of a field.</p></li>
     <a class="headerlink" href="#Field.from_dataclass"></a>
             <div class="pdoc-code codehilite"><pre><span></span><span id="Field.from_dataclass-450"><a href="#Field.from_dataclass-450"><span class="linenos">450</span></a>    <span class="nd">@classmethod</span>
 </span><span id="Field.from_dataclass-451"><a href="#Field.from_dataclass-451"><span class="linenos">451</span></a>    <span class="k">def</span> <span class="nf">from_dataclass</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">f</span><span class="p">:</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">Field</span><span class="p">,</span> <span class="n">parent</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Type</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Field&#39;</span><span class="p">:</span>
-</span><span id="Field.from_dataclass-452"><a href="#Field.from_dataclass-452"><span class="linenos">452</span></a>        <span class="sd">&quot;&quot;&quot;</span>
+</span><span id="Field.from_dataclass-452"><a href="#Field.from_dataclass-452"><span class="linenos">452</span></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 </span><span id="Field.from_dataclass-453"><a href="#Field.from_dataclass-453"><span class="linenos">453</span></a><span class="sd">        Create `Field` object from `dataclasses.Field`.</span>
 </span><span id="Field.from_dataclass-454"><a href="#Field.from_dataclass-454"><span class="linenos">454</span></a><span class="sd">        &quot;&quot;&quot;</span>
 </span><span id="Field.from_dataclass-455"><a href="#Field.from_dataclass-455"><span class="linenos">455</span></a>        <span class="n">skip_if_false_func</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Func</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
@@ -1699,7 +1699,7 @@ deserialization behaviour of a field.</p></li>
     <a class="headerlink" href="#Field.mangle"></a>
             <div class="pdoc-code codehilite"><pre><span></span><span id="Field.mangle-526"><a href="#Field.mangle-526"><span class="linenos">526</span></a>    <span class="nd">@staticmethod</span>
 </span><span id="Field.mangle-527"><a href="#Field.mangle-527"><span class="linenos">527</span></a>    <span class="k">def</span> <span class="nf">mangle</span><span class="p">(</span><span class="n">field</span><span class="p">:</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">Field</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-</span><span id="Field.mangle-528"><a href="#Field.mangle-528"><span class="linenos">528</span></a>        <span class="sd">&quot;&quot;&quot;</span>
+</span><span id="Field.mangle-528"><a href="#Field.mangle-528"><span class="linenos">528</span></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 </span><span id="Field.mangle-529"><a href="#Field.mangle-529"><span class="linenos">529</span></a><span class="sd">        Get mangled name based on field name.</span>
 </span><span id="Field.mangle-530"><a href="#Field.mangle-530"><span class="linenos">530</span></a><span class="sd">        &quot;&quot;&quot;</span>
 </span><span id="Field.mangle-531"><a href="#Field.mangle-531"><span class="linenos">531</span></a>        <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">&#39;</span>
@@ -1723,7 +1723,7 @@ deserialization behaviour of a field.</p></li>
     </div>
     <a class="headerlink" href="#Field.conv_name"></a>
             <div class="pdoc-code codehilite"><pre><span></span><span id="Field.conv_name-533"><a href="#Field.conv_name-533"><span class="linenos">533</span></a>    <span class="k">def</span> <span class="nf">conv_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">case</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-</span><span id="Field.conv_name-534"><a href="#Field.conv_name-534"><span class="linenos">534</span></a>        <span class="sd">&quot;&quot;&quot;</span>
+</span><span id="Field.conv_name-534"><a href="#Field.conv_name-534"><span class="linenos">534</span></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 </span><span id="Field.conv_name-535"><a href="#Field.conv_name-535"><span class="linenos">535</span></a><span class="sd">        Get an actual field name which `rename` and `rename_all` conversions</span>
 </span><span id="Field.conv_name-536"><a href="#Field.conv_name-536"><span class="linenos">536</span></a><span class="sd">        are made. Use `name` property to get a field name before conversion.</span>
 </span><span id="Field.conv_name-537"><a href="#Field.conv_name-537"><span class="linenos">537</span></a><span class="sd">        &quot;&quot;&quot;</span>
@@ -1769,7 +1769,7 @@ are made. Use <code>name</code> property to get a field name before conversion.<
     </div>
     <a class="headerlink" href="#fields"></a>
             <div class="pdoc-code codehilite"><pre><span></span><span id="fields-547"><a href="#fields-547"><span class="linenos">547</span></a><span class="k">def</span> <span class="nf">fields</span><span class="p">(</span><span class="n">field_cls</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">F</span><span class="p">],</span> <span class="bp">cls</span><span class="p">:</span> <span class="n">Type</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">F</span><span class="p">]:</span>
-</span><span id="fields-548"><a href="#fields-548"><span class="linenos">548</span></a>    <span class="sd">&quot;&quot;&quot;</span>
+</span><span id="fields-548"><a href="#fields-548"><span class="linenos">548</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 </span><span id="fields-549"><a href="#fields-549"><span class="linenos">549</span></a><span class="sd">    Iterate fields of the dataclass and returns `serde.core.Field`.</span>
 </span><span id="fields-550"><a href="#fields-550"><span class="linenos">550</span></a><span class="sd">    &quot;&quot;&quot;</span>
 </span><span id="fields-551"><a href="#fields-551"><span class="linenos">551</span></a>    <span class="k">return</span> <span class="p">[</span><span class="n">field_cls</span><span class="o">.</span><span class="n">from_dataclass</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">cls</span><span class="p">)</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">dataclass_fields</span><span class="p">(</span><span class="bp">cls</span><span class="p">)]</span>
@@ -1795,7 +1795,7 @@ are made. Use <code>name</code> property to get a field name before conversion.<
     <a class="headerlink" href="#FlattenOpts"></a>
             <div class="pdoc-code codehilite"><pre><span></span><span id="FlattenOpts-315"><a href="#FlattenOpts-315"><span class="linenos">315</span></a><span class="nd">@dataclass</span>
 </span><span id="FlattenOpts-316"><a href="#FlattenOpts-316"><span class="linenos">316</span></a><span class="k">class</span> <span class="nc">FlattenOpts</span><span class="p">:</span>
-</span><span id="FlattenOpts-317"><a href="#FlattenOpts-317"><span class="linenos">317</span></a>    <span class="sd">&quot;&quot;&quot;</span>
+</span><span id="FlattenOpts-317"><a href="#FlattenOpts-317"><span class="linenos">317</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 </span><span id="FlattenOpts-318"><a href="#FlattenOpts-318"><span class="linenos">318</span></a><span class="sd">    Flatten options. Currently not used.</span>
 </span><span id="FlattenOpts-319"><a href="#FlattenOpts-319"><span class="linenos">319</span></a><span class="sd">    &quot;&quot;&quot;</span>
 </span></pre></div>
@@ -1830,7 +1830,7 @@ are made. Use <code>name</code> property to get a field name before conversion.<
     </div>
     <a class="headerlink" href="#conv"></a>
             <div class="pdoc-code codehilite"><pre><span></span><span id="conv-554"><a href="#conv-554"><span class="linenos">554</span></a><span class="k">def</span> <span class="nf">conv</span><span class="p">(</span><span class="n">f</span><span class="p">:</span> <span class="n">Field</span><span class="p">,</span> <span class="n">case</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-</span><span id="conv-555"><a href="#conv-555"><span class="linenos">555</span></a>    <span class="sd">&quot;&quot;&quot;</span>
+</span><span id="conv-555"><a href="#conv-555"><span class="linenos">555</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 </span><span id="conv-556"><a href="#conv-556"><span class="linenos">556</span></a><span class="sd">    Convert field name.</span>
 </span><span id="conv-557"><a href="#conv-557"><span class="linenos">557</span></a><span class="sd">    &quot;&quot;&quot;</span>
 </span><span id="conv-558"><a href="#conv-558"><span class="linenos">558</span></a>    <span class="n">name</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">name</span>
@@ -1864,7 +1864,7 @@ are made. Use <code>name</code> property to get a field name before conversion.<
     </div>
     <a class="headerlink" href="#union_func_name"></a>
             <div class="pdoc-code codehilite"><pre><span></span><span id="union_func_name-571"><a href="#union_func_name-571"><span class="linenos">571</span></a><span class="k">def</span> <span class="nf">union_func_name</span><span class="p">(</span><span class="n">prefix</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">union_args</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Type</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-</span><span id="union_func_name-572"><a href="#union_func_name-572"><span class="linenos">572</span></a>    <span class="sd">&quot;&quot;&quot;</span>
+</span><span id="union_func_name-572"><a href="#union_func_name-572"><span class="linenos">572</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 </span><span id="union_func_name-573"><a href="#union_func_name-573"><span class="linenos">573</span></a><span class="sd">    Generate a function name that contains all union types</span>
 </span><span id="union_func_name-574"><a href="#union_func_name-574"><span class="linenos">574</span></a>
 </span><span id="union_func_name-575"><a href="#union_func_name-575"><span class="linenos">575</span></a><span class="sd">    * `prefix` prefix to distinguish between serializing and deserializing</span>
@@ -1875,7 +1875,7 @@ are made. Use <code>name</code> property to get a field name before conversion.<
 </span><span id="union_func_name-580"><a href="#union_func_name-580"><span class="linenos">580</span></a><span class="sd">    &gt;&gt;&gt; union_func_name(&quot;union_se&quot;, [int, List[str], IPv4Address])</span>
 </span><span id="union_func_name-581"><a href="#union_func_name-581"><span class="linenos">581</span></a><span class="sd">    &#39;union_se_int_List_str__IPv4Address&#39;</span>
 </span><span id="union_func_name-582"><a href="#union_func_name-582"><span class="linenos">582</span></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="union_func_name-583"><a href="#union_func_name-583"><span class="linenos">583</span></a>    <span class="k">return</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;[^A-Za-z0-9]&quot;</span><span class="p">,</span> <span class="s2">&quot;_&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">prefix</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="s1">&#39;_&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">typename</span><span class="p">(</span><span class="n">e</span><span class="p">)</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">union_args</span><span class="p">])</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span id="union_func_name-583"><a href="#union_func_name-583"><span class="linenos">583</span></a>    <span class="k">return</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;[^A-Za-z0-9]&quot;</span><span class="p">,</span> <span class="s2">&quot;_&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">prefix</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="s1">&#39;_&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">typename</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">e</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">union_args</span><span class="p">])</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 </span></pre></div>
 
 
