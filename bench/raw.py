@@ -1,10 +1,10 @@
 import json
-from typing import Tuple, List
+from functools import partial
+from typing import List, Tuple
 
 import data
-from dataclasses_class import Small, Medium, SMALL, MEDIUM
-from functools import partial
-from runner import Size, Runner
+from dataclasses_class import MEDIUM, SMALL, Medium, Small
+from runner import Runner, Size
 
 
 def new(size: Size) -> Runner:

@@ -1,6 +1,6 @@
 import enum
 from dataclasses import dataclass
-from typing import Callable, Any
+from typing import Any, Callable
 
 
 class Size(enum.Enum):

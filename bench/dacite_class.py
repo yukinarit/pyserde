@@ -1,10 +1,11 @@
 import json
+from functools import partial
+from typing import Type
+
 import dacite
 import data
-from typing import Type
-from dataclasses_class import SMALL, MEDIUM, Small, Medium
-from functools import partial
-from runner import Size, Runner
+from dataclasses_class import MEDIUM, SMALL, Medium, Small
+from runner import Runner, Size
 
 
 def de(cls: Type, data: str):

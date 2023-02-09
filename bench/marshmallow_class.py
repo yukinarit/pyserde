@@ -1,10 +1,11 @@
 import json
-import marshmallow as ms
-import data
-from typing import Union
-from dataclasses_class import Small, Medium, SMALL, MEDIUM
 from functools import partial
-from runner import Size, Runner
+from typing import Union
+
+import data
+import marshmallow as ms
+from dataclasses_class import MEDIUM, SMALL, Medium, Small
+from runner import Runner, Size
 
 
 class SmallSchema(ms.Schema):

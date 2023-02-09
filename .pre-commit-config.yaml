@@ -19,8 +19,8 @@ repos:
                "--skip-string-normalization",
               ]
 
-  - repo: https://github.com/timothycrosley/isort
-    rev: 5.7.0
+  - repo: https://github.com/PyCQA/isort
+    rev: 5.12.0
     hooks:
       - id: isort
         args: [

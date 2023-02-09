@@ -1,10 +1,11 @@
-import json
 import dataclasses
-import data
+import json
 from dataclasses import dataclass, field
-from typing import List, Union
 from functools import partial
-from runner import Size, Runner
+from typing import List, Union
+
+import data
+from runner import Runner, Size
 
 
 @dataclass
