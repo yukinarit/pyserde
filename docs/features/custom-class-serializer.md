@@ -23,4 +23,4 @@ class Foo:
     dt2: datetime
 ```
 
-For complete example, please see [examples/custom_class_serializer.py](https://github.com/yukinarit/pyserde/blob/master/examples/custom_class_serializer.py)
+For complete example, please see [examples/custom_class_serializer.py](https://github.com/yukinarit/pyserde/blob/main/examples/custom_class_serializer.py)

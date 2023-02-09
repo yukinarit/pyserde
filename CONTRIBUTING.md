@@ -33,15 +33,15 @@ Thank you for considering contributing to Pyserde!
   git remote add upstream https://github.com/yukinarit/pyserde
   git fetch upstream
   ```
-- Install Poetry (used for dependency management and packaging):  
+- Install Poetry (used for dependency management and packaging):
 
   For macOS / Linux / WSL
   ```bash
-  curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python -
+  curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/main/get-poetry.py | python -
   ```
   For Windows Powershell
   ```bash
-  (Invoke-WebRequest -Uri https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py -UseBasicParsing).Content | python -
+  (Invoke-WebRequest -Uri https://raw.githubusercontent.com/python-poetry/poetry/main/get-poetry.py -UseBasicParsing).Content | python -
   ```
 - Run setup script:
   ```bash
@@ -51,7 +51,7 @@ Thank you for considering contributing to Pyserde!
 ### Start coding
 - Create a branch to identify the issue you would like to work on:
   ```bash
-  git checkout -b your-branch-name origin/master
+  git checkout -b your-branch-name origin/main
   ```
 - Using your favorite editor, make your changes, committing as you go.
 - Include tests that cover any code changes you make. Make sure the test fails without your patch. Run the tests via `make test`.

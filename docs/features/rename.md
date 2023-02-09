@@ -17,4 +17,4 @@ Output json is having `class` instead of `class_name`.
 {"class": "Foo"}
 ```
 
-For complete example, please see [examples/rename.py](https://github.com/yukinarit/pyserde/blob/master/examples/rename.py)
+For complete example, please see [examples/rename.py](https://github.com/yukinarit/pyserde/blob/main/examples/rename.py)

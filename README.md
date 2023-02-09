@@ -5,7 +5,7 @@ Yet another serialization library on top of [dataclasses](https://docs.python.or
 [![image](https://img.shields.io/pypi/v/pyserde.svg)](https://pypi.org/project/pyserde/)
 [![image](https://img.shields.io/pypi/pyversions/pyserde.svg)](https://pypi.org/project/pyserde/)
 ![Tests](https://github.com/yukinarit/pyserde/workflows/Tests/badge.svg)
-[![codecov](https://codecov.io/gh/yukinarit/pyserde/branch/master/graph/badge.svg)](https://codecov.io/gh/yukinarit/pyserde)
+[![codecov](https://codecov.io/gh/yukinarit/pyserde/branch/main/graph/badge.svg)](https://codecov.io/gh/yukinarit/pyserde)
 
 [Guide](https://yukinarit.github.io/pyserde/guide) | [API Docs](https://yukinarit.github.io/pyserde/api/serde.html) | [Examples](./examples)
 
@@ -137,4 +137,4 @@ This project follows the [all-contributors](https://github.com/all-contributors/
 
 ## LICENSE
 
-This project is licensed under the [MIT license](https://github.com/yukinarit/pyserde/blob/master/LICENSE).
+This project is licensed under the [MIT license](https://github.com/yukinarit/pyserde/blob/main/LICENSE).

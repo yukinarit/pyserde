@@ -14,4 +14,4 @@ class Foo:
     nested: Bar
 ```
 
-For complete example, please see [examples/collection.py](https://github.com/yukinarit/pyserde/blob/master/examples/collection.py)
+For complete example, please see [examples/collection.py](https://github.com/yukinarit/pyserde/blob/main/examples/collection.py)

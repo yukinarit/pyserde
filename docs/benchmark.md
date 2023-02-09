@@ -4,17 +4,17 @@
 * Intel 2.3GHz 8-core Intel Core i9
 * DDR4 32GB RAM
 
-Serialize and deserialize a [struct](https://github.com/yukinarit/pyserde/blob/master/bench/dataclasses_class.py#L7-L12) into and from json 10,000 times.
+Serialize and deserialize a [struct](https://github.com/yukinarit/pyserde/blob/main/bench/dataclasses_class.py#L7-L12) into and from json 10,000 times.
 
 | Serialize | Deserialize |
 |-----------|-------------|
-| <img src="https://raw.githubusercontent.com/yukinarit/pyserde/master/bench/charts/se-small.png"> | <img src="https://raw.githubusercontent.com/yukinarit/pyserde/master/bench/charts/de-small.png"> |
+| <img src="https://raw.githubusercontent.com/yukinarit/pyserde/main/bench/charts/se-small.png"> | <img src="https://raw.githubusercontent.com/yukinarit/pyserde/main/bench/charts/de-small.png"> |
 
 Serialize the struct into tuple and dictionary.
 
 | to_tuple | to_dict |
 |-----------|-------------|
-| <img src="https://raw.githubusercontent.com/yukinarit/pyserde/master/bench/charts/astuple-small.png"> | <img src="https://raw.githubusercontent.com/yukinarit/pyserde/master/bench/charts/asdict-small.png"> |
+| <img src="https://raw.githubusercontent.com/yukinarit/pyserde/main/bench/charts/astuple-small.png"> | <img src="https://raw.githubusercontent.com/yukinarit/pyserde/main/bench/charts/asdict-small.png"> |
 
 * `raw`: Serialize and deserialize manually. Fastest in theory.
 * `dataclass`: Serialize using dataclass's asdict.
@@ -34,4 +34,4 @@ poetry install
 poetry run python bench.py --full
 ```
 
-You can check [the benchmarking code](https://github.com/yukinarit/pyserde/blob/master/bench/bench.py) for more information.
+You can check [the benchmarking code](https://github.com/yukinarit/pyserde/blob/main/bench/bench.py) for more information.

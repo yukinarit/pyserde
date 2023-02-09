@@ -39,11 +39,11 @@ fmt:
 docs:
 	mkdir -p docs out/api out/guide
 	cp -f CHANGELOG.md docs/
-	$(POETRY) run pdoc -e serde=https://github.com/yukinarit/pyserde/tree/master/serde/ serde -o out/api
+	$(POETRY) run pdoc -e serde=https://github.com/yukinarit/pyserde/tree/main/serde/ serde -o out/api
 	mdbook build -d out/guide
 
 open-docs:
-	$(POETRY) run pdoc -e serde=https://github.com/yukinarit/pyserde/tree/master/serde serde
+	$(POETRY) run pdoc -e serde=https://github.com/yukinarit/pyserde/tree/main/serde serde
 
 bench:
 	pushd bench && $(POETRY) run $(PYTHON) bench.py && popd

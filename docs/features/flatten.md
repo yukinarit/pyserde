@@ -19,4 +19,4 @@ class Foo:
 
 Bar's c, d fields will be deserialized as if they are defined in Foo.
 
-For complete example, please see [examples/flatten.py](https://github.com/yukinarit/pyserde/blob/master/examples/flatten.py)
+For complete example, please see [examples/flatten.py](https://github.com/yukinarit/pyserde/blob/main/examples/flatten.py)

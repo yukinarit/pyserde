@@ -11,4 +11,4 @@ class Foo:
 
 `Foo` can be deserialized from either `{"a": "..."}`, `{"b": "..."}` or `{"c": "..."}`.
 
-For complete example, please see [examples/alias.py](https://github.com/yukinarit/pyserde/blob/master/examples/alias.py)
+For complete example, please see [examples/alias.py](https://github.com/yukinarit/pyserde/blob/main/examples/alias.py)
