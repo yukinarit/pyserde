@@ -22,4 +22,4 @@ Here, `metadata` is not present in output json.
 [{"name": "Stack Overflow", "hash": "hash1"}, {"name": "GitHub", "hash": "hash2"}]
 ```
 
-For complete example, please see [examples/skip.py](https://github.com/yukinarit/pyserde/blob/master/examples/skip.py)
+For complete example, please see [examples/skip.py](https://github.com/yukinarit/pyserde/blob/main/examples/skip.py)

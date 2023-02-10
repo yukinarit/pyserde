@@ -19,4 +19,4 @@ class Foo:
         print('foo')
 ```
 
-For complete example, please see [examples/lazy_type_evaluation.py](https://github.com/yukinarit/pyserde/blob/master/examples/lazy_type_evaluation.py)
+For complete example, please see [examples/lazy_type_evaluation.py](https://github.com/yukinarit/pyserde/blob/main/examples/lazy_type_evaluation.py)

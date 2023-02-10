@@ -19,4 +19,4 @@ class Bar:
 serde(Foo)
 ```
 
-For complete example, please see [examples/forward_reference.py](https://github.com/yukinarit/pyserde/blob/master/examples/forward_reference.py)
+For complete example, please see [examples/forward_reference.py](https://github.com/yukinarit/pyserde/blob/main/examples/forward_reference.py)

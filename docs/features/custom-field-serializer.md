@@ -16,4 +16,4 @@ class Foo:
 ```
 `dt1` in the example will serialized into `2021-01-01T00:00:00` because the pyserde's default (de)serializer for datetime is ISO 8601. `dt2` field in the example will be serialized into `01/01/21` by the custom field serializer.
 
-For complete example, please see [examples/custom_field_serializer.py](https://github.com/yukinarit/pyserde/blob/master/examples/custom_field_serializer.py)
+For complete example, please see [examples/custom_field_serializer.py](https://github.com/yukinarit/pyserde/blob/main/examples/custom_field_serializer.py)
