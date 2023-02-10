@@ -677,7 +677,7 @@ class Foo:
     o: Optional[str]
     nested: Bar
 </code></pre>
-<p>For complete example, please see <a href="https://github.com/yukinarit/pyserde/blob/master/examples/collection.py">examples/collection.py</a></p>
+<p>For complete example, please see <a href="https://github.com/yukinarit/pyserde/blob/main/examples/collection.py">examples/collection.py</a></p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="postponed-evaluation-of-type-annotation"><a class="header" href="#postponed-evaluation-of-type-annotation">Postponed evaluation of type annotation</a></h1>
 <p><a href="https://www.python.org/dev/peps/pep-0563/">PEP563</a> Postponed evaluation of type annotation is supported.</p>
 <pre><code class="language-python">from __future__ import annotations
@@ -695,7 +695,7 @@ class Foo:
     def foo(self, cls: Foo):  # You can use &quot;Foo&quot; type before it's defined.
         print('foo')
 </code></pre>
-<p>For complete example, please see <a href="https://github.com/yukinarit/pyserde/blob/master/examples/lazy_type_evaluation.py">examples/lazy_type_evaluation.py</a></p>
+<p>For complete example, please see <a href="https://github.com/yukinarit/pyserde/blob/main/examples/lazy_type_evaluation.py">examples/lazy_type_evaluation.py</a></p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="forward-reference"><a class="header" href="#forward-reference">Forward reference</a></h1>
 <p>You can use a forward reference in annotations.</p>
 <pre><code class="language-python">@dataclass
@@ -713,7 +713,7 @@ class Bar:
 # Evaluate pyserde decorators after `Bar` is defined.
 serde(Foo)
 </code></pre>
-<p>For complete example, please see <a href="https://github.com/yukinarit/pyserde/blob/master/examples/forward_reference.py">examples/forward_reference.py</a></p>
+<p>For complete example, please see <a href="https://github.com/yukinarit/pyserde/blob/main/examples/forward_reference.py">examples/forward_reference.py</a></p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="case-conversion"><a class="header" href="#case-conversion">Case Conversion</a></h1>
 <p>Converting <code>snake_case</code> fields into supported case styles e.g. <code>camelCase</code> and <code>kebab-case</code>.</p>
 <pre><code class="language-python">@serde(rename_all = 'camelcase')
@@ -740,7 +740,7 @@ print(to_json(Foo(class_name='Foo')))
 <p>Output json is having <code>class</code> instead of <code>class_name</code>.</p>
 <pre><code class="language-json">{&quot;class&quot;: &quot;Foo&quot;}
 </code></pre>
-<p>For complete example, please see <a href="https://github.com/yukinarit/pyserde/blob/master/examples/rename.py">examples/rename.py</a></p>
+<p>For complete example, please see <a href="https://github.com/yukinarit/pyserde/blob/main/examples/rename.py">examples/rename.py</a></p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="alias"><a class="header" href="#alias">Alias</a></h1>
 <p>You can set aliases for field names. Alias only works for deserialization.</p>
 <pre><code class="language-python">@serde
@@ -749,7 +749,7 @@ class Foo:
     a: str = field(alias=[&quot;b&quot;, &quot;c&quot;])
 </code></pre>
 <p><code>Foo</code> can be deserialized from either <code>{&quot;a&quot;: &quot;...&quot;}</code>, <code>{&quot;b&quot;: &quot;...&quot;}</code> or <code>{&quot;c&quot;: &quot;...&quot;}</code>.</p>
-<p>For complete example, please see <a href="https://github.com/yukinarit/pyserde/blob/master/examples/alias.py">examples/alias.py</a></p>
+<p>For complete example, please see <a href="https://github.com/yukinarit/pyserde/blob/main/examples/alias.py">examples/alias.py</a></p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="skip"><a class="header" href="#skip">Skip</a></h1>
 <p>You can skip serialization for a certain field, you can use <code>serde_skip</code>.</p>
 <pre><code class="language-python">@serde
@@ -767,7 +767,7 @@ print(to_json(resources))
 <p>Here, <code>metadata</code> is not present in output json.</p>
 <pre><code class="language-json">[{&quot;name&quot;: &quot;Stack Overflow&quot;, &quot;hash&quot;: &quot;hash1&quot;}, {&quot;name&quot;: &quot;GitHub&quot;, &quot;hash&quot;: &quot;hash2&quot;}]
 </code></pre>
-<p>For complete example, please see <a href="https://github.com/yukinarit/pyserde/blob/master/examples/skip.py">examples/skip.py</a></p>
+<p>For complete example, please see <a href="https://github.com/yukinarit/pyserde/blob/main/examples/skip.py">examples/skip.py</a></p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="conditional-skip"><a class="header" href="#conditional-skip">Conditional Skip</a></h1>
 <h2 id="skip_if"><a class="header" href="#skip_if"><code>skip_if</code></a></h2>
 <p>If you conditionally skip some fields, you can pass function or lambda in <code>skip_if</code>.</p>
@@ -791,7 +791,7 @@ print(to_json(world))
 <p><code>skip_if_false</code> is a shorthand of <code>skip_if=lambda v: not v</code>.</p>
 <h2 id="skip_if_default"><a class="header" href="#skip_if_default"><code>skip_if_default</code></a></h2>
 <p><code>skip_if_false</code> is a shorthand of <code>skip_if=lambda v: v == &lt;default_value&gt;</code>.</p>
-<p>For complete example, please see <a href="https://github.com/yukinarit/pyserde/blob/master/examples/skip.py">examples/skip.py</a></p>
+<p>For complete example, please see <a href="https://github.com/yukinarit/pyserde/blob/main/examples/skip.py">examples/skip.py</a></p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="custom-field-deserializer"><a class="header" href="#custom-field-deserializer">Custom field (de)serializer</a></h1>
 <p>If you want to provide a custom function to override the default (de)serialization behaviour of a field, you can pass your functions to <code>serializer</code> and <code>deserializer</code> in <code>serde.field</code>.</p>
 <pre><code class="language-python">from dataclasses import dataclass
@@ -806,7 +806,7 @@ class Foo:
     )
 </code></pre>
 <p><code>dt1</code> in the example will serialized into <code>2021-01-01T00:00:00</code> because the pyserde's default (de)serializer for datetime is ISO 8601. <code>dt2</code> field in the example will be serialized into <code>01/01/21</code> by the custom field serializer.</p>
-<p>For complete example, please see <a href="https://github.com/yukinarit/pyserde/blob/master/examples/custom_field_serializer.py">examples/custom_field_serializer.py</a></p>
+<p>For complete example, please see <a href="https://github.com/yukinarit/pyserde/blob/main/examples/custom_field_serializer.py">examples/custom_field_serializer.py</a></p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="custom-class-deserializer"><a class="header" href="#custom-class-deserializer">Custom class (de)serializer</a></h1>
 <p>If you want to provide (de)serializer at class level, you can pass your functions to <code>serializer</code> and <code>deserializer</code> class attributes.</p>
 <pre><code class="language-python">def serializer(cls, o):
@@ -828,7 +828,7 @@ class Foo:
     dt1: datetime
     dt2: datetime
 </code></pre>
-<p>For complete example, please see <a href="https://github.com/yukinarit/pyserde/blob/master/examples/custom_class_serializer.py">examples/custom_class_serializer.py</a></p>
+<p>For complete example, please see <a href="https://github.com/yukinarit/pyserde/blob/main/examples/custom_class_serializer.py">examples/custom_class_serializer.py</a></p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="flatten"><a class="header" href="#flatten">Flatten</a></h1>
 <p>You can flatten the fields of the nested structure.</p>
 <pre><code class="language-python">@serde
@@ -845,21 +845,21 @@ class Foo:
     bar: Bar = field(metadata={'serde_flatten': True})
 </code></pre>
 <p>Bar's c, d fields will be deserialized as if they are defined in Foo.</p>
-<p>For complete example, please see <a href="https://github.com/yukinarit/pyserde/blob/master/examples/flatten.py">examples/flatten.py</a></p>
+<p>For complete example, please see <a href="https://github.com/yukinarit/pyserde/blob/main/examples/flatten.py">examples/flatten.py</a></p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="benchmark"><a class="header" href="#benchmark">Benchmark</a></h1>
 <ul>
 <li>macOS 10.14 Mojave</li>
 <li>Intel 2.3GHz 8-core Intel Core i9</li>
 <li>DDR4 32GB RAM</li>
 </ul>
-<p>Serialize and deserialize a <a href="https://github.com/yukinarit/pyserde/blob/master/bench/dataclasses_class.py#L7-L12">struct</a> into and from json 10,000 times.</p>
+<p>Serialize and deserialize a <a href="https://github.com/yukinarit/pyserde/blob/main/bench/dataclasses_class.py#L7-L12">struct</a> into and from json 10,000 times.</p>
 <div class="table-wrapper"><table><thead><tr><th>Serialize</th><th>Deserialize</th></tr></thead><tbody>
-<tr><td><img src="https://raw.githubusercontent.com/yukinarit/pyserde/master/bench/charts/se-small.png"></td><td><img src="https://raw.githubusercontent.com/yukinarit/pyserde/master/bench/charts/de-small.png"></td></tr>
+<tr><td><img src="https://raw.githubusercontent.com/yukinarit/pyserde/main/bench/charts/se-small.png"></td><td><img src="https://raw.githubusercontent.com/yukinarit/pyserde/main/bench/charts/de-small.png"></td></tr>
 </tbody></table>
 </div>
 <p>Serialize the struct into tuple and dictionary.</p>
 <div class="table-wrapper"><table><thead><tr><th>to_tuple</th><th>to_dict</th></tr></thead><tbody>
-<tr><td><img src="https://raw.githubusercontent.com/yukinarit/pyserde/master/bench/charts/astuple-small.png"></td><td><img src="https://raw.githubusercontent.com/yukinarit/pyserde/master/bench/charts/asdict-small.png"></td></tr>
+<tr><td><img src="https://raw.githubusercontent.com/yukinarit/pyserde/main/bench/charts/astuple-small.png"></td><td><img src="https://raw.githubusercontent.com/yukinarit/pyserde/main/bench/charts/asdict-small.png"></td></tr>
 </tbody></table>
 </div>
 <ul>
@@ -878,7 +878,7 @@ cd pyserde/bench
 poetry install
 poetry run python bench.py --full
 </code></pre>
-<p>You can check <a href="https://github.com/yukinarit/pyserde/blob/master/bench/bench.py">the benchmarking code</a> for more information.</p>
+<p>You can check <a href="https://github.com/yukinarit/pyserde/blob/main/bench/bench.py">the benchmarking code</a> for more information.</p>
 <div style="break-before: page; page-break-before: always;"></div><h2 id="097-2022-12-15"><a class="header" href="#097-2022-12-15"><code>0.9.7</code> (2022-12-15)</a></h2>
 <p>A bug for optional unions was fixed, Thanks <a href="https://github.com/soaxelbrooke">@soaxelbrooke</a>!</p>
 <pre><code class="language-python">@serde
