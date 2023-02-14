@@ -126,6 +126,7 @@ def serde(
     deserializer: Optional[DeserializeFunc] = None,
     tagging: Tagging = DefaultTagging,
     type_check: TypeCheck = NoCheck,
+    serialize_class_var: bool = False,
 ) -> Callable[[Type[T]], Type[T]]:
     ...
 

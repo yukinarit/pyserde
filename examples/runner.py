@@ -75,6 +75,7 @@ def run_all():
     run(class_var)
     run(alias)
     run(recursive)
+    run(class_var)
     if PY310:
         import union_operator
 

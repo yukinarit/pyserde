@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import ClassVar, Optional
+from typing import ClassVar, List
 
 from serde import serde
 from serde.json import from_json, to_json
@@ -7,20 +7,22 @@ from serde.json import from_json, to_json
 
 @serde
 @dataclass
+class Bar:
+    v: int
+
+
+@serde(serialize_class_var=True)
+@dataclass
 class Foo:
-    i: int
-    j: Optional[int] = None
-    k: ClassVar[int] = 100
+    a: ClassVar[int] = 10
+    b: ClassVar[Bar] = Bar(100)
+    c: ClassVar[List[Bar]] = [Bar(1), Bar(2)]
 
 
-def main():
-    f = Foo(i=10, j=20)
+def main() -> None:
+    f = Foo()
     print(f"Into Json: {to_json(f)}")
-
-    s = '{"i": 10, "j": 20}'
-    print(f"From Json: {from_json(Foo, s)}")
-
-    print(f"Class variable: Foo.k={f.k}")
+    print(f"From Json: {from_json(Foo, '{}')}")
 
 
 if __name__ == '__main__':

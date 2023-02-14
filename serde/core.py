@@ -11,7 +11,7 @@ from typing import Any, Callable, Dict, List, Mapping, Optional, TypeVar, Union
 
 import casefy
 import jinja2
-from typing_extensions import Type
+from typing_extensions import Type, get_type_hints
 
 from .compat import (
     SerdeError,
@@ -23,6 +23,7 @@ from .compat import (
     is_bare_list,
     is_bare_set,
     is_bare_tuple,
+    is_class_var,
     is_dict,
     is_generic,
     is_list,
@@ -543,11 +544,18 @@ class Field:
 F = TypeVar('F', bound=Field)
 
 
-def fields(field_cls: Type[F], cls: Type) -> List[F]:
+def fields(field_cls: Type[F], cls: Type[Any], serialize_class_var: bool = False) -> List[F]:
     """
     Iterate fields of the dataclass and returns `serde.core.Field`.
     """
-    return [field_cls.from_dataclass(f, parent=cls) for f in dataclass_fields(cls)]
+    fields = [field_cls.from_dataclass(f, parent=cls) for f in dataclass_fields(cls)]
+
+    if serialize_class_var:
+        for name, typ in get_type_hints(cls).items():
+            if is_class_var(typ):
+                fields.append(field_cls(typ, name, default=getattr(cls, name)))
+
+    return fields
 
 
 def conv(f: Field, case: Optional[str] = None) -> str:
