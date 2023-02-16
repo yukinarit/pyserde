@@ -4,7 +4,7 @@ import enum
 import logging
 import pathlib
 import uuid
-from typing import DefaultDict, Dict, FrozenSet, List, Optional, Set, Tuple, Union
+from typing import ClassVar, DefaultDict, Dict, FrozenSet, List, Optional, Set, Tuple, Union
 
 import pytest
 
@@ -961,3 +961,66 @@ def test_defaultdict_invalid_value_type() -> None:
 
     with pytest.raises(Exception):
         serde.json.from_json(DefaultDict, '{"k":[1,2]}')
+
+
+def test_class_var() -> None:
+    @serde.serde
+    @dataclasses.dataclass
+    class Disabled:
+        v: ClassVar[int] = 10
+
+    a = Disabled()
+    assert {} == serde.to_dict(a)
+    assert a == serde.from_dict(Disabled, {})
+
+    @serde.serde(serialize_class_var=True)
+    @dataclasses.dataclass
+    class Enabled:
+        v: ClassVar[int] = 10
+
+    b = Enabled()
+    assert {"v": 10} == serde.to_dict(b)
+    assert b == serde.from_dict(Enabled, {})
+
+    @serde.serde
+    @dataclasses.dataclass
+    class Foo:
+        v: int
+
+    @serde.serde(serialize_class_var=True)
+    @dataclasses.dataclass
+    class Dataclass:
+        v: ClassVar[Foo] = Foo(10)
+
+    c = Dataclass()
+    assert {"v": {"v": 10}} == serde.to_dict(c)
+    assert c == serde.from_dict(Dataclass, {})
+
+    @serde.serde(serialize_class_var=True)
+    @dataclasses.dataclass
+    class ClassList:
+        v: ClassVar[List[Foo]] = [Foo(10), Foo(20)]
+
+    d = ClassList()
+    assert {"v": [{"v": 10}, {"v": 20}]} == serde.to_dict(d)
+    assert d == serde.from_dict(ClassList, {})
+
+    # Mutate class variable
+    Enabled.v = 100
+    e = Enabled()
+    assert {"v": 100} == serde.to_dict(e)
+    assert e == serde.from_dict(Enabled, {})
+
+    @serde.serde(serialize_class_var=True)
+    @dataclasses.dataclass
+    class Bar:
+        v: ClassVar[int] = 100
+
+    @serde.serde(serialize_class_var=True)
+    @dataclasses.dataclass
+    class Nested:
+        v: ClassVar[Bar] = Bar()
+
+    f = Nested()
+    assert {"v": {"v": 100}} == serde.to_dict(f)
+    assert f == serde.from_dict(Nested, {})

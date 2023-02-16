@@ -11,6 +11,7 @@
 * [`typing.Any`](https://docs.python.org/3/library/typing.html#the-any-type)
 * [`typing.Literal`](https://docs.python.org/3/library/typing.html#typing.Literal)
 * [`typing.Generic`](https://docs.python.org/3/library/typing.html#user-defined-generic-types)
+* [`typing.ClassVar`](https://docs.python.org/3/library/typing.html#user-defined-generic-type://docs.python.org/3/library/typing.html#typing.ClassVar)
 * [`Enum`](https://docs.python.org/3/library/enum.html#enum.Enum) and [`IntEnum`](https://docs.python.org/3/library/enum.html#enum.IntEnum)
 * Standard library
     * [`pathlib.Path`](https://docs.python.org/3/library/pathlib.html)

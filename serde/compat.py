@@ -15,14 +15,27 @@ import typing
 import uuid
 from collections import defaultdict
 from dataclasses import is_dataclass
-from typing import Any, DefaultDict, Dict, FrozenSet, Generic, Iterator, List, Optional, Set, Tuple, TypeVar, Union
+from typing import (
+    Any,
+    ClassVar,
+    DefaultDict,
+    Dict,
+    FrozenSet,
+    Generic,
+    Iterator,
+    List,
+    Optional,
+    Set,
+    Tuple,
+    TypeVar,
+    Union,
+)
 
+import typing_extensions
 import typing_inspect
 from typing_extensions import Type
 
 if sys.version_info[:2] == (3, 7):
-    import typing_extensions
-
     Literal = typing_extensions.Literal
 else:
     Literal = typing.Literal
@@ -124,7 +137,7 @@ def get_origin(typ: Type[Any]) -> Optional[Any]:
     try:
         return typing.get_origin(typ) or get_np_origin(typ)  # python>=3.8 typing module has get_origin.
     except AttributeError:
-        return typing_inspect.get_origin(typ) or get_np_origin(typ)
+        return typing_extensions.get_origin(typ) or get_np_origin(typ)
 
 
 def get_args(typ: Any) -> Tuple[Any, ...]:
@@ -134,7 +147,7 @@ def get_args(typ: Any) -> Tuple[Any, ...]:
     try:
         return typing.get_args(typ) or get_np_args(typ)  # python>=3.8 typing module has get_args.
     except AttributeError:
-        return typing_inspect.get_args(typ) or get_np_args(typ)
+        return typing_extensions.get_args(typ) or get_np_args(typ)
 
 
 def typename(typ: Type[Any], with_typing_module: bool = False) -> str:
@@ -717,6 +730,18 @@ def is_generic(typ: Type[Any]) -> bool:
     """
     origin = get_origin(typ)
     return origin is not None and Generic in getattr(origin, "__bases__", ())
+
+
+def is_class_var(typ: Type[Any]) -> bool:
+    """
+    Test if the type is `typing.ClassVar`.
+
+    >>> is_class_var(ClassVar[int])
+    True
+    >>> is_class_var(ClassVar)
+    True
+    """
+    return get_origin(typ) is ClassVar or typ is ClassVar  # type: ignore
 
 
 def is_literal(typ: Type[Any]) -> bool:

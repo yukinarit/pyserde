@@ -24,6 +24,7 @@ from .compat import (
     is_bare_opt,
     is_bare_set,
     is_bare_tuple,
+    is_class_var,
     is_datetime,
     is_datetime_instance,
     is_dict,
@@ -116,6 +117,9 @@ def _make_serialize(
     reuse_instances_default: bool = True,
     convert_sets_default: bool = False,
     serializer: Optional[SerializeFunc] = None,
+    tagging: Tagging = DefaultTagging,
+    type_check: TypeCheck = NoCheck,
+    serialize_class_var: bool = False,
     **kwargs,
 ):
     """
@@ -127,6 +131,10 @@ def _make_serialize(
         rename_all=rename_all,
         reuse_instances_default=reuse_instances_default,
         convert_sets_default=convert_sets_default,
+        serializer=serializer,
+        tagging=tagging,
+        type_check=type_check,
+        serialize_class_var=serialize_class_var,
         **kwargs,
     )
     return C
@@ -141,6 +149,7 @@ def serialize(
     serializer: Optional[SerializeFunc] = None,
     tagging: Tagging = DefaultTagging,
     type_check: TypeCheck = NoCheck,
+    serialize_class_var: bool = False,
     **kwargs,
 ):
     """
@@ -198,6 +207,15 @@ def serialize(
 
     >>> to_json(Foo(10, datetime(2021, 1, 1, 0, 0, 0)))
     '{"i":10,"dt":"01/01/21"}'
+
+    * `serialize_class_var` enables `typing.ClassVar` serialization.
+    >>> @serialize(serialize_class_var=True)
+    ... class Foo:
+    ...     v: typing.ClassVar[int] = 10
+    >>>
+    >>> to_json(Foo())
+    '{"v":10}'
+
     """
 
     def wrap(cls: Type[Any]):
@@ -253,14 +271,14 @@ def serialize(
             add_func(scope, union_key, render_union_func(cls, union_args, tagging), g)
             scope.union_se_args[union_key] = union_args
 
-        for f in sefields(cls):
+        for f in sefields(cls, serialize_class_var):
             if f.skip_if:
                 g[f.skip_if.name] = f.skip_if
             if f.serializer:
                 g[f.serializer.name] = f.serializer
 
-        add_func(scope, TO_ITER, render_to_tuple(cls, serializer, type_check), g)
-        add_func(scope, TO_DICT, render_to_dict(cls, rename_all, serializer, type_check), g)
+        add_func(scope, TO_ITER, render_to_tuple(cls, serializer, type_check, serialize_class_var), g)
+        add_func(scope, TO_DICT, render_to_dict(cls, rename_all, serializer, type_check, serialize_class_var), g)
         add_func(scope, TYPE_CHECK, render_type_check(cls), g)
 
         logger.debug(f"{typename(cls)}: {SERDE_SCOPE} {scope}")
@@ -416,17 +434,22 @@ class SeField(Field):
         return SeField(typ, name=None)
 
 
-def sefields(cls: Type[Any]) -> Iterator[SeField]:
+def sefields(cls: Type[Any], serialize_class_var: bool = False) -> Iterator[SeField]:
     """
     Iterate fields for serialization.
     """
-    for f in fields(SeField, cls):
+    for f in fields(SeField, cls, serialize_class_var=serialize_class_var):
         f.parent = SeField(None, "obj")  # type: ignore
         assert isinstance(f, SeField)
         yield f
 
 
-def render_to_tuple(cls: Type[Any], custom: Optional[SerializeFunc] = None, type_check: TypeCheck = NoCheck) -> str:
+def render_to_tuple(
+    cls: Type[Any],
+    custom: Optional[SerializeFunc] = None,
+    type_check: TypeCheck = NoCheck,
+    serialize_class_var: bool = False,
+) -> str:
     template = """
 def {{func}}(obj, reuse_instances = {{serde_scope.reuse_instances_default}},
              convert_sets = {{serde_scope.convert_sets_default}}):
@@ -451,16 +474,25 @@ def {{func}}(obj, reuse_instances = {{serde_scope.reuse_instances_default}},
   )
     """
 
-    renderer = Renderer(TO_ITER, custom, suppress_coerce=(not type_check.is_coerce()))
+    renderer = Renderer(
+        TO_ITER, custom, suppress_coerce=(not type_check.is_coerce()), serialize_class_var=serialize_class_var
+    )
     env = jinja2.Environment(loader=jinja2.DictLoader({"iter": template}))
     env.filters.update({"rvalue": renderer.render})
     return env.get_template("iter").render(
-        func=TO_ITER, serde_scope=getattr(cls, SERDE_SCOPE), fields=sefields(cls), type_check=type_check
+        func=TO_ITER,
+        serde_scope=getattr(cls, SERDE_SCOPE),
+        fields=sefields(cls, serialize_class_var),
+        type_check=type_check,
     )
 
 
 def render_to_dict(
-    cls: Type[Any], case: Optional[str] = None, custom: Optional[SerializeFunc] = None, type_check: TypeCheck = NoCheck
+    cls: Type[Any],
+    case: Optional[str] = None,
+    custom: Optional[SerializeFunc] = None,
+    type_check: TypeCheck = NoCheck,
+    serialize_class_var: bool = False,
 ) -> str:
     template = """
 def {{func}}(obj, reuse_instances = {{serde_scope.reuse_instances_default}},
@@ -492,13 +524,16 @@ def {{func}}(obj, reuse_instances = {{serde_scope.reuse_instances_default}},
   return res
     """
     renderer = Renderer(TO_DICT, custom, suppress_coerce=(not type_check.is_coerce()))
-    lrenderer = LRenderer(case)
+    lrenderer = LRenderer(case, serialize_class_var)
     env = jinja2.Environment(loader=jinja2.DictLoader({"dict": template}))
     env.filters.update({"rvalue": renderer.render})
     env.filters.update({"lvalue": lrenderer.render})
     env.filters.update({"case": functools.partial(conv, case=case)})
     return env.get_template("dict").render(
-        func=TO_DICT, serde_scope=getattr(cls, SERDE_SCOPE), fields=sefields(cls), type_check=type_check
+        func=TO_DICT,
+        serde_scope=getattr(cls, SERDE_SCOPE),
+        fields=sefields(cls, serialize_class_var),
+        type_check=type_check,
     )
 
 
@@ -555,6 +590,7 @@ class LRenderer:
     """
 
     case: Optional[str]
+    serialize_class_var: bool = False
 
     def render(self, arg: SeField) -> str:
         """
@@ -570,7 +606,7 @@ class LRenderer:
         Render field with flatten attribute.
         """
         flattened = []
-        for f in sefields(arg.type):
+        for f in sefields(arg.type, self.serialize_class_var):
             flattened.append(self.render(f))
         return ", ".join(flattened)
 
@@ -585,6 +621,7 @@ class Renderer:
     custom: Optional[SerializeFunc] = None  # Custom class level serializer.
     suppress_coerce: bool = False
     """ Suppress type coercing because generated union serializer has its own type checking """
+    serialize_class_var: bool = False
 
     def render(self, arg: SeField) -> str:
         """
@@ -659,6 +696,9 @@ convert_sets=convert_sets), coerce(int, foo[2]),)"
             res = self.render(arg)
         elif is_literal(arg.type):
             res = self.literal(arg)
+        elif is_class_var(arg.type):
+            arg.type = type_args(arg.type)[0]
+            res = self.render(arg)
         else:
             res = f"raise_unsupported_type({arg.varname})"
 
@@ -681,7 +721,7 @@ convert_sets=convert_sets), coerce(int, foo[2]),)"
         """
         if arg.flatten:
             flattened = []
-            for f in sefields(arg.type):
+            for f in sefields(arg.type, self.serialize_class_var):
                 f.parent = arg  # type: ignore
                 flattened.append(self.render(f))  # type: ignore
             return ", ".join(flattened)
