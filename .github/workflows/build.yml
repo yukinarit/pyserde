@@ -45,7 +45,7 @@ jobs:
       - name: Build docs
         run: make docs
       - name: Deploy on gh-pages
-        uses: JamesIves/github-pages-deploy-action@4
+        uses: JamesIves/github-pages-deploy-action@v4
         with:
           folder: out
           commit-message: ${{ env.COMMIT_MESSAGE }}
