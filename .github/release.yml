@@ -23,6 +23,9 @@ changelog:
     - title: Build
       labels:
         - build
+    - title: Refactoring
+      labels:
+        - refactoring
     - title: Test
       labels:
         - test
