@@ -1,0 +1,34 @@
+changelog:
+  exclude:
+    labels:
+      - ignore-for-release
+    authors:
+      - octocat
+  categories:
+    - title: New features
+      labels:
+        - enhancement
+    - title: Bug fixes
+      labels:
+        - bug
+    - title: Breaking changes
+      labels:
+        - breaking-change
+    - title: Style fixes
+      labels:
+        - style
+    - title: CI
+      labels:
+        - ci
+    - title: Build
+      labels:
+        - build
+    - title: Test
+      labels:
+        - test
+    - title: Documentation
+      labels:
+        - documentation
+    - title: Other changes
+      labels:
+        - "*"
