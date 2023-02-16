@@ -12,23 +12,17 @@ jobs:
         # Remove pypy-3.8 until it supports numpy
         python-version: ["3.7", "3.8", "3.9", "3.10", "3.11"]  # "pypy-3.8"
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
+      - uses: actions/checkout@v3
+      - name: Install poetry
+        run: pip install poetry
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
-      # - name: Restore pip cache
-      #   # Caching on Windows is turned off due to inconsistent behaviour
-      #   if: matrix.os != 'windows-2019'
-      #   uses: actions/cache@v2
-      #   with:
-      #     path: ${{ env.pythonLocation }}
-      #     key: ${{ matrix.os }}-${{ env.pythonLocation }}-${{ hashFiles('**/Pipfile') }}
+          cache: poetry
+          cache-dependency-path: pyproject.toml
       - name: Install dependencies
-        run: |
-          pip install poetry
-          make setup
+        run: make setup
       - name: Run tests
         run: |
           make test
@@ -41,53 +35,43 @@ jobs:
 
   check_formatting:
     name: Check formatting
-    needs: test
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout
-      uses: actions/checkout@v2
-    - name: Set up Python 3.10
-      uses: actions/setup-python@v2
-      with:
-        python-version: "3.10"
-    # - name: Restore pip cache
-    #   uses: actions/cache@v2
-    #   with:
-    #     path: ${{ env.pythonLocation }}
-    #     key: ubuntu-20.04-${{ env.pythonLocation }}-${{ hashFiles('**/.pre-commit-config.yaml', '**/pyproject.toml') }}
-    - name: Install dependencies
-      run: |
-        pip install pre-commit
-        pre-commit install
-    - name: Check formatting
-      run: pre-commit run -a
-    - name: Comment PR
-      if: ${{ failure() && github.event_name == 'pull_request' }}
-      uses: thollander/actions-comment-pull-request@1.0.2
-      with:
-        message: 'Please consider formatting your code according to the standards described here: https://github.com/yukinarit/pyserde/blob/main/CONTRIBUTING.md'
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/checkout@v3
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+          cache: pip
+          cache-dependency-path: .pre-commit-config.yaml
+      - name: Install pre-commit
+        run: |
+          pip install pre-commit
+          pre-commit install
+      - name: Check formatting
+        run: pre-commit run -a
+      - name: Comment PR
+        if: ${{ failure() && github.event_name == 'pull_request' }}
+        uses: thollander/actions-comment-pull-request@1.0.2
+        with:
+          message: 'Please consider formatting your code according to the standards described here: https://github.com/yukinarit/pyserde/blob/main/CONTRIBUTING.md'
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   check_coverage:
     name: Check coverage
-    needs: test
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
+      - uses: actions/checkout@v3
+      - name: Install poetry
+        run: pip install poetry
       - name: Set up Python 3.10
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           python-version: "3.10"
-      # - name: Restore pip cache
-      #   uses: actions/cache@v2
-      #   with:
-      #     path: ${{ env.pythonLocation }}
-      #     key: ubuntu-20.04-${{ env.pythonLocation }}-${{ hashFiles('**/Pipfile') }}
+          cache: poetry
+          cache-dependency-path: pyproject.toml
       - name: Install dependencies
-        run: |
-          pip install poetry
-          poetry install
+        run: poetry install
       - name: Check coverage
         run: make coverage
       - name: Upload coverage report to codecov.io
