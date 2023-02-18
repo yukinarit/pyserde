@@ -73,9 +73,6 @@ yaml = ["pyyaml"]
 orjson = ["orjson"]
 all = ["msgpack", "tomli", "tomli-w", "pyyaml", "numpy", "orjson"]
 
-[tool.poetry.group.dev.dependencies]
-poetry-dynamic-versioning = "^0.21.3"
-
 [build-system]
 requires = ["poetry-core>=1.0.0", "poetry-dynamic-versioning"]
 build-backend = "poetry_dynamic_versioning.backend"
