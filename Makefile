@@ -38,7 +38,6 @@ fmt:
 
 docs:
 	mkdir -p docs out/api out/guide
-	cp -f CHANGELOG.md docs/
 	$(POETRY) run pdoc -e serde=https://github.com/yukinarit/pyserde/tree/main/serde/ serde -o out/api
 	mdbook build -d out/guide
 

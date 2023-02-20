@@ -18,5 +18,4 @@ venv/
 .venv/
 .idea/
 out/
-docs/CHANGELOG.md
 poetry.lock
