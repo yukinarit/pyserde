@@ -22,5 +22,4 @@
     - [Custom class (de)serializer](features/custom-class-serializer.md)
     - [Flatten](features/flatten.md)
 - [Benchmark](benchmark.md)
-- [Changelogs](CHANGELOG.md)
 - [FAQ](faq.md)
