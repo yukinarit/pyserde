@@ -1024,3 +1024,19 @@ def test_class_var() -> None:
     f = Nested()
     assert {"v": {"v": 100}} == serde.to_dict(f)
     assert f == serde.from_dict(Nested, {})
+
+
+def test_nested_dataclass_without_serde() -> None:
+    @dataclasses.dataclass
+    class Foo:
+        v: int
+
+    @serde.serde
+    @dataclasses.dataclass
+    class Wrapper:
+        foo: Foo
+
+    a = Wrapper(foo=Foo(v=1))
+    serialized = serde.to_dict(a)
+    assert {'foo': {'v': 1}} == serialized
+    assert a == serde.from_dict(Wrapper, serialized)

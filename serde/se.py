@@ -218,7 +218,13 @@ def serialize(
 
     """
 
+    stack = []
+
     def wrap(cls: Type[Any]):
+        if cls in stack:
+            return
+        stack.append(cls)
+
         tagging.check()
 
         # If no `dataclass` found in the class, dataclassify it automatically.
@@ -260,6 +266,11 @@ def serialize(
 
         # Collect types used in the generated code.
         for typ in iter_types(cls):
+            # When we encounter a dataclass not marked with serialize, then also generate serialize
+            # functions for it.
+            if is_dataclass_without_se(typ):
+                wrap(typ)
+
             if typ is cls or (is_primitive(typ) and not is_enum(typ) and not is_new_type_primitive(typ)):
                 continue
             g[typename(typ)] = typ
@@ -283,6 +294,7 @@ def serialize(
 
         logger.debug(f"{typename(cls)}: {SERDE_SCOPE} {scope}")
 
+        stack.pop()
         return cls
 
     if _cls is None:
@@ -308,6 +320,15 @@ def is_serializable(instance_or_class: Any) -> bool:
     True
     """
     return hasattr(instance_or_class, SERDE_SCOPE)
+
+
+def is_dataclass_without_se(cls: Type[Any]) -> bool:
+    if not dataclasses.is_dataclass(cls):
+        return False
+    if not hasattr(cls, SERDE_SCOPE):
+        return True
+    scope: Optional[SerdeScope] = getattr(cls, SERDE_SCOPE)
+    return TO_DICT not in scope.funcs
 
 
 def to_obj(o, named: bool, reuse_instances: bool, convert_sets: bool, c: Optional[Type[Any]] = None):
