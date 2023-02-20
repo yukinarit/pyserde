@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pyserde"
-version = "0.9.7"
+version = "0.0.0"  # using poetry-dynamic-versioning
 description = "Yet another serialization library on top of dataclasses"
 authors = ["yukinarit <yukinarit84@gmail.com>"]
 license = "MIT"
@@ -74,5 +74,9 @@ orjson = ["orjson"]
 all = ["msgpack", "tomli", "tomli-w", "pyyaml", "numpy", "orjson"]
 
 [build-system]
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
+requires = ["poetry-core>=1.0.0", "poetry-dynamic-versioning"]
+build-backend = "poetry_dynamic_versioning.backend"
+
+[tool.poetry-dynamic-versioning]
+enable = true
+style = "pep440"
