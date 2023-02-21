@@ -2,7 +2,7 @@ import logging
 import sys
 from dataclasses import dataclass
 from ipaddress import IPv4Address
-from typing import Dict, Generic, List, Optional, Tuple, TypeVar, Union
+from typing import Dict, Generic, List, NewType, Optional, Tuple, TypeVar, Union
 from uuid import UUID
 
 import pytest
@@ -674,3 +674,32 @@ def test_untagged():
     f = Foo({10: 'bar'})
     with pytest.raises(Exception):
         assert to_dict(from_dict(Foo, d)) == f
+
+
+def test_newtype_and_untagged_union() -> None:
+    """
+    Regression test for
+    https://github.com/yukinarit/pyserde/issues/292
+    """
+    from serde import Untagged
+
+    OtherNewtypeThing = NewType('OtherNewtypeThing', str)
+
+    @serde
+    class SupposedlyUnrelated:
+        name: OtherNewtypeThing
+
+    @serde
+    class Innerclass:
+        inner_value: str = 'SHOULD_NOT_APPEAR'
+
+    @serde(tagging=Untagged)
+    class MyDataclass:
+        unrelateds: List[SupposedlyUnrelated]
+        buggy_field: List[Union[str, Innerclass]]
+
+    data = {'unrelateds': [], 'buggy_field': [{'inner_value': 'value'}, 'something']}
+    actual = from_dict(MyDataclass, data)
+
+    assert isinstance(actual.buggy_field[0], Innerclass)
+    assert isinstance(actual.buggy_field[1], str)
