@@ -340,6 +340,11 @@ def is_dataclass_without_se(cls: Type[Any]) -> bool:
 
 
 def to_obj(o, named: bool, reuse_instances: bool, convert_sets: bool, c: Optional[Type[Any]] = None):
+    def serializable_to_obj(object):
+        serde_scope: SerdeScope = getattr(object, SERDE_SCOPE)
+        func_name = TO_DICT if named else TO_ITER
+        return serde_scope.funcs[func_name](object, reuse_instances=reuse_instances, convert_sets=convert_sets)
+
     try:
         thisfunc = functools.partial(
             to_obj,
@@ -349,15 +354,11 @@ def to_obj(o, named: bool, reuse_instances: bool, convert_sets: bool, c: Optiona
         )
         if o is None:
             return None
+        if is_dataclass_without_se(o):
+            serialize(type(o))
+            return serializable_to_obj(o)
         if is_serializable(o):
-            serde_scope: SerdeScope = getattr(o, SERDE_SCOPE)
-            func_name = TO_DICT if named else TO_ITER
-            return serde_scope.funcs[func_name](o, reuse_instances=reuse_instances, convert_sets=convert_sets)
-        elif is_dataclass(o):
-            if named:
-                return dataclasses.asdict(o)
-            else:
-                return dataclasses.astuple(o)
+            return serializable_to_obj(o)
         elif isinstance(o, list):
             return [thisfunc(e) for e in o]
         elif isinstance(o, tuple):

@@ -371,6 +371,13 @@ def from_obj(c: Type, o: Any, named: bool, reuse_instances: bool):
     Deserialize from an object into an instance of the type specified as arg `c`.
     `c` can be either primitive type, `List`, `Tuple`, `Dict` or `deserialize` class.
     """
+
+    def deserializable_to_obj(cls):
+        serde_scope: SerdeScope = getattr(cls, SERDE_SCOPE)
+        func_name = FROM_DICT if named else FROM_ITER
+        res = serde_scope.funcs[func_name](cls, maybe_generic=maybe_generic, data=o, reuse_instances=reuse_instances)
+        return res
+
     if is_generic(c):
         # Store subscripted generic type such as Foo[Bar] in "maybe_generic",
         # and store origin type such as Foo in "c". Since subscripted generics
@@ -384,11 +391,11 @@ def from_obj(c: Type, o: Any, named: bool, reuse_instances: bool):
         thisfunc = functools.partial(from_obj, named=named, reuse_instances=reuse_instances)
         if o is None:
             return None
-        if is_deserializable(c):
-            serde_scope: SerdeScope = getattr(c, SERDE_SCOPE)
-            func_name = FROM_DICT if named else FROM_ITER
-            res = serde_scope.funcs[func_name](c, maybe_generic=maybe_generic, data=o, reuse_instances=reuse_instances)
-            return res
+        if is_dataclass_without_de(c):
+            deserialize(c)
+            return deserializable_to_obj(c)
+        elif is_deserializable(c):
+            return deserializable_to_obj(c)
         elif is_opt(c):
             if o is None:
                 return None
