@@ -145,6 +145,12 @@ def _make_deserialize(
     return C
 
 
+# The `deserialize` function can call itself recursively when it needs to generate code for
+# unmarked dataclasses. To avoid infinite recursion, this array remembers types for which code is
+# currently being generated.
+GENERATION_STACK = []
+
+
 @dataclass_transform()
 def deserialize(
     _cls=None,
@@ -264,7 +270,9 @@ def deserialize(
             # When we encounter a dataclass not marked with deserialize, then also generate
             # deserialize functions for it.
             if is_dataclass_without_de(typ):
-                wrap(typ)
+                # We call deserialize and not wrap to make sure that we will use the default serde
+                # configuration for generating the deserialization function.
+                deserialize(typ)
             if typ is cls or (is_primitive(typ) and not is_enum(typ) and not is_new_type_primitive(typ)):
                 continue
             if is_generic(typ):
@@ -306,7 +314,14 @@ def deserialize(
     if _cls is None:
         return wrap  # type: ignore
 
-    return wrap(_cls)
+    if _cls in GENERATION_STACK:
+        return _cls
+
+    GENERATION_STACK.append(_cls)
+    try:
+        return wrap(_cls)
+    finally:
+        GENERATION_STACK.pop()
 
 
 def is_deserializable(instance_or_class: Any) -> bool:

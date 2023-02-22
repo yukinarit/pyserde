@@ -140,6 +140,12 @@ def _make_serialize(
     return C
 
 
+# The `serialize` function can call itself recursively when it needs to generate code for
+# unmarked dataclasses. To avoid infinite recursion, this array remembers types for which code is
+# currently being generated.
+GENERATION_STACK = []
+
+
 @dataclass_transform()
 def serialize(
     _cls=None,
@@ -218,13 +224,7 @@ def serialize(
 
     """
 
-    stack = []
-
     def wrap(cls: Type[Any]):
-        if cls in stack:
-            return
-        stack.append(cls)
-
         tagging.check()
 
         # If no `dataclass` found in the class, dataclassify it automatically.
@@ -269,7 +269,9 @@ def serialize(
             # When we encounter a dataclass not marked with serialize, then also generate serialize
             # functions for it.
             if is_dataclass_without_se(typ):
-                wrap(typ)
+                # We call serialize and not wrap to make sure that we will use the default serde
+                # configuration for generating the serialization function.
+                serialize(typ)
 
             if typ is cls or (is_primitive(typ) and not is_enum(typ) and not is_new_type_primitive(typ)):
                 continue
@@ -294,13 +296,19 @@ def serialize(
 
         logger.debug(f"{typename(cls)}: {SERDE_SCOPE} {scope}")
 
-        stack.pop()
         return cls
 
     if _cls is None:
         return wrap  # type: ignore
 
-    return wrap(_cls)
+    if _cls in GENERATION_STACK:
+        return _cls
+
+    GENERATION_STACK.append(_cls)
+    try:
+        return wrap(_cls)
+    finally:
+        GENERATION_STACK.pop()
 
 
 def is_serializable(instance_or_class: Any) -> bool:
