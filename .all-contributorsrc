@@ -6,9 +6,9 @@
   "files": [
     "README.md"
   ],
-  "imageSize": 100,
+  "imageSize": 60,
   "commit": true,
-  "commitConvention": "angular",
+  "commitConvention": "gitmoji",
   "contributors": [
     {
       "login": "yukinarit",
@@ -159,6 +159,15 @@
       "name": "Stuart Axelbrooke",
       "avatar_url": "https://avatars.githubusercontent.com/u/2815794?v=4",
       "profile": "http://stuart.axelbrooke.com/",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "Kobzol",
+      "name": "Jakub Beránek",
+      "avatar_url": "https://avatars.githubusercontent.com/u/4539057?v=4",
+      "profile": "https://kobzol.github.io/",
       "contributions": [
         "code"
       ]
