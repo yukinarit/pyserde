@@ -2,7 +2,9 @@
 
 ## `@serde`
 
-@serde is a shortcut of @serialize and @deserialize decorators. This code
+`@serde` is a shortcut of `@serialize` and `@deserialize` decorators.
+
+This code
 ```python
 @serde
 @dataclass
@@ -56,4 +58,29 @@ https://mypy.readthedocs.io/en/stable/additional_features.html#caveats-known-iss
 @serialize(rename_all = "camelcase")
 class Foo:
     ...
+```
+
+## `@dataclass` without `@serde`
+
+pyserde can (de)serialize dataclasses without `@serde` since v0.9.9. This feature is convenient when you want to use classes declared in external libraries or a type checker doesn't work with `@serde` decorator. See [this example](https://github.com/yukinarit/pyserde/blob/main/examples/plain_dataclass.py).
+
+```python
+@dataclass
+class External:
+    ...
+
+to_dict(External()) # works without @serde
+```
+
+Note that you can't specify class attributes e.g. `rename_all` in this case. If you want to add a class attribute to an external dataclass, there is a technique to do that by extending dataclass. See [this example](https://github.com/yukinarit/pyserde/blob/main/examples/plain_dataclass_class_attribute.py).
+
+```python
+@dataclass
+class External:
+    some_value: int
+
+@serde(rename_all="kebabcase")
+@dataclass
+class Wrapper(External):
+    pass
 ```

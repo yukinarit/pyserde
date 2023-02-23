@@ -21,6 +21,8 @@ import lazy_type_evaluation
 import literal
 import newtype
 import pep681
+import plain_dataclass
+import plain_dataclass_class_attribute
 import recursive
 import rename
 import rename_all
@@ -76,6 +78,8 @@ def run_all():
     run(alias)
     run(recursive)
     run(class_var)
+    run(plain_dataclass)
+    run(plain_dataclass_class_attribute)
     if PY310:
         import union_operator
 
