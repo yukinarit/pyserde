@@ -214,6 +214,7 @@ def serialize(
     '{"i":10,"dt":"01/01/21"}'
 
     * `serialize_class_var` enables `typing.ClassVar` serialization.
+
     >>> @serialize(serialize_class_var=True)
     ... class Foo:
     ...     v: typing.ClassVar[int] = 10
