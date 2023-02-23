@@ -1037,11 +1037,11 @@ for a certain field, raise <code><a href="#SerdeSkip">serde.SerdeSkip</a></code>
 
     </div>
     <a class="headerlink" href="#asdict"></a>
-            <div class="pdoc-code codehilite"><pre><span></span><span id="asdict-411"><a href="#asdict-411"><span class="linenos">411</span></a><span class="k">def</span> <span class="nf">asdict</span><span class="p">(</span><span class="n">v</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
-</span><span id="asdict-412"><a href="#asdict-412"><span class="linenos">412</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-</span><span id="asdict-413"><a href="#asdict-413"><span class="linenos">413</span></a><span class="sd">    Serialize object into dictionary.</span>
-</span><span id="asdict-414"><a href="#asdict-414"><span class="linenos">414</span></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="asdict-415"><a href="#asdict-415"><span class="linenos">415</span></a>    <span class="k">return</span> <span class="n">to_dict</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">reuse_instances</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">convert_sets</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="asdict-412"><a href="#asdict-412"><span class="linenos">412</span></a><span class="k">def</span> <span class="nf">asdict</span><span class="p">(</span><span class="n">v</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+</span><span id="asdict-413"><a href="#asdict-413"><span class="linenos">413</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+</span><span id="asdict-414"><a href="#asdict-414"><span class="linenos">414</span></a><span class="sd">    Serialize object into dictionary.</span>
+</span><span id="asdict-415"><a href="#asdict-415"><span class="linenos">415</span></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="asdict-416"><a href="#asdict-416"><span class="linenos">416</span></a>    <span class="k">return</span> <span class="n">to_dict</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">reuse_instances</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">convert_sets</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 </span></pre></div>
 
 
@@ -1061,11 +1061,11 @@ for a certain field, raise <code><a href="#SerdeSkip">serde.SerdeSkip</a></code>
 
     </div>
     <a class="headerlink" href="#astuple"></a>
-            <div class="pdoc-code codehilite"><pre><span></span><span id="astuple-381"><a href="#astuple-381"><span class="linenos">381</span></a><span class="k">def</span> <span class="nf">astuple</span><span class="p">(</span><span class="n">v</span><span class="p">):</span>
-</span><span id="astuple-382"><a href="#astuple-382"><span class="linenos">382</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-</span><span id="astuple-383"><a href="#astuple-383"><span class="linenos">383</span></a><span class="sd">    Serialize object into tuple.</span>
-</span><span id="astuple-384"><a href="#astuple-384"><span class="linenos">384</span></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="astuple-385"><a href="#astuple-385"><span class="linenos">385</span></a>    <span class="k">return</span> <span class="n">to_tuple</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">reuse_instances</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">convert_sets</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="astuple-382"><a href="#astuple-382"><span class="linenos">382</span></a><span class="k">def</span> <span class="nf">astuple</span><span class="p">(</span><span class="n">v</span><span class="p">):</span>
+</span><span id="astuple-383"><a href="#astuple-383"><span class="linenos">383</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+</span><span id="astuple-384"><a href="#astuple-384"><span class="linenos">384</span></a><span class="sd">    Serialize object into tuple.</span>
+</span><span id="astuple-385"><a href="#astuple-385"><span class="linenos">385</span></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="astuple-386"><a href="#astuple-386"><span class="linenos">386</span></a>    <span class="k">return</span> <span class="n">to_tuple</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">reuse_instances</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">convert_sets</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 </span></pre></div>
 
 
@@ -1110,23 +1110,23 @@ at the class but you want to override a field with the default serializer.</p>
 
     </div>
     <a class="headerlink" href="#is_serializable"></a>
-            <div class="pdoc-code codehilite"><pre><span></span><span id="is_serializable-314"><a href="#is_serializable-314"><span class="linenos">314</span></a><span class="k">def</span> <span class="nf">is_serializable</span><span class="p">(</span><span class="n">instance_or_class</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-</span><span id="is_serializable-315"><a href="#is_serializable-315"><span class="linenos">315</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-</span><span id="is_serializable-316"><a href="#is_serializable-316"><span class="linenos">316</span></a><span class="sd">    Test if an instance or class is serializable.</span>
-</span><span id="is_serializable-317"><a href="#is_serializable-317"><span class="linenos">317</span></a>
-</span><span id="is_serializable-318"><a href="#is_serializable-318"><span class="linenos">318</span></a><span class="sd">    &gt;&gt;&gt; @serialize</span>
-</span><span id="is_serializable-319"><a href="#is_serializable-319"><span class="linenos">319</span></a><span class="sd">    ... class Foo:</span>
-</span><span id="is_serializable-320"><a href="#is_serializable-320"><span class="linenos">320</span></a><span class="sd">    ...     pass</span>
-</span><span id="is_serializable-321"><a href="#is_serializable-321"><span class="linenos">321</span></a>
-</span><span id="is_serializable-322"><a href="#is_serializable-322"><span class="linenos">322</span></a><span class="sd">    Testing `Foo` class object returns `True`.</span>
-</span><span id="is_serializable-323"><a href="#is_serializable-323"><span class="linenos">323</span></a><span class="sd">    &gt;&gt;&gt; is_serializable(Foo)</span>
-</span><span id="is_serializable-324"><a href="#is_serializable-324"><span class="linenos">324</span></a><span class="sd">    True</span>
-</span><span id="is_serializable-325"><a href="#is_serializable-325"><span class="linenos">325</span></a>
-</span><span id="is_serializable-326"><a href="#is_serializable-326"><span class="linenos">326</span></a><span class="sd">    Testing `Foo` object laso returns `True`.</span>
-</span><span id="is_serializable-327"><a href="#is_serializable-327"><span class="linenos">327</span></a><span class="sd">    &gt;&gt;&gt; is_serializable(Foo())</span>
-</span><span id="is_serializable-328"><a href="#is_serializable-328"><span class="linenos">328</span></a><span class="sd">    True</span>
-</span><span id="is_serializable-329"><a href="#is_serializable-329"><span class="linenos">329</span></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="is_serializable-330"><a href="#is_serializable-330"><span class="linenos">330</span></a>    <span class="k">return</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">instance_or_class</span><span class="p">,</span> <span class="n">SERDE_SCOPE</span><span class="p">)</span>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="is_serializable-315"><a href="#is_serializable-315"><span class="linenos">315</span></a><span class="k">def</span> <span class="nf">is_serializable</span><span class="p">(</span><span class="n">instance_or_class</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+</span><span id="is_serializable-316"><a href="#is_serializable-316"><span class="linenos">316</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+</span><span id="is_serializable-317"><a href="#is_serializable-317"><span class="linenos">317</span></a><span class="sd">    Test if an instance or class is serializable.</span>
+</span><span id="is_serializable-318"><a href="#is_serializable-318"><span class="linenos">318</span></a>
+</span><span id="is_serializable-319"><a href="#is_serializable-319"><span class="linenos">319</span></a><span class="sd">    &gt;&gt;&gt; @serialize</span>
+</span><span id="is_serializable-320"><a href="#is_serializable-320"><span class="linenos">320</span></a><span class="sd">    ... class Foo:</span>
+</span><span id="is_serializable-321"><a href="#is_serializable-321"><span class="linenos">321</span></a><span class="sd">    ...     pass</span>
+</span><span id="is_serializable-322"><a href="#is_serializable-322"><span class="linenos">322</span></a>
+</span><span id="is_serializable-323"><a href="#is_serializable-323"><span class="linenos">323</span></a><span class="sd">    Testing `Foo` class object returns `True`.</span>
+</span><span id="is_serializable-324"><a href="#is_serializable-324"><span class="linenos">324</span></a><span class="sd">    &gt;&gt;&gt; is_serializable(Foo)</span>
+</span><span id="is_serializable-325"><a href="#is_serializable-325"><span class="linenos">325</span></a><span class="sd">    True</span>
+</span><span id="is_serializable-326"><a href="#is_serializable-326"><span class="linenos">326</span></a>
+</span><span id="is_serializable-327"><a href="#is_serializable-327"><span class="linenos">327</span></a><span class="sd">    Testing `Foo` object laso returns `True`.</span>
+</span><span id="is_serializable-328"><a href="#is_serializable-328"><span class="linenos">328</span></a><span class="sd">    &gt;&gt;&gt; is_serializable(Foo())</span>
+</span><span id="is_serializable-329"><a href="#is_serializable-329"><span class="linenos">329</span></a><span class="sd">    True</span>
+</span><span id="is_serializable-330"><a href="#is_serializable-330"><span class="linenos">330</span></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="is_serializable-331"><a href="#is_serializable-331"><span class="linenos">331</span></a>    <span class="k">return</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">instance_or_class</span><span class="p">,</span> <span class="n">SERDE_SCOPE</span><span class="p">)</span>
 </span></pre></div>
 
 
@@ -1239,100 +1239,101 @@ at the class but you want to override a field with the default serializer.</p>
 </span><span id="serialize-215"><a href="#serialize-215"><span class="linenos">215</span></a><span class="sd">    &#39;{&quot;i&quot;:10,&quot;dt&quot;:&quot;01/01/21&quot;}&#39;</span>
 </span><span id="serialize-216"><a href="#serialize-216"><span class="linenos">216</span></a>
 </span><span id="serialize-217"><a href="#serialize-217"><span class="linenos">217</span></a><span class="sd">    * `serialize_class_var` enables `typing.ClassVar` serialization.</span>
-</span><span id="serialize-218"><a href="#serialize-218"><span class="linenos">218</span></a><span class="sd">    &gt;&gt;&gt; @serialize(serialize_class_var=True)</span>
-</span><span id="serialize-219"><a href="#serialize-219"><span class="linenos">219</span></a><span class="sd">    ... class Foo:</span>
-</span><span id="serialize-220"><a href="#serialize-220"><span class="linenos">220</span></a><span class="sd">    ...     v: typing.ClassVar[int] = 10</span>
-</span><span id="serialize-221"><a href="#serialize-221"><span class="linenos">221</span></a><span class="sd">    &gt;&gt;&gt;</span>
-</span><span id="serialize-222"><a href="#serialize-222"><span class="linenos">222</span></a><span class="sd">    &gt;&gt;&gt; to_json(Foo())</span>
-</span><span id="serialize-223"><a href="#serialize-223"><span class="linenos">223</span></a><span class="sd">    &#39;{&quot;v&quot;:10}&#39;</span>
-</span><span id="serialize-224"><a href="#serialize-224"><span class="linenos">224</span></a>
-</span><span id="serialize-225"><a href="#serialize-225"><span class="linenos">225</span></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="serialize-226"><a href="#serialize-226"><span class="linenos">226</span></a>
-</span><span id="serialize-227"><a href="#serialize-227"><span class="linenos">227</span></a>    <span class="k">def</span> <span class="nf">wrap</span><span class="p">(</span><span class="bp">cls</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">Any</span><span class="p">]):</span>
-</span><span id="serialize-228"><a href="#serialize-228"><span class="linenos">228</span></a>        <span class="n">tagging</span><span class="o">.</span><span class="n">check</span><span class="p">()</span>
-</span><span id="serialize-229"><a href="#serialize-229"><span class="linenos">229</span></a>
-</span><span id="serialize-230"><a href="#serialize-230"><span class="linenos">230</span></a>        <span class="c1"># If no `dataclass` found in the class, dataclassify it automatically.</span>
-</span><span id="serialize-231"><a href="#serialize-231"><span class="linenos">231</span></a>        <span class="k">if</span> <span class="ow">not</span> <span class="n">is_dataclass</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
-</span><span id="serialize-232"><a href="#serialize-232"><span class="linenos">232</span></a>            <span class="n">dataclass</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
-</span><span id="serialize-233"><a href="#serialize-233"><span class="linenos">233</span></a>
-</span><span id="serialize-234"><a href="#serialize-234"><span class="linenos">234</span></a>        <span class="n">g</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
-</span><span id="serialize-235"><a href="#serialize-235"><span class="linenos">235</span></a>
-</span><span id="serialize-236"><a href="#serialize-236"><span class="linenos">236</span></a>        <span class="c1"># Create a scope storage used by serde.</span>
-</span><span id="serialize-237"><a href="#serialize-237"><span class="linenos">237</span></a>        <span class="c1"># Each class should get own scope. Child classes can not share scope with parent class.</span>
-</span><span id="serialize-238"><a href="#serialize-238"><span class="linenos">238</span></a>        <span class="c1"># That&#39;s why we need the &quot;scope.cls is not cls&quot; check.</span>
-</span><span id="serialize-239"><a href="#serialize-239"><span class="linenos">239</span></a>        <span class="n">scope</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">SerdeScope</span><span class="p">]</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">SERDE_SCOPE</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-</span><span id="serialize-240"><a href="#serialize-240"><span class="linenos">240</span></a>        <span class="k">if</span> <span class="n">scope</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">scope</span><span class="o">.</span><span class="n">cls</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">cls</span><span class="p">:</span>
-</span><span id="serialize-241"><a href="#serialize-241"><span class="linenos">241</span></a>            <span class="n">scope</span> <span class="o">=</span> <span class="n">SerdeScope</span><span class="p">(</span>
-</span><span id="serialize-242"><a href="#serialize-242"><span class="linenos">242</span></a>                <span class="bp">cls</span><span class="p">,</span>
-</span><span id="serialize-243"><a href="#serialize-243"><span class="linenos">243</span></a>                <span class="n">reuse_instances_default</span><span class="o">=</span><span class="n">reuse_instances_default</span><span class="p">,</span>
-</span><span id="serialize-244"><a href="#serialize-244"><span class="linenos">244</span></a>                <span class="n">convert_sets_default</span><span class="o">=</span><span class="n">convert_sets_default</span><span class="p">,</span>
-</span><span id="serialize-245"><a href="#serialize-245"><span class="linenos">245</span></a>            <span class="p">)</span>
-</span><span id="serialize-246"><a href="#serialize-246"><span class="linenos">246</span></a>            <span class="nb">setattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">SERDE_SCOPE</span><span class="p">,</span> <span class="n">scope</span><span class="p">)</span>
-</span><span id="serialize-247"><a href="#serialize-247"><span class="linenos">247</span></a>
-</span><span id="serialize-248"><a href="#serialize-248"><span class="linenos">248</span></a>        <span class="c1"># Set some globals for all generated functions</span>
-</span><span id="serialize-249"><a href="#serialize-249"><span class="linenos">249</span></a>        <span class="n">g</span><span class="p">[</span><span class="s2">&quot;cls&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">cls</span>
-</span><span id="serialize-250"><a href="#serialize-250"><span class="linenos">250</span></a>        <span class="n">g</span><span class="p">[</span><span class="s2">&quot;copy&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">copy</span>
-</span><span id="serialize-251"><a href="#serialize-251"><span class="linenos">251</span></a>        <span class="n">g</span><span class="p">[</span><span class="s2">&quot;serde_scope&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">scope</span>
-</span><span id="serialize-252"><a href="#serialize-252"><span class="linenos">252</span></a>        <span class="n">g</span><span class="p">[</span><span class="s2">&quot;SerdeError&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">SerdeError</span>
-</span><span id="serialize-253"><a href="#serialize-253"><span class="linenos">253</span></a>        <span class="n">g</span><span class="p">[</span><span class="s2">&quot;raise_unsupported_type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">raise_unsupported_type</span>
-</span><span id="serialize-254"><a href="#serialize-254"><span class="linenos">254</span></a>        <span class="n">g</span><span class="p">[</span><span class="s2">&quot;enum_value&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">enum_value</span>
-</span><span id="serialize-255"><a href="#serialize-255"><span class="linenos">255</span></a>        <span class="n">g</span><span class="p">[</span><span class="s2">&quot;is_dataclass&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">is_dataclass</span>
-</span><span id="serialize-256"><a href="#serialize-256"><span class="linenos">256</span></a>        <span class="n">g</span><span class="p">[</span><span class="s2">&quot;typename&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">typename</span>  <span class="c1"># used in union functions</span>
-</span><span id="serialize-257"><a href="#serialize-257"><span class="linenos">257</span></a>        <span class="n">g</span><span class="p">[</span><span class="s2">&quot;is_instance&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">is_instance</span>  <span class="c1"># used in union functions</span>
-</span><span id="serialize-258"><a href="#serialize-258"><span class="linenos">258</span></a>        <span class="n">g</span><span class="p">[</span><span class="s2">&quot;to_obj&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">to_obj</span>
-</span><span id="serialize-259"><a href="#serialize-259"><span class="linenos">259</span></a>        <span class="n">g</span><span class="p">[</span><span class="s2">&quot;typing&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">typing</span>
-</span><span id="serialize-260"><a href="#serialize-260"><span class="linenos">260</span></a>        <span class="n">g</span><span class="p">[</span><span class="s2">&quot;Literal&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Literal</span>
-</span><span id="serialize-261"><a href="#serialize-261"><span class="linenos">261</span></a>        <span class="n">g</span><span class="p">[</span><span class="s2">&quot;TypeCheck&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">TypeCheck</span>
-</span><span id="serialize-262"><a href="#serialize-262"><span class="linenos">262</span></a>        <span class="n">g</span><span class="p">[</span><span class="s2">&quot;NoCheck&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">NoCheck</span>
-</span><span id="serialize-263"><a href="#serialize-263"><span class="linenos">263</span></a>        <span class="n">g</span><span class="p">[</span><span class="s2">&quot;coerce&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">coerce</span>
-</span><span id="serialize-264"><a href="#serialize-264"><span class="linenos">264</span></a>        <span class="k">if</span> <span class="n">serialize</span><span class="p">:</span>
-</span><span id="serialize-265"><a href="#serialize-265"><span class="linenos">265</span></a>            <span class="n">g</span><span class="p">[</span><span class="s2">&quot;serde_custom_class_serializer&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">functools</span><span class="o">.</span><span class="n">partial</span><span class="p">(</span><span class="n">serde_custom_class_serializer</span><span class="p">,</span> <span class="n">custom</span><span class="o">=</span><span class="n">serializer</span><span class="p">)</span>
-</span><span id="serialize-266"><a href="#serialize-266"><span class="linenos">266</span></a>
-</span><span id="serialize-267"><a href="#serialize-267"><span class="linenos">267</span></a>        <span class="c1"># Collect types used in the generated code.</span>
-</span><span id="serialize-268"><a href="#serialize-268"><span class="linenos">268</span></a>        <span class="k">for</span> <span class="n">typ</span> <span class="ow">in</span> <span class="n">iter_types</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
-</span><span id="serialize-269"><a href="#serialize-269"><span class="linenos">269</span></a>            <span class="c1"># When we encounter a dataclass not marked with serialize, then also generate serialize</span>
-</span><span id="serialize-270"><a href="#serialize-270"><span class="linenos">270</span></a>            <span class="c1"># functions for it.</span>
-</span><span id="serialize-271"><a href="#serialize-271"><span class="linenos">271</span></a>            <span class="k">if</span> <span class="n">is_dataclass_without_se</span><span class="p">(</span><span class="n">typ</span><span class="p">):</span>
-</span><span id="serialize-272"><a href="#serialize-272"><span class="linenos">272</span></a>                <span class="c1"># We call serialize and not wrap to make sure that we will use the default serde</span>
-</span><span id="serialize-273"><a href="#serialize-273"><span class="linenos">273</span></a>                <span class="c1"># configuration for generating the serialization function.</span>
-</span><span id="serialize-274"><a href="#serialize-274"><span class="linenos">274</span></a>                <span class="n">serialize</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
-</span><span id="serialize-275"><a href="#serialize-275"><span class="linenos">275</span></a>
-</span><span id="serialize-276"><a href="#serialize-276"><span class="linenos">276</span></a>            <span class="k">if</span> <span class="n">typ</span> <span class="ow">is</span> <span class="bp">cls</span> <span class="ow">or</span> <span class="p">(</span><span class="n">is_primitive</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">is_enum</span><span class="p">(</span><span class="n">typ</span><span class="p">)):</span>
-</span><span id="serialize-277"><a href="#serialize-277"><span class="linenos">277</span></a>                <span class="k">continue</span>
-</span><span id="serialize-278"><a href="#serialize-278"><span class="linenos">278</span></a>            <span class="n">g</span><span class="p">[</span><span class="n">typename</span><span class="p">(</span><span class="n">typ</span><span class="p">)]</span> <span class="o">=</span> <span class="n">typ</span>
-</span><span id="serialize-279"><a href="#serialize-279"><span class="linenos">279</span></a>
-</span><span id="serialize-280"><a href="#serialize-280"><span class="linenos">280</span></a>        <span class="c1"># render all union functions</span>
-</span><span id="serialize-281"><a href="#serialize-281"><span class="linenos">281</span></a>        <span class="k">for</span> <span class="n">union</span> <span class="ow">in</span> <span class="n">iter_unions</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
-</span><span id="serialize-282"><a href="#serialize-282"><span class="linenos">282</span></a>            <span class="n">union_args</span> <span class="o">=</span> <span class="n">type_args</span><span class="p">(</span><span class="n">union</span><span class="p">)</span>
-</span><span id="serialize-283"><a href="#serialize-283"><span class="linenos">283</span></a>            <span class="n">union_key</span> <span class="o">=</span> <span class="n">union_func_name</span><span class="p">(</span><span class="n">UNION_SE_PREFIX</span><span class="p">,</span> <span class="n">union_args</span><span class="p">)</span>
-</span><span id="serialize-284"><a href="#serialize-284"><span class="linenos">284</span></a>            <span class="n">add_func</span><span class="p">(</span><span class="n">scope</span><span class="p">,</span> <span class="n">union_key</span><span class="p">,</span> <span class="n">render_union_func</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">union_args</span><span class="p">,</span> <span class="n">tagging</span><span class="p">),</span> <span class="n">g</span><span class="p">)</span>
-</span><span id="serialize-285"><a href="#serialize-285"><span class="linenos">285</span></a>            <span class="n">scope</span><span class="o">.</span><span class="n">union_se_args</span><span class="p">[</span><span class="n">union_key</span><span class="p">]</span> <span class="o">=</span> <span class="n">union_args</span>
-</span><span id="serialize-286"><a href="#serialize-286"><span class="linenos">286</span></a>
-</span><span id="serialize-287"><a href="#serialize-287"><span class="linenos">287</span></a>        <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">sefields</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">serialize_class_var</span><span class="p">):</span>
-</span><span id="serialize-288"><a href="#serialize-288"><span class="linenos">288</span></a>            <span class="k">if</span> <span class="n">f</span><span class="o">.</span><span class="n">skip_if</span><span class="p">:</span>
-</span><span id="serialize-289"><a href="#serialize-289"><span class="linenos">289</span></a>                <span class="n">g</span><span class="p">[</span><span class="n">f</span><span class="o">.</span><span class="n">skip_if</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">skip_if</span>
-</span><span id="serialize-290"><a href="#serialize-290"><span class="linenos">290</span></a>            <span class="k">if</span> <span class="n">f</span><span class="o">.</span><span class="n">serializer</span><span class="p">:</span>
-</span><span id="serialize-291"><a href="#serialize-291"><span class="linenos">291</span></a>                <span class="n">g</span><span class="p">[</span><span class="n">f</span><span class="o">.</span><span class="n">serializer</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">serializer</span>
-</span><span id="serialize-292"><a href="#serialize-292"><span class="linenos">292</span></a>
-</span><span id="serialize-293"><a href="#serialize-293"><span class="linenos">293</span></a>        <span class="n">add_func</span><span class="p">(</span><span class="n">scope</span><span class="p">,</span> <span class="n">TO_ITER</span><span class="p">,</span> <span class="n">render_to_tuple</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">serializer</span><span class="p">,</span> <span class="n">type_check</span><span class="p">,</span> <span class="n">serialize_class_var</span><span class="p">),</span> <span class="n">g</span><span class="p">)</span>
-</span><span id="serialize-294"><a href="#serialize-294"><span class="linenos">294</span></a>        <span class="n">add_func</span><span class="p">(</span><span class="n">scope</span><span class="p">,</span> <span class="n">TO_DICT</span><span class="p">,</span> <span class="n">render_to_dict</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">rename_all</span><span class="p">,</span> <span class="n">serializer</span><span class="p">,</span> <span class="n">type_check</span><span class="p">,</span> <span class="n">serialize_class_var</span><span class="p">),</span> <span class="n">g</span><span class="p">)</span>
-</span><span id="serialize-295"><a href="#serialize-295"><span class="linenos">295</span></a>        <span class="n">add_func</span><span class="p">(</span><span class="n">scope</span><span class="p">,</span> <span class="n">TYPE_CHECK</span><span class="p">,</span> <span class="n">render_type_check</span><span class="p">(</span><span class="bp">cls</span><span class="p">),</span> <span class="n">g</span><span class="p">)</span>
-</span><span id="serialize-296"><a href="#serialize-296"><span class="linenos">296</span></a>
-</span><span id="serialize-297"><a href="#serialize-297"><span class="linenos">297</span></a>        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">typename</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">SERDE_SCOPE</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">scope</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</span><span id="serialize-298"><a href="#serialize-298"><span class="linenos">298</span></a>
-</span><span id="serialize-299"><a href="#serialize-299"><span class="linenos">299</span></a>        <span class="k">return</span> <span class="bp">cls</span>
-</span><span id="serialize-300"><a href="#serialize-300"><span class="linenos">300</span></a>
-</span><span id="serialize-301"><a href="#serialize-301"><span class="linenos">301</span></a>    <span class="k">if</span> <span class="n">_cls</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-</span><span id="serialize-302"><a href="#serialize-302"><span class="linenos">302</span></a>        <span class="k">return</span> <span class="n">wrap</span>  <span class="c1"># type: ignore</span>
-</span><span id="serialize-303"><a href="#serialize-303"><span class="linenos">303</span></a>
-</span><span id="serialize-304"><a href="#serialize-304"><span class="linenos">304</span></a>    <span class="k">if</span> <span class="n">_cls</span> <span class="ow">in</span> <span class="n">GENERATION_STACK</span><span class="p">:</span>
-</span><span id="serialize-305"><a href="#serialize-305"><span class="linenos">305</span></a>        <span class="k">return</span> <span class="n">_cls</span>
-</span><span id="serialize-306"><a href="#serialize-306"><span class="linenos">306</span></a>
-</span><span id="serialize-307"><a href="#serialize-307"><span class="linenos">307</span></a>    <span class="n">GENERATION_STACK</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_cls</span><span class="p">)</span>
-</span><span id="serialize-308"><a href="#serialize-308"><span class="linenos">308</span></a>    <span class="k">try</span><span class="p">:</span>
-</span><span id="serialize-309"><a href="#serialize-309"><span class="linenos">309</span></a>        <span class="k">return</span> <span class="n">wrap</span><span class="p">(</span><span class="n">_cls</span><span class="p">)</span>
-</span><span id="serialize-310"><a href="#serialize-310"><span class="linenos">310</span></a>    <span class="k">finally</span><span class="p">:</span>
-</span><span id="serialize-311"><a href="#serialize-311"><span class="linenos">311</span></a>        <span class="n">GENERATION_STACK</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+</span><span id="serialize-218"><a href="#serialize-218"><span class="linenos">218</span></a>
+</span><span id="serialize-219"><a href="#serialize-219"><span class="linenos">219</span></a><span class="sd">    &gt;&gt;&gt; @serialize(serialize_class_var=True)</span>
+</span><span id="serialize-220"><a href="#serialize-220"><span class="linenos">220</span></a><span class="sd">    ... class Foo:</span>
+</span><span id="serialize-221"><a href="#serialize-221"><span class="linenos">221</span></a><span class="sd">    ...     v: typing.ClassVar[int] = 10</span>
+</span><span id="serialize-222"><a href="#serialize-222"><span class="linenos">222</span></a><span class="sd">    &gt;&gt;&gt;</span>
+</span><span id="serialize-223"><a href="#serialize-223"><span class="linenos">223</span></a><span class="sd">    &gt;&gt;&gt; to_json(Foo())</span>
+</span><span id="serialize-224"><a href="#serialize-224"><span class="linenos">224</span></a><span class="sd">    &#39;{&quot;v&quot;:10}&#39;</span>
+</span><span id="serialize-225"><a href="#serialize-225"><span class="linenos">225</span></a>
+</span><span id="serialize-226"><a href="#serialize-226"><span class="linenos">226</span></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="serialize-227"><a href="#serialize-227"><span class="linenos">227</span></a>
+</span><span id="serialize-228"><a href="#serialize-228"><span class="linenos">228</span></a>    <span class="k">def</span> <span class="nf">wrap</span><span class="p">(</span><span class="bp">cls</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">Any</span><span class="p">]):</span>
+</span><span id="serialize-229"><a href="#serialize-229"><span class="linenos">229</span></a>        <span class="n">tagging</span><span class="o">.</span><span class="n">check</span><span class="p">()</span>
+</span><span id="serialize-230"><a href="#serialize-230"><span class="linenos">230</span></a>
+</span><span id="serialize-231"><a href="#serialize-231"><span class="linenos">231</span></a>        <span class="c1"># If no `dataclass` found in the class, dataclassify it automatically.</span>
+</span><span id="serialize-232"><a href="#serialize-232"><span class="linenos">232</span></a>        <span class="k">if</span> <span class="ow">not</span> <span class="n">is_dataclass</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+</span><span id="serialize-233"><a href="#serialize-233"><span class="linenos">233</span></a>            <span class="n">dataclass</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
+</span><span id="serialize-234"><a href="#serialize-234"><span class="linenos">234</span></a>
+</span><span id="serialize-235"><a href="#serialize-235"><span class="linenos">235</span></a>        <span class="n">g</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+</span><span id="serialize-236"><a href="#serialize-236"><span class="linenos">236</span></a>
+</span><span id="serialize-237"><a href="#serialize-237"><span class="linenos">237</span></a>        <span class="c1"># Create a scope storage used by serde.</span>
+</span><span id="serialize-238"><a href="#serialize-238"><span class="linenos">238</span></a>        <span class="c1"># Each class should get own scope. Child classes can not share scope with parent class.</span>
+</span><span id="serialize-239"><a href="#serialize-239"><span class="linenos">239</span></a>        <span class="c1"># That&#39;s why we need the &quot;scope.cls is not cls&quot; check.</span>
+</span><span id="serialize-240"><a href="#serialize-240"><span class="linenos">240</span></a>        <span class="n">scope</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">SerdeScope</span><span class="p">]</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">SERDE_SCOPE</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+</span><span id="serialize-241"><a href="#serialize-241"><span class="linenos">241</span></a>        <span class="k">if</span> <span class="n">scope</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">scope</span><span class="o">.</span><span class="n">cls</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">cls</span><span class="p">:</span>
+</span><span id="serialize-242"><a href="#serialize-242"><span class="linenos">242</span></a>            <span class="n">scope</span> <span class="o">=</span> <span class="n">SerdeScope</span><span class="p">(</span>
+</span><span id="serialize-243"><a href="#serialize-243"><span class="linenos">243</span></a>                <span class="bp">cls</span><span class="p">,</span>
+</span><span id="serialize-244"><a href="#serialize-244"><span class="linenos">244</span></a>                <span class="n">reuse_instances_default</span><span class="o">=</span><span class="n">reuse_instances_default</span><span class="p">,</span>
+</span><span id="serialize-245"><a href="#serialize-245"><span class="linenos">245</span></a>                <span class="n">convert_sets_default</span><span class="o">=</span><span class="n">convert_sets_default</span><span class="p">,</span>
+</span><span id="serialize-246"><a href="#serialize-246"><span class="linenos">246</span></a>            <span class="p">)</span>
+</span><span id="serialize-247"><a href="#serialize-247"><span class="linenos">247</span></a>            <span class="nb">setattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">SERDE_SCOPE</span><span class="p">,</span> <span class="n">scope</span><span class="p">)</span>
+</span><span id="serialize-248"><a href="#serialize-248"><span class="linenos">248</span></a>
+</span><span id="serialize-249"><a href="#serialize-249"><span class="linenos">249</span></a>        <span class="c1"># Set some globals for all generated functions</span>
+</span><span id="serialize-250"><a href="#serialize-250"><span class="linenos">250</span></a>        <span class="n">g</span><span class="p">[</span><span class="s2">&quot;cls&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">cls</span>
+</span><span id="serialize-251"><a href="#serialize-251"><span class="linenos">251</span></a>        <span class="n">g</span><span class="p">[</span><span class="s2">&quot;copy&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">copy</span>
+</span><span id="serialize-252"><a href="#serialize-252"><span class="linenos">252</span></a>        <span class="n">g</span><span class="p">[</span><span class="s2">&quot;serde_scope&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">scope</span>
+</span><span id="serialize-253"><a href="#serialize-253"><span class="linenos">253</span></a>        <span class="n">g</span><span class="p">[</span><span class="s2">&quot;SerdeError&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">SerdeError</span>
+</span><span id="serialize-254"><a href="#serialize-254"><span class="linenos">254</span></a>        <span class="n">g</span><span class="p">[</span><span class="s2">&quot;raise_unsupported_type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">raise_unsupported_type</span>
+</span><span id="serialize-255"><a href="#serialize-255"><span class="linenos">255</span></a>        <span class="n">g</span><span class="p">[</span><span class="s2">&quot;enum_value&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">enum_value</span>
+</span><span id="serialize-256"><a href="#serialize-256"><span class="linenos">256</span></a>        <span class="n">g</span><span class="p">[</span><span class="s2">&quot;is_dataclass&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">is_dataclass</span>
+</span><span id="serialize-257"><a href="#serialize-257"><span class="linenos">257</span></a>        <span class="n">g</span><span class="p">[</span><span class="s2">&quot;typename&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">typename</span>  <span class="c1"># used in union functions</span>
+</span><span id="serialize-258"><a href="#serialize-258"><span class="linenos">258</span></a>        <span class="n">g</span><span class="p">[</span><span class="s2">&quot;is_instance&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">is_instance</span>  <span class="c1"># used in union functions</span>
+</span><span id="serialize-259"><a href="#serialize-259"><span class="linenos">259</span></a>        <span class="n">g</span><span class="p">[</span><span class="s2">&quot;to_obj&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">to_obj</span>
+</span><span id="serialize-260"><a href="#serialize-260"><span class="linenos">260</span></a>        <span class="n">g</span><span class="p">[</span><span class="s2">&quot;typing&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">typing</span>
+</span><span id="serialize-261"><a href="#serialize-261"><span class="linenos">261</span></a>        <span class="n">g</span><span class="p">[</span><span class="s2">&quot;Literal&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Literal</span>
+</span><span id="serialize-262"><a href="#serialize-262"><span class="linenos">262</span></a>        <span class="n">g</span><span class="p">[</span><span class="s2">&quot;TypeCheck&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">TypeCheck</span>
+</span><span id="serialize-263"><a href="#serialize-263"><span class="linenos">263</span></a>        <span class="n">g</span><span class="p">[</span><span class="s2">&quot;NoCheck&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">NoCheck</span>
+</span><span id="serialize-264"><a href="#serialize-264"><span class="linenos">264</span></a>        <span class="n">g</span><span class="p">[</span><span class="s2">&quot;coerce&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">coerce</span>
+</span><span id="serialize-265"><a href="#serialize-265"><span class="linenos">265</span></a>        <span class="k">if</span> <span class="n">serialize</span><span class="p">:</span>
+</span><span id="serialize-266"><a href="#serialize-266"><span class="linenos">266</span></a>            <span class="n">g</span><span class="p">[</span><span class="s2">&quot;serde_custom_class_serializer&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">functools</span><span class="o">.</span><span class="n">partial</span><span class="p">(</span><span class="n">serde_custom_class_serializer</span><span class="p">,</span> <span class="n">custom</span><span class="o">=</span><span class="n">serializer</span><span class="p">)</span>
+</span><span id="serialize-267"><a href="#serialize-267"><span class="linenos">267</span></a>
+</span><span id="serialize-268"><a href="#serialize-268"><span class="linenos">268</span></a>        <span class="c1"># Collect types used in the generated code.</span>
+</span><span id="serialize-269"><a href="#serialize-269"><span class="linenos">269</span></a>        <span class="k">for</span> <span class="n">typ</span> <span class="ow">in</span> <span class="n">iter_types</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+</span><span id="serialize-270"><a href="#serialize-270"><span class="linenos">270</span></a>            <span class="c1"># When we encounter a dataclass not marked with serialize, then also generate serialize</span>
+</span><span id="serialize-271"><a href="#serialize-271"><span class="linenos">271</span></a>            <span class="c1"># functions for it.</span>
+</span><span id="serialize-272"><a href="#serialize-272"><span class="linenos">272</span></a>            <span class="k">if</span> <span class="n">is_dataclass_without_se</span><span class="p">(</span><span class="n">typ</span><span class="p">):</span>
+</span><span id="serialize-273"><a href="#serialize-273"><span class="linenos">273</span></a>                <span class="c1"># We call serialize and not wrap to make sure that we will use the default serde</span>
+</span><span id="serialize-274"><a href="#serialize-274"><span class="linenos">274</span></a>                <span class="c1"># configuration for generating the serialization function.</span>
+</span><span id="serialize-275"><a href="#serialize-275"><span class="linenos">275</span></a>                <span class="n">serialize</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
+</span><span id="serialize-276"><a href="#serialize-276"><span class="linenos">276</span></a>
+</span><span id="serialize-277"><a href="#serialize-277"><span class="linenos">277</span></a>            <span class="k">if</span> <span class="n">typ</span> <span class="ow">is</span> <span class="bp">cls</span> <span class="ow">or</span> <span class="p">(</span><span class="n">is_primitive</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">is_enum</span><span class="p">(</span><span class="n">typ</span><span class="p">)):</span>
+</span><span id="serialize-278"><a href="#serialize-278"><span class="linenos">278</span></a>                <span class="k">continue</span>
+</span><span id="serialize-279"><a href="#serialize-279"><span class="linenos">279</span></a>            <span class="n">g</span><span class="p">[</span><span class="n">typename</span><span class="p">(</span><span class="n">typ</span><span class="p">)]</span> <span class="o">=</span> <span class="n">typ</span>
+</span><span id="serialize-280"><a href="#serialize-280"><span class="linenos">280</span></a>
+</span><span id="serialize-281"><a href="#serialize-281"><span class="linenos">281</span></a>        <span class="c1"># render all union functions</span>
+</span><span id="serialize-282"><a href="#serialize-282"><span class="linenos">282</span></a>        <span class="k">for</span> <span class="n">union</span> <span class="ow">in</span> <span class="n">iter_unions</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+</span><span id="serialize-283"><a href="#serialize-283"><span class="linenos">283</span></a>            <span class="n">union_args</span> <span class="o">=</span> <span class="n">type_args</span><span class="p">(</span><span class="n">union</span><span class="p">)</span>
+</span><span id="serialize-284"><a href="#serialize-284"><span class="linenos">284</span></a>            <span class="n">union_key</span> <span class="o">=</span> <span class="n">union_func_name</span><span class="p">(</span><span class="n">UNION_SE_PREFIX</span><span class="p">,</span> <span class="n">union_args</span><span class="p">)</span>
+</span><span id="serialize-285"><a href="#serialize-285"><span class="linenos">285</span></a>            <span class="n">add_func</span><span class="p">(</span><span class="n">scope</span><span class="p">,</span> <span class="n">union_key</span><span class="p">,</span> <span class="n">render_union_func</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">union_args</span><span class="p">,</span> <span class="n">tagging</span><span class="p">),</span> <span class="n">g</span><span class="p">)</span>
+</span><span id="serialize-286"><a href="#serialize-286"><span class="linenos">286</span></a>            <span class="n">scope</span><span class="o">.</span><span class="n">union_se_args</span><span class="p">[</span><span class="n">union_key</span><span class="p">]</span> <span class="o">=</span> <span class="n">union_args</span>
+</span><span id="serialize-287"><a href="#serialize-287"><span class="linenos">287</span></a>
+</span><span id="serialize-288"><a href="#serialize-288"><span class="linenos">288</span></a>        <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">sefields</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">serialize_class_var</span><span class="p">):</span>
+</span><span id="serialize-289"><a href="#serialize-289"><span class="linenos">289</span></a>            <span class="k">if</span> <span class="n">f</span><span class="o">.</span><span class="n">skip_if</span><span class="p">:</span>
+</span><span id="serialize-290"><a href="#serialize-290"><span class="linenos">290</span></a>                <span class="n">g</span><span class="p">[</span><span class="n">f</span><span class="o">.</span><span class="n">skip_if</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">skip_if</span>
+</span><span id="serialize-291"><a href="#serialize-291"><span class="linenos">291</span></a>            <span class="k">if</span> <span class="n">f</span><span class="o">.</span><span class="n">serializer</span><span class="p">:</span>
+</span><span id="serialize-292"><a href="#serialize-292"><span class="linenos">292</span></a>                <span class="n">g</span><span class="p">[</span><span class="n">f</span><span class="o">.</span><span class="n">serializer</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">serializer</span>
+</span><span id="serialize-293"><a href="#serialize-293"><span class="linenos">293</span></a>
+</span><span id="serialize-294"><a href="#serialize-294"><span class="linenos">294</span></a>        <span class="n">add_func</span><span class="p">(</span><span class="n">scope</span><span class="p">,</span> <span class="n">TO_ITER</span><span class="p">,</span> <span class="n">render_to_tuple</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">serializer</span><span class="p">,</span> <span class="n">type_check</span><span class="p">,</span> <span class="n">serialize_class_var</span><span class="p">),</span> <span class="n">g</span><span class="p">)</span>
+</span><span id="serialize-295"><a href="#serialize-295"><span class="linenos">295</span></a>        <span class="n">add_func</span><span class="p">(</span><span class="n">scope</span><span class="p">,</span> <span class="n">TO_DICT</span><span class="p">,</span> <span class="n">render_to_dict</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">rename_all</span><span class="p">,</span> <span class="n">serializer</span><span class="p">,</span> <span class="n">type_check</span><span class="p">,</span> <span class="n">serialize_class_var</span><span class="p">),</span> <span class="n">g</span><span class="p">)</span>
+</span><span id="serialize-296"><a href="#serialize-296"><span class="linenos">296</span></a>        <span class="n">add_func</span><span class="p">(</span><span class="n">scope</span><span class="p">,</span> <span class="n">TYPE_CHECK</span><span class="p">,</span> <span class="n">render_type_check</span><span class="p">(</span><span class="bp">cls</span><span class="p">),</span> <span class="n">g</span><span class="p">)</span>
+</span><span id="serialize-297"><a href="#serialize-297"><span class="linenos">297</span></a>
+</span><span id="serialize-298"><a href="#serialize-298"><span class="linenos">298</span></a>        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">typename</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">SERDE_SCOPE</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">scope</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span id="serialize-299"><a href="#serialize-299"><span class="linenos">299</span></a>
+</span><span id="serialize-300"><a href="#serialize-300"><span class="linenos">300</span></a>        <span class="k">return</span> <span class="bp">cls</span>
+</span><span id="serialize-301"><a href="#serialize-301"><span class="linenos">301</span></a>
+</span><span id="serialize-302"><a href="#serialize-302"><span class="linenos">302</span></a>    <span class="k">if</span> <span class="n">_cls</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="serialize-303"><a href="#serialize-303"><span class="linenos">303</span></a>        <span class="k">return</span> <span class="n">wrap</span>  <span class="c1"># type: ignore</span>
+</span><span id="serialize-304"><a href="#serialize-304"><span class="linenos">304</span></a>
+</span><span id="serialize-305"><a href="#serialize-305"><span class="linenos">305</span></a>    <span class="k">if</span> <span class="n">_cls</span> <span class="ow">in</span> <span class="n">GENERATION_STACK</span><span class="p">:</span>
+</span><span id="serialize-306"><a href="#serialize-306"><span class="linenos">306</span></a>        <span class="k">return</span> <span class="n">_cls</span>
+</span><span id="serialize-307"><a href="#serialize-307"><span class="linenos">307</span></a>
+</span><span id="serialize-308"><a href="#serialize-308"><span class="linenos">308</span></a>    <span class="n">GENERATION_STACK</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_cls</span><span class="p">)</span>
+</span><span id="serialize-309"><a href="#serialize-309"><span class="linenos">309</span></a>    <span class="k">try</span><span class="p">:</span>
+</span><span id="serialize-310"><a href="#serialize-310"><span class="linenos">310</span></a>        <span class="k">return</span> <span class="n">wrap</span><span class="p">(</span><span class="n">_cls</span><span class="p">)</span>
+</span><span id="serialize-311"><a href="#serialize-311"><span class="linenos">311</span></a>    <span class="k">finally</span><span class="p">:</span>
+</span><span id="serialize-312"><a href="#serialize-312"><span class="linenos">312</span></a>        <span class="n">GENERATION_STACK</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
 </span></pre></div>
 
 
@@ -1411,14 +1412,18 @@ for a certain field, raise <code><a href="#SerdeSkip">serde.SerdeSkip</a></code>
 </div>
 
 <ul>
-<li><code>serialize_class_var</code> enables <code>typing.ClassVar</code> serialization.
-&gt;&gt;&gt; @serialize(serialize_class_var=True)
-... class Foo:
-...     v: typing.ClassVar[int] = 10
-&gt;&gt;&gt;
-&gt;&gt;&gt; to_json(Foo())
-'{"v":10}'</li>
+<li><code>serialize_class_var</code> enables <code>typing.ClassVar</code> serialization.</li>
 </ul>
+
+<div class="pdoc-code codehilite">
+<pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="nd">@serialize</span><span class="p">(</span><span class="n">serialize_class_var</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="gp">... </span><span class="k">class</span> <span class="nc">Foo</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="n">v</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">ClassVar</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">10</span>
+<span class="go">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">to_json</span><span class="p">(</span><span class="n">Foo</span><span class="p">())</span>
+<span class="go">&#39;{&quot;v&quot;:10}&#39;</span>
+</code></pre>
+</div>
 </div>
 
 
@@ -1434,27 +1439,27 @@ for a certain field, raise <code><a href="#SerdeSkip">serde.SerdeSkip</a></code>
 
     </div>
     <a class="headerlink" href="#to_dict"></a>
-            <div class="pdoc-code codehilite"><pre><span></span><span id="to_dict-418"><a href="#to_dict-418"><span class="linenos">418</span></a><span class="k">def</span> <span class="nf">to_dict</span><span class="p">(</span><span class="n">o</span><span class="p">,</span> <span class="n">reuse_instances</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="o">...</span><span class="p">,</span> <span class="n">convert_sets</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="o">...</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
-</span><span id="to_dict-419"><a href="#to_dict-419"><span class="linenos">419</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-</span><span id="to_dict-420"><a href="#to_dict-420"><span class="linenos">420</span></a><span class="sd">    Serialize object into dictionary.</span>
-</span><span id="to_dict-421"><a href="#to_dict-421"><span class="linenos">421</span></a>
-</span><span id="to_dict-422"><a href="#to_dict-422"><span class="linenos">422</span></a><span class="sd">    &gt;&gt;&gt; @serialize</span>
-</span><span id="to_dict-423"><a href="#to_dict-423"><span class="linenos">423</span></a><span class="sd">    ... class Foo:</span>
-</span><span id="to_dict-424"><a href="#to_dict-424"><span class="linenos">424</span></a><span class="sd">    ...     i: int</span>
-</span><span id="to_dict-425"><a href="#to_dict-425"><span class="linenos">425</span></a><span class="sd">    ...     s: str = &#39;foo&#39;</span>
-</span><span id="to_dict-426"><a href="#to_dict-426"><span class="linenos">426</span></a><span class="sd">    ...     f: float = 100.0</span>
-</span><span id="to_dict-427"><a href="#to_dict-427"><span class="linenos">427</span></a><span class="sd">    ...     b: bool = True</span>
-</span><span id="to_dict-428"><a href="#to_dict-428"><span class="linenos">428</span></a><span class="sd">    &gt;&gt;&gt;</span>
-</span><span id="to_dict-429"><a href="#to_dict-429"><span class="linenos">429</span></a><span class="sd">    &gt;&gt;&gt; to_dict(Foo(i=10))</span>
-</span><span id="to_dict-430"><a href="#to_dict-430"><span class="linenos">430</span></a><span class="sd">    {&#39;i&#39;: 10, &#39;s&#39;: &#39;foo&#39;, &#39;f&#39;: 100.0, &#39;b&#39;: True}</span>
-</span><span id="to_dict-431"><a href="#to_dict-431"><span class="linenos">431</span></a>
-</span><span id="to_dict-432"><a href="#to_dict-432"><span class="linenos">432</span></a><span class="sd">    You can pass any type supported by pyserde. For example,</span>
-</span><span id="to_dict-433"><a href="#to_dict-433"><span class="linenos">433</span></a>
-</span><span id="to_dict-434"><a href="#to_dict-434"><span class="linenos">434</span></a><span class="sd">    &gt;&gt;&gt; lst = [Foo(i=10), Foo(i=20)]</span>
-</span><span id="to_dict-435"><a href="#to_dict-435"><span class="linenos">435</span></a><span class="sd">    &gt;&gt;&gt; to_dict(lst)</span>
-</span><span id="to_dict-436"><a href="#to_dict-436"><span class="linenos">436</span></a><span class="sd">    [{&#39;i&#39;: 10, &#39;s&#39;: &#39;foo&#39;, &#39;f&#39;: 100.0, &#39;b&#39;: True}, {&#39;i&#39;: 20, &#39;s&#39;: &#39;foo&#39;, &#39;f&#39;: 100.0, &#39;b&#39;: True}]</span>
-</span><span id="to_dict-437"><a href="#to_dict-437"><span class="linenos">437</span></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="to_dict-438"><a href="#to_dict-438"><span class="linenos">438</span></a>    <span class="k">return</span> <span class="n">to_obj</span><span class="p">(</span><span class="n">o</span><span class="p">,</span> <span class="n">named</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">reuse_instances</span><span class="o">=</span><span class="n">reuse_instances</span><span class="p">,</span> <span class="n">convert_sets</span><span class="o">=</span><span class="n">convert_sets</span><span class="p">)</span>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="to_dict-419"><a href="#to_dict-419"><span class="linenos">419</span></a><span class="k">def</span> <span class="nf">to_dict</span><span class="p">(</span><span class="n">o</span><span class="p">,</span> <span class="n">reuse_instances</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="o">...</span><span class="p">,</span> <span class="n">convert_sets</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="o">...</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+</span><span id="to_dict-420"><a href="#to_dict-420"><span class="linenos">420</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+</span><span id="to_dict-421"><a href="#to_dict-421"><span class="linenos">421</span></a><span class="sd">    Serialize object into dictionary.</span>
+</span><span id="to_dict-422"><a href="#to_dict-422"><span class="linenos">422</span></a>
+</span><span id="to_dict-423"><a href="#to_dict-423"><span class="linenos">423</span></a><span class="sd">    &gt;&gt;&gt; @serialize</span>
+</span><span id="to_dict-424"><a href="#to_dict-424"><span class="linenos">424</span></a><span class="sd">    ... class Foo:</span>
+</span><span id="to_dict-425"><a href="#to_dict-425"><span class="linenos">425</span></a><span class="sd">    ...     i: int</span>
+</span><span id="to_dict-426"><a href="#to_dict-426"><span class="linenos">426</span></a><span class="sd">    ...     s: str = &#39;foo&#39;</span>
+</span><span id="to_dict-427"><a href="#to_dict-427"><span class="linenos">427</span></a><span class="sd">    ...     f: float = 100.0</span>
+</span><span id="to_dict-428"><a href="#to_dict-428"><span class="linenos">428</span></a><span class="sd">    ...     b: bool = True</span>
+</span><span id="to_dict-429"><a href="#to_dict-429"><span class="linenos">429</span></a><span class="sd">    &gt;&gt;&gt;</span>
+</span><span id="to_dict-430"><a href="#to_dict-430"><span class="linenos">430</span></a><span class="sd">    &gt;&gt;&gt; to_dict(Foo(i=10))</span>
+</span><span id="to_dict-431"><a href="#to_dict-431"><span class="linenos">431</span></a><span class="sd">    {&#39;i&#39;: 10, &#39;s&#39;: &#39;foo&#39;, &#39;f&#39;: 100.0, &#39;b&#39;: True}</span>
+</span><span id="to_dict-432"><a href="#to_dict-432"><span class="linenos">432</span></a>
+</span><span id="to_dict-433"><a href="#to_dict-433"><span class="linenos">433</span></a><span class="sd">    You can pass any type supported by pyserde. For example,</span>
+</span><span id="to_dict-434"><a href="#to_dict-434"><span class="linenos">434</span></a>
+</span><span id="to_dict-435"><a href="#to_dict-435"><span class="linenos">435</span></a><span class="sd">    &gt;&gt;&gt; lst = [Foo(i=10), Foo(i=20)]</span>
+</span><span id="to_dict-436"><a href="#to_dict-436"><span class="linenos">436</span></a><span class="sd">    &gt;&gt;&gt; to_dict(lst)</span>
+</span><span id="to_dict-437"><a href="#to_dict-437"><span class="linenos">437</span></a><span class="sd">    [{&#39;i&#39;: 10, &#39;s&#39;: &#39;foo&#39;, &#39;f&#39;: 100.0, &#39;b&#39;: True}, {&#39;i&#39;: 20, &#39;s&#39;: &#39;foo&#39;, &#39;f&#39;: 100.0, &#39;b&#39;: True}]</span>
+</span><span id="to_dict-438"><a href="#to_dict-438"><span class="linenos">438</span></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="to_dict-439"><a href="#to_dict-439"><span class="linenos">439</span></a>    <span class="k">return</span> <span class="n">to_obj</span><span class="p">(</span><span class="n">o</span><span class="p">,</span> <span class="n">named</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">reuse_instances</span><span class="o">=</span><span class="n">reuse_instances</span><span class="p">,</span> <span class="n">convert_sets</span><span class="o">=</span><span class="n">convert_sets</span><span class="p">)</span>
 </span></pre></div>
 
 
@@ -1496,27 +1501,27 @@ for a certain field, raise <code><a href="#SerdeSkip">serde.SerdeSkip</a></code>
 
     </div>
     <a class="headerlink" href="#to_tuple"></a>
-            <div class="pdoc-code codehilite"><pre><span></span><span id="to_tuple-388"><a href="#to_tuple-388"><span class="linenos">388</span></a><span class="k">def</span> <span class="nf">to_tuple</span><span class="p">(</span><span class="n">o</span><span class="p">,</span> <span class="n">reuse_instances</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="o">...</span><span class="p">,</span> <span class="n">convert_sets</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="o">...</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
-</span><span id="to_tuple-389"><a href="#to_tuple-389"><span class="linenos">389</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-</span><span id="to_tuple-390"><a href="#to_tuple-390"><span class="linenos">390</span></a><span class="sd">    Serialize object into tuple.</span>
-</span><span id="to_tuple-391"><a href="#to_tuple-391"><span class="linenos">391</span></a>
-</span><span id="to_tuple-392"><a href="#to_tuple-392"><span class="linenos">392</span></a><span class="sd">    &gt;&gt;&gt; @serialize</span>
-</span><span id="to_tuple-393"><a href="#to_tuple-393"><span class="linenos">393</span></a><span class="sd">    ... class Foo:</span>
-</span><span id="to_tuple-394"><a href="#to_tuple-394"><span class="linenos">394</span></a><span class="sd">    ...     i: int</span>
-</span><span id="to_tuple-395"><a href="#to_tuple-395"><span class="linenos">395</span></a><span class="sd">    ...     s: str = &#39;foo&#39;</span>
-</span><span id="to_tuple-396"><a href="#to_tuple-396"><span class="linenos">396</span></a><span class="sd">    ...     f: float = 100.0</span>
-</span><span id="to_tuple-397"><a href="#to_tuple-397"><span class="linenos">397</span></a><span class="sd">    ...     b: bool = True</span>
-</span><span id="to_tuple-398"><a href="#to_tuple-398"><span class="linenos">398</span></a><span class="sd">    &gt;&gt;&gt;</span>
-</span><span id="to_tuple-399"><a href="#to_tuple-399"><span class="linenos">399</span></a><span class="sd">    &gt;&gt;&gt; to_tuple(Foo(i=10))</span>
-</span><span id="to_tuple-400"><a href="#to_tuple-400"><span class="linenos">400</span></a><span class="sd">    (10, &#39;foo&#39;, 100.0, True)</span>
-</span><span id="to_tuple-401"><a href="#to_tuple-401"><span class="linenos">401</span></a>
-</span><span id="to_tuple-402"><a href="#to_tuple-402"><span class="linenos">402</span></a><span class="sd">    You can pass any type supported by pyserde. For example,</span>
-</span><span id="to_tuple-403"><a href="#to_tuple-403"><span class="linenos">403</span></a>
-</span><span id="to_tuple-404"><a href="#to_tuple-404"><span class="linenos">404</span></a><span class="sd">    &gt;&gt;&gt; lst = [Foo(i=10), Foo(i=20)]</span>
-</span><span id="to_tuple-405"><a href="#to_tuple-405"><span class="linenos">405</span></a><span class="sd">    &gt;&gt;&gt; to_tuple(lst)</span>
-</span><span id="to_tuple-406"><a href="#to_tuple-406"><span class="linenos">406</span></a><span class="sd">    [(10, &#39;foo&#39;, 100.0, True), (20, &#39;foo&#39;, 100.0, True)]</span>
-</span><span id="to_tuple-407"><a href="#to_tuple-407"><span class="linenos">407</span></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="to_tuple-408"><a href="#to_tuple-408"><span class="linenos">408</span></a>    <span class="k">return</span> <span class="n">to_obj</span><span class="p">(</span><span class="n">o</span><span class="p">,</span> <span class="n">named</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">reuse_instances</span><span class="o">=</span><span class="n">reuse_instances</span><span class="p">,</span> <span class="n">convert_sets</span><span class="o">=</span><span class="n">convert_sets</span><span class="p">)</span>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="to_tuple-389"><a href="#to_tuple-389"><span class="linenos">389</span></a><span class="k">def</span> <span class="nf">to_tuple</span><span class="p">(</span><span class="n">o</span><span class="p">,</span> <span class="n">reuse_instances</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="o">...</span><span class="p">,</span> <span class="n">convert_sets</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="o">...</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+</span><span id="to_tuple-390"><a href="#to_tuple-390"><span class="linenos">390</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+</span><span id="to_tuple-391"><a href="#to_tuple-391"><span class="linenos">391</span></a><span class="sd">    Serialize object into tuple.</span>
+</span><span id="to_tuple-392"><a href="#to_tuple-392"><span class="linenos">392</span></a>
+</span><span id="to_tuple-393"><a href="#to_tuple-393"><span class="linenos">393</span></a><span class="sd">    &gt;&gt;&gt; @serialize</span>
+</span><span id="to_tuple-394"><a href="#to_tuple-394"><span class="linenos">394</span></a><span class="sd">    ... class Foo:</span>
+</span><span id="to_tuple-395"><a href="#to_tuple-395"><span class="linenos">395</span></a><span class="sd">    ...     i: int</span>
+</span><span id="to_tuple-396"><a href="#to_tuple-396"><span class="linenos">396</span></a><span class="sd">    ...     s: str = &#39;foo&#39;</span>
+</span><span id="to_tuple-397"><a href="#to_tuple-397"><span class="linenos">397</span></a><span class="sd">    ...     f: float = 100.0</span>
+</span><span id="to_tuple-398"><a href="#to_tuple-398"><span class="linenos">398</span></a><span class="sd">    ...     b: bool = True</span>
+</span><span id="to_tuple-399"><a href="#to_tuple-399"><span class="linenos">399</span></a><span class="sd">    &gt;&gt;&gt;</span>
+</span><span id="to_tuple-400"><a href="#to_tuple-400"><span class="linenos">400</span></a><span class="sd">    &gt;&gt;&gt; to_tuple(Foo(i=10))</span>
+</span><span id="to_tuple-401"><a href="#to_tuple-401"><span class="linenos">401</span></a><span class="sd">    (10, &#39;foo&#39;, 100.0, True)</span>
+</span><span id="to_tuple-402"><a href="#to_tuple-402"><span class="linenos">402</span></a>
+</span><span id="to_tuple-403"><a href="#to_tuple-403"><span class="linenos">403</span></a><span class="sd">    You can pass any type supported by pyserde. For example,</span>
+</span><span id="to_tuple-404"><a href="#to_tuple-404"><span class="linenos">404</span></a>
+</span><span id="to_tuple-405"><a href="#to_tuple-405"><span class="linenos">405</span></a><span class="sd">    &gt;&gt;&gt; lst = [Foo(i=10), Foo(i=20)]</span>
+</span><span id="to_tuple-406"><a href="#to_tuple-406"><span class="linenos">406</span></a><span class="sd">    &gt;&gt;&gt; to_tuple(lst)</span>
+</span><span id="to_tuple-407"><a href="#to_tuple-407"><span class="linenos">407</span></a><span class="sd">    [(10, &#39;foo&#39;, 100.0, True), (20, &#39;foo&#39;, 100.0, True)]</span>
+</span><span id="to_tuple-408"><a href="#to_tuple-408"><span class="linenos">408</span></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="to_tuple-409"><a href="#to_tuple-409"><span class="linenos">409</span></a>    <span class="k">return</span> <span class="n">to_obj</span><span class="p">(</span><span class="n">o</span><span class="p">,</span> <span class="n">named</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">reuse_instances</span><span class="o">=</span><span class="n">reuse_instances</span><span class="p">,</span> <span class="n">convert_sets</span><span class="o">=</span><span class="n">convert_sets</span><span class="p">)</span>
 </span></pre></div>
 
 
