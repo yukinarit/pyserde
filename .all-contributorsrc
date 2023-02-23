@@ -6,9 +6,9 @@
   "files": [
     "README.md"
   ],
-  "imageSize": 100,
+  "imageSize": 60,
   "commit": true,
-  "commitConvention": "angular",
+  "commitConvention": "gitmoji",
   "contributors": [
     {
       "login": "yukinarit",
