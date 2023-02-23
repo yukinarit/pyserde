@@ -1026,6 +1026,56 @@ def test_class_var() -> None:
     assert f == serde.from_dict(Nested, {})
 
 
+def test_dataclass_without_serde() -> None:
+    @serde.serde(rename_all="kebabcase")
+    @dataclasses.dataclass
+    class Foo:
+        myLongName: int
+
+    @dataclasses.dataclass
+    class Wrapper:
+        foo: Foo
+
+    a = Wrapper(foo=Foo(myLongName=1))
+    serialized = serde.to_dict(a)
+    assert {'foo': {'my-long-name': 1}} == serialized
+    assert a == serde.from_dict(Wrapper, serialized)
+
+
+def test_dataclass_add_serialize() -> None:
+    @serde.serde(rename_all="kebabcase")
+    @dataclasses.dataclass
+    class Foo:
+        myLongName: int
+
+    @serde.deserialize
+    @dataclasses.dataclass
+    class Wrapper:
+        foo: Foo
+
+    a = Wrapper(foo=Foo(myLongName=1))
+    serialized = serde.to_dict(a)
+    assert {'foo': {'my-long-name': 1}} == serialized
+    assert a == serde.from_dict(Wrapper, serialized)
+
+
+def test_dataclass_add_deserialize() -> None:
+    @serde.serde(rename_all="kebabcase")
+    @dataclasses.dataclass
+    class Foo:
+        myLongName: int
+
+    @serde.serialize
+    @dataclasses.dataclass
+    class Wrapper:
+        foo: Foo
+
+    a = Wrapper(foo=Foo(myLongName=1))
+    serialized = serde.to_dict(a)
+    assert {'foo': {'my-long-name': 1}} == serialized
+    assert a == serde.from_dict(Wrapper, serialized)
+
+
 def test_nested_dataclass_without_serde() -> None:
     @dataclasses.dataclass
     class Foo:
