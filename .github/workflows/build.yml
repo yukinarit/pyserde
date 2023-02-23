@@ -31,14 +31,14 @@ jobs:
         uses: jwalton/gh-find-current-pr@v1
         id: findPr
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          state: all
       - name: Set commit message
         run: |
           if [ -z "$PR" ]
           then
-            echo "COMMIT_MESSAGE=docs: Update docs" >> $GITHUB_ENV
+            echo "COMMIT_MESSAGE=:octocat: Update docs" >> $GITHUB_ENV
           else
-            echo "COMMIT_MESSAGE=docs: Update docs for #$PR" >> $GITHUB_ENV
+            echo "COMMIT_MESSAGE=:octocat: Update docs for #$PR" >> $GITHUB_ENV
           fi
         env:
           PR: ${{ steps.findPr.outputs.pr }}
@@ -50,5 +50,5 @@ jobs:
           folder: out
           commit-message: ${{ env.COMMIT_MESSAGE }}
           clean: true
-          git-config-name: octocat
-          git-config-email: octocat@github.com
+          git-config-name: github-actions
+          git-config-email: github-actions@github.com
