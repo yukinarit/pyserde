@@ -38,7 +38,6 @@ from .compat import (
     is_generic,
     is_list,
     is_literal,
-    is_new_type_primitive,
     is_none,
     is_opt,
     is_primitive,
@@ -273,7 +272,7 @@ def deserialize(
                 # We call deserialize and not wrap to make sure that we will use the default serde
                 # configuration for generating the deserialization function.
                 deserialize(typ)
-            if typ is cls or (is_primitive(typ) and not is_enum(typ) and not is_new_type_primitive(typ)):
+            if typ is cls or (is_primitive(typ) and not is_enum(typ)):
                 continue
             if is_generic(typ):
                 g[typename(typ)] = get_origin(typ)
@@ -1006,7 +1005,7 @@ def {{func}}(cls=cls, maybe_generic=None, data=None, reuse_instances = {{serde_s
     fake_dict = {"fake_key": data}
     {% endif %}
 
-    {% if t|is_primitive or t |is_none %}
+    {% if t|is_primitive or t|is_none %}
     if not isinstance(fake_dict["fake_key"], {{t|typename}}):
         raise Exception("Not a type of {{t|typename}}")
     {% endif %}

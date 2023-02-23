@@ -32,7 +32,6 @@ from .compat import (
     is_generic,
     is_list,
     is_literal,
-    is_new_type_primitive,
     is_none,
     is_opt,
     is_primitive,
@@ -273,7 +272,7 @@ def serialize(
                 # configuration for generating the serialization function.
                 serialize(typ)
 
-            if typ is cls or (is_primitive(typ) and not is_enum(typ) and not is_new_type_primitive(typ)):
+            if typ is cls or (is_primitive(typ) and not is_enum(typ)):
                 continue
             g[typename(typ)] = typ
 
