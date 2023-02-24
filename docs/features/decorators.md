@@ -62,7 +62,7 @@ class Foo:
 
 ## `@dataclass` without `@serde`
 
-pyserde can (de)serialize dataclasses without `@serde` since v0.9.9. This feature is convenient when you want to use classes declared in external libraries or a type checker doesn't work with `@serde` decorator. See [this example](https://github.com/yukinarit/pyserde/blob/main/examples/plain_dataclass.py).
+pyserde can (de)serialize dataclasses without `@serde` since v0.10.0. This feature is convenient when you want to use classes declared in external libraries or a type checker doesn't work with `@serde` decorator. See [this example](https://github.com/yukinarit/pyserde/blob/main/examples/plain_dataclass.py).
 
 ```python
 @dataclass
