@@ -150,7 +150,8 @@
                     <main>
                         <h1 id="decorators"><a class="header" href="#decorators">Decorators</a></h1>
 <h2 id="serde"><a class="header" href="#serde"><code>@serde</code></a></h2>
-<p>@serde is a shortcut of @serialize and @deserialize decorators. This code</p>
+<p><code>@serde</code> is a shortcut of <code>@serialize</code> and <code>@deserialize</code> decorators.</p>
+<p>This code</p>
 <pre><code class="language-python">@serde
 @dataclass
 class Foo:
@@ -197,6 +198,24 @@ class Foo:
 @serialize(rename_all = &quot;camelcase&quot;)
 class Foo:
     ...
+</code></pre>
+<h2 id="dataclass-without-serde"><a class="header" href="#dataclass-without-serde"><code>@dataclass</code> without <code>@serde</code></a></h2>
+<p>pyserde can (de)serialize dataclasses without <code>@serde</code> since v0.9.9. This feature is convenient when you want to use classes declared in external libraries or a type checker doesn't work with <code>@serde</code> decorator. See <a href="https://github.com/yukinarit/pyserde/blob/main/examples/plain_dataclass.py">this example</a>.</p>
+<pre><code class="language-python">@dataclass
+class External:
+    ...
+
+to_dict(External()) # works without @serde
+</code></pre>
+<p>Note that you can't specify class attributes e.g. <code>rename_all</code> in this case. If you want to add a class attribute to an external dataclass, there is a technique to do that by extending dataclass. See <a href="https://github.com/yukinarit/pyserde/blob/main/examples/plain_dataclass_class_attribute.py">this example</a>.</p>
+<pre><code class="language-python">@dataclass
+class External:
+    some_value: int
+
+@serde(rename_all=&quot;kebabcase&quot;)
+@dataclass
+class Wrapper(External):
+    pass
 </code></pre>
 
                     </main>
