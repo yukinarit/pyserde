@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from serde.json import from_json, to_json
 
 
-# Works without @serde since v0.9.9
+# Works without @serde since v0.10.0
 @dataclass
 class Foo:
     i: int
