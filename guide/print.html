@@ -538,7 +538,7 @@ class Foo:
     ...
 </code></pre>
 <h2 id="dataclass-without-serde"><a class="header" href="#dataclass-without-serde"><code>@dataclass</code> without <code>@serde</code></a></h2>
-<p>pyserde can (de)serialize dataclasses without <code>@serde</code> since v0.9.9. This feature is convenient when you want to use classes declared in external libraries or a type checker doesn't work with <code>@serde</code> decorator. See <a href="https://github.com/yukinarit/pyserde/blob/main/examples/plain_dataclass.py">this example</a>.</p>
+<p>pyserde can (de)serialize dataclasses without <code>@serde</code> since v0.10.0. This feature is convenient when you want to use classes declared in external libraries or a type checker doesn't work with <code>@serde</code> decorator. See <a href="https://github.com/yukinarit/pyserde/blob/main/examples/plain_dataclass.py">this example</a>.</p>
 <pre><code class="language-python">@dataclass
 class External:
     ...
