@@ -33,6 +33,7 @@ from .compat import (
     is_datetime,
     is_default_dict,
     is_dict,
+    is_ellipsis,
     is_enum,
     is_frozen_set,
     is_generic,
@@ -45,6 +46,7 @@ from .compat import (
     is_str_serializable,
     is_tuple,
     is_union,
+    is_variable_tuple,
     iter_literals,
     iter_types,
     iter_unions,
@@ -425,7 +427,7 @@ def from_obj(c: Type, o: Any, named: bool, reuse_instances: bool):
                 res = set(thisfunc(type_args(c)[0], e) for e in o)
                 return res
         elif is_tuple(c):
-            if is_bare_tuple(c):
+            if is_bare_tuple(c) or is_variable_tuple(c):
                 return tuple(e for e in o)
             else:
                 res = tuple(thisfunc(type_args(c)[i], e) for i, e in enumerate(o))
@@ -448,7 +450,7 @@ def from_obj(c: Type, o: Any, named: bool, reuse_instances: bool):
             return deserialize_numpy_array_direct(c, o)
         elif is_datetime(c):
             return c.fromisoformat(o)
-        elif is_any(c) or c is Ellipsis:
+        elif is_any(c) or is_ellipsis(c):
             return o
 
         return c(o)
@@ -641,7 +643,7 @@ class Renderer:
                     if reuse_instances else {from_iso}"
         elif is_none(arg.type):
             res = "None"
-        elif arg.type is Any or arg.type is Ellipsis:
+        elif is_any(arg.type) or is_ellipsis(arg.type):
             res = arg.data
         elif isinstance(arg.type, TypeVar):
             index = find_generic_arg(self.cls, arg.type)
@@ -786,7 +788,7 @@ Foo.__serde__.funcs[\\'foo\\'](data=data["d"][3], maybe_generic=maybe_generic, r
 [coerce(int, v) for v in data[0][2]], Foo.__serde__.funcs['foo'](data=data[0][3], \
 maybe_generic=maybe_generic, reuse_instances=reuse_instances),)"
         """
-        if is_bare_tuple(arg.type):
+        if is_bare_tuple(arg.type) or is_variable_tuple(arg.type):
             return f'tuple({arg.data})'
         else:
             values = []

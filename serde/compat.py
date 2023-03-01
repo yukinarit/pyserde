@@ -241,7 +241,7 @@ def typename(typ: Type[Any], with_typing_module: bool = False) -> str:
         return f'Literal[{", ".join(str(e) for e in args)}]'
     elif typ is Any:
         return f'{mod}Any'
-    elif typ is Ellipsis:
+    elif is_ellipsis(typ):
         return '...'
     else:
         # Get super type for NewType
@@ -569,6 +569,23 @@ def is_bare_tuple(typ: Type[Any]) -> bool:
     return typ in (Tuple, tuple)
 
 
+def is_variable_tuple(typ: Type[Any]) -> bool:
+    """
+    Test if the type is a variable length of tuple `typing.Tuple[T, ...]`.
+
+    >>> from typing import Tuple
+    >>> is_variable_tuple(Tuple[int, ...])
+    True
+    >>> is_variable_tuple(Tuple[int, bool])
+    False
+    >>> is_variable_tuple(Tuple[()])
+    False
+    """
+    istuple = is_tuple(typ) and not is_bare_tuple(typ)
+    args = get_args(typ)
+    return istuple and len(args) == 2 and is_ellipsis(args[1])
+
+
 def is_set(typ: Type[Any]) -> bool:
     """
     Test if the type is `typing.Set` or `typing.FrozenSet`.
@@ -789,6 +806,10 @@ def is_str_serializable_instance(obj: Any) -> bool:
 
 def is_datetime_instance(obj: Any) -> bool:
     return isinstance(obj, DateTimeTypes)
+
+
+def is_ellipsis(typ: Any) -> bool:
+    return typ is Ellipsis
 
 
 def find_generic_arg(cls: Type[Any], field: TypeVar) -> int:

@@ -204,7 +204,10 @@ def test_is_instance():
     assert is_instance((10, "a"), tuple)
     assert is_instance((10, 'foo', 100.0, True), Tuple[int, str, float, bool])
     assert not is_instance((10, 'foo', 100.0, "last-type-is-wrong"), Tuple[int, str, float, bool])
-    assert is_instance((10, "a"), Tuple[int, ...])
+    assert is_instance((10, 20), Tuple[int, ...])
+    assert is_instance((10, 20, 30), Tuple[int, ...])
+    assert is_instance((), Tuple[int, ...])
+    assert not is_instance((10, "a"), Tuple[int, ...])
 
     # Tuple of dataclasses
     assert is_instance((Int(10), Str('foo'), Float(100.0), Bool(True)), Tuple[Int, Str, Float, Bool])

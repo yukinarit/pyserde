@@ -19,6 +19,7 @@ from .compat import (
     SerdeError,
     SerdeSkip,
     get_origin,
+    is_any,
     is_bare_dict,
     is_bare_list,
     is_bare_opt,
@@ -28,6 +29,7 @@ from .compat import (
     is_datetime,
     is_datetime_instance,
     is_dict,
+    is_ellipsis,
     is_enum,
     is_generic,
     is_list,
@@ -40,6 +42,7 @@ from .compat import (
     is_str_serializable_instance,
     is_tuple,
     is_union,
+    is_variable_tuple,
     iter_types,
     iter_unions,
     type_args,
@@ -719,7 +722,7 @@ convert_sets=convert_sets), coerce(int, foo[2]),)"
             res = f"{arg.varname} if reuse_instances else {arg.varname}.isoformat()"
         elif is_none(arg.type):
             res = "None"
-        elif arg.type is Any or arg.type is Ellipsis or isinstance(arg.type, TypeVar):
+        elif is_any(arg.type) or isinstance(arg.type, TypeVar):
             res = f"to_obj({arg.varname}, True, False, False)"
         elif is_generic(arg.type):
             arg.type = get_origin(arg.type)
@@ -801,7 +804,7 @@ convert_sets=convert_sets), coerce(int, foo[2]),)"
         """
         Render rvalue for tuple.
         """
-        if is_bare_tuple(arg.type):
+        if is_bare_tuple(arg.type) or is_variable_tuple(arg.type):
             return arg.varname
         else:
             rvalues = []
