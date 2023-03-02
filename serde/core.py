@@ -33,6 +33,7 @@ from .compat import (
     is_set,
     is_tuple,
     is_union,
+    is_variable_tuple,
     type_args,
     typename,
 )
@@ -251,6 +252,11 @@ def is_set_instance(obj: Any, typ: Type) -> bool:
 def is_tuple_instance(obj: Any, typ: Type) -> bool:
     if not isinstance(obj, tuple):
         return False
+    if is_variable_tuple(typ):
+        arg = type_args(typ)[0]
+        for v in obj:
+            if not is_instance(v, arg):
+                return False
     if len(obj) == 0 or is_bare_tuple(typ):
         return True
     for i, arg in enumerate(type_args(typ)):

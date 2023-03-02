@@ -8,7 +8,6 @@ import custom_class_serializer
 import custom_field_serializer
 import default
 import default_dict
-import ellipsis
 import env
 import flatten
 import forward_reference
@@ -36,6 +35,7 @@ import type_decimal
 import union
 import union_tagging
 import user_exception
+import variable_length_tuple
 import yamlfile
 
 PY310 = sys.version_info[:3] >= (3, 10, 0)
@@ -72,7 +72,7 @@ def run_all():
     run(type_check_coerce)
     run(user_exception)
     run(pep681)
-    run(ellipsis)
+    run(variable_length_tuple)
     run(init_var)
     run(class_var)
     run(alias)

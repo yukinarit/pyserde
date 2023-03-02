@@ -64,6 +64,14 @@ def test_simple(se, de, opt, t, T, f):
         assert t == de(T, se(t))
 
 
+@pytest.mark.parametrize('t,T,f', types, ids=type_ids())
+@pytest.mark.parametrize('named', (True, False))
+@pytest.mark.parametrize('reuse', (True, False))
+def test_from_to_obj(t, T, f, named, reuse):
+    obj = serde.se.to_obj(t, named, reuse, False)
+    assert t == serde.de.from_obj(T, obj, named, reuse)
+
+
 @pytest.mark.parametrize('t,T,filter', types, ids=type_ids())
 @pytest.mark.parametrize('opt', opt_case, ids=opt_case_ids())
 @pytest.mark.parametrize('se,de', (format_dict + format_tuple))
@@ -244,36 +252,43 @@ def test_enum_imported(se, de):
 @pytest.mark.parametrize('se,de', all_formats)
 def test_tuple(se, de, opt):
     @serde.serde(**opt)
+    @dataclasses.dataclass
     class Homogeneous:
         i: Tuple[int, int]
         s: Tuple[str, str]
         f: Tuple[float, float]
         b: Tuple[bool, bool]
 
-    p = Homogeneous((10, 20), ('a', 'b'), (10.0, 20.0), (True, False))
-    assert p == de(Homogeneous, se(p))
+    a = Homogeneous((10, 20), ('a', 'b'), (10.0, 20.0), (True, False))
+    assert a == de(Homogeneous, se(a))
 
     # List will be type mismatch if type_check=True.
-    p = Homogeneous([10, 20], ['a', 'b'], [10.0, 20.0], [True, False])
-    p != de(Homogeneous, se(p))
+    a = Homogeneous([10, 20], ['a', 'b'], [10.0, 20.0], [True, False])
+    a != de(Homogeneous, se(a))
 
     @serde.serde(**opt)
+    @dataclasses.dataclass
     class Variant:
         t: Tuple[int, str, float, bool]
 
     # Toml doesn't support variant type of array.
     if se is not serde.toml.to_toml:
-        p = Variant((10, 'a', 10.0, True))
-        assert p == de(Variant, se(p))
+        b = Variant((10, 'a', 10.0, True))
+        assert b == de(Variant, se(b))
 
     @serde.serde(**opt)
+    @dataclasses.dataclass
     class BareTuple:
         t: Tuple
 
-    p = BareTuple((10, 20))
-    assert p == de(BareTuple, se(p))
+    c = BareTuple((10, 20))
+    assert c == de(BareTuple, se(c))
+
+    c = BareTuple(())
+    assert c == de(BareTuple, se(c))
 
     @serde.serde(**opt)
+    @dataclasses.dataclass
     class Nested:
         i: Tuple[data.Int, data.Int]
         s: Tuple[data.Str, data.Str]
@@ -282,13 +297,31 @@ def test_tuple(se, de, opt):
 
     # hmmm.. Nested tuple doesn't work ..
     if se is not serde.toml.to_toml:
-        p = Nested(
+        d = Nested(
             (data.Int(10), data.Int(20)),
             (data.Str("a"), data.Str("b")),
             (data.Float(10.0), data.Float(20.0)),
             (data.Bool(True), data.Bool(False)),
         )
-        assert p == de(Nested, se(p))
+        assert d == de(Nested, se(d))
+
+    @serde.serde(**opt)
+    @dataclasses.dataclass
+    class VariableTuple:
+        t: Tuple[int, ...]
+
+    e = VariableTuple((1, 2, 3))
+    assert e == de(VariableTuple, se(e))
+
+    e = VariableTuple(())
+    assert e == de(VariableTuple, se(e))
+
+    with pytest.raises(Exception):
+
+        @serde.serde(**opt)
+        @dataclasses.dataclass
+        class EmptyTuple:
+            t: Tuple[()]
 
 
 @pytest.mark.parametrize('se,de', all_formats)
@@ -809,6 +842,11 @@ test_cases = [
     (Tuple[int], (10.0,), True),
     (Tuple[int, str], (10, "foo"), False),
     (Tuple[int, str], (10, 10.0), True),
+    (Tuple[data.Int, data.Str], (data.Int(1), data.Str("2")), False),
+    (Tuple[data.Int, data.Str], (data.Int(1), data.Int(2)), True),
+    (Tuple, (10, 10.0), False),
+    (Tuple[int, ...], (1, 2), False),
+    (Tuple[int, ...], (1, 2.0), True),
     (data.E, data.E.S, False),
     (data.E, data.IE.V0, False),  # TODO enum type check is not yet perfect
     (Union[int, str], 10, False),
