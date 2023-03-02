@@ -293,7 +293,7 @@
 </span><span id="L-241"><a href="#L-241"><span class="linenos">241</span></a>        <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;Literal[</span><span class="si">{</span><span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">e</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">args</span><span class="p">)</span><span class="si">}</span><span class="s1">]&#39;</span>
 </span><span id="L-242"><a href="#L-242"><span class="linenos">242</span></a>    <span class="k">elif</span> <span class="n">typ</span> <span class="ow">is</span> <span class="n">Any</span><span class="p">:</span>
 </span><span id="L-243"><a href="#L-243"><span class="linenos">243</span></a>        <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">mod</span><span class="si">}</span><span class="s1">Any&#39;</span>
-</span><span id="L-244"><a href="#L-244"><span class="linenos">244</span></a>    <span class="k">elif</span> <span class="n">typ</span> <span class="ow">is</span> <span class="bp">Ellipsis</span><span class="p">:</span>
+</span><span id="L-244"><a href="#L-244"><span class="linenos">244</span></a>    <span class="k">elif</span> <span class="n">is_ellipsis</span><span class="p">(</span><span class="n">typ</span><span class="p">):</span>
 </span><span id="L-245"><a href="#L-245"><span class="linenos">245</span></a>        <span class="k">return</span> <span class="s1">&#39;...&#39;</span>
 </span><span id="L-246"><a href="#L-246"><span class="linenos">246</span></a>    <span class="k">else</span><span class="p">:</span>
 </span><span id="L-247"><a href="#L-247"><span class="linenos">247</span></a>        <span class="c1"># Get super type for NewType</span>
@@ -621,312 +621,333 @@
 </span><span id="L-569"><a href="#L-569"><span class="linenos">569</span></a>    <span class="k">return</span> <span class="n">typ</span> <span class="ow">in</span> <span class="p">(</span><span class="n">Tuple</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)</span>
 </span><span id="L-570"><a href="#L-570"><span class="linenos">570</span></a>
 </span><span id="L-571"><a href="#L-571"><span class="linenos">571</span></a>
-</span><span id="L-572"><a href="#L-572"><span class="linenos">572</span></a><span class="k">def</span> <span class="nf">is_set</span><span class="p">(</span><span class="n">typ</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+</span><span id="L-572"><a href="#L-572"><span class="linenos">572</span></a><span class="k">def</span> <span class="nf">is_variable_tuple</span><span class="p">(</span><span class="n">typ</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 </span><span id="L-573"><a href="#L-573"><span class="linenos">573</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-</span><span id="L-574"><a href="#L-574"><span class="linenos">574</span></a><span class="sd">    Test if the type is `typing.Set` or `typing.FrozenSet`.</span>
+</span><span id="L-574"><a href="#L-574"><span class="linenos">574</span></a><span class="sd">    Test if the type is a variable length of tuple `typing.Tuple[T, ...]`.</span>
 </span><span id="L-575"><a href="#L-575"><span class="linenos">575</span></a>
-</span><span id="L-576"><a href="#L-576"><span class="linenos">576</span></a><span class="sd">    &gt;&gt;&gt; from typing import Set</span>
-</span><span id="L-577"><a href="#L-577"><span class="linenos">577</span></a><span class="sd">    &gt;&gt;&gt; is_set(Set[int])</span>
+</span><span id="L-576"><a href="#L-576"><span class="linenos">576</span></a><span class="sd">    &gt;&gt;&gt; from typing import Tuple</span>
+</span><span id="L-577"><a href="#L-577"><span class="linenos">577</span></a><span class="sd">    &gt;&gt;&gt; is_variable_tuple(Tuple[int, ...])</span>
 </span><span id="L-578"><a href="#L-578"><span class="linenos">578</span></a><span class="sd">    True</span>
-</span><span id="L-579"><a href="#L-579"><span class="linenos">579</span></a><span class="sd">    &gt;&gt;&gt; is_set(Set)</span>
-</span><span id="L-580"><a href="#L-580"><span class="linenos">580</span></a><span class="sd">    True</span>
-</span><span id="L-581"><a href="#L-581"><span class="linenos">581</span></a><span class="sd">    &gt;&gt;&gt; is_set(FrozenSet[int])</span>
-</span><span id="L-582"><a href="#L-582"><span class="linenos">582</span></a><span class="sd">    True</span>
+</span><span id="L-579"><a href="#L-579"><span class="linenos">579</span></a><span class="sd">    &gt;&gt;&gt; is_variable_tuple(Tuple[int, bool])</span>
+</span><span id="L-580"><a href="#L-580"><span class="linenos">580</span></a><span class="sd">    False</span>
+</span><span id="L-581"><a href="#L-581"><span class="linenos">581</span></a><span class="sd">    &gt;&gt;&gt; is_variable_tuple(Tuple[()])</span>
+</span><span id="L-582"><a href="#L-582"><span class="linenos">582</span></a><span class="sd">    False</span>
 </span><span id="L-583"><a href="#L-583"><span class="linenos">583</span></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="L-584"><a href="#L-584"><span class="linenos">584</span></a>    <span class="k">try</span><span class="p">:</span>
-</span><span id="L-585"><a href="#L-585"><span class="linenos">585</span></a>        <span class="k">return</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">get_origin</span><span class="p">(</span><span class="n">typ</span><span class="p">),</span> <span class="p">(</span><span class="nb">set</span><span class="p">,</span> <span class="nb">frozenset</span><span class="p">))</span>  <span class="c1"># type: ignore</span>
-</span><span id="L-586"><a href="#L-586"><span class="linenos">586</span></a>    <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
-</span><span id="L-587"><a href="#L-587"><span class="linenos">587</span></a>        <span class="k">return</span> <span class="n">typ</span> <span class="ow">in</span> <span class="p">(</span><span class="n">Set</span><span class="p">,</span> <span class="nb">set</span><span class="p">,</span> <span class="n">FrozenSet</span><span class="p">,</span> <span class="nb">frozenset</span><span class="p">)</span>
+</span><span id="L-584"><a href="#L-584"><span class="linenos">584</span></a>    <span class="n">istuple</span> <span class="o">=</span> <span class="n">is_tuple</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">is_bare_tuple</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
+</span><span id="L-585"><a href="#L-585"><span class="linenos">585</span></a>    <span class="n">args</span> <span class="o">=</span> <span class="n">get_args</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
+</span><span id="L-586"><a href="#L-586"><span class="linenos">586</span></a>    <span class="k">return</span> <span class="n">istuple</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span> <span class="ow">and</span> <span class="n">is_ellipsis</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+</span><span id="L-587"><a href="#L-587"><span class="linenos">587</span></a>
 </span><span id="L-588"><a href="#L-588"><span class="linenos">588</span></a>
-</span><span id="L-589"><a href="#L-589"><span class="linenos">589</span></a>
-</span><span id="L-590"><a href="#L-590"><span class="linenos">590</span></a><span class="k">def</span> <span class="nf">is_bare_set</span><span class="p">(</span><span class="n">typ</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-</span><span id="L-591"><a href="#L-591"><span class="linenos">591</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-</span><span id="L-592"><a href="#L-592"><span class="linenos">592</span></a><span class="sd">    Test if the type is `typing.Set` without type args.</span>
-</span><span id="L-593"><a href="#L-593"><span class="linenos">593</span></a>
-</span><span id="L-594"><a href="#L-594"><span class="linenos">594</span></a><span class="sd">    &gt;&gt;&gt; from typing import Set</span>
-</span><span id="L-595"><a href="#L-595"><span class="linenos">595</span></a><span class="sd">    &gt;&gt;&gt; is_bare_set(Set[int])</span>
-</span><span id="L-596"><a href="#L-596"><span class="linenos">596</span></a><span class="sd">    False</span>
-</span><span id="L-597"><a href="#L-597"><span class="linenos">597</span></a><span class="sd">    &gt;&gt;&gt; is_bare_set(Set)</span>
-</span><span id="L-598"><a href="#L-598"><span class="linenos">598</span></a><span class="sd">    True</span>
-</span><span id="L-599"><a href="#L-599"><span class="linenos">599</span></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="L-600"><a href="#L-600"><span class="linenos">600</span></a>    <span class="k">return</span> <span class="n">typ</span> <span class="ow">in</span> <span class="p">(</span><span class="n">Set</span><span class="p">,</span> <span class="nb">set</span><span class="p">)</span>
-</span><span id="L-601"><a href="#L-601"><span class="linenos">601</span></a>
-</span><span id="L-602"><a href="#L-602"><span class="linenos">602</span></a>
-</span><span id="L-603"><a href="#L-603"><span class="linenos">603</span></a><span class="k">def</span> <span class="nf">is_frozen_set</span><span class="p">(</span><span class="n">typ</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-</span><span id="L-604"><a href="#L-604"><span class="linenos">604</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-</span><span id="L-605"><a href="#L-605"><span class="linenos">605</span></a><span class="sd">    Test if the type is `typing.FrozenSet`.</span>
+</span><span id="L-589"><a href="#L-589"><span class="linenos">589</span></a><span class="k">def</span> <span class="nf">is_set</span><span class="p">(</span><span class="n">typ</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+</span><span id="L-590"><a href="#L-590"><span class="linenos">590</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+</span><span id="L-591"><a href="#L-591"><span class="linenos">591</span></a><span class="sd">    Test if the type is `typing.Set` or `typing.FrozenSet`.</span>
+</span><span id="L-592"><a href="#L-592"><span class="linenos">592</span></a>
+</span><span id="L-593"><a href="#L-593"><span class="linenos">593</span></a><span class="sd">    &gt;&gt;&gt; from typing import Set</span>
+</span><span id="L-594"><a href="#L-594"><span class="linenos">594</span></a><span class="sd">    &gt;&gt;&gt; is_set(Set[int])</span>
+</span><span id="L-595"><a href="#L-595"><span class="linenos">595</span></a><span class="sd">    True</span>
+</span><span id="L-596"><a href="#L-596"><span class="linenos">596</span></a><span class="sd">    &gt;&gt;&gt; is_set(Set)</span>
+</span><span id="L-597"><a href="#L-597"><span class="linenos">597</span></a><span class="sd">    True</span>
+</span><span id="L-598"><a href="#L-598"><span class="linenos">598</span></a><span class="sd">    &gt;&gt;&gt; is_set(FrozenSet[int])</span>
+</span><span id="L-599"><a href="#L-599"><span class="linenos">599</span></a><span class="sd">    True</span>
+</span><span id="L-600"><a href="#L-600"><span class="linenos">600</span></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="L-601"><a href="#L-601"><span class="linenos">601</span></a>    <span class="k">try</span><span class="p">:</span>
+</span><span id="L-602"><a href="#L-602"><span class="linenos">602</span></a>        <span class="k">return</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">get_origin</span><span class="p">(</span><span class="n">typ</span><span class="p">),</span> <span class="p">(</span><span class="nb">set</span><span class="p">,</span> <span class="nb">frozenset</span><span class="p">))</span>  <span class="c1"># type: ignore</span>
+</span><span id="L-603"><a href="#L-603"><span class="linenos">603</span></a>    <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
+</span><span id="L-604"><a href="#L-604"><span class="linenos">604</span></a>        <span class="k">return</span> <span class="n">typ</span> <span class="ow">in</span> <span class="p">(</span><span class="n">Set</span><span class="p">,</span> <span class="nb">set</span><span class="p">,</span> <span class="n">FrozenSet</span><span class="p">,</span> <span class="nb">frozenset</span><span class="p">)</span>
+</span><span id="L-605"><a href="#L-605"><span class="linenos">605</span></a>
 </span><span id="L-606"><a href="#L-606"><span class="linenos">606</span></a>
-</span><span id="L-607"><a href="#L-607"><span class="linenos">607</span></a><span class="sd">    &gt;&gt;&gt; from typing import Set</span>
-</span><span id="L-608"><a href="#L-608"><span class="linenos">608</span></a><span class="sd">    &gt;&gt;&gt; is_frozen_set(FrozenSet[int])</span>
-</span><span id="L-609"><a href="#L-609"><span class="linenos">609</span></a><span class="sd">    True</span>
-</span><span id="L-610"><a href="#L-610"><span class="linenos">610</span></a><span class="sd">    &gt;&gt;&gt; is_frozen_set(Set)</span>
-</span><span id="L-611"><a href="#L-611"><span class="linenos">611</span></a><span class="sd">    False</span>
-</span><span id="L-612"><a href="#L-612"><span class="linenos">612</span></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="L-613"><a href="#L-613"><span class="linenos">613</span></a>    <span class="k">try</span><span class="p">:</span>
-</span><span id="L-614"><a href="#L-614"><span class="linenos">614</span></a>        <span class="k">return</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">get_origin</span><span class="p">(</span><span class="n">typ</span><span class="p">),</span> <span class="nb">frozenset</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
-</span><span id="L-615"><a href="#L-615"><span class="linenos">615</span></a>    <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
-</span><span id="L-616"><a href="#L-616"><span class="linenos">616</span></a>        <span class="k">return</span> <span class="n">typ</span> <span class="ow">in</span> <span class="p">(</span><span class="n">FrozenSet</span><span class="p">,</span> <span class="nb">frozenset</span><span class="p">)</span>
-</span><span id="L-617"><a href="#L-617"><span class="linenos">617</span></a>
+</span><span id="L-607"><a href="#L-607"><span class="linenos">607</span></a><span class="k">def</span> <span class="nf">is_bare_set</span><span class="p">(</span><span class="n">typ</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+</span><span id="L-608"><a href="#L-608"><span class="linenos">608</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+</span><span id="L-609"><a href="#L-609"><span class="linenos">609</span></a><span class="sd">    Test if the type is `typing.Set` without type args.</span>
+</span><span id="L-610"><a href="#L-610"><span class="linenos">610</span></a>
+</span><span id="L-611"><a href="#L-611"><span class="linenos">611</span></a><span class="sd">    &gt;&gt;&gt; from typing import Set</span>
+</span><span id="L-612"><a href="#L-612"><span class="linenos">612</span></a><span class="sd">    &gt;&gt;&gt; is_bare_set(Set[int])</span>
+</span><span id="L-613"><a href="#L-613"><span class="linenos">613</span></a><span class="sd">    False</span>
+</span><span id="L-614"><a href="#L-614"><span class="linenos">614</span></a><span class="sd">    &gt;&gt;&gt; is_bare_set(Set)</span>
+</span><span id="L-615"><a href="#L-615"><span class="linenos">615</span></a><span class="sd">    True</span>
+</span><span id="L-616"><a href="#L-616"><span class="linenos">616</span></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="L-617"><a href="#L-617"><span class="linenos">617</span></a>    <span class="k">return</span> <span class="n">typ</span> <span class="ow">in</span> <span class="p">(</span><span class="n">Set</span><span class="p">,</span> <span class="nb">set</span><span class="p">)</span>
 </span><span id="L-618"><a href="#L-618"><span class="linenos">618</span></a>
-</span><span id="L-619"><a href="#L-619"><span class="linenos">619</span></a><span class="k">def</span> <span class="nf">is_dict</span><span class="p">(</span><span class="n">typ</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-</span><span id="L-620"><a href="#L-620"><span class="linenos">620</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-</span><span id="L-621"><a href="#L-621"><span class="linenos">621</span></a><span class="sd">    Test if the type is `typing.Dict`.</span>
-</span><span id="L-622"><a href="#L-622"><span class="linenos">622</span></a>
-</span><span id="L-623"><a href="#L-623"><span class="linenos">623</span></a><span class="sd">    &gt;&gt;&gt; from typing import Dict</span>
-</span><span id="L-624"><a href="#L-624"><span class="linenos">624</span></a><span class="sd">    &gt;&gt;&gt; is_dict(Dict[int, int])</span>
-</span><span id="L-625"><a href="#L-625"><span class="linenos">625</span></a><span class="sd">    True</span>
-</span><span id="L-626"><a href="#L-626"><span class="linenos">626</span></a><span class="sd">    &gt;&gt;&gt; is_dict(Dict)</span>
-</span><span id="L-627"><a href="#L-627"><span class="linenos">627</span></a><span class="sd">    True</span>
-</span><span id="L-628"><a href="#L-628"><span class="linenos">628</span></a><span class="sd">    &gt;&gt;&gt; is_dict(DefaultDict[int, int])</span>
-</span><span id="L-629"><a href="#L-629"><span class="linenos">629</span></a><span class="sd">    True</span>
-</span><span id="L-630"><a href="#L-630"><span class="linenos">630</span></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="L-631"><a href="#L-631"><span class="linenos">631</span></a>    <span class="k">try</span><span class="p">:</span>
-</span><span id="L-632"><a href="#L-632"><span class="linenos">632</span></a>        <span class="k">return</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">get_origin</span><span class="p">(</span><span class="n">typ</span><span class="p">),</span> <span class="p">(</span><span class="nb">dict</span><span class="p">,</span> <span class="n">defaultdict</span><span class="p">))</span>  <span class="c1"># type: ignore</span>
-</span><span id="L-633"><a href="#L-633"><span class="linenos">633</span></a>    <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
-</span><span id="L-634"><a href="#L-634"><span class="linenos">634</span></a>        <span class="k">return</span> <span class="n">typ</span> <span class="ow">in</span> <span class="p">(</span><span class="n">Dict</span><span class="p">,</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">DefaultDict</span><span class="p">,</span> <span class="n">defaultdict</span><span class="p">)</span>
+</span><span id="L-619"><a href="#L-619"><span class="linenos">619</span></a>
+</span><span id="L-620"><a href="#L-620"><span class="linenos">620</span></a><span class="k">def</span> <span class="nf">is_frozen_set</span><span class="p">(</span><span class="n">typ</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+</span><span id="L-621"><a href="#L-621"><span class="linenos">621</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+</span><span id="L-622"><a href="#L-622"><span class="linenos">622</span></a><span class="sd">    Test if the type is `typing.FrozenSet`.</span>
+</span><span id="L-623"><a href="#L-623"><span class="linenos">623</span></a>
+</span><span id="L-624"><a href="#L-624"><span class="linenos">624</span></a><span class="sd">    &gt;&gt;&gt; from typing import Set</span>
+</span><span id="L-625"><a href="#L-625"><span class="linenos">625</span></a><span class="sd">    &gt;&gt;&gt; is_frozen_set(FrozenSet[int])</span>
+</span><span id="L-626"><a href="#L-626"><span class="linenos">626</span></a><span class="sd">    True</span>
+</span><span id="L-627"><a href="#L-627"><span class="linenos">627</span></a><span class="sd">    &gt;&gt;&gt; is_frozen_set(Set)</span>
+</span><span id="L-628"><a href="#L-628"><span class="linenos">628</span></a><span class="sd">    False</span>
+</span><span id="L-629"><a href="#L-629"><span class="linenos">629</span></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="L-630"><a href="#L-630"><span class="linenos">630</span></a>    <span class="k">try</span><span class="p">:</span>
+</span><span id="L-631"><a href="#L-631"><span class="linenos">631</span></a>        <span class="k">return</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">get_origin</span><span class="p">(</span><span class="n">typ</span><span class="p">),</span> <span class="nb">frozenset</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
+</span><span id="L-632"><a href="#L-632"><span class="linenos">632</span></a>    <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
+</span><span id="L-633"><a href="#L-633"><span class="linenos">633</span></a>        <span class="k">return</span> <span class="n">typ</span> <span class="ow">in</span> <span class="p">(</span><span class="n">FrozenSet</span><span class="p">,</span> <span class="nb">frozenset</span><span class="p">)</span>
+</span><span id="L-634"><a href="#L-634"><span class="linenos">634</span></a>
 </span><span id="L-635"><a href="#L-635"><span class="linenos">635</span></a>
-</span><span id="L-636"><a href="#L-636"><span class="linenos">636</span></a>
-</span><span id="L-637"><a href="#L-637"><span class="linenos">637</span></a><span class="k">def</span> <span class="nf">is_bare_dict</span><span class="p">(</span><span class="n">typ</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-</span><span id="L-638"><a href="#L-638"><span class="linenos">638</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-</span><span id="L-639"><a href="#L-639"><span class="linenos">639</span></a><span class="sd">    Test if the type is `typing.Dict` without type args.</span>
-</span><span id="L-640"><a href="#L-640"><span class="linenos">640</span></a>
-</span><span id="L-641"><a href="#L-641"><span class="linenos">641</span></a><span class="sd">    &gt;&gt;&gt; from typing import Dict</span>
-</span><span id="L-642"><a href="#L-642"><span class="linenos">642</span></a><span class="sd">    &gt;&gt;&gt; is_bare_dict(Dict[int, str])</span>
-</span><span id="L-643"><a href="#L-643"><span class="linenos">643</span></a><span class="sd">    False</span>
-</span><span id="L-644"><a href="#L-644"><span class="linenos">644</span></a><span class="sd">    &gt;&gt;&gt; is_bare_dict(Dict)</span>
-</span><span id="L-645"><a href="#L-645"><span class="linenos">645</span></a><span class="sd">    True</span>
-</span><span id="L-646"><a href="#L-646"><span class="linenos">646</span></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="L-647"><a href="#L-647"><span class="linenos">647</span></a>    <span class="k">return</span> <span class="n">typ</span> <span class="ow">in</span> <span class="p">(</span><span class="n">Dict</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span>
-</span><span id="L-648"><a href="#L-648"><span class="linenos">648</span></a>
-</span><span id="L-649"><a href="#L-649"><span class="linenos">649</span></a>
-</span><span id="L-650"><a href="#L-650"><span class="linenos">650</span></a><span class="k">def</span> <span class="nf">is_default_dict</span><span class="p">(</span><span class="n">typ</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-</span><span id="L-651"><a href="#L-651"><span class="linenos">651</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-</span><span id="L-652"><a href="#L-652"><span class="linenos">652</span></a><span class="sd">    Test if the type is `typing.DefaultDict`.</span>
+</span><span id="L-636"><a href="#L-636"><span class="linenos">636</span></a><span class="k">def</span> <span class="nf">is_dict</span><span class="p">(</span><span class="n">typ</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+</span><span id="L-637"><a href="#L-637"><span class="linenos">637</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+</span><span id="L-638"><a href="#L-638"><span class="linenos">638</span></a><span class="sd">    Test if the type is `typing.Dict`.</span>
+</span><span id="L-639"><a href="#L-639"><span class="linenos">639</span></a>
+</span><span id="L-640"><a href="#L-640"><span class="linenos">640</span></a><span class="sd">    &gt;&gt;&gt; from typing import Dict</span>
+</span><span id="L-641"><a href="#L-641"><span class="linenos">641</span></a><span class="sd">    &gt;&gt;&gt; is_dict(Dict[int, int])</span>
+</span><span id="L-642"><a href="#L-642"><span class="linenos">642</span></a><span class="sd">    True</span>
+</span><span id="L-643"><a href="#L-643"><span class="linenos">643</span></a><span class="sd">    &gt;&gt;&gt; is_dict(Dict)</span>
+</span><span id="L-644"><a href="#L-644"><span class="linenos">644</span></a><span class="sd">    True</span>
+</span><span id="L-645"><a href="#L-645"><span class="linenos">645</span></a><span class="sd">    &gt;&gt;&gt; is_dict(DefaultDict[int, int])</span>
+</span><span id="L-646"><a href="#L-646"><span class="linenos">646</span></a><span class="sd">    True</span>
+</span><span id="L-647"><a href="#L-647"><span class="linenos">647</span></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="L-648"><a href="#L-648"><span class="linenos">648</span></a>    <span class="k">try</span><span class="p">:</span>
+</span><span id="L-649"><a href="#L-649"><span class="linenos">649</span></a>        <span class="k">return</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">get_origin</span><span class="p">(</span><span class="n">typ</span><span class="p">),</span> <span class="p">(</span><span class="nb">dict</span><span class="p">,</span> <span class="n">defaultdict</span><span class="p">))</span>  <span class="c1"># type: ignore</span>
+</span><span id="L-650"><a href="#L-650"><span class="linenos">650</span></a>    <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
+</span><span id="L-651"><a href="#L-651"><span class="linenos">651</span></a>        <span class="k">return</span> <span class="n">typ</span> <span class="ow">in</span> <span class="p">(</span><span class="n">Dict</span><span class="p">,</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">DefaultDict</span><span class="p">,</span> <span class="n">defaultdict</span><span class="p">)</span>
+</span><span id="L-652"><a href="#L-652"><span class="linenos">652</span></a>
 </span><span id="L-653"><a href="#L-653"><span class="linenos">653</span></a>
-</span><span id="L-654"><a href="#L-654"><span class="linenos">654</span></a><span class="sd">    &gt;&gt;&gt; from typing import Dict</span>
-</span><span id="L-655"><a href="#L-655"><span class="linenos">655</span></a><span class="sd">    &gt;&gt;&gt; is_default_dict(DefaultDict[int, int])</span>
-</span><span id="L-656"><a href="#L-656"><span class="linenos">656</span></a><span class="sd">    True</span>
-</span><span id="L-657"><a href="#L-657"><span class="linenos">657</span></a><span class="sd">    &gt;&gt;&gt; is_default_dict(Dict[int, int])</span>
-</span><span id="L-658"><a href="#L-658"><span class="linenos">658</span></a><span class="sd">    False</span>
-</span><span id="L-659"><a href="#L-659"><span class="linenos">659</span></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="L-660"><a href="#L-660"><span class="linenos">660</span></a>    <span class="k">try</span><span class="p">:</span>
-</span><span id="L-661"><a href="#L-661"><span class="linenos">661</span></a>        <span class="k">return</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">get_origin</span><span class="p">(</span><span class="n">typ</span><span class="p">),</span> <span class="n">defaultdict</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
-</span><span id="L-662"><a href="#L-662"><span class="linenos">662</span></a>    <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
-</span><span id="L-663"><a href="#L-663"><span class="linenos">663</span></a>        <span class="k">return</span> <span class="n">typ</span> <span class="ow">in</span> <span class="p">(</span><span class="n">DefaultDict</span><span class="p">,</span> <span class="n">defaultdict</span><span class="p">)</span>
-</span><span id="L-664"><a href="#L-664"><span class="linenos">664</span></a>
+</span><span id="L-654"><a href="#L-654"><span class="linenos">654</span></a><span class="k">def</span> <span class="nf">is_bare_dict</span><span class="p">(</span><span class="n">typ</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+</span><span id="L-655"><a href="#L-655"><span class="linenos">655</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+</span><span id="L-656"><a href="#L-656"><span class="linenos">656</span></a><span class="sd">    Test if the type is `typing.Dict` without type args.</span>
+</span><span id="L-657"><a href="#L-657"><span class="linenos">657</span></a>
+</span><span id="L-658"><a href="#L-658"><span class="linenos">658</span></a><span class="sd">    &gt;&gt;&gt; from typing import Dict</span>
+</span><span id="L-659"><a href="#L-659"><span class="linenos">659</span></a><span class="sd">    &gt;&gt;&gt; is_bare_dict(Dict[int, str])</span>
+</span><span id="L-660"><a href="#L-660"><span class="linenos">660</span></a><span class="sd">    False</span>
+</span><span id="L-661"><a href="#L-661"><span class="linenos">661</span></a><span class="sd">    &gt;&gt;&gt; is_bare_dict(Dict)</span>
+</span><span id="L-662"><a href="#L-662"><span class="linenos">662</span></a><span class="sd">    True</span>
+</span><span id="L-663"><a href="#L-663"><span class="linenos">663</span></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="L-664"><a href="#L-664"><span class="linenos">664</span></a>    <span class="k">return</span> <span class="n">typ</span> <span class="ow">in</span> <span class="p">(</span><span class="n">Dict</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span>
 </span><span id="L-665"><a href="#L-665"><span class="linenos">665</span></a>
-</span><span id="L-666"><a href="#L-666"><span class="linenos">666</span></a><span class="k">def</span> <span class="nf">is_none</span><span class="p">(</span><span class="n">typ</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-</span><span id="L-667"><a href="#L-667"><span class="linenos">667</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-</span><span id="L-668"><a href="#L-668"><span class="linenos">668</span></a><span class="sd">    &gt;&gt;&gt; is_none(int)</span>
-</span><span id="L-669"><a href="#L-669"><span class="linenos">669</span></a><span class="sd">    False</span>
-</span><span id="L-670"><a href="#L-670"><span class="linenos">670</span></a><span class="sd">    &gt;&gt;&gt; is_none(type(None))</span>
-</span><span id="L-671"><a href="#L-671"><span class="linenos">671</span></a><span class="sd">    True</span>
-</span><span id="L-672"><a href="#L-672"><span class="linenos">672</span></a><span class="sd">    &gt;&gt;&gt; is_none(None)</span>
-</span><span id="L-673"><a href="#L-673"><span class="linenos">673</span></a><span class="sd">    False</span>
-</span><span id="L-674"><a href="#L-674"><span class="linenos">674</span></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="L-675"><a href="#L-675"><span class="linenos">675</span></a>    <span class="k">return</span> <span class="n">typ</span> <span class="ow">is</span> <span class="nb">type</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>  <span class="c1"># noqa</span>
-</span><span id="L-676"><a href="#L-676"><span class="linenos">676</span></a>
-</span><span id="L-677"><a href="#L-677"><span class="linenos">677</span></a>
-</span><span id="L-678"><a href="#L-678"><span class="linenos">678</span></a><span class="n">PRIMITIVES</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">bool</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span>
-</span><span id="L-679"><a href="#L-679"><span class="linenos">679</span></a>
-</span><span id="L-680"><a href="#L-680"><span class="linenos">680</span></a>
-</span><span id="L-681"><a href="#L-681"><span class="linenos">681</span></a><span class="k">def</span> <span class="nf">is_enum</span><span class="p">(</span><span class="n">typ</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-</span><span id="L-682"><a href="#L-682"><span class="linenos">682</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-</span><span id="L-683"><a href="#L-683"><span class="linenos">683</span></a><span class="sd">    Test if the type is `enum.Enum`.</span>
-</span><span id="L-684"><a href="#L-684"><span class="linenos">684</span></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="L-685"><a href="#L-685"><span class="linenos">685</span></a>    <span class="k">try</span><span class="p">:</span>
-</span><span id="L-686"><a href="#L-686"><span class="linenos">686</span></a>        <span class="k">return</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="n">enum</span><span class="o">.</span><span class="n">Enum</span><span class="p">)</span>
-</span><span id="L-687"><a href="#L-687"><span class="linenos">687</span></a>    <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
-</span><span id="L-688"><a href="#L-688"><span class="linenos">688</span></a>        <span class="k">return</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="n">enum</span><span class="o">.</span><span class="n">Enum</span><span class="p">)</span>
-</span><span id="L-689"><a href="#L-689"><span class="linenos">689</span></a>
-</span><span id="L-690"><a href="#L-690"><span class="linenos">690</span></a>
-</span><span id="L-691"><a href="#L-691"><span class="linenos">691</span></a><span class="k">def</span> <span class="nf">is_primitive</span><span class="p">(</span><span class="n">typ</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-</span><span id="L-692"><a href="#L-692"><span class="linenos">692</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-</span><span id="L-693"><a href="#L-693"><span class="linenos">693</span></a><span class="sd">    Test if the type is primitive.</span>
+</span><span id="L-666"><a href="#L-666"><span class="linenos">666</span></a>
+</span><span id="L-667"><a href="#L-667"><span class="linenos">667</span></a><span class="k">def</span> <span class="nf">is_default_dict</span><span class="p">(</span><span class="n">typ</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+</span><span id="L-668"><a href="#L-668"><span class="linenos">668</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+</span><span id="L-669"><a href="#L-669"><span class="linenos">669</span></a><span class="sd">    Test if the type is `typing.DefaultDict`.</span>
+</span><span id="L-670"><a href="#L-670"><span class="linenos">670</span></a>
+</span><span id="L-671"><a href="#L-671"><span class="linenos">671</span></a><span class="sd">    &gt;&gt;&gt; from typing import Dict</span>
+</span><span id="L-672"><a href="#L-672"><span class="linenos">672</span></a><span class="sd">    &gt;&gt;&gt; is_default_dict(DefaultDict[int, int])</span>
+</span><span id="L-673"><a href="#L-673"><span class="linenos">673</span></a><span class="sd">    True</span>
+</span><span id="L-674"><a href="#L-674"><span class="linenos">674</span></a><span class="sd">    &gt;&gt;&gt; is_default_dict(Dict[int, int])</span>
+</span><span id="L-675"><a href="#L-675"><span class="linenos">675</span></a><span class="sd">    False</span>
+</span><span id="L-676"><a href="#L-676"><span class="linenos">676</span></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="L-677"><a href="#L-677"><span class="linenos">677</span></a>    <span class="k">try</span><span class="p">:</span>
+</span><span id="L-678"><a href="#L-678"><span class="linenos">678</span></a>        <span class="k">return</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">get_origin</span><span class="p">(</span><span class="n">typ</span><span class="p">),</span> <span class="n">defaultdict</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
+</span><span id="L-679"><a href="#L-679"><span class="linenos">679</span></a>    <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
+</span><span id="L-680"><a href="#L-680"><span class="linenos">680</span></a>        <span class="k">return</span> <span class="n">typ</span> <span class="ow">in</span> <span class="p">(</span><span class="n">DefaultDict</span><span class="p">,</span> <span class="n">defaultdict</span><span class="p">)</span>
+</span><span id="L-681"><a href="#L-681"><span class="linenos">681</span></a>
+</span><span id="L-682"><a href="#L-682"><span class="linenos">682</span></a>
+</span><span id="L-683"><a href="#L-683"><span class="linenos">683</span></a><span class="k">def</span> <span class="nf">is_none</span><span class="p">(</span><span class="n">typ</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+</span><span id="L-684"><a href="#L-684"><span class="linenos">684</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+</span><span id="L-685"><a href="#L-685"><span class="linenos">685</span></a><span class="sd">    &gt;&gt;&gt; is_none(int)</span>
+</span><span id="L-686"><a href="#L-686"><span class="linenos">686</span></a><span class="sd">    False</span>
+</span><span id="L-687"><a href="#L-687"><span class="linenos">687</span></a><span class="sd">    &gt;&gt;&gt; is_none(type(None))</span>
+</span><span id="L-688"><a href="#L-688"><span class="linenos">688</span></a><span class="sd">    True</span>
+</span><span id="L-689"><a href="#L-689"><span class="linenos">689</span></a><span class="sd">    &gt;&gt;&gt; is_none(None)</span>
+</span><span id="L-690"><a href="#L-690"><span class="linenos">690</span></a><span class="sd">    False</span>
+</span><span id="L-691"><a href="#L-691"><span class="linenos">691</span></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="L-692"><a href="#L-692"><span class="linenos">692</span></a>    <span class="k">return</span> <span class="n">typ</span> <span class="ow">is</span> <span class="nb">type</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>  <span class="c1"># noqa</span>
+</span><span id="L-693"><a href="#L-693"><span class="linenos">693</span></a>
 </span><span id="L-694"><a href="#L-694"><span class="linenos">694</span></a>
-</span><span id="L-695"><a href="#L-695"><span class="linenos">695</span></a><span class="sd">    &gt;&gt;&gt; is_primitive(int)</span>
-</span><span id="L-696"><a href="#L-696"><span class="linenos">696</span></a><span class="sd">    True</span>
-</span><span id="L-697"><a href="#L-697"><span class="linenos">697</span></a><span class="sd">    &gt;&gt;&gt; class CustomInt(int):</span>
-</span><span id="L-698"><a href="#L-698"><span class="linenos">698</span></a><span class="sd">    ...     pass</span>
-</span><span id="L-699"><a href="#L-699"><span class="linenos">699</span></a><span class="sd">    &gt;&gt;&gt; is_primitive(CustomInt)</span>
-</span><span id="L-700"><a href="#L-700"><span class="linenos">700</span></a><span class="sd">    True</span>
+</span><span id="L-695"><a href="#L-695"><span class="linenos">695</span></a><span class="n">PRIMITIVES</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">bool</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span>
+</span><span id="L-696"><a href="#L-696"><span class="linenos">696</span></a>
+</span><span id="L-697"><a href="#L-697"><span class="linenos">697</span></a>
+</span><span id="L-698"><a href="#L-698"><span class="linenos">698</span></a><span class="k">def</span> <span class="nf">is_enum</span><span class="p">(</span><span class="n">typ</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+</span><span id="L-699"><a href="#L-699"><span class="linenos">699</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+</span><span id="L-700"><a href="#L-700"><span class="linenos">700</span></a><span class="sd">    Test if the type is `enum.Enum`.</span>
 </span><span id="L-701"><a href="#L-701"><span class="linenos">701</span></a><span class="sd">    &quot;&quot;&quot;</span>
 </span><span id="L-702"><a href="#L-702"><span class="linenos">702</span></a>    <span class="k">try</span><span class="p">:</span>
-</span><span id="L-703"><a href="#L-703"><span class="linenos">703</span></a>        <span class="k">return</span> <span class="nb">any</span><span class="p">(</span><span class="nb">issubclass</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="n">ty</span><span class="p">)</span> <span class="k">for</span> <span class="n">ty</span> <span class="ow">in</span> <span class="n">PRIMITIVES</span><span class="p">)</span>
+</span><span id="L-703"><a href="#L-703"><span class="linenos">703</span></a>        <span class="k">return</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="n">enum</span><span class="o">.</span><span class="n">Enum</span><span class="p">)</span>
 </span><span id="L-704"><a href="#L-704"><span class="linenos">704</span></a>    <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
-</span><span id="L-705"><a href="#L-705"><span class="linenos">705</span></a>        <span class="k">return</span> <span class="n">is_new_type_primitive</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
+</span><span id="L-705"><a href="#L-705"><span class="linenos">705</span></a>        <span class="k">return</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="n">enum</span><span class="o">.</span><span class="n">Enum</span><span class="p">)</span>
 </span><span id="L-706"><a href="#L-706"><span class="linenos">706</span></a>
 </span><span id="L-707"><a href="#L-707"><span class="linenos">707</span></a>
-</span><span id="L-708"><a href="#L-708"><span class="linenos">708</span></a><span class="k">def</span> <span class="nf">is_new_type_primitive</span><span class="p">(</span><span class="n">typ</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+</span><span id="L-708"><a href="#L-708"><span class="linenos">708</span></a><span class="k">def</span> <span class="nf">is_primitive</span><span class="p">(</span><span class="n">typ</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 </span><span id="L-709"><a href="#L-709"><span class="linenos">709</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-</span><span id="L-710"><a href="#L-710"><span class="linenos">710</span></a><span class="sd">    Test if the type is a NewType of primitives.</span>
-</span><span id="L-711"><a href="#L-711"><span class="linenos">711</span></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="L-712"><a href="#L-712"><span class="linenos">712</span></a>    <span class="n">inner</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="s1">&#39;__supertype__&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-</span><span id="L-713"><a href="#L-713"><span class="linenos">713</span></a>    <span class="k">if</span> <span class="n">inner</span><span class="p">:</span>
-</span><span id="L-714"><a href="#L-714"><span class="linenos">714</span></a>        <span class="k">return</span> <span class="n">is_primitive</span><span class="p">(</span><span class="n">inner</span><span class="p">)</span>
-</span><span id="L-715"><a href="#L-715"><span class="linenos">715</span></a>    <span class="k">else</span><span class="p">:</span>
-</span><span id="L-716"><a href="#L-716"><span class="linenos">716</span></a>        <span class="k">return</span> <span class="nb">any</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="n">ty</span><span class="p">)</span> <span class="k">for</span> <span class="n">ty</span> <span class="ow">in</span> <span class="n">PRIMITIVES</span><span class="p">)</span>
-</span><span id="L-717"><a href="#L-717"><span class="linenos">717</span></a>
-</span><span id="L-718"><a href="#L-718"><span class="linenos">718</span></a>
-</span><span id="L-719"><a href="#L-719"><span class="linenos">719</span></a><span class="k">def</span> <span class="nf">is_generic</span><span class="p">(</span><span class="n">typ</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-</span><span id="L-720"><a href="#L-720"><span class="linenos">720</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-</span><span id="L-721"><a href="#L-721"><span class="linenos">721</span></a><span class="sd">    Test if the type is derived from `typing.Generic`.</span>
-</span><span id="L-722"><a href="#L-722"><span class="linenos">722</span></a>
-</span><span id="L-723"><a href="#L-723"><span class="linenos">723</span></a><span class="sd">    &gt;&gt;&gt; T = typing.TypeVar(&#39;T&#39;)</span>
-</span><span id="L-724"><a href="#L-724"><span class="linenos">724</span></a><span class="sd">    &gt;&gt;&gt; class GenericFoo(typing.Generic[T]):</span>
-</span><span id="L-725"><a href="#L-725"><span class="linenos">725</span></a><span class="sd">    ...     pass</span>
-</span><span id="L-726"><a href="#L-726"><span class="linenos">726</span></a><span class="sd">    &gt;&gt;&gt; is_generic(GenericFoo[int])</span>
-</span><span id="L-727"><a href="#L-727"><span class="linenos">727</span></a><span class="sd">    True</span>
-</span><span id="L-728"><a href="#L-728"><span class="linenos">728</span></a><span class="sd">    &gt;&gt;&gt; is_generic(GenericFoo)</span>
-</span><span id="L-729"><a href="#L-729"><span class="linenos">729</span></a><span class="sd">    False</span>
-</span><span id="L-730"><a href="#L-730"><span class="linenos">730</span></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="L-731"><a href="#L-731"><span class="linenos">731</span></a>    <span class="n">origin</span> <span class="o">=</span> <span class="n">get_origin</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
-</span><span id="L-732"><a href="#L-732"><span class="linenos">732</span></a>    <span class="k">return</span> <span class="n">origin</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">Generic</span> <span class="ow">in</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">origin</span><span class="p">,</span> <span class="s2">&quot;__bases__&quot;</span><span class="p">,</span> <span class="p">())</span>
-</span><span id="L-733"><a href="#L-733"><span class="linenos">733</span></a>
+</span><span id="L-710"><a href="#L-710"><span class="linenos">710</span></a><span class="sd">    Test if the type is primitive.</span>
+</span><span id="L-711"><a href="#L-711"><span class="linenos">711</span></a>
+</span><span id="L-712"><a href="#L-712"><span class="linenos">712</span></a><span class="sd">    &gt;&gt;&gt; is_primitive(int)</span>
+</span><span id="L-713"><a href="#L-713"><span class="linenos">713</span></a><span class="sd">    True</span>
+</span><span id="L-714"><a href="#L-714"><span class="linenos">714</span></a><span class="sd">    &gt;&gt;&gt; class CustomInt(int):</span>
+</span><span id="L-715"><a href="#L-715"><span class="linenos">715</span></a><span class="sd">    ...     pass</span>
+</span><span id="L-716"><a href="#L-716"><span class="linenos">716</span></a><span class="sd">    &gt;&gt;&gt; is_primitive(CustomInt)</span>
+</span><span id="L-717"><a href="#L-717"><span class="linenos">717</span></a><span class="sd">    True</span>
+</span><span id="L-718"><a href="#L-718"><span class="linenos">718</span></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="L-719"><a href="#L-719"><span class="linenos">719</span></a>    <span class="k">try</span><span class="p">:</span>
+</span><span id="L-720"><a href="#L-720"><span class="linenos">720</span></a>        <span class="k">return</span> <span class="nb">any</span><span class="p">(</span><span class="nb">issubclass</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="n">ty</span><span class="p">)</span> <span class="k">for</span> <span class="n">ty</span> <span class="ow">in</span> <span class="n">PRIMITIVES</span><span class="p">)</span>
+</span><span id="L-721"><a href="#L-721"><span class="linenos">721</span></a>    <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
+</span><span id="L-722"><a href="#L-722"><span class="linenos">722</span></a>        <span class="k">return</span> <span class="n">is_new_type_primitive</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
+</span><span id="L-723"><a href="#L-723"><span class="linenos">723</span></a>
+</span><span id="L-724"><a href="#L-724"><span class="linenos">724</span></a>
+</span><span id="L-725"><a href="#L-725"><span class="linenos">725</span></a><span class="k">def</span> <span class="nf">is_new_type_primitive</span><span class="p">(</span><span class="n">typ</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+</span><span id="L-726"><a href="#L-726"><span class="linenos">726</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+</span><span id="L-727"><a href="#L-727"><span class="linenos">727</span></a><span class="sd">    Test if the type is a NewType of primitives.</span>
+</span><span id="L-728"><a href="#L-728"><span class="linenos">728</span></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="L-729"><a href="#L-729"><span class="linenos">729</span></a>    <span class="n">inner</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="s1">&#39;__supertype__&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+</span><span id="L-730"><a href="#L-730"><span class="linenos">730</span></a>    <span class="k">if</span> <span class="n">inner</span><span class="p">:</span>
+</span><span id="L-731"><a href="#L-731"><span class="linenos">731</span></a>        <span class="k">return</span> <span class="n">is_primitive</span><span class="p">(</span><span class="n">inner</span><span class="p">)</span>
+</span><span id="L-732"><a href="#L-732"><span class="linenos">732</span></a>    <span class="k">else</span><span class="p">:</span>
+</span><span id="L-733"><a href="#L-733"><span class="linenos">733</span></a>        <span class="k">return</span> <span class="nb">any</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="n">ty</span><span class="p">)</span> <span class="k">for</span> <span class="n">ty</span> <span class="ow">in</span> <span class="n">PRIMITIVES</span><span class="p">)</span>
 </span><span id="L-734"><a href="#L-734"><span class="linenos">734</span></a>
-</span><span id="L-735"><a href="#L-735"><span class="linenos">735</span></a><span class="k">def</span> <span class="nf">is_class_var</span><span class="p">(</span><span class="n">typ</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-</span><span id="L-736"><a href="#L-736"><span class="linenos">736</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-</span><span id="L-737"><a href="#L-737"><span class="linenos">737</span></a><span class="sd">    Test if the type is `typing.ClassVar`.</span>
-</span><span id="L-738"><a href="#L-738"><span class="linenos">738</span></a>
-</span><span id="L-739"><a href="#L-739"><span class="linenos">739</span></a><span class="sd">    &gt;&gt;&gt; is_class_var(ClassVar[int])</span>
-</span><span id="L-740"><a href="#L-740"><span class="linenos">740</span></a><span class="sd">    True</span>
-</span><span id="L-741"><a href="#L-741"><span class="linenos">741</span></a><span class="sd">    &gt;&gt;&gt; is_class_var(ClassVar)</span>
-</span><span id="L-742"><a href="#L-742"><span class="linenos">742</span></a><span class="sd">    True</span>
-</span><span id="L-743"><a href="#L-743"><span class="linenos">743</span></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="L-744"><a href="#L-744"><span class="linenos">744</span></a>    <span class="k">return</span> <span class="n">get_origin</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span> <span class="ow">is</span> <span class="n">ClassVar</span> <span class="ow">or</span> <span class="n">typ</span> <span class="ow">is</span> <span class="n">ClassVar</span>  <span class="c1"># type: ignore</span>
-</span><span id="L-745"><a href="#L-745"><span class="linenos">745</span></a>
-</span><span id="L-746"><a href="#L-746"><span class="linenos">746</span></a>
-</span><span id="L-747"><a href="#L-747"><span class="linenos">747</span></a><span class="k">def</span> <span class="nf">is_literal</span><span class="p">(</span><span class="n">typ</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-</span><span id="L-748"><a href="#L-748"><span class="linenos">748</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-</span><span id="L-749"><a href="#L-749"><span class="linenos">749</span></a><span class="sd">    Test if the type is derived from `typing.Literal`.</span>
+</span><span id="L-735"><a href="#L-735"><span class="linenos">735</span></a>
+</span><span id="L-736"><a href="#L-736"><span class="linenos">736</span></a><span class="k">def</span> <span class="nf">is_generic</span><span class="p">(</span><span class="n">typ</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+</span><span id="L-737"><a href="#L-737"><span class="linenos">737</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+</span><span id="L-738"><a href="#L-738"><span class="linenos">738</span></a><span class="sd">    Test if the type is derived from `typing.Generic`.</span>
+</span><span id="L-739"><a href="#L-739"><span class="linenos">739</span></a>
+</span><span id="L-740"><a href="#L-740"><span class="linenos">740</span></a><span class="sd">    &gt;&gt;&gt; T = typing.TypeVar(&#39;T&#39;)</span>
+</span><span id="L-741"><a href="#L-741"><span class="linenos">741</span></a><span class="sd">    &gt;&gt;&gt; class GenericFoo(typing.Generic[T]):</span>
+</span><span id="L-742"><a href="#L-742"><span class="linenos">742</span></a><span class="sd">    ...     pass</span>
+</span><span id="L-743"><a href="#L-743"><span class="linenos">743</span></a><span class="sd">    &gt;&gt;&gt; is_generic(GenericFoo[int])</span>
+</span><span id="L-744"><a href="#L-744"><span class="linenos">744</span></a><span class="sd">    True</span>
+</span><span id="L-745"><a href="#L-745"><span class="linenos">745</span></a><span class="sd">    &gt;&gt;&gt; is_generic(GenericFoo)</span>
+</span><span id="L-746"><a href="#L-746"><span class="linenos">746</span></a><span class="sd">    False</span>
+</span><span id="L-747"><a href="#L-747"><span class="linenos">747</span></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="L-748"><a href="#L-748"><span class="linenos">748</span></a>    <span class="n">origin</span> <span class="o">=</span> <span class="n">get_origin</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
+</span><span id="L-749"><a href="#L-749"><span class="linenos">749</span></a>    <span class="k">return</span> <span class="n">origin</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">Generic</span> <span class="ow">in</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">origin</span><span class="p">,</span> <span class="s2">&quot;__bases__&quot;</span><span class="p">,</span> <span class="p">())</span>
 </span><span id="L-750"><a href="#L-750"><span class="linenos">750</span></a>
-</span><span id="L-751"><a href="#L-751"><span class="linenos">751</span></a><span class="sd">    &gt;&gt;&gt; T = typing.TypeVar(&#39;T&#39;)</span>
-</span><span id="L-752"><a href="#L-752"><span class="linenos">752</span></a><span class="sd">    &gt;&gt;&gt; class GenericFoo(typing.Generic[T]):</span>
-</span><span id="L-753"><a href="#L-753"><span class="linenos">753</span></a><span class="sd">    ...     pass</span>
-</span><span id="L-754"><a href="#L-754"><span class="linenos">754</span></a><span class="sd">    &gt;&gt;&gt; is_generic(GenericFoo[int])</span>
-</span><span id="L-755"><a href="#L-755"><span class="linenos">755</span></a><span class="sd">    True</span>
-</span><span id="L-756"><a href="#L-756"><span class="linenos">756</span></a><span class="sd">    &gt;&gt;&gt; is_generic(GenericFoo)</span>
-</span><span id="L-757"><a href="#L-757"><span class="linenos">757</span></a><span class="sd">    False</span>
-</span><span id="L-758"><a href="#L-758"><span class="linenos">758</span></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="L-759"><a href="#L-759"><span class="linenos">759</span></a>    <span class="n">origin</span> <span class="o">=</span> <span class="n">get_origin</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
-</span><span id="L-760"><a href="#L-760"><span class="linenos">760</span></a>    <span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">version_info</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">7</span><span class="p">):</span>
-</span><span id="L-761"><a href="#L-761"><span class="linenos">761</span></a>        <span class="k">return</span> <span class="n">origin</span> <span class="ow">is</span> <span class="n">typing_extensions</span><span class="o">.</span><span class="n">Literal</span>
-</span><span id="L-762"><a href="#L-762"><span class="linenos">762</span></a>    <span class="k">return</span> <span class="n">origin</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">origin</span> <span class="ow">is</span> <span class="n">typing</span><span class="o">.</span><span class="n">Literal</span>
+</span><span id="L-751"><a href="#L-751"><span class="linenos">751</span></a>
+</span><span id="L-752"><a href="#L-752"><span class="linenos">752</span></a><span class="k">def</span> <span class="nf">is_class_var</span><span class="p">(</span><span class="n">typ</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+</span><span id="L-753"><a href="#L-753"><span class="linenos">753</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+</span><span id="L-754"><a href="#L-754"><span class="linenos">754</span></a><span class="sd">    Test if the type is `typing.ClassVar`.</span>
+</span><span id="L-755"><a href="#L-755"><span class="linenos">755</span></a>
+</span><span id="L-756"><a href="#L-756"><span class="linenos">756</span></a><span class="sd">    &gt;&gt;&gt; is_class_var(ClassVar[int])</span>
+</span><span id="L-757"><a href="#L-757"><span class="linenos">757</span></a><span class="sd">    True</span>
+</span><span id="L-758"><a href="#L-758"><span class="linenos">758</span></a><span class="sd">    &gt;&gt;&gt; is_class_var(ClassVar)</span>
+</span><span id="L-759"><a href="#L-759"><span class="linenos">759</span></a><span class="sd">    True</span>
+</span><span id="L-760"><a href="#L-760"><span class="linenos">760</span></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="L-761"><a href="#L-761"><span class="linenos">761</span></a>    <span class="k">return</span> <span class="n">get_origin</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span> <span class="ow">is</span> <span class="n">ClassVar</span> <span class="ow">or</span> <span class="n">typ</span> <span class="ow">is</span> <span class="n">ClassVar</span>  <span class="c1"># type: ignore</span>
+</span><span id="L-762"><a href="#L-762"><span class="linenos">762</span></a>
 </span><span id="L-763"><a href="#L-763"><span class="linenos">763</span></a>
-</span><span id="L-764"><a href="#L-764"><span class="linenos">764</span></a>
-</span><span id="L-765"><a href="#L-765"><span class="linenos">765</span></a><span class="k">def</span> <span class="nf">is_any</span><span class="p">(</span><span class="n">typ</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-</span><span id="L-766"><a href="#L-766"><span class="linenos">766</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-</span><span id="L-767"><a href="#L-767"><span class="linenos">767</span></a><span class="sd">    Test if the type is `typing.Any`.</span>
-</span><span id="L-768"><a href="#L-768"><span class="linenos">768</span></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="L-769"><a href="#L-769"><span class="linenos">769</span></a>    <span class="k">return</span> <span class="n">typ</span> <span class="ow">is</span> <span class="n">Any</span>
-</span><span id="L-770"><a href="#L-770"><span class="linenos">770</span></a>
-</span><span id="L-771"><a href="#L-771"><span class="linenos">771</span></a>
-</span><span id="L-772"><a href="#L-772"><span class="linenos">772</span></a><span class="k">def</span> <span class="nf">is_str_serializable</span><span class="p">(</span><span class="n">typ</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-</span><span id="L-773"><a href="#L-773"><span class="linenos">773</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-</span><span id="L-774"><a href="#L-774"><span class="linenos">774</span></a><span class="sd">    Test if the type is serializable to `str`.</span>
+</span><span id="L-764"><a href="#L-764"><span class="linenos">764</span></a><span class="k">def</span> <span class="nf">is_literal</span><span class="p">(</span><span class="n">typ</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+</span><span id="L-765"><a href="#L-765"><span class="linenos">765</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+</span><span id="L-766"><a href="#L-766"><span class="linenos">766</span></a><span class="sd">    Test if the type is derived from `typing.Literal`.</span>
+</span><span id="L-767"><a href="#L-767"><span class="linenos">767</span></a>
+</span><span id="L-768"><a href="#L-768"><span class="linenos">768</span></a><span class="sd">    &gt;&gt;&gt; T = typing.TypeVar(&#39;T&#39;)</span>
+</span><span id="L-769"><a href="#L-769"><span class="linenos">769</span></a><span class="sd">    &gt;&gt;&gt; class GenericFoo(typing.Generic[T]):</span>
+</span><span id="L-770"><a href="#L-770"><span class="linenos">770</span></a><span class="sd">    ...     pass</span>
+</span><span id="L-771"><a href="#L-771"><span class="linenos">771</span></a><span class="sd">    &gt;&gt;&gt; is_generic(GenericFoo[int])</span>
+</span><span id="L-772"><a href="#L-772"><span class="linenos">772</span></a><span class="sd">    True</span>
+</span><span id="L-773"><a href="#L-773"><span class="linenos">773</span></a><span class="sd">    &gt;&gt;&gt; is_generic(GenericFoo)</span>
+</span><span id="L-774"><a href="#L-774"><span class="linenos">774</span></a><span class="sd">    False</span>
 </span><span id="L-775"><a href="#L-775"><span class="linenos">775</span></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="L-776"><a href="#L-776"><span class="linenos">776</span></a>    <span class="k">return</span> <span class="n">typ</span> <span class="ow">in</span> <span class="n">StrSerializableTypes</span>
-</span><span id="L-777"><a href="#L-777"><span class="linenos">777</span></a>
-</span><span id="L-778"><a href="#L-778"><span class="linenos">778</span></a>
-</span><span id="L-779"><a href="#L-779"><span class="linenos">779</span></a><span class="k">def</span> <span class="nf">is_datetime</span><span class="p">(</span><span class="n">typ</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-</span><span id="L-780"><a href="#L-780"><span class="linenos">780</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-</span><span id="L-781"><a href="#L-781"><span class="linenos">781</span></a><span class="sd">    Test if the type is any of the datetime types..</span>
-</span><span id="L-782"><a href="#L-782"><span class="linenos">782</span></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="L-783"><a href="#L-783"><span class="linenos">783</span></a>    <span class="k">return</span> <span class="n">typ</span> <span class="ow">in</span> <span class="n">DateTimeTypes</span>
-</span><span id="L-784"><a href="#L-784"><span class="linenos">784</span></a>
-</span><span id="L-785"><a href="#L-785"><span class="linenos">785</span></a>
-</span><span id="L-786"><a href="#L-786"><span class="linenos">786</span></a><span class="k">def</span> <span class="nf">is_str_serializable_instance</span><span class="p">(</span><span class="n">obj</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-</span><span id="L-787"><a href="#L-787"><span class="linenos">787</span></a>    <span class="k">return</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">StrSerializableTypes</span><span class="p">)</span>
+</span><span id="L-776"><a href="#L-776"><span class="linenos">776</span></a>    <span class="n">origin</span> <span class="o">=</span> <span class="n">get_origin</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
+</span><span id="L-777"><a href="#L-777"><span class="linenos">777</span></a>    <span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">version_info</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">7</span><span class="p">):</span>
+</span><span id="L-778"><a href="#L-778"><span class="linenos">778</span></a>        <span class="k">return</span> <span class="n">origin</span> <span class="ow">is</span> <span class="n">typing_extensions</span><span class="o">.</span><span class="n">Literal</span>
+</span><span id="L-779"><a href="#L-779"><span class="linenos">779</span></a>    <span class="k">return</span> <span class="n">origin</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">origin</span> <span class="ow">is</span> <span class="n">typing</span><span class="o">.</span><span class="n">Literal</span>
+</span><span id="L-780"><a href="#L-780"><span class="linenos">780</span></a>
+</span><span id="L-781"><a href="#L-781"><span class="linenos">781</span></a>
+</span><span id="L-782"><a href="#L-782"><span class="linenos">782</span></a><span class="k">def</span> <span class="nf">is_any</span><span class="p">(</span><span class="n">typ</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+</span><span id="L-783"><a href="#L-783"><span class="linenos">783</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+</span><span id="L-784"><a href="#L-784"><span class="linenos">784</span></a><span class="sd">    Test if the type is `typing.Any`.</span>
+</span><span id="L-785"><a href="#L-785"><span class="linenos">785</span></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="L-786"><a href="#L-786"><span class="linenos">786</span></a>    <span class="k">return</span> <span class="n">typ</span> <span class="ow">is</span> <span class="n">Any</span>
+</span><span id="L-787"><a href="#L-787"><span class="linenos">787</span></a>
 </span><span id="L-788"><a href="#L-788"><span class="linenos">788</span></a>
-</span><span id="L-789"><a href="#L-789"><span class="linenos">789</span></a>
-</span><span id="L-790"><a href="#L-790"><span class="linenos">790</span></a><span class="k">def</span> <span class="nf">is_datetime_instance</span><span class="p">(</span><span class="n">obj</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-</span><span id="L-791"><a href="#L-791"><span class="linenos">791</span></a>    <span class="k">return</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">DateTimeTypes</span><span class="p">)</span>
-</span><span id="L-792"><a href="#L-792"><span class="linenos">792</span></a>
-</span><span id="L-793"><a href="#L-793"><span class="linenos">793</span></a>
-</span><span id="L-794"><a href="#L-794"><span class="linenos">794</span></a><span class="k">def</span> <span class="nf">find_generic_arg</span><span class="p">(</span><span class="bp">cls</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span> <span class="n">field</span><span class="p">:</span> <span class="n">TypeVar</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-</span><span id="L-795"><a href="#L-795"><span class="linenos">795</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-</span><span id="L-796"><a href="#L-796"><span class="linenos">796</span></a><span class="sd">    Find a type in generic parameters.</span>
-</span><span id="L-797"><a href="#L-797"><span class="linenos">797</span></a>
-</span><span id="L-798"><a href="#L-798"><span class="linenos">798</span></a><span class="sd">    &gt;&gt;&gt; T = typing.TypeVar(&#39;T&#39;)</span>
-</span><span id="L-799"><a href="#L-799"><span class="linenos">799</span></a><span class="sd">    &gt;&gt;&gt; U = typing.TypeVar(&#39;U&#39;)</span>
-</span><span id="L-800"><a href="#L-800"><span class="linenos">800</span></a><span class="sd">    &gt;&gt;&gt; V = typing.TypeVar(&#39;V&#39;)</span>
-</span><span id="L-801"><a href="#L-801"><span class="linenos">801</span></a><span class="sd">    &gt;&gt;&gt; class GenericFoo(typing.Generic[T, U]):</span>
-</span><span id="L-802"><a href="#L-802"><span class="linenos">802</span></a><span class="sd">    ...     pass</span>
-</span><span id="L-803"><a href="#L-803"><span class="linenos">803</span></a><span class="sd">    &gt;&gt;&gt; find_generic_arg(GenericFoo, T)</span>
-</span><span id="L-804"><a href="#L-804"><span class="linenos">804</span></a><span class="sd">    0</span>
-</span><span id="L-805"><a href="#L-805"><span class="linenos">805</span></a><span class="sd">    &gt;&gt;&gt; find_generic_arg(GenericFoo, U)</span>
-</span><span id="L-806"><a href="#L-806"><span class="linenos">806</span></a><span class="sd">    1</span>
-</span><span id="L-807"><a href="#L-807"><span class="linenos">807</span></a><span class="sd">    &gt;&gt;&gt; find_generic_arg(GenericFoo, V)</span>
-</span><span id="L-808"><a href="#L-808"><span class="linenos">808</span></a><span class="sd">    -1</span>
-</span><span id="L-809"><a href="#L-809"><span class="linenos">809</span></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="L-810"><a href="#L-810"><span class="linenos">810</span></a>    <span class="n">bases</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s2">&quot;__orig_bases__&quot;</span><span class="p">,</span> <span class="p">())</span>
-</span><span id="L-811"><a href="#L-811"><span class="linenos">811</span></a>    <span class="k">if</span> <span class="ow">not</span> <span class="n">bases</span><span class="p">:</span>
-</span><span id="L-812"><a href="#L-812"><span class="linenos">812</span></a>        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\&quot;</span><span class="s2">__orig_bases__</span><span class="se">\&quot;</span><span class="s2"> property was not found: </span><span class="si">{</span><span class="bp">cls</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span id="L-789"><a href="#L-789"><span class="linenos">789</span></a><span class="k">def</span> <span class="nf">is_str_serializable</span><span class="p">(</span><span class="n">typ</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+</span><span id="L-790"><a href="#L-790"><span class="linenos">790</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+</span><span id="L-791"><a href="#L-791"><span class="linenos">791</span></a><span class="sd">    Test if the type is serializable to `str`.</span>
+</span><span id="L-792"><a href="#L-792"><span class="linenos">792</span></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="L-793"><a href="#L-793"><span class="linenos">793</span></a>    <span class="k">return</span> <span class="n">typ</span> <span class="ow">in</span> <span class="n">StrSerializableTypes</span>
+</span><span id="L-794"><a href="#L-794"><span class="linenos">794</span></a>
+</span><span id="L-795"><a href="#L-795"><span class="linenos">795</span></a>
+</span><span id="L-796"><a href="#L-796"><span class="linenos">796</span></a><span class="k">def</span> <span class="nf">is_datetime</span><span class="p">(</span><span class="n">typ</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+</span><span id="L-797"><a href="#L-797"><span class="linenos">797</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+</span><span id="L-798"><a href="#L-798"><span class="linenos">798</span></a><span class="sd">    Test if the type is any of the datetime types..</span>
+</span><span id="L-799"><a href="#L-799"><span class="linenos">799</span></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="L-800"><a href="#L-800"><span class="linenos">800</span></a>    <span class="k">return</span> <span class="n">typ</span> <span class="ow">in</span> <span class="n">DateTimeTypes</span>
+</span><span id="L-801"><a href="#L-801"><span class="linenos">801</span></a>
+</span><span id="L-802"><a href="#L-802"><span class="linenos">802</span></a>
+</span><span id="L-803"><a href="#L-803"><span class="linenos">803</span></a><span class="k">def</span> <span class="nf">is_str_serializable_instance</span><span class="p">(</span><span class="n">obj</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+</span><span id="L-804"><a href="#L-804"><span class="linenos">804</span></a>    <span class="k">return</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">StrSerializableTypes</span><span class="p">)</span>
+</span><span id="L-805"><a href="#L-805"><span class="linenos">805</span></a>
+</span><span id="L-806"><a href="#L-806"><span class="linenos">806</span></a>
+</span><span id="L-807"><a href="#L-807"><span class="linenos">807</span></a><span class="k">def</span> <span class="nf">is_datetime_instance</span><span class="p">(</span><span class="n">obj</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+</span><span id="L-808"><a href="#L-808"><span class="linenos">808</span></a>    <span class="k">return</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">DateTimeTypes</span><span class="p">)</span>
+</span><span id="L-809"><a href="#L-809"><span class="linenos">809</span></a>
+</span><span id="L-810"><a href="#L-810"><span class="linenos">810</span></a>
+</span><span id="L-811"><a href="#L-811"><span class="linenos">811</span></a><span class="k">def</span> <span class="nf">is_ellipsis</span><span class="p">(</span><span class="n">typ</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+</span><span id="L-812"><a href="#L-812"><span class="linenos">812</span></a>    <span class="k">return</span> <span class="n">typ</span> <span class="ow">is</span> <span class="bp">Ellipsis</span>
 </span><span id="L-813"><a href="#L-813"><span class="linenos">813</span></a>
-</span><span id="L-814"><a href="#L-814"><span class="linenos">814</span></a>    <span class="k">for</span> <span class="n">base</span> <span class="ow">in</span> <span class="n">bases</span><span class="p">:</span>
-</span><span id="L-815"><a href="#L-815"><span class="linenos">815</span></a>        <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">arg</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">get_args</span><span class="p">(</span><span class="n">base</span><span class="p">)):</span>
-</span><span id="L-816"><a href="#L-816"><span class="linenos">816</span></a>            <span class="k">if</span> <span class="n">arg</span><span class="o">.</span><span class="vm">__name__</span> <span class="o">==</span> <span class="n">field</span><span class="o">.</span><span class="vm">__name__</span><span class="p">:</span>
-</span><span id="L-817"><a href="#L-817"><span class="linenos">817</span></a>                <span class="k">return</span> <span class="n">n</span>
+</span><span id="L-814"><a href="#L-814"><span class="linenos">814</span></a>
+</span><span id="L-815"><a href="#L-815"><span class="linenos">815</span></a><span class="k">def</span> <span class="nf">find_generic_arg</span><span class="p">(</span><span class="bp">cls</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span> <span class="n">field</span><span class="p">:</span> <span class="n">TypeVar</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+</span><span id="L-816"><a href="#L-816"><span class="linenos">816</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+</span><span id="L-817"><a href="#L-817"><span class="linenos">817</span></a><span class="sd">    Find a type in generic parameters.</span>
 </span><span id="L-818"><a href="#L-818"><span class="linenos">818</span></a>
-</span><span id="L-819"><a href="#L-819"><span class="linenos">819</span></a>    <span class="k">if</span> <span class="ow">not</span> <span class="n">bases</span><span class="p">:</span>
-</span><span id="L-820"><a href="#L-820"><span class="linenos">820</span></a>        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Generic field not found in class: </span><span class="si">{</span><span class="n">bases</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</span><span id="L-821"><a href="#L-821"><span class="linenos">821</span></a>
-</span><span id="L-822"><a href="#L-822"><span class="linenos">822</span></a>    <span class="k">return</span> <span class="o">-</span><span class="mi">1</span>
-</span><span id="L-823"><a href="#L-823"><span class="linenos">823</span></a>
-</span><span id="L-824"><a href="#L-824"><span class="linenos">824</span></a>
-</span><span id="L-825"><a href="#L-825"><span class="linenos">825</span></a><span class="k">def</span> <span class="nf">get_generic_arg</span><span class="p">(</span><span class="n">typ</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
-</span><span id="L-826"><a href="#L-826"><span class="linenos">826</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-</span><span id="L-827"><a href="#L-827"><span class="linenos">827</span></a><span class="sd">    Get generic type argument by index.</span>
-</span><span id="L-828"><a href="#L-828"><span class="linenos">828</span></a>
-</span><span id="L-829"><a href="#L-829"><span class="linenos">829</span></a><span class="sd">    &gt;&gt;&gt; T = typing.TypeVar(&#39;T&#39;)</span>
-</span><span id="L-830"><a href="#L-830"><span class="linenos">830</span></a><span class="sd">    &gt;&gt;&gt; U = typing.TypeVar(&#39;U&#39;)</span>
-</span><span id="L-831"><a href="#L-831"><span class="linenos">831</span></a><span class="sd">    &gt;&gt;&gt; class GenericFoo(typing.Generic[T, U]):</span>
-</span><span id="L-832"><a href="#L-832"><span class="linenos">832</span></a><span class="sd">    ...     pass</span>
-</span><span id="L-833"><a href="#L-833"><span class="linenos">833</span></a><span class="sd">    &gt;&gt;&gt; get_generic_arg(GenericFoo[int, str], 0).__name__</span>
-</span><span id="L-834"><a href="#L-834"><span class="linenos">834</span></a><span class="sd">    &#39;int&#39;</span>
-</span><span id="L-835"><a href="#L-835"><span class="linenos">835</span></a><span class="sd">    &gt;&gt;&gt; get_generic_arg(GenericFoo[int, str], 1).__name__</span>
-</span><span id="L-836"><a href="#L-836"><span class="linenos">836</span></a><span class="sd">    &#39;str&#39;</span>
-</span><span id="L-837"><a href="#L-837"><span class="linenos">837</span></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="L-838"><a href="#L-838"><span class="linenos">838</span></a>    <span class="k">if</span> <span class="ow">not</span> <span class="n">is_generic</span><span class="p">(</span><span class="n">typ</span><span class="p">):</span>
-</span><span id="L-839"><a href="#L-839"><span class="linenos">839</span></a>        <span class="k">return</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span>
-</span><span id="L-840"><a href="#L-840"><span class="linenos">840</span></a>    <span class="k">else</span><span class="p">:</span>
-</span><span id="L-841"><a href="#L-841"><span class="linenos">841</span></a>        <span class="n">args</span> <span class="o">=</span> <span class="n">get_args</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
-</span><span id="L-842"><a href="#L-842"><span class="linenos">842</span></a>        <span class="k">if</span> <span class="n">index</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">):</span>
-</span><span id="L-843"><a href="#L-843"><span class="linenos">843</span></a>            <span class="k">return</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span>
-</span><span id="L-844"><a href="#L-844"><span class="linenos">844</span></a>        <span class="k">return</span> <span class="n">args</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+</span><span id="L-819"><a href="#L-819"><span class="linenos">819</span></a><span class="sd">    &gt;&gt;&gt; T = typing.TypeVar(&#39;T&#39;)</span>
+</span><span id="L-820"><a href="#L-820"><span class="linenos">820</span></a><span class="sd">    &gt;&gt;&gt; U = typing.TypeVar(&#39;U&#39;)</span>
+</span><span id="L-821"><a href="#L-821"><span class="linenos">821</span></a><span class="sd">    &gt;&gt;&gt; V = typing.TypeVar(&#39;V&#39;)</span>
+</span><span id="L-822"><a href="#L-822"><span class="linenos">822</span></a><span class="sd">    &gt;&gt;&gt; class GenericFoo(typing.Generic[T, U]):</span>
+</span><span id="L-823"><a href="#L-823"><span class="linenos">823</span></a><span class="sd">    ...     pass</span>
+</span><span id="L-824"><a href="#L-824"><span class="linenos">824</span></a><span class="sd">    &gt;&gt;&gt; find_generic_arg(GenericFoo, T)</span>
+</span><span id="L-825"><a href="#L-825"><span class="linenos">825</span></a><span class="sd">    0</span>
+</span><span id="L-826"><a href="#L-826"><span class="linenos">826</span></a><span class="sd">    &gt;&gt;&gt; find_generic_arg(GenericFoo, U)</span>
+</span><span id="L-827"><a href="#L-827"><span class="linenos">827</span></a><span class="sd">    1</span>
+</span><span id="L-828"><a href="#L-828"><span class="linenos">828</span></a><span class="sd">    &gt;&gt;&gt; find_generic_arg(GenericFoo, V)</span>
+</span><span id="L-829"><a href="#L-829"><span class="linenos">829</span></a><span class="sd">    -1</span>
+</span><span id="L-830"><a href="#L-830"><span class="linenos">830</span></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="L-831"><a href="#L-831"><span class="linenos">831</span></a>    <span class="n">bases</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s2">&quot;__orig_bases__&quot;</span><span class="p">,</span> <span class="p">())</span>
+</span><span id="L-832"><a href="#L-832"><span class="linenos">832</span></a>    <span class="k">if</span> <span class="ow">not</span> <span class="n">bases</span><span class="p">:</span>
+</span><span id="L-833"><a href="#L-833"><span class="linenos">833</span></a>        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\&quot;</span><span class="s2">__orig_bases__</span><span class="se">\&quot;</span><span class="s2"> property was not found: </span><span class="si">{</span><span class="bp">cls</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span id="L-834"><a href="#L-834"><span class="linenos">834</span></a>
+</span><span id="L-835"><a href="#L-835"><span class="linenos">835</span></a>    <span class="k">for</span> <span class="n">base</span> <span class="ow">in</span> <span class="n">bases</span><span class="p">:</span>
+</span><span id="L-836"><a href="#L-836"><span class="linenos">836</span></a>        <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">arg</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">get_args</span><span class="p">(</span><span class="n">base</span><span class="p">)):</span>
+</span><span id="L-837"><a href="#L-837"><span class="linenos">837</span></a>            <span class="k">if</span> <span class="n">arg</span><span class="o">.</span><span class="vm">__name__</span> <span class="o">==</span> <span class="n">field</span><span class="o">.</span><span class="vm">__name__</span><span class="p">:</span>
+</span><span id="L-838"><a href="#L-838"><span class="linenos">838</span></a>                <span class="k">return</span> <span class="n">n</span>
+</span><span id="L-839"><a href="#L-839"><span class="linenos">839</span></a>
+</span><span id="L-840"><a href="#L-840"><span class="linenos">840</span></a>    <span class="k">if</span> <span class="ow">not</span> <span class="n">bases</span><span class="p">:</span>
+</span><span id="L-841"><a href="#L-841"><span class="linenos">841</span></a>        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Generic field not found in class: </span><span class="si">{</span><span class="n">bases</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span id="L-842"><a href="#L-842"><span class="linenos">842</span></a>
+</span><span id="L-843"><a href="#L-843"><span class="linenos">843</span></a>    <span class="k">return</span> <span class="o">-</span><span class="mi">1</span>
+</span><span id="L-844"><a href="#L-844"><span class="linenos">844</span></a>
 </span><span id="L-845"><a href="#L-845"><span class="linenos">845</span></a>
-</span><span id="L-846"><a href="#L-846"><span class="linenos">846</span></a>
-</span><span id="L-847"><a href="#L-847"><span class="linenos">847</span></a><span class="k">def</span> <span class="nf">has_default</span><span class="p">(</span><span class="n">field</span><span class="p">:</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">Field</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-</span><span id="L-848"><a href="#L-848"><span class="linenos">848</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-</span><span id="L-849"><a href="#L-849"><span class="linenos">849</span></a><span class="sd">    Test if the field has default value.</span>
-</span><span id="L-850"><a href="#L-850"><span class="linenos">850</span></a>
-</span><span id="L-851"><a href="#L-851"><span class="linenos">851</span></a><span class="sd">    &gt;&gt;&gt; @dataclasses.dataclass</span>
-</span><span id="L-852"><a href="#L-852"><span class="linenos">852</span></a><span class="sd">    ... class C:</span>
-</span><span id="L-853"><a href="#L-853"><span class="linenos">853</span></a><span class="sd">    ...     a: int</span>
-</span><span id="L-854"><a href="#L-854"><span class="linenos">854</span></a><span class="sd">    ...     d: int = 10</span>
-</span><span id="L-855"><a href="#L-855"><span class="linenos">855</span></a><span class="sd">    &gt;&gt;&gt; has_default(dataclasses.fields(C)[0])</span>
-</span><span id="L-856"><a href="#L-856"><span class="linenos">856</span></a><span class="sd">    False</span>
-</span><span id="L-857"><a href="#L-857"><span class="linenos">857</span></a><span class="sd">    &gt;&gt;&gt; has_default(dataclasses.fields(C)[1])</span>
-</span><span id="L-858"><a href="#L-858"><span class="linenos">858</span></a><span class="sd">    True</span>
-</span><span id="L-859"><a href="#L-859"><span class="linenos">859</span></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="L-860"><a href="#L-860"><span class="linenos">860</span></a>    <span class="k">return</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">,</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">_MISSING_TYPE</span><span class="p">)</span>
-</span><span id="L-861"><a href="#L-861"><span class="linenos">861</span></a>
-</span><span id="L-862"><a href="#L-862"><span class="linenos">862</span></a>
-</span><span id="L-863"><a href="#L-863"><span class="linenos">863</span></a><span class="k">def</span> <span class="nf">has_default_factory</span><span class="p">(</span><span class="n">field</span><span class="p">:</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">Field</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-</span><span id="L-864"><a href="#L-864"><span class="linenos">864</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-</span><span id="L-865"><a href="#L-865"><span class="linenos">865</span></a><span class="sd">    Test if the field has default factory.</span>
+</span><span id="L-846"><a href="#L-846"><span class="linenos">846</span></a><span class="k">def</span> <span class="nf">get_generic_arg</span><span class="p">(</span><span class="n">typ</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+</span><span id="L-847"><a href="#L-847"><span class="linenos">847</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+</span><span id="L-848"><a href="#L-848"><span class="linenos">848</span></a><span class="sd">    Get generic type argument by index.</span>
+</span><span id="L-849"><a href="#L-849"><span class="linenos">849</span></a>
+</span><span id="L-850"><a href="#L-850"><span class="linenos">850</span></a><span class="sd">    &gt;&gt;&gt; T = typing.TypeVar(&#39;T&#39;)</span>
+</span><span id="L-851"><a href="#L-851"><span class="linenos">851</span></a><span class="sd">    &gt;&gt;&gt; U = typing.TypeVar(&#39;U&#39;)</span>
+</span><span id="L-852"><a href="#L-852"><span class="linenos">852</span></a><span class="sd">    &gt;&gt;&gt; class GenericFoo(typing.Generic[T, U]):</span>
+</span><span id="L-853"><a href="#L-853"><span class="linenos">853</span></a><span class="sd">    ...     pass</span>
+</span><span id="L-854"><a href="#L-854"><span class="linenos">854</span></a><span class="sd">    &gt;&gt;&gt; get_generic_arg(GenericFoo[int, str], 0).__name__</span>
+</span><span id="L-855"><a href="#L-855"><span class="linenos">855</span></a><span class="sd">    &#39;int&#39;</span>
+</span><span id="L-856"><a href="#L-856"><span class="linenos">856</span></a><span class="sd">    &gt;&gt;&gt; get_generic_arg(GenericFoo[int, str], 1).__name__</span>
+</span><span id="L-857"><a href="#L-857"><span class="linenos">857</span></a><span class="sd">    &#39;str&#39;</span>
+</span><span id="L-858"><a href="#L-858"><span class="linenos">858</span></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="L-859"><a href="#L-859"><span class="linenos">859</span></a>    <span class="k">if</span> <span class="ow">not</span> <span class="n">is_generic</span><span class="p">(</span><span class="n">typ</span><span class="p">):</span>
+</span><span id="L-860"><a href="#L-860"><span class="linenos">860</span></a>        <span class="k">return</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span>
+</span><span id="L-861"><a href="#L-861"><span class="linenos">861</span></a>    <span class="k">else</span><span class="p">:</span>
+</span><span id="L-862"><a href="#L-862"><span class="linenos">862</span></a>        <span class="n">args</span> <span class="o">=</span> <span class="n">get_args</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
+</span><span id="L-863"><a href="#L-863"><span class="linenos">863</span></a>        <span class="k">if</span> <span class="n">index</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">):</span>
+</span><span id="L-864"><a href="#L-864"><span class="linenos">864</span></a>            <span class="k">return</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span>
+</span><span id="L-865"><a href="#L-865"><span class="linenos">865</span></a>        <span class="k">return</span> <span class="n">args</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
 </span><span id="L-866"><a href="#L-866"><span class="linenos">866</span></a>
-</span><span id="L-867"><a href="#L-867"><span class="linenos">867</span></a><span class="sd">    &gt;&gt;&gt; from typing import Dict</span>
-</span><span id="L-868"><a href="#L-868"><span class="linenos">868</span></a><span class="sd">    &gt;&gt;&gt; @dataclasses.dataclass</span>
-</span><span id="L-869"><a href="#L-869"><span class="linenos">869</span></a><span class="sd">    ... class C:</span>
-</span><span id="L-870"><a href="#L-870"><span class="linenos">870</span></a><span class="sd">    ...     a: int</span>
-</span><span id="L-871"><a href="#L-871"><span class="linenos">871</span></a><span class="sd">    ...     d: Dict = dataclasses.field(default_factory=dict)</span>
-</span><span id="L-872"><a href="#L-872"><span class="linenos">872</span></a><span class="sd">    &gt;&gt;&gt; has_default_factory(dataclasses.fields(C)[0])</span>
-</span><span id="L-873"><a href="#L-873"><span class="linenos">873</span></a><span class="sd">    False</span>
-</span><span id="L-874"><a href="#L-874"><span class="linenos">874</span></a><span class="sd">    &gt;&gt;&gt; has_default_factory(dataclasses.fields(C)[1])</span>
-</span><span id="L-875"><a href="#L-875"><span class="linenos">875</span></a><span class="sd">    True</span>
-</span><span id="L-876"><a href="#L-876"><span class="linenos">876</span></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="L-877"><a href="#L-877"><span class="linenos">877</span></a>    <span class="k">return</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">default_factory</span><span class="p">,</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">_MISSING_TYPE</span><span class="p">)</span>
+</span><span id="L-867"><a href="#L-867"><span class="linenos">867</span></a>
+</span><span id="L-868"><a href="#L-868"><span class="linenos">868</span></a><span class="k">def</span> <span class="nf">has_default</span><span class="p">(</span><span class="n">field</span><span class="p">:</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">Field</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+</span><span id="L-869"><a href="#L-869"><span class="linenos">869</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+</span><span id="L-870"><a href="#L-870"><span class="linenos">870</span></a><span class="sd">    Test if the field has default value.</span>
+</span><span id="L-871"><a href="#L-871"><span class="linenos">871</span></a>
+</span><span id="L-872"><a href="#L-872"><span class="linenos">872</span></a><span class="sd">    &gt;&gt;&gt; @dataclasses.dataclass</span>
+</span><span id="L-873"><a href="#L-873"><span class="linenos">873</span></a><span class="sd">    ... class C:</span>
+</span><span id="L-874"><a href="#L-874"><span class="linenos">874</span></a><span class="sd">    ...     a: int</span>
+</span><span id="L-875"><a href="#L-875"><span class="linenos">875</span></a><span class="sd">    ...     d: int = 10</span>
+</span><span id="L-876"><a href="#L-876"><span class="linenos">876</span></a><span class="sd">    &gt;&gt;&gt; has_default(dataclasses.fields(C)[0])</span>
+</span><span id="L-877"><a href="#L-877"><span class="linenos">877</span></a><span class="sd">    False</span>
+</span><span id="L-878"><a href="#L-878"><span class="linenos">878</span></a><span class="sd">    &gt;&gt;&gt; has_default(dataclasses.fields(C)[1])</span>
+</span><span id="L-879"><a href="#L-879"><span class="linenos">879</span></a><span class="sd">    True</span>
+</span><span id="L-880"><a href="#L-880"><span class="linenos">880</span></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="L-881"><a href="#L-881"><span class="linenos">881</span></a>    <span class="k">return</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">,</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">_MISSING_TYPE</span><span class="p">)</span>
+</span><span id="L-882"><a href="#L-882"><span class="linenos">882</span></a>
+</span><span id="L-883"><a href="#L-883"><span class="linenos">883</span></a>
+</span><span id="L-884"><a href="#L-884"><span class="linenos">884</span></a><span class="k">def</span> <span class="nf">has_default_factory</span><span class="p">(</span><span class="n">field</span><span class="p">:</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">Field</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+</span><span id="L-885"><a href="#L-885"><span class="linenos">885</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+</span><span id="L-886"><a href="#L-886"><span class="linenos">886</span></a><span class="sd">    Test if the field has default factory.</span>
+</span><span id="L-887"><a href="#L-887"><span class="linenos">887</span></a>
+</span><span id="L-888"><a href="#L-888"><span class="linenos">888</span></a><span class="sd">    &gt;&gt;&gt; from typing import Dict</span>
+</span><span id="L-889"><a href="#L-889"><span class="linenos">889</span></a><span class="sd">    &gt;&gt;&gt; @dataclasses.dataclass</span>
+</span><span id="L-890"><a href="#L-890"><span class="linenos">890</span></a><span class="sd">    ... class C:</span>
+</span><span id="L-891"><a href="#L-891"><span class="linenos">891</span></a><span class="sd">    ...     a: int</span>
+</span><span id="L-892"><a href="#L-892"><span class="linenos">892</span></a><span class="sd">    ...     d: Dict = dataclasses.field(default_factory=dict)</span>
+</span><span id="L-893"><a href="#L-893"><span class="linenos">893</span></a><span class="sd">    &gt;&gt;&gt; has_default_factory(dataclasses.fields(C)[0])</span>
+</span><span id="L-894"><a href="#L-894"><span class="linenos">894</span></a><span class="sd">    False</span>
+</span><span id="L-895"><a href="#L-895"><span class="linenos">895</span></a><span class="sd">    &gt;&gt;&gt; has_default_factory(dataclasses.fields(C)[1])</span>
+</span><span id="L-896"><a href="#L-896"><span class="linenos">896</span></a><span class="sd">    True</span>
+</span><span id="L-897"><a href="#L-897"><span class="linenos">897</span></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="L-898"><a href="#L-898"><span class="linenos">898</span></a>    <span class="k">return</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">default_factory</span><span class="p">,</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">_MISSING_TYPE</span><span class="p">)</span>
 </span></pre></div>
 
 
