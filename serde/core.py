@@ -63,7 +63,7 @@ LITERAL_DE_PREFIX = "literal_de"
 SETTINGS = dict(debug=False)
 
 
-def init(debug: bool = False):
+def init(debug: bool = False) -> None:
     SETTINGS['debug'] = debug
 
 
@@ -73,7 +73,7 @@ class SerdeScope:
     Container to store types and functions used in code generation context.
     """
 
-    cls: Type
+    cls: Type[Any]
     """ The exact class this scope is for (needed to distinguish scopes between inherited classes) """
 
     funcs: Dict[str, Callable] = dataclasses.field(default_factory=dict)
@@ -581,7 +581,7 @@ def conv(f: Field, case: Optional[str] = None) -> str:
     return name
 
 
-def union_func_name(prefix: str, union_args: List[Type]) -> str:
+def union_func_name(prefix: str, union_args: List[Type[Any]]) -> str:
     """
     Generate a function name that contains all union types
 

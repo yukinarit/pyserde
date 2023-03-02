@@ -33,7 +33,7 @@ from typing import (
 
 import typing_extensions
 import typing_inspect
-from typing_extensions import Type
+from typing_extensions import Type, TypeGuard
 
 if sys.version_info[:2] == (3, 7):
     Literal = typing_extensions.Literal
@@ -130,7 +130,7 @@ class SerdeSkip(Exception):
     """
 
 
-def get_origin(typ: Type[Any]) -> Optional[Any]:
+def get_origin(typ: Any) -> Optional[Any]:
     """
     Provide `get_origin` that works in all python versions.
     """
@@ -288,7 +288,7 @@ def union_args(typ: Union) -> Tuple[Type[Any], ...]:
     return tuple(types)
 
 
-def dataclass_fields(cls: Type[Any]) -> Iterator[dataclasses.Field]:
+def dataclass_fields(cls: Type[Any]) -> Iterator[dataclasses.Field]:  # type: ignore
     raw_fields = dataclasses.fields(cls)
 
     try:
@@ -341,33 +341,33 @@ def iter_types(cls: TypeLike) -> List[TypeLike]:
             lst.add(cls)
         elif is_opt(cls):
             lst.add(Optional)
-            arg = type_args(cls)
-            if arg:
-                recursive(arg[0])
+            args = type_args(cls)
+            if args:
+                recursive(args[0])
         elif is_union(cls):
             lst.add(Union)
             for arg in type_args(cls):
                 recursive(arg)
         elif is_list(cls) or is_set(cls):
             lst.add(List)
-            arg = type_args(cls)
-            if arg:
-                recursive(arg[0])
+            args = type_args(cls)
+            if args:
+                recursive(args[0])
         elif is_set(cls):
             lst.add(Set)
-            arg = type_args(cls)
-            if arg:
-                recursive(arg[0])
+            args = type_args(cls)
+            if args:
+                recursive(args[0])
         elif is_tuple(cls):
             lst.add(Tuple)
             for arg in type_args(cls):
                 recursive(arg)
         elif is_dict(cls):
             lst.add(Dict)
-            arg = type_args(cls)
-            if arg and len(arg) >= 2:
-                recursive(arg[0])
-                recursive(arg[1])
+            args = type_args(cls)
+            if args and len(args) >= 2:
+                recursive(args[0])
+                recursive(args[1])
         else:
             lst.add(cls)
 
@@ -393,21 +393,21 @@ def iter_unions(cls: TypeLike) -> List[TypeLike]:
             for f in dataclass_fields(cls):
                 recursive(f.type)
         elif is_opt(cls):
-            arg = type_args(cls)
-            if arg:
-                recursive(arg[0])
+            args = type_args(cls)
+            if args:
+                recursive(args[0])
         elif is_list(cls) or is_set(cls):
-            arg = type_args(cls)
-            if arg:
-                recursive(arg[0])
+            args = type_args(cls)
+            if args:
+                recursive(args[0])
         elif is_tuple(cls):
             for arg in type_args(cls):
                 recursive(arg)
         elif is_dict(cls):
-            arg = type_args(cls)
-            if arg and len(arg) >= 2:
-                recursive(arg[0])
-                recursive(arg[1])
+            args = type_args(cls)
+            if args and len(args) >= 2:
+                recursive(args[0])
+                recursive(args[1])
 
     recursive(cls)
     return list(lst)
@@ -433,21 +433,21 @@ def iter_literals(cls: TypeLike) -> List[TypeLike]:
             for f in dataclass_fields(cls):
                 recursive(f.type)
         elif is_opt(cls):
-            arg = type_args(cls)
-            if arg:
-                recursive(arg[0])
+            args = type_args(cls)
+            if args:
+                recursive(args[0])
         elif is_list(cls) or is_set(cls):
-            arg = type_args(cls)
-            if arg:
-                recursive(arg[0])
+            args = type_args(cls)
+            if args:
+                recursive(args[0])
         elif is_tuple(cls):
             for arg in type_args(cls):
                 recursive(arg)
         elif is_dict(cls):
-            arg = type_args(cls)
-            if arg and len(arg) >= 2:
-                recursive(arg[0])
-                recursive(arg[1])
+            args = type_args(cls)
+            if args and len(args) >= 2:
+                recursive(args[0])
+                recursive(args[1])
 
     recursive(cls)
     return list(lst)
@@ -695,7 +695,7 @@ def is_none(typ: Type[Any]) -> bool:
 PRIMITIVES = [int, float, bool, str]
 
 
-def is_enum(typ: Type[Any]) -> bool:
+def is_enum(typ: Type[Any]) -> TypeGuard[enum.Enum]:
     """
     Test if the type is `enum.Enum`.
     """
