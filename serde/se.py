@@ -9,7 +9,7 @@ import dataclasses
 import functools
 import typing
 from dataclasses import dataclass, is_dataclass
-from typing import Any, Callable, Dict, Iterator, List, Optional, Type, TypeVar
+from typing import Any, Callable, Dict, Iterator, List, Optional, Tuple, Type, TypeVar
 
 import jinja2
 from typing_extensions import dataclass_transform
@@ -29,7 +29,6 @@ from .compat import (
     is_datetime,
     is_datetime_instance,
     is_dict,
-    is_ellipsis,
     is_enum,
     is_generic,
     is_list,
@@ -381,14 +380,14 @@ def to_obj(o, named: bool, reuse_instances: bool, convert_sets: bool, c: Optiona
         raise SerdeError(e)
 
 
-def astuple(v):
+def astuple(v: Any) -> Tuple[Any, ...]:
     """
     Serialize object into tuple.
     """
     return to_tuple(v, reuse_instances=False, convert_sets=False)
 
 
-def to_tuple(o, reuse_instances: bool = ..., convert_sets: bool = ...) -> Any:
+def to_tuple(o, reuse_instances: bool = ..., convert_sets: bool = ...) -> Tuple[Any, ...]:
     """
     Serialize object into tuple.
 
@@ -411,14 +410,14 @@ def to_tuple(o, reuse_instances: bool = ..., convert_sets: bool = ...) -> Any:
     return to_obj(o, named=False, reuse_instances=reuse_instances, convert_sets=convert_sets)
 
 
-def asdict(v: Any) -> Dict[str, Any]:
+def asdict(v: Any) -> Dict[Any, Any]:
     """
     Serialize object into dictionary.
     """
     return to_dict(v, reuse_instances=False, convert_sets=False)
 
 
-def to_dict(o, reuse_instances: bool = ..., convert_sets: bool = ...) -> Any:
+def to_dict(o, reuse_instances: bool = ..., convert_sets: bool = ...) -> Dict[Any, Any]:
     """
     Serialize object into dictionary.
 
@@ -462,7 +461,7 @@ class SeField(Field):
                 raise SerdeError("Field name is None.")
             return self.name
 
-    def __getitem__(self, n) -> "SeField":
+    def __getitem__(self, n: int) -> "SeField":
         typ = type_args(self.type)[n]
         return SeField(typ, name=None)
 
@@ -473,7 +472,6 @@ def sefields(cls: Type[Any], serialize_class_var: bool = False) -> Iterator[SeFi
     """
     for f in fields(SeField, cls, serialize_class_var=serialize_class_var):
         f.parent = SeField(None, "obj")  # type: ignore
-        assert isinstance(f, SeField)
         yield f
 
 
@@ -725,7 +723,9 @@ convert_sets=convert_sets), coerce(int, foo[2]),)"
         elif is_any(arg.type) or isinstance(arg.type, TypeVar):
             res = f"to_obj({arg.varname}, True, False, False)"
         elif is_generic(arg.type):
-            arg.type = get_origin(arg.type)
+            origin = get_origin(arg.type)
+            assert origin
+            arg.type = origin
             res = self.render(arg)
         elif is_literal(arg.type):
             res = self.literal(arg)
@@ -852,7 +852,7 @@ convert_sets=convert_sets), coerce(int, foo[2]),)"
         return f"{arg.varname}"
 
 
-def enum_value(cls, e):
+def enum_value(cls: Any, e: Any) -> Any:
     """
     Helper function to get value from enum or enum compatible value.
     """

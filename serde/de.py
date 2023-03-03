@@ -9,7 +9,7 @@ import dataclasses
 import functools
 import typing
 from dataclasses import dataclass, is_dataclass
-from typing import Any, Callable, Dict, List, Optional, TypeVar
+from typing import Any, Callable, Dict, Iterator, List, Optional, TypeVar
 
 import jinja2
 from typing_extensions import Type, dataclass_transform
@@ -87,10 +87,10 @@ from .numpy import (
 __all__ = ['deserialize', 'is_deserializable', 'from_dict', 'from_tuple']
 
 # Interface of Custom deserialize function.
-DeserializeFunc = Callable[[Type, Any], Any]
+DeserializeFunc = Callable[[Type[Any], Any], Any]
 
 
-def serde_custom_class_deserializer(cls: Type, datavar, value, custom: DeserializeFunc, default: Callable):
+def serde_custom_class_deserializer(cls: Type[Any], datavar, value, custom: DeserializeFunc, default: Callable):
     """
     Handle custom deserialization. Use default deserialization logic if it receives `SerdeSkip` exception.
 
@@ -106,7 +106,7 @@ def serde_custom_class_deserializer(cls: Type, datavar, value, custom: Deseriali
         return default()
 
 
-def default_deserializer(_cls: Type, obj):
+def default_deserializer(_cls: Type[Any], obj):
     """
     Marker function to tell serde to use the default deserializer. It's used when custom deserializer is specified
     at the class but you want to override a field with the default deserializer.
@@ -590,7 +590,8 @@ class InnerField(DeField):
         self.datavar = d
 
 
-defields = functools.partial(fields, DeField)
+def defields(cls: Type[Any]) -> List[DeField]:
+    return fields(DeField, cls)
 
 
 @dataclass
@@ -884,7 +885,7 @@ for k, v in data["f"].items()}'
             return code
 
 
-def to_arg(f: DeField, index, rename_all: Optional[str] = None) -> DeField:
+def to_arg(f: DeField, index: int, rename_all: Optional[str] = None) -> DeField:
     f.index = index
     f.data = 'data'
     f.case = f.case or rename_all
@@ -897,7 +898,7 @@ def to_iter_arg(f: DeField, *args, **kwargs) -> DeField:
     return f
 
 
-def render_from_iter(cls: Type, custom: Optional[DeserializeFunc] = None, type_check: TypeCheck = NoCheck) -> str:
+def render_from_iter(cls: Type[Any], custom: Optional[DeserializeFunc] = None, type_check: TypeCheck = NoCheck) -> str:
     template = """
 def {{func}}(cls=cls, maybe_generic=None, data=None, reuse_instances = {{serde_scope.reuse_instances_default}}):
   if reuse_instances is Ellipsis:
@@ -933,7 +934,7 @@ def {{func}}(cls=cls, maybe_generic=None, data=None, reuse_instances = {{serde_s
 
 
 def render_from_dict(
-    cls: Type,
+    cls: Type[Any],
     rename_all: Optional[str] = None,
     custom: Optional[DeserializeFunc] = None,
     type_check: TypeCheck = NoCheck,
@@ -981,7 +982,7 @@ def {{func}}(cls=cls, maybe_generic=None, data=None,
     return res
 
 
-def render_union_func(cls: Type, union_args: List[Type], tagging: Tagging = DefaultTagging) -> str:
+def render_union_func(cls: Type[Any], union_args: List[Type], tagging: Tagging = DefaultTagging) -> str:
     template = """
 def {{func}}(cls=cls, maybe_generic=None, data=None, reuse_instances = {{serde_scope.reuse_instances_default}}):
   errors = []
@@ -1039,7 +1040,7 @@ def {{func}}(cls=cls, maybe_generic=None, data=None, reuse_instances = {{serde_s
     )
 
 
-def render_literal_func(cls: Type, literal_args: List[Any], tagging: Tagging = DefaultTagging) -> str:
+def render_literal_func(cls: Type[Any], literal_args: List[Any], tagging: Tagging = DefaultTagging) -> str:
     template = """
 def {{func}}(cls=cls, maybe_generic=None, data=None, reuse_instances = {{serde_scope.reuse_instances_default}}):
   if data in ({%- for v in literal_args -%}{{v|repr}},{%- endfor -%}):
