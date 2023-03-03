@@ -75,7 +75,7 @@ def from_msgpack(
     named: bool = True,
     ext_dict: Dict[int, Type] = None,
     **opts,
-) -> Type[T]:
+) -> T:
     """
     Deserialize from MsgPack into the object.
 

@@ -18,6 +18,7 @@ import init_var
 import jsonfile
 import lazy_type_evaluation
 import literal
+import msg_pack
 import newtype
 import pep681
 import plain_dataclass
@@ -80,6 +81,7 @@ def run_all():
     run(class_var)
     run(plain_dataclass)
     run(plain_dataclass_class_attribute)
+    run(msg_pack)
     if PY310:
         import union_operator
 
