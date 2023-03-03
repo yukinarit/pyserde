@@ -9,7 +9,7 @@ import dataclasses
 import functools
 import typing
 from dataclasses import dataclass, is_dataclass
-from typing import Any, Callable, Dict, Iterator, List, Optional, TypeVar
+from typing import Any, Callable, Dict, List, Optional, TypeVar
 
 import jinja2
 from typing_extensions import Type, dataclass_transform
@@ -18,6 +18,7 @@ from .compat import (
     Literal,
     SerdeError,
     SerdeSkip,
+    T,
     UserError,
     find_generic_arg,
     get_args,
@@ -367,7 +368,7 @@ class Deserializer(metaclass=abc.ABCMeta):
         raise NotImplementedError
 
 
-def from_obj(c: Type, o: Any, named: bool, reuse_instances: bool):
+def from_obj(c: Type[T], o: Any, named: bool, reuse_instances: bool) -> T:
     """
     Deserialize from an object into an instance of the type specified as arg `c`.
     `c` can be either primitive type, `List`, `Tuple`, `Dict` or `deserialize` class.
@@ -462,7 +463,7 @@ def from_obj(c: Type, o: Any, named: bool, reuse_instances: bool):
         raise SerdeError(e)
 
 
-def from_dict(cls, o, reuse_instances: bool = ...):
+def from_dict(cls: Type[T], o, reuse_instances: bool = ...) -> T:
     """
     Deserialize dictionary into object.
 
@@ -485,7 +486,7 @@ def from_dict(cls, o, reuse_instances: bool = ...):
     return from_obj(cls, o, named=True, reuse_instances=reuse_instances)
 
 
-def from_tuple(cls, o, reuse_instances: bool = ...):
+def from_tuple(cls: Type[T], o: Any, reuse_instances: bool = ...) -> T:
     """
     Deserialize tuple into object.
 
