@@ -1,13 +1,22 @@
-# `pyserde`
-
-Yet another serialization library on top of [dataclasses](https://docs.python.org/3/library/dataclasses.html), inspired by [serde-rs](https://github.com/serde-rs/serde).
-
-[![image](https://img.shields.io/pypi/v/pyserde.svg)](https://pypi.org/project/pyserde/)
-[![image](https://img.shields.io/pypi/pyversions/pyserde.svg)](https://pypi.org/project/pyserde/)
-![Tests](https://github.com/yukinarit/pyserde/workflows/Tests/badge.svg)
-[![codecov](https://codecov.io/gh/yukinarit/pyserde/branch/main/graph/badge.svg)](https://codecov.io/gh/yukinarit/pyserde)
-
-[Guide](https://yukinarit.github.io/pyserde/guide) | [API Docs](https://yukinarit.github.io/pyserde/api/serde.html) | [Examples](./examples)
+<h1 align="center"><code>pyserde</code></h1>
+<p align="center">Yet another serialization library on top of <a href="https://docs.python.org/3/library/dataclasses.html">dataclasses</a>, inspired by <a href="https://github.com/serde-rs/serde">serde-rs</a>.</p>
+<p align="center">
+  <a href="https://pypi.org/project/pyserde/">
+    <img alt="pypi" src="https://img.shields.io/pypi/v/pyserde.svg">
+  </a>
+  <a href="https://pypi.org/project/pyserde/">
+    <img alt="pypi" src="https://img.shields.io/pypi/pyversions/pyserde.svg">
+  </a>
+  <a href="https://github.com/yukinarit/pyserde/actions/workflows/test.yml">
+    <img alt="GithubActions" src="https://github.com/yukinarit/pyserde/actions/workflows/test.yml/badge.svg">
+  </a>
+  <a href="https://codecov.io/gh/yukinarit/pyserde">
+    <img alt="CodeCov" src="https://codecov.io/gh/yukinarit/pyserde/branch/main/graph/badge.svg">
+  </a>
+</p>
+<p align="center">
+  <a href="https://yukinarit.github.io/pyserde/guide">Guide</a> | <a href="https://yukinarit.github.io/pyserde/api/serde.html">API Docs</a> | <a href="https://github.com/yukinarit/pyserde/tree/main/examples">Examples</a>
+</p>
 
 ## Overview
 
@@ -68,22 +77,22 @@ Foo(i=10, s='foo', f=100.0, b=True)
         - [`ipaddress`](https://docs.python.org/3/library/ipaddress.html)
     - PyPI library
         - [`numpy`](https://github.com/numpy/numpy) types
-- [Attributes](docs/features/attributes.md)
-- [Decorators](docs/features/decorators.md)
-- [TypeCheck](docs/features/type-check.md)
-- [Union Representation](docs/features/union.md)
-- [Python 3.10 Union operator](docs/features/union-operator.md)
-- [Python 3.9 type hinting](docs/features/python3.9-type-hinting.md)
-- [Postponed evaluation of type annotation](docs/features/postponed-evaluation-of-type-annotation.md)
-- [Forward reference](docs/features/forward-reference.md)
-- [Case Conversion](docs/features/case-conversion.md)
-- [Rename](docs/features/rename.md)
-- [Alias](docs/features/alias.md)
-- [Skip](docs/features/skip.md)
-- [Conditional Skip](docs/features/conditional-skip.md)
-- [Custom field (de)serializer](docs/features/custom-field-serializer.md)
-- [Custom class (de)serializer](docs/features/custom-class-serializer.md)
-- [Flatten](docs/features/flatten.md)
+- [Attributes](https://github.com/yukinarit/pyserde/blob/main/docs/features/attributes.md)
+- [Decorators](https://github.com/yukinarit/pyserde/blob/main/docs/features/decorators.md)
+- [TypeCheck](https://github.com/yukinarit/pyserde/blob/main/docs/features/type-check.md)
+- [Union Representation](https://github.com/yukinarit/pyserde/blob/main/docs/features/union.md)
+- [Python 3.10 Union operator](https://github.com/yukinarit/pyserde/blob/main/docs/features/union-operator.md)
+- [Python 3.9 type hinting](https://github.com/yukinarit/pyserde/blob/main/docs/features/python3.9-type-hinting.md)
+- [Postponed evaluation of type annotation](https://github.com/yukinarit/pyserde/blob/main/docs/features/postponed-evaluation-of-type-annotation.md)
+- [Forward reference](https://github.com/yukinarit/pyserde/blob/main/docs/features/forward-reference.md)
+- [Case Conversion](https://github.com/yukinarit/pyserde/blob/main/docs/features/case-conversion.md)
+- [Rename](https://github.com/yukinarit/pyserde/blob/main/docs/features/rename.md)
+- [Alias](https://github.com/yukinarit/pyserde/blob/main/docs/features/alias.md)
+- [Skip](https://github.com/yukinarit/pyserde/blob/main/docs/features/skip.md)
+- [Conditional Skip](https://github.com/yukinarit/pyserde/blob/main/docs/features/conditional-skip.md)
+- [Custom field (de)serializer](https://github.com/yukinarit/pyserde/blob/main/docs/features/custom-field-serializer.md)
+- [Custom class (de)serializer](https://github.com/yukinarit/pyserde/blob/main/docs/features/custom-class-serializer.md)
+- [Flatten](https://github.com/yukinarit/pyserde/blob/main/docs/features/flatten.md)
 
 ## Contributors ✨
 
