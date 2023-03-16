@@ -2,7 +2,7 @@
 authors = ["yukinarit"]
 language = "en"
 multilingual = true
-src = "docs"
+src = "./"
 title = "pyserde documentation"
 
 [output.html]
