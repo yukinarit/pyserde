@@ -1,6 +1,6 @@
 # Supported data formats
 
-Currently `dict`, `tuple`, `JSON`, `Yaml`, `Toml`, `MsgPack` and `Pickle` are supported.
+`dict`, `tuple`, `JSON`, `Yaml`, `Toml`, `MsgPack` `Pickle`がサポートされています。
 
 ```python
 

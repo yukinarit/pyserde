@@ -1,28 +1,28 @@
-# Supported types
+# 使用可能な型
 
-* Primitives (int, float, str, bool)
-* Containers
+* プリミティブ (int, float, str, bool)
+* コンテナ
     * `List`, `Set`, `Tuple`, `Dict`
     * [`FrozenSet`](https://docs.python.org/3/library/stdtypes.html#frozenset), [`DefaultDict`](https://docs.python.org/3/library/collections.html#collections.defaultdict)
 * [`typing.Optional`](https://docs.python.org/3/library/typing.html#typing.Optional)
 * [`typing.Union`](https://docs.python.org/3/library/typing.html#typing.Union)
-* User defined class with [`@dataclass`](https://docs.python.org/3/library/dataclasses.html)
-* [`typing.NewType`](https://docs.python.org/3/library/typing.html#newtype) for primitive types
+* ユーザーが定義した[`@dataclass`](https://docs.python.org/3/library/dataclasses.html)
+* [`typing.NewType`](https://docs.python.org/3/library/typing.html#newtype) (プリミティブのみ)
 * [`typing.Any`](https://docs.python.org/3/library/typing.html#the-any-type)
 * [`typing.Literal`](https://docs.python.org/3/library/typing.html#typing.Literal)
 * [`typing.Generic`](https://docs.python.org/3/library/typing.html#user-defined-generic-types)
 * [`typing.ClassVar`](https://docs.python.org/3/library/typing.html#user-defined-generic-type://docs.python.org/3/library/typing.html#typing.ClassVar)
-* [`Enum`](https://docs.python.org/3/library/enum.html#enum.Enum) and [`IntEnum`](https://docs.python.org/3/library/enum.html#enum.IntEnum)
-* Standard library
+* [`Enum`](https://docs.python.org/3/library/enum.html#enum.Enum)と[`IntEnum`](https://docs.python.org/3/library/enum.html#enum.IntEnum)
+* 標準ライブラリ
     * [`pathlib.Path`](https://docs.python.org/3/library/pathlib.html)
     * [`decimal.Decimal`](https://docs.python.org/3/library/decimal.html)
     * [`uuid.UUID`](https://docs.python.org/3/library/uuid.html)
     * [`datetime.date`](https://docs.python.org/3/library/datetime.html#date-objects), [`datetime.time`](https://docs.python.org/3/library/datetime.html#time-objects), [`datetime.datetime`](https://docs.python.org/3/library/datetime.html#datetime-objects)
     * [`ipaddress`](https://docs.python.org/3/library/ipaddress.html)
-* PyPI library
+* PyPIライブラリ
     * [`numpy`](https://github.com/numpy/numpy) types
 
-You can write pretty complex class like this:
+このような様々な型を使った複雑なクラスも表現可能です。
 ```python
 @serde
 @dataclass
@@ -42,8 +42,7 @@ class Foo:
 
 ## Numpy
 
-All of the above (de)serialization methods can transparently handle most numpy
-types with the "numpy" extras package.
+`numpy`のほとんどの型もpyserdeの機能が使えるようになっています。
 
 ```python
 import numpy as np

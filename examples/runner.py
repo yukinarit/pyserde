@@ -23,6 +23,7 @@ import newtype
 import pep681
 import plain_dataclass
 import plain_dataclass_class_attribute
+import python_pickle
 import recursive
 import rename
 import rename_all
@@ -75,6 +76,7 @@ def run_all():
     run(pep681)
     run(variable_length_tuple)
     run(init_var)
+    run(python_pickle)
     run(class_var)
     run(alias)
     run(recursive)

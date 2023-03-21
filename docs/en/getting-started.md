@@ -1,24 +1,43 @@
 # Getting started
 
-Install pyserde from PyPI. pyserde requires Python>=3.6.
+## Installation
 
-```sh
+Install pyserde from PyPI. pyserde requires Python>=3.7.
+
+```
 pip install pyserde
 ```
 
-Additional data formats besides JSON need additional dependencies installed. Install `msgpack`, `toml`, or `yaml` extras to work with the appropriate data formats; you can skip formats that you don't plan to use. For example, if you want to use Toml and YAML:
+If you're using poetry, run this command.
+```
+poetry add pyserde
+```
 
-```sh
+Additional data formats besides JSON and Pickle need additional dependencies installed. Install `msgpack`, `toml`, or `yaml` extras to work with the appropriate data formats; you can skip formats that you don't plan to use. For example, if you want to use Toml and YAML:
+
+```
 pip install "pyserde[toml,yaml]"
+```
+
+With poetry
+```
+poetry add pyserde -E toml -E yaml
 ```
 
 Or all at once:
 
-```sh
+```
 pip install "pyserde[all]"
 ```
 
-Define your class with pyserde's `@serde` decorators. Be careful that module name is `serde`, not `pyserde`. `pyserde` depends on `dataclasses` module. If you are new to dataclass, I would recommend to read [dataclasses documentation](https://docs.python.org/3/library/dataclasses.html) first.
+With poetry
+```
+poetry add pyserde -E all
+```
+
+## Define a class with pyserde
+
+Define your class with pyserde's `@serde` decorators. Be careful that module name is `serde`, not `pyserde`. `pyserde` heavily depends on standard library's `dataclasses` module. If you are new to dataclass, I would recommend to read [dataclasses documentation](https://docs.python.org/3/library/dataclasses.html) first.
 
 ```python
 from dataclasses import dataclass
@@ -50,6 +69,8 @@ pyserde generates methods necessary for (de)serialization by `@serde` when a cla
 >     f: float
 >     b: bool
 > ```
+
+## Use pyserde class
 
 Next, import pyserde (de)serialize API. For JSON:
 

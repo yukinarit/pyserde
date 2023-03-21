@@ -23,7 +23,7 @@ class PickleDeserializer(Deserializer):
         return pickle.loads(data, **opts)
 
 
-def to_pickle(obj, se: Type[Serializer] = PickleSerializer, **opts) -> str:
+def to_pickle(obj, se: Type[Serializer] = PickleSerializer, **opts) -> bytes:
     return se.serialize(to_dict(obj, reuse_instances=False), **opts)
 
 
