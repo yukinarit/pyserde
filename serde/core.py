@@ -722,6 +722,7 @@ def {{type_check_func}}(self):
            compat.is_list(f.type) or
            compat.is_dict(f.type) or
            compat.is_tuple(f.type) or
+           compat.is_opt(f.type) or
            compat.is_primitive(f.type) or
            compat.is_str_serializable(f.type) or
            compat.is_datetime(f.type)) %}
