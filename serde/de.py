@@ -899,6 +899,10 @@ def to_iter_arg(f: DeField, *args, **kwargs) -> DeField:
     return f
 
 
+def renderable(f: DeField) -> bool:
+    return f.init
+
+
 def render_from_iter(cls: Type[Any], custom: Optional[DeserializeFunc] = None, type_check: TypeCheck = NoCheck) -> str:
     template = """
 def {{func}}(cls=cls, maybe_generic=None, data=None, reuse_instances = {{serde_scope.reuse_instances_default}}):
@@ -926,7 +930,8 @@ def {{func}}(cls=cls, maybe_generic=None, data=None, reuse_instances = {{serde_s
     env = jinja2.Environment(loader=jinja2.DictLoader({'iter': template}))
     env.filters.update({'rvalue': renderer.render})
     env.filters.update({'arg': to_iter_arg})
-    res = env.get_template('iter').render(func=FROM_ITER, serde_scope=getattr(cls, SERDE_SCOPE), fields=defields(cls))
+    fields = list(filter(renderable, defields(cls)))
+    res = env.get_template('iter').render(func=FROM_ITER, serde_scope=getattr(cls, SERDE_SCOPE), fields=fields)
 
     if renderer.import_numpy:
         res = "import numpy\n" + res
@@ -973,8 +978,9 @@ def {{func}}(cls=cls, maybe_generic=None, data=None,
     env = jinja2.Environment(loader=jinja2.DictLoader({'dict': template}))
     env.filters.update({'rvalue': renderer.render})
     env.filters.update({'arg': functools.partial(to_arg, rename_all=rename_all)})
+    fields = list(filter(renderable, defields(cls)))
     res = env.get_template('dict').render(
-        func=FROM_DICT, serde_scope=getattr(cls, SERDE_SCOPE), fields=defields(cls), type_check=type_check
+        func=FROM_DICT, serde_scope=getattr(cls, SERDE_SCOPE), fields=fields, type_check=type_check
     )
 
     if renderer.import_numpy:

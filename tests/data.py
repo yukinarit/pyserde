@@ -2,7 +2,7 @@ import enum
 from dataclasses import dataclass
 from typing import Dict, List, Optional, Tuple
 
-from serde import serde
+from serde import field, serde
 
 from . import imported
 
@@ -257,3 +257,13 @@ PRILIST = ([10], ['foo'], [100.0], [True])
 NESTED_PRILIST = ([INT], [STR], [FLOAT], [BOOL])
 
 NESTED_PRILIST_TUPLE = ([(10,)], [('foo',)], [(100.0,)], [(True,)])
+
+
+@dataclass
+@serde
+class Init:
+    a: int
+    b: int = field(init=False)
+
+    def __post_init__(self) -> None:
+        self.b = self.a * 10

@@ -436,7 +436,7 @@ class Field:
     name: Optional[str]
     default: Any = field(default_factory=dataclasses._MISSING_TYPE)
     default_factory: Any = field(default_factory=dataclasses._MISSING_TYPE)
-    init: Any = field(default_factory=dataclasses._MISSING_TYPE)
+    init: bool = field(default_factory=dataclasses._MISSING_TYPE)
     repr: Any = field(default_factory=dataclasses._MISSING_TYPE)
     hash: Any = field(default_factory=dataclasses._MISSING_TYPE)
     compare: Any = field(default_factory=dataclasses._MISSING_TYPE)
