@@ -8,6 +8,7 @@ from . import data
 from .data import (
     Bool,
     Float,
+    Complex,
     Int,
     NestedInt,
     NestedPri,
@@ -44,6 +45,7 @@ def test_se_func_iter():
     assert (10.0,) == to_tuple(Float(10.0))
     assert ("10",) == to_tuple(Str("10"))
     assert (False,) == to_tuple(Bool(False))
+    assert (1.0, 0.5,) == to_tuple(Complex(1.0+0.5j))
 
     assert (10, '10', 10.0, False) == to_tuple(Pri(10, "10", 10.0, False))
     assert ((10,),) == to_tuple(NestedInt(Int(10)))

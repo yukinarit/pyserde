@@ -39,6 +39,16 @@ class Float:
 
 @serde
 @dataclass(unsafe_hash=True)
+class Complex:
+    """
+    Complex.
+    """
+
+    f: complex
+
+
+@serde
+@dataclass(unsafe_hash=True)
 class Bool:
     """
     Boolean.
