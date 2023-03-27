@@ -361,6 +361,8 @@ def to_obj(o, named: bool, reuse_instances: bool, convert_sets: bool, c: Optiona
             return serializable_to_obj(o)
         if is_serializable(o):
             return serializable_to_obj(o)
+        elif isinstance(o, complex):
+            return thisfunc((o.real, o.imag))
         elif isinstance(o, list):
             return [thisfunc(e) for e in o]
         elif isinstance(o, tuple):
