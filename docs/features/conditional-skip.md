@@ -31,6 +31,6 @@ As you can see below, field is skipped in serialization if `buddy` is "Pikachu".
 
 ## `skip_if_default`
 
-`skip_if_false` is a shorthand of `skip_if=lambda v: v == <default_value>`.
+`skip_if_default` is a shorthand of `skip_if=lambda v: v == <default_value>`.
 
 For complete example, please see [examples/skip.py](https://github.com/yukinarit/pyserde/blob/main/examples/skip.py)
