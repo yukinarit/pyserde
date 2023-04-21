@@ -58,7 +58,7 @@ from .core import (
     DefaultTagging,
     Field,
     NoCheck,
-    SerdeScope,
+    Scope,
     Tagging,
     TypeCheck,
     add_func,
@@ -195,9 +195,9 @@ def serialize(
         # Create a scope storage used by serde.
         # Each class should get own scope. Child classes can not share scope with parent class.
         # That's why we need the "scope.cls is not cls" check.
-        scope: Optional[SerdeScope] = getattr(cls, SERDE_SCOPE, None)
+        scope: Optional[Scope] = getattr(cls, SERDE_SCOPE, None)
         if scope is None or scope.cls is not cls:
-            scope = SerdeScope(
+            scope = Scope(
                 cls,
                 reuse_instances_default=reuse_instances_default,
                 convert_sets_default=convert_sets_default,
@@ -303,7 +303,7 @@ def is_dataclass_without_se(cls: Type[Any]) -> bool:
         return False
     if not hasattr(cls, SERDE_SCOPE):
         return True
-    scope: Optional[SerdeScope] = getattr(cls, SERDE_SCOPE)
+    scope: Optional[Scope] = getattr(cls, SERDE_SCOPE)
     return TO_DICT not in scope.funcs
 
 
@@ -311,7 +311,7 @@ def to_obj(
     o, named: bool, reuse_instances: bool, convert_sets: bool, c: Optional[Type[Any]] = None
 ):
     def serializable_to_obj(object):
-        serde_scope: SerdeScope = getattr(object, SERDE_SCOPE)
+        serde_scope: Scope = getattr(object, SERDE_SCOPE)
         func_name = TO_DICT if named else TO_ITER
         return serde_scope.funcs[func_name](
             object, reuse_instances=reuse_instances, convert_sets=convert_sets

@@ -64,7 +64,7 @@ from .core import (
     DefaultTagging,
     Field,
     NoCheck,
-    SerdeScope,
+    Scope,
     Tagging,
     TypeCheck,
     add_func,
@@ -214,9 +214,9 @@ def deserialize(
         # Create a scope storage used by serde.
         # Each class should get own scope. Child classes can not share scope with parent class.
         # That's why we need the "scope.cls is not cls" check.
-        scope: Optional[SerdeScope] = getattr(cls, SERDE_SCOPE, None)
+        scope: Optional[Scope] = getattr(cls, SERDE_SCOPE, None)
         if scope is None or scope.cls is not cls:
-            scope = SerdeScope(cls, reuse_instances_default=reuse_instances_default)
+            scope = Scope(cls, reuse_instances_default=reuse_instances_default)
             setattr(cls, SERDE_SCOPE, scope)
 
         # Set some globals for all generated functions
@@ -331,7 +331,7 @@ def is_dataclass_without_de(cls: Type[Any]) -> bool:
         return False
     if not hasattr(cls, SERDE_SCOPE):
         return True
-    scope: Optional[SerdeScope] = getattr(cls, SERDE_SCOPE)
+    scope: Optional[Scope] = getattr(cls, SERDE_SCOPE)
     return FROM_DICT not in scope.funcs
 
 
@@ -362,7 +362,7 @@ def from_obj(c: Type[T], o: Any, named: bool, reuse_instances: bool) -> T:
     """
 
     def deserializable_to_obj(cls):
-        serde_scope: SerdeScope = getattr(cls, SERDE_SCOPE)
+        serde_scope: Scope = getattr(cls, SERDE_SCOPE)
         func_name = FROM_DICT if named else FROM_ITER
         res = serde_scope.funcs[func_name](
             cls, maybe_generic=maybe_generic, data=o, reuse_instances=reuse_instances

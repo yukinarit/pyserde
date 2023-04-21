@@ -40,7 +40,7 @@ from .compat import (
 from .numpy import is_numpy_available, is_numpy_type
 
 __all__ = [
-    "SerdeScope",
+    "Scope",
     "gen",
     "add_func",
     "Func",
@@ -78,7 +78,7 @@ def init(debug: bool = False) -> None:
 
 
 @dataclass
-class SerdeScope:
+class Scope:
     """
     Container to store types and functions used in code generation context.
     """
@@ -174,12 +174,12 @@ def gen(
 
 
 def add_func(
-    serde_scope: SerdeScope, func_name: str, func_code: str, globals: Dict[str, Any]
+    serde_scope: Scope, func_name: str, func_code: str, globals: Dict[str, Any]
 ) -> None:
     """
-    Generate a function and add it to a SerdeScope's `funcs` dictionary.
+    Generate a function and add it to a Scope's `funcs` dictionary.
 
-    * `serde_scope`: the SerdeScope instance to modify
+    * `serde_scope`: the Scope instance to modify
     * `func_name`: the name of the function
     * `func_code`: the source code of the function
     * `globals`: global variables that should be accessible to the generated function
@@ -198,7 +198,7 @@ def is_instance(obj: Any, typ: Type[Any]) -> bool:
     Subscripted Generics e.g. `List[int]`.
     """
     if dataclasses.is_dataclass(typ):
-        serde_scope: Optional[SerdeScope] = getattr(typ, SERDE_SCOPE, None)
+        serde_scope: Optional[Scope] = getattr(typ, SERDE_SCOPE, None)
         if serde_scope:
             try:
                 serde_scope.funcs[TYPE_CHECK](obj)
