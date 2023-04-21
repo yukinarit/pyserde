@@ -2,7 +2,7 @@
 Serialize and Deserialize in YAML format. This module depends on
 [pyyaml](https://pypi.org/project/PyYAML/) package.
 """
-from typing import Type, Any, overload
+from typing import Type, Any, overload, Optional
 
 import yaml
 
@@ -25,7 +25,9 @@ class YamlDeserializer(Deserializer[str]):
         return yaml.safe_load(data, **opts)
 
 
-def to_yaml(obj: Any, se: Type[Serializer[str]] = YamlSerializer, **opts: Any) -> str:
+def to_yaml(
+    obj: Any, cls: Optional[Any] = None, se: Type[Serializer[str]] = YamlSerializer, **opts: Any
+) -> str:
     """
     Serialize the object into YAML.
 
@@ -35,7 +37,7 @@ def to_yaml(obj: Any, se: Type[Serializer[str]] = YamlSerializer, **opts: Any) -
     If you want to use the other yaml package, you can subclass `YamlSerializer` and implement
     your own logic.
     """
-    return se.serialize(to_dict(obj, reuse_instances=False), **opts)
+    return se.serialize(to_dict(obj, c=cls, reuse_instances=False), **opts)
 
 
 @overload

@@ -7,9 +7,19 @@ from uuid import UUID
 
 import pytest
 
-from serde import SerdeError, from_dict, from_tuple
-from serde import init as serde_init
-from serde import logger, serde, to_dict, to_tuple
+from serde import (
+    SerdeError,
+    from_dict,
+    from_tuple,
+    init as serde_init,
+    logger,
+    serde,
+    to_dict,
+    to_tuple,
+    InternalTagging,
+    AdjacentTagging,
+    Untagged,
+)
 from serde.compat import Literal
 from serde.json import from_json, to_json
 
@@ -572,7 +582,7 @@ def test_internal_tagging():
     with pytest.raises(Exception):
         assert from_dict(Foo, {"a": {"type": "Bar", "c": 10}})
 
-    with pytest.raises(SerdeError):
+    with pytest.raises(TypeError):
         # Tag is not specified in attribute
         @serde(tagging=InternalTagging())
         class Foo:
@@ -632,19 +642,19 @@ def test_adjacent_tagging():
     with pytest.raises(Exception):
         assert from_dict(Foo, {"a": {"type": "Bar", "content": {"c": 10}}})
 
-    with pytest.raises(SerdeError):
+    with pytest.raises(TypeError):
         # Tag is not specified in attribute
         @serde(tagging=AdjacentTagging(content="content"))
         class Foo:
             pass
 
-    with pytest.raises(SerdeError):
+    with pytest.raises(TypeError):
         # Content is not specified in attribute
         @serde(tagging=AdjacentTagging(tag="tag"))
         class Foo:
             pass
 
-    with pytest.raises(SerdeError):
+    with pytest.raises(TypeError):
         # Tag/Content is not specified in attribute
         @serde(tagging=AdjacentTagging())
         class Foo:
@@ -725,3 +735,31 @@ def test_newtype_and_untagged_union() -> None:
 
     assert isinstance(actual.buggy_field[0], Innerclass)
     assert isinstance(actual.buggy_field[1], str)
+
+
+def test_union_directly() -> None:
+    @dataclass
+    class Foo:
+        v: int
+
+    @dataclass
+    class Bar:
+        w: str
+
+    bar = Bar("bar")
+
+    # externally tagged
+    s = to_json(bar, cls=Union[Foo, Bar])
+    assert bar == from_json(Union[Foo, Bar], s)
+
+    # internally tagged
+    s = to_json(bar, cls=InternalTagging("type", Union[Foo, Bar]))
+    assert bar == from_json(InternalTagging("type", Union[Foo, Bar]), s)
+
+    # adjacently tagged
+    s = to_json(bar, cls=AdjacentTagging("type", "content", Union[Foo, Bar]))
+    assert bar == from_json(AdjacentTagging("type", "content", Union[Foo, Bar]), s)
+
+    # untagged tagged
+    s = to_json(bar, cls=Untagged(Union[Foo, Bar]))
+    assert bar == from_json(Untagged(Union[Foo, Bar]), s)

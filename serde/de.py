@@ -59,6 +59,7 @@ from .core import (
     FROM_DICT,
     FROM_ITER,
     SERDE_SCOPE,
+    CACHE,
     TYPE_CHECK,
     UNION_DE_PREFIX,
     DefaultTagging,
@@ -82,8 +83,8 @@ from .core import (
 )
 from .numpy import (
     deserialize_numpy_array,
-    deserialize_numpy_array_direct,
     deserialize_numpy_scalar,
+    deserialize_numpy_array_direct,
     is_numpy_array,
     is_numpy_scalar,
 )
@@ -369,6 +370,12 @@ def from_obj(c: Type[T], o: Any, named: bool, reuse_instances: bool) -> T:
         )
         return res
 
+    if is_union(c) and not is_opt(c):
+        # If a class in the argument is a non-dataclass class e.g. Union[Foo, Bar],
+        # pyserde generates a wrapper (de)serializable dataclass on the fly,
+        # and use it to deserialize into the object.
+        return CACHE.deserialize_union(c, o)
+
     if is_generic(c):
         # Store subscripted generic type such as Foo[Bar] in "maybe_generic",
         # and store origin type such as Foo in "c". Since subscripted generics
@@ -390,15 +397,6 @@ def from_obj(c: Type[T], o: Any, named: bool, reuse_instances: bool) -> T:
                 return None
             else:
                 return thisfunc(type_args(c)[0], o)
-        elif is_union(c):
-            v = None
-            for typ in type_args(c):
-                try:
-                    v = thisfunc(typ, o)
-                    break
-                except (SerdeError, ValueError):
-                    pass
-            return v
         elif is_list(c):
             if is_bare_list(c):
                 return list(o)

@@ -50,6 +50,7 @@ from .compat import (
     typename,
 )
 from .core import (
+    CACHE,
     SERDE_SCOPE,
     TO_DICT,
     TO_ITER,
@@ -307,9 +308,7 @@ def is_dataclass_without_se(cls: Type[Any]) -> bool:
     return TO_DICT not in scope.funcs
 
 
-def to_obj(
-    o, named: bool, reuse_instances: bool, convert_sets: bool, c: Optional[Type[Any]] = None
-):
+def to_obj(o, named: bool, reuse_instances: bool, convert_sets: bool, c: Optional[Any] = None):
     def serializable_to_obj(object):
         serde_scope: Scope = getattr(object, SERDE_SCOPE)
         func_name = TO_DICT if named else TO_ITER
@@ -324,6 +323,13 @@ def to_obj(
             reuse_instances=reuse_instances,
             convert_sets=convert_sets,
         )
+
+        # If a class in the argument is a non-dataclass class e.g. Union[Foo, Bar],
+        # pyserde generates a wrapper (de)serializable dataclass on the fly,
+        # and use it to serialize the object.
+        if c and is_union(c) and not is_opt(c):
+            return CACHE.serialize_union(c, o)
+
         if o is None:
             return None
         if is_dataclass_without_se(o):
@@ -357,7 +363,9 @@ def astuple(v: Any) -> Tuple[Any, ...]:
     return to_tuple(v, reuse_instances=False, convert_sets=False)
 
 
-def to_tuple(o, reuse_instances: bool = ..., convert_sets: bool = ...) -> Tuple[Any, ...]:
+def to_tuple(
+    o: Any, c: Optional[Type[Any]] = None, reuse_instances: bool = ..., convert_sets: bool = ...
+) -> Tuple[Any, ...]:
     """
     Serialize object into tuple.
 
@@ -377,7 +385,7 @@ def to_tuple(o, reuse_instances: bool = ..., convert_sets: bool = ...) -> Tuple[
     >>> to_tuple(lst)
     [(10, 'foo', 100.0, True), (20, 'foo', 100.0, True)]
     """
-    return to_obj(o, named=False, reuse_instances=reuse_instances, convert_sets=convert_sets)
+    return to_obj(o, named=False, c=c, reuse_instances=reuse_instances, convert_sets=convert_sets)
 
 
 def asdict(v: Any) -> Dict[Any, Any]:
@@ -387,7 +395,9 @@ def asdict(v: Any) -> Dict[Any, Any]:
     return to_dict(v, reuse_instances=False, convert_sets=False)
 
 
-def to_dict(o, reuse_instances: bool = ..., convert_sets: bool = ...) -> Dict[Any, Any]:
+def to_dict(
+    o: Any, c: Optional[Type[Any]] = None, reuse_instances: bool = ..., convert_sets: bool = ...
+) -> Dict[Any, Any]:
     """
     Serialize object into dictionary.
 
@@ -407,7 +417,7 @@ def to_dict(o, reuse_instances: bool = ..., convert_sets: bool = ...) -> Dict[An
     >>> to_dict(lst)
     [{'i': 10, 's': 'foo', 'f': 100.0, 'b': True}, {'i': 20, 's': 'foo', 'f': 100.0, 'b': True}]
     """
-    return to_obj(o, named=True, reuse_instances=reuse_instances, convert_sets=convert_sets)
+    return to_obj(o, named=True, c=c, reuse_instances=reuse_instances, convert_sets=convert_sets)
 
 
 @dataclass
@@ -702,7 +712,7 @@ convert_sets=convert_sets), coerce(int, foo[2]),)"
         elif is_none(arg.type):
             res = "None"
         elif is_any(arg.type) or isinstance(arg.type, TypeVar):
-            res = f"to_obj({arg.varname}, True, False, False)"
+            res = f"to_obj({arg.varname}, True, False, False, c=typing.Any)"
         elif is_generic(arg.type):
             origin = get_origin(arg.type)
             assert origin

@@ -20,7 +20,7 @@ import sys
 from typing import Any
 from typing_extensions import Type
 
-from .core import SERDE_SCOPE, Scope, init, logger
+from .core import SERDE_SCOPE, init, logger
 
 init(True)
 

@@ -8,7 +8,19 @@ import functools
 import logging
 import re
 from dataclasses import dataclass
-from typing import Any, Callable, Dict, List, Mapping, Optional, Union, Generic, TypeVar
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    List,
+    Mapping,
+    Optional,
+    Union,
+    Generic,
+    TypeVar,
+    Tuple,
+    overload,
+)
 
 import casefy
 import jinja2
@@ -36,6 +48,7 @@ from .compat import (
     is_variable_tuple,
     type_args,
     typename,
+    _WithTagging,
 )
 from .numpy import is_numpy_available, is_numpy_type
 
@@ -75,6 +88,147 @@ SETTINGS = {"debug": False}
 
 def init(debug: bool = False) -> None:
     SETTINGS["debug"] = debug
+
+
+@dataclass
+class Cache:
+    """
+    Cache the generated code for non-dataclass classes.
+
+    for example, a type not bound in a dataclass is passed in from_json
+
+    ```
+    from_json(Union[Foo, Bar], ...)
+    ```
+
+    It creates the following wrapper dataclass on the fly,
+
+    ```
+    @serde
+    @dataclass
+    class Union_Foo_bar:
+        v: Union[Foo, Bar]
+    ```
+
+    Then store this class in this cache. Whenever the same type is passed,
+    the class is retrieved from this cache. So the overhead of the codegen
+    should be only once.
+    """
+
+    classes: Dict[str, Type[Any]] = dataclasses.field(default_factory=dict)
+
+    def _get_class(self, cls: Type[Any]) -> Type[Any]:
+        """
+        Get a wrapper class from the the cache. If not found, it will generate
+        the class and store it in the cache.
+        """
+        class_name = f"Wrapper{typename(cls)}"
+        wrapper = self.classes.get(class_name)
+        return wrapper or self._generate_class(cls)
+
+    def _generate_class(self, cls: Type[Any]) -> Type[Any]:
+        """
+        Generate a wrapper dataclass then make the it (de)serializable using
+        @serde decorator.
+        """
+        from . import serde
+
+        class_name = f"Wrapper{typename(cls)}"
+        logger.debug(f"Generating a wrapper class code for {class_name}")
+
+        wrapper = dataclasses.make_dataclass(class_name, [("v", cls)])
+
+        serde(wrapper)
+        self.classes[class_name] = wrapper
+
+        logger.debug(f"(de)serializing code for {class_name} was generated")
+        return wrapper
+
+    def serialize(self, cls: Type[Any], obj: Any) -> Any:
+        """
+        Serialize the specified type of object into dict or tuple.
+        """
+        wrapper = self._get_class(cls)
+        scope: Scope = getattr(wrapper, SERDE_SCOPE)
+        data = scope.funcs[TO_DICT](wrapper(obj), reuse_instances=False, convert_sets=True)
+
+        logging.debug(f"Intermediate value: {data}")
+
+        return data["v"]
+
+    def deserialize(self, cls: Type[T], obj: Any) -> T:
+        """
+        Deserialize from dict or tuple into the specified type.
+        """
+        wrapper = self._get_class(cls)
+        scope: Scope = getattr(wrapper, SERDE_SCOPE)
+        return scope.funcs[FROM_DICT](data={"v": obj}).v  # type: ignore
+
+    def _get_union_class(self, cls: Type[Any]) -> Optional[Type[Any]]:
+        """
+        Get a wrapper class from the the cache. If not found, it will generate
+        the class and store it in the cache.
+        """
+        union_cls, tagging = _extract_from_with_tagging(cls)
+        class_name = union_func_name(
+            f"{tagging.produce_unique_class_name()}Union", list(type_args(union_cls))
+        )
+        wrapper = self.classes.get(class_name)
+        return wrapper or self._generate_union_class(cls)
+
+    def _generate_union_class(self, cls: Type[Any]) -> Type[Any]:
+        """
+        Generate a wrapper dataclass then make the it (de)serializable using
+        @serde decorator.
+        """
+        import serde
+
+        union_cls, tagging = _extract_from_with_tagging(cls)
+        class_name = union_func_name(
+            f"{tagging.produce_unique_class_name()}Union", list(type_args(union_cls))
+        )
+        wrapper = dataclasses.make_dataclass(class_name, [("v", union_cls)])
+        serde.serde(wrapper, tagging=tagging)
+        self.classes[class_name] = wrapper
+        return wrapper
+
+    def serialize_union(self, cls: Type[Any], obj: Any) -> Any:
+        """
+        Serialize the specified Union into dict or tuple.
+        """
+        union_cls, _ = _extract_from_with_tagging(cls)
+        wrapper = self._get_union_class(cls)
+        scope: Scope = getattr(wrapper, SERDE_SCOPE)
+        func_name = union_func_name(UNION_SE_PREFIX, list(type_args(union_cls)))
+        return scope.funcs[func_name](obj, False, False)
+
+    def deserialize_union(self, cls: Type[T], data: Any) -> T:
+        """
+        Deserialize from dict or tuple into the specified Union.
+        """
+        union_cls, _ = _extract_from_with_tagging(cls)
+        wrapper = self._get_union_class(cls)
+        scope: Scope = getattr(wrapper, SERDE_SCOPE)
+        func_name = union_func_name(UNION_DE_PREFIX, list(type_args(union_cls)))
+        return scope.funcs[func_name](cls=union_cls, data=data)  # type: ignore
+
+
+def _extract_from_with_tagging(maybe_with_tagging: Any) -> Tuple[Any, Tagging]:
+    try:
+        if isinstance(maybe_with_tagging, _WithTagging):
+            union_cls = maybe_with_tagging.inner
+            tagging = maybe_with_tagging.tagging
+        else:
+            raise Exception()
+    except Exception:
+        union_cls = maybe_with_tagging
+        tagging = ExternalTagging
+
+    return (union_cls, tagging)
+
+
+CACHE = Cache()
+""" Global cache variable for non-dataclass classes """
 
 
 @dataclass
@@ -173,9 +327,7 @@ def gen(
     return code
 
 
-def add_func(
-    serde_scope: Scope, func_name: str, func_code: str, globals: Dict[str, Any]
-) -> None:
+def add_func(serde_scope: Scope, func_name: str, func_code: str, globals: Dict[str, Any]) -> None:
     """
     Generate a function and add it to a Scope's `funcs` dictionary.
 
@@ -623,14 +775,73 @@ class Tagging:
         if self.is_adjacent() and (self.tag is None or self.content is None):
             raise SerdeError('"tag" and "content" must be specified in AdjacentTagging')
 
+    def produce_unique_class_name(self) -> str:
+        """
+        Produce a unique class name for this tagging. The name is used for generated
+        wrapper dataclass and stored in `Cache`.
+        """
+        if self.is_internal():
+            tag = casefy.pascalcase(self.tag)
+            if not tag:
+                raise SerdeError('"tag" must be specified in InternalTagging')
+            return f"Internal{tag}"
+        elif self.is_adjacent():
+            tag = casefy.pascalcase(self.tag)
+            content = casefy.pascalcase(self.content)
+            if not tag:
+                raise SerdeError('"tag" must be specified in AdjacentTagging')
+            if not content:
+                raise SerdeError('"content" must be specified in AdjacentTagging')
+            return f"Adjacent{tag}{content}"
+        else:
+            return self.kind.name
+
+    def __call__(self, cls: T) -> _WithTagging[T]:
+        return _WithTagging(cls, self)
+
+
+@overload
+def InternalTagging(tag: str) -> Tagging:
+    ...
+
+
+@overload
+def InternalTagging(tag: str, cls: T) -> _WithTagging[T]:
+    ...
+
+
+def InternalTagging(tag: str, cls: Optional[T] = None) -> Union[Tagging, _WithTagging[T]]:
+    tagging = Tagging(tag, kind=Tagging.Kind.Internal)
+    if cls:
+        return tagging(cls)
+    else:
+        return tagging
+
+
+@overload
+def AdjacentTagging(tag: str, content: str) -> Tagging:
+    ...
+
+
+@overload
+def AdjacentTagging(tag: str, content: str, cls: T) -> _WithTagging[T]:
+    ...
+
+
+def AdjacentTagging(
+    tag: str, content: str, cls: Optional[T] = None
+) -> Union[Tagging, _WithTagging[T]]:
+    tagging = Tagging(tag, content, kind=Tagging.Kind.Adjacent)
+    if cls:
+        return tagging(cls)
+    else:
+        return tagging
+
 
 ExternalTagging = Tagging()
 
-InternalTagging = functools.partial(Tagging, kind=Tagging.Kind.Internal)
-
-AdjacentTagging = functools.partial(Tagging, kind=Tagging.Kind.Adjacent)
-
 Untagged = Tagging(kind=Tagging.Kind.Untagged)
+
 
 DefaultTagging = ExternalTagging
 
