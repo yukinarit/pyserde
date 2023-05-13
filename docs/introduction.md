@@ -4,6 +4,7 @@
 
 ```python
 @serde
+@dataclass
 class Foo:
     i: int
     s: str
@@ -27,18 +28,24 @@ Foo(i=10, s='foo', f=100.0, b=True)
 ## Features
 
 - [Supported types](supported-types.md)
+    - dict
+    - tuple
     - JSON
 	- Yaml
 	- Toml
 	- MsgPack
+	- Pickle
 - [Supported data formats](supported-data-formats.md)
     - Primitives (`int`, `float`, `str`, `bool`)
-    - Containers (`List`, `Set`, `Tuple`, `Dict`)
+    - Containers
+        - `List`, `Set`, `Tuple`, `Dict`
+        - [`FrozenSet`](https://docs.python.org/3/library/stdtypes.html#frozenset), [`DefaultDict`](https://docs.python.org/3/library/collections.html#collections.defaultdict)
     - [`typing.Optional`](https://docs.python.org/3/library/typing.html#typing.Optional)
     - [`typing.Union`](https://docs.python.org/3/library/typing.html#typing.Union)
     - User defined class with [`@dataclass`](https://docs.python.org/3/library/dataclasses.html)
     - [`typing.NewType`](https://docs.python.org/3/library/typing.html#newtype) for primitive types
     - [`typing.Any`](https://docs.python.org/3/library/typing.html#the-any-type)
+    - [`typing.Literal`](https://docs.python.org/3/library/typing.html#typing.Literal)
     - [`typing.Generic`](https://docs.python.org/3/library/typing.html#user-defined-generic-types)
     - [`typing.ClassVar`](https://docs.python.org/3/library/typing.html#user-defined-generic-type://docs.python.org/3/library/typing.html#typing.ClassVar)
     - [`Enum`](https://docs.python.org/3/library/enum.html#enum.Enum) and [`IntEnum`](https://docs.python.org/3/library/enum.html#enum.IntEnum)
@@ -48,6 +55,8 @@ Foo(i=10, s='foo', f=100.0, b=True)
         - [`uuid.UUID`](https://docs.python.org/3/library/uuid.html)
         - [`datetime.date`](https://docs.python.org/3/library/datetime.html#date-objects) & [`datetime.datetime`](https://docs.python.org/3/library/datetime.html#datetime-objects)
         - [`ipaddress`](https://docs.python.org/3/library/ipaddress.html)
+    - PyPI library
+        - [`numpy`](https://github.com/numpy/numpy) types
 - [Attributes](features/attributes.md)
 - [Decorators](features/decorators.md)
 - [TypeCheck](features/type-check.md)
