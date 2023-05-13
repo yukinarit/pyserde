@@ -9,7 +9,6 @@ import uuid
 from typing import Any, Callable, DefaultDict, Dict, FrozenSet, Generic, List, NewType, Optional, Set, Tuple, TypeVar
 
 import more_itertools
-
 from serde import from_dict, from_tuple, serde, to_dict, to_tuple
 from serde.json import from_json, to_json
 from serde.msgpack import from_msgpack, to_msgpack
@@ -92,6 +91,11 @@ types: List = [
     param(data.Pri(10, 'foo', 100.0, True), Optional[data.Pri]),
     param(None, Optional[data.Pri], toml_not_supported),
     param(data.Recur(data.Recur(None, None, None), None, None), data.Recur, toml_not_supported),
+    param(
+        data.RecurContainer([data.RecurContainer([], {})], {"c": data.RecurContainer([], {})}),
+        data.RecurContainer,
+        toml_not_supported,
+    ),
     param(data.Init(1), data.Init),
     param(10, NewType('Int', int)),  # NewType
     param({'a': 1}, Any),  # Any

@@ -353,11 +353,6 @@ def iter_types(cls: TypeLike) -> List[TypeLike]:
             args = type_args(cls)
             if args:
                 recursive(args[0])
-        elif is_set(cls):
-            lst.add(Set)
-            args = type_args(cls)
-            if args:
-                recursive(args[0])
         elif is_tuple(cls):
             lst.add(Tuple)
             for arg in type_args(cls):
@@ -380,9 +375,12 @@ def iter_unions(cls: TypeLike) -> List[TypeLike]:
     Iterate over all unions that are used in the dataclass
     """
     lst: Set[TypeLike] = set()
+    stack: List[TypeLike] = []  # To prevent infinite recursion
 
     def recursive(cls: TypeLike) -> None:
         if cls in lst:
+            return
+        if cls in stack:
             return
 
         if is_union(cls):
@@ -390,8 +388,10 @@ def iter_unions(cls: TypeLike) -> List[TypeLike]:
             for arg in type_args(cls):
                 recursive(arg)
         if is_dataclass(cls):
+            stack.append(cls)
             for f in dataclass_fields(cls):
                 recursive(f.type)
+            stack.pop()
         elif is_opt(cls):
             args = type_args(cls)
             if args:
