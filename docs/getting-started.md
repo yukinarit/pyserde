@@ -1,6 +1,6 @@
 # Getting started
 
-Install pyserde from PyPI. pyserde requires Python>=3.6.
+Install pyserde from PyPI. pyserde requires at least Python>=3.7.
 
 ```sh
 pip install pyserde
@@ -18,7 +18,7 @@ Or all at once:
 pip install "pyserde[all]"
 ```
 
-Define your class with pyserde's `@serde` decorators. Be careful that module name is `serde`, not `pyserde`. `pyserde` depends on `dataclasses` module. If you are new to dataclass, I would recommend to read [dataclasses documentation](https://docs.python.org/3/library/dataclasses.html) first.
+Declare your class with `@dataclass` and pyserde's `@serde` decorators. Be careful that module name is `serde`, not `pyserde`. `pyserde` depends on `dataclasses` module. If you are new to dataclass, I would recommend to read [dataclasses documentation](https://docs.python.org/3/library/dataclasses.html) first.
 
 ```python
 from dataclasses import dataclass
@@ -33,7 +33,7 @@ class Foo:
     b: bool
 ```
 
-pyserde generates methods necessary for (de)serialization by `@serde` when a class is loaded into python interpreter. The code generation occurs only once and there is no overhead when you use the generated methods. Now your class is serializable and deserializable in the data formats supported by pyserde.
+pyserde generates methods necessary for (de)serialization by `@serde` when a class is loaded into python interpreter. The code generation occurs only once and there is no overhead when you use the class. Now your class is serializable and deserializable in the data formats supported by pyserde.
 
 > **NOTE:** If you need only either serialization or deserialization functionality, you can use `@serialize` or `@deserialize` instead of `@serde` decorator.
 >
