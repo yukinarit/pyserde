@@ -9,7 +9,7 @@ Thank you for considering contributing to Pyserde!
 - List your Python and Pyserde versions. If possible, check if this issue is already fixed in the repository.
 
 ## Submitting patches
-- Pyserde uses Black and isort to autoformat your code. This should be done for you as a git pre-commit hook, which gets installed when you run `make setup` but you can do it manually via `make fmt`.
+- Pyserde uses Black to autoformat your code. This should be done for you as a git pre-commit hook, which gets installed when you run `make setup` but you can do it manually via `make fmt`.
 - Include tests if your patch is supposed to solve a bug, and explain clearly under which circumstances the bug happens. Make sure the test fails without your patch.
 - Include a string like “Fixes #123” in your commit message (where 123 is the issue you fixed). See [Closing issues using keywords](https://help.github.com/articles/creating-a-pull-request/).
 
