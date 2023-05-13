@@ -236,6 +236,15 @@ class Recur:
 serde(Recur)
 
 
+@dataclass(unsafe_hash=True)
+class RecurContainer:
+    a: List['RecurContainer']
+    b: Dict[str, 'RecurContainer']
+
+
+serde(Recur)
+
+
 ListPri = List[Pri]
 
 DictPri = Dict[str, Pri]

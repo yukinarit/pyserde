@@ -24,6 +24,7 @@ import pep681
 import plain_dataclass
 import plain_dataclass_class_attribute
 import recursive
+import recursive_list
 import rename
 import rename_all
 import simple
@@ -78,6 +79,7 @@ def run_all():
     run(class_var)
     run(alias)
     run(recursive)
+    run(recursive_list)
     run(class_var)
     run(plain_dataclass)
     run(plain_dataclass_class_attribute)
