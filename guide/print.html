@@ -151,6 +151,7 @@
                         <h1 id="introduction"><a class="header" href="#introduction">Introduction</a></h1>
 <p><code>pyserde</code> is a simple yet powerful serialization library on top of <a href="https://docs.python.org/3/library/dataclasses.html">dataclasses</a>. Simply adding pyserde's <code>@serde</code> decorator makes your class (de)serializable.</p>
 <pre><code class="language-python">@serde
+@dataclass
 class Foo:
     i: int
     s: str
@@ -169,21 +170,30 @@ Foo(i=10, s='foo', f=100.0, b=True)
 <ul>
 <li><a href="supported-types.html">Supported types</a>
 <ul>
+<li>dict</li>
+<li>tuple</li>
 <li>JSON</li>
 <li>Yaml</li>
 <li>Toml</li>
 <li>MsgPack</li>
+<li>Pickle</li>
 </ul>
 </li>
 <li><a href="supported-data-formats.html">Supported data formats</a>
 <ul>
 <li>Primitives (<code>int</code>, <code>float</code>, <code>str</code>, <code>bool</code>)</li>
-<li>Containers (<code>List</code>, <code>Set</code>, <code>Tuple</code>, <code>Dict</code>)</li>
+<li>Containers
+<ul>
+<li><code>List</code>, <code>Set</code>, <code>Tuple</code>, <code>Dict</code></li>
+<li><a href="https://docs.python.org/3/library/stdtypes.html#frozenset"><code>FrozenSet</code></a>, <a href="https://docs.python.org/3/library/collections.html#collections.defaultdict"><code>DefaultDict</code></a></li>
+</ul>
+</li>
 <li><a href="https://docs.python.org/3/library/typing.html#typing.Optional"><code>typing.Optional</code></a></li>
 <li><a href="https://docs.python.org/3/library/typing.html#typing.Union"><code>typing.Union</code></a></li>
 <li>User defined class with <a href="https://docs.python.org/3/library/dataclasses.html"><code>@dataclass</code></a></li>
 <li><a href="https://docs.python.org/3/library/typing.html#newtype"><code>typing.NewType</code></a> for primitive types</li>
 <li><a href="https://docs.python.org/3/library/typing.html#the-any-type"><code>typing.Any</code></a></li>
+<li><a href="https://docs.python.org/3/library/typing.html#typing.Literal"><code>typing.Literal</code></a></li>
 <li><a href="https://docs.python.org/3/library/typing.html#user-defined-generic-types"><code>typing.Generic</code></a></li>
 <li><a href="https://docs.python.org/3/library/typing.html#user-defined-generic-type://docs.python.org/3/library/typing.html#typing.ClassVar"><code>typing.ClassVar</code></a></li>
 <li><a href="https://docs.python.org/3/library/enum.html#enum.Enum"><code>Enum</code></a> and <a href="https://docs.python.org/3/library/enum.html#enum.IntEnum"><code>IntEnum</code></a></li>
@@ -194,6 +204,11 @@ Foo(i=10, s='foo', f=100.0, b=True)
 <li><a href="https://docs.python.org/3/library/uuid.html"><code>uuid.UUID</code></a></li>
 <li><a href="https://docs.python.org/3/library/datetime.html#date-objects"><code>datetime.date</code></a> &amp; <a href="https://docs.python.org/3/library/datetime.html#datetime-objects"><code>datetime.datetime</code></a></li>
 <li><a href="https://docs.python.org/3/library/ipaddress.html"><code>ipaddress</code></a></li>
+</ul>
+</li>
+<li>PyPI library
+<ul>
+<li><a href="https://github.com/numpy/numpy"><code>numpy</code></a> types</li>
 </ul>
 </li>
 </ul>
@@ -216,7 +231,7 @@ Foo(i=10, s='foo', f=100.0, b=True)
 <li><a href="features/flatten.html">Flatten</a></li>
 </ul>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="getting-started"><a class="header" href="#getting-started">Getting started</a></h1>
-<p>Install pyserde from PyPI. pyserde requires Python&gt;=3.6.</p>
+<p>Install pyserde from PyPI. pyserde requires at least Python&gt;=3.7.</p>
 <pre><code class="language-sh">pip install pyserde
 </code></pre>
 <p>Additional data formats besides JSON need additional dependencies installed. Install <code>msgpack</code>, <code>toml</code>, or <code>yaml</code> extras to work with the appropriate data formats; you can skip formats that you don't plan to use. For example, if you want to use Toml and YAML:</p>
@@ -225,7 +240,7 @@ Foo(i=10, s='foo', f=100.0, b=True)
 <p>Or all at once:</p>
 <pre><code class="language-sh">pip install &quot;pyserde[all]&quot;
 </code></pre>
-<p>Define your class with pyserde's <code>@serde</code> decorators. Be careful that module name is <code>serde</code>, not <code>pyserde</code>. <code>pyserde</code> depends on <code>dataclasses</code> module. If you are new to dataclass, I would recommend to read <a href="https://docs.python.org/3/library/dataclasses.html">dataclasses documentation</a> first.</p>
+<p>Declare your class with <code>@dataclass</code> and pyserde's <code>@serde</code> decorators. Be careful that module name is <code>serde</code>, not <code>pyserde</code>. <code>pyserde</code> depends on <code>dataclasses</code> module. If you are new to dataclass, I would recommend to read <a href="https://docs.python.org/3/library/dataclasses.html">dataclasses documentation</a> first.</p>
 <pre><code class="language-python">from dataclasses import dataclass
 from serde import serde
 
@@ -237,7 +252,7 @@ class Foo:
     f: float
     b: bool
 </code></pre>
-<p>pyserde generates methods necessary for (de)serialization by <code>@serde</code> when a class is loaded into python interpreter. The code generation occurs only once and there is no overhead when you use the generated methods. Now your class is serializable and deserializable in the data formats supported by pyserde.</p>
+<p>pyserde generates methods necessary for (de)serialization by <code>@serde</code> when a class is loaded into python interpreter. The code generation occurs only once and there is no overhead when you use the class. Now your class is serializable and deserializable in the data formats supported by pyserde.</p>
 <blockquote>
 <p><strong>NOTE:</strong> If you need only either serialization or deserialization functionality, you can use <code>@serialize</code> or <code>@deserialize</code> instead of <code>@serde</code> decorator.</p>
 <p>e.g. If you don't need deserialization functionality, you can add <code>@serialize</code> decorator only. But, calling deserialize API e.g. <code>from_json</code> for <code>Foo</code> will raise an error.</p>

@@ -151,7 +151,7 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="getting-started"><a class="header" href="#getting-started">Getting started</a></h1>
-<p>Install pyserde from PyPI. pyserde requires Python&gt;=3.6.</p>
+<p>Install pyserde from PyPI. pyserde requires at least Python&gt;=3.7.</p>
 <pre><code class="language-sh">pip install pyserde
 </code></pre>
 <p>Additional data formats besides JSON need additional dependencies installed. Install <code>msgpack</code>, <code>toml</code>, or <code>yaml</code> extras to work with the appropriate data formats; you can skip formats that you don't plan to use. For example, if you want to use Toml and YAML:</p>
@@ -160,7 +160,7 @@
 <p>Or all at once:</p>
 <pre><code class="language-sh">pip install &quot;pyserde[all]&quot;
 </code></pre>
-<p>Define your class with pyserde's <code>@serde</code> decorators. Be careful that module name is <code>serde</code>, not <code>pyserde</code>. <code>pyserde</code> depends on <code>dataclasses</code> module. If you are new to dataclass, I would recommend to read <a href="https://docs.python.org/3/library/dataclasses.html">dataclasses documentation</a> first.</p>
+<p>Declare your class with <code>@dataclass</code> and pyserde's <code>@serde</code> decorators. Be careful that module name is <code>serde</code>, not <code>pyserde</code>. <code>pyserde</code> depends on <code>dataclasses</code> module. If you are new to dataclass, I would recommend to read <a href="https://docs.python.org/3/library/dataclasses.html">dataclasses documentation</a> first.</p>
 <pre><code class="language-python">from dataclasses import dataclass
 from serde import serde
 
@@ -172,7 +172,7 @@ class Foo:
     f: float
     b: bool
 </code></pre>
-<p>pyserde generates methods necessary for (de)serialization by <code>@serde</code> when a class is loaded into python interpreter. The code generation occurs only once and there is no overhead when you use the generated methods. Now your class is serializable and deserializable in the data formats supported by pyserde.</p>
+<p>pyserde generates methods necessary for (de)serialization by <code>@serde</code> when a class is loaded into python interpreter. The code generation occurs only once and there is no overhead when you use the class. Now your class is serializable and deserializable in the data formats supported by pyserde.</p>
 <blockquote>
 <p><strong>NOTE:</strong> If you need only either serialization or deserialization functionality, you can use <code>@serialize</code> or <code>@deserialize</code> instead of <code>@serde</code> decorator.</p>
 <p>e.g. If you don't need deserialization functionality, you can add <code>@serialize</code> decorator only. But, calling deserialize API e.g. <code>from_json</code> for <code>Foo</code> will raise an error.</p>

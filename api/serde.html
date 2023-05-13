@@ -147,7 +147,7 @@ inspired by <a href="https://github.com/serde-rs/serde">serde-rs</a>.</p>
 
 <div class="pdoc-code codehilite">
 <pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">serde</span> <span class="kn">import</span> <span class="n">serde</span>
-<span class="go">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nd">@serde</span>
 <span class="gp">... </span><span class="nd">@dataclass</span>
 <span class="gp">... </span><span class="k">class</span> <span class="nc">Foo</span><span class="p">:</span>
@@ -789,14 +789,14 @@ at the class but you want to override a field with the default deserializer.</p>
 <div class="pdoc-code codehilite">
 <pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">serde</span> <span class="kn">import</span> <span class="n">deserialize</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn"><a href="serde/json.html">serde.json</a></span> <span class="kn">import</span> <span class="n">from_json</span>
-<span class="go">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nd">@deserialize</span>
 <span class="gp">... </span><span class="k">class</span> <span class="nc">Foo</span><span class="p">:</span>
 <span class="gp">... </span>    <span class="n">i</span><span class="p">:</span> <span class="nb">int</span>
 <span class="gp">... </span>    <span class="n">s</span><span class="p">:</span> <span class="nb">str</span>
 <span class="gp">... </span>    <span class="n">f</span><span class="p">:</span> <span class="nb">float</span>
 <span class="gp">... </span>    <span class="n">b</span><span class="p">:</span> <span class="nb">bool</span>
-<span class="go">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">from_json</span><span class="p">(</span><span class="n">Foo</span><span class="p">,</span> <span class="s1">&#39;{&quot;i&quot;: 10, &quot;s&quot;: &quot;foo&quot;, &quot;f&quot;: 100.0, &quot;b&quot;: true}&#39;</span><span class="p">)</span>
 <span class="go">Foo(i=10, s=&#39;foo&#39;, f=100.0, b=True)</span>
 </code></pre>
@@ -817,7 +817,7 @@ The following example converts camel-case field names into snake-case names.</li
 <span class="gp">... </span><span class="k">class</span> <span class="nc">Foo</span><span class="p">:</span>
 <span class="gp">... </span>    <span class="n">int_field</span><span class="p">:</span> <span class="nb">int</span>
 <span class="gp">... </span>    <span class="n">str_field</span><span class="p">:</span> <span class="nb">str</span>
-<span class="go">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">from_json</span><span class="p">(</span><span class="n">Foo</span><span class="p">,</span> <span class="s1">&#39;{&quot;intField&quot;: 10, &quot;strField&quot;: &quot;foo&quot;}&#39;</span><span class="p">)</span>
 <span class="go">Foo(int_field=10, str_field=&#39;foo&#39;)</span>
 </code></pre>
@@ -905,7 +905,7 @@ for a certain field, raise <code><a href="#SerdeSkip">serde.SerdeSkip</a></code>
 <span class="gp">... </span>    <span class="n">s</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;foo&#39;</span>
 <span class="gp">... </span>    <span class="n">f</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">100.0</span>
 <span class="gp">... </span>    <span class="n">b</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
-<span class="go">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">from_dict</span><span class="p">(</span><span class="n">Foo</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;i&#39;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span> <span class="s1">&#39;s&#39;</span><span class="p">:</span> <span class="s1">&#39;foo&#39;</span><span class="p">,</span> <span class="s1">&#39;f&#39;</span><span class="p">:</span> <span class="mf">100.0</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">})</span>
 <span class="go">Foo(i=10, s=&#39;foo&#39;, f=100.0, b=True)</span>
 </code></pre>
@@ -967,7 +967,7 @@ for a certain field, raise <code><a href="#SerdeSkip">serde.SerdeSkip</a></code>
 <span class="gp">... </span>    <span class="n">s</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;foo&#39;</span>
 <span class="gp">... </span>    <span class="n">f</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">100.0</span>
 <span class="gp">... </span>    <span class="n">b</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
-<span class="go">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">from_tuple</span><span class="p">(</span><span class="n">Foo</span><span class="p">,</span> <span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="s1">&#39;foo&#39;</span><span class="p">,</span> <span class="mf">100.0</span><span class="p">,</span> <span class="kc">True</span><span class="p">))</span>
 <span class="go">Foo(i=10, s=&#39;foo&#39;, f=100.0, b=True)</span>
 </code></pre>
@@ -1017,7 +1017,7 @@ for a certain field, raise <code><a href="#SerdeSkip">serde.SerdeSkip</a></code>
 <pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="nd">@deserialize</span>
 <span class="gp">... </span><span class="k">class</span> <span class="nc">Foo</span><span class="p">:</span>
 <span class="gp">... </span>    <span class="k">pass</span>
-<span class="go">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">is_deserializable</span><span class="p">(</span><span class="n">Foo</span><span class="p">)</span>
 <span class="go">True</span>
 </code></pre>
@@ -1343,14 +1343,14 @@ at the class but you want to override a field with the default serializer.</p>
 <pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">serde</span> <span class="kn">import</span> <span class="n">serialize</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn"><a href="serde/json.html">serde.json</a></span> <span class="kn">import</span> <span class="n">to_json</span>
-<span class="go">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nd">@serialize</span>
 <span class="gp">... </span><span class="k">class</span> <span class="nc">Foo</span><span class="p">:</span>
 <span class="gp">... </span>    <span class="n">i</span><span class="p">:</span> <span class="nb">int</span>
 <span class="gp">... </span>    <span class="n">s</span><span class="p">:</span> <span class="nb">str</span>
 <span class="gp">... </span>    <span class="n">f</span><span class="p">:</span> <span class="nb">float</span>
 <span class="gp">... </span>    <span class="n">b</span><span class="p">:</span> <span class="nb">bool</span>
-<span class="go">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">to_json</span><span class="p">(</span><span class="n">Foo</span><span class="p">(</span><span class="n">i</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="s1">&#39;foo&#39;</span><span class="p">,</span> <span class="n">f</span><span class="o">=</span><span class="mf">100.0</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
 <span class="go">&#39;{&quot;i&quot;:10,&quot;s&quot;:&quot;foo&quot;,&quot;f&quot;:100.0,&quot;b&quot;:true}&#39;</span>
 </code></pre>
@@ -1371,7 +1371,7 @@ The following example converts snake-case field names into camel-case names.</li
 <span class="gp">... </span><span class="k">class</span> <span class="nc">Foo</span><span class="p">:</span>
 <span class="gp">... </span>    <span class="n">int_field</span><span class="p">:</span> <span class="nb">int</span>
 <span class="gp">... </span>    <span class="n">str_field</span><span class="p">:</span> <span class="nb">str</span>
-<span class="go">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">to_json</span><span class="p">(</span><span class="n">Foo</span><span class="p">(</span><span class="n">int_field</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">str_field</span><span class="o">=</span><span class="s1">&#39;foo&#39;</span><span class="p">))</span>
 <span class="go">&#39;{&quot;intField&quot;:10,&quot;strField&quot;:&quot;foo&quot;}&#39;</span>
 </code></pre>
@@ -1419,7 +1419,7 @@ for a certain field, raise <code><a href="#SerdeSkip">serde.SerdeSkip</a></code>
 <pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="nd">@serialize</span><span class="p">(</span><span class="n">serialize_class_var</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="gp">... </span><span class="k">class</span> <span class="nc">Foo</span><span class="p">:</span>
 <span class="gp">... </span>    <span class="n">v</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">ClassVar</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">10</span>
-<span class="go">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">to_json</span><span class="p">(</span><span class="n">Foo</span><span class="p">())</span>
 <span class="go">&#39;{&quot;v&quot;:10}&#39;</span>
 </code></pre>
@@ -1472,7 +1472,7 @@ for a certain field, raise <code><a href="#SerdeSkip">serde.SerdeSkip</a></code>
 <span class="gp">... </span>    <span class="n">s</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;foo&#39;</span>
 <span class="gp">... </span>    <span class="n">f</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">100.0</span>
 <span class="gp">... </span>    <span class="n">b</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
-<span class="go">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">to_dict</span><span class="p">(</span><span class="n">Foo</span><span class="p">(</span><span class="n">i</span><span class="o">=</span><span class="mi">10</span><span class="p">))</span>
 <span class="go">{&#39;i&#39;: 10, &#39;s&#39;: &#39;foo&#39;, &#39;f&#39;: 100.0, &#39;b&#39;: True}</span>
 </code></pre>
@@ -1534,7 +1534,7 @@ for a certain field, raise <code><a href="#SerdeSkip">serde.SerdeSkip</a></code>
 <span class="gp">... </span>    <span class="n">s</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;foo&#39;</span>
 <span class="gp">... </span>    <span class="n">f</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">100.0</span>
 <span class="gp">... </span>    <span class="n">b</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
-<span class="go">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">to_tuple</span><span class="p">(</span><span class="n">Foo</span><span class="p">(</span><span class="n">i</span><span class="o">=</span><span class="mi">10</span><span class="p">))</span>
 <span class="go">(10, &#39;foo&#39;, 100.0, True)</span>
 </code></pre>

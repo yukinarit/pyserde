@@ -892,11 +892,11 @@ associated with deserialization.</p>
 </span><span id="L-823"><a href="#L-823"><span class="linenos"> 823</span></a>            <span class="k">if</span> <span class="n">origin</span><span class="p">:</span>
 </span><span id="L-824"><a href="#L-824"><span class="linenos"> 824</span></a>                <span class="c1"># When the callable type is of generic type e.g List.</span>
 </span><span id="L-825"><a href="#L-825"><span class="linenos"> 825</span></a>                <span class="c1"># Get origin type &quot;list&quot; from &quot;List[X]&quot;.</span>
-</span><span id="L-826"><a href="#L-826"><span class="linenos"> 826</span></a>                <span class="n">callable</span> <span class="o">=</span> <span class="n">origin</span><span class="o">.</span><span class="vm">__name__</span>
+</span><span id="L-826"><a href="#L-826"><span class="linenos"> 826</span></a>                <span class="nb">callable</span> <span class="o">=</span> <span class="n">origin</span><span class="o">.</span><span class="vm">__name__</span>
 </span><span id="L-827"><a href="#L-827"><span class="linenos"> 827</span></a>            <span class="k">else</span><span class="p">:</span>
 </span><span id="L-828"><a href="#L-828"><span class="linenos"> 828</span></a>                <span class="c1"># When the callable type is non generic type e.g int, Foo.</span>
-</span><span id="L-829"><a href="#L-829"><span class="linenos"> 829</span></a>                <span class="n">callable</span> <span class="o">=</span> <span class="n">v</span><span class="o">.</span><span class="n">type</span><span class="o">.</span><span class="vm">__name__</span>
-</span><span id="L-830"><a href="#L-830"><span class="linenos"> 830</span></a>            <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;collections.defaultdict(</span><span class="si">{</span><span class="n">callable</span><span class="si">}</span><span class="s1">, </span><span class="se">\</span>
+</span><span id="L-829"><a href="#L-829"><span class="linenos"> 829</span></a>                <span class="nb">callable</span> <span class="o">=</span> <span class="n">v</span><span class="o">.</span><span class="n">type</span><span class="o">.</span><span class="vm">__name__</span>
+</span><span id="L-830"><a href="#L-830"><span class="linenos"> 830</span></a>            <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;collections.defaultdict(</span><span class="si">{</span><span class="nb">callable</span><span class="si">}</span><span class="s1">, </span><span class="se">\</span>
 </span><span id="L-831"><a href="#L-831"><span class="linenos"> 831</span></a><span class="s1">                    </span><span class="se">{{</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">k</span><span class="p">)</span><span class="si">}</span><span class="s1">: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">v</span><span class="p">)</span><span class="si">}</span><span class="s1"> for k, v in </span><span class="si">{</span><span class="n">arg</span><span class="o">.</span><span class="n">data</span><span class="si">}</span><span class="s1">.items()</span><span class="se">}}</span><span class="s1">)&#39;</span>
 </span><span id="L-832"><a href="#L-832"><span class="linenos"> 832</span></a>        <span class="k">else</span><span class="p">:</span>
 </span><span id="L-833"><a href="#L-833"><span class="linenos"> 833</span></a>            <span class="n">k</span> <span class="o">=</span> <span class="n">arg</span><span class="o">.</span><span class="n">key_field</span><span class="p">()</span>
@@ -1331,14 +1331,14 @@ associated with deserialization.</p>
 <div class="pdoc-code codehilite">
 <pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">serde</span> <span class="kn">import</span> <span class="n">deserialize</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn"><a href="json.html">serde.json</a></span> <span class="kn">import</span> <span class="n">from_json</span>
-<span class="go">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nd">@deserialize</span>
 <span class="gp">... </span><span class="k">class</span> <span class="nc">Foo</span><span class="p">:</span>
 <span class="gp">... </span>    <span class="n">i</span><span class="p">:</span> <span class="nb">int</span>
 <span class="gp">... </span>    <span class="n">s</span><span class="p">:</span> <span class="nb">str</span>
 <span class="gp">... </span>    <span class="n">f</span><span class="p">:</span> <span class="nb">float</span>
 <span class="gp">... </span>    <span class="n">b</span><span class="p">:</span> <span class="nb">bool</span>
-<span class="go">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">from_json</span><span class="p">(</span><span class="n">Foo</span><span class="p">,</span> <span class="s1">&#39;{&quot;i&quot;: 10, &quot;s&quot;: &quot;foo&quot;, &quot;f&quot;: 100.0, &quot;b&quot;: true}&#39;</span><span class="p">)</span>
 <span class="go">Foo(i=10, s=&#39;foo&#39;, f=100.0, b=True)</span>
 </code></pre>
@@ -1359,7 +1359,7 @@ The following example converts camel-case field names into snake-case names.</li
 <span class="gp">... </span><span class="k">class</span> <span class="nc">Foo</span><span class="p">:</span>
 <span class="gp">... </span>    <span class="n">int_field</span><span class="p">:</span> <span class="nb">int</span>
 <span class="gp">... </span>    <span class="n">str_field</span><span class="p">:</span> <span class="nb">str</span>
-<span class="go">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">from_json</span><span class="p">(</span><span class="n">Foo</span><span class="p">,</span> <span class="s1">&#39;{&quot;intField&quot;: 10, &quot;strField&quot;: &quot;foo&quot;}&#39;</span><span class="p">)</span>
 <span class="go">Foo(int_field=10, str_field=&#39;foo&#39;)</span>
 </code></pre>
@@ -1435,7 +1435,7 @@ for a certain field, raise <code><a href="../serde.html#SerdeSkip">serde.SerdeSk
 <pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="nd">@deserialize</span>
 <span class="gp">... </span><span class="k">class</span> <span class="nc">Foo</span><span class="p">:</span>
 <span class="gp">... </span>    <span class="k">pass</span>
-<span class="go">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">is_deserializable</span><span class="p">(</span><span class="n">Foo</span><span class="p">)</span>
 <span class="go">True</span>
 </code></pre>
@@ -1488,7 +1488,7 @@ for a certain field, raise <code><a href="../serde.html#SerdeSkip">serde.SerdeSk
 <span class="gp">... </span>    <span class="n">s</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;foo&#39;</span>
 <span class="gp">... </span>    <span class="n">f</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">100.0</span>
 <span class="gp">... </span>    <span class="n">b</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
-<span class="go">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">from_dict</span><span class="p">(</span><span class="n">Foo</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;i&#39;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span> <span class="s1">&#39;s&#39;</span><span class="p">:</span> <span class="s1">&#39;foo&#39;</span><span class="p">,</span> <span class="s1">&#39;f&#39;</span><span class="p">:</span> <span class="mf">100.0</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">})</span>
 <span class="go">Foo(i=10, s=&#39;foo&#39;, f=100.0, b=True)</span>
 </code></pre>
@@ -1550,7 +1550,7 @@ for a certain field, raise <code><a href="../serde.html#SerdeSkip">serde.SerdeSk
 <span class="gp">... </span>    <span class="n">s</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;foo&#39;</span>
 <span class="gp">... </span>    <span class="n">f</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">100.0</span>
 <span class="gp">... </span>    <span class="n">b</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
-<span class="go">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">from_tuple</span><span class="p">(</span><span class="n">Foo</span><span class="p">,</span> <span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="s1">&#39;foo&#39;</span><span class="p">,</span> <span class="mf">100.0</span><span class="p">,</span> <span class="kc">True</span><span class="p">))</span>
 <span class="go">Foo(i=10, s=&#39;foo&#39;, f=100.0, b=True)</span>
 </code></pre>

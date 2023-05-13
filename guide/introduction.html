@@ -153,6 +153,7 @@
                         <h1 id="introduction"><a class="header" href="#introduction">Introduction</a></h1>
 <p><code>pyserde</code> is a simple yet powerful serialization library on top of <a href="https://docs.python.org/3/library/dataclasses.html">dataclasses</a>. Simply adding pyserde's <code>@serde</code> decorator makes your class (de)serializable.</p>
 <pre><code class="language-python">@serde
+@dataclass
 class Foo:
     i: int
     s: str
@@ -171,21 +172,30 @@ Foo(i=10, s='foo', f=100.0, b=True)
 <ul>
 <li><a href="supported-types.html">Supported types</a>
 <ul>
+<li>dict</li>
+<li>tuple</li>
 <li>JSON</li>
 <li>Yaml</li>
 <li>Toml</li>
 <li>MsgPack</li>
+<li>Pickle</li>
 </ul>
 </li>
 <li><a href="supported-data-formats.html">Supported data formats</a>
 <ul>
 <li>Primitives (<code>int</code>, <code>float</code>, <code>str</code>, <code>bool</code>)</li>
-<li>Containers (<code>List</code>, <code>Set</code>, <code>Tuple</code>, <code>Dict</code>)</li>
+<li>Containers
+<ul>
+<li><code>List</code>, <code>Set</code>, <code>Tuple</code>, <code>Dict</code></li>
+<li><a href="https://docs.python.org/3/library/stdtypes.html#frozenset"><code>FrozenSet</code></a>, <a href="https://docs.python.org/3/library/collections.html#collections.defaultdict"><code>DefaultDict</code></a></li>
+</ul>
+</li>
 <li><a href="https://docs.python.org/3/library/typing.html#typing.Optional"><code>typing.Optional</code></a></li>
 <li><a href="https://docs.python.org/3/library/typing.html#typing.Union"><code>typing.Union</code></a></li>
 <li>User defined class with <a href="https://docs.python.org/3/library/dataclasses.html"><code>@dataclass</code></a></li>
 <li><a href="https://docs.python.org/3/library/typing.html#newtype"><code>typing.NewType</code></a> for primitive types</li>
 <li><a href="https://docs.python.org/3/library/typing.html#the-any-type"><code>typing.Any</code></a></li>
+<li><a href="https://docs.python.org/3/library/typing.html#typing.Literal"><code>typing.Literal</code></a></li>
 <li><a href="https://docs.python.org/3/library/typing.html#user-defined-generic-types"><code>typing.Generic</code></a></li>
 <li><a href="https://docs.python.org/3/library/typing.html#user-defined-generic-type://docs.python.org/3/library/typing.html#typing.ClassVar"><code>typing.ClassVar</code></a></li>
 <li><a href="https://docs.python.org/3/library/enum.html#enum.Enum"><code>Enum</code></a> and <a href="https://docs.python.org/3/library/enum.html#enum.IntEnum"><code>IntEnum</code></a></li>
@@ -196,6 +206,11 @@ Foo(i=10, s='foo', f=100.0, b=True)
 <li><a href="https://docs.python.org/3/library/uuid.html"><code>uuid.UUID</code></a></li>
 <li><a href="https://docs.python.org/3/library/datetime.html#date-objects"><code>datetime.date</code></a> &amp; <a href="https://docs.python.org/3/library/datetime.html#datetime-objects"><code>datetime.datetime</code></a></li>
 <li><a href="https://docs.python.org/3/library/ipaddress.html"><code>ipaddress</code></a></li>
+</ul>
+</li>
+<li>PyPI library
+<ul>
+<li><a href="https://github.com/numpy/numpy"><code>numpy</code></a> types</li>
 </ul>
 </li>
 </ul>
