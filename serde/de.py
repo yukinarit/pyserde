@@ -275,7 +275,7 @@ def deserialize(
                 # We call deserialize and not wrap to make sure that we will use the default serde
                 # configuration for generating the deserialization function.
                 deserialize(typ)
-            if typ is cls or (is_primitive(typ) and not is_enum(typ)):
+            if is_primitive(typ) and not is_enum(typ):
                 continue
             if is_generic(typ):
                 g[typename(typ)] = get_origin(typ)

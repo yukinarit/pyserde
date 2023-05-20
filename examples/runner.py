@@ -25,6 +25,7 @@ import plain_dataclass
 import plain_dataclass_class_attribute
 import recursive
 import recursive_list
+import recursive_union
 import rename
 import rename_all
 import simple
@@ -80,6 +81,7 @@ def run_all():
     run(alias)
     run(recursive)
     run(recursive_list)
+    run(recursive_union)
     run(class_var)
     run(plain_dataclass)
     run(plain_dataclass_class_attribute)
