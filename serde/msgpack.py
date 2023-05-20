@@ -38,7 +38,7 @@ def to_msgpack(
     obj: Any,
     se: Type[Serializer] = MsgPackSerializer,
     named: bool = True,
-    ext_dict: Dict[Type, int] = None,
+    ext_dict: Dict[Type[Any], int] = None,
     **opts,
 ) -> bytes:
     """
@@ -73,7 +73,7 @@ def from_msgpack(
     s: str,
     de: Type[Deserializer] = MsgPackDeserializer,
     named: bool = True,
-    ext_dict: Dict[int, Type] = None,
+    ext_dict: Dict[int, Type[Any]] = None,
     **opts,
 ) -> T:
     """

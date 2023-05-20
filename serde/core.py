@@ -85,7 +85,7 @@ class SerdeScope:
     code: Dict[str, str] = dataclasses.field(default_factory=dict)
     """ Generated source code (only filled when debug is True) """
 
-    union_se_args: Dict[str, List[Type]] = dataclasses.field(default_factory=dict)
+    union_se_args: Dict[str, List[Type[Any]]] = dataclasses.field(default_factory=dict)
     """ The union serializing functions need references to their types """
 
     reuse_instances_default: bool = True
@@ -177,7 +177,7 @@ def add_func(serde_scope: SerdeScope, func_name: str, func_code: str, globals: D
         serde_scope.code[func_name] = code
 
 
-def is_instance(obj: Any, typ: Type) -> bool:
+def is_instance(obj: Any, typ: Type[Any]) -> bool:
     """
     Type check function that works like `isinstance` but it accepts
     Subscripted Generics e.g. `List[int]`.
@@ -215,21 +215,21 @@ def is_instance(obj: Any, typ: Type) -> bool:
         return isinstance(obj, typ)
 
 
-def is_opt_instance(obj: Any, typ: Type) -> bool:
+def is_opt_instance(obj: Any, typ: Type[Any]) -> bool:
     if obj is None:
         return True
     opt_arg = type_args(typ)[0]
     return is_instance(obj, opt_arg)
 
 
-def is_union_instance(obj: Any, typ: Type) -> bool:
+def is_union_instance(obj: Any, typ: Type[Any]) -> bool:
     for arg in type_args(typ):
         if is_instance(obj, arg):
             return True
     return False
 
 
-def is_list_instance(obj: Any, typ: Type) -> bool:
+def is_list_instance(obj: Any, typ: Type[Any]) -> bool:
     if not isinstance(obj, list):
         return False
     if len(obj) == 0 or is_bare_list(typ):
@@ -239,7 +239,7 @@ def is_list_instance(obj: Any, typ: Type) -> bool:
     return is_instance(obj[0], list_arg)
 
 
-def is_set_instance(obj: Any, typ: Type) -> bool:
+def is_set_instance(obj: Any, typ: Type[Any]) -> bool:
     if not isinstance(obj, set):
         return False
     if len(obj) == 0 or is_bare_set(typ):
@@ -249,7 +249,7 @@ def is_set_instance(obj: Any, typ: Type) -> bool:
     return is_instance(next(iter(obj)), set_arg)
 
 
-def is_tuple_instance(obj: Any, typ: Type) -> bool:
+def is_tuple_instance(obj: Any, typ: Type[Any]) -> bool:
     if not isinstance(obj, tuple):
         return False
     if is_variable_tuple(typ):
@@ -265,7 +265,7 @@ def is_tuple_instance(obj: Any, typ: Type) -> bool:
     return True
 
 
-def is_dict_instance(obj: Any, typ: Type) -> bool:
+def is_dict_instance(obj: Any, typ: Type[Any]) -> bool:
     if not isinstance(obj, dict):
         return False
     if len(obj) == 0 or is_bare_dict(typ):
@@ -278,7 +278,7 @@ def is_dict_instance(obj: Any, typ: Type) -> bool:
     return False
 
 
-def is_generic_instance(obj: Any, typ: Type) -> bool:
+def is_generic_instance(obj: Any, typ: Type[Any]) -> bool:
     return is_instance(obj, get_origin(typ))
 
 
@@ -432,7 +432,7 @@ class Field:
 
     """
 
-    type: Type
+    type: Type[Any]
     name: Optional[str]
     default: Any = field(default_factory=dataclasses._MISSING_TYPE)
     default_factory: Any = field(default_factory=dataclasses._MISSING_TYPE)
@@ -451,10 +451,10 @@ class Field:
     serializer: Optional[Func] = None  # Custom field serializer.
     deserializer: Optional[Func] = None  # Custom field deserializer.
     flatten: Optional[FlattenOpts] = None
-    parent: Optional[Type] = None
+    parent: Optional[Type[Any]] = None
 
     @classmethod
-    def from_dataclass(cls, f: dataclasses.Field, parent: Optional[Type] = None) -> 'Field':
+    def from_dataclass(cls, f: dataclasses.Field, parent: Optional[Type[Any]] = None) -> 'Field':
         """
         Create `Field` object from `dataclasses.Field`.
         """
@@ -704,7 +704,7 @@ def should_impl_dataclass(cls):
     return False
 
 
-def render_type_check(cls: Type) -> str:
+def render_type_check(cls: Type[Any]) -> str:
     import serde.compat
 
     template = """
@@ -784,11 +784,11 @@ Coerce = TypeCheck(kind=TypeCheck.Kind.Coerce)
 Strict = TypeCheck(kind=TypeCheck.Kind.Strict)
 
 
-def coerce(typ: Type, obj: Any) -> Any:
+def coerce(typ: Type[Any], obj: Any) -> Any:
     return typ(obj) if is_coercible(typ, obj) else obj
 
 
-def is_coercible(typ: Type, obj: Any) -> bool:
+def is_coercible(typ: Type[Any], obj: Any) -> bool:
     if obj is None:
         return False
     return True

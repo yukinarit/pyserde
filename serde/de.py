@@ -223,7 +223,7 @@ def deserialize(
 
     stack = []
 
-    def wrap(cls: Type):
+    def wrap(cls: Type[Any]):
         if cls in stack:
             return
         stack.append(cls)
@@ -602,7 +602,7 @@ class Renderer:
     """
 
     func: str
-    cls: Optional[Type] = None
+    cls: Optional[Type[Any]] = None
     custom: Optional[DeserializeFunc] = None  # Custom class level deserializer.
     import_numpy: bool = False
     suppress_coerce: bool = False
@@ -989,7 +989,7 @@ def {{func}}(cls=cls, maybe_generic=None, data=None,
     return res
 
 
-def render_union_func(cls: Type[Any], union_args: List[Type], tagging: Tagging = DefaultTagging) -> str:
+def render_union_func(cls: Type[Any], union_args: List[Type[Any]], tagging: Tagging = DefaultTagging) -> str:
     template = """
 def {{func}}(cls=cls, maybe_generic=None, data=None, reuse_instances = {{serde_scope.reuse_instances_default}}):
   errors = []
