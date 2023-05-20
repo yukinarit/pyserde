@@ -275,7 +275,7 @@ def serialize(
                 # configuration for generating the serialization function.
                 serialize(typ)
 
-            if typ is cls or (is_primitive(typ) and not is_enum(typ)):
+            if is_primitive(typ) and not is_enum(typ):
                 continue
             g[typename(typ)] = typ
 
