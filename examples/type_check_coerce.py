@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import Dict, List, Optional
 
-from serde import Coerce, SerdeError, serde
+from serde import Coerce, serde
 from serde.json import from_json, to_json
 
 
@@ -20,8 +20,8 @@ class Foo:
     d: Optional[Bar] = None
 
 
-def main():
-    f = Foo(a="1", b=[True], c=[{10: 1.0}])
+def main() -> None:
+    f = Foo(a="1", b=[True], c=[{10: 1.0}])  # type: ignore
     print(f"Into Json: {to_json(f)}")
 
     s = '{"a": "1", "b": [false], "c": [{"10": 1.0}], "d": {"e": "100"}}'

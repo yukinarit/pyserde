@@ -278,7 +278,7 @@ def union_args(typ: Union) -> Tuple[Type[Any], ...]:
         return (args[0],)
     it = iter(args)
     types = []
-    for (i1, i2) in itertools.zip_longest(it, it):
+    for i1, i2 in itertools.zip_longest(it, it):
         if not i2:
             types.append(i1)
         elif is_none(i2):

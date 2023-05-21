@@ -11,8 +11,8 @@ class Foo:
     i: FrozenSet[int]
 
 
-def main():
-    f = Foo(i={1, 2})
+def main() -> None:
+    f = Foo(i=frozenset({1, 2}))
     print(f"Into Json: {to_json(f)}")
 
     s = '{"i": [1, 2]}'

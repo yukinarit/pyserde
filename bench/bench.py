@@ -133,7 +133,7 @@ def equals_small(x):
 
 def equals_medium(x):
     y = dc.MEDIUM
-    for (xs, ys) in zip(x.inner, y.inner):
+    for xs, ys in zip(x.inner, y.inner):
         assert xs.i == xs.i and xs.s == ys.s and xs.f == ys.f and xs.b == ys.b, f'Expected: {x}, Actual: {y}'
 
 

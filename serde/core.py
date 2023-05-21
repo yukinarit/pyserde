@@ -335,7 +335,7 @@ def field(
     skip_if_default: Optional[bool] = None,
     serializer=None,
     deserializer=None,
-    flatten: Optional[FlattenOpts] = None,
+    flatten: Optional[Union[FlattenOpts, bool]] = None,
     metadata=None,
     **kwargs,
 ):

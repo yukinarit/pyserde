@@ -64,6 +64,8 @@ more-itertools = "~=8.6.0"
 pre-commit = "==v2.10.1"
 pytest-xdist = "^2.3.0"
 types-PyYAML = "^6.0.9"
+requests = "*"
+envclasses = "^0.2.1"
 
 [tool.poetry.extras]
 msgpack = ["msgpack"]
@@ -80,3 +82,9 @@ build-backend = "poetry_dynamic_versioning.backend"
 [tool.poetry-dynamic-versioning]
 enable = true
 style = "pep440"
+
+[tool.pyright]
+include = ["examples"]
+exclude = ["serde", "bench", "tests", "examples/webapi"]
+pythonVersion = "3.11"
+reportMissingImports = false

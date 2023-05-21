@@ -13,8 +13,8 @@ class Foo:
     c: List[Dict[str, int]]
 
 
-def main():
-    f = Foo(a=1.0, b=[1.0], c=[{"k": 1.0}])
+def main() -> None:
+    f = Foo(a=1.0, b=[1.0], c=[{"k": 1.0}])  # type: ignore
     try:
         print(f"Into Json: {to_json(f)}")
     except SerdeError as e:

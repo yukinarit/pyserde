@@ -8,11 +8,11 @@ from serde.json import from_json, to_json
 
 
 class Nested(enum.Enum):
-    S = 'foo'
+    S = "foo"
 
 
 class E(enum.Enum):
-    S = 'foo'
+    S = "foo"
     F = 10.0
     B = True
     N = Nested.S
@@ -34,7 +34,7 @@ class Foo:
     v4: E = E.N  # Use nested enum.
 
 
-if __name__ == "__main__":
+def main() -> None:
     f = Foo(IE.V0)
     s = to_json(f)
     print(s)
@@ -45,5 +45,9 @@ if __name__ == "__main__":
 
     # You can also pass an enum-compabitle value (in this case True for E.B).
     # Caveat: Foo takes any value IE accepts. e.g., Foo(True) is also valid.
-    s = to_json(Foo(3))
+    s = to_json(Foo(3))  # type: ignore
     print(s)
+
+
+if __name__ == "__main__":
+    main()

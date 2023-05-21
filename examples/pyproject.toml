@@ -8,3 +8,9 @@ authors = ["yukinarit <yukinarit84@gmail.com>"]
 python = "^3.7.0"
 pyserde = {path = "../", extras = ["all"]}
 envclasses = "^0.2.1"
+
+[tool.poetry.dev-dependencies]
+pyright = "==1.1.309"
+
+[tool.pyright]
+ignore = ["webapi"]
