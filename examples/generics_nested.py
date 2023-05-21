@@ -35,7 +35,7 @@ class Event(Generic[Data]):
     payload: Payload[Data]
 
 
-def main():
+def main() -> None:
     event_a = Event("a", Payload(1, A("a_str")))
 
     a_dict = to_dict(event_a)

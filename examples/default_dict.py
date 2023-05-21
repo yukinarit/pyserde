@@ -20,12 +20,12 @@ class Foo:
     c: DefaultDict[str, Bar]
 
 
-def main():
-    a = defaultdict(list)
+def main() -> None:
+    a: DefaultDict[str, List[int]] = defaultdict(list)
     a["a"].append(1)
-    b = defaultdict(int)
+    b: DefaultDict[str, int] = defaultdict(int)
     b["b"]
-    c = defaultdict(Bar)
+    c: DefaultDict[str, Bar] = defaultdict(Bar)
     c["c"].v = 10
 
     f = Foo(a, b, c)
@@ -35,5 +35,5 @@ def main():
     print(f"From Json: {from_json(Foo, s)}")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

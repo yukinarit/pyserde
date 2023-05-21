@@ -25,5 +25,5 @@ def main() -> None:
     print(f"From Json: {from_json(Foo, '{}')}")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

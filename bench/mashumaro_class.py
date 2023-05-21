@@ -26,7 +26,7 @@ MEDIUM = Medium([Small(**d) for d in data.args_md])
 
 
 def new(size: Size) -> Runner:
-    name = 'mashmaro'
+    name = "mashmaro"
     if size == Size.Small:
         unp = SMALL
         pac = data.SMALL

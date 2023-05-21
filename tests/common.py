@@ -35,9 +35,9 @@ all_formats: List = (
     format_dict + format_tuple + format_json + format_msgpack + format_yaml + format_toml + format_pickle
 )
 
-T = TypeVar('T')
+T = TypeVar("T")
 
-U = TypeVar('U')
+U = TypeVar("U")
 
 
 @serde
@@ -63,7 +63,7 @@ def toml_not_supported(se, de, opt) -> bool:
 
 types: List = [
     param(10, int),  # Primitive
-    param('foo', str),
+    param("foo", str),
     param(100.0, float),
     param(True, bool),
     param(10, Optional[int]),  # Optional
@@ -80,15 +80,15 @@ types: List = [
     param((1, 1), Tuple[int, int]),
     param((1, 1), Tuple),
     param((1, 2, 3), Tuple[int, ...]),
-    param({'a': 1}, Dict[str, int]),
-    param({'a': 1}, Dict),
-    param({'a': 1}, dict),
+    param({"a": 1}, Dict[str, int]),
+    param({"a": 1}, Dict),
+    param({"a": 1}, dict),
     param({}, Dict[str, int]),
-    param({'a': 1}, Dict[str, int]),
-    param({'a': 1}, DefaultDict[str, int]),
-    param({'a': [1]}, DefaultDict[str, List[int]]),
-    param(data.Pri(10, 'foo', 100.0, True), data.Pri),  # dataclass
-    param(data.Pri(10, 'foo', 100.0, True), Optional[data.Pri]),
+    param({"a": 1}, Dict[str, int]),
+    param({"a": 1}, DefaultDict[str, int]),
+    param({"a": [1]}, DefaultDict[str, List[int]]),
+    param(data.Pri(10, "foo", 100.0, True), data.Pri),  # dataclass
+    param(data.Pri(10, "foo", 100.0, True), Optional[data.Pri]),
     param(None, Optional[data.Pri], toml_not_supported),
     param(data.Recur(data.Recur(None, None, None), None, None), data.Recur, toml_not_supported),
     param(
@@ -97,15 +97,15 @@ types: List = [
         toml_not_supported,
     ),
     param(data.Init(1), data.Init),
-    param(10, NewType('Int', int)),  # NewType
-    param({'a': 1}, Any),  # Any
-    param(GenericClass[str, int]('foo', 10), GenericClass[str, int]),  # Generic
-    param(pathlib.Path('/tmp/foo'), pathlib.Path),  # Extended types
-    param(pathlib.Path('/tmp/foo'), Optional[pathlib.Path]),
+    param(10, NewType("Int", int)),  # NewType
+    param({"a": 1}, Any),  # Any
+    param(GenericClass[str, int]("foo", 10), GenericClass[str, int]),  # Generic
+    param(pathlib.Path("/tmp/foo"), pathlib.Path),  # Extended types
+    param(pathlib.Path("/tmp/foo"), Optional[pathlib.Path]),
     param(None, Optional[pathlib.Path], toml_not_supported),
-    param(pathlib.PurePath('/tmp/foo'), pathlib.PurePath),
-    param(pathlib.PurePosixPath('/tmp/foo'), pathlib.PurePosixPath),
-    param(pathlib.PureWindowsPath('C:\\tmp'), pathlib.PureWindowsPath),
+    param(pathlib.PurePath("/tmp/foo"), pathlib.PurePath),
+    param(pathlib.PurePosixPath("/tmp/foo"), pathlib.PurePosixPath),
+    param(pathlib.PureWindowsPath("C:\\tmp"), pathlib.PureWindowsPath),
     param(uuid.UUID("8f85b32c-a0be-466c-87eb-b7bbf7a01683"), uuid.UUID),
     param(ipaddress.IPv4Address("127.0.0.1"), ipaddress.IPv4Address),
     param(ipaddress.IPv6Address("::1"), ipaddress.IPv6Address),
@@ -114,35 +114,35 @@ types: List = [
     param(ipaddress.IPv4Interface("192.168.1.1/24"), ipaddress.IPv4Interface),
     param(ipaddress.IPv6Interface("::1/128"), ipaddress.IPv6Interface),
     param(decimal.Decimal(10), decimal.Decimal),
-    param(datetime.datetime.strptime('Jan 1 2021 1:55PM', '%b %d %Y %I:%M%p'), datetime.datetime),
-    param(datetime.datetime.strptime('Jan 1 2021 1:55PM', '%b %d %Y %I:%M%p').date(), datetime.date),
-    param(datetime.datetime.strptime('Jan 1 2021 1:55PM', '%b %d %Y %I:%M%p').time(), datetime.time),
+    param(datetime.datetime.strptime("Jan 1 2021 1:55PM", "%b %d %Y %I:%M%p"), datetime.datetime),
+    param(datetime.datetime.strptime("Jan 1 2021 1:55PM", "%b %d %Y %I:%M%p").date(), datetime.date),
+    param(datetime.datetime.strptime("Jan 1 2021 1:55PM", "%b %d %Y %I:%M%p").time(), datetime.time),
 ]
 
 # these types can only be instantiated on their corresponding system
 if os.name == "posix":
-    types.append(param(pathlib.PosixPath('/tmp/foo'), pathlib.PosixPath))
+    types.append(param(pathlib.PosixPath("/tmp/foo"), pathlib.PosixPath))
 if os.name == "nt":
-    types.append(param(pathlib.WindowsPath('C:\\tmp'), pathlib.WindowsPath))
+    types.append(param(pathlib.WindowsPath("C:\\tmp"), pathlib.WindowsPath))
 
 if sys.version_info[:3] >= (3, 9, 0):
-    types.extend([param([1, 2], list[int]), param({'a': 1}, dict[str, int]), param((1, 1), tuple[int, int])])
+    types.extend([param([1, 2], list[int]), param({"a": 1}, dict[str, int]), param((1, 1), tuple[int, int])])
 
-types_combinations: List = list(map(lambda c: list(more_itertools.flatten(c)), itertools.combinations(types, 2)))
+types_combinations: List = [list(more_itertools.flatten(c)) for c in itertools.combinations(types, 2)]
 
 opt_case: List = [
-    {'reuse_instances_default': False},
-    {'reuse_instances_default': False, 'rename_all': 'camelcase'},
-    {'reuse_instances_default': False, 'rename_all': 'snakecase'},
+    {"reuse_instances_default": False},
+    {"reuse_instances_default": False, "rename_all": "camelcase"},
+    {"reuse_instances_default": False, "rename_all": "snakecase"},
 ]
 
 
 def make_id_from_dict(d: Dict) -> str:
     if not d:
-        return 'none'
+        return "none"
     else:
         key = list(d)[0]
-        return f'{key}-{d[key]}'
+        return f"{key}-{d[key]}"
 
 
 def opt_case_ids():
@@ -154,7 +154,7 @@ def type_ids():
 
     def make_id(pair: Tuple):
         t, T, _ = pair
-        return f'{typename(T)}({t})'
+        return f"{typename(T)}({t})"
 
     return list(map(make_id, types))
 
@@ -164,6 +164,6 @@ def type_combinations_ids():
 
     def make_id(quad: Tuple):
         t, T, u, U = quad
-        return f'{typename(T)}({t})-{typename(U)}({u})'
+        return f"{typename(T)}({t})-{typename(U)}({u})"
 
     return list(map(make_id, types_combinations))

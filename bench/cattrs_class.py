@@ -9,7 +9,7 @@ from runner import Runner, Size
 
 
 def new(size: Size) -> Runner:
-    name = 'cattrs'
+    name = "cattrs"
     if size == Size.Small:
         unp = SMALL
         pac = data.SMALL

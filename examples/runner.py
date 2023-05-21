@@ -40,13 +40,16 @@ import union_tagging
 import user_exception
 import variable_length_tuple
 import yamlfile
+import typing
+import enum34
 
 PY310 = sys.version_info[:3] >= (3, 10, 0)
 
 
-def run_all():
+def run_all() -> None:
     run(any)
     run(simple)
+    run(enum34)
     run(frozen_set)
     run(newtype)
     run(collection)
@@ -92,13 +95,13 @@ def run_all():
         run(union_operator)
 
 
-def run(module):
-    print('-----------------')
-    print(f'running {module.__name__}')
+def run(module: typing.Any) -> None:
+    print("-----------------")
+    print(f"running {module.__name__}")
     module.main()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     try:
         run_all()
     except Exception:

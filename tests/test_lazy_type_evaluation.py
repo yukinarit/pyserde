@@ -57,7 +57,7 @@ class ForwardReferenceBar:
 
 
 # assert type is str
-assert 'ForwardReferenceBar' == dataclasses.fields(ForwardReferenceFoo)[0].type
+assert "ForwardReferenceBar" == dataclasses.fields(ForwardReferenceFoo)[0].type
 
 # setup pyserde for Foo after Bar becomes visible to global scope
 deserialize(ForwardReferenceFoo)
@@ -99,7 +99,7 @@ def test_string_forward_reference_throws():
         @serde
         class UnresolvedStringForwardFoo:
             # string forward references are not compatible with PEP 563 and will throw
-            bar: 'UnresolvedStringForwardBar'
+            bar: "UnresolvedStringForwardBar"
 
         @serde
         class UnresolvedStringForwardBar:

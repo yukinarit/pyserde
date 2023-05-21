@@ -11,6 +11,7 @@ from runner import Runner, Size
 class SmallSchema(ms.Schema):
     class Meta:
         render_module = json
+
     i = ms.fields.Int()
     s = ms.fields.Str()
     f = ms.fields.Float()
@@ -24,15 +25,16 @@ class SmallSchema(ms.Schema):
 class MediumSchema(ms.Schema):
     class Meta:
         render_module = json
+
     inner = ms.fields.List(ms.fields.Nested(SmallSchema))
 
     @ms.post_load
     def make_medium(self, data, **kwargs):
-        return Medium([s for s in data['inner']])
+        return Medium([s for s in data["inner"]])
 
 
 def new(size: Size) -> Runner:
-    name = 'marshmallow'
+    name = "marshmallow"
     if size == Size.Small:
         unp = SMALL
         pac = data.SMALL

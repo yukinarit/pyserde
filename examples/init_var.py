@@ -13,7 +13,7 @@ class Foo:
     k: InitVar[Optional[int]] = None
 
 
-def main():
+def main() -> None:
     f = Foo(i=10, j=20)
     print(f"Into Json: {to_json(f)}")
 
@@ -21,5 +21,5 @@ def main():
     print(f"From Json: {from_json(Foo, s)}")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

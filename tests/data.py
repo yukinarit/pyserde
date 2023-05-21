@@ -187,7 +187,7 @@ class PriDefault:
     """
 
     i: int = 10
-    s: str = 'foo'
+    s: str = "foo"
     f: float = 100.0
     b: bool = True
 
@@ -203,7 +203,7 @@ class OptDefault:
 
 
 class E(enum.Enum):
-    S = 'foo'
+    S = "foo"
     F = 10.0
     B = True
 
@@ -228,9 +228,9 @@ class EnumInClass:
 
 @dataclass(unsafe_hash=True)
 class Recur:
-    a: Optional['Recur']
-    b: Optional[List['Recur']]
-    c: Optional[Dict[str, 'Recur']]
+    a: Optional["Recur"]
+    b: Optional[List["Recur"]]
+    c: Optional[Dict[str, "Recur"]]
 
 
 serde(Recur)
@@ -238,8 +238,8 @@ serde(Recur)
 
 @dataclass(unsafe_hash=True)
 class RecurContainer:
-    a: List['RecurContainer']
-    b: Dict[str, 'RecurContainer']
+    a: List["RecurContainer"]
+    b: Dict[str, "RecurContainer"]
 
 
 serde(Recur)
@@ -251,21 +251,21 @@ DictPri = Dict[str, Pri]
 
 INT = Int(10)
 
-STR = Str('foo')
+STR = Str("foo")
 
 FLOAT = Float(100.0)
 
 BOOL = Bool(True)
 
-PRI = Pri(10, 'foo', 100.0, True)
+PRI = Pri(10, "foo", 100.0, True)
 
-PRI_TUPLE = (10, 'foo', 100.0, True)
+PRI_TUPLE = (10, "foo", 100.0, True)
 
-PRILIST = ([10], ['foo'], [100.0], [True])
+PRILIST = ([10], ["foo"], [100.0], [True])
 
 NESTED_PRILIST = ([INT], [STR], [FLOAT], [BOOL])
 
-NESTED_PRILIST_TUPLE = ([(10,)], [('foo',)], [(100.0,)], [(True,)])
+NESTED_PRILIST_TUPLE = ([(10,)], [("foo",)], [(100.0,)], [(True,)])
 
 
 @dataclass

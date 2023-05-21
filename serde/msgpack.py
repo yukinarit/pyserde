@@ -70,7 +70,7 @@ def to_msgpack(
 
 def from_msgpack(
     c: Type[T],
-    s: str,
+    s: bytes,
     de: Type[Deserializer] = MsgPackDeserializer,
     named: bool = True,
     ext_dict: Dict[int, Type[Any]] = None,

@@ -27,7 +27,7 @@ MEDIUM = Medium([Small(**d) for d in data.args_md])
 
 
 def new(size: Size) -> Runner:
-    name = 'dataclass'
+    name = "dataclass"
     if size == Size.Small:
         unp = SMALL
     elif size == Size.Medium:

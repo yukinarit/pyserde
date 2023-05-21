@@ -1,5 +1,6 @@
 """
-Serialize and Deserialize in TOML format. This module depends on [tomli](https://github.com/hukkin/tomli) (for python<=3.10) and [tomli-w](https://github.com/hukkin/tomli-w) packages.
+Serialize and Deserialize in TOML format. This module depends on [tomli](https://github.com/hukkin/tomli)
+(for python<=3.10) and [tomli-w](https://github.com/hukkin/tomli-w) packages.
 """
 import sys
 from typing import Type

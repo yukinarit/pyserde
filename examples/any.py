@@ -20,9 +20,9 @@ class Foo:
     d: Any
 
 
-def main():
+def main() -> None:
     # Bar is serialized into dict.
-    f = Foo(a=10, b=[1, 2], c={'foo': 'bar'}, d=Bar(100.0))
+    f = Foo(a=10, b=[1, 2], c={"foo": "bar"}, d=Bar(100.0))
     print(f"Into Json: {to_json(f)}")
 
     # However, pyserde can't deserialize the dict into Bar.
@@ -31,5 +31,5 @@ def main():
     print(f"From Json: {from_json(Foo, s)}")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

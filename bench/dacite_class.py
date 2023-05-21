@@ -13,7 +13,7 @@ def de(cls: Type, data: str):
 
 
 def new(size: Size) -> Runner:
-    name = 'attrs'
+    name = "attrs"
     if size == Size.Small:
         unp = SMALL
         pac = data.SMALL

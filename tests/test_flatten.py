@@ -24,13 +24,13 @@ def test_flatten_simple():
         b: str
         bar: Bar = field(flatten=True)
 
-    f = Foo(a=10, b='foo', bar=Bar(c=100.0, d=True))
+    f = Foo(a=10, b="foo", bar=Bar(c=100.0, d=True))
     s = '{"a":10,"b":"foo","c":100.0,"d":true}'
     assert to_json(f) == s
     assert from_json(Foo, s) == f
 
 
-@pytest.mark.parametrize('se,de', all_formats)
+@pytest.mark.parametrize("se,de", all_formats)
 def test_flatten(se, de):
     @serde
     class Baz:
@@ -49,5 +49,5 @@ def test_flatten(se, de):
         b: str
         bar: Bar = field(flatten=True)
 
-    f = Foo(a=10, b='foo', bar=Bar(c=100.0, d=True, baz=Baz([1, 2], {"a": "10"})))
+    f = Foo(a=10, b="foo", bar=Bar(c=100.0, d=True, baz=Baz([1, 2], {"a": "10"})))
     assert de(Foo, se(f)) == f

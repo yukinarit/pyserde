@@ -52,18 +52,18 @@ numpy = [
     { version = ">1.21.0", markers = "python_version ~= '3.9.0'" },
     { version = ">1.22.0", markers = "python_version ~= '3.10'" },
 ]
-flake8 = "*"
+mypy = "==1.3.0"
 pytest = "*"
 pytest-cov = "*"
 pytest-watch = "*"
 pytest-flake8 = "*"
 coverage = "==4.5.4"
 pdoc = "^12"
-mypy = { version = "==0.931", markers = "platform_python_implementation!='PyPy'" }
 more-itertools = "~=8.6.0"
 pre-commit = "==v2.10.1"
 pytest-xdist = "^2.3.0"
 types-PyYAML = "^6.0.9"
+envclasses = "^0.2.1"
 
 [tool.poetry.extras]
 msgpack = ["msgpack"]
@@ -80,3 +80,32 @@ build-backend = "poetry_dynamic_versioning.backend"
 [tool.poetry-dynamic-versioning]
 enable = true
 style = "pep440"
+
+[tool.black]
+target_version = ["py311"]
+line_length = 120
+
+[tool.pyright]
+include = ["examples"]
+exclude = ["serde", "bench", "tests"]
+pythonVersion = "3.11"
+reportMissingImports = false
+
+[tool.mypy]
+strict = true
+ignore_missing_imports = true
+exclude = [
+    'serde',
+    'bench',
+    'tests',
+]
+
+[tool.ruff]
+select = [
+    "E",  # pycodestyle errors
+    "W",  # pycodestyle warnings
+    "F",  # pyflakes
+    "C",  # flake8-comprehensions
+    "B",  # flake8-bugbear
+]
+line-length = 120

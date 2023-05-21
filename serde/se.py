@@ -105,7 +105,8 @@ class Serializer(metaclass=abc.ABCMeta):
     See `serde.json.JsonSerializer` and `serde.msgpack.MsgPackSerializer` for example usage.
     """
 
-    @abc.abstractclassmethod
+    @classmethod
+    @abc.abstractmethod
     def serialize(cls, obj, **opts):
         raise NotImplementedError
 
@@ -377,7 +378,7 @@ def to_obj(o, named: bool, reuse_instances: bool, convert_sets: bool, c: Optiona
         return o
 
     except Exception as e:
-        raise SerdeError(e)
+        raise SerdeError(e) from None
 
 
 def astuple(v: Any) -> Tuple[Any, ...]:
@@ -839,7 +840,7 @@ convert_sets=convert_sets), coerce(int, foo[2]),)"
         if self.suppress_coerce:
             return var
         else:
-            return f'coerce({typ}, {var})'
+            return f"coerce({typ}, {var})"
 
     def string(self, arg: SeField) -> str:
         return f"str({arg.varname})"

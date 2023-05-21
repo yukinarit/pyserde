@@ -37,8 +37,8 @@ class Data:
     slideshow: Slideshow
 
 
-def main():
-    text = r'''{
+def main() -> None:
+    text = r"""{
   "slideshow": {
     "author": "Yours Truly",
     "date": "date of publication",
@@ -59,10 +59,10 @@ def main():
     "title": "Sample Slide Show"
   }
 }
-'''
+"""
     data = from_json(Data, text)
     print(data)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

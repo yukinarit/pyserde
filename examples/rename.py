@@ -17,12 +17,12 @@ from serde.json import to_json
 @dataclass
 class Foo:
     # Use 'class_name' because 'class' is a keyword.
-    class_name: str = field(rename='class')
+    class_name: str = field(rename="class")
 
 
-def main():
-    print(to_json(Foo(class_name='Foo')))
+def main() -> None:
+    print(to_json(Foo(class_name="Foo")))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

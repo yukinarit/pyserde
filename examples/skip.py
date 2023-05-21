@@ -28,11 +28,11 @@ class Resource:
 class World:
     player: str
     enemies: List[str] = field(default_factory=list, skip_if_false=True)
-    buddy: str = field(default='', skip_if=lambda v: v == 'Pikachu')
-    town: str = field(default='Masara Town', skip_if_default=True)
+    buddy: str = field(default="", skip_if=lambda v: v == "Pikachu")
+    town: str = field(default="Masara Town", skip_if_default=True)
 
 
-def main():
+def main() -> None:
     resources = [
         Resource("Stack Overflow", "b6469c3f31653d281bbbfa6f94d60fea130abe38"),
         Resource("GitHub", "5cb7a0c47e53854cd00e1a968de5abce1c124601", metadata={"headquarters": "San Francisco"}),
@@ -40,13 +40,13 @@ def main():
     print(to_json(resources))
 
     # "buddy" and "town" field will be omitted
-    world = World('satoshi', ['Rattata', 'Pidgey'], 'Pikachu')
+    world = World("satoshi", ["Rattata", "Pidgey"], "Pikachu")
     print(to_json(world))
 
     # "enemies" field will be omitted
-    world = World('green', [], 'Charmander', 'Black City')
+    world = World("green", [], "Charmander", "Black City")
     print(to_json(world))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
