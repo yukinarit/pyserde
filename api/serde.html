@@ -680,7 +680,7 @@ at the class but you want to override a field with the default deserializer.</p>
 </span><span id="deserialize-224"><a href="#deserialize-224"><span class="linenos">224</span></a>
 </span><span id="deserialize-225"><a href="#deserialize-225"><span class="linenos">225</span></a>    <span class="n">stack</span> <span class="o">=</span> <span class="p">[]</span>
 </span><span id="deserialize-226"><a href="#deserialize-226"><span class="linenos">226</span></a>
-</span><span id="deserialize-227"><a href="#deserialize-227"><span class="linenos">227</span></a>    <span class="k">def</span> <span class="nf">wrap</span><span class="p">(</span><span class="bp">cls</span><span class="p">:</span> <span class="n">Type</span><span class="p">):</span>
+</span><span id="deserialize-227"><a href="#deserialize-227"><span class="linenos">227</span></a>    <span class="k">def</span> <span class="nf">wrap</span><span class="p">(</span><span class="bp">cls</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">Any</span><span class="p">]):</span>
 </span><span id="deserialize-228"><a href="#deserialize-228"><span class="linenos">228</span></a>        <span class="k">if</span> <span class="bp">cls</span> <span class="ow">in</span> <span class="n">stack</span><span class="p">:</span>
 </span><span id="deserialize-229"><a href="#deserialize-229"><span class="linenos">229</span></a>            <span class="k">return</span>
 </span><span id="deserialize-230"><a href="#deserialize-230"><span class="linenos">230</span></a>        <span class="n">stack</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
