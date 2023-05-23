@@ -36,7 +36,7 @@ class Foo:
     a: Union[Bar, Baz]
 ```
 
-> **NOTE:** Non dataclass objects are alreays (de)serialized with `Ungagged` regardless of `tagging` attribute because there is no information which can be used for tag. The drawback of `Untagged` is pyserde can't correctly deserialize certain types. For example, `Foo({1, 2, 3})` of below class is serialized into `{"a": [1, 2, 3]}`, but you get `Foo([1, 2, 3])` by deserializing.
+> **NOTE:** Non dataclass objects are alreays (de)serialized with `Untagged` regardless of `tagging` attribute because there is no information which can be used for tag. The drawback of `Untagged` is pyserde can't correctly deserialize certain types. For example, `Foo({1, 2, 3})` of below class is serialized into `{"a": [1, 2, 3]}`, but you get `Foo([1, 2, 3])` by deserializing.
 >
 > ```python
 > @serde(tagging=ExternalTagging)
