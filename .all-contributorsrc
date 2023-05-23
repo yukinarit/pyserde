@@ -180,6 +180,15 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "nicoddemus",
+      "name": "Bruno Oliveira",
+      "avatar_url": "https://avatars.githubusercontent.com/u/1085180?v=4",
+      "profile": "https://www.patreon.com/nicoddemus",
+      "contributions": [
+        "doc"
+      ]
     }
   ],
   "contributorsPerLine": 7,
