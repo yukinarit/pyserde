@@ -113,6 +113,14 @@ __all__ = [
 @overload
 def serde(
     _cls: Type[T],
+    rename_all: Optional[str] = None,
+    reuse_instances_default: bool = True,
+    convert_sets_default: bool = False,
+    serializer: Optional[SerializeFunc] = None,
+    deserializer: Optional[DeserializeFunc] = None,
+    tagging: Tagging = DefaultTagging,
+    type_check: TypeCheck = NoCheck,
+    serialize_class_var: bool = False,
 ) -> Type[T]:
     ...
 
