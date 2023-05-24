@@ -4,7 +4,17 @@ import enum
 import logging
 import pathlib
 import uuid
-from typing import ClassVar, DefaultDict, Dict, FrozenSet, List, Optional, Set, Tuple, Union
+from typing import (
+    ClassVar,
+    DefaultDict,
+    Dict,
+    FrozenSet,
+    List,
+    Optional,
+    Set,
+    Tuple,
+    Union,
+)
 
 import pytest
 
@@ -534,6 +544,45 @@ def test_rename_and_alias():
     assert '{"z":1}' == serde.json.to_json(f)
     ff = serde.json.from_json(Foo, '{"b":10}')
     assert ff.a == 10
+
+
+def test_default_and_alias():
+    @serde.serde
+    class Foo:
+        a: int = serde.field(default=2, alias=["b", "c", "d"])
+
+    f = Foo(a=1)
+    assert '{"a":1}' == serde.json.to_json(f)
+    ff = serde.json.from_json(Foo, '{"b":10}')
+    assert ff.a == 10
+    ff = serde.json.from_json(Foo, '{"e":10}')
+    assert ff.a == 2
+
+
+def test_default_and_rename():
+    @serde.serde
+    class Foo:
+        a: int = serde.field(default=2, rename="z")
+
+    f = Foo(a=1)
+    assert '{"z":1}' == serde.json.to_json(f)
+    ff = serde.json.from_json(Foo, '{"z":10}')
+    assert ff.a == 10
+    fff = serde.json.from_json(Foo, '{"a":10}')
+    assert fff.a == 2
+
+
+def test_default_rename_and_alias():
+    @serde.serde
+    class Foo:
+        a: int = serde.field(default=2, rename="z", alias=["b", "c", "d"])
+
+    f = Foo(a=1)
+    assert '{"z":1}' == serde.json.to_json(f)
+    ff = serde.json.from_json(Foo, '{"b":10}')
+    assert ff.a == 10
+    ff = serde.json.from_json(Foo, '{"e":10}')
+    assert ff.a == 2
 
 
 @pytest.mark.parametrize(
