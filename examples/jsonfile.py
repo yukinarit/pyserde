@@ -1,7 +1,7 @@
 """
 jsonfile.py
 
-Make an http request to JSON WebAPI.
+Deserialize JSON into an object.
 
 Usage:
     $ poetry install
@@ -9,8 +9,6 @@ Usage:
 """
 from dataclasses import dataclass
 from typing import List, Optional
-
-import requests
 
 from serde import serde
 from serde.json import from_json
@@ -40,7 +38,28 @@ class Data:
 
 
 def main():
-    text = requests.get('https://httpbin.org/json').text
+    text = r'''{
+  "slideshow": {
+    "author": "Yours Truly",
+    "date": "date of publication",
+    "slides": [
+      {
+        "title": "Wake up to WonderWidgets!",
+        "type": "all"
+      },
+      {
+        "items": [
+          "Why <em>WonderWidgets</em> are great",
+          "Who <em>buys</em> WonderWidgets"
+        ],
+        "title": "Overview",
+        "type": "all"
+      }
+    ],
+    "title": "Sample Slide Show"
+  }
+}
+'''
     data = from_json(Data, text)
     print(data)
 

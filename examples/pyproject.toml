@@ -7,5 +7,4 @@ authors = ["yukinarit <yukinarit84@gmail.com>"]
 [tool.poetry.dependencies]
 python = "^3.7.0"
 pyserde = {path = "../", extras = ["all"]}
-requests = "*"
 envclasses = "^0.2.1"
