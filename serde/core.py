@@ -335,7 +335,7 @@ def field(
     skip_if_default: Optional[bool] = None,
     serializer=None,
     deserializer=None,
-    flatten: Optional[FlattenOpts] = None,
+    flatten: Optional[Union[FlattenOpts, bool]] = None,
     metadata=None,
     **kwargs,
 ):
@@ -361,7 +361,9 @@ def field(
         metadata["serde_serializer"] = serializer
     if deserializer:
         metadata["serde_deserializer"] = deserializer
-    if flatten:
+    if flatten is True:
+        metadata["serde_flatten"] = FlattenOpts()
+    elif flatten:
         metadata["serde_flatten"] = flatten
 
     return dataclasses.field(*args, metadata=metadata, **kwargs)
