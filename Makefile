@@ -34,9 +34,9 @@ check:
 	$(POETRY) run mypy .
 
 docs:
-	mkdir -p docs out/api out/guide
+	mkdir -p docs out/api out/guide/en
 	$(POETRY) run pdoc -e serde=https://github.com/yukinarit/pyserde/tree/main/serde/ serde -o out/api
-	mdbook build -d out/guide
+	mdbook build -d ../../out/guide/en ./docs/en
 
 open-docs:
 	$(POETRY) run pdoc -e serde=https://github.com/yukinarit/pyserde/tree/main/serde serde

@@ -8,8 +8,8 @@ from serde.json import from_json, to_json
 @serde
 @dataclass
 class Foo:
-    dt1: datetime
-    dt2: datetime = field(
+    a: datetime
+    b: datetime = field(
         serializer=lambda x: x.strftime("%d/%m/%y"), deserializer=lambda x: datetime.strptime(x, "%d/%m/%y")
     )
 
@@ -19,7 +19,7 @@ def main() -> None:
     f = Foo(dt, dt)
     print(f"Into Json: {to_json(f)}")
 
-    s = '{"dt1": "2021-01-01T00:00:00", "dt2": "01/01/21"}'
+    s = '{"a": "2021-01-01T00:00:00", "b": "01/01/21"}'
     print(f"From Json: {from_json(Foo, s)}")
 
 

@@ -2,7 +2,7 @@
 
 ## `@serde`
 
-`@serde` is a shortcut of `@serialize` and `@deserialize` decorators.
+`@serde` is a wrapper of `@serialize` and `@deserialize` decorators.
 
 This code
 ```python
@@ -22,9 +22,9 @@ class Foo:
     ...
 ```
 
-`@serde` decorator does those for you:
-* Automatically add @serialize and @deserialize decorators to a class
-* Automatically add @dataclass decorator to a class
+`@serde` decorator does these for you:
+* Add `@serialize` and `@deserialize` decorators to a class
+* Add `@dataclass` decorator to a class if a class doesn't have `@dataclass`
 * You can pass both (de)serialize attributes to the decorator
     * `serializer` attribute is ignored in `@deserialize` and `deserializer` attribute is ignored in `@serialize`
 
@@ -35,8 +35,7 @@ class Foo:
     ...
 ```
 
-> **Note:** `@serde` actually works without @dataclass decorator, because it detects and add @dataclass to the declared class automatically. However, mypy will produce `Too many arguments` or `Unexpected keyword argument` error. This is due to the current mypy limitation. See the following documentation for more information.
-https://mypy.readthedocs.io/en/stable/additional_features.html#caveats-known-issues
+> **NOTE:** `@serde` actually works without @dataclass decorator, because it detects and add @dataclass to the declared class automatically. However, mypy will produce `Too many arguments` or `Unexpected keyword argument` error. This is due to [the mypy limitation](https://mypy.readthedocs.io/en/stable/additional_features.html#caveats-known-issues).
 >
 > ```python
 > @serde
@@ -44,14 +43,14 @@ https://mypy.readthedocs.io/en/stable/additional_features.html#caveats-known-iss
 >     ...
 > ```
 >
-> But if you're a PEP681 compliant type checker (e.g. pyright) user, you don't get the type error because pyserde supports [PEP681 dataclass_transform](https://peps.python.org/pep-0681/)
+> But if you use a PEP681 compliant type checker (e.g. pyright), you don't get the type error because pyserde supports [PEP681 dataclass_transform](https://peps.python.org/pep-0681/)
 
 
 ## `@serialize`/`@deserialize`
 
-`@serialize` and `@deserialize` are used by `@serde` under the hood. It's recommended to use the decorators in such cases:
+`@serialize` and `@deserialize` are used by `@serde` under the hood. We recommend to use those two decorators in the following cases. Otherwise `@serde` is recommended.
 * You only need either serialization or deserialization functionality
-* You want to have different class attributes
+* You want to have different class attributes as below
 
 ```python
 @deserialize(rename_all = "snakecase")
@@ -60,9 +59,11 @@ class Foo:
     ...
 ```
 
-## `@dataclass` without `@serde`
+## (de)serializing class without `@serde`
 
 pyserde can (de)serialize dataclasses without `@serde` since v0.10.0. This feature is convenient when you want to use classes declared in external libraries or a type checker doesn't work with `@serde` decorator. See [this example](https://github.com/yukinarit/pyserde/blob/main/examples/plain_dataclass.py).
+
+How does it work? It's quite simple that pyserde add `@serde` decorator if a class doesn't has it. It may take for a while for the first API call, but the generated code will be cached internally. So it won't be a problem. See the following example to deserialize a class in a third party package.
 
 ```python
 @dataclass
