@@ -123,6 +123,13 @@ def _get_by_aliases(d: Dict[str, str], aliases: List[str]):
         return _get_by_aliases(d, aliases[1:])
 
 
+def _exists_by_aliases(d: Dict[str, str], aliases: List[str]):
+    for alias in aliases:
+        if alias in d:
+            return True
+    return False
+
+
 def _make_deserialize(
     cls_name: str,
     fields,
@@ -262,6 +269,7 @@ def deserialize(
         g['NoCheck'] = NoCheck
         g['coerce'] = coerce
         g['_get_by_aliases'] = _get_by_aliases
+        g['_exists_by_aliases'] = _exists_by_aliases
         if deserialize:
             g['serde_custom_class_deserializer'] = functools.partial(
                 serde_custom_class_deserializer, custom=deserializer
@@ -877,7 +885,11 @@ for k, v in data["f"].items()}'
         return f"serde_scope.funcs['{func_name}'](cls=cls, data={arg.data}, reuse_instances=reuse_instances)"
 
     def default(self, arg: DeField, code: str) -> str:
-        exists = f'"{arg.conv_name()}" in {arg.datavar}'
+        if arg.alias:
+            aliases = map(lambda s: f'"{s}"', [arg.name, *arg.alias])
+            exists = f'_exists_by_aliases({arg.datavar}, [{",".join(aliases)}])'
+        else:
+            exists = f'"{arg.conv_name()}" in {arg.datavar}'
         if has_default(arg):
             return f'({code}) if {exists} else serde_scope.defaults["{arg.name}"]'
         elif has_default_factory(arg):
