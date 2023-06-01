@@ -2,12 +2,12 @@
 Serialize and Deserialize in MsgPack format. This module depends on
 [msgpack](https://pypi.org/project/msgpack/) package.
 """
-from typing import Any, Dict, Type
+from typing import Any, Dict, Type, Optional
 
 import msgpack
 
 from .compat import T
-from .core import SerdeError
+from .compat import SerdeError
 from .de import Deserializer, from_dict, from_tuple
 from .numpy import encode_numpy
 from .se import Serializer, to_dict, to_tuple
@@ -15,9 +15,9 @@ from .se import Serializer, to_dict, to_tuple
 __all__ = ["from_msgpack", "to_msgpack"]
 
 
-class MsgPackSerializer(Serializer):
+class MsgPackSerializer(Serializer[bytes]):
     @classmethod
-    def serialize(cls, obj, use_bin_type: bool = True, ext_type_code: int = None, **opts) -> bytes:
+    def serialize(cls, obj: Any, use_bin_type: bool = True, ext_type_code: Optional[int] = None, **opts: Any) -> bytes:
         if "default" not in opts:
             opts["default"] = encode_numpy
         if ext_type_code is not None:
@@ -28,18 +28,18 @@ class MsgPackSerializer(Serializer):
         return msgpack.packb(obj_or_ext, use_bin_type=use_bin_type, **opts)
 
 
-class MsgPackDeserializer(Deserializer):
+class MsgPackDeserializer(Deserializer[bytes]):
     @classmethod
-    def deserialize(cls, s, raw: bool = False, use_list: bool = False, **opts):
-        return msgpack.unpackb(s, raw=raw, use_list=use_list, **opts)
+    def deserialize(cls, data: bytes, raw: bool = False, use_list: bool = False, **opts: Any) -> Any:
+        return msgpack.unpackb(data, raw=raw, use_list=use_list, **opts)
 
 
 def to_msgpack(
     obj: Any,
-    se: Type[Serializer] = MsgPackSerializer,
+    se: Type[Serializer[bytes]] = MsgPackSerializer,
     named: bool = True,
-    ext_dict: Dict[Type[Any], int] = None,
-    **opts,
+    ext_dict: Optional[Dict[Type[Any], int]] = None,
+    **opts: Any,
 ) -> bytes:
     """
     Serialize the object into MsgPack.
@@ -71,10 +71,10 @@ def to_msgpack(
 def from_msgpack(
     c: Type[T],
     s: bytes,
-    de: Type[Deserializer] = MsgPackDeserializer,
+    de: Type[Deserializer[bytes]] = MsgPackDeserializer,
     named: bool = True,
-    ext_dict: Dict[int, Type[Any]] = None,
-    **opts,
+    ext_dict: Optional[Dict[int, Type[Any]]] = None,
+    **opts: Any,
 ) -> T:
     """
     Deserialize from MsgPack into the object.
@@ -90,7 +90,7 @@ def from_msgpack(
         ext_type = ext_dict.get(ext.code)
         if ext_type is None:
             raise SerdeError(f"Could not find type for code {ext.code} in ext_dict")
-        return from_msgpack(ext_type, ext.data, de, named, **opts)
+        return from_msgpack(ext_type, ext.data, de, named, **opts)  # type: ignore
     else:
         from_func = from_dict if named else from_tuple
         return from_func(c, de.deserialize(s, **opts), reuse_instances=False)

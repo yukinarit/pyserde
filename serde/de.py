@@ -9,7 +9,7 @@ import dataclasses
 import functools
 import typing
 from dataclasses import dataclass, is_dataclass
-from typing import Any, Callable, Dict, List, Optional, TypeVar
+from typing import Any, Callable, Dict, List, Optional, TypeVar, Generic
 
 import jinja2
 from typing_extensions import Type, dataclass_transform
@@ -357,7 +357,7 @@ def is_dataclass_without_de(cls: Type[Any]) -> bool:
     return FROM_DICT not in scope.funcs
 
 
-class Deserializer(metaclass=abc.ABCMeta):
+class Deserializer(Generic[T], metaclass=abc.ABCMeta):
     """
     `Deserializer` base class. Subclass this to customize deserialize behaviour.
 
@@ -366,7 +366,7 @@ class Deserializer(metaclass=abc.ABCMeta):
 
     @classmethod
     @abc.abstractmethod
-    def deserialize(cls, data, **opts):
+    def deserialize(cls, data: T, **opts: Any) -> Any:
         """
         deserialize `data` into an object typically `dict`, `list` or `tuple`.
 
