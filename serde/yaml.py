@@ -1,7 +1,7 @@
 """
 Serialize and Deserialize in YAML format. This module depends on [pyyaml](https://pypi.org/project/PyYAML/) package.
 """
-from typing import Type, Any
+from typing import Type, Any, overload
 
 import yaml
 
@@ -36,7 +36,18 @@ def to_yaml(obj: Any, se: Type[Serializer[str]] = YamlSerializer, **opts: Any) -
     return se.serialize(to_dict(obj, reuse_instances=False), **opts)
 
 
+@overload
 def from_yaml(c: Type[T], s: str, de: Type[Deserializer[str]] = YamlDeserializer, **opts: Any) -> T:
+    ...
+
+
+# For Union, Optional etc.
+@overload
+def from_yaml(c: Any, s: str, de: Type[Deserializer[str]] = YamlDeserializer, **opts: Any) -> Any:
+    ...
+
+
+def from_yaml(c: Any, s: str, de: Type[Deserializer[str]] = YamlDeserializer, **opts: Any) -> Any:
     """
     `c` is a class obejct and `s` is YAML string. If you supply keyword arguments other than `de`,
     they will be passed in `yaml.safe_load` function.

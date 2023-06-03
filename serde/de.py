@@ -9,7 +9,7 @@ import dataclasses
 import functools
 import typing
 from dataclasses import dataclass, is_dataclass
-from typing import Any, Callable, Dict, List, Optional, TypeVar, Generic
+from typing import Any, Callable, Dict, List, Optional, TypeVar, Generic, overload
 
 import jinja2
 from typing_extensions import Type, dataclass_transform
@@ -472,7 +472,17 @@ def from_obj(c: Type[T], o: Any, named: bool, reuse_instances: bool) -> T:
         raise SerdeError(e) from None
 
 
-def from_dict(cls: Type[T], o, reuse_instances: bool = ...) -> T:
+@overload
+def from_dict(cls: Type[T], o: Dict[str, Any], reuse_instances: bool = ...) -> T:
+    ...
+
+
+@overload
+def from_dict(cls: Any, o: Dict[str, Any], reuse_instances: bool = ...) -> Any:
+    ...
+
+
+def from_dict(cls: Any, o: Dict[str, Any], reuse_instances: bool = ...) -> Any:
     """
     Deserialize dictionary into object.
 
@@ -495,7 +505,17 @@ def from_dict(cls: Type[T], o, reuse_instances: bool = ...) -> T:
     return from_obj(cls, o, named=True, reuse_instances=reuse_instances)
 
 
+@overload
 def from_tuple(cls: Type[T], o: Any, reuse_instances: bool = ...) -> T:
+    ...
+
+
+@overload
+def from_tuple(cls: Any, o: Any, reuse_instances: bool = ...) -> Any:
+    ...
+
+
+def from_tuple(cls: Any, o: Any, reuse_instances: bool = ...) -> Any:
     """
     Deserialize tuple into object.
 
