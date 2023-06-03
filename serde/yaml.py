@@ -1,7 +1,7 @@
 """
 Serialize and Deserialize in YAML format. This module depends on [pyyaml](https://pypi.org/project/PyYAML/) package.
 """
-from typing import Type
+from typing import Type, Any
 
 import yaml
 
@@ -12,19 +12,19 @@ from .se import Serializer, to_dict
 __all__ = ["from_yaml", "to_yaml"]
 
 
-class YamlSerializer(Serializer):
+class YamlSerializer(Serializer[str]):
     @classmethod
-    def serialize(cls, obj, **opts) -> str:
-        return yaml.safe_dump(obj, **opts)
+    def serialize(cls, obj: Any, **opts: Any) -> str:
+        return yaml.safe_dump(obj, **opts)  # type: ignore
 
 
-class YamlDeserializer(Deserializer):
+class YamlDeserializer(Deserializer[str]):
     @classmethod
-    def deserialize(cls, s, **opts):
-        return yaml.safe_load(s, **opts)
+    def deserialize(cls, data: str, **opts: Any) -> Any:
+        return yaml.safe_load(data, **opts)
 
 
-def to_yaml(obj, se: Type[Serializer] = YamlSerializer, **opts) -> str:
+def to_yaml(obj: Any, se: Type[Serializer[str]] = YamlSerializer, **opts: Any) -> str:
     """
     Serialize the object into YAML.
 
@@ -36,7 +36,7 @@ def to_yaml(obj, se: Type[Serializer] = YamlSerializer, **opts) -> str:
     return se.serialize(to_dict(obj, reuse_instances=False), **opts)
 
 
-def from_yaml(c: Type[T], s: str, de: Type[Deserializer] = YamlDeserializer, **opts) -> T:
+def from_yaml(c: Type[T], s: str, de: Type[Deserializer[str]] = YamlDeserializer, **opts: Any) -> T:
     """
     `c` is a class obejct and `s` is YAML string. If you supply keyword arguments other than `de`,
     they will be passed in `yaml.safe_load` function.

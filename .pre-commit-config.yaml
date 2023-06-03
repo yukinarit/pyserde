@@ -17,6 +17,7 @@ repos:
     rev: v1.1.309
     hooks:
     - id: pyright
+      additional_dependencies: ['pyyaml', 'msgpack', 'msgpack-types']
   - repo: https://github.com/charliermarsh/ruff-pre-commit
     rev: v0.0.254
     hooks:

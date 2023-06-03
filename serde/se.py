@@ -9,12 +9,13 @@ import dataclasses
 import functools
 import typing
 from dataclasses import dataclass, is_dataclass
-from typing import Any, Callable, Dict, Iterator, List, Optional, Tuple, Type, TypeVar
+from typing import Any, Callable, Dict, Iterator, List, Optional, Tuple, Type, TypeVar, Generic
 
 import jinja2
 from typing_extensions import dataclass_transform
 
 from .compat import (
+    T,
     Literal,
     SerdeError,
     SerdeSkip,
@@ -98,7 +99,7 @@ def serde_custom_class_serializer(cls: Type[Any], obj: Any, custom: SerializeFun
         return default()
 
 
-class Serializer(metaclass=abc.ABCMeta):
+class Serializer(Generic[T], metaclass=abc.ABCMeta):
     """
     `Serializer` base class. Subclass this to customize serialize behaviour.
 
@@ -107,7 +108,7 @@ class Serializer(metaclass=abc.ABCMeta):
 
     @classmethod
     @abc.abstractmethod
-    def serialize(cls, obj, **opts):
+    def serialize(cls, obj: Any, **opts: Any) -> T:
         raise NotImplementedError
 
 

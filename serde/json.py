@@ -1,7 +1,7 @@
 """
 Serialize and Deserialize in JSON format.
 """
-from typing import Any, Union
+from typing import Any
 
 from typing_extensions import Type
 
@@ -13,18 +13,18 @@ from .se import Serializer, to_dict
 try:  # pragma: no cover
     import orjson
 
-    def json_dumps(obj, **opts) -> str:
+    def json_dumps(obj: Any, **opts: Any) -> str:
         if "option" not in opts:
             opts["option"] = orjson.OPT_SERIALIZE_NUMPY
-        return orjson.dumps(obj, **opts).decode()
+        return orjson.dumps(obj, **opts).decode()  # type: ignore
 
-    def json_loads(s, **opts) -> Any:
+    def json_loads(s: str, **opts: Any) -> Any:
         return orjson.loads(s, **opts)
 
 except ImportError:
     import json
 
-    def json_dumps(obj, **opts):
+    def json_dumps(obj: Any, **opts: Any) -> str:
         if "default" not in opts:
             opts["default"] = encode_numpy
         # compact output
@@ -32,26 +32,26 @@ except ImportError:
         separators = opts.pop("separators", (",", ":"))
         return json.dumps(obj, ensure_ascii=ensure_ascii, separators=separators, **opts)
 
-    def json_loads(s, **opts):
+    def json_loads(s: str, **opts: Any) -> Any:
         return json.loads(s, **opts)
 
 
 __all__ = ["from_json", "to_json"]
 
 
-class JsonSerializer(Serializer):
+class JsonSerializer(Serializer[str]):
     @classmethod
-    def serialize(cls, obj: Any, **opts) -> str:
+    def serialize(cls, obj: Any, **opts: Any) -> str:
         return json_dumps(obj, **opts)
 
 
-class JsonDeserializer(Deserializer):
+class JsonDeserializer(Deserializer[str]):
     @classmethod
-    def deserialize(cls, s: Union[bytes, str], **opts):
-        return json_loads(s, **opts)
+    def deserialize(cls, data: str, **opts: Any) -> Any:
+        return json_loads(data, **opts)
 
 
-def to_json(obj: Any, se: Type[Serializer] = JsonSerializer, **opts) -> str:
+def to_json(obj: Any, se: Type[Serializer[str]] = JsonSerializer, **opts: Any) -> str:
     """
     Serialize the object into JSON str. [orjson](https://github.com/ijl/orjson) will be used if installed.
 
@@ -65,7 +65,7 @@ def to_json(obj: Any, se: Type[Serializer] = JsonSerializer, **opts) -> str:
     return se.serialize(to_dict(obj, reuse_instances=False, convert_sets=True), **opts)
 
 
-def from_json(c: Type[T], s: Union[str, bytes], de: Type[Deserializer] = JsonDeserializer, **opts) -> T:
+def from_json(c: Type[T], s: str, de: Type[Deserializer[str]] = JsonDeserializer, **opts: Any) -> T:
     """
     Deserialize from JSON into the object. [orjson](https://github.com/ijl/orjson) will be used if installed.
 
