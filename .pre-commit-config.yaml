@@ -8,14 +8,18 @@ repos:
       - id: end-of-file-fixer
 
   - repo: https://github.com/psf/black
-    rev: 22.3.0
+    rev: 23.3.0
     hooks:
       - id: black
-        args: [
-               "--target-version=py36",
-               "--target-version=py37",
-               "--target-version=py38",
-               "--line-length=120",
-               "--skip-string-normalization",
-              ]
-
+        args:
+          - .
+  - repo: https://github.com/RobertCraigie/pyright-python
+    rev: v1.1.309
+    hooks:
+    - id: pyright
+  - repo: https://github.com/charliermarsh/ruff-pre-commit
+    rev: v0.0.254
+    hooks:
+    - id: ruff
+      args:
+        - --fix

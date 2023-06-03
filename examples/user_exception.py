@@ -13,12 +13,12 @@ class MyException(Exception):
 class Foo:
     v: int
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         if self.v == 10:
             raise MyException("Invalid value")
 
 
-def main():
+def main() -> None:
     try:
         s = '{"v": 10}'
         print(f"From Json: {from_json(Foo, s)}")
@@ -28,5 +28,5 @@ def main():
         print(f"Got user exception: {e}")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

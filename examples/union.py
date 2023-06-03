@@ -25,19 +25,19 @@ class Foo:
     c: Union[Bar, Baz]
 
 
-def main():
+def main() -> None:
     f = Foo(10, [1, 2, 3], Bar(10))
     print(f"Into Json: {to_json(f)}")
 
     s = '{"a": 10, "b": [1, 2, 3], "c": {"Bar": {"v": 10}}}'
     print(f"From Json: {from_json(Foo, s)}")
 
-    f = Foo('foo', {'bar': 1, 'baz': 2}, Baz(100.0))
+    f = Foo("foo", {"bar": 1, "baz": 2}, Baz(100.0))
     print(f"Into Json: {to_json(f)}")
 
     s = '{"a": "foo", "b": {"bar": 1, "baz": 2}, "c": {"Baz": {"v": 100.0}}}'
     print(f"From Json: {from_json(Foo, s)}")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

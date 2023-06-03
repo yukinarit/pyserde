@@ -17,7 +17,6 @@ from .common import (
     format_dict,
     format_json,
     format_msgpack,
-    format_pickle,
     format_tuple,
     format_yaml,
     opt_case,
@@ -139,7 +138,6 @@ Tests
 @pytest.mark.parametrize("opt", opt_case, ids=opt_case_ids())
 @pytest.mark.parametrize("se,de", all_formats)
 def test_dict(se, de, opt):
-
     if se in (serde.json.to_json, serde.msgpack.to_msgpack, serde.toml.to_toml):
         # JSON, Msgpack, Toml don't allow non string key.
         p = LitStrDict({"1": 2}, {"foo": "bar"}, {"True": True}, {"foo": True})
@@ -152,7 +150,6 @@ def test_dict(se, de, opt):
 @pytest.mark.parametrize("opt", opt_case, ids=opt_case_ids())
 @pytest.mark.parametrize("se,de", all_formats)
 def test_tuple(se, de, opt):
-
     if se is not serde.toml.to_toml:
         p = LitNestedPriTuple(
             (LitInt(1), LitInt(2)),

@@ -8,7 +8,7 @@ from runner import Runner, Size
 
 
 def new(size: Size) -> Runner:
-    name = 'raw'
+    name = "raw"
     if size == Size.Small:
         unp = SMALL
         pac = data.SMALL
@@ -31,7 +31,7 @@ def se_small(s: Small):
 
 
 def se_medium(m: Medium):
-    return json.dumps({'inner': [{'i': s.i, 's': s.s, 'f': s.f, 'b': s.b} for s in m.inner]})
+    return json.dumps({"inner": [{"i": s.i, "s": s.s, "f": s.f, "b": s.b} for s in m.inner]})
 
 
 def de_small(data: str) -> Small:
@@ -39,12 +39,12 @@ def de_small(data: str) -> Small:
 
 
 def _de_small(dct) -> Small:
-    return Small(dct['i'], dct['s'], dct['f'], dct['b'])
+    return Small(dct["i"], dct["s"], dct["f"], dct["b"])
 
 
 def de_medium(data: str) -> Medium:
     lst = json.loads(data)
-    return Medium([_de_small(v) for v in lst['inner']])
+    return Medium([_de_small(v) for v in lst["inner"]])
 
 
 def astuple_small(sm: Small) -> Tuple[int, str, float, bool]:
@@ -56,8 +56,8 @@ def astuple_medium(md: Medium) -> Tuple[List[Tuple[int, str, float, bool]]]:
 
 
 def asdict_small(s: Small):
-    return {'i': s.i, 's': s.s, 'f': s.f, 'b': s.b}
+    return {"i": s.i, "s": s.s, "f": s.f, "b": s.b}
 
 
 def asdict_medium(m: Medium):
-    return {'inner': [asdict_small(s) for s in m.inner]}
+    return {"inner": [asdict_small(s) for s in m.inner]}

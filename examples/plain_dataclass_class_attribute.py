@@ -19,7 +19,7 @@ class Wrapper(External):
     pass
 
 
-def main():
+def main() -> None:
     f = Wrapper(some_value=10)
     print(f"Into Json: {to_json(f)}")
 
@@ -27,5 +27,5 @@ def main():
     print(f"From Json: {from_json(Wrapper, s)}")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

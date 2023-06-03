@@ -16,15 +16,15 @@ class App:
     workers: int
 
 
-def main():
-    with open('app.yml') as f:
+def main() -> None:
+    with open("app.yml") as f:
         yml = f.read()
     cfg = from_yaml(App, yml)
     print(cfg)
 
-    load_env(cfg, prefix='APP')
+    load_env(cfg, prefix="APP")
     print(cfg)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

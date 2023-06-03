@@ -11,7 +11,7 @@ class Foo:
     v: Decimal
 
 
-def main():
+def main() -> None:
     foo = Foo(Decimal(0.1))
     print(f"Into Json: {to_json(foo)}")
 
@@ -19,5 +19,5 @@ def main():
     print(f"From Json: {from_json(Foo, s)}")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

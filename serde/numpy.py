@@ -5,9 +5,9 @@ from serde.compat import get_args, get_origin
 
 def fullname(klass):
     module = klass.__module__
-    if module == 'builtins':
+    if module == "builtins":
         return klass.__qualname__  # avoid outputs like 'builtins.str'
-    return module + '.' + klass.__qualname__
+    return module + "." + klass.__qualname__
 
 
 def is_numpy_type(typ) -> bool:

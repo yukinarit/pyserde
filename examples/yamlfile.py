@@ -14,7 +14,7 @@ from serde import Untagged, serde
 from serde.yaml import from_yaml
 
 
-@serde(rename_all='camelcase')
+@serde(rename_all="camelcase")
 @dataclass
 class Info:
     title: str
@@ -22,7 +22,7 @@ class Info:
     version: str
 
 
-@serde(rename_all='camelcase')
+@serde(rename_all="camelcase")
 @dataclass
 class Parameter:
     name: str
@@ -32,13 +32,13 @@ class Parameter:
     required: bool
 
 
-@serde(rename_all='camelcase')
+@serde(rename_all="camelcase")
 @dataclass
 class Response:
     description: str
 
 
-@serde(rename_all='camelcase', tagging=Untagged)
+@serde(rename_all="camelcase", tagging=Untagged)
 @dataclass
 class Path:
     description: str
@@ -47,21 +47,21 @@ class Path:
     responses: Dict[Union[str, int], Response]
 
 
-@serde(rename_all='camelcase')
+@serde(rename_all="camelcase")
 @dataclass
 class Prop:
     type: str
     format: Optional[str]
 
 
-@serde(rename_all='camelcase')
+@serde(rename_all="camelcase")
 @dataclass
 class Definition:
     required: Optional[List[str]]
     properties: Dict[str, Prop]
 
 
-@serde(rename_all='camelcase')
+@serde(rename_all="camelcase")
 @dataclass
 class Swagger:
     swagger: int
@@ -74,12 +74,12 @@ class Swagger:
     definitions: Dict[str, Definition]
 
 
-def main():
-    with open('swagger.yml') as f:
+def main() -> None:
+    with open("swagger.yml") as f:
         yaml = f.read()
     swagger = from_yaml(Swagger, yaml)
     print(swagger)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

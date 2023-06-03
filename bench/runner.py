@@ -4,9 +4,9 @@ from typing import Any, Callable
 
 
 class Size(enum.Enum):
-    Small = 'Small'
-    Medium = 'Medium'
-    Large = 'Large'
+    Small = "Small"
+    Medium = "Medium"
+    Large = "Large"
 
 
 @dataclass

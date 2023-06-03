@@ -44,12 +44,12 @@ class Pipfile:
     packages: Dict[str, Union[str, Package]]
 
 
-def main():
-    with open('Pipfile') as f:
+def main() -> None:
+    with open("Pipfile") as f:
         toml = f.read()
     pip = from_toml(Pipfile, toml)
     print(pip)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

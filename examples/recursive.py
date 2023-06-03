@@ -6,7 +6,7 @@ from serde import from_dict, serde, to_dict
 
 @dataclass
 class Recur:
-    f: Optional['Recur']
+    f: Optional["Recur"]
 
 
 serde(Recur)
@@ -15,7 +15,7 @@ serde(Recur)
 def main() -> None:
     f = Recur(Recur(Recur(None)))
     print(to_dict(f))
-    print(from_dict(Recur, {'f': {'f': {'f': None}}}))
+    print(from_dict(Recur, {"f": {"f": {"f": None}}}))
 
 
 if __name__ == "__main__":

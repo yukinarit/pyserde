@@ -79,7 +79,7 @@ class LitUnion:
     Union of literals
     """
 
-    v: Union[int, Literal["foo", "bar", "*"]]
+    v: Union[int, Literal["foo", "bar", "*"]]  # noqa
 
 
 def test_union():
@@ -93,7 +93,7 @@ def test_union():
     assert s == to_json(v)
     assert v == from_json(PriUnion, s)
 
-    v = PriUnion('foo')
+    v = PriUnion("foo")
     s = '{"v":"foo"}'
     assert s == to_json(v)
     assert v == from_json(PriUnion, s)
@@ -130,8 +130,8 @@ def test_union_optional():
     assert s == to_json(v)
     assert v == from_json(PriOptUnion, s)
 
-    assert PriOptUnion(None) == from_json(PriOptUnion, '{}')
-    assert OptionalUnion(None) == from_json(OptionalUnion, '{}')
+    assert PriOptUnion(None) == from_json(PriOptUnion, "{}")
+    assert OptionalUnion(None) == from_json(OptionalUnion, "{}")
 
 
 def test_union_containers():
@@ -140,12 +140,12 @@ def test_union_containers():
     assert s == to_json(v)
     assert v == from_json(ContUnion, s)
 
-    v = ContUnion(['1', '2', '3'])
+    v = ContUnion(["1", "2", "3"])
     s = '{"v":["1","2","3"]}'
     assert s == to_json(v)
     assert v == from_json(ContUnion, s)
 
-    v = ContUnion({'a': 1, 'b': 2, 'c': 3})
+    v = ContUnion({"a": 1, "b": 2, "c": 3})
     s = '{"v":{"a":1,"b":2,"c":3}}'
     assert s == to_json(v)
     # Note: this only works because Dict[str, int] comes first in Union otherwise a List would win
@@ -353,12 +353,12 @@ def test_union_in_other_type():
 
 
 def test_union_rename_all():
-    @serde(rename_all='pascalcase')
+    @serde(rename_all="pascalcase")
     class Foo:
         bar_baz: Union[int, str]
 
-    assert to_dict(Foo(10)) == {'BarBaz': 10}
-    assert from_dict(Foo, {'BarBaz': 'foo'}) == Foo('foo')
+    assert to_dict(Foo(10)) == {"BarBaz": 10}
+    assert from_dict(Foo, {"BarBaz": "foo"}) == Foo("foo")
 
 
 def test_union_with_list_of_other_class():
@@ -416,8 +416,8 @@ def test_union_with_union_in_nested_tuple():
 
 
 def test_generic_union():
-    T = TypeVar('T')
-    U = TypeVar('U')
+    T = TypeVar("T")
+    U = TypeVar("U")
 
     @serde
     class Foo(Generic[T]):
@@ -448,7 +448,7 @@ def test_generic_union():
     assert b == from_tuple(B[int, str], to_tuple(b))
 
     b = B[Foo[int], Bar[str]](Foo(Foo(10)))
-    assert {'v': {'v': {'v': 10}}} == to_dict(b)
+    assert {"v": {"v": {"v": 10}}} == to_dict(b)
     # TODO Nested union generic still doesn't work
     # assert b == from_dict(B[Foo[int], Bar[str]], to_dict(b))
 
@@ -473,7 +473,7 @@ def test_external_tagging():
         c: Union[Dict[int, str], List[int]]
         d: Union[int, Nested]
 
-    f = Foo(Bar(10), 'foo', {10: 'bar'}, Nested(Baz(100)))
+    f = Foo(Bar(10), "foo", {10: "bar"}, Nested(Baz(100)))
     d = {
         "a": {"Bar": {"b": 10}},  # Union of dataclasses will be (de)serialized with external tagging
         "b": "foo",  # non dataclass will be untagged
@@ -529,7 +529,7 @@ def test_internal_tagging():
         c: Union[Dict[int, str], List[int]]
         d: Union[int, Nested]
 
-    f = Foo(Bar(10), 'foo', {10: 'bar'}, Nested(Baz(100)))
+    f = Foo(Bar(10), "foo", {10: "bar"}, Nested(Baz(100)))
     d = {
         "a": {"type": "Bar", "v": 10},  # Union of dataclasses will be (de)serialized with internal tagging
         "b": "foo",  # non dataclass will be untagged
@@ -582,7 +582,7 @@ def test_adjacent_tagging():
         c: Union[Dict[int, str], List[int]]
         d: Union[int, Nested]
 
-    f = Foo(Bar(10), 'foo', {10: 'bar'}, Nested(Baz(100)))
+    f = Foo(Bar(10), "foo", {10: "bar"}, Nested(Baz(100)))
     d = {
         "a": {"type": "Bar", "content": {"v": 10}},  # Union of dataclasses will be (de)serialized with adjacent tagging
         "b": "foo",  # non dataclass will be untagged
@@ -651,7 +651,7 @@ def test_untagged():
         c: Union[Dict[int, str], List[int]]
         d: Union[int, Nested]
 
-    f = Foo(Bar(10), 'foo', {10: 'bar'}, Nested(Bar(100)))
+    f = Foo(Bar(10), "foo", {10: "bar"}, Nested(Bar(100)))
     d = {"a": {"v": 10}, "b": "foo", "c": {10: "bar"}, "d": {"v": {"v": 100}}}
     assert to_dict(f) == d
     assert from_dict(Foo, d) == f
@@ -671,7 +671,7 @@ def test_untagged():
     class Foo:
         a: Union[List[int], Dict[int, str]]
 
-    f = Foo({10: 'bar'})
+    f = Foo({10: "bar"})
     with pytest.raises(Exception):
         assert to_dict(from_dict(Foo, d)) == f
 
@@ -683,7 +683,7 @@ def test_newtype_and_untagged_union() -> None:
     """
     from serde import Untagged
 
-    OtherNewtypeThing = NewType('OtherNewtypeThing', str)
+    OtherNewtypeThing = NewType("OtherNewtypeThing", str)
 
     @serde
     class SupposedlyUnrelated:
@@ -691,14 +691,14 @@ def test_newtype_and_untagged_union() -> None:
 
     @serde
     class Innerclass:
-        inner_value: str = 'SHOULD_NOT_APPEAR'
+        inner_value: str = "SHOULD_NOT_APPEAR"
 
     @serde(tagging=Untagged)
     class MyDataclass:
         unrelateds: List[SupposedlyUnrelated]
         buggy_field: List[Union[str, Innerclass]]
 
-    data = {'unrelateds': [], 'buggy_field': [{'inner_value': 'value'}, 'something']}
+    data = {"unrelateds": [], "buggy_field": [{"inner_value": "value"}, "something"]}
     actual = from_dict(MyDataclass, data)
 
     assert isinstance(actual.buggy_field[0], Innerclass)

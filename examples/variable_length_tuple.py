@@ -11,7 +11,7 @@ class Foo:
     v: Tuple[int, ...]
 
 
-def main():
+def main() -> None:
     f = Foo(v=(1, 2, 3))
     print(f"Into Json: {to_json(f)}")
 
@@ -19,5 +19,5 @@ def main():
     print(f"From Json: {from_json(Foo, s)}")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

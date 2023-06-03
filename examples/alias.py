@@ -10,7 +10,7 @@ class Foo:
     a: int = field(alias=["b", "c", "d"])
 
 
-def main():
+def main() -> None:
     s = '{"a": 10}'
     print(f"From Json: {from_json(Foo, s)}")
 
@@ -30,5 +30,5 @@ def main():
         pass
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

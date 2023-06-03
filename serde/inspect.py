@@ -45,23 +45,23 @@ def main(arg):
 
         assert black
     except ImportError:
-        logger.warning(('Tips: Installing "black" makes the output prettier! Try this command:\n' 'pip install back'))
+        logger.warning(('Tips: Installing "black" makes the output prettier! Try this command:\n' "pip install back"))
 
     dir = os.path.dirname(arg.path)
     mod = os.path.basename(arg.path)[:-3]
-    print(f'Loading {mod}.{arg.name} from {dir}/{mod}.py')
+    print(f"Loading {mod}.{arg.name} from {dir}/{mod}.py")
     sys.path.append(dir)
     pkg = importlib.import_module(mod)
     cls = getattr(pkg, arg.name)
     inspect(cls)
 
 
-parser = argparse.ArgumentParser(description='pyserde-inspect')
-parser.add_argument('path', type=str, help='Python script path.')
-parser.add_argument('name', type=str, help='Pyserde class name.')
-parser.add_argument('-v', dest='verbose', action='store_true', help='Enable debug logging.')
+parser = argparse.ArgumentParser(description="pyserde-inspect")
+parser.add_argument("path", type=str, help="Python script path.")
+parser.add_argument("name", type=str, help="Pyserde class name.")
+parser.add_argument("-v", dest="verbose", action="store_true", help="Enable debug logging.")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     args = parser.parse_args()
     main(args)

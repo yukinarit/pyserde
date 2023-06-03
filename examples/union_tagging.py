@@ -17,7 +17,7 @@ class Baz:
     b: int
 
 
-def external_tagging():
+def external_tagging() -> None:
     @serde
     @dataclass
     class Foo:
@@ -30,7 +30,7 @@ def external_tagging():
     print(f"From Json: {from_json(Foo, s)}")
 
 
-def internal_tagging():
+def internal_tagging() -> None:
     @serde(tagging=InternalTagging("type"))
     @dataclass
     class Foo:
@@ -43,7 +43,7 @@ def internal_tagging():
     print(f"From Json: {from_json(Foo, s)}")
 
 
-def adjacent_tagging():
+def adjacent_tagging() -> None:
     @serde(tagging=AdjacentTagging(tag="type", content="content"))
     @dataclass
     class Foo:
@@ -56,7 +56,7 @@ def adjacent_tagging():
     print(f"From Json: {from_json(Foo, s)}")
 
 
-def untagged():
+def untagged() -> None:
     @serde(tagging=Untagged)
     @dataclass
     class Foo:
@@ -70,16 +70,16 @@ def untagged():
     print(f"From Json: {from_json(Foo, s)}")
 
 
-def main():
-    print('# external tagging (default)')
+def main() -> None:
+    print("# external tagging (default)")
     external_tagging()
-    print('# internal tagging')
+    print("# internal tagging")
     internal_tagging()
-    print('# adjacent tagging')
+    print("# adjacent tagging")
     adjacent_tagging()
-    print('# untagged')
+    print("# untagged")
     untagged()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

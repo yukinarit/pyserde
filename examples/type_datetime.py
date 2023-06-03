@@ -13,7 +13,7 @@ class Foo:
     dt: datetime.datetime
 
 
-def main():
+def main() -> None:
     dt = datetime.datetime(2021, 1, 1, 0, 0, 0)
 
     foo = Foo(dt.date(), dt.time(), dt)
@@ -23,5 +23,5 @@ def main():
     print(f"From Json: {from_json(Foo, s)}")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

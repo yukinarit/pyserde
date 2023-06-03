@@ -13,12 +13,12 @@ class Foo:
     b: bool
 
 
-def main():
-    f = Foo(i=10, s='foo', f=100.0, b=True)
+def main() -> None:
+    f = Foo(i=10, s="foo", f=100.0, b=True)
     p = to_msgpack(f)
-    print(f"Into MsgPack: {p}")
+    print("Into MsgPack:", p)
     print(f"From MsgPack: {from_msgpack(Foo, p)}")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

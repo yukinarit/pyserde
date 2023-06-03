@@ -84,7 +84,7 @@ except ImportError:
 
 __all__: List[str] = []
 
-T = TypeVar('T')
+T = TypeVar("T")
 
 
 StrSerializableTypes = (
@@ -178,58 +178,58 @@ def typename(typ: Type[Any], with_typing_module: bool = False) -> str:
     if is_opt(typ):
         args = type_args(typ)
         if args:
-            return f'{mod}Optional[{thisfunc(type_args(typ)[0])}]'
+            return f"{mod}Optional[{thisfunc(type_args(typ)[0])}]"
         else:
-            return f'{mod}Optional'
+            return f"{mod}Optional"
     elif is_union(typ):
         args = union_args(typ)
         if args:
             return f'{mod}Union[{", ".join([thisfunc(e) for e in args])}]'
         else:
-            return f'{mod}Union'
+            return f"{mod}Union"
     elif is_list(typ):
         # Workaround for python 3.7.
         # get_args for the bare List returns parameter T.
         if typ is List:
-            return f'{mod}List'
+            return f"{mod}List"
 
         args = type_args(typ)
         if args:
             et = thisfunc(args[0])
-            return f'{mod}List[{et}]'
+            return f"{mod}List[{et}]"
         else:
-            return f'{mod}List'
+            return f"{mod}List"
     elif is_set(typ):
         # Workaround for python 3.7.
         # get_args for the bare Set returns parameter T.
         if typ is Set:
-            return f'{mod}Set'
+            return f"{mod}Set"
 
         args = type_args(typ)
         if args:
             et = thisfunc(args[0])
-            return f'{mod}Set[{et}]'
+            return f"{mod}Set[{et}]"
         else:
-            return f'{mod}Set'
+            return f"{mod}Set"
     elif is_dict(typ):
         # Workaround for python 3.7.
         # get_args for the bare Dict returns parameter K, V.
         if typ is Dict:
-            return f'{mod}Dict'
+            return f"{mod}Dict"
 
         args = type_args(typ)
         if args and len(args) == 2:
             kt = thisfunc(args[0])
             vt = thisfunc(args[1])
-            return f'{mod}Dict[{kt}, {vt}]'
+            return f"{mod}Dict[{kt}, {vt}]"
         else:
-            return f'{mod}Dict'
+            return f"{mod}Dict"
     elif is_tuple(typ):
         args = type_args(typ)
         if args:
             return f'{mod}Tuple[{", ".join([thisfunc(e) for e in args])}]'
         else:
-            return f'{mod}Tuple'
+            return f"{mod}Tuple"
     elif is_generic(typ):
         origin = get_origin(typ)
         assert origin is not None
@@ -240,16 +240,16 @@ def typename(typ: Type[Any], with_typing_module: bool = False) -> str:
             raise TypeError("Literal type requires at least one literal argument")
         return f'Literal[{", ".join(str(e) for e in args)}]'
     elif typ is Any:
-        return f'{mod}Any'
+        return f"{mod}Any"
     elif is_ellipsis(typ):
-        return '...'
+        return "..."
     else:
         # Get super type for NewType
-        inner = getattr(typ, '__supertype__', None)
+        inner = getattr(typ, "__supertype__", None)
         if inner:
             return typename(typ.__supertype__)
 
-        name: Optional[str] = getattr(typ, '_name', None)
+        name: Optional[str] = getattr(typ, "_name", None)
         if name:
             return name
         else:
@@ -272,13 +272,13 @@ def type_args(typ: Any) -> Tuple[Type[Any], ...]:
 
 def union_args(typ: Union) -> Tuple[Type[Any], ...]:
     if not is_union(typ):
-        raise TypeError(f'{typ} is not Union')
+        raise TypeError(f"{typ} is not Union")
     args = type_args(typ)
     if len(args) == 1:
         return (args[0],)
     it = iter(args)
     types = []
-    for (i1, i2) in itertools.zip_longest(it, it):
+    for i1, i2 in itertools.zip_longest(it, it):
         if not i2:
             types.append(i1)
         elif is_none(i2):
@@ -301,7 +301,7 @@ def dataclass_fields(cls: Type[Any]) -> Iterator[dataclasses.Field]:  # type: ig
             f"{e.__class__.__name__}: {e}\n\n"
             f"If you are using forward references make sure you are calling deserialize & "
             "serialize after all classes are globally visible."
-        )
+        ) from e
 
     for f in raw_fields:
         real_type = resolved_hints.get(f.name)
@@ -726,7 +726,7 @@ def is_new_type_primitive(typ: Type[Any]) -> bool:
     """
     Test if the type is a NewType of primitives.
     """
-    inner = getattr(typ, '__supertype__', None)
+    inner = getattr(typ, "__supertype__", None)
     if inner:
         return is_primitive(inner)
     else:
@@ -830,7 +830,7 @@ def find_generic_arg(cls: Type[Any], field: TypeVar) -> int:
     """
     bases = getattr(cls, "__orig_bases__", ())
     if not bases:
-        raise Exception(f"\"__orig_bases__\" property was not found: {cls}")
+        raise Exception(f'"__orig_bases__" property was not found: {cls}')
 
     for base in bases:
         for n, arg in enumerate(get_args(base)):
