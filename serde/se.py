@@ -254,7 +254,7 @@ def serialize(
         return cls
 
     if _cls is None:
-        return wrap  # type: ignore
+        return wrap
 
     if _cls in GENERATION_STACK:
         return _cls
@@ -278,7 +278,7 @@ def is_serializable(instance_or_class: Any) -> bool:
     >>> is_serializable(Foo)
     True
 
-    Testing `Foo` object laso returns `True`.
+    Testing `Foo` object also returns `True`.
     >>> is_serializable(Foo())
     True
     """
