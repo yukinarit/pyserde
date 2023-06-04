@@ -885,33 +885,33 @@ for a certain field, raise <code><a href="#SerdeSkip">serde.SerdeSkip</a></code>
 <div class="attr function">
             
         <span class="def">def</span>
-        <span class="name">from_dict</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">cls</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="o">~</span><span class="n">T</span><span class="p">]</span>, </span><span class="param"><span class="n">o</span>, </span><span class="param"><span class="n">reuse_instances</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="bp">Ellipsis</span></span><span class="return-annotation">) -> <span class="o">~</span><span class="n">T</span>:</span></span>
+        <span class="name">from_dict</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">cls</span><span class="p">:</span> <span class="n">Any</span>, </span><span class="param"><span class="n">o</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span>, </span><span class="param"><span class="n">reuse_instances</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="bp">Ellipsis</span></span><span class="return-annotation">) -> <span class="n">Any</span>:</span></span>
 
                 <label class="view-source-button" for="from_dict-view-source"><span>View Source</span></label>
 
     </div>
     <a class="headerlink" href="#from_dict"></a>
-            <div class="pdoc-code codehilite"><pre><span></span><span id="from_dict-476"><a href="#from_dict-476"><span class="linenos">476</span></a><span class="k">def</span> <span class="nf">from_dict</span><span class="p">(</span><span class="bp">cls</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">T</span><span class="p">],</span> <span class="n">o</span><span class="p">,</span> <span class="n">reuse_instances</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="o">...</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">T</span><span class="p">:</span>
-</span><span id="from_dict-477"><a href="#from_dict-477"><span class="linenos">477</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-</span><span id="from_dict-478"><a href="#from_dict-478"><span class="linenos">478</span></a><span class="sd">    Deserialize dictionary into object.</span>
-</span><span id="from_dict-479"><a href="#from_dict-479"><span class="linenos">479</span></a>
-</span><span id="from_dict-480"><a href="#from_dict-480"><span class="linenos">480</span></a><span class="sd">    &gt;&gt;&gt; @deserialize</span>
-</span><span id="from_dict-481"><a href="#from_dict-481"><span class="linenos">481</span></a><span class="sd">    ... class Foo:</span>
-</span><span id="from_dict-482"><a href="#from_dict-482"><span class="linenos">482</span></a><span class="sd">    ...     i: int</span>
-</span><span id="from_dict-483"><a href="#from_dict-483"><span class="linenos">483</span></a><span class="sd">    ...     s: str = &#39;foo&#39;</span>
-</span><span id="from_dict-484"><a href="#from_dict-484"><span class="linenos">484</span></a><span class="sd">    ...     f: float = 100.0</span>
-</span><span id="from_dict-485"><a href="#from_dict-485"><span class="linenos">485</span></a><span class="sd">    ...     b: bool = True</span>
-</span><span id="from_dict-486"><a href="#from_dict-486"><span class="linenos">486</span></a><span class="sd">    &gt;&gt;&gt;</span>
-</span><span id="from_dict-487"><a href="#from_dict-487"><span class="linenos">487</span></a><span class="sd">    &gt;&gt;&gt; from_dict(Foo, {&#39;i&#39;: 10, &#39;s&#39;: &#39;foo&#39;, &#39;f&#39;: 100.0, &#39;b&#39;: True})</span>
-</span><span id="from_dict-488"><a href="#from_dict-488"><span class="linenos">488</span></a><span class="sd">    Foo(i=10, s=&#39;foo&#39;, f=100.0, b=True)</span>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="from_dict-486"><a href="#from_dict-486"><span class="linenos">486</span></a><span class="k">def</span> <span class="nf">from_dict</span><span class="p">(</span><span class="bp">cls</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">o</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="n">reuse_instances</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="o">...</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+</span><span id="from_dict-487"><a href="#from_dict-487"><span class="linenos">487</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+</span><span id="from_dict-488"><a href="#from_dict-488"><span class="linenos">488</span></a><span class="sd">    Deserialize dictionary into object.</span>
 </span><span id="from_dict-489"><a href="#from_dict-489"><span class="linenos">489</span></a>
-</span><span id="from_dict-490"><a href="#from_dict-490"><span class="linenos">490</span></a><span class="sd">    You can pass any type supported by pyserde. For example,</span>
-</span><span id="from_dict-491"><a href="#from_dict-491"><span class="linenos">491</span></a>
-</span><span id="from_dict-492"><a href="#from_dict-492"><span class="linenos">492</span></a><span class="sd">    &gt;&gt;&gt; lst = [{&#39;i&#39;: 10, &#39;s&#39;: &#39;foo&#39;, &#39;f&#39;: 100.0, &#39;b&#39;: True}, {&#39;i&#39;: 20, &#39;s&#39;: &#39;foo&#39;, &#39;f&#39;: 100.0, &#39;b&#39;: True}]</span>
-</span><span id="from_dict-493"><a href="#from_dict-493"><span class="linenos">493</span></a><span class="sd">    &gt;&gt;&gt; from_dict(List[Foo], lst)</span>
-</span><span id="from_dict-494"><a href="#from_dict-494"><span class="linenos">494</span></a><span class="sd">    [Foo(i=10, s=&#39;foo&#39;, f=100.0, b=True), Foo(i=20, s=&#39;foo&#39;, f=100.0, b=True)]</span>
-</span><span id="from_dict-495"><a href="#from_dict-495"><span class="linenos">495</span></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="from_dict-496"><a href="#from_dict-496"><span class="linenos">496</span></a>    <span class="k">return</span> <span class="n">from_obj</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">o</span><span class="p">,</span> <span class="n">named</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">reuse_instances</span><span class="o">=</span><span class="n">reuse_instances</span><span class="p">)</span>
+</span><span id="from_dict-490"><a href="#from_dict-490"><span class="linenos">490</span></a><span class="sd">    &gt;&gt;&gt; @deserialize</span>
+</span><span id="from_dict-491"><a href="#from_dict-491"><span class="linenos">491</span></a><span class="sd">    ... class Foo:</span>
+</span><span id="from_dict-492"><a href="#from_dict-492"><span class="linenos">492</span></a><span class="sd">    ...     i: int</span>
+</span><span id="from_dict-493"><a href="#from_dict-493"><span class="linenos">493</span></a><span class="sd">    ...     s: str = &#39;foo&#39;</span>
+</span><span id="from_dict-494"><a href="#from_dict-494"><span class="linenos">494</span></a><span class="sd">    ...     f: float = 100.0</span>
+</span><span id="from_dict-495"><a href="#from_dict-495"><span class="linenos">495</span></a><span class="sd">    ...     b: bool = True</span>
+</span><span id="from_dict-496"><a href="#from_dict-496"><span class="linenos">496</span></a><span class="sd">    &gt;&gt;&gt;</span>
+</span><span id="from_dict-497"><a href="#from_dict-497"><span class="linenos">497</span></a><span class="sd">    &gt;&gt;&gt; from_dict(Foo, {&#39;i&#39;: 10, &#39;s&#39;: &#39;foo&#39;, &#39;f&#39;: 100.0, &#39;b&#39;: True})</span>
+</span><span id="from_dict-498"><a href="#from_dict-498"><span class="linenos">498</span></a><span class="sd">    Foo(i=10, s=&#39;foo&#39;, f=100.0, b=True)</span>
+</span><span id="from_dict-499"><a href="#from_dict-499"><span class="linenos">499</span></a>
+</span><span id="from_dict-500"><a href="#from_dict-500"><span class="linenos">500</span></a><span class="sd">    You can pass any type supported by pyserde. For example,</span>
+</span><span id="from_dict-501"><a href="#from_dict-501"><span class="linenos">501</span></a>
+</span><span id="from_dict-502"><a href="#from_dict-502"><span class="linenos">502</span></a><span class="sd">    &gt;&gt;&gt; lst = [{&#39;i&#39;: 10, &#39;s&#39;: &#39;foo&#39;, &#39;f&#39;: 100.0, &#39;b&#39;: True}, {&#39;i&#39;: 20, &#39;s&#39;: &#39;foo&#39;, &#39;f&#39;: 100.0, &#39;b&#39;: True}]</span>
+</span><span id="from_dict-503"><a href="#from_dict-503"><span class="linenos">503</span></a><span class="sd">    &gt;&gt;&gt; from_dict(List[Foo], lst)</span>
+</span><span id="from_dict-504"><a href="#from_dict-504"><span class="linenos">504</span></a><span class="sd">    [Foo(i=10, s=&#39;foo&#39;, f=100.0, b=True), Foo(i=20, s=&#39;foo&#39;, f=100.0, b=True)]</span>
+</span><span id="from_dict-505"><a href="#from_dict-505"><span class="linenos">505</span></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="from_dict-506"><a href="#from_dict-506"><span class="linenos">506</span></a>    <span class="k">return</span> <span class="n">from_obj</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">o</span><span class="p">,</span> <span class="n">named</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">reuse_instances</span><span class="o">=</span><span class="n">reuse_instances</span><span class="p">)</span>
 </span></pre></div>
 
 
@@ -947,33 +947,33 @@ for a certain field, raise <code><a href="#SerdeSkip">serde.SerdeSkip</a></code>
 <div class="attr function">
             
         <span class="def">def</span>
-        <span class="name">from_tuple</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">cls</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="o">~</span><span class="n">T</span><span class="p">]</span>, </span><span class="param"><span class="n">o</span><span class="p">:</span> <span class="n">Any</span>, </span><span class="param"><span class="n">reuse_instances</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="bp">Ellipsis</span></span><span class="return-annotation">) -> <span class="o">~</span><span class="n">T</span>:</span></span>
+        <span class="name">from_tuple</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">cls</span><span class="p">:</span> <span class="n">Any</span>, </span><span class="param"><span class="n">o</span><span class="p">:</span> <span class="n">Any</span>, </span><span class="param"><span class="n">reuse_instances</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="bp">Ellipsis</span></span><span class="return-annotation">) -> <span class="n">Any</span>:</span></span>
 
                 <label class="view-source-button" for="from_tuple-view-source"><span>View Source</span></label>
 
     </div>
     <a class="headerlink" href="#from_tuple"></a>
-            <div class="pdoc-code codehilite"><pre><span></span><span id="from_tuple-499"><a href="#from_tuple-499"><span class="linenos">499</span></a><span class="k">def</span> <span class="nf">from_tuple</span><span class="p">(</span><span class="bp">cls</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">T</span><span class="p">],</span> <span class="n">o</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">reuse_instances</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="o">...</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">T</span><span class="p">:</span>
-</span><span id="from_tuple-500"><a href="#from_tuple-500"><span class="linenos">500</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-</span><span id="from_tuple-501"><a href="#from_tuple-501"><span class="linenos">501</span></a><span class="sd">    Deserialize tuple into object.</span>
-</span><span id="from_tuple-502"><a href="#from_tuple-502"><span class="linenos">502</span></a>
-</span><span id="from_tuple-503"><a href="#from_tuple-503"><span class="linenos">503</span></a><span class="sd">    &gt;&gt;&gt; @deserialize</span>
-</span><span id="from_tuple-504"><a href="#from_tuple-504"><span class="linenos">504</span></a><span class="sd">    ... class Foo:</span>
-</span><span id="from_tuple-505"><a href="#from_tuple-505"><span class="linenos">505</span></a><span class="sd">    ...     i: int</span>
-</span><span id="from_tuple-506"><a href="#from_tuple-506"><span class="linenos">506</span></a><span class="sd">    ...     s: str = &#39;foo&#39;</span>
-</span><span id="from_tuple-507"><a href="#from_tuple-507"><span class="linenos">507</span></a><span class="sd">    ...     f: float = 100.0</span>
-</span><span id="from_tuple-508"><a href="#from_tuple-508"><span class="linenos">508</span></a><span class="sd">    ...     b: bool = True</span>
-</span><span id="from_tuple-509"><a href="#from_tuple-509"><span class="linenos">509</span></a><span class="sd">    &gt;&gt;&gt;</span>
-</span><span id="from_tuple-510"><a href="#from_tuple-510"><span class="linenos">510</span></a><span class="sd">    &gt;&gt;&gt; from_tuple(Foo, (10, &#39;foo&#39;, 100.0, True))</span>
-</span><span id="from_tuple-511"><a href="#from_tuple-511"><span class="linenos">511</span></a><span class="sd">    Foo(i=10, s=&#39;foo&#39;, f=100.0, b=True)</span>
-</span><span id="from_tuple-512"><a href="#from_tuple-512"><span class="linenos">512</span></a>
-</span><span id="from_tuple-513"><a href="#from_tuple-513"><span class="linenos">513</span></a><span class="sd">    You can pass any type supported by pyserde. For example,</span>
-</span><span id="from_tuple-514"><a href="#from_tuple-514"><span class="linenos">514</span></a>
-</span><span id="from_tuple-515"><a href="#from_tuple-515"><span class="linenos">515</span></a><span class="sd">    &gt;&gt;&gt; lst = [(10, &#39;foo&#39;, 100.0, True), (20, &#39;foo&#39;, 100.0, True)]</span>
-</span><span id="from_tuple-516"><a href="#from_tuple-516"><span class="linenos">516</span></a><span class="sd">    &gt;&gt;&gt; from_tuple(List[Foo], lst)</span>
-</span><span id="from_tuple-517"><a href="#from_tuple-517"><span class="linenos">517</span></a><span class="sd">    [Foo(i=10, s=&#39;foo&#39;, f=100.0, b=True), Foo(i=20, s=&#39;foo&#39;, f=100.0, b=True)]</span>
-</span><span id="from_tuple-518"><a href="#from_tuple-518"><span class="linenos">518</span></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="from_tuple-519"><a href="#from_tuple-519"><span class="linenos">519</span></a>    <span class="k">return</span> <span class="n">from_obj</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">o</span><span class="p">,</span> <span class="n">named</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">reuse_instances</span><span class="o">=</span><span class="n">reuse_instances</span><span class="p">)</span>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="from_tuple-519"><a href="#from_tuple-519"><span class="linenos">519</span></a><span class="k">def</span> <span class="nf">from_tuple</span><span class="p">(</span><span class="bp">cls</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">o</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">reuse_instances</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="o">...</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+</span><span id="from_tuple-520"><a href="#from_tuple-520"><span class="linenos">520</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+</span><span id="from_tuple-521"><a href="#from_tuple-521"><span class="linenos">521</span></a><span class="sd">    Deserialize tuple into object.</span>
+</span><span id="from_tuple-522"><a href="#from_tuple-522"><span class="linenos">522</span></a>
+</span><span id="from_tuple-523"><a href="#from_tuple-523"><span class="linenos">523</span></a><span class="sd">    &gt;&gt;&gt; @deserialize</span>
+</span><span id="from_tuple-524"><a href="#from_tuple-524"><span class="linenos">524</span></a><span class="sd">    ... class Foo:</span>
+</span><span id="from_tuple-525"><a href="#from_tuple-525"><span class="linenos">525</span></a><span class="sd">    ...     i: int</span>
+</span><span id="from_tuple-526"><a href="#from_tuple-526"><span class="linenos">526</span></a><span class="sd">    ...     s: str = &#39;foo&#39;</span>
+</span><span id="from_tuple-527"><a href="#from_tuple-527"><span class="linenos">527</span></a><span class="sd">    ...     f: float = 100.0</span>
+</span><span id="from_tuple-528"><a href="#from_tuple-528"><span class="linenos">528</span></a><span class="sd">    ...     b: bool = True</span>
+</span><span id="from_tuple-529"><a href="#from_tuple-529"><span class="linenos">529</span></a><span class="sd">    &gt;&gt;&gt;</span>
+</span><span id="from_tuple-530"><a href="#from_tuple-530"><span class="linenos">530</span></a><span class="sd">    &gt;&gt;&gt; from_tuple(Foo, (10, &#39;foo&#39;, 100.0, True))</span>
+</span><span id="from_tuple-531"><a href="#from_tuple-531"><span class="linenos">531</span></a><span class="sd">    Foo(i=10, s=&#39;foo&#39;, f=100.0, b=True)</span>
+</span><span id="from_tuple-532"><a href="#from_tuple-532"><span class="linenos">532</span></a>
+</span><span id="from_tuple-533"><a href="#from_tuple-533"><span class="linenos">533</span></a><span class="sd">    You can pass any type supported by pyserde. For example,</span>
+</span><span id="from_tuple-534"><a href="#from_tuple-534"><span class="linenos">534</span></a>
+</span><span id="from_tuple-535"><a href="#from_tuple-535"><span class="linenos">535</span></a><span class="sd">    &gt;&gt;&gt; lst = [(10, &#39;foo&#39;, 100.0, True), (20, &#39;foo&#39;, 100.0, True)]</span>
+</span><span id="from_tuple-536"><a href="#from_tuple-536"><span class="linenos">536</span></a><span class="sd">    &gt;&gt;&gt; from_tuple(List[Foo], lst)</span>
+</span><span id="from_tuple-537"><a href="#from_tuple-537"><span class="linenos">537</span></a><span class="sd">    [Foo(i=10, s=&#39;foo&#39;, f=100.0, b=True), Foo(i=20, s=&#39;foo&#39;, f=100.0, b=True)]</span>
+</span><span id="from_tuple-538"><a href="#from_tuple-538"><span class="linenos">538</span></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="from_tuple-539"><a href="#from_tuple-539"><span class="linenos">539</span></a>    <span class="k">return</span> <span class="n">from_obj</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">o</span><span class="p">,</span> <span class="n">named</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">reuse_instances</span><span class="o">=</span><span class="n">reuse_instances</span><span class="p">)</span>
 </span></pre></div>
 
 
