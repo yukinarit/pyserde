@@ -554,6 +554,41 @@ class External:
 class Wrapper(External):
     pass
 </code></pre>
+<h2 id="how-can-i-use-forward-references"><a class="header" href="#how-can-i-use-forward-references">How can I use forward references?</a></h2>
+<p>pyserde supports forward references. If you replace a nested class name with with string, pyserde looks up and evaluate the decorator after nested class is defined.</p>
+<pre><code class="language-python">@dataclass
+class Foo:
+    i: int
+    s: str
+    bar: 'Bar'  # Specify type annotation in string.
+
+@serde
+@dataclass
+class Bar:
+    f: float
+    b: bool
+
+# Evaluate pyserde decorators after `Bar` is defined.
+serde(Foo)
+</code></pre>
+<h2 id="pep563-postponed-evaluation-of-annotations"><a class="header" href="#pep563-postponed-evaluation-of-annotations">PEP563 Postponed Evaluation of Annotations</a></h2>
+<p>pyserde supports <a href="https://peps.python.org/pep-0563/">PEP563 Postponed evaluation of annotation</a>.</p>
+<pre><code class="language-python">from __future__ import annotations
+from serde import serde
+from dataclasses import dataclass
+
+@serde
+@dataclass
+class Foo:
+    i: int
+    s: str
+    f: float
+    b: bool
+
+    def foo(self, cls: Foo):  # You can use &quot;Foo&quot; type before it's defined.
+        print('foo')
+</code></pre>
+<p>See <a href="https://github.com/yukinarit/pyserde/blob/main/examples/lazy_type_evaluation.py">examples/lazy_type_evaluation.py</a> for complete example.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="class-attributes"><a class="header" href="#class-attributes">Class Attributes</a></h1>
 <p>Class attributes can be specified as arguments in the <code>serialize</code>/<code>deserialize</code> decorators in order to customize the (de)serialization behaviour of the class entirely. If you want to customize a field, please consider using <a href="field-attributes.html">Field Attributes</a>.</p>
 <h2 id="rename_all"><a class="header" href="#rename_all"><strong><code>rename_all</code></strong></a></h2>
