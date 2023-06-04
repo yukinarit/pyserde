@@ -85,3 +85,47 @@ class External:
 class Wrapper(External):
     pass
 ```
+
+## How can I use forward references?
+
+pyserde supports forward references. If you replace a nested class name with with string, pyserde looks up and evaluate the decorator after nested class is defined.
+
+```python
+@dataclass
+class Foo:
+    i: int
+    s: str
+    bar: 'Bar'  # Specify type annotation in string.
+
+@serde
+@dataclass
+class Bar:
+    f: float
+    b: bool
+
+# Evaluate pyserde decorators after `Bar` is defined.
+serde(Foo)
+```
+
+## PEP563 Postponed Evaluation of Annotations
+
+pyserde supports [PEP563 Postponed evaluation of annotation](https://peps.python.org/pep-0563/).
+
+```python
+from __future__ import annotations
+from serde import serde
+from dataclasses import dataclass
+
+@serde
+@dataclass
+class Foo:
+    i: int
+    s: str
+    f: float
+    b: bool
+
+    def foo(self, cls: Foo):  # You can use "Foo" type before it's defined.
+        print('foo')
+```
+
+See [examples/lazy_type_evaluation.py](https://github.com/yukinarit/pyserde/blob/main/examples/lazy_type_evaluation.py) for complete example.

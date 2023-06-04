@@ -1,42 +1,15 @@
 """
-`pyserde` is a yet another serialization library on top of
-[dataclasses](https://docs.python.org/3/library/dataclasses.html),
-inspired by [serde-rs](https://github.com/serde-rs/serde).
-
-## Overview
-
-Declare a class with `@dataclasses.dataclass` and pyserde's `@serde` decorators.
-
->>> from serde import serde
->>>
->>> @serde
-... @dataclass
-... class Foo:
-...     i: int
-...     s: str
-...     f: float
-...     b: bool
-
-You can serialize `Foo` object into JSON.
-
->>> from serde.json import to_json
->>> to_json(Foo(i=10, s='foo', f=100.0, b=True))
-'{"i":10,"s":"foo","f":100.0,"b":true}'
-
-You can deserialize JSON into `Foo` object.
->>> from serde.json import from_json
->>> from_json(Foo, '{"i": 10, "s": "foo", "f": 100.0, "b": true}')
-Foo(i=10, s='foo', f=100.0, b=True)
+.. include:: ../README.md
 
 ## Modules
 
 The following modules provide the core functionalities of `pyserde`.
 * `serde.se`: All about serialization.
 * `serde.de`: All about deserialization.
-* `serde.core`: Core module used by `serde.se` and `serde.de`.
-* `serde.compat`: Compatibility layer which handles mostly typing.
+* `serde.core`: Core module used by `serde.se` and `serde.de` modules.
+* `serde.compat`: Compatibility layer which handles mostly differences of `typing` module between python versions.
 
-The following modules provide (de)serialize APIs.
+The following modules provide pyserde's (de)serialize APIs.
 * `serde.json`: Serialize and Deserialize in JSON.
 * `serde.msgpack`: Serialize and Deserialize in MsgPack.
 * `serde.yaml`: Serialize and Deserialize in YAML.
@@ -73,6 +46,15 @@ from .de import DeserializeFunc, default_deserializer, deserialize, from_dict, f
 from .se import SerializeFunc, asdict, astuple, default_serializer, is_serializable, serialize, to_dict, to_tuple
 
 __all__ = [
+    "serde",
+    "serialize",
+    "deserialize",
+    "is_serializable",
+    "is_deserializable",
+    "to_dict",
+    "from_dict",
+    "to_tuple",
+    "from_tuple",
     "SerdeError",
     "SerdeSkip",
     "AdjacentTagging",
@@ -84,18 +66,9 @@ __all__ = [
     "Coerce",
     "field",
     "default_deserializer",
-    "deserialize",
-    "from_dict",
-    "from_tuple",
-    "is_deserializable",
     "asdict",
     "astuple",
     "default_serializer",
-    "is_serializable",
-    "serialize",
-    "to_dict",
-    "to_tuple",
-    "serde",
     "compat",
     "core",
     "de",
