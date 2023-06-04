@@ -186,46 +186,6 @@ def deserialize(
     >>>
     >>> from_json(Foo, '{"i": 10, "s": "foo", "f": 100.0, "b": true}')
     Foo(i=10, s='foo', f=100.0, b=True)
-
-    #### Class Attributes
-
-    Class attributes can be specified as arguments in the `deserialize` decorator in order to customize the
-    deserialization behaviour of the class entirely.
-
-    * `rename_all` attribute converts field names into the specified string case.
-    The following example converts camel-case field names into snake-case names.
-
-    >>> @deserialize(rename_all = 'camelcase')
-    ... class Foo:
-    ...     int_field: int
-    ...     str_field: str
-    >>>
-    >>> from_json(Foo, '{"intField": 10, "strField": "foo"}')
-    Foo(int_field=10, str_field='foo')
-
-    * `deserializer` takes a custom class-level deserialize function. The function applies to the all the fields
-    in the class.
-
-    >>> from datetime import datetime
-    >>> def deserializer(cls, o):
-    ...     if cls is datetime:
-    ...         return datetime.strptime(o, '%d/%m/%y')
-    ...     else:
-    ...         raise SerdeSkip()
-
-    The first argument `cls` is a class of the field and the second argument `o` is value to deserialize from.
-    `deserializer` function will be called for every field. If you don't want to use the custom deserializer
-    for a certain field, raise `serde.SerdeSkip` exception, pyserde will use the default deserializer for that field.
-
-    >>> @deserialize(deserializer=deserializer)
-    ... class Foo:
-    ...     i: int
-    ...     dt: datetime
-
-    This custom deserializer deserializes `datetime` the string in `MM/DD/YY` format into datetime object.
-
-    >>> from_json(Foo, '{"i": 10, "dt": "01/01/21"}')
-    Foo(i=10, dt=datetime.datetime(2021, 1, 1, 0, 0))
     """
 
     stack = []

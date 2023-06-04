@@ -36,7 +36,7 @@ The following modules provide the core functionalities of `pyserde`.
 * `serde.core`: Core module used by `serde.se` and `serde.de`.
 * `serde.compat`: Compatibility layer which handles mostly typing.
 
-The following modules (de)serialize functions.
+The following modules provide (de)serialize APIs.
 * `serde.json`: Serialize and Deserialize in JSON.
 * `serde.msgpack`: Serialize and Deserialize in MsgPack.
 * `serde.yaml`: Serialize and Deserialize in YAML.

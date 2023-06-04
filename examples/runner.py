@@ -14,6 +14,7 @@ import forward_reference
 import frozen_set
 import generics
 import generics_nested
+import nested
 import init_var
 import jsonfile
 import lazy_type_evaluation
@@ -23,6 +24,7 @@ import newtype
 import pep681
 import plain_dataclass
 import plain_dataclass_class_attribute
+import python_pickle
 import recursive
 import recursive_list
 import recursive_union
@@ -72,6 +74,7 @@ def run_all() -> None:
     run(union_tagging)
     run(generics)
     run(generics_nested)
+    run(nested)
     run(lazy_type_evaluation)
     run(literal)
     run(type_check_strict)
@@ -80,6 +83,7 @@ def run_all() -> None:
     run(pep681)
     run(variable_length_tuple)
     run(init_var)
+    run(python_pickle)
     run(class_var)
     run(alias)
     run(recursive)

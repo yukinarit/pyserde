@@ -177,55 +177,6 @@ def serialize(
     >>>
     >>> to_json(Foo(i=10, s='foo', f=100.0, b=True))
     '{"i":10,"s":"foo","f":100.0,"b":true}'
-
-    #### Class Attributes
-
-    Class attributes can be specified as arguments in the `serialize` decorator in order to customize the serialization
-    behaviour of the class entirely.
-
-    * `rename_all` attribute converts field names into the specified string case.
-    The following example converts snake-case field names into camel-case names.
-
-    >>> @serialize(rename_all = 'camelcase')
-    ... class Foo:
-    ...     int_field: int
-    ...     str_field: str
-    >>>
-    >>> to_json(Foo(int_field=10, str_field='foo'))
-    '{"intField":10,"strField":"foo"}'
-
-    * `serializer` takes a custom class-level serialize function. The function applies to the all the fields
-    in the class.
-
-    >>> def serializer(cls, o):
-    ...    if cls is datetime:
-    ...        return o.strftime('%d/%m/%y')
-    ...    else:
-    ...        raise SerdeSkip()
-
-    The first argument `cls` is a class of the field and the second argument `o` is a value of the field.
-    `serializer` function will be called for every field. If you don't want to use the custom serializer
-    for a certain field, raise `serde.SerdeSkip` exception, pyserde will use the default serializer for that field.
-
-    >>> @serialize(serializer=serializer)
-    ... class Foo:
-    ...     i: int
-    ...     dt: datetime
-
-    This custom serializer serializes `datetime` object into the string in `MM/DD/YY` format.
-
-    >>> to_json(Foo(10, datetime(2021, 1, 1, 0, 0, 0)))
-    '{"i":10,"dt":"01/01/21"}'
-
-    * `serialize_class_var` enables `typing.ClassVar` serialization.
-
-    >>> @serialize(serialize_class_var=True)
-    ... class Foo:
-    ...     v: typing.ClassVar[int] = 10
-    >>>
-    >>> to_json(Foo())
-    '{"v":10}'
-
     """
 
     def wrap(cls: Type[Any]):
