@@ -2,7 +2,7 @@
 Serialize and Deserialize in MsgPack format. This module depends on
 [msgpack](https://pypi.org/project/msgpack/) package.
 """
-from typing import Any, Dict, Type, Optional
+from typing import Any, Dict, Type, Optional, overload
 
 import msgpack
 
@@ -68,6 +68,7 @@ def to_msgpack(
     )
 
 
+@overload
 def from_msgpack(
     c: Type[T],
     s: bytes,
@@ -76,6 +77,29 @@ def from_msgpack(
     ext_dict: Optional[Dict[int, Type[Any]]] = None,
     **opts: Any,
 ) -> T:
+    ...
+
+
+@overload
+def from_msgpack(
+    c: Any,
+    s: bytes,
+    de: Type[Deserializer[bytes]] = MsgPackDeserializer,
+    named: bool = True,
+    ext_dict: Optional[Dict[int, Type[Any]]] = None,
+    **opts: Any,
+) -> Any:
+    ...
+
+
+def from_msgpack(
+    c: Any,
+    s: bytes,
+    de: Type[Deserializer[bytes]] = MsgPackDeserializer,
+    named: bool = True,
+    ext_dict: Optional[Dict[int, Type[Any]]] = None,
+    **opts: Any,
+) -> Any:
     """
     Deserialize from MsgPack into the object.
 
@@ -90,7 +114,7 @@ def from_msgpack(
         ext_type = ext_dict.get(ext.code)
         if ext_type is None:
             raise SerdeError(f"Could not find type for code {ext.code} in ext_dict")
-        return from_msgpack(ext_type, ext.data, de, named, **opts)  # type: ignore
+        return from_msgpack(ext_type, ext.data, de, named, **opts)
     else:
         from_func = from_dict if named else from_tuple
         return from_func(c, de.deserialize(s, **opts), reuse_instances=False)
