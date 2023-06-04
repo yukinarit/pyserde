@@ -47,7 +47,7 @@ jobs:
       - name: Deploy on gh-pages
         uses: JamesIves/github-pages-deploy-action@v4
         with:
-          folder: out/guide/en
+          folder: out
           commit-message: ${{ env.COMMIT_MESSAGE }}
           clean: true
           git-config-name: github-actions
