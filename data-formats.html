@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Supported data formats - pyserde documentation</title>
+        <title>Data Formats - pyserde documentation</title>
 
 
         <!-- Custom HTML head -->
@@ -83,7 +83,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded "><a href="introduction.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="getting-started.html"><strong aria-hidden="true">2.</strong> Getting started</a></li><li class="chapter-item expanded "><a href="supported-data-formats.html" class="active"><strong aria-hidden="true">3.</strong> Supported data formats</a></li><li class="chapter-item expanded "><a href="supported-types.html"><strong aria-hidden="true">4.</strong> Supported types</a></li><li class="chapter-item expanded "><a href="features/summary.html"><strong aria-hidden="true">5.</strong> Features</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="features/attributes.html"><strong aria-hidden="true">5.1.</strong> Attributes</a></li><li class="chapter-item expanded "><a href="features/decorators.html"><strong aria-hidden="true">5.2.</strong> Decorators</a></li><li class="chapter-item expanded "><a href="features/type-check.html"><strong aria-hidden="true">5.3.</strong> TypeCheck</a></li><li class="chapter-item expanded "><a href="features/union.html"><strong aria-hidden="true">5.4.</strong> Union Representation</a></li><li class="chapter-item expanded "><a href="features/union-operator.html"><strong aria-hidden="true">5.5.</strong> Python 3.10 Union operator</a></li><li class="chapter-item expanded "><a href="features/python3.9-type-hinting.html"><strong aria-hidden="true">5.6.</strong> Python 3.9 type hinting</a></li><li class="chapter-item expanded "><a href="features/postponed-evaluation-of-type-annotation.html"><strong aria-hidden="true">5.7.</strong> Postponed evaluation of type annotation</a></li><li class="chapter-item expanded "><a href="features/forward-reference.html"><strong aria-hidden="true">5.8.</strong> Forward reference</a></li><li class="chapter-item expanded "><a href="features/case-conversion.html"><strong aria-hidden="true">5.9.</strong> Case Conversion</a></li><li class="chapter-item expanded "><a href="features/rename.html"><strong aria-hidden="true">5.10.</strong> Rename</a></li><li class="chapter-item expanded "><a href="features/alias.html"><strong aria-hidden="true">5.11.</strong> Alias</a></li><li class="chapter-item expanded "><a href="features/skip.html"><strong aria-hidden="true">5.12.</strong> Skip</a></li><li class="chapter-item expanded "><a href="features/conditional-skip.html"><strong aria-hidden="true">5.13.</strong> Conditional Skip</a></li><li class="chapter-item expanded "><a href="features/custom-field-serializer.html"><strong aria-hidden="true">5.14.</strong> Custom field (de)serializer</a></li><li class="chapter-item expanded "><a href="features/custom-class-serializer.html"><strong aria-hidden="true">5.15.</strong> Custom class (de)serializer</a></li><li class="chapter-item expanded "><a href="features/flatten.html"><strong aria-hidden="true">5.16.</strong> Flatten</a></li></ol></li><li class="chapter-item expanded "><a href="benchmark.html"><strong aria-hidden="true">6.</strong> Benchmark</a></li><li class="chapter-item expanded "><a href="faq.html"><strong aria-hidden="true">7.</strong> FAQ</a></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded "><a href="introduction.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="getting-started.html"><strong aria-hidden="true">2.</strong> Getting Started</a></li><li class="chapter-item expanded "><a href="data-formats.html" class="active"><strong aria-hidden="true">3.</strong> Data Formats</a></li><li class="chapter-item expanded "><a href="types.html"><strong aria-hidden="true">4.</strong> Types</a></li><li class="chapter-item expanded "><a href="decorators.html"><strong aria-hidden="true">5.</strong> Decorators</a></li><li class="chapter-item expanded "><a href="class-attributes.html"><strong aria-hidden="true">6.</strong> Class Attributes</a></li><li class="chapter-item expanded "><a href="field-attributes.html"><strong aria-hidden="true">7.</strong> Field Attributes</a></li><li class="chapter-item expanded "><a href="union.html"><strong aria-hidden="true">8.</strong> Union</a></li><li class="chapter-item expanded "><a href="type-check.html"><strong aria-hidden="true">9.</strong> Type Check</a></li><li class="chapter-item expanded "><a href="benchmark.html"><strong aria-hidden="true">10.</strong> Benchmark</a></li><li class="chapter-item expanded "><a href="faq.html"><strong aria-hidden="true">11.</strong> FAQ</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -121,7 +121,7 @@
                         <a href="https://github.com/yukinarit/pyserde" title="Git repository" aria-label="Git repository">
                             <i id="git-repository-button" class="fa fa-github"></i>
                         </a>
-                        <a href="https://github.com/yukinarit/pyserde/edit/main/docs/supported-data-formats.md" title="Suggest an edit" aria-label="Suggest an edit">
+                        <a href="https://github.com/yukinarit/pyserde/edit/main/.//data-formats.md" title="Suggest an edit" aria-label="Suggest an edit">
                             <i id="git-edit-button" class="fa fa-edit"></i>
                         </a>
 
@@ -150,17 +150,12 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="supported-data-formats"><a class="header" href="#supported-data-formats">Supported data formats</a></h1>
-<p>Currently <code>dict</code>, <code>tuple</code>, <code>JSON</code>, <code>Yaml</code>, <code>Toml</code>, <code>MsgPack</code> and <code>Pickle</code> are supported.</p>
-<pre><code class="language-python">
-@serde
-@dataclass
-class Foo:
-    i: int
-    s: str
-    f: float
-    b: bool
+                        <h1 id="data-formats"><a class="header" href="#data-formats">Data Formats</a></h1>
+<p>Currently <code>dict</code>, <code>tuple</code>, <code>JSON</code>, <code>Yaml</code>, <code>Toml</code>, <code>MsgPack</code> and <code>Pickle</code> are supported. Each Serialize/Deserialize API can take additional keyword arguments. Keyword arguements are forwared to the packages which is used by pyserde to encode data internally.</p>
+<p>e.g. If you want to preserve the field order in YAML, you can pass <code>sort_key=True</code> in <code>serde.yaml.to_yaml</code></p>
+<pre><code class="language-python">serde.yaml.to_yaml(foo, sort_key=True)
 </code></pre>
+<p><code>sort_key=True</code> will be passed in the <a href="https://github.com/yukinarit/pyserde/blob/a9f44d52d109144a4c3bb93965f831e91d13960b/serde/yaml.py#L18">yaml.safedump</a></p>
 <h2 id="dict"><a class="header" href="#dict">dict</a></h2>
 <pre><code class="language-python">&gt;&gt;&gt; from serde import to_dict, from_dict
 
@@ -170,6 +165,7 @@ from_dict(Foo, {&quot;i&quot;: 10, &quot;s&quot;: &quot;foo&quot;, &quot;f&quot;
 &gt;&gt;&gt; from_dict(Foo, {&quot;i&quot;: 10, &quot;s&quot;: &quot;foo&quot;, &quot;f&quot;: 100.0, &quot;b&quot;: True})
 Foo(i=10, s='foo', f=100.0, b=True)
 </code></pre>
+<p>See <a href="https://yukinarit.github.io/pyserde/api/serde/se.html#to_dict">serde.to_dict</a> / <a href="https://yukinarit.github.io/pyserde/api/serde/de.html#from_dict">serde.from_dict</a> for more information.</p>
 <h2 id="tuple"><a class="header" href="#tuple">tuple</a></h2>
 <pre><code class="language-python">&gt;&gt;&gt; from serde import to_tuple, from_tuple
 
@@ -179,8 +175,8 @@ Foo(i=10, s='foo', f=100.0, b=True)
 &gt;&gt;&gt; from_tuple(Foo, (10, 'foo', 100.0, True))
 Foo(i=10, s='foo', f=100.0, b=True)
 </code></pre>
+<p>See <a href="https://yukinarit.github.io/pyserde/api/serde/se.html#to_tuple">serde.to_tuple</a> / <a href="https://yukinarit.github.io/pyserde/api/serde/de.html#from_tuple">serde.from_tuple</a> for more information.</p>
 <h2 id="json"><a class="header" href="#json">JSON</a></h2>
-<p>Call <code>to_json</code> to serialize <code>Foo</code> object into JSON string and <code>from_json</code> to deserialize JSON string into <code>Foo</code> object. For more information, please visit <a href="https://yukinarit.github.io/pyserde/api/serde/json.html">serde.json</a> module.</p>
 <pre><code class="language-python">&gt;&gt;&gt; from serde.json import to_json, from_json
 
 &gt;&gt;&gt; to_json(Foo(i=10, s='foo', f=100.0, b=True))
@@ -189,8 +185,8 @@ Foo(i=10, s='foo', f=100.0, b=True)
 &gt;&gt;&gt; from_json(Foo, '{&quot;i&quot;: 10, &quot;s&quot;: &quot;foo&quot;, &quot;f&quot;: 100.0, &quot;b&quot;: true}')
 Foo(i=10, s='foo', f=100.0, b=True)
 </code></pre>
+<p>See <a href="https://yukinarit.github.io/pyserde/api/serde/json.html#to_json">serde.json.to_json</a> / <a href="https://yukinarit.github.io/pyserde/api/serde/json.html#from_json">serde.json.from_json</a> for more information.</p>
 <h2 id="yaml"><a class="header" href="#yaml">Yaml</a></h2>
-<p>Call <code>to_yaml</code> to serialize <code>Foo</code> object into Yaml string and <code>from_yaml</code> to deserialize Yaml string into <code>Foo</code> object. For more information, please visit <a href="https://yukinarit.github.io/pyserde/api/serde/yaml.html">serde.yaml</a> module.</p>
 <pre><code class="language-python">&gt;&gt;&gt; from serde.yaml import from_yaml, to_yaml
 
 &gt;&gt;&gt; to_yaml(Foo(i=10, s='foo', f=100.0, b=True))
@@ -202,8 +198,8 @@ s: foo
 &gt;&gt;&gt; from_yaml(Foo, 'b: true\nf: 100.0\ni: 10\ns: foo')
 Foo(i=10, s='foo', f=100.0, b=True)
 </code></pre>
+<p>See <a href="https://yukinarit.github.io/pyserde/api/serde/yaml.html#to_yaml">serde.yaml.to_yaml</a> / <a href="https://yukinarit.github.io/pyserde/api/serde/yaml.html#from_yaml">serde.yaml.from_yaml</a> for more information.</p>
 <h2 id="toml"><a class="header" href="#toml">Toml</a></h2>
-<p>Call <code>to_toml</code> to serialize <code>Foo</code> object into Toml string and <code>from_toml</code> to deserialize Toml string into <code>Foo</code> object. For more information, please visit <a href="https://yukinarit.github.io/pyserde/api/serde/toml.html">serde.toml</a> module.</p>
 <pre><code class="language-python">&gt;&gt;&gt; from serde.toml import from_toml, to_toml
 
 &gt;&gt;&gt; to_toml(Foo(i=10, s='foo', f=100.0, b=True))
@@ -215,8 +211,8 @@ b = true
 &gt;&gt;&gt; from_toml(Foo, 'i = 10\ns = &quot;foo&quot;\nf = 100.0\nb = true')
 Foo(i=10, s='foo', f=100.0, b=True)
 </code></pre>
+<p>See <a href="https://yukinarit.github.io/pyserde/api/serde/toml.html#to_toml">serde.toml.to_toml</a> / <a href="https://yukinarit.github.io/pyserde/api/serde/toml.html#from_toml">serde.toml.from_toml</a> for more information.</p>
 <h2 id="msgpack"><a class="header" href="#msgpack">MsgPack</a></h2>
-<p>Call <code>to_msgpack</code> to serialize <code>Foo</code> object into MsgPack and <code>from_msgpack</code> to deserialize MsgPack into <code>Foo</code> object. For more information, please visit <a href="https://yukinarit.github.io/pyserde/api/serde/msgpack.html">serde.msgpack</a> module.</p>
 <pre><code class="language-python">
 &gt;&gt;&gt; from serde.msgpack import from_msgpack, to_msgpack
 
@@ -226,74 +222,20 @@ b'\x84\xa1i\n\xa1s\xa3foo\xa1f\xcb@Y\x00\x00\x00\x00\x00\x00\xa1b\xc3'
 &gt;&gt;&gt; from_msgpack(Foo, b'\x84\xa1i\n\xa1s\xa3foo\xa1f\xcb@Y\x00\x00\x00\x00\x00\x00\xa1b\xc3')
 Foo(i=10, s='foo', f=100.0, b=True)
 </code></pre>
+<p>See <a href="https://yukinarit.github.io/pyserde/api/serde/msgpack.html#to_msgpack">serde.msgpack.to_msgpack</a> / <a href="https://yukinarit.github.io/pyserde/api/serde/msgpack.html#from_msgpack">serde.msgpack.from_msgpack</a> for more information.</p>
 <h2 id="pickle"><a class="header" href="#pickle">Pickle</a></h2>
-<p>Call <code>to_pickle</code> to serialize <code>Foo</code> object into Pickle and <code>from_pickle</code> to deserialize Pickle into <code>Foo</code> object. For more information, please visit <a href="https://yukinarit.github.io/pyserde/api/serde/pickle.html">serde.pickle</a> module.</p>
-<h2 id="numpy"><a class="header" href="#numpy">Numpy</a></h2>
-<p>All of the above (de)serialization methods can transparently handle most numpy
-types with the &quot;numpy&quot; extras package.</p>
-<pre><code class="language-python">import numpy as np
-import numpy.typing as npt
+<p>New in v0.9.6</p>
+<pre><code class="language-python">&gt;&gt;&gt; from serde.pickle import from_pickle, to_pickle
 
-@serde
-class NPFoo:
-    i: np.int32
-    j: np.int64
-    f: np.float32
-    g: np.float64
-    h: np.bool_
-    u: np.ndarray
-    v: npt.NDArray
-    w: npt.NDArray[np.int32]
-    x: npt.NDArray[np.int64]
-    y: npt.NDArray[np.float32]
-    z: npt.NDArray[np.float64]
+&gt;&gt;&gt; to_pickle(Foo(i=10, s='foo', f=100.0, b=True))
+b&quot;\x80\x04\x95'\x00\x00\x00\x00\x00\x00\x00}\x94(\x8c\x01i\x94K\n\x8c\x01s\x94\x8c\x03foo\x94\x8c\x01f\x94G@Y\x00\x00\x00\x00\x00\x00\x8c\x01b\x94\x88u.&quot;
 
-npfoo = NPFoo(
-    np.int32(1),
-    np.int64(2),
-    np.float32(3.0),
-    np.float64(4.0),
-    np.bool_(False),
-    np.array([1, 2]),
-    np.array([3, 4]),
-    np.array([np.int32(i) for i in [1, 2]]),
-    np.array([np.int64(i) for i in [3, 4]]),
-    np.array([np.float32(i) for i in [5.0, 6.0]]),
-    np.array([np.float64(i) for i in [7.0, 8.0]]),
-)
+&gt;&gt;&gt; from_pickle(Foo, b&quot;\x80\x04\x95'\x00\x00\x00\x00\x00\x00\x00}\x94(\x8c\x01i\x94K\n\x8c\x01s\x94\x8c\x03foo\x94\x8c\x01f\x94G@Y\x00\x00\x00\x00\x00\x00\x8c\x01b\x94\x88u.&quot;)
+Foo(i=10, s='foo', f=100.0, b=True)
 </code></pre>
-<pre><code class="language-python">&gt;&gt;&gt; from serde.json import to_json, from_json
-
-&gt;&gt;&gt; to_json(npfoo)
-'{&quot;i&quot;: 1, &quot;j&quot;: 2, &quot;f&quot;: 3.0, &quot;g&quot;: 4.0, &quot;h&quot;: false, &quot;u&quot;: [1, 2], &quot;v&quot;: [3, 4], &quot;w&quot;: [1, 2], &quot;x&quot;: [3, 4], &quot;y&quot;: [5.0, 6.0], &quot;z&quot;: [7.0, 8.0]}'
-
-&gt;&gt;&gt; from_json(NPFoo, to_json(npfoo))
-NPFoo(i=1, j=2, f=3.0, g=4.0, h=False, u=array([1, 2]), v=array([3, 4]), w=array([1, 2], dtype=int32), x=array([3, 4]), y=array([5., 6.], dtype=float32), z=array([7., 8.]))
-
-&gt;&gt;&gt; from serde.yaml import from_yaml, to_yaml
-
-&gt;&gt;&gt; to_yaml(npfoo)
-'f: 3.0\ng: 4.0\nh: false\ni: 1\nj: 2\nu:\n- 1\n- 2\nv:\n- 3\n- 4\nw:\n- 1\n- 2\nx:\n- 3\n- 4\ny:\n- 5.0\n- 6.0\nz:\n- 7.0\n- 8.0\n'
-
-&gt;&gt;&gt; from_yaml(NPFoo, to_yaml(npfoo))
-NPFoo(i=1, j=2, f=3.0, g=4.0, h=False, u=array([1, 2]), v=array([3, 4]), w=array([1, 2], dtype=int32), x=array([3, 4]), y=array([5., 6.], dtype=float32), z=array([7., 8.]))
-
-&gt;&gt;&gt; from serde.toml import from_toml, to_toml
-
-&gt;&gt;&gt; to_toml(npfoo)
-'i = 1\nj = 2\nf = 3.0\ng = 4.0\nh = false\nu = [ 1, 2,]\nv = [ 3, 4,]\nw = [ 1, 2,]\nx = [ 3, 4,]\ny = [ 5.0, 6.0,]\nz = [ 7.0, 8.0,]\n'
-
-&gt;&gt;&gt; from_toml(NPFoo, to_toml(npfoo))
-NPFoo(i=1, j=2, f=3.0, g=4.0, h=False, u=array([1, 2]), v=array([3, 4]), w=array([1, 2], dtype=int32), x=array([3, 4]), y=array([5., 6.], dtype=float32), z=array([7., 8.]))
-
-&gt;&gt;&gt; from serde.msgpack import from_msgpack, to_msgpack
-
-&gt;&gt;&gt; to_msgpack(npfoo)
-b'\x8b\xa1i\x01\xa1j\x02\xa1f\xcb@\x08\x00\x00\x00\x00\x00\x00\xa1g\xcb@\x10\x00\x00\x00\x00\x00\x00\xa1h\xc2\xa1u\x92\x01\x02\xa1v\x92\x03\x04\xa1w\x92\x01\x02\xa1x\x92\x03\x04\xa1y\x92\xcb@\x14\x00\x00\x00\x00\x00\x00\xcb@\x18\x00\x00\x00\x00\x00\x00\xa1z\x92\xcb@\x1c\x00\x00\x00\x00\x00\x00\xcb@ \x00\x00\x00\x00\x00\x00'
-
-&gt;&gt;&gt; from_msgpack(NPFoo, to_msgpack(npfoo))
-NPFoo(i=1, j=2, f=3.0, g=4.0, h=False, u=array([1, 2]), v=array([3, 4]), w=array([1, 2], dtype=int32), x=array([3, 4]), y=array([5., 6.], dtype=float32), z=array([7., 8.]))
-</code></pre>
+<p>See <a href="https://yukinarit.github.io/pyserde/api/serde/pickle.html#to_pickle">serde.pickle.to_pickle</a> / <a href="https://yukinarit.github.io/pyserde/api/serde/pickle.html#from_pickle">serde.pickle.from_pickle</a> for more information.</p>
+<h2 id="needs-a-new-data-format-support"><a class="header" href="#needs-a-new-data-format-support">Needs a new data format support?</a></h2>
+<p>We don't plan to supprot a data format such as XML to keep pyserde as simple as possible. If you need a new data format support, we recommend to create a separate python package. If the data format is interchangable to dict or tuple, implementing the serialize/desrialize API is not that difficult. See <a href="https://github.com/yukinarit/pyserde/blob/main/serde/yaml.py">YAML's implementation</a> to know how to implement.</p>
 
                     </main>
 
@@ -303,7 +245,7 @@ NPFoo(i=1, j=2, f=3.0, g=4.0, h=False, u=array([1, 2]), v=array([3, 4]), w=array
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next" href="supported-types.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next" href="types.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -317,7 +259,7 @@ NPFoo(i=1, j=2, f=3.0, g=4.0, h=False, u=array([1, 2]), v=array([3, 4]), w=array
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next" href="supported-types.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next" href="types.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>

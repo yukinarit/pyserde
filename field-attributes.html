@@ -1,0 +1,311 @@
+<!DOCTYPE HTML>
+<html lang="en" class="sidebar-visible no-js light">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Field Attributes - pyserde documentation</title>
+
+
+        <!-- Custom HTML head -->
+        
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+    </head>
+    <body>
+    <div id="body-container">
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('no-js')
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add('js');
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var html = document.querySelector('html');
+            var sidebar = null;
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded "><a href="introduction.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="getting-started.html"><strong aria-hidden="true">2.</strong> Getting Started</a></li><li class="chapter-item expanded "><a href="data-formats.html"><strong aria-hidden="true">3.</strong> Data Formats</a></li><li class="chapter-item expanded "><a href="types.html"><strong aria-hidden="true">4.</strong> Types</a></li><li class="chapter-item expanded "><a href="decorators.html"><strong aria-hidden="true">5.</strong> Decorators</a></li><li class="chapter-item expanded "><a href="class-attributes.html"><strong aria-hidden="true">6.</strong> Class Attributes</a></li><li class="chapter-item expanded "><a href="field-attributes.html" class="active"><strong aria-hidden="true">7.</strong> Field Attributes</a></li><li class="chapter-item expanded "><a href="union.html"><strong aria-hidden="true">8.</strong> Union</a></li><li class="chapter-item expanded "><a href="type-check.html"><strong aria-hidden="true">9.</strong> Type Check</a></li><li class="chapter-item expanded "><a href="benchmark.html"><strong aria-hidden="true">10.</strong> Benchmark</a></li><li class="chapter-item expanded "><a href="faq.html"><strong aria-hidden="true">11.</strong> FAQ</a></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky bordered">
+                    <div class="left-buttons">
+                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">pyserde documentation</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/yukinarit/pyserde" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+                        <a href="https://github.com/yukinarit/pyserde/edit/main/.//field-attributes.md" title="Suggest an edit" aria-label="Suggest an edit">
+                            <i id="git-edit-button" class="fa fa-edit"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="field-attributes"><a class="header" href="#field-attributes">Field Attributes</a></h1>
+<p>Field attributes are options to customize (de)serialization behaviour for a field of a dataclass.</p>
+<h2 id="attributes-offered-by-dataclasses"><a class="header" href="#attributes-offered-by-dataclasses">Attributes offered by dataclasses</a></h2>
+<h3 id="default--default_factory"><a class="header" href="#default--default_factory"><strong><code>default</code></strong> / <strong><code>default_factory</code></strong></a></h3>
+<p><code>default</code> and <code>default_factory</code> work as expected. If a field has <code>default</code> or <code>default_factory</code> attribute, it behaves like an optional field. If the field is found in the data, the value is fetched from the data and set in the deserialized object. If the field is not found in the data, the specified default value is set in the deserialized object.</p>
+<pre><code class="language-python">class Foo:
+    a: int = 10
+    b: int = field(default=10)  # same as field &quot;a&quot;
+    c: Dict[str, int] = field(default_factory=dict)
+
+print(from_dict(Foo, {}))  # prints Foo(a=10, b=10, c={})
+</code></pre>
+<p>See <a href="https://github.com/yukinarit/pyserde/blob/main/examples/default.py">examples/default.py</a> for the complete example.</p>
+<h3 id="classvar"><a class="header" href="#classvar"><strong><code>ClassVar</code></strong></a></h3>
+<p><code>dataclasses.ClassVar</code> is a class variable for the dataclasses. Since dataclass treats ClassVar as pseudo-field and <code>dataclasses.field</code> doesn't pick ClassVar, pyserde doesn't (de)serialize ClassVar fields as a default behaviour. If you want to serialize ClassVar fields, consider using <a href="class-attributes.html#serialize_class_var">serialize_class_var</a> class attribute.</p>
+<p>See <a href="https://github.com/yukinarit/pyserde/blob/main/examples/class_var.py">examples/class_var.py</a> for the complete example.</p>
+<h2 id="attributes-offered-by-pyserde"><a class="header" href="#attributes-offered-by-pyserde">Attributes offered by pyserde</a></h2>
+<p>Field attributes can be specified through <code>serde.field</code> or <code>dataclasses.field</code>. We recommend to use <code>serde.field</code> because it's shorter and type check works.
+Here is an example specifying <code>rename</code> attribute in both <code>serde.field</code> and <code>dataclasses.field</code>.</p>
+<pre><code class="language-python">@serde.serde
+@dataclass.dataclass
+class Foo:
+    a: str = serde.field(rename=&quot;A&quot;)
+    b: str = dataclasses.field(metadata={&quot;serde_rename&quot;=&quot;B&quot;})
+</code></pre>
+<h3 id="rename"><a class="header" href="#rename"><strong><code>rename</code></strong></a></h3>
+<p><code>rename</code> is used to rename field name during (de)serialization. This attribute is convenient when you want to use a python keyword in field name. For example, this code renames field name <code>id</code> to <code>ID</code>.</p>
+<pre><code class="language-python">@serde
+@dataclass
+class Foo:
+    id: int = field(rename=&quot;ID&quot;)
+</code></pre>
+<p>See <a href="https://github.com/yukinarit/pyserde/blob/main/examples/rename.py">examples/rename.py</a> for the complete example.</p>
+<h3 id="skip"><a class="header" href="#skip"><strong><code>skip</code></strong></a></h3>
+<p><code>skip</code> is used to skip (de)serialization of the field with this attribute.</p>
+<pre><code class="language-python">@serde
+@dataclass
+class Resource:
+    name: str
+    hash: str
+    metadata: Dict[str, str] = field(default_factory=dict, skip=True)
+</code></pre>
+<p>See <a href="https://github.com/yukinarit/pyserde/blob/main/examples/skip.py">examples/skip.py</a> for the complete example.</p>
+<h3 id="skip_if"><a class="header" href="#skip_if"><strong><code>skip_if</code></strong></a></h3>
+<p><code>skip</code> is used to skip (de)serialization of the field if the predicate function returns <code>True</code>.</p>
+<pre><code class="language-python">@serde
+@dataclass
+class World:
+    buddy: str = field(default='', skip_if=lambda v: v == 'Pikachu')
+</code></pre>
+<p>See <a href="https://github.com/yukinarit/pyserde/blob/main/examples/skip.py">examples/skip.py</a> for the complete example.</p>
+<h3 id="skip_if_false"><a class="header" href="#skip_if_false"><strong><code>skip_if_false</code></strong></a></h3>
+<p><code>skip</code> is used to skip (de)serialization of the field if the field evaluates to <code>False</code>. For example, this code skip (de)serializing if <code>enemies</code> is empty.</p>
+<pre><code class="language-python">@serde
+@dataclass
+class World:
+    enemies: List[str] = field(default_factory=list, skip_if_false=True)
+</code></pre>
+<p>See <a href="https://github.com/yukinarit/pyserde/blob/main/examples/skip.py">examples/skip.py</a> for the complete example.</p>
+<h3 id="skip_if_default"><a class="header" href="#skip_if_default"><strong><code>skip_if_default</code></strong></a></h3>
+<p><code>skip</code> is used to skip (de)serialization of the field if the field is equivalent to its default value. For example, this code skip (de)serializing if <code>town</code> is <code>Masara Town</code>.</p>
+<pre><code class="language-python">@serde
+@dataclass
+class World:
+    town: str = field(default='Masara Town', skip_if_default=True)
+</code></pre>
+<p>See <a href="https://github.com/yukinarit/pyserde/blob/main/examples/skip.py">examples/skip.py</a> for the complete example.</p>
+<h3 id="alias"><a class="header" href="#alias"><strong><code>alias</code></strong></a></h3>
+<p>You can set aliases for field names. Alias only works for deserialization.</p>
+<pre><code class="language-python">@serde
+@dataclass
+class Foo:
+    a: str = field(alias=[&quot;b&quot;, &quot;c&quot;])
+</code></pre>
+<p><code>Foo</code> can be deserialized from either <code>{&quot;a&quot;: &quot;...&quot;}</code>, <code>{&quot;b&quot;: &quot;...&quot;}</code> or <code>{&quot;c&quot;: &quot;...&quot;}</code>.</p>
+<p>See <a href="https://github.com/yukinarit/pyserde/blob/main/examples/alias.py">examples/alias.py</a> for complete example.</p>
+<h2 id="serializerdeserializer"><a class="header" href="#serializerdeserializer"><strong><code>serializer</code></strong>/<strong><code>deserializer</code></strong></a></h2>
+<p>Sometimes you want to customize (de)serializer for a particular field, such as</p>
+<ul>
+<li>You want to serialize datetime into a different format</li>
+<li>You want to serialize a type in a third party package</li>
+</ul>
+<p>In the following example, field <code>a</code> is serialized into <code>&quot;2021-01-01T00:00:00&quot;</code> by the default serializer for <code>datetime</code>, whereas field <code>b</code> is serialized into <code>&quot;01/01/21&quot;</code> by the custom serializer.</p>
+<pre><code class="language-python">@serde
+@dataclass
+class Foo:
+    a: datetime
+    b: datetime = field(serializer=lambda x: x.strftime('%d/%m/%y'), deserializer=lambda x: datetime.strptime(x, '%d/%m/%y'))
+</code></pre>
+<p>See <a href="https://github.com/yukinarit/pyserde/blob/main/examples/custom_field_serializer.py">examples/custom_field_serializer.py</a> for the complete example.</p>
+<h2 id="flatten"><a class="header" href="#flatten"><strong><code>flatten</code></strong></a></h2>
+<p>You can flatten the fields of the nested structure.</p>
+<pre><code class="language-python">@serde
+@dataclass
+class Bar:
+    c: float
+    d: bool
+
+@serde
+@dataclass
+class Foo:
+    a: int
+    b: str
+    bar: Bar = field(flatten=True})
+</code></pre>
+<p>Bar's c, d fields are deserialized as if they are defined in Foo. So you will get <code>{&quot;a&quot;:10,&quot;b&quot;:&quot;foo&quot;,&quot;c&quot;:100.0,&quot;d&quot;:true}</code> if you serialize <code>Foo</code> into JSON.</p>
+<p>See <a href="https://github.com/yukinarit/pyserde/blob/main/examples/flatten.py">examples/flatten.py</a> for complete example.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="class-attributes.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next" href="union.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="class-attributes.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next" href="union.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </div>
+    </body>
+</html>
