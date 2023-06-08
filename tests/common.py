@@ -9,6 +9,7 @@ import uuid
 from typing import Any, Callable, DefaultDict, Dict, FrozenSet, Generic, List, NewType, Optional, Set, Tuple, TypeVar
 
 import more_itertools
+
 from serde import from_dict, from_tuple, serde, to_dict, to_tuple
 from serde.json import from_json, to_json
 from serde.msgpack import from_msgpack, to_msgpack
@@ -39,11 +40,24 @@ T = TypeVar("T")
 
 U = TypeVar("U")
 
+V = TypeVar("V")
+
 
 @serde
 class GenericClass(Generic[T, U]):
     a: T
     b: U
+
+
+@serde
+class Inner(Generic[T]):
+    c: T
+
+
+@serde
+class NestedGenericClass(Generic[U, V]):
+    a: U
+    b: Inner[V]
 
 
 def param(val, typ, filter: Optional[Callable] = None):
@@ -100,6 +114,7 @@ types: List = [
     param(10, NewType("Int", int)),  # NewType
     param({"a": 1}, Any),  # Any
     param(GenericClass[str, int]("foo", 10), GenericClass[str, int]),  # Generic
+    param(NestedGenericClass[str, int]("foo", Inner[int](10)), NestedGenericClass[str, int]),
     param(pathlib.Path("/tmp/foo"), pathlib.Path),  # Extended types
     param(pathlib.Path("/tmp/foo"), Optional[pathlib.Path]),
     param(None, Optional[pathlib.Path], toml_not_supported),

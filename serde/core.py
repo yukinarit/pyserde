@@ -398,6 +398,7 @@ class Field:
     deserializer: Optional[Func] = None  # Custom field deserializer.
     flatten: Optional[FlattenOpts] = None
     parent: Optional[Type[Any]] = None
+    type_args: Optional[List[str]] = None
 
     @classmethod
     def from_dataclass(cls, f: dataclasses.Field, parent: Optional[Type[Any]] = None) -> "Field":
