@@ -9,7 +9,7 @@ import dataclasses
 import functools
 import typing
 from dataclasses import dataclass, is_dataclass
-from typing import Any, Callable, Dict, List, Optional, TypeVar, Generic, overload
+from typing import Any, Callable, Dict, Generic, List, Optional, TypeVar, overload
 
 import jinja2
 from typing_extensions import Type, dataclass_transform
@@ -779,8 +779,10 @@ Foo.__serde__.funcs[\\'foo\\'](data=data["d"][3], maybe_generic=maybe_generic, r
 [coerce(int, v) for v in data[0][2]], Foo.__serde__.funcs['foo'](data=data[0][3], \
 maybe_generic=maybe_generic, reuse_instances=reuse_instances),)"
         """
-        if is_bare_tuple(arg.type) or is_variable_tuple(arg.type):
+        if is_bare_tuple(arg.type):
             return f"tuple({arg.data})"
+        elif is_variable_tuple(arg.type):
+            return f"tuple({self.render(arg[0])} for v in {arg.data})"
         else:
             values = []
             for i, _typ in enumerate(type_args(arg.type)):
