@@ -9,16 +9,16 @@ import dataclasses
 import functools
 import typing
 from dataclasses import dataclass, is_dataclass
-from typing import Any, Callable, Dict, Iterator, List, Optional, Tuple, Type, TypeVar, Generic
+from typing import Any, Callable, Dict, Generic, Iterator, List, Optional, Tuple, Type, TypeVar
 
 import jinja2
 from typing_extensions import dataclass_transform
 
 from .compat import (
-    T,
     Literal,
     SerdeError,
     SerdeSkip,
+    T,
     get_origin,
     is_any,
     is_bare_dict,
@@ -757,8 +757,12 @@ convert_sets=convert_sets), coerce(int, foo[2]),)"
         """
         Render rvalue for tuple.
         """
-        if is_bare_tuple(arg.type) or is_variable_tuple(arg.type):
+        if is_bare_tuple(arg.type):
             return arg.varname
+        elif is_variable_tuple(arg.type):
+            earg = arg[0]
+            earg.name = "v"
+            return f"tuple({self.render(earg)} for v in {arg.varname})"
         else:
             rvalues = []
             for i, _ in enumerate(type_args(arg.type)):
