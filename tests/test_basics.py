@@ -317,13 +317,19 @@ def test_tuple(se, de, opt):
 
     @serde.serde(**opt)
     @dataclasses.dataclass
+    class Inner:
+        i: int
+
+    @serde.serde(**opt)
+    @dataclasses.dataclass
     class VariableTuple:
         t: Tuple[int, ...]
+        i: Tuple[Inner, ...]
 
-    e = VariableTuple((1, 2, 3))
+    e = VariableTuple((1, 2, 3), (Inner(0), Inner(1)))
     assert e == de(VariableTuple, se(e))
 
-    e = VariableTuple(())
+    e = VariableTuple((), ())
     assert e == de(VariableTuple, se(e))
 
     with pytest.raises(Exception):
