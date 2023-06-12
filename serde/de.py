@@ -919,8 +919,7 @@ def {{func}}(cls=cls, maybe_generic=None, maybe_generic_type_vars=None, data=Non
   if data is None:
     return None
 
-  cls_type_vars = {{cls_type_vars}}
-  maybe_generic_type_vars = maybe_generic_type_vars or cls_type_vars
+  maybe_generic_type_vars = maybe_generic_type_vars or {{cls_type_vars}}
 
   {% for f in fields %}
   __{{f.name}} = {{f|arg(loop.index-1)|rvalue}}
@@ -969,8 +968,7 @@ def {{func}}(cls=cls, maybe_generic=None, maybe_generic_type_vars=None, data=Non
   if data is None:
     return None
 
-  cls_type_vars = {{cls_type_vars}}
-  maybe_generic_type_vars = maybe_generic_type_vars or cls_type_vars
+  maybe_generic_type_vars = maybe_generic_type_vars or {{cls_type_vars}}
 
   {% for f in fields %}
   __{{f.name}} = {{f|arg(loop.index-1)|rvalue}}
