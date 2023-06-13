@@ -43,7 +43,8 @@
       "avatar_url": "https://avatars.githubusercontent.com/u/223250?v=4",
       "profile": "https://github.com/kmsquire",
       "contributions": [
-        "code"
+        "code",
+        "doc"
       ]
     },
     {
@@ -188,6 +189,15 @@
       "profile": "https://www.patreon.com/nicoddemus",
       "contributions": [
         "doc"
+      ]
+    },
+    {
+      "login": "kykosic",
+      "name": "Kyle Kosic",
+      "avatar_url": "https://avatars.githubusercontent.com/u/23020003?v=4",
+      "profile": "https://kylekosic.dev/",
+      "contributions": [
+        "code"
       ]
     }
   ],
