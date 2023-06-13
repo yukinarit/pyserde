@@ -3,11 +3,18 @@ branch = True
 source = serde
 
 [report]
-exclude_lines =
+exclude_also =
+    def __repr__
     if self.debug:
-    pragma: no cover
+    if settings.DEBUG
+    raise AssertionError
     raise NotImplementedError
+    if 0:
     if __name__ == .__main__.:
+    if TYPE_CHECKING:
+    class .*\bProtocol\):
+    @(abc\.)?abstractmethod
+    @overload
 ignore_errors = True
 omit =
     tests/*
