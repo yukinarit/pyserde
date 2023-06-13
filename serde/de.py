@@ -791,8 +791,12 @@ reuse_instances=reuse_instances),)'
 maybe_generic=maybe_generic, maybe_generic_type_vars=maybe_generic_type_vars, \
 variable_type_args=None, reuse_instances=reuse_instances),)"
         """
-        if is_bare_tuple(arg.type) or is_variable_tuple(arg.type):
+        if is_bare_tuple(arg.type):
             return f"tuple({arg.data})"
+        elif is_variable_tuple(arg.type):
+            earg = arg[0]
+            earg.datavar = "v"
+            return f"tuple({self.render(earg)} for v in {arg.data})"
         else:
             values = []
             for i, _typ in enumerate(type_args(arg.type)):
