@@ -812,6 +812,28 @@ def is_ellipsis(typ: Any) -> bool:
     return typ is Ellipsis
 
 
+def get_type_var_names(cls: Type[Any]) -> Optional[List[str]]:
+    """
+    Get type argument names of a generic class.
+
+    >>> T = typing.TypeVar('T')
+    >>> class GenericFoo(typing.Generic[T]):
+    ...     pass
+    >>> get_type_var_names(GenericFoo)
+    ['T']
+    >>> get_type_var_names(int)
+    """
+    bases = getattr(cls, "__orig_bases__", ())
+    if not bases:
+        return None
+
+    type_arg_names: List[str] = []
+    for base in bases:
+        type_arg_names.extend(arg.__name__ for arg in get_args(base))
+
+    return type_arg_names
+
+
 def find_generic_arg(cls: Type[Any], field: TypeVar) -> int:
     """
     Find a type in generic parameters.
@@ -843,26 +865,47 @@ def find_generic_arg(cls: Type[Any], field: TypeVar) -> int:
     return -1
 
 
-def get_generic_arg(typ: Any, index: int) -> Any:
+def get_generic_arg(
+    typ: Any,
+    maybe_generic_type_vars: Optional[List[str]],
+    variable_type_args: Optional[List[str]],
+    index: int,
+) -> Any:
     """
-    Get generic type argument by index.
+    Get generic type argument.
 
     >>> T = typing.TypeVar('T')
     >>> U = typing.TypeVar('U')
     >>> class GenericFoo(typing.Generic[T, U]):
     ...     pass
-    >>> get_generic_arg(GenericFoo[int, str], 0).__name__
+    >>> get_generic_arg(GenericFoo[int, str], ['T', 'U'], ['T', 'U'], 0).__name__
     'int'
-    >>> get_generic_arg(GenericFoo[int, str], 1).__name__
+    >>> get_generic_arg(GenericFoo[int, str], ['T', 'U'], ['T', 'U'], 1).__name__
+    'str'
+    >>> get_generic_arg(GenericFoo[int, str], ['T', 'U'], ['U'], 0).__name__
     'str'
     """
-    if not is_generic(typ):
+    if not is_generic(typ) or maybe_generic_type_vars is None or variable_type_args is None:
         return typing.Any
-    else:
-        args = get_args(typ)
-        if index + 1 > len(args):
-            return typing.Any
-        return args[index]
+
+    args = get_args(typ)
+
+    if len(args) != len(maybe_generic_type_vars):
+        raise SerdeError(
+            f"Number of type args for {typ} does not match number of generic type vars: "
+            f"\n  type args: {args}\n  type_vars: {maybe_generic_type_vars}"
+        )
+
+    # Get the name of the type var used for this field in the parent class definition
+    type_var_name = variable_type_args[index]
+
+    try:
+        # Find the slot of that type var in the original generic class definition
+        orig_index = maybe_generic_type_vars.index(type_var_name)
+    except ValueError:
+        return typing.Any
+
+    return args[orig_index]
 
 
 def has_default(field: dataclasses.Field) -> bool:

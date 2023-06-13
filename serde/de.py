@@ -9,7 +9,7 @@ import dataclasses
 import functools
 import typing
 from dataclasses import dataclass, is_dataclass
-from typing import Any, Callable, Dict, List, Optional, TypeVar, Generic, overload
+from typing import Any, Callable, Dict, Generic, List, Optional, TypeVar, overload
 
 import jinja2
 from typing_extensions import Type, dataclass_transform
@@ -24,6 +24,7 @@ from .compat import (
     get_args,
     get_generic_arg,
     get_origin,
+    get_type_var_names,
     has_default,
     has_default_factory,
     is_any,
@@ -602,6 +603,10 @@ class Renderer:
         """
         if arg.deserializer and arg.deserializer.inner is not default_deserializer:
             res = self.custom_field_deserializer(arg)
+        elif is_generic(arg.type):
+            arg.type_args = get_args(arg.type)
+            arg.type = get_origin(arg.type)
+            res = self.render(arg)
         elif is_dataclass(arg.type):
             res = self.dataclass(arg)
         elif is_opt(arg.type):
@@ -639,12 +644,10 @@ class Renderer:
         elif isinstance(arg.type, TypeVar):
             index = find_generic_arg(self.cls, arg.type)
             res = (
-                f"from_obj(get_generic_arg(maybe_generic, {index}), "
-                f" {arg.data}, named={not arg.iterbased}, reuse_instances=reuse_instances)"
+                f"from_obj(get_generic_arg(maybe_generic, maybe_generic_type_vars, "
+                f"variable_type_args, {index}), {arg.data}, named={not arg.iterbased}, "
+                "reuse_instances=reuse_instances)"
             )
-        elif is_generic(arg.type):
-            arg.type = get_origin(arg.type)
-            res = self.render(arg)
         elif is_literal(arg.type):
             res = self.literal(arg)
         else:
@@ -690,7 +693,12 @@ class Renderer:
             else:
                 var = arg.datavar
 
-        opts = "maybe_generic=maybe_generic, reuse_instances=reuse_instances"
+        type_args_str = [str(t).lstrip("~") for t in arg.type_args] if arg.type_args else None
+
+        opts = (
+            "maybe_generic=maybe_generic, maybe_generic_type_vars=maybe_generic_type_vars, "
+            f"variable_type_args={type_args_str}, reuse_instances=reuse_instances"
+        )
 
         if arg.is_self_referencing():
             class_name = "cls"
@@ -718,6 +726,7 @@ class Renderer:
         ...     o: Optional[List[int]]
         >>> Renderer('foo').render(DeField(Optional[Foo], 'f', datavar='data'))
         '(Foo.__serde__.funcs[\\'foo\\'](data=data["f"], maybe_generic=maybe_generic, \
+maybe_generic_type_vars=maybe_generic_type_vars, variable_type_args=None, \
 reuse_instances=reuse_instances)) if data.get("f") is not None else None'
         """
         value = arg[0]
@@ -771,13 +780,16 @@ reuse_instances=reuse_instances)) if data.get("f") is not None else None'
         >>> Renderer('foo').render(DeField(Tuple[str, int, List[int], Foo], 'd', datavar='data'))
         '(coerce(str, data["d"][0]), coerce(int, data["d"][1]), \
 [coerce(int, v) for v in data["d"][2]], \
-Foo.__serde__.funcs[\\'foo\\'](data=data["d"][3], maybe_generic=maybe_generic, reuse_instances=reuse_instances),)'
+Foo.__serde__.funcs[\\'foo\\'](data=data["d"][3], maybe_generic=maybe_generic, \
+maybe_generic_type_vars=maybe_generic_type_vars, variable_type_args=None, \
+reuse_instances=reuse_instances),)'
 
         >>> field = DeField(Tuple[str, int, List[int], Foo], 'd', datavar='data', index=0, iterbased=True)
         >>> Renderer('foo').render(field)
         "(coerce(str, data[0][0]), coerce(int, data[0][1]), \
 [coerce(int, v) for v in data[0][2]], Foo.__serde__.funcs['foo'](data=data[0][3], \
-maybe_generic=maybe_generic, reuse_instances=reuse_instances),)"
+maybe_generic=maybe_generic, maybe_generic_type_vars=maybe_generic_type_vars, \
+variable_type_args=None, reuse_instances=reuse_instances),)"
         """
         if is_bare_tuple(arg.type) or is_variable_tuple(arg.type):
             return f"tuple({arg.data})"
@@ -799,9 +811,10 @@ maybe_generic=maybe_generic, reuse_instances=reuse_instances),)"
         >>> @deserialize
         ... class Foo: pass
         >>> Renderer('foo').render(DeField(Dict[Foo, List[Foo]], 'f', datavar='data'))
-        '{Foo.__serde__.funcs[\\'foo\\'](data=k, maybe_generic=maybe_generic, reuse_instances=reuse_instances): \
-[Foo.__serde__.funcs[\\'foo\\'](data=v, maybe_generic=maybe_generic, reuse_instances=reuse_instances) for v in v] \
-for k, v in data["f"].items()}'
+        '{Foo.__serde__.funcs[\\'foo\\'](data=k, maybe_generic=maybe_generic, \
+maybe_generic_type_vars=maybe_generic_type_vars, variable_type_args=None, reuse_instances=reuse_instances): \
+[Foo.__serde__.funcs[\\'foo\\'](data=v, maybe_generic=maybe_generic, maybe_generic_type_vars=maybe_generic_type_vars, \
+variable_type_args=None, reuse_instances=reuse_instances) for v in v] for k, v in data["f"].items()}'
         """
         if is_bare_dict(arg.type):
             return arg.data
@@ -898,12 +911,15 @@ def renderable(f: DeField) -> bool:
 
 def render_from_iter(cls: Type[Any], custom: Optional[DeserializeFunc] = None, type_check: TypeCheck = NoCheck) -> str:
     template = """
-def {{func}}(cls=cls, maybe_generic=None, data=None, reuse_instances = {{serde_scope.reuse_instances_default}}):
+def {{func}}(cls=cls, maybe_generic=None, maybe_generic_type_vars=None, data=None,
+             variable_type_args=None, reuse_instances = {{serde_scope.reuse_instances_default}}):
   if reuse_instances is Ellipsis:
     reuse_instances = {{serde_scope.reuse_instances_default}}
 
   if data is None:
     return None
+
+  maybe_generic_type_vars = maybe_generic_type_vars or {{cls_type_vars}}
 
   {% for f in fields %}
   __{{f.name}} = {{f|arg(loop.index-1)|rvalue}}
@@ -924,7 +940,12 @@ def {{func}}(cls=cls, maybe_generic=None, data=None, reuse_instances = {{serde_s
     env.filters.update({"rvalue": renderer.render})
     env.filters.update({"arg": to_iter_arg})
     fields = list(filter(renderable, defields(cls)))
-    res = env.get_template("iter").render(func=FROM_ITER, serde_scope=getattr(cls, SERDE_SCOPE), fields=fields)
+    res = env.get_template("iter").render(
+        func=FROM_ITER,
+        serde_scope=getattr(cls, SERDE_SCOPE),
+        fields=fields,
+        cls_type_vars=get_type_var_names(cls),
+    )
 
     if renderer.import_numpy:
         res = "import numpy\n" + res
@@ -939,13 +960,15 @@ def render_from_dict(
     type_check: TypeCheck = NoCheck,
 ) -> str:
     template = """
-def {{func}}(cls=cls, maybe_generic=None, data=None,
-             reuse_instances = {{serde_scope.reuse_instances_default}}):
+def {{func}}(cls=cls, maybe_generic=None, maybe_generic_type_vars=None, data=None,
+             variable_type_args=None, reuse_instances = {{serde_scope.reuse_instances_default}}):
   if reuse_instances is Ellipsis:
     reuse_instances = {{serde_scope.reuse_instances_default}}
 
   if data is None:
     return None
+
+  maybe_generic_type_vars = maybe_generic_type_vars or {{cls_type_vars}}
 
   {% for f in fields %}
   __{{f.name}} = {{f|arg(loop.index-1)|rvalue}}
@@ -973,7 +996,11 @@ def {{func}}(cls=cls, maybe_generic=None, data=None,
     env.filters.update({"arg": functools.partial(to_arg, rename_all=rename_all)})
     fields = list(filter(renderable, defields(cls)))
     res = env.get_template("dict").render(
-        func=FROM_DICT, serde_scope=getattr(cls, SERDE_SCOPE), fields=fields, type_check=type_check
+        func=FROM_DICT,
+        serde_scope=getattr(cls, SERDE_SCOPE),
+        fields=fields,
+        type_check=type_check,
+        cls_type_vars=get_type_var_names(cls),
     )
 
     if renderer.import_numpy:
@@ -984,7 +1011,8 @@ def {{func}}(cls=cls, maybe_generic=None, data=None,
 
 def render_union_func(cls: Type[Any], union_args: List[Type[Any]], tagging: Tagging = DefaultTagging) -> str:
     template = """
-def {{func}}(cls=cls, maybe_generic=None, data=None, reuse_instances = {{serde_scope.reuse_instances_default}}):
+def {{func}}(cls=cls, maybe_generic=None, maybe_generic_type_vars=None, data=None,
+             variable_type_args=None, reuse_instances = {{serde_scope.reuse_instances_default}}):
   errors = []
   {% for t in union_args %}
   try:
@@ -1042,7 +1070,8 @@ def {{func}}(cls=cls, maybe_generic=None, data=None, reuse_instances = {{serde_s
 
 def render_literal_func(cls: Type[Any], literal_args: List[Any], tagging: Tagging = DefaultTagging) -> str:
     template = """
-def {{func}}(cls=cls, maybe_generic=None, data=None, reuse_instances = {{serde_scope.reuse_instances_default}}):
+def {{func}}(cls=cls, maybe_generic=None, maybe_generic_type_vars=None, data=None,
+             variable_type_args=None, reuse_instances = {{serde_scope.reuse_instances_default}}):
   if data in ({%- for v in literal_args -%}{{v|repr}},{%- endfor -%}):
     return data
   raise SerdeError("Can not deserialize " + repr(data) + " as {{literal_name}}.")

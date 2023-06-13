@@ -1,11 +1,14 @@
 import sys
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Dict, Generic, List, NewType, Optional, Set, Tuple, TypeVar, Union
+from typing import Any, Dict, Generic, List, NewType, Optional, Set, Tuple, TypeVar, Union
+
+import pytest
 
 import serde
 from serde.compat import (
     Literal,
+    get_generic_arg,
     is_dict,
     is_generic,
     is_list,
@@ -25,6 +28,7 @@ from serde.core import is_instance
 from .data import Bool, Float, Int, Pri, PriOpt, Str
 
 T = TypeVar("T")
+U = TypeVar("U")
 
 
 def test_types():
@@ -257,3 +261,19 @@ def test_is_generic():
     assert not serde.is_serializable(GenericFoo[List[int]])
     assert serde.is_deserializable(GenericFoo)
     assert not serde.is_deserializable(GenericFoo[List[int]])
+
+
+def test_get_generic_arg():
+    class GenericFoo(Generic[T, U]):
+        pass
+
+    assert get_generic_arg(GenericFoo[int, str], ["T", "U"], ["T", "U"], 0) == int
+    assert get_generic_arg(GenericFoo[int, str], ["T", "U"], ["T", "U"], 1) == str
+    assert get_generic_arg(GenericFoo[int, str], ["T", "U"], ["U"], 0) == str
+    assert get_generic_arg(GenericFoo[int, str], ["T", "U"], ["V"], 0) == Any
+
+    with pytest.raises(serde.SerdeError):
+        get_generic_arg(GenericFoo[int, str], ["T"], ["T"], 0)
+
+    with pytest.raises(serde.SerdeError):
+        get_generic_arg(GenericFoo[int, str], ["T"], ["U"], 0)
