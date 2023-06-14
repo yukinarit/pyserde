@@ -151,7 +151,7 @@ GENERATION_STACK = []
 
 @dataclass_transform()
 def serialize(
-    _cls=None,
+    _cls: Optional[Type[T]] = None,
     rename_all: Optional[str] = None,
     reuse_instances_default: bool = True,
     convert_sets_default: bool = False,
@@ -159,8 +159,8 @@ def serialize(
     tagging: Tagging = DefaultTagging,
     type_check: TypeCheck = NoCheck,
     serialize_class_var: bool = False,
-    **kwargs,
-):
+    **kwargs: Any,
+) -> Type[T]:
     """
     A dataclass with this decorator is serializable into any of the data formats supported by pyserde.
 
@@ -179,7 +179,7 @@ def serialize(
     '{"i":10,"s":"foo","f":100.0,"b":true}'
     """
 
-    def wrap(cls: Type[Any]):
+    def wrap(cls: Type[T]) -> Type[T]:
         tagging.check()
 
         # If no `dataclass` found in the class, dataclassify it automatically.
@@ -216,7 +216,7 @@ def serialize(
         g["TypeCheck"] = TypeCheck
         g["NoCheck"] = NoCheck
         g["coerce"] = coerce
-        if serialize:
+        if serializer:
             g["serde_custom_class_serializer"] = functools.partial(serde_custom_class_serializer, custom=serializer)
 
         # Collect types used in the generated code.

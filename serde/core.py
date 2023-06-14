@@ -374,14 +374,17 @@ class Field:
     """
     Field class is similar to `dataclasses.Field`. It provides pyserde specific options.
 
-
     `type`, `name`, `default` and `default_factory` are the same members as `dataclasses.Field`.
     """
 
     type: Type[Any]
+    """ Type of Field """
     name: Optional[str]
+    """ Name of Field """
     default: Any = field(default_factory=dataclasses._MISSING_TYPE)
+    """ Default value of Field """
     default_factory: Any = field(default_factory=dataclasses._MISSING_TYPE)
+    """ Default factory method of Field """
     init: bool = field(default_factory=dataclasses._MISSING_TYPE)
     repr: Any = field(default_factory=dataclasses._MISSING_TYPE)
     hash: Any = field(default_factory=dataclasses._MISSING_TYPE)
@@ -438,7 +441,7 @@ class Field:
             f.type,
             f.name,
             default=f.default,
-            default_factory=f.default_factory,  # type: ignore
+            default_factory=f.default_factory,
             init=f.init,
             repr=f.repr,
             hash=f.hash,
@@ -575,23 +578,23 @@ class Tagging:
     content: Optional[str] = None
     kind: Kind = Kind.External
 
-    def is_external(self):
+    def is_external(self) -> bool:
         return self.kind == self.Kind.External
 
-    def is_internal(self):
+    def is_internal(self) -> bool:
         return self.kind == self.Kind.Internal
 
-    def is_adjacent(self):
+    def is_adjacent(self) -> bool:
         return self.kind == self.Kind.Adjacent
 
-    def is_untagged(self):
+    def is_untagged(self) -> bool:
         return self.kind == self.Kind.Untagged
 
     @classmethod
-    def is_taggable(cls, typ):
+    def is_taggable(cls, typ: Any) -> bool:
         return dataclasses.is_dataclass(typ)
 
-    def check(self):
+    def check(self) -> None:
         if self.is_internal() and self.tag is None:
             raise SerdeError('"tag" must be specified in InternalTagging')
         if self.is_adjacent() and (self.tag is None or self.content is None):
@@ -609,7 +612,7 @@ Untagged = Tagging(kind=Tagging.Kind.Untagged)
 DefaultTagging = ExternalTagging
 
 
-def ensure(expr, description):
+def ensure(expr: Any, description: str) -> None:
     if not expr:
         raise Exception(description)
 

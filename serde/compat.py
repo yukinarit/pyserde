@@ -150,7 +150,7 @@ def get_args(typ: Any) -> Tuple[Any, ...]:
         return typing_extensions.get_args(typ) or get_np_args(typ)
 
 
-def typename(typ: Type[Any], with_typing_module: bool = False) -> str:  # noqa: C901
+def typename(typ: Type[Any], with_typing_module: bool = False) -> str:
     """
     >>> from typing import List, Dict, Set, Any
     >>> typename(int)
@@ -320,7 +320,7 @@ def dataclass_fields(cls: Type[Any]) -> Iterator[dataclasses.Field]:  # type: ig
 TypeLike = Union[Type[Any], typing.Any]
 
 
-def iter_types(cls: TypeLike) -> List[TypeLike]:  # noqa: C901
+def iter_types(cls: TypeLike) -> List[TypeLike]:
     """
     Iterate field types recursively.
 
@@ -329,7 +329,7 @@ def iter_types(cls: TypeLike) -> List[TypeLike]:  # noqa: C901
     """
     lst: Set[TypeLike] = set()
 
-    def recursive(cls: TypeLike) -> None:  # noqa: C901
+    def recursive(cls: TypeLike) -> None:
         if cls in lst:
             return
 
@@ -370,14 +370,14 @@ def iter_types(cls: TypeLike) -> List[TypeLike]:  # noqa: C901
     return list(lst)
 
 
-def iter_unions(cls: TypeLike) -> List[TypeLike]:  # noqa: C901
+def iter_unions(cls: TypeLike) -> List[TypeLike]:
     """
     Iterate over all unions that are used in the dataclass
     """
     lst: Set[TypeLike] = set()
     stack: List[TypeLike] = []  # To prevent infinite recursion
 
-    def recursive(cls: TypeLike) -> None:  # noqa: C901
+    def recursive(cls: TypeLike) -> None:
         if cls in lst:
             return
         if cls in stack:
@@ -413,13 +413,13 @@ def iter_unions(cls: TypeLike) -> List[TypeLike]:  # noqa: C901
     return list(lst)
 
 
-def iter_literals(cls: TypeLike) -> List[TypeLike]:  # noqa: C901
+def iter_literals(cls: TypeLike) -> List[TypeLike]:
     """
     Iterate over all literals that are used in the dataclass
     """
     lst: Set[TypeLike] = set()
 
-    def recursive(cls: TypeLike) -> None:  # noqa: C901
+    def recursive(cls: TypeLike) -> None:
         if cls in lst:
             return
 

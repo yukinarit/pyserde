@@ -9,7 +9,7 @@ import dataclasses
 import functools
 import typing
 from dataclasses import dataclass, is_dataclass
-from typing import Any, Callable, Dict, Generic, List, Optional, TypeVar, overload
+from typing import Any, Callable, Dict, Generic, List, Optional, TypeVar, overload, Union
 
 import jinja2
 from typing_extensions import Type, dataclass_transform
@@ -163,15 +163,15 @@ GENERATION_STACK = []
 
 @dataclass_transform()
 def deserialize(
-    _cls=None,
+    _cls: Optional[Type[T]] = None,
     rename_all: Optional[str] = None,
     reuse_instances_default: bool = True,
     convert_sets_default: bool = False,
     deserializer: Optional[DeserializeFunc] = None,
     tagging: Tagging = DefaultTagging,
     type_check: TypeCheck = NoCheck,
-    **kwargs,
-):
+    **kwargs: Any,
+) -> Type[T]:
     """
     A dataclass with this decorator is deserializable from any of the data formats supported by pyserde.
 
@@ -191,9 +191,9 @@ def deserialize(
 
     stack = []
 
-    def wrap(cls: Type[Any]):
+    def wrap(cls: Type[T]) -> Type[T]:
         if cls in stack:
-            return
+            return cls
         stack.append(cls)
 
         tagging.check()
@@ -218,7 +218,7 @@ def deserialize(
         g["SerdeError"] = SerdeError
         g["UserError"] = UserError
         g["raise_unsupported_type"] = raise_unsupported_type
-        g["typename"] = typename  # used in union functions
+        g["typename"] = typename
         g["ensure"] = ensure
         g["typing"] = typing
         g["collections"] = collections
@@ -231,7 +231,7 @@ def deserialize(
         g["coerce"] = coerce
         g["_exists_by_aliases"] = _exists_by_aliases
         g["_get_by_aliases"] = _get_by_aliases
-        if deserialize:
+        if deserializer:
             g["serde_custom_class_deserializer"] = functools.partial(
                 serde_custom_class_deserializer, custom=deserializer
             )
@@ -502,19 +502,27 @@ def from_tuple(cls: Any, o: Any, reuse_instances: bool = ...) -> Any:
 @dataclass
 class DeField(Field):
     """
-    Field class for deserialization.
+    Represents a field of dataclass.
     """
 
-    datavar: Optional[str] = None  # name of variable to deserialize from.
-    index: int = 0  # Field index.
-    iterbased: bool = False  # Iterater based deserializer or not.
+    datavar: Optional[str] = None
+    """ Name of variable which is passed in the deserialize API """
 
-    def __getitem__(self, n: int) -> "DeField":
+    index: int = 0
+    """ Field index """
+
+    iterbased: bool = False
+    """ Iterater based deserializer or not """
+
+    def __getitem__(self, n: int) -> Union["DeField", "InnerField"]:
         """
-        Access inner `Field` e.g. T of List[T].
+        Get inner `Field` from current `Field`.
+
+        `InnerField` is returned if self is of any standard collection e.g. List.
+        `DeField` is returned if self is Optional.
         """
         typ = type_args(self.type)[n]
-        opts = {
+        opts: Dict[str, Any] = {
             "case": self.case,
             "rename": self.rename,
             "skip": self.skip,
@@ -529,6 +537,7 @@ class DeField(Field):
         elif is_tuple(self.type):
             return InnerField(typ, f"{self.data}[{n}]", datavar=f"{self.data}[{n}]", **opts)
         else:
+            # For Optional etc.
             return DeField(typ, self.name, datavar=self.datavar, index=self.index, iterbased=self.iterbased, **opts)
 
     def key_field(self) -> "DeField":
@@ -548,6 +557,20 @@ class DeField(Field):
 
     @property
     def data(self) -> str:
+        """
+        Renders the variable name that possesses the data.
+
+        e.g. Tuple
+            * datavar property returns "data"
+            * data property returns "data[0]".
+        e.g. Optional
+            * datavar property returns "data"
+            * data property returns "data.get("field_name")".
+        For other types
+            * datavar property returns "data"
+            * data property returns "data["field_name"]".
+        """
+
         if self.iterbased:
             return f"{self.datavar}[{self.index}]"
         elif is_union(self.type) and type(None) in get_args(self.type):
@@ -556,10 +579,10 @@ class DeField(Field):
             return f'{self.datavar}["{self.conv_name()}"]'
 
     @data.setter
-    def data(self, d):
+    def data(self, d: str) -> None:
         self.datavar = d
 
-    def data_or(self):
+    def data_or(self) -> str:
         if self.iterbased:
             return self.data
         else:
@@ -569,7 +592,13 @@ class DeField(Field):
 @dataclass
 class InnerField(DeField):
     """
-    Field for inner type e.g. T of List[T].
+    Field of Inner type. The purpose of this class is to override "data" method
+    for inner type codegen.
+
+    e.g.
+      T of List[T]
+      V of Dict[K, V]
+      T of Optional[T]
     """
 
     @property
@@ -577,7 +606,7 @@ class InnerField(DeField):
         return self.datavar or ""
 
     @data.setter
-    def data(self, d):
+    def data(self, d: str) -> None:
         self.datavar = d
 
 
@@ -667,7 +696,8 @@ class Renderer:
         """
         Render rvalue for the field with custom deserializer.
         """
-        assert arg.deserializer
+        if not arg.deserializer:
+            raise SerdeError("Missing custom field deserializer")
         return f"{arg.deserializer.name}({arg.data})"
 
     def custom_class_deserializer(self, arg: DeField, code: str) -> str:
@@ -729,12 +759,12 @@ class Renderer:
 maybe_generic_type_vars=maybe_generic_type_vars, variable_type_args=None, \
 reuse_instances=reuse_instances)) if data.get("f") is not None else None'
         """
-        value = arg[0]
+        value_arg = arg[0]
         if arg.iterbased:
             exists = f"{arg.data} is not None"
         else:
             exists = f'{arg.datavar}.get("{arg.conv_name()}") is not None'
-        return f"({self.render(value)}) if {exists} else None"
+        return f"({self.render(value_arg)}) if {exists} else None"
 
     def list(self, arg: DeField) -> str:
         """
@@ -903,7 +933,7 @@ def to_arg(f: DeField, index: int, rename_all: Optional[str] = None) -> DeField:
     return f
 
 
-def to_iter_arg(f: DeField, *args, **kwargs) -> DeField:
+def to_iter_arg(f: DeField, *args: Any, **kwargs: Any) -> DeField:
     f = to_arg(f, *args, **kwargs)
     f.iterbased = True
     return f
