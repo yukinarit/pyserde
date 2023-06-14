@@ -15,7 +15,7 @@
   </a>
 </p>
 <p align="center">
-  <a href="https://yukinarit.github.io/pyserde/guide">Guide</a> | <a href="https://yukinarit.github.io/pyserde/api/serde.html">API Docs</a> | <a href="https://github.com/yukinarit/pyserde/tree/main/examples">Examples</a>
+  <a href="https://yukinarit.github.io/pyserde/guide/en">Guide</a> | <a href="https://yukinarit.github.io/pyserde/api/serde.html">API Docs</a> | <a href="https://github.com/yukinarit/pyserde/tree/main/examples">Examples</a>
 </p>
 
 ## Overview
@@ -85,8 +85,8 @@ Foo(i=10, s='foo', f=100.0, b=True)
 - [Union Representation](https://github.com/yukinarit/pyserde/blob/main/docs/en/union.md)
 - [Forward reference](https://github.com/yukinarit/pyserde/blob/main/docs/en/decorators.md#how-can-i-use-forward-references)
 - [PEP563 Postponed Evaluation of Annotations](https://github.com/yukinarit/pyserde/blob/main/docs/en/decorators.md#pep563-postponed-evaluation-of-annotations)
-- [PEP585 type hinting](https://github.com/yukinarit/pyserde/blob/main/docs/en/getting-started.md#pep585-and-pep604)
-- [PEP604 Union operator](https://github.com/yukinarit/pyserde/blob/main/docs/en/getting-started.md#pep585-and-pep604)
+- [PEP585 Type Hinting Generics In Standard Collections](https://github.com/yukinarit/pyserde/blob/main/docs/en/getting-started.md#pep585-and-pep604)
+- [PEP604 Allow writing union types as X | Y](https://github.com/yukinarit/pyserde/blob/main/docs/en/getting-started.md#pep585-and-pep604)
 - [PEP681 Data Class Transform](https://github.com/yukinarit/pyserde/blob/main/docs/en/decorators.md#serde)
 - [Case Conversion](https://github.com/yukinarit/pyserde/blob/main/docs/en/class-attributes.md#rename_all)
 - [Rename](https://github.com/yukinarit/pyserde/blob/main/docs/en/field-attributes.md#rename)
