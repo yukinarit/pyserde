@@ -3,6 +3,7 @@ This module provides `deserialize`, `is_deserializable` `from_dict`, `from_tuple
 associated with deserialization.
 """
 
+from __future__ import annotations
 import abc
 import collections
 import dataclasses
@@ -500,7 +501,7 @@ def from_tuple(cls: Any, o: Any, reuse_instances: bool = ...) -> Any:
 
 
 @dataclass
-class DeField(Field):
+class DeField(Field[T]):
     """
     Represents a field of dataclass.
     """
@@ -514,7 +515,7 @@ class DeField(Field):
     iterbased: bool = False
     """ Iterater based deserializer or not """
 
-    def __getitem__(self, n: int) -> Union["DeField", "InnerField"]:
+    def __getitem__(self, n: int) -> Union[DeField[Any], InnerField[Any]]:
         """
         Get inner `Field` from current `Field`.
 
@@ -540,7 +541,7 @@ class DeField(Field):
             # For Optional etc.
             return DeField(typ, self.name, datavar=self.datavar, index=self.index, iterbased=self.iterbased, **opts)
 
-    def key_field(self) -> "DeField":
+    def key_field(self) -> DeField[Any]:
         """
         Get inner key field for Dict like class.
         """
@@ -549,7 +550,7 @@ class DeField(Field):
         k.datavar = "k"
         return k
 
-    def value_field(self) -> "DeField":
+    def value_field(self) -> DeField[Any]:
         """
         Get inner value field for Dict like class.
         """
@@ -590,7 +591,7 @@ class DeField(Field):
 
 
 @dataclass
-class InnerField(DeField):
+class InnerField(DeField[T]):
     """
     Field of Inner type. The purpose of this class is to override "data" method
     for inner type codegen.
@@ -610,7 +611,7 @@ class InnerField(DeField):
         self.datavar = d
 
 
-def defields(cls: Type[Any]) -> List[DeField]:
+def defields(cls: Type[Any]) -> List[DeField[Any]]:
     return fields(DeField, cls)
 
 
@@ -626,7 +627,7 @@ class Renderer:
     import_numpy: bool = False
     suppress_coerce: bool = False
 
-    def render(self, arg: DeField) -> str:
+    def render(self, arg: DeField[Any]) -> str:
         """
         Render rvalue
         """
@@ -692,7 +693,7 @@ class Renderer:
         else:
             return res
 
-    def custom_field_deserializer(self, arg: DeField) -> str:
+    def custom_field_deserializer(self, arg: DeField[Any]) -> str:
         """
         Render rvalue for the field with custom deserializer.
         """
@@ -700,7 +701,7 @@ class Renderer:
             raise SerdeError("Missing custom field deserializer")
         return f"{arg.deserializer.name}({arg.data})"
 
-    def custom_class_deserializer(self, arg: DeField, code: str) -> str:
+    def custom_class_deserializer(self, arg: DeField[Any], code: str) -> str:
         """
         Render custom class deserializer.
         """
@@ -710,7 +711,7 @@ class Renderer:
             f"default=lambda: {code})"
         )
 
-    def dataclass(self, arg: DeField) -> str:
+    def dataclass(self, arg: DeField[Any]) -> str:
         if not arg.flatten:
             # e.g. "data['field']" will be used as variable name.
             var = arg.data
@@ -737,7 +738,7 @@ class Renderer:
 
         return f"{class_name}.{SERDE_SCOPE}.funcs['{self.func}'](data={var}, {opts})"
 
-    def opt(self, arg: DeField) -> str:
+    def opt(self, arg: DeField[Any]) -> str:
         """
         Render rvalue for Optional.
 
@@ -766,7 +767,7 @@ reuse_instances=reuse_instances)) if data.get("f") is not None else None'
             exists = f'{arg.datavar}.get("{arg.conv_name()}") is not None'
         return f"({self.render(value_arg)}) if {exists} else None"
 
-    def list(self, arg: DeField) -> str:
+    def list(self, arg: DeField[Any]) -> str:
         """
         Render rvalue for list.
 
@@ -782,7 +783,7 @@ reuse_instances=reuse_instances)) if data.get("f") is not None else None'
         else:
             return f"[{self.render(arg[0])} for v in {arg.data}]"
 
-    def set(self, arg: DeField) -> str:
+    def set(self, arg: DeField[Any]) -> str:
         """
         Render rvalue for set.
 
@@ -800,7 +801,7 @@ reuse_instances=reuse_instances)) if data.get("f") is not None else None'
         else:
             return f"set({self.render(arg[0])} for v in {arg.data})"
 
-    def tuple(self, arg: DeField) -> str:
+    def tuple(self, arg: DeField[Any]) -> str:
         """
         Render rvalue for tuple.
 
@@ -834,7 +835,7 @@ variable_type_args=None, reuse_instances=reuse_instances),)"
                 values.append(self.render(inner))
             return f'({", ".join(values)},)'  # trailing , is required for single element tuples
 
-    def dict(self, arg: DeField) -> str:
+    def dict(self, arg: DeField[Any]) -> str:
         """
         Render rvalue for dict.
 
@@ -870,10 +871,10 @@ variable_type_args=None, reuse_instances=reuse_instances) for v in v] for k, v i
             v = arg.value_field()
             return f"{{{self.render(k)}: {self.render(v)} for k, v in {arg.data}.items()}}"
 
-    def enum(self, arg: DeField) -> str:
+    def enum(self, arg: DeField[Any]) -> str:
         return f"{typename(arg.type)}({self.primitive(arg)})"
 
-    def primitive(self, arg: DeField, suppress_coerce: bool = False) -> str:
+    def primitive(self, arg: DeField[Any], suppress_coerce: bool = False) -> str:
         """
         Render rvalue for primitives.
 
@@ -896,23 +897,23 @@ variable_type_args=None, reuse_instances=reuse_instances) for v in v] for k, v i
         else:
             return f"coerce({typ}, {dat})"
 
-    def c_tor(self, arg: DeField) -> str:
+    def c_tor(self, arg: DeField[Any]) -> str:
         return f"{typename(arg.type)}({arg.data})"
 
-    def c_tor_with_check(self, arg: DeField, ctor: Optional[str] = None) -> str:
+    def c_tor_with_check(self, arg: DeField[Any], ctor: Optional[str] = None) -> str:
         if ctor is None:
             ctor = self.c_tor(arg)
         return f"{arg.data} if isinstance({arg.data}, {typename(arg.type)}) else {ctor}"
 
-    def union_func(self, arg: DeField) -> str:
+    def union_func(self, arg: DeField[Any]) -> str:
         func_name = union_func_name(UNION_DE_PREFIX, type_args(arg.type))
         return f"serde_scope.funcs['{func_name}'](cls=cls, data={arg.data}, reuse_instances=reuse_instances)"
 
-    def literal(self, arg: DeField) -> str:
+    def literal(self, arg: DeField[Any]) -> str:
         func_name = literal_func_name(type_args(arg.type))
         return f"serde_scope.funcs['{func_name}'](cls=cls, data={arg.data}, reuse_instances=reuse_instances)"
 
-    def default(self, arg: DeField, code: str) -> str:
+    def default(self, arg: DeField[Any], code: str) -> str:
         if arg.alias:
             aliases = (f'"{s}"' for s in [arg.name, *arg.alias])
             exists = f'_exists_by_aliases({arg.datavar}, [{",".join(aliases)}])'
@@ -926,20 +927,20 @@ variable_type_args=None, reuse_instances=reuse_instances) for v in v] for k, v i
             return code
 
 
-def to_arg(f: DeField, index: int, rename_all: Optional[str] = None) -> DeField:
+def to_arg(f: DeField[T], index: int, rename_all: Optional[str] = None) -> DeField[T]:
     f.index = index
     f.data = "data"
     f.case = f.case or rename_all
     return f
 
 
-def to_iter_arg(f: DeField, *args: Any, **kwargs: Any) -> DeField:
+def to_iter_arg(f: DeField[T], *args: Any, **kwargs: Any) -> DeField[T]:
     f = to_arg(f, *args, **kwargs)
     f.iterbased = True
     return f
 
 
-def renderable(f: DeField) -> bool:
+def renderable(f: DeField[Any]) -> bool:
     return f.init
 
 

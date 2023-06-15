@@ -1,19 +1,21 @@
 """
 pyserde core module.
 """
+from __future__ import annotations
 import dataclasses
 import enum
 import functools
 import logging
 import re
 from dataclasses import dataclass
-from typing import Any, Callable, Dict, List, Mapping, Optional, TypeVar, Union
+from typing import Any, Callable, Dict, List, Mapping, Optional, Union, Generic, TypeVar
 
 import casefy
 import jinja2
 from typing_extensions import Type, get_type_hints
 
 from .compat import (
+    T,
     SerdeError,
     dataclass_fields,
     get_origin,
@@ -370,14 +372,14 @@ def field(
 
 
 @dataclass
-class Field:
+class Field(Generic[T]):
     """
     Field class is similar to `dataclasses.Field`. It provides pyserde specific options.
 
     `type`, `name`, `default` and `default_factory` are the same members as `dataclasses.Field`.
     """
 
-    type: Type[Any]
+    type: Type[T]
     """ Type of Field """
     name: Optional[str]
     """ Name of Field """
@@ -404,7 +406,7 @@ class Field:
     type_args: Optional[List[str]] = None
 
     @classmethod
-    def from_dataclass(cls, f: dataclasses.Field, parent: Optional[Type[Any]] = None) -> "Field":
+    def from_dataclass(cls: Type[T], f: dataclasses.Field, parent: Optional[Type[Any]] = None) -> Field[T]:
         """
         Create `Field` object from `dataclasses.Field`.
         """
@@ -480,7 +482,7 @@ class Field:
         return self.type == self.parent
 
     @staticmethod
-    def mangle(field: dataclasses.Field, name: str) -> str:
+    def mangle(field: Field[T], name: str) -> str:
         """
         Get mangled name based on field name.
         """
@@ -497,7 +499,7 @@ class Field:
         return not getattr(self, "iterbased", False) and (has_default(self) or has_default_factory(self))
 
 
-F = TypeVar("F", bound=Field)
+F = TypeVar("F", bound=Field[Any])
 
 
 def fields(field_cls: Type[F], cls: Type[Any], serialize_class_var: bool = False) -> List[F]:
@@ -511,10 +513,10 @@ def fields(field_cls: Type[F], cls: Type[Any], serialize_class_var: bool = False
             if is_class_var(typ):
                 fields.append(field_cls(typ, name, default=getattr(cls, name)))
 
-    return fields
+    return fields  # type: ignore
 
 
-def conv(f: Field, case: Optional[str] = None) -> str:
+def conv(f: Field[Any], case: Optional[str] = None) -> str:
     """
     Convert field name.
     """
@@ -722,7 +724,7 @@ class TypeCheck:
     def is_coerce(self) -> bool:
         return self.kind == self.Kind.Coerce
 
-    def __call__(self, **kwargs) -> "TypeCheck":
+    def __call__(self, **kwargs: Any) -> TypeCheck:
         # TODO
         return self
 

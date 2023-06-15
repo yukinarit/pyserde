@@ -1,6 +1,7 @@
 """
 bench.py - Benchmarking pyserde.
 """
+from __future__ import annotations
 import json
 import timeit
 from dataclasses import dataclass, field
@@ -103,7 +104,7 @@ runners_base = ("raw", "dc", "ps")
 runners_extra = ("da", "mc", "ms", "at", "ca")
 
 
-def run(opt: Opt, name: str, tc: "TestCase"):
+def run(opt: Opt, name: str, tc: TestCase):
     """
     Run benchmark.
     """
@@ -122,7 +123,7 @@ class TestCase:
     number: int
 
     @classmethod
-    def make(cls, size: Size, expected=None, number=10000) -> Dict[str, "TestCase"]:
+    def make(cls, size: Size, expected=None, number=10000) -> Dict[Size, TestCase]:
         return {size: TestCase(size, expected, number)}
 
 
