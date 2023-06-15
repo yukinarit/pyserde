@@ -3,6 +3,7 @@ This module provides `serialize`, `is_serializable` `to_dict`, `to_tuple` and cl
 associated with serialization.
 """
 
+from __future__ import annotations
 import abc
 import copy
 import dataclasses
@@ -151,7 +152,7 @@ GENERATION_STACK = []
 
 @dataclass_transform()
 def serialize(
-    _cls=None,
+    _cls: Optional[Type[T]] = None,
     rename_all: Optional[str] = None,
     reuse_instances_default: bool = True,
     convert_sets_default: bool = False,
@@ -159,8 +160,8 @@ def serialize(
     tagging: Tagging = DefaultTagging,
     type_check: TypeCheck = NoCheck,
     serialize_class_var: bool = False,
-    **kwargs,
-):
+    **kwargs: Any,
+) -> Type[T]:
     """
     A dataclass with this decorator is serializable into any of the data formats supported by pyserde.
 
@@ -179,7 +180,7 @@ def serialize(
     '{"i":10,"s":"foo","f":100.0,"b":true}'
     """
 
-    def wrap(cls: Type[Any]):
+    def wrap(cls: Type[T]) -> Type[T]:
         tagging.check()
 
         # If no `dataclass` found in the class, dataclassify it automatically.
@@ -216,7 +217,7 @@ def serialize(
         g["TypeCheck"] = TypeCheck
         g["NoCheck"] = NoCheck
         g["coerce"] = coerce
-        if serialize:
+        if serializer:
             g["serde_custom_class_serializer"] = functools.partial(serde_custom_class_serializer, custom=serializer)
 
         # Collect types used in the generated code.
@@ -394,12 +395,10 @@ def to_dict(o, reuse_instances: bool = ..., convert_sets: bool = ...) -> Dict[An
 
 
 @dataclass
-class SeField(Field):
+class SeField(Field[T]):
     """
     Field class for serialization.
     """
-
-    parent: Optional["SeField"] = None
 
     @property
     def varname(self) -> str:
@@ -414,12 +413,12 @@ class SeField(Field):
                 raise SerdeError("Field name is None.")
             return self.name
 
-    def __getitem__(self, n: int) -> "SeField":
+    def __getitem__(self, n: int) -> SeField[Any]:
         typ = type_args(self.type)[n]
         return SeField(typ, name=None)
 
 
-def sefields(cls: Type[Any], serialize_class_var: bool = False) -> Iterator[SeField]:
+def sefields(cls: Type[Any], serialize_class_var: bool = False) -> Iterator[SeField[Any]]:
     """
     Iterate fields for serialization.
     """
@@ -576,7 +575,7 @@ class LRenderer:
     case: Optional[str]
     serialize_class_var: bool = False
 
-    def render(self, arg: SeField) -> str:
+    def render(self, arg: SeField[Any]) -> str:
         """
         Render lvalue
         """
@@ -585,7 +584,7 @@ class LRenderer:
         else:
             return f'res["{arg.conv_name(self.case)}"]'
 
-    def flatten(self, arg: SeField) -> str:
+    def flatten(self, arg: SeField[Any]) -> str:
         """
         Render field with flatten attribute.
         """
@@ -607,7 +606,7 @@ class Renderer:
     """ Suppress type coercing because generated union serializer has its own type checking """
     serialize_class_var: bool = False
 
-    def render(self, arg: SeField) -> str:
+    def render(self, arg: SeField[Any]) -> str:
         """
         Render rvalue
 
@@ -694,14 +693,14 @@ convert_sets=convert_sets), coerce(int, foo[2]),)"
         else:
             return res
 
-    def custom_field_serializer(self, arg: SeField) -> str:
+    def custom_field_serializer(self, arg: SeField[Any]) -> str:
         """
         Render rvalue for the field with custom serializer.
         """
         assert arg.serializer
         return f"{arg.serializer.name}({arg.varname})"
 
-    def dataclass(self, arg: SeField) -> str:
+    def dataclass(self, arg: SeField[Any]) -> str:
         """
         Render rvalue for dataclass.
         """
@@ -717,7 +716,7 @@ convert_sets=convert_sets), coerce(int, foo[2]),)"
                 " reuse_instances=reuse_instances, convert_sets=convert_sets)"
             )
 
-    def opt(self, arg: SeField) -> str:
+    def opt(self, arg: SeField[Any]) -> str:
         """
         Render rvalue for optional.
         """
@@ -728,7 +727,7 @@ convert_sets=convert_sets), coerce(int, foo[2]),)"
             inner.name = arg.varname
             return f"({self.render(inner)}) if {arg.varname} is not None else None"
 
-    def list(self, arg: SeField) -> str:
+    def list(self, arg: SeField[Any]) -> str:
         """
         Render rvalue for list.
         """
@@ -739,7 +738,7 @@ convert_sets=convert_sets), coerce(int, foo[2]),)"
             earg.name = "v"
             return f"[{self.render(earg)} for v in {arg.varname}]"
 
-    def set(self, arg: SeField) -> str:
+    def set(self, arg: SeField[Any]) -> str:
         """
         Render rvalue for set.
         """
@@ -753,7 +752,7 @@ convert_sets=convert_sets), coerce(int, foo[2]),)"
                 f"if convert_sets else set({self.render(earg)} for v in {arg.varname})"
             )
 
-    def tuple(self, arg: SeField) -> str:
+    def tuple(self, arg: SeField[Any]) -> str:
         """
         Render rvalue for tuple.
         """
@@ -771,7 +770,7 @@ convert_sets=convert_sets), coerce(int, foo[2]),)"
                 rvalues.append(self.render(r))
             return f"({', '.join(rvalues)},)"  # trailing , is required for single element tuples
 
-    def dict(self, arg: SeField) -> str:
+    def dict(self, arg: SeField[Any]) -> str:
         """
         Render rvalue for dict.
         """
@@ -784,10 +783,10 @@ convert_sets=convert_sets), coerce(int, foo[2]),)"
             varg.name = "v"
             return f"{{{self.render(karg)}: {self.render(varg)} for k, v in {arg.varname}.items()}}"
 
-    def enum(self, arg: SeField) -> str:
+    def enum(self, arg: SeField[Any]) -> str:
         return f"enum_value({typename(arg.type)}, {arg.varname})"
 
-    def primitive(self, arg: SeField) -> str:
+    def primitive(self, arg: SeField[Any]) -> str:
         """
         Render rvalue for primitives.
         """
@@ -798,14 +797,14 @@ convert_sets=convert_sets), coerce(int, foo[2]),)"
         else:
             return f"coerce({typ}, {var})"
 
-    def string(self, arg: SeField) -> str:
+    def string(self, arg: SeField[Any]) -> str:
         return f"str({arg.varname})"
 
-    def union_func(self, arg: SeField) -> str:
+    def union_func(self, arg: SeField[Any]) -> str:
         func_name = union_func_name(UNION_SE_PREFIX, type_args(arg.type))
         return f"serde_scope.funcs['{func_name}']({arg.varname}, reuse_instances, convert_sets)"
 
-    def literal(self, arg: SeField) -> str:
+    def literal(self, arg: SeField[Any]) -> str:
         return f"{arg.varname}"
 
 
