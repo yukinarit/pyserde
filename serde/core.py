@@ -19,8 +19,6 @@ from .compat import (
     SerdeError,
     dataclass_fields,
     get_origin,
-    has_default,
-    has_default_factory,
     is_bare_dict,
     is_bare_list,
     is_bare_set,
@@ -78,10 +76,10 @@ class SerdeScope:
     cls: Type[Any]
     """ The exact class this scope is for (needed to distinguish scopes between inherited classes) """
 
-    funcs: Dict[str, Callable] = dataclasses.field(default_factory=dict)
+    funcs: Dict[str, Callable[..., Any]] = dataclasses.field(default_factory=dict)
     """ Generated serialize and deserialize functions """
 
-    defaults: Dict[str, Union[Callable, Any]] = dataclasses.field(default_factory=dict)
+    defaults: Dict[str, Union[Callable[..., Any], Any]] = dataclasses.field(default_factory=dict)
     """ Default values of the dataclass fields (factories & normal values) """
 
     code: Dict[str, str] = dataclasses.field(default_factory=dict)
@@ -136,17 +134,17 @@ class SerdeScope:
 
         return "\n".join(res)
 
-    def _justify(self, s: str, length=50) -> str:
+    def _justify(self, s: str, length: int = 50) -> str:
         white_spaces = int((50 - len(s)) / 2)
         return " " * (white_spaces if white_spaces > 0 else 0) + s
 
 
-def raise_unsupported_type(obj):
+def raise_unsupported_type(obj: Any) -> None:
     # needed because we can not render a raise statement everywhere, e.g. as argument
     raise SerdeError(f"Unsupported type: {typename(type(obj))}")
 
 
-def gen(code: str, globals: Dict = None, locals: Dict = None) -> str:
+def gen(code: str, globals: Optional[Dict[str, Any]] = None, locals: Optional[Dict[str, Any]] = None) -> str:
     """
     A wrapper of builtin `exec` function.
     """
@@ -162,7 +160,7 @@ def gen(code: str, globals: Dict = None, locals: Dict = None) -> str:
     return code
 
 
-def add_func(serde_scope: SerdeScope, func_name: str, func_code: str, globals: Dict) -> None:
+def add_func(serde_scope: SerdeScope, func_name: str, func_code: str, globals: Dict[str, Any]) -> None:
     """
     Generate a function and add it to a SerdeScope's `funcs` dictionary.
 
@@ -593,7 +591,7 @@ class Tagging:
         return self.kind == self.Kind.Untagged
 
     @classmethod
-    def is_taggable(cls, typ: Any) -> bool:
+    def is_taggable(cls, typ: Type[Any]) -> bool:
         return dataclasses.is_dataclass(typ)
 
     def check(self) -> None:
@@ -619,7 +617,7 @@ def ensure(expr: Any, description: str) -> None:
         raise Exception(description)
 
 
-def should_impl_dataclass(cls):
+def should_impl_dataclass(cls: Type[Any]) -> bool:
     """
     Test if class doesn't have @dataclass.
 
@@ -744,3 +742,36 @@ def is_coercible(typ: Type[Any], obj: Any) -> bool:
     if obj is None:
         return False
     return True
+
+
+def has_default(field: Field[Any]) -> bool:
+    """
+    Test if the field has default value.
+
+    >>> @dataclasses.dataclass
+    ... class C:
+    ...     a: int
+    ...     d: int = 10
+    >>> has_default(dataclasses.fields(C)[0])
+    False
+    >>> has_default(dataclasses.fields(C)[1])
+    True
+    """
+    return not isinstance(field.default, dataclasses._MISSING_TYPE)
+
+
+def has_default_factory(field: Field[Any]) -> bool:
+    """
+    Test if the field has default factory.
+
+    >>> from typing import Dict
+    >>> @dataclasses.dataclass
+    ... class C:
+    ...     a: int
+    ...     d: Dict = dataclasses.field(default_factory=dict)
+    >>> has_default_factory(dataclasses.fields(C)[0])
+    False
+    >>> has_default_factory(dataclasses.fields(C)[1])
+    True
+    """
+    return not isinstance(field.default_factory, dataclasses._MISSING_TYPE)
