@@ -71,8 +71,12 @@ def param(val, typ, filter: Optional[Callable] = None):
     return (val, typ, filter or (lambda se, de, opt: False))
 
 
-def toml_not_supported(se, de, opt) -> bool:
+def toml_not_supported(se: Any, de: Any, opt: Any) -> bool:
     return se is to_toml
+
+
+def yaml_not_supported(se: Any, de: Any, opt: Any) -> bool:
+    return se is to_yaml
 
 
 types: List = [
@@ -103,6 +107,7 @@ types: List = [
     param({"a": [1]}, DefaultDict[str, List[int]]),
     param(data.Pri(10, "foo", 100.0, True), data.Pri),  # dataclass
     param(data.Pri(10, "foo", 100.0, True), Optional[data.Pri]),
+    param(data.PrimitiveSubclass(data.StrSubclass("a")), data.PrimitiveSubclass, yaml_not_supported),
     param(None, Optional[data.Pri], toml_not_supported),
     param(data.Recur(data.Recur(None, None, None), None, None), data.Recur, toml_not_supported),
     param(

@@ -276,3 +276,13 @@ class Init:
 
     def __post_init__(self) -> None:
         self.b = self.a * 10
+
+
+class StrSubclass(str):
+    pass
+
+
+@serde
+@dataclass
+class PrimitiveSubclass:
+    v: StrSubclass
