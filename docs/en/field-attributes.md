@@ -154,7 +154,7 @@ class Bar:
 class Foo:
     a: int
     b: str
-    bar: Bar = field(flatten=True})
+    bar: Bar = field(flatten=True)
 ```
 
 Bar's c, d fields are deserialized as if they are defined in Foo. So you will get `{"a":10,"b":"foo","c":100.0,"d":true}` if you serialize `Foo` into JSON.
