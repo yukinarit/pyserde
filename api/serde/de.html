@@ -95,50 +95,50 @@ associated with deserialization.</p>
 </span><span id="L-26"><a href="#L-26"><span class="linenos">  26</span></a>    <span class="n">get_generic_arg</span><span class="p">,</span>
 </span><span id="L-27"><a href="#L-27"><span class="linenos">  27</span></a>    <span class="n">get_origin</span><span class="p">,</span>
 </span><span id="L-28"><a href="#L-28"><span class="linenos">  28</span></a>    <span class="n">get_type_var_names</span><span class="p">,</span>
-</span><span id="L-29"><a href="#L-29"><span class="linenos">  29</span></a>    <span class="n">has_default</span><span class="p">,</span>
-</span><span id="L-30"><a href="#L-30"><span class="linenos">  30</span></a>    <span class="n">has_default_factory</span><span class="p">,</span>
-</span><span id="L-31"><a href="#L-31"><span class="linenos">  31</span></a>    <span class="n">is_any</span><span class="p">,</span>
-</span><span id="L-32"><a href="#L-32"><span class="linenos">  32</span></a>    <span class="n">is_bare_dict</span><span class="p">,</span>
-</span><span id="L-33"><a href="#L-33"><span class="linenos">  33</span></a>    <span class="n">is_bare_list</span><span class="p">,</span>
-</span><span id="L-34"><a href="#L-34"><span class="linenos">  34</span></a>    <span class="n">is_bare_set</span><span class="p">,</span>
-</span><span id="L-35"><a href="#L-35"><span class="linenos">  35</span></a>    <span class="n">is_bare_tuple</span><span class="p">,</span>
-</span><span id="L-36"><a href="#L-36"><span class="linenos">  36</span></a>    <span class="n">is_datetime</span><span class="p">,</span>
-</span><span id="L-37"><a href="#L-37"><span class="linenos">  37</span></a>    <span class="n">is_default_dict</span><span class="p">,</span>
-</span><span id="L-38"><a href="#L-38"><span class="linenos">  38</span></a>    <span class="n">is_dict</span><span class="p">,</span>
-</span><span id="L-39"><a href="#L-39"><span class="linenos">  39</span></a>    <span class="n">is_ellipsis</span><span class="p">,</span>
-</span><span id="L-40"><a href="#L-40"><span class="linenos">  40</span></a>    <span class="n">is_enum</span><span class="p">,</span>
-</span><span id="L-41"><a href="#L-41"><span class="linenos">  41</span></a>    <span class="n">is_frozen_set</span><span class="p">,</span>
-</span><span id="L-42"><a href="#L-42"><span class="linenos">  42</span></a>    <span class="n">is_generic</span><span class="p">,</span>
-</span><span id="L-43"><a href="#L-43"><span class="linenos">  43</span></a>    <span class="n">is_list</span><span class="p">,</span>
-</span><span id="L-44"><a href="#L-44"><span class="linenos">  44</span></a>    <span class="n">is_literal</span><span class="p">,</span>
-</span><span id="L-45"><a href="#L-45"><span class="linenos">  45</span></a>    <span class="n">is_none</span><span class="p">,</span>
-</span><span id="L-46"><a href="#L-46"><span class="linenos">  46</span></a>    <span class="n">is_opt</span><span class="p">,</span>
-</span><span id="L-47"><a href="#L-47"><span class="linenos">  47</span></a>    <span class="n">is_primitive</span><span class="p">,</span>
-</span><span id="L-48"><a href="#L-48"><span class="linenos">  48</span></a>    <span class="n">is_set</span><span class="p">,</span>
-</span><span id="L-49"><a href="#L-49"><span class="linenos">  49</span></a>    <span class="n">is_str_serializable</span><span class="p">,</span>
-</span><span id="L-50"><a href="#L-50"><span class="linenos">  50</span></a>    <span class="n">is_tuple</span><span class="p">,</span>
-</span><span id="L-51"><a href="#L-51"><span class="linenos">  51</span></a>    <span class="n">is_union</span><span class="p">,</span>
-</span><span id="L-52"><a href="#L-52"><span class="linenos">  52</span></a>    <span class="n">is_variable_tuple</span><span class="p">,</span>
-</span><span id="L-53"><a href="#L-53"><span class="linenos">  53</span></a>    <span class="n">iter_literals</span><span class="p">,</span>
-</span><span id="L-54"><a href="#L-54"><span class="linenos">  54</span></a>    <span class="n">iter_types</span><span class="p">,</span>
-</span><span id="L-55"><a href="#L-55"><span class="linenos">  55</span></a>    <span class="n">iter_unions</span><span class="p">,</span>
-</span><span id="L-56"><a href="#L-56"><span class="linenos">  56</span></a>    <span class="n">type_args</span><span class="p">,</span>
-</span><span id="L-57"><a href="#L-57"><span class="linenos">  57</span></a>    <span class="n">typename</span><span class="p">,</span>
-</span><span id="L-58"><a href="#L-58"><span class="linenos">  58</span></a><span class="p">)</span>
-</span><span id="L-59"><a href="#L-59"><span class="linenos">  59</span></a><span class="kn">from</span> <span class="nn">.core</span> <span class="kn">import</span> <span class="p">(</span>
-</span><span id="L-60"><a href="#L-60"><span class="linenos">  60</span></a>    <span class="n">FROM_DICT</span><span class="p">,</span>
-</span><span id="L-61"><a href="#L-61"><span class="linenos">  61</span></a>    <span class="n">FROM_ITER</span><span class="p">,</span>
-</span><span id="L-62"><a href="#L-62"><span class="linenos">  62</span></a>    <span class="n">SERDE_SCOPE</span><span class="p">,</span>
-</span><span id="L-63"><a href="#L-63"><span class="linenos">  63</span></a>    <span class="n">TYPE_CHECK</span><span class="p">,</span>
-</span><span id="L-64"><a href="#L-64"><span class="linenos">  64</span></a>    <span class="n">UNION_DE_PREFIX</span><span class="p">,</span>
-</span><span id="L-65"><a href="#L-65"><span class="linenos">  65</span></a>    <span class="n">DefaultTagging</span><span class="p">,</span>
-</span><span id="L-66"><a href="#L-66"><span class="linenos">  66</span></a>    <span class="n">Field</span><span class="p">,</span>
-</span><span id="L-67"><a href="#L-67"><span class="linenos">  67</span></a>    <span class="n">NoCheck</span><span class="p">,</span>
-</span><span id="L-68"><a href="#L-68"><span class="linenos">  68</span></a>    <span class="n">SerdeScope</span><span class="p">,</span>
-</span><span id="L-69"><a href="#L-69"><span class="linenos">  69</span></a>    <span class="n">Tagging</span><span class="p">,</span>
-</span><span id="L-70"><a href="#L-70"><span class="linenos">  70</span></a>    <span class="n">TypeCheck</span><span class="p">,</span>
-</span><span id="L-71"><a href="#L-71"><span class="linenos">  71</span></a>    <span class="n">add_func</span><span class="p">,</span>
-</span><span id="L-72"><a href="#L-72"><span class="linenos">  72</span></a>    <span class="n">coerce</span><span class="p">,</span>
+</span><span id="L-29"><a href="#L-29"><span class="linenos">  29</span></a>    <span class="n">is_any</span><span class="p">,</span>
+</span><span id="L-30"><a href="#L-30"><span class="linenos">  30</span></a>    <span class="n">is_bare_dict</span><span class="p">,</span>
+</span><span id="L-31"><a href="#L-31"><span class="linenos">  31</span></a>    <span class="n">is_bare_list</span><span class="p">,</span>
+</span><span id="L-32"><a href="#L-32"><span class="linenos">  32</span></a>    <span class="n">is_bare_set</span><span class="p">,</span>
+</span><span id="L-33"><a href="#L-33"><span class="linenos">  33</span></a>    <span class="n">is_bare_tuple</span><span class="p">,</span>
+</span><span id="L-34"><a href="#L-34"><span class="linenos">  34</span></a>    <span class="n">is_datetime</span><span class="p">,</span>
+</span><span id="L-35"><a href="#L-35"><span class="linenos">  35</span></a>    <span class="n">is_default_dict</span><span class="p">,</span>
+</span><span id="L-36"><a href="#L-36"><span class="linenos">  36</span></a>    <span class="n">is_dict</span><span class="p">,</span>
+</span><span id="L-37"><a href="#L-37"><span class="linenos">  37</span></a>    <span class="n">is_ellipsis</span><span class="p">,</span>
+</span><span id="L-38"><a href="#L-38"><span class="linenos">  38</span></a>    <span class="n">is_enum</span><span class="p">,</span>
+</span><span id="L-39"><a href="#L-39"><span class="linenos">  39</span></a>    <span class="n">is_frozen_set</span><span class="p">,</span>
+</span><span id="L-40"><a href="#L-40"><span class="linenos">  40</span></a>    <span class="n">is_generic</span><span class="p">,</span>
+</span><span id="L-41"><a href="#L-41"><span class="linenos">  41</span></a>    <span class="n">is_list</span><span class="p">,</span>
+</span><span id="L-42"><a href="#L-42"><span class="linenos">  42</span></a>    <span class="n">is_literal</span><span class="p">,</span>
+</span><span id="L-43"><a href="#L-43"><span class="linenos">  43</span></a>    <span class="n">is_none</span><span class="p">,</span>
+</span><span id="L-44"><a href="#L-44"><span class="linenos">  44</span></a>    <span class="n">is_opt</span><span class="p">,</span>
+</span><span id="L-45"><a href="#L-45"><span class="linenos">  45</span></a>    <span class="n">is_primitive</span><span class="p">,</span>
+</span><span id="L-46"><a href="#L-46"><span class="linenos">  46</span></a>    <span class="n">is_set</span><span class="p">,</span>
+</span><span id="L-47"><a href="#L-47"><span class="linenos">  47</span></a>    <span class="n">is_str_serializable</span><span class="p">,</span>
+</span><span id="L-48"><a href="#L-48"><span class="linenos">  48</span></a>    <span class="n">is_tuple</span><span class="p">,</span>
+</span><span id="L-49"><a href="#L-49"><span class="linenos">  49</span></a>    <span class="n">is_union</span><span class="p">,</span>
+</span><span id="L-50"><a href="#L-50"><span class="linenos">  50</span></a>    <span class="n">is_variable_tuple</span><span class="p">,</span>
+</span><span id="L-51"><a href="#L-51"><span class="linenos">  51</span></a>    <span class="n">iter_literals</span><span class="p">,</span>
+</span><span id="L-52"><a href="#L-52"><span class="linenos">  52</span></a>    <span class="n">iter_types</span><span class="p">,</span>
+</span><span id="L-53"><a href="#L-53"><span class="linenos">  53</span></a>    <span class="n">iter_unions</span><span class="p">,</span>
+</span><span id="L-54"><a href="#L-54"><span class="linenos">  54</span></a>    <span class="n">type_args</span><span class="p">,</span>
+</span><span id="L-55"><a href="#L-55"><span class="linenos">  55</span></a>    <span class="n">typename</span><span class="p">,</span>
+</span><span id="L-56"><a href="#L-56"><span class="linenos">  56</span></a><span class="p">)</span>
+</span><span id="L-57"><a href="#L-57"><span class="linenos">  57</span></a><span class="kn">from</span> <span class="nn">.core</span> <span class="kn">import</span> <span class="p">(</span>
+</span><span id="L-58"><a href="#L-58"><span class="linenos">  58</span></a>    <span class="n">FROM_DICT</span><span class="p">,</span>
+</span><span id="L-59"><a href="#L-59"><span class="linenos">  59</span></a>    <span class="n">FROM_ITER</span><span class="p">,</span>
+</span><span id="L-60"><a href="#L-60"><span class="linenos">  60</span></a>    <span class="n">SERDE_SCOPE</span><span class="p">,</span>
+</span><span id="L-61"><a href="#L-61"><span class="linenos">  61</span></a>    <span class="n">TYPE_CHECK</span><span class="p">,</span>
+</span><span id="L-62"><a href="#L-62"><span class="linenos">  62</span></a>    <span class="n">UNION_DE_PREFIX</span><span class="p">,</span>
+</span><span id="L-63"><a href="#L-63"><span class="linenos">  63</span></a>    <span class="n">DefaultTagging</span><span class="p">,</span>
+</span><span id="L-64"><a href="#L-64"><span class="linenos">  64</span></a>    <span class="n">Field</span><span class="p">,</span>
+</span><span id="L-65"><a href="#L-65"><span class="linenos">  65</span></a>    <span class="n">NoCheck</span><span class="p">,</span>
+</span><span id="L-66"><a href="#L-66"><span class="linenos">  66</span></a>    <span class="n">SerdeScope</span><span class="p">,</span>
+</span><span id="L-67"><a href="#L-67"><span class="linenos">  67</span></a>    <span class="n">Tagging</span><span class="p">,</span>
+</span><span id="L-68"><a href="#L-68"><span class="linenos">  68</span></a>    <span class="n">TypeCheck</span><span class="p">,</span>
+</span><span id="L-69"><a href="#L-69"><span class="linenos">  69</span></a>    <span class="n">add_func</span><span class="p">,</span>
+</span><span id="L-70"><a href="#L-70"><span class="linenos">  70</span></a>    <span class="n">coerce</span><span class="p">,</span>
+</span><span id="L-71"><a href="#L-71"><span class="linenos">  71</span></a>    <span class="n">has_default</span><span class="p">,</span>
+</span><span id="L-72"><a href="#L-72"><span class="linenos">  72</span></a>    <span class="n">has_default_factory</span><span class="p">,</span>
 </span><span id="L-73"><a href="#L-73"><span class="linenos">  73</span></a>    <span class="n">ensure</span><span class="p">,</span>
 </span><span id="L-74"><a href="#L-74"><span class="linenos">  74</span></a>    <span class="n">fields</span><span class="p">,</span>
 </span><span id="L-75"><a href="#L-75"><span class="linenos">  75</span></a>    <span class="n">is_instance</span><span class="p">,</span>
@@ -178,14 +178,14 @@ associated with deserialization.</p>
 </span><span id="L-109"><a href="#L-109"><span class="linenos"> 109</span></a>        <span class="k">return</span> <span class="n">default</span><span class="p">()</span>
 </span><span id="L-110"><a href="#L-110"><span class="linenos"> 110</span></a>
 </span><span id="L-111"><a href="#L-111"><span class="linenos"> 111</span></a>
-</span><span id="L-112"><a href="#L-112"><span class="linenos"> 112</span></a><span class="k">def</span> <span class="nf">default_deserializer</span><span class="p">(</span><span class="n">_cls</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span> <span class="n">obj</span><span class="p">):</span>
+</span><span id="L-112"><a href="#L-112"><span class="linenos"> 112</span></a><span class="k">def</span> <span class="nf">default_deserializer</span><span class="p">(</span><span class="n">_cls</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span> <span class="n">obj</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
 </span><span id="L-113"><a href="#L-113"><span class="linenos"> 113</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 </span><span id="L-114"><a href="#L-114"><span class="linenos"> 114</span></a><span class="sd">    Marker function to tell serde to use the default deserializer. It&#39;s used when custom deserializer is specified</span>
 </span><span id="L-115"><a href="#L-115"><span class="linenos"> 115</span></a><span class="sd">    at the class but you want to override a field with the default deserializer.</span>
 </span><span id="L-116"><a href="#L-116"><span class="linenos"> 116</span></a><span class="sd">    &quot;&quot;&quot;</span>
 </span><span id="L-117"><a href="#L-117"><span class="linenos"> 117</span></a>
 </span><span id="L-118"><a href="#L-118"><span class="linenos"> 118</span></a>
-</span><span id="L-119"><a href="#L-119"><span class="linenos"> 119</span></a><span class="k">def</span> <span class="nf">_get_by_aliases</span><span class="p">(</span><span class="n">d</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span> <span class="n">aliases</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]):</span>
+</span><span id="L-119"><a href="#L-119"><span class="linenos"> 119</span></a><span class="k">def</span> <span class="nf">_get_by_aliases</span><span class="p">(</span><span class="n">d</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span> <span class="n">aliases</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 </span><span id="L-120"><a href="#L-120"><span class="linenos"> 120</span></a>    <span class="k">if</span> <span class="ow">not</span> <span class="n">aliases</span><span class="p">:</span>
 </span><span id="L-121"><a href="#L-121"><span class="linenos"> 121</span></a>        <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s2">&quot;Tried all aliases, but key not found&quot;</span><span class="p">)</span>
 </span><span id="L-122"><a href="#L-122"><span class="linenos"> 122</span></a>    <span class="k">if</span> <span class="n">aliases</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="n">d</span><span class="p">:</span>
@@ -194,7 +194,7 @@ associated with deserialization.</p>
 </span><span id="L-125"><a href="#L-125"><span class="linenos"> 125</span></a>        <span class="k">return</span> <span class="n">_get_by_aliases</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">aliases</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
 </span><span id="L-126"><a href="#L-126"><span class="linenos"> 126</span></a>
 </span><span id="L-127"><a href="#L-127"><span class="linenos"> 127</span></a>
-</span><span id="L-128"><a href="#L-128"><span class="linenos"> 128</span></a><span class="k">def</span> <span class="nf">_exists_by_aliases</span><span class="p">(</span><span class="n">d</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span> <span class="n">aliases</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]):</span>
+</span><span id="L-128"><a href="#L-128"><span class="linenos"> 128</span></a><span class="k">def</span> <span class="nf">_exists_by_aliases</span><span class="p">(</span><span class="n">d</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span> <span class="n">aliases</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 </span><span id="L-129"><a href="#L-129"><span class="linenos"> 129</span></a>    <span class="k">for</span> <span class="n">alias</span> <span class="ow">in</span> <span class="n">aliases</span><span class="p">:</span>
 </span><span id="L-130"><a href="#L-130"><span class="linenos"> 130</span></a>        <span class="k">if</span> <span class="n">alias</span> <span class="ow">in</span> <span class="n">d</span><span class="p">:</span>
 </span><span id="L-131"><a href="#L-131"><span class="linenos"> 131</span></a>            <span class="k">return</span> <span class="kc">True</span>
@@ -203,14 +203,14 @@ associated with deserialization.</p>
 </span><span id="L-134"><a href="#L-134"><span class="linenos"> 134</span></a>
 </span><span id="L-135"><a href="#L-135"><span class="linenos"> 135</span></a><span class="k">def</span> <span class="nf">_make_deserialize</span><span class="p">(</span>
 </span><span id="L-136"><a href="#L-136"><span class="linenos"> 136</span></a>    <span class="n">cls_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-</span><span id="L-137"><a href="#L-137"><span class="linenos"> 137</span></a>    <span class="n">fields</span><span class="p">,</span>
-</span><span id="L-138"><a href="#L-138"><span class="linenos"> 138</span></a>    <span class="o">*</span><span class="n">args</span><span class="p">,</span>
+</span><span id="L-137"><a href="#L-137"><span class="linenos"> 137</span></a>    <span class="n">fields</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span>
+</span><span id="L-138"><a href="#L-138"><span class="linenos"> 138</span></a>    <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
 </span><span id="L-139"><a href="#L-139"><span class="linenos"> 139</span></a>    <span class="n">rename_all</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 </span><span id="L-140"><a href="#L-140"><span class="linenos"> 140</span></a>    <span class="n">reuse_instances_default</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
 </span><span id="L-141"><a href="#L-141"><span class="linenos"> 141</span></a>    <span class="n">convert_sets_default</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 </span><span id="L-142"><a href="#L-142"><span class="linenos"> 142</span></a>    <span class="n">serializer</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">DeserializeFunc</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-</span><span id="L-143"><a href="#L-143"><span class="linenos"> 143</span></a>    <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
-</span><span id="L-144"><a href="#L-144"><span class="linenos"> 144</span></a><span class="p">):</span>
+</span><span id="L-143"><a href="#L-143"><span class="linenos"> 143</span></a>    <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+</span><span id="L-144"><a href="#L-144"><span class="linenos"> 144</span></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Type</span><span class="p">[</span><span class="n">Any</span><span class="p">]:</span>
 </span><span id="L-145"><a href="#L-145"><span class="linenos"> 145</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 </span><span id="L-146"><a href="#L-146"><span class="linenos"> 146</span></a><span class="sd">    Create a deserializable class programatically.</span>
 </span><span id="L-147"><a href="#L-147"><span class="linenos"> 147</span></a><span class="sd">    &quot;&quot;&quot;</span>

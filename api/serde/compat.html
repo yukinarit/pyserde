@@ -958,39 +958,6 @@
 </span><span id="L-906"><a href="#L-906"><span class="linenos">906</span></a>        <span class="k">return</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span>
 </span><span id="L-907"><a href="#L-907"><span class="linenos">907</span></a>
 </span><span id="L-908"><a href="#L-908"><span class="linenos">908</span></a>    <span class="k">return</span> <span class="n">args</span><span class="p">[</span><span class="n">orig_index</span><span class="p">]</span>
-</span><span id="L-909"><a href="#L-909"><span class="linenos">909</span></a>
-</span><span id="L-910"><a href="#L-910"><span class="linenos">910</span></a>
-</span><span id="L-911"><a href="#L-911"><span class="linenos">911</span></a><span class="k">def</span> <span class="nf">has_default</span><span class="p">(</span><span class="n">field</span><span class="p">:</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">Field</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-</span><span id="L-912"><a href="#L-912"><span class="linenos">912</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-</span><span id="L-913"><a href="#L-913"><span class="linenos">913</span></a><span class="sd">    Test if the field has default value.</span>
-</span><span id="L-914"><a href="#L-914"><span class="linenos">914</span></a>
-</span><span id="L-915"><a href="#L-915"><span class="linenos">915</span></a><span class="sd">    &gt;&gt;&gt; @dataclasses.dataclass</span>
-</span><span id="L-916"><a href="#L-916"><span class="linenos">916</span></a><span class="sd">    ... class C:</span>
-</span><span id="L-917"><a href="#L-917"><span class="linenos">917</span></a><span class="sd">    ...     a: int</span>
-</span><span id="L-918"><a href="#L-918"><span class="linenos">918</span></a><span class="sd">    ...     d: int = 10</span>
-</span><span id="L-919"><a href="#L-919"><span class="linenos">919</span></a><span class="sd">    &gt;&gt;&gt; has_default(dataclasses.fields(C)[0])</span>
-</span><span id="L-920"><a href="#L-920"><span class="linenos">920</span></a><span class="sd">    False</span>
-</span><span id="L-921"><a href="#L-921"><span class="linenos">921</span></a><span class="sd">    &gt;&gt;&gt; has_default(dataclasses.fields(C)[1])</span>
-</span><span id="L-922"><a href="#L-922"><span class="linenos">922</span></a><span class="sd">    True</span>
-</span><span id="L-923"><a href="#L-923"><span class="linenos">923</span></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="L-924"><a href="#L-924"><span class="linenos">924</span></a>    <span class="k">return</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">,</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">_MISSING_TYPE</span><span class="p">)</span>
-</span><span id="L-925"><a href="#L-925"><span class="linenos">925</span></a>
-</span><span id="L-926"><a href="#L-926"><span class="linenos">926</span></a>
-</span><span id="L-927"><a href="#L-927"><span class="linenos">927</span></a><span class="k">def</span> <span class="nf">has_default_factory</span><span class="p">(</span><span class="n">field</span><span class="p">:</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">Field</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-</span><span id="L-928"><a href="#L-928"><span class="linenos">928</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-</span><span id="L-929"><a href="#L-929"><span class="linenos">929</span></a><span class="sd">    Test if the field has default factory.</span>
-</span><span id="L-930"><a href="#L-930"><span class="linenos">930</span></a>
-</span><span id="L-931"><a href="#L-931"><span class="linenos">931</span></a><span class="sd">    &gt;&gt;&gt; from typing import Dict</span>
-</span><span id="L-932"><a href="#L-932"><span class="linenos">932</span></a><span class="sd">    &gt;&gt;&gt; @dataclasses.dataclass</span>
-</span><span id="L-933"><a href="#L-933"><span class="linenos">933</span></a><span class="sd">    ... class C:</span>
-</span><span id="L-934"><a href="#L-934"><span class="linenos">934</span></a><span class="sd">    ...     a: int</span>
-</span><span id="L-935"><a href="#L-935"><span class="linenos">935</span></a><span class="sd">    ...     d: Dict = dataclasses.field(default_factory=dict)</span>
-</span><span id="L-936"><a href="#L-936"><span class="linenos">936</span></a><span class="sd">    &gt;&gt;&gt; has_default_factory(dataclasses.fields(C)[0])</span>
-</span><span id="L-937"><a href="#L-937"><span class="linenos">937</span></a><span class="sd">    False</span>
-</span><span id="L-938"><a href="#L-938"><span class="linenos">938</span></a><span class="sd">    &gt;&gt;&gt; has_default_factory(dataclasses.fields(C)[1])</span>
-</span><span id="L-939"><a href="#L-939"><span class="linenos">939</span></a><span class="sd">    True</span>
-</span><span id="L-940"><a href="#L-940"><span class="linenos">940</span></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="L-941"><a href="#L-941"><span class="linenos">941</span></a>    <span class="k">return</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">default_factory</span><span class="p">,</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">_MISSING_TYPE</span><span class="p">)</span>
 </span></pre></div>
 
 
