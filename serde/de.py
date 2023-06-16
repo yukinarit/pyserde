@@ -26,8 +26,6 @@ from .compat import (
     get_generic_arg,
     get_origin,
     get_type_var_names,
-    has_default,
-    has_default_factory,
     is_any,
     is_bare_dict,
     is_bare_list,
@@ -70,6 +68,8 @@ from .core import (
     TypeCheck,
     add_func,
     coerce,
+    has_default,
+    has_default_factory,
     ensure,
     fields,
     is_instance,
@@ -109,14 +109,14 @@ def serde_custom_class_deserializer(cls: Type[Any], datavar, value, custom: Dese
         return default()
 
 
-def default_deserializer(_cls: Type[Any], obj):
+def default_deserializer(_cls: Type[Any], obj: Any) -> Any:
     """
     Marker function to tell serde to use the default deserializer. It's used when custom deserializer is specified
     at the class but you want to override a field with the default deserializer.
     """
 
 
-def _get_by_aliases(d: Dict[str, str], aliases: List[str]):
+def _get_by_aliases(d: Dict[str, str], aliases: List[str]) -> str:
     if not aliases:
         raise KeyError("Tried all aliases, but key not found")
     if aliases[0] in d:
@@ -125,7 +125,7 @@ def _get_by_aliases(d: Dict[str, str], aliases: List[str]):
         return _get_by_aliases(d, aliases[1:])
 
 
-def _exists_by_aliases(d: Dict[str, str], aliases: List[str]):
+def _exists_by_aliases(d: Dict[str, str], aliases: List[str]) -> bool:
     for alias in aliases:
         if alias in d:
             return True
@@ -134,14 +134,14 @@ def _exists_by_aliases(d: Dict[str, str], aliases: List[str]):
 
 def _make_deserialize(
     cls_name: str,
-    fields,
-    *args,
+    fields: List[Any],
+    *args: Any,
     rename_all: Optional[str] = None,
     reuse_instances_default: bool = True,
     convert_sets_default: bool = False,
     serializer: Optional[DeserializeFunc] = None,
-    **kwargs,
-):
+    **kwargs: Any,
+) -> Type[Any]:
     """
     Create a deserializable class programatically.
     """

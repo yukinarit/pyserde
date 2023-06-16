@@ -906,36 +906,3 @@ def get_generic_arg(
         return typing.Any
 
     return args[orig_index]
-
-
-def has_default(field: dataclasses.Field) -> bool:
-    """
-    Test if the field has default value.
-
-    >>> @dataclasses.dataclass
-    ... class C:
-    ...     a: int
-    ...     d: int = 10
-    >>> has_default(dataclasses.fields(C)[0])
-    False
-    >>> has_default(dataclasses.fields(C)[1])
-    True
-    """
-    return not isinstance(field.default, dataclasses._MISSING_TYPE)
-
-
-def has_default_factory(field: dataclasses.Field) -> bool:
-    """
-    Test if the field has default factory.
-
-    >>> from typing import Dict
-    >>> @dataclasses.dataclass
-    ... class C:
-    ...     a: int
-    ...     d: Dict = dataclasses.field(default_factory=dict)
-    >>> has_default_factory(dataclasses.fields(C)[0])
-    False
-    >>> has_default_factory(dataclasses.fields(C)[1])
-    True
-    """
-    return not isinstance(field.default_factory, dataclasses._MISSING_TYPE)
