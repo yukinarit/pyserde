@@ -759,7 +759,7 @@ class Bar:
 class Foo:
     a: int
     b: str
-    bar: Bar = field(flatten=True})
+    bar: Bar = field(flatten=True)
 </code></pre>
 <p>Bar's c, d fields are deserialized as if they are defined in Foo. So you will get <code>{&quot;a&quot;:10,&quot;b&quot;:&quot;foo&quot;,&quot;c&quot;:100.0,&quot;d&quot;:true}</code> if you serialize <code>Foo</code> into JSON.</p>
 <p>See <a href="https://github.com/yukinarit/pyserde/blob/main/examples/flatten.py">examples/flatten.py</a> for complete example.</p>
