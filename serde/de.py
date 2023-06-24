@@ -362,8 +362,6 @@ def from_obj(c: Type[T], o: Any, named: bool, reuse_instances: bool) -> T:
         maybe_generic = c
     try:
         thisfunc = functools.partial(from_obj, named=named, reuse_instances=reuse_instances)
-        if o is None:
-            return None
         if is_dataclass_without_de(c):
             deserialize(c)
             return deserializable_to_obj(c)
@@ -951,9 +949,6 @@ def {{func}}(cls=cls, maybe_generic=None, maybe_generic_type_vars=None, data=Non
   if reuse_instances is Ellipsis:
     reuse_instances = {{serde_scope.reuse_instances_default}}
 
-  if data is None:
-    return None
-
   maybe_generic_type_vars = maybe_generic_type_vars or {{cls_type_vars}}
 
   {% for f in fields %}
@@ -999,9 +994,6 @@ def {{func}}(cls=cls, maybe_generic=None, maybe_generic_type_vars=None, data=Non
              variable_type_args=None, reuse_instances = {{serde_scope.reuse_instances_default}}):
   if reuse_instances is Ellipsis:
     reuse_instances = {{serde_scope.reuse_instances_default}}
-
-  if data is None:
-    return None
 
   maybe_generic_type_vars = maybe_generic_type_vars or {{cls_type_vars}}
 
