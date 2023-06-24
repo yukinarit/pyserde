@@ -1233,3 +1233,17 @@ def test_nested_dataclass_ignore_wrapper_options() -> None:
     serialized = serde.to_dict(a)
     assert {"foo": {"myLongName": 1}} == serialized
     assert a == serde.from_dict(Wrapper, serialized)
+
+
+def test_deserialize_from_incompatible_value() -> None:
+    @serde.deserialize
+    @dataclasses.dataclass
+    class Foo:
+        v: int
+
+    with pytest.raises(serde.SerdeError):
+        assert serde.from_dict(Foo, None)
+    with pytest.raises(serde.SerdeError):
+        assert serde.from_dict(Foo, "")
+    with pytest.raises(serde.SerdeError):
+        assert serde.from_dict(Foo, 10)

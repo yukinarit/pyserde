@@ -5,9 +5,6 @@ from serde.de import from_obj
 
 
 def test_from_obj():
-    # None will be None
-    assert from_obj(int, None, False, False) is None
-
     # Primitive
     assert 10 == from_obj(int, 10, False, False)
 
