@@ -22,7 +22,7 @@ Other modules
 """
 
 from dataclasses import dataclass
-from typing import Callable, Optional, Type, overload
+from typing import Callable, Optional, Type, overload, Any
 
 from typing_extensions import dataclass_transform
 
@@ -61,6 +61,7 @@ from .se import (
     to_dict,
     to_tuple,
 )
+from . import inspect, json, msgpack, numpy, toml, pickle, yaml
 
 __all__ = [
     "serde",
@@ -131,23 +132,50 @@ def serde(
     ...
 
 
-@dataclass_transform()
+@dataclass_transform()  # type: ignore
 def serde(
-    _cls=None,
-    **kwargs,
-):  # type: ignore
+    _cls: Any = None,
+    rename_all: Optional[str] = None,
+    reuse_instances_default: bool = True,
+    convert_sets_default: bool = False,
+    serializer: Optional[SerializeFunc] = None,
+    deserializer: Optional[DeserializeFunc] = None,
+    tagging: Tagging = DefaultTagging,
+    type_check: TypeCheck = NoCheck,
+    serialize_class_var: bool = False,
+) -> Any:
     """
     serde decorator. Keyword arguments are passed in `serialize` and `deserialize`.
     """
 
-    def wrap(cls):
+    def wrap(cls: Any) -> Any:
         if should_impl_dataclass(cls):
             dataclass(cls)
-        serialize(cls, **kwargs)
-        deserialize(cls, **kwargs)
+        serialize(
+            cls,
+            rename_all=rename_all,
+            reuse_instances_default=reuse_instances_default,
+            convert_sets_default=convert_sets_default,
+            serializer=serializer,
+            deserializer=deserializer,
+            tagging=tagging,
+            type_check=type_check,
+            serialize_class_var=serialize_class_var,
+        )
+        deserialize(
+            cls,
+            rename_all=rename_all,
+            reuse_instances_default=reuse_instances_default,
+            convert_sets_default=convert_sets_default,
+            serializer=serializer,
+            deserializer=deserializer,
+            tagging=tagging,
+            type_check=type_check,
+            serialize_class_var=serialize_class_var,
+        )
         return cls
 
     if _cls is None:
-        return wrap  # type: ignore
+        return wrap
 
     return wrap(_cls)
