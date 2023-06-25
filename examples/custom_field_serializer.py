@@ -10,7 +10,8 @@ from serde.json import from_json, to_json
 class Foo:
     a: datetime
     b: datetime = field(
-        serializer=lambda x: x.strftime("%d/%m/%y"), deserializer=lambda x: datetime.strptime(x, "%d/%m/%y")
+        serializer=lambda x: x.strftime("%d/%m/%y"),
+        deserializer=lambda x: datetime.strptime(x, "%d/%m/%y"),
     )
 
 

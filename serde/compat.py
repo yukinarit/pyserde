@@ -135,7 +135,9 @@ def get_origin(typ: Any) -> Optional[Any]:
     Provide `get_origin` that works in all python versions.
     """
     try:
-        return typing.get_origin(typ) or get_np_origin(typ)  # python>=3.8 typing module has get_origin.
+        return typing.get_origin(typ) or get_np_origin(
+            typ
+        )  # python>=3.8 typing module has get_origin.
     except AttributeError:
         return typing_extensions.get_origin(typ) or get_np_origin(typ)
 
@@ -309,7 +311,8 @@ def dataclass_fields(cls: Type[Any]) -> Iterator[dataclasses.Field]:  # type: ig
         if sys.version_info[:2] != (3, 6) and isinstance(real_type, typing.ForwardRef):
             raise SerdeError(
                 f"Failed to resolve {real_type} for {typename(cls)}.\n\n"
-                f"Make sure you are calling deserialize & serialize after all classes are globally visible."
+                f"Make sure you are calling deserialize & serialize after all classes are "
+                "globally visible."
             )
         if real_type is not None:
             f.type = real_type
@@ -499,7 +502,12 @@ def is_opt(typ: Any) -> bool:
 
     args = type_args(typ)
     if args:
-        return (is_union_type or is_typing_union) and len(args) == 2 and not is_none(args[0]) and is_none(args[1])
+        return (
+            (is_union_type or is_typing_union)
+            and len(args) == 2
+            and not is_none(args[0])
+            and is_none(args[1])
+        )
     else:
         return typ is Optional
 

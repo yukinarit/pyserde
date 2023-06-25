@@ -23,7 +23,9 @@ def new(size: Size) -> Runner:
         de = de_medium
         astuple = astuple_medium
         asdict = asdict_medium
-    return Runner(name, unp, partial(se, unp), partial(de, pac), partial(astuple, unp), partial(asdict, unp))
+    return Runner(
+        name, unp, partial(se, unp), partial(de, pac), partial(astuple, unp), partial(asdict, unp)
+    )
 
 
 def se_small(s: Small):

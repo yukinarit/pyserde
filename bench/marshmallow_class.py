@@ -43,7 +43,14 @@ def new(size: Size) -> Runner:
         unp = MEDIUM
         pac = data.MEDIUM
         schema = MediumSchema()
-    return Runner(name, unp, partial(se, schema, unp), partial(de, schema, pac), None, partial(asdict, schema, unp))
+    return Runner(
+        name,
+        unp,
+        partial(se, schema, unp),
+        partial(de, schema, pac),
+        None,
+        partial(asdict, schema, unp),
+    )
 
 
 def se(schema: ms.Schema, obj: Union[Small, Medium]):

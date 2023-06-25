@@ -1,6 +1,7 @@
 """
-Serialize and Deserialize in TOML format. This module depends on [tomli](https://github.com/hukkin/tomli)
-(for python<=3.10) and [tomli-w](https://github.com/hukkin/tomli-w) packages.
+Serialize and Deserialize in TOML format. This module depends on
+[tomli](https://github.com/hukkin/tomli) (for python<=3.10) and
+[tomli-w](https://github.com/hukkin/tomli-w) packages.
 """
 import sys
 from typing import Type, Any, overload
@@ -39,7 +40,8 @@ def to_toml(obj: Any, se: Type[Serializer[str]] = TomlSerializer, **opts: Any) -
     You can pass any serializable `obj`. If you supply keyword arguments other than `se`,
     they will be passed in `toml_w.dumps` function.
 
-    If you want to use the other toml package, you can subclass `TomlSerializer` and implement your own logic.
+    If you want to use the other toml package, you can subclass `TomlSerializer` and implement
+    your own logic.
     """
     return se.serialize(to_dict(obj, reuse_instances=False), **opts)
 
@@ -62,6 +64,7 @@ def from_toml(c: Any, s: str, de: Type[Deserializer[str]] = TomlDeserializer, **
     `c` is a class obejct and `s` is TOML string. If you supply keyword arguments other than `de`,
     they will be passed in `toml.loads` function.
 
-    If you want to use the other toml package, you can subclass `TomlDeserializer` and implement your own logic.
+    If you want to use the other toml package, you can subclass `TomlDeserializer` and implement
+    your own logic.
     """
     return from_dict(c, de.deserialize(s, **opts), reuse_instances=False)

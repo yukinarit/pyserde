@@ -47,7 +47,9 @@ def test_se_func_iter():
 
     assert (10, "10", 10.0, False) == to_tuple(Pri(10, "10", 10.0, False))
     assert ((10,),) == to_tuple(NestedInt(Int(10)))
-    assert ((10,), ("10",), (10.0,), (True,)) == to_tuple(NestedPri(Int(10), Str("10"), Float(10.0), Bool(True)))
+    assert ((10,), ("10",), (10.0,), (True,)) == to_tuple(
+        NestedPri(Int(10), Str("10"), Float(10.0), Bool(True))
+    )
 
     # List
     assert ([10], ["10"], [10.0], [False]) == to_tuple(PriList([10], ["10"], [10.0], [False]))
@@ -63,7 +65,12 @@ def test_se_func_iter():
         PriDict({"i": 10}, {"s": "10"}, {"f": 10.0}, {"b": False})
     )
     assert ({("i",): (10,)}, {("i",): ("10",)}, {("i",): (10.0,)}, {("i",): (True,)}) == to_tuple(
-        NestedPriDict({Str("i"): Int(10)}, {Str("i"): Str("10")}, {Str("i"): Float(10.0)}, {Str("i"): Bool(True)})
+        NestedPriDict(
+            {Str("i"): Int(10)},
+            {Str("i"): Str("10")},
+            {Str("i"): Float(10.0)},
+            {Str("i"): Bool(True)},
+        )
     )
 
     # Tuple

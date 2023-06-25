@@ -39,7 +39,17 @@ from .compat import (
 )
 from .numpy import is_numpy_available, is_numpy_type
 
-__all__ = ["SerdeScope", "gen", "add_func", "Func", "Field", "fields", "FlattenOpts", "conv", "union_func_name"]
+__all__ = [
+    "SerdeScope",
+    "gen",
+    "add_func",
+    "Func",
+    "Field",
+    "fields",
+    "FlattenOpts",
+    "conv",
+    "union_func_name",
+]
 
 logger = logging.getLogger("serde")
 
@@ -74,7 +84,8 @@ class SerdeScope:
     """
 
     cls: Type[Any]
-    """ The exact class this scope is for (needed to distinguish scopes between inherited classes) """
+    """ The exact class this scope is for
+    (needed to distinguish scopes between inherited classes) """
 
     funcs: Dict[str, Callable[..., Any]] = dataclasses.field(default_factory=dict)
     """ Generated serialize and deserialize functions """
@@ -144,7 +155,9 @@ def raise_unsupported_type(obj: Any) -> None:
     raise SerdeError(f"Unsupported type: {typename(type(obj))}")
 
 
-def gen(code: str, globals: Optional[Dict[str, Any]] = None, locals: Optional[Dict[str, Any]] = None) -> str:
+def gen(
+    code: str, globals: Optional[Dict[str, Any]] = None, locals: Optional[Dict[str, Any]] = None
+) -> str:
     """
     A wrapper of builtin `exec` function.
     """
@@ -160,7 +173,9 @@ def gen(code: str, globals: Optional[Dict[str, Any]] = None, locals: Optional[Di
     return code
 
 
-def add_func(serde_scope: SerdeScope, func_name: str, func_code: str, globals: Dict[str, Any]) -> None:
+def add_func(
+    serde_scope: SerdeScope, func_name: str, func_code: str, globals: Dict[str, Any]
+) -> None:
     """
     Generate a function and add it to a SerdeScope's `funcs` dictionary.
 
@@ -404,7 +419,9 @@ class Field(Generic[T]):
     type_args: Optional[List[str]] = None
 
     @classmethod
-    def from_dataclass(cls: Type[T], f: dataclasses.Field, parent: Optional[Type[Any]] = None) -> Field[T]:
+    def from_dataclass(
+        cls: Type[T], f: dataclasses.Field, parent: Optional[Type[Any]] = None
+    ) -> Field[T]:
         """
         Create `Field` object from `dataclasses.Field`.
         """
@@ -494,7 +511,9 @@ class Field(Generic[T]):
         return conv(self, case or self.case)
 
     def supports_default(self) -> bool:
-        return not getattr(self, "iterbased", False) and (has_default(self) or has_default_factory(self))
+        return not getattr(self, "iterbased", False) and (
+            has_default(self) or has_default_factory(self)
+        )
 
 
 F = TypeVar("F", bound=Field[Any])
@@ -522,7 +541,9 @@ def conv(f: Field[Any], case: Optional[str] = None) -> str:
     if case:
         casef = getattr(casefy, case, None)
         if not casef:
-            raise SerdeError(f"Unkown case type: {f.case}. Pass the name of case supported by 'casefy' package.")
+            raise SerdeError(
+                f"Unkown case type: {f.case}. Pass the name of case supported by 'casefy' package."
+            )
         name = casef(name)
     if f.rename:
         name = f.rename
@@ -557,7 +578,9 @@ def literal_func_name(literal_args: List[Any]) -> str:
     'literal_de_r_str_w_str_a_str_x_str_r__str_w__str_a__str_x__str'
     """
     return re.sub(
-        r"[^A-Za-z0-9]", "_", f"{LITERAL_DE_PREFIX}_{'_'.join(f'{a}_{typename(type(a))}' for a in literal_args)}"
+        r"[^A-Za-z0-9]",
+        "_",
+        f"{LITERAL_DE_PREFIX}_{'_'.join(f'{a}_{typename(type(a))}' for a in literal_args)}",
     )
 
 

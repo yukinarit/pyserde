@@ -45,7 +45,12 @@ def main(arg):
 
         assert black
     except ImportError:
-        logger.warning(('Tips: Installing "black" makes the output prettier! Try this command:\n' "pip install back"))
+        logger.warning(
+            (
+                'Tips: Installing "black" makes the output prettier! Try this command:\n'
+                "pip install back"
+            )
+        )
 
     dir = os.path.dirname(arg.path)
     mod = os.path.basename(arg.path)[:-3]

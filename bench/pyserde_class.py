@@ -39,7 +39,14 @@ def new(size: Size) -> Runner:
         unp = MEDIUM
         pac = data.MEDIUM
         cls = Medium
-    return Runner(name, unp, partial(se, unp), partial(de, cls, pac), partial(astuple, unp), partial(asdict, unp))
+    return Runner(
+        name,
+        unp,
+        partial(se, unp),
+        partial(de, cls, pac),
+        partial(astuple, unp),
+        partial(asdict, unp),
+    )
 
 
 def se(obj: Union[Small, Medium]):

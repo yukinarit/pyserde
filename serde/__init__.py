@@ -7,7 +7,8 @@ The following modules provide the core functionalities of `pyserde`.
 * `serde.se`: All about serialization.
 * `serde.de`: All about deserialization.
 * `serde.core`: Core module used by `serde.se` and `serde.de` modules.
-* `serde.compat`: Compatibility layer which handles mostly differences of `typing` module between python versions.
+* `serde.compat`: Compatibility layer which handles mostly differences of `typing` module between
+python versions.
 
 The following modules provide pyserde's (de)serialize APIs.
 * `serde.json`: Serialize and Deserialize in JSON.
@@ -42,8 +43,24 @@ from .core import (
     logger,
     should_impl_dataclass,
 )
-from .de import DeserializeFunc, default_deserializer, deserialize, from_dict, from_tuple, is_deserializable
-from .se import SerializeFunc, asdict, astuple, default_serializer, is_serializable, serialize, to_dict, to_tuple
+from .de import (
+    DeserializeFunc,
+    default_deserializer,
+    deserialize,
+    from_dict,
+    from_tuple,
+    is_deserializable,
+)
+from .se import (
+    SerializeFunc,
+    asdict,
+    astuple,
+    default_serializer,
+    is_serializable,
+    serialize,
+    to_dict,
+    to_tuple,
+)
 
 __all__ = [
     "serde",

@@ -28,15 +28,21 @@ def to_pickle(obj: Any, se: Type[Serializer[bytes]] = PickleSerializer, **opts: 
 
 
 @overload
-def from_pickle(c: Type[T], data: bytes, de: Type[Deserializer[bytes]] = PickleDeserializer, **opts: Any) -> T:
+def from_pickle(
+    c: Type[T], data: bytes, de: Type[Deserializer[bytes]] = PickleDeserializer, **opts: Any
+) -> T:
     ...
 
 
 @overload
-def from_pickle(c: Any, data: bytes, de: Type[Deserializer[bytes]] = PickleDeserializer, **opts: Any) -> Any:
+def from_pickle(
+    c: Any, data: bytes, de: Type[Deserializer[bytes]] = PickleDeserializer, **opts: Any
+) -> Any:
     ...
 
 
 # For Union, Optional etc.
-def from_pickle(c: Any, data: bytes, de: Type[Deserializer[bytes]] = PickleDeserializer, **opts: Any) -> Any:
+def from_pickle(
+    c: Any, data: bytes, de: Type[Deserializer[bytes]] = PickleDeserializer, **opts: Any
+) -> Any:
     return from_dict(c, de.deserialize(data, **opts), reuse_instances=False)
