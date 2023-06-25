@@ -160,7 +160,9 @@ def test_tuple(se, de, opt):
         assert p == de(LitNestedPriTuple, se(p))
 
 
-@pytest.mark.parametrize("se,de", (format_dict + format_tuple + format_json + format_msgpack + format_yaml))
+@pytest.mark.parametrize(
+    "se,de", (format_dict + format_tuple + format_json + format_msgpack + format_yaml)
+)
 def test_list_literals(se, de):
     p = [PRI, PRI]
     assert p == de(ListLiterals, se(p))
@@ -169,7 +171,9 @@ def test_list_literals(se, de):
     assert p == de(ListLiterals, se(p))
 
 
-@pytest.mark.parametrize("se,de", (format_dict + format_tuple + format_json + format_msgpack + format_yaml))
+@pytest.mark.parametrize(
+    "se,de", (format_dict + format_tuple + format_json + format_msgpack + format_yaml)
+)
 def test_dict_literals(se, de):
     p = {"1": PRI, "2": PRI}
     assert p == de(DictLiterals, se(p))

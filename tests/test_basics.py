@@ -86,7 +86,9 @@ def test_from_to_obj(t, T, f, named, reuse):
 @pytest.mark.parametrize("opt", opt_case, ids=opt_case_ids())
 @pytest.mark.parametrize("se,de", (format_dict + format_tuple))
 def test_simple_with_reuse_instances(se, de, opt, t, T, filter):
-    log.info(f"Running test with se={se.__name__} de={de.__name__} opts={opt} while reusing instances")
+    log.info(
+        f"Running test with se={se.__name__} de={de.__name__} opts={opt} while reusing instances"
+    )
 
     @serde.serde(**opt)
     class C:
@@ -405,7 +407,8 @@ def test_default(se, de):
 
 
 @pytest.mark.parametrize(
-    "se,de", (format_dict + format_tuple + format_json + format_msgpack + format_yaml + format_pickle)
+    "se,de",
+    (format_dict + format_tuple + format_json + format_msgpack + format_yaml + format_pickle),
 )
 def test_list_pri(se, de):
     p = [data.PRI, data.PRI]
@@ -416,7 +419,8 @@ def test_list_pri(se, de):
 
 
 @pytest.mark.parametrize(
-    "se,de", (format_dict + format_tuple + format_json + format_msgpack + format_yaml + format_pickle)
+    "se,de",
+    (format_dict + format_tuple + format_json + format_msgpack + format_yaml + format_pickle),
 )
 def test_dict_pri(se, de):
     p = {"1": data.PRI, "2": data.PRI}
@@ -498,7 +502,9 @@ def test_rename_msgpack(se, de):
     assert f == de(Foo, se(f, named=False), named=False)
 
 
-@pytest.mark.parametrize("se,de", (format_dict + format_json + format_yaml + format_toml + format_pickle))
+@pytest.mark.parametrize(
+    "se,de", (format_dict + format_json + format_yaml + format_toml + format_pickle)
+)
 def test_rename_formats(se, de):
     @serde.serde(rename_all="camelcase")
     class Foo:
@@ -508,7 +514,9 @@ def test_rename_formats(se, de):
     assert f == de(Foo, se(f))
 
 
-@pytest.mark.parametrize("se,de", (format_dict + format_json + format_yaml + format_toml + format_pickle))
+@pytest.mark.parametrize(
+    "se,de", (format_dict + format_json + format_yaml + format_toml + format_pickle)
+)
 def test_alias(se, de):
     @serde.serde
     class Foo:
@@ -592,13 +600,18 @@ def test_default_rename_and_alias():
 
 
 @pytest.mark.parametrize(
-    "se,de", (format_dict + format_json + format_msgpack + format_yaml + format_toml + format_pickle)
+    "se,de",
+    (format_dict + format_json + format_msgpack + format_yaml + format_toml + format_pickle),
 )
 def test_skip_if(se, de):
     @serde.serde
     class Foo:
-        comments: Optional[List[str]] = serde.field(default_factory=list, skip_if=lambda v: len(v) == 0)
-        attrs: Optional[Dict[str, str]] = serde.field(default_factory=dict, skip_if=lambda v: v is None or len(v) == 0)
+        comments: Optional[List[str]] = serde.field(
+            default_factory=list, skip_if=lambda v: len(v) == 0
+        )
+        attrs: Optional[Dict[str, str]] = serde.field(
+            default_factory=dict, skip_if=lambda v: v is None or len(v) == 0
+        )
 
     f = Foo(["foo"], {"bar": "baz"})
     assert f == de(Foo, se(f))
@@ -620,7 +633,8 @@ def test_skip_if_false(se, de):
 
 
 @pytest.mark.parametrize(
-    "se,de", (format_dict + format_json + format_msgpack + format_yaml + format_toml + format_pickle)
+    "se,de",
+    (format_dict + format_json + format_msgpack + format_yaml + format_toml + format_pickle),
 )
 def test_skip_if_overrides_skip_if_false(se, de):
     @serde.serde
@@ -759,9 +773,12 @@ def test_dataclass_inheritance():
         k: float
 
     # each class should have own scope
-    # ensure the generated code of DerivedB does not overwrite the earlier generated code from DerivedA
+    # ensure the generated code of DerivedB does not overwrite the earlier generated code
+    # from DerivedA
     assert getattr(Base, serde.core.SERDE_SCOPE) is not getattr(DerivedA, serde.core.SERDE_SCOPE)
-    assert getattr(DerivedA, serde.core.SERDE_SCOPE) is not getattr(DerivedB, serde.core.SERDE_SCOPE)
+    assert getattr(DerivedA, serde.core.SERDE_SCOPE) is not getattr(
+        DerivedB, serde.core.SERDE_SCOPE
+    )
 
     base = Base(i=0, s="foo")
     assert base == serde.from_dict(Base, serde.to_dict(base))
@@ -775,9 +792,13 @@ def test_dataclass_inheritance():
 
 def make_serde(class_name: str, se: bool, fields, *args, **kwargs):
     if se:
-        return serde.de.deserialize(serde.se._make_serialize(class_name, fields, *args, **kwargs), **kwargs)
+        return serde.de.deserialize(
+            serde.se._make_serialize(class_name, fields, *args, **kwargs), **kwargs
+        )
     else:
-        return serde.se.serialize(serde.de._make_deserialize(class_name, fields, *args, **kwargs), **kwargs)
+        return serde.se.serialize(
+            serde.de._make_deserialize(class_name, fields, *args, **kwargs), **kwargs
+        )
 
 
 @pytest.mark.parametrize("se", (True, False))
@@ -797,7 +818,10 @@ def test_make_serialize_deserialize(se):
     assert serde.to_dict(f) == {"IntField": 10}
 
     # Test field attribute
-    fields = [("i", int, dataclasses.field(metadata={"serde_skip": True})), ("j", float, dataclasses.field())]
+    fields = [
+        ("i", int, dataclasses.field(metadata={"serde_skip": True})),
+        ("j", float, dataclasses.field()),
+    ]
     Foo = make_serde("Foo", se, fields)
     f = Foo(10, 100.0)
     assert serde.to_dict(f) == {"j": 100.0}

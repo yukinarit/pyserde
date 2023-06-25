@@ -84,7 +84,7 @@ style = "pep440"
 
 [tool.black]
 target_version = ["py311"]
-line_length = 120
+line_length = 100
 
 [tool.pyright]
 include = ["examples", "serde/json.py", "serde/msgpack.py", "serde/toml.py", "serde/yaml.py", "serde/pickle.py"]
@@ -105,7 +105,7 @@ select = [
     "C",  # flake8-comprehensions
     "B",  # flake8-bugbear
 ]
-line-length = 120
+line-length = 100
 
 [tool.ruff.mccabe]
 max-complexity = 30

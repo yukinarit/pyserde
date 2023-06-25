@@ -257,8 +257,12 @@ def test_optional_complex_type_with_default():
         assert a_none == from_dict(A, to_dict(a_none, reuse_instances=True), reuse_instances=True)
 
         a_default = A()
-        assert a_default == from_dict(A, to_dict(a_default, reuse_instances=False), reuse_instances=False)
-        assert a_default == from_dict(A, to_dict(a_default, reuse_instances=True), reuse_instances=True)
+        assert a_default == from_dict(
+            A, to_dict(a_default, reuse_instances=False), reuse_instances=False
+        )
+        assert a_default == from_dict(
+            A, to_dict(a_default, reuse_instances=True), reuse_instances=True
+        )
 
 
 def test_union_with_complex_types_in_containers():
@@ -270,7 +274,9 @@ def test_union_with_complex_types_in_containers():
     assert a_ips == from_dict(A, to_dict(a_ips, reuse_instances=False), reuse_instances=False)
     assert a_ips == from_dict(A, to_dict(a_ips, reuse_instances=True), reuse_instances=True)
 
-    a_uids = A([UUID("9c244009-c60d-452b-a378-b8afdc0c2d90"), UUID("5831dc09-20fe-4433-b476-5866b7143364")])
+    a_uids = A(
+        [UUID("9c244009-c60d-452b-a378-b8afdc0c2d90"), UUID("5831dc09-20fe-4433-b476-5866b7143364")]
+    )
     assert a_uids == from_dict(A, to_dict(a_uids, reuse_instances=False), reuse_instances=False)
     assert a_uids == from_dict(A, to_dict(a_uids, reuse_instances=True), reuse_instances=True)
 
@@ -305,15 +311,23 @@ def test_union_exception_if_nothing_matches():
     with pytest.raises(SerdeError) as ex3:
         from_dict(A, {"v": None})
     # omit reason because it is not the same for all python versions & operating systems
-    assert str(ex3.value).startswith("Can not deserialize None of type NoneType into Union[IPv4Address, UUID].")
+    assert str(ex3.value).startswith(
+        "Can not deserialize None of type NoneType into Union[IPv4Address, UUID]."
+    )
 
     with pytest.raises(SerdeError) as ex4:
         to_dict(A("not-ip-or-uuid"))
-    assert str(ex4.value) == "Can not serialize 'not-ip-or-uuid' of type str for Union[IPv4Address, UUID]"
+    assert (
+        str(ex4.value)
+        == "Can not serialize 'not-ip-or-uuid' of type str for Union[IPv4Address, UUID]"
+    )
 
     with pytest.raises(SerdeError) as ex5:
         to_dict(A("not-ip-or-uuid"), reuse_instances=True)
-    assert str(ex5.value) == "Can not serialize 'not-ip-or-uuid' of type str for Union[IPv4Address, UUID]"
+    assert (
+        str(ex5.value)
+        == "Can not serialize 'not-ip-or-uuid' of type str for Union[IPv4Address, UUID]"
+    )
 
     with pytest.raises(SerdeError) as ex6:
         to_dict(A(None), reuse_instances=True)
@@ -475,7 +489,9 @@ def test_external_tagging():
 
     f = Foo(Bar(10), "foo", {10: "bar"}, Nested(Baz(100)))
     d = {
-        "a": {"Bar": {"b": 10}},  # Union of dataclasses will be (de)serialized with external tagging
+        "a": {
+            "Bar": {"b": 10}
+        },  # Union of dataclasses will be (de)serialized with external tagging
         "b": "foo",  # non dataclass will be untagged
         "c": {10: "bar"},
         "d": {"Nested": {"v": {"Baz": {"b": 100}}}},
@@ -531,7 +547,10 @@ def test_internal_tagging():
 
     f = Foo(Bar(10), "foo", {10: "bar"}, Nested(Baz(100)))
     d = {
-        "a": {"type": "Bar", "v": 10},  # Union of dataclasses will be (de)serialized with internal tagging
+        "a": {
+            "type": "Bar",
+            "v": 10,
+        },  # Union of dataclasses will be (de)serialized with internal tagging
         "b": "foo",  # non dataclass will be untagged
         "c": {10: "bar"},
         "d": {"type": "Nested", "v": {"type": "Baz", "v": 100}},
@@ -584,7 +603,10 @@ def test_adjacent_tagging():
 
     f = Foo(Bar(10), "foo", {10: "bar"}, Nested(Baz(100)))
     d = {
-        "a": {"type": "Bar", "content": {"v": 10}},  # Union of dataclasses will be (de)serialized with adjacent tagging
+        "a": {
+            "type": "Bar",
+            "content": {"v": 10},
+        },  # Union of dataclasses will be (de)serialized with adjacent tagging
         "b": "foo",  # non dataclass will be untagged
         "c": {10: "bar"},
         "d": {"type": "Nested", "content": {"v": {"type": "Baz", "content": {"v": 100}}}},

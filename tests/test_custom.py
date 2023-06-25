@@ -6,7 +6,16 @@ from typing import List, Optional, Union
 
 import pytest
 
-from serde import SerdeError, SerdeSkip, default_deserializer, default_serializer, field, from_tuple, serde, to_tuple
+from serde import (
+    SerdeError,
+    SerdeSkip,
+    default_deserializer,
+    default_serializer,
+    field,
+    from_tuple,
+    serde,
+    to_tuple,
+)
 from serde.json import from_json, to_json
 
 
@@ -15,7 +24,8 @@ def test_custom_field_serializer():
     class Foo:
         a: datetime
         b: datetime = field(
-            serializer=lambda x: x.strftime("%d/%m/%y"), deserializer=lambda x: datetime.strptime(x, "%d/%m/%y")
+            serializer=lambda x: x.strftime("%d/%m/%y"),
+            deserializer=lambda x: datetime.strptime(x, "%d/%m/%y"),
         )
         c: Optional[datetime] = field(
             serializer=lambda x: x.strftime("%d/%m/%y") if x else None,
@@ -128,7 +138,8 @@ def test_field_serialize_override_class_serializer():
         a: int
         b: datetime
         c: datetime = field(
-            serializer=lambda x: x.strftime("%y.%m.%d"), deserializer=lambda x: datetime.strptime(x, "%y.%m.%d")
+            serializer=lambda x: x.strftime("%y.%m.%d"),
+            deserializer=lambda x: datetime.strptime(x, "%y.%m.%d"),
         )
 
     dt = datetime(2021, 1, 1, 0, 0, 0)

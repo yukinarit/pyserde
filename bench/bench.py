@@ -135,26 +135,52 @@ def equals_small(x):
 def equals_medium(x):
     y = dc.MEDIUM
     for xs, ys in zip(x.inner, y.inner, strict=True):
-        assert xs.i == xs.i and xs.s == ys.s and xs.f == ys.f and xs.b == ys.b, f"Expected: {x}, Actual: {y}"
+        assert (
+            xs.i == xs.i and xs.s == ys.s and xs.f == ys.f and xs.b == ys.b
+        ), f"Expected: {x}, Actual: {y}"
 
 
 TESTCASES = {
     "se": {
         **TestCase.make(Size.Small, lambda x: json.loads(x) == json.loads(data.SMALL)),
-        **TestCase.make(Size.Medium, lambda x: json.loads(x) == json.loads(data.MEDIUM), number=500),
+        **TestCase.make(
+            Size.Medium, lambda x: json.loads(x) == json.loads(data.MEDIUM), number=500
+        ),
     },
-    "de": {**TestCase.make(Size.Small, equals_small), **TestCase.make(Size.Medium, equals_medium, number=500)},
-    "astuple": {**TestCase.make(Size.Small, data.SMALL_TUPLE), **TestCase.make(Size.Medium, number=500)},
-    "asdict": {**TestCase.make(Size.Small, data.SMALL_DICT), **TestCase.make(Size.Medium, number=500)},
+    "de": {
+        **TestCase.make(Size.Small, equals_small),
+        **TestCase.make(Size.Medium, equals_medium, number=500),
+    },
+    "astuple": {
+        **TestCase.make(Size.Small, data.SMALL_TUPLE),
+        **TestCase.make(Size.Medium, number=500),
+    },
+    "asdict": {
+        **TestCase.make(Size.Small, data.SMALL_DICT),
+        **TestCase.make(Size.Medium, number=500),
+    },
 }
 
 
 @click.command()
-@click.option("-f", "--full", type=bool, is_flag=True, default=False, help="Run full benchmark tests.")
-@click.option("-t", "--test", default="", help="Run specified test case only.")
-@click.option("-c", "--chart", type=bool, is_flag=True, default=False, help="Draw barcharts of benchmark results.")
 @click.option(
-    "-o", "--output", default="charts", callback=lambda _, __, p: Path(p), help="Output directory for charts."
+    "-f", "--full", type=bool, is_flag=True, default=False, help="Run full benchmark tests."
+)
+@click.option("-t", "--test", default="", help="Run specified test case only.")
+@click.option(
+    "-c",
+    "--chart",
+    type=bool,
+    is_flag=True,
+    default=False,
+    help="Draw barcharts of benchmark results.",
+)
+@click.option(
+    "-o",
+    "--output",
+    default="charts",
+    callback=lambda _, __, p: Path(p),
+    help="Output directory for charts.",
 )
 def main(full: bool, test: str, chart: bool, output: Path):
     """

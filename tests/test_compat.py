@@ -128,7 +128,9 @@ def test_iter_unions():
         b: Dict[str, List[Union[float, int]]]
         C: Dict[Union[bool, str], Union[float, int]]
 
-    assert {Union[int, str], Union[float, int], Union[bool, str], Union[float, int]} == set(iter_unions(A))
+    assert {Union[int, str], Union[float, int], Union[bool, str], Union[float, int]} == set(
+        iter_unions(A)
+    )
 
 
 def test_type_args():
@@ -214,8 +216,12 @@ def test_is_instance():
     assert not is_instance((10, "a"), Tuple[int, ...])
 
     # Tuple of dataclasses
-    assert is_instance((Int(10), Str("foo"), Float(100.0), Bool(True)), Tuple[Int, Str, Float, Bool])
-    assert not is_instance((Int(10), Str("foo"), Str("wrong-class"), Bool(True)), Tuple[Int, Str, Float, Bool])
+    assert is_instance(
+        (Int(10), Str("foo"), Float(100.0), Bool(True)), Tuple[Int, Str, Float, Bool]
+    )
+    assert not is_instance(
+        (Int(10), Str("foo"), Str("wrong-class"), Bool(True)), Tuple[Int, Str, Float, Bool]
+    )
 
     # Dict
     assert is_instance({}, Dict[str, int])
@@ -240,7 +246,9 @@ def test_is_instance():
 
     # Nested containers
     assert is_instance([({"a": "b"}, 10, [True])], List[Tuple[Dict[str, str], int, List[bool]]])
-    assert not is_instance([({"a": "b"}, 10, ["wrong-type"])], List[Tuple[Dict[str, str], int, List[bool]]])
+    assert not is_instance(
+        [({"a": "b"}, 10, ["wrong-type"])], List[Tuple[Dict[str, str], int, List[bool]]]
+    )
 
 
 @serde.serde

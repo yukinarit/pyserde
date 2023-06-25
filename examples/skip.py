@@ -35,7 +35,11 @@ class World:
 def main() -> None:
     resources = [
         Resource("Stack Overflow", "b6469c3f31653d281bbbfa6f94d60fea130abe38"),
-        Resource("GitHub", "5cb7a0c47e53854cd00e1a968de5abce1c124601", metadata={"headquarters": "San Francisco"}),
+        Resource(
+            "GitHub",
+            "5cb7a0c47e53854cd00e1a968de5abce1c124601",
+            metadata={"headquarters": "San Francisco"},
+        ),
     ]
     print(to_json(resources))
 

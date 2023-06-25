@@ -37,7 +37,8 @@ class Foo:
     dt1: datetime
     # Override by field serializer/deserializer.
     dt2: datetime = field(
-        serializer=lambda x: x.strftime("%y.%m.%d"), deserializer=lambda x: datetime.strptime(x, "%y.%m.%d")
+        serializer=lambda x: x.strftime("%y.%m.%d"),
+        deserializer=lambda x: datetime.strptime(x, "%y.%m.%d"),
     )
     # Override by the default serializer/deserializer.
     dt3: datetime = field(serializer=default_serializer, deserializer=default_deserializer)
