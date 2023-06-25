@@ -43,6 +43,7 @@ from .compat import (
     is_none,
     is_opt,
     is_primitive,
+    is_primitive_subclass,
     is_set,
     is_str_serializable,
     is_tuple,
@@ -245,8 +246,13 @@ def deserialize(
                 # We call deserialize and not wrap to make sure that we will use the default serde
                 # configuration for generating the deserialization function.
                 deserialize(typ)
-            if is_primitive(typ) and not is_enum(typ):
+
+            # We don't want to add primitive class e.g "str" into the scope, but primitive
+            # compatible types such as IntEnum and a subclass of primitives are added,
+            # so that generated code can use those types.
+            if is_primitive(typ) and not is_enum(typ) and not is_primitive_subclass(typ):
                 continue
+
             if is_generic(typ):
                 g[typename(typ)] = get_origin(typ)
             else:
@@ -624,6 +630,7 @@ class Renderer:
     custom: Optional[DeserializeFunc] = None  # Custom class level deserializer.
     import_numpy: bool = False
     suppress_coerce: bool = False
+    """ Disable type coercing in codegen """
 
     def render(self, arg: DeField[Any]) -> str:
         """
@@ -655,8 +662,6 @@ class Renderer:
         elif is_numpy_array(arg.type):
             self.import_numpy = True
             res = deserialize_numpy_array(arg)
-        elif is_primitive(arg.type):
-            res = self.primitive(arg)
         elif is_union(arg.type):
             res = self.union_func(arg)
         elif is_str_serializable(arg.type):
@@ -669,6 +674,9 @@ class Renderer:
             res = "None"
         elif is_any(arg.type) or is_ellipsis(arg.type):
             res = arg.data
+        elif is_primitive(arg.type):
+            # For subclasses for primitives e.g. class FooStr(str), coercing is always enabled
+            res = self.primitive(arg, not is_primitive_subclass(arg.type))
         elif isinstance(arg.type, TypeVar):
             index = find_generic_arg(self.cls, arg.type)
             res = (
@@ -876,6 +884,8 @@ variable_type_args=None, reuse_instances=reuse_instances) for v in v] for k, v i
         """
         Render rvalue for primitives.
 
+        * `suppress_coerce`: Overrides "suppress_coerce" in the Renderer's field
+
         >>> Renderer('foo').render(DeField(int, 'i', datavar='data'))
         'coerce(int, data["i"])'
 
@@ -890,7 +900,7 @@ variable_type_args=None, reuse_instances=reuse_instances) for v in v] for k, v i
         if arg.alias:
             aliases = (f'"{s}"' for s in [arg.name, *arg.alias])
             dat = f"_get_by_aliases(data, [{','.join(aliases)}])"
-        if self.suppress_coerce:
+        if self.suppress_coerce and suppress_coerce:
             return dat
         else:
             return f"coerce({typ}, {dat})"

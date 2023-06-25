@@ -3,6 +3,7 @@ import sys
 import alias
 import any
 import class_var
+import primitive_subclass
 import collection
 import custom_class_serializer
 import custom_field_serializer
@@ -93,6 +94,7 @@ def run_all() -> None:
     run(plain_dataclass)
     run(plain_dataclass_class_attribute)
     run(msg_pack)
+    run(primitive_subclass)
     if PY310:
         import union_operator
 

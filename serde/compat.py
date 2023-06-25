@@ -705,6 +705,20 @@ def is_enum(typ: Type[Any]) -> TypeGuard[enum.Enum]:
         return isinstance(typ, enum.Enum)
 
 
+def is_primitive_subclass(typ: Type[Any]) -> bool:
+    """
+    Test if the type is a subclass of primitive type.
+
+    >>> is_primitive_subclass(str)
+    False
+    >>> class Str(str):
+    ...     pass
+    >>> is_primitive_subclass(Str)
+    True
+    """
+    return is_primitive(typ) and typ not in PRIMITIVES and not is_new_type_primitive(typ)
+
+
 def is_primitive(typ: Type[Any]) -> bool:
     """
     Test if the type is primitive.
