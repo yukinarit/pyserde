@@ -199,6 +199,15 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "gpetrovic-meltin",
+      "name": "Gajo Petrovic",
+      "avatar_url": "https://avatars.githubusercontent.com/u/72957645?v=4",
+      "profile": "https://github.com/gpetrovic-meltin",
+      "contributions": [
+        "doc"
+      ]
     }
   ],
   "contributorsPerLine": 7,
