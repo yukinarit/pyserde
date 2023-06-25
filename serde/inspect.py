@@ -20,7 +20,7 @@ import sys
 from typing import Any
 from typing_extensions import Type
 
-from .core import SERDE_SCOPE, SerdeScope, init, logger
+from .core import SERDE_SCOPE, init, logger
 
 init(True)
 
@@ -29,11 +29,11 @@ def inspect(cls: Type[Any]) -> None:
     """
     Inspect a pyserde class.
     """
-    scope: SerdeScope = getattr(cls, SERDE_SCOPE, {})
+    scope = getattr(cls, SERDE_SCOPE, {})
     print(scope)
 
 
-def main(arg):
+def main(arg: Any) -> None:
     """
     Main entrypoint of `serde.inspect`.
     """
