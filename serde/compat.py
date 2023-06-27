@@ -45,7 +45,12 @@ try:
         import numpy as np
 
         def __is_nptype(tp):
-            return getattr(tp, "__origin__", None) in (np.ndarray, np.dtype)
+            origin = getattr(tp, "__origin__", None)
+            ndarray = getattr(np, "ndarray", None)
+            dtype = getattr(np, "dtype", None)
+            if not origin or not ndarray or not dtype:
+                return False
+            return origin in (ndarray, dtype)
 
         # If the given type is NDArray or _DType, returns __origin__ or __args__.
         # This should work since the only GenericAliases that current NumPy (1.23)
@@ -53,13 +58,13 @@ try:
         # Note: these functions are only needed on Python 3.8 or earlier.
         # On Python >= 3.9, numpy.ndarray[...] and numpy.dtype[...] are instances of
         # the builtin genericalias class.
-        def get_np_origin(tp):
+        def get_np_origin(tp: Type[Any]) -> Optional[Any]:
             if __is_nptype(tp):
-                return tp.__origin__
+                return getattr(tp, "__origin__", None)
             else:
                 return None
 
-        def get_np_args(tp):
+        def get_np_args(tp: Any) -> Tuple[Any, ...]:
             if __is_nptype(tp):
                 return tp.__args__
             else:
@@ -234,8 +239,14 @@ def typename(typ: Type[Any], with_typing_module: bool = False) -> str:
             return f"{mod}Tuple"
     elif is_generic(typ):
         origin = get_origin(typ)
-        assert origin is not None
+        if origin is None:
+            raise SerdeError("Could not extract origin class from generic class")
+
+        if not isinstance(origin.__name__, str):
+            raise SerdeError("Name of generic class is not string")
+
         return origin.__name__
+
     elif is_literal(typ):
         args = type_args(typ)
         if not args:
@@ -249,7 +260,7 @@ def typename(typ: Type[Any], with_typing_module: bool = False) -> str:
         # Get super type for NewType
         inner = getattr(typ, "__supertype__", None)
         if inner:
-            return typename(typ.__supertype__)
+            return typename(inner)
 
         name: Optional[str] = getattr(typ, "_name", None)
         if name:
@@ -272,7 +283,7 @@ def type_args(typ: Any) -> Tuple[Type[Any], ...]:
         return get_args(typ)
 
 
-def union_args(typ: Union) -> Tuple[Type[Any], ...]:
+def union_args(typ: Any) -> Tuple[Type[Any], ...]:
     if not is_union(typ):
         raise TypeError(f"{typ} is not Union")
     args = type_args(typ)

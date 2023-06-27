@@ -88,14 +88,14 @@ line_length = 100
 
 [tool.pyright]
 include = ["examples", "serde/json.py", "serde/msgpack.py", "serde/toml.py", "serde/yaml.py", "serde/pickle.py"]
-exclude = ["serde/core.py", "serde/compat.py", "serde/se.py", "serde/de.py", "serde/numpy.py", "bench", "tests", "serde/__init__.py"]
+exclude = ["serde/core.py", "serde/se.py", "serde/de.py", "serde/numpy.py", "bench", "tests", "serde/__init__.py"]
 pythonVersion = "3.11"
 reportMissingImports = false
 
 [tool.mypy]
 strict = true
 ignore_missing_imports = true
-exclude = ["serde/core.py", "serde/compat.py", "serde/se.py", "serde/de.py", "serde/numpy.py", "bench", "tests"]
+exclude = ["serde/core.py", "serde/se.py", "serde/de.py", "serde/numpy.py", "bench", "tests"]
 
 [tool.ruff]
 select = [
