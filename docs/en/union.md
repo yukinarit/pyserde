@@ -66,3 +66,84 @@ A class declaration with `AdjacentTagging` looks like below. If you serialize `F
 class Foo:
     a: Union[Bar, Baz]
 ```
+
+## (de)serializing Union types directly
+
+New in v0.12.0.
+
+Passing Union types directly in (de)serialize APIs (e.g. to_json, from_json) was partially supported prior to v0.12, but the union type was always treated as untagged. Users had no way to change the union tagging. The following example code wasn't able to correctly deserialize into `Bar` due to untagged.
+
+```python
+@serde
+@dataclass
+class Foo:
+    a: int
+
+@serde
+@dataclass
+class Bar:
+    a: int
+
+bar = Bar(10)
+s = to_json(bar)
+print(s)
+# prints {"a": 10}
+print(from_json(Union[Foo, Bar], s))
+# prints Foo(10)
+```
+
+Since v0.12.0, pyserde can handle union that's passed in (de)serialize APIs a bit nicely. The union type is treated as externally tagged as that is the default tagging in pyserde. So the above example can correctly (de)serialize as `Bar`.
+
+```python
+@serde
+@dataclass
+class Foo:
+    a: int
+
+@serde
+@dataclass
+class Bar:
+    a: int
+
+bar = Bar(10)
+s = to_json(bar)
+print(s)
+# prints {"Bar" {"a": 10}}
+print(from_json(Union[Foo, Bar], s))
+# prints Bar(10)
+```
+
+Also you can change the tagging using `serde.InternalTagging`, `serde.AdjacentTagging` and `serde.Untagged`.
+
+Now try to change the tagging for the above example. You need to pass a new argument `cls` in `to_json`. Also union class must be wrapped in either `InternalTagging`, `AdjacentTaging` or `Untagged` with required parameters.
+
+* InternalTagging
+    ```python
+    from serde import InternalTagging
+
+    s = to_json(bar, cls=InternalTagging("type", Union[Foo, Bar]))
+    print(s)
+    # prints {"type": "Bar", "a": 10}
+    print(from_json(InternalTagging("type", Union[Foo, Bar]), s))
+    # prints Bar(10)
+    ```
+* AdjacentTagging
+    ```python
+    from serde import AdjacentTagging
+
+    s = to_json(bar, cls=AdjacentTagging("type", "content", Union[Foo, Bar]))
+    print(s)
+    # prints {"type": "Bar", "content": {"a": 10}}
+    print(from_json(AdjacentTagging("type", "content", Union[Foo, Bar]), s))
+    # prints Bar(10)
+    ```
+* Untagged
+    ```python
+    from serde import Untagged
+
+    s = to_json(bar, cls=Untagged(Union[Foo, Bar]))
+    print(s)
+    # prints {"a": 10}
+    print(from_json(Untagged(Union[Foo, Bar]), s))
+    # prints Foo(10)
+    ```

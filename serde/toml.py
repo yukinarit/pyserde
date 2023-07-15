@@ -4,7 +4,7 @@ Serialize and Deserialize in TOML format. This module depends on
 [tomli-w](https://github.com/hukkin/tomli-w) packages.
 """
 import sys
-from typing import Type, Any, overload
+from typing import Type, Any, overload, Optional
 
 import tomli_w
 
@@ -33,7 +33,9 @@ class TomlDeserializer(Deserializer[str]):
         return tomllib.loads(data, **opts)
 
 
-def to_toml(obj: Any, se: Type[Serializer[str]] = TomlSerializer, **opts: Any) -> str:
+def to_toml(
+    obj: Any, cls: Optional[Any] = None, se: Type[Serializer[str]] = TomlSerializer, **opts: Any
+) -> str:
     """
     Serialize the object into TOML.
 
@@ -43,7 +45,7 @@ def to_toml(obj: Any, se: Type[Serializer[str]] = TomlSerializer, **opts: Any) -
     If you want to use the other toml package, you can subclass `TomlSerializer` and implement
     your own logic.
     """
-    return se.serialize(to_dict(obj, reuse_instances=False), **opts)
+    return se.serialize(to_dict(obj, c=cls, reuse_instances=False), **opts)
 
 
 @overload

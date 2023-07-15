@@ -114,6 +114,18 @@ DateTimeTypes = (datetime.date, datetime.time, datetime.datetime)
 """ List of datetime types """
 
 
+@dataclasses.dataclass
+class _WithTagging(Generic[T]):
+    """
+    Intermediate data structure for (de)serializaing Union without dataclass.
+    """
+
+    inner: T
+    """ Union type .e.g Union[Foo,Bar] passed in from_obj. """
+    tagging: Any
+    """ Union Tagging """
+
+
 class SerdeError(Exception):
     """
     Serde error class.
@@ -474,6 +486,13 @@ def is_union(typ: Any) -> bool:
     >>> is_union(Union[int, str])
     True
     """
+
+    try:
+        # When `_WithTagging` is received, it will check inner type.
+        if isinstance(typ, _WithTagging):
+            return is_union(typ.inner)
+    except Exception:
+        pass
 
     # Python 3.10 Union operator e.g. str | int
     if sys.version_info[:2] >= (3, 10):

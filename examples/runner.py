@@ -40,6 +40,7 @@ import type_datetime
 import type_decimal
 import union
 import union_tagging
+import union_directly
 import user_exception
 import variable_length_tuple
 import yamlfile
@@ -73,6 +74,7 @@ def run_all() -> None:
     run(type_decimal)
     run(type_datetime)
     run(union_tagging)
+    run(union_directly)
     run(generics)
     run(generics_nested)
     run(nested)

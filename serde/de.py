@@ -59,12 +59,13 @@ from .core import (
     FROM_DICT,
     FROM_ITER,
     SERDE_SCOPE,
+    CACHE,
     TYPE_CHECK,
     UNION_DE_PREFIX,
     DefaultTagging,
     Field,
     NoCheck,
-    SerdeScope,
+    Scope,
     Tagging,
     TypeCheck,
     add_func,
@@ -82,8 +83,8 @@ from .core import (
 )
 from .numpy import (
     deserialize_numpy_array,
-    deserialize_numpy_array_direct,
     deserialize_numpy_scalar,
+    deserialize_numpy_array_direct,
     is_numpy_array,
     is_numpy_scalar,
 )
@@ -214,9 +215,9 @@ def deserialize(
         # Create a scope storage used by serde.
         # Each class should get own scope. Child classes can not share scope with parent class.
         # That's why we need the "scope.cls is not cls" check.
-        scope: Optional[SerdeScope] = getattr(cls, SERDE_SCOPE, None)
+        scope: Optional[Scope] = getattr(cls, SERDE_SCOPE, None)
         if scope is None or scope.cls is not cls:
-            scope = SerdeScope(cls, reuse_instances_default=reuse_instances_default)
+            scope = Scope(cls, reuse_instances_default=reuse_instances_default)
             setattr(cls, SERDE_SCOPE, scope)
 
         # Set some globals for all generated functions
@@ -331,7 +332,7 @@ def is_dataclass_without_de(cls: Type[Any]) -> bool:
         return False
     if not hasattr(cls, SERDE_SCOPE):
         return True
-    scope: Optional[SerdeScope] = getattr(cls, SERDE_SCOPE)
+    scope: Optional[Scope] = getattr(cls, SERDE_SCOPE)
     return FROM_DICT not in scope.funcs
 
 
@@ -362,12 +363,18 @@ def from_obj(c: Type[T], o: Any, named: bool, reuse_instances: bool) -> T:
     """
 
     def deserializable_to_obj(cls):
-        serde_scope: SerdeScope = getattr(cls, SERDE_SCOPE)
+        serde_scope: Scope = getattr(cls, SERDE_SCOPE)
         func_name = FROM_DICT if named else FROM_ITER
         res = serde_scope.funcs[func_name](
             cls, maybe_generic=maybe_generic, data=o, reuse_instances=reuse_instances
         )
         return res
+
+    if is_union(c) and not is_opt(c):
+        # If a class in the argument is a non-dataclass class e.g. Union[Foo, Bar],
+        # pyserde generates a wrapper (de)serializable dataclass on the fly,
+        # and use it to deserialize into the object.
+        return CACHE.deserialize_union(c, o)
 
     if is_generic(c):
         # Store subscripted generic type such as Foo[Bar] in "maybe_generic",
@@ -390,15 +397,6 @@ def from_obj(c: Type[T], o: Any, named: bool, reuse_instances: bool) -> T:
                 return None
             else:
                 return thisfunc(type_args(c)[0], o)
-        elif is_union(c):
-            v = None
-            for typ in type_args(c):
-                try:
-                    v = thisfunc(typ, o)
-                    break
-                except (SerdeError, ValueError):
-                    pass
-            return v
         elif is_list(c):
             if is_bare_list(c):
                 return list(o)
