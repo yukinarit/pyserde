@@ -9,5 +9,4 @@
 - [Field Attributes](field-attributes.md)
 - [Union](union.md)
 - [Type Check](type-check.md)
-- [Benchmark](benchmark.md)
 - [FAQ](faq.md)
