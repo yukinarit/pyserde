@@ -84,7 +84,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded "><a href="introduction.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="getting-started.html"><strong aria-hidden="true">2.</strong> Getting Started</a></li><li class="chapter-item expanded "><a href="data-formats.html"><strong aria-hidden="true">3.</strong> Data Formats</a></li><li class="chapter-item expanded "><a href="types.html"><strong aria-hidden="true">4.</strong> Types</a></li><li class="chapter-item expanded "><a href="decorators.html"><strong aria-hidden="true">5.</strong> Decorators</a></li><li class="chapter-item expanded "><a href="class-attributes.html"><strong aria-hidden="true">6.</strong> Class Attributes</a></li><li class="chapter-item expanded "><a href="field-attributes.html"><strong aria-hidden="true">7.</strong> Field Attributes</a></li><li class="chapter-item expanded "><a href="union.html"><strong aria-hidden="true">8.</strong> Union</a></li><li class="chapter-item expanded "><a href="type-check.html"><strong aria-hidden="true">9.</strong> Type Check</a></li><li class="chapter-item expanded "><a href="benchmark.html"><strong aria-hidden="true">10.</strong> Benchmark</a></li><li class="chapter-item expanded "><a href="faq.html"><strong aria-hidden="true">11.</strong> FAQ</a></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded "><a href="introduction.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="getting-started.html"><strong aria-hidden="true">2.</strong> Getting Started</a></li><li class="chapter-item expanded "><a href="data-formats.html"><strong aria-hidden="true">3.</strong> Data Formats</a></li><li class="chapter-item expanded "><a href="types.html"><strong aria-hidden="true">4.</strong> Types</a></li><li class="chapter-item expanded "><a href="decorators.html"><strong aria-hidden="true">5.</strong> Decorators</a></li><li class="chapter-item expanded "><a href="class-attributes.html"><strong aria-hidden="true">6.</strong> Class Attributes</a></li><li class="chapter-item expanded "><a href="field-attributes.html"><strong aria-hidden="true">7.</strong> Field Attributes</a></li><li class="chapter-item expanded "><a href="union.html"><strong aria-hidden="true">8.</strong> Union</a></li><li class="chapter-item expanded "><a href="type-check.html"><strong aria-hidden="true">9.</strong> Type Check</a></li><li class="chapter-item expanded "><a href="faq.html"><strong aria-hidden="true">10.</strong> FAQ</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -962,39 +962,6 @@ class Foo
 f = Foo(100) # beartype raises an error
 </code></pre>
 </blockquote>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="benchmark"><a class="header" href="#benchmark">Benchmark</a></h1>
-<ul>
-<li>macOS 10.14 Mojave</li>
-<li>Intel 2.3GHz 8-core Intel Core i9</li>
-<li>DDR4 32GB RAM</li>
-</ul>
-<p>Serialize and deserialize a <a href="https://github.com/yukinarit/pyserde/blob/main/bench/dataclasses_class.py#L7-L12">struct</a> into and from json 10,000 times.</p>
-<div class="table-wrapper"><table><thead><tr><th>Serialize</th><th>Deserialize</th></tr></thead><tbody>
-<tr><td><img src="https://raw.githubusercontent.com/yukinarit/pyserde/main/bench/charts/se-small.png"></td><td><img src="https://raw.githubusercontent.com/yukinarit/pyserde/main/bench/charts/de-small.png"></td></tr>
-</tbody></table>
-</div>
-<p>Serialize the struct into tuple and dictionary.</p>
-<div class="table-wrapper"><table><thead><tr><th>to_tuple</th><th>to_dict</th></tr></thead><tbody>
-<tr><td><img src="https://raw.githubusercontent.com/yukinarit/pyserde/main/bench/charts/astuple-small.png"></td><td><img src="https://raw.githubusercontent.com/yukinarit/pyserde/main/bench/charts/asdict-small.png"></td></tr>
-</tbody></table>
-</div>
-<ul>
-<li><code>raw</code>: Serialize and deserialize manually. Fastest in theory.</li>
-<li><code>dataclass</code>: Serialize using dataclass's asdict.</li>
-<li><code>pyserde</code>: This library.</li>
-<li><a href="https://github.com/konradhalas/dacite"><code>dacite</code></a>: Simple creation of data classes from dictionaries.</li>
-<li><a href="https://github.com/Fatal1ty/mashumaro"><code>mashumaro</code></a>: Fast and well tested serialization framework on top of dataclasses.</li>
-<li><a href="https://github.com/marshmallow-code/marshmallow"><code>marshallow</code></a>: A lightweight library for converting complex objects to and from simple datatypes.</li>
-<li><a href="https://github.com/python-attrs/attrs"><code>attrs</code></a>: Python Classes Without Boilerplate.</li>
-<li><a href="https://github.com/Tinche/cattrs"><code>cattrs</code></a>: Complex custom class converters for attrs.</li>
-</ul>
-<p>To run benchmark in your environment:</p>
-<pre><code class="language-sh">git clone git@github.com:yukinarit/pyserde.git
-cd pyserde/bench
-poetry install
-poetry run python bench.py --full
-</code></pre>
-<p>You can check <a href="https://github.com/yukinarit/pyserde/blob/main/bench/bench.py">the benchmarking code</a> for more information.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="faq"><a class="header" href="#faq">FAQ</a></h1>
 <h2 id="how-can-i-see-the-code-generated-by-pyserde"><a class="header" href="#how-can-i-see-the-code-generated-by-pyserde">How can I see the code generated by pyserde?</a></h2>
 <p>pyserde provides <code>inspect</code> submodule that works as commandline:</p>
