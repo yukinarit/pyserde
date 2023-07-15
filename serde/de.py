@@ -91,8 +91,9 @@ from .numpy import (
 
 __all__ = ["deserialize", "is_deserializable", "from_dict", "from_tuple"]
 
-# Interface of Custom deserialize function.
+
 DeserializeFunc = Callable[[Type[Any], Any], Any]
+""" Interface of Custom deserialize function. """
 
 
 def serde_custom_class_deserializer(

@@ -40,6 +40,13 @@ if sys.version_info[:2] == (3, 7):
 else:
     Literal = typing.Literal
 
+# Create alias for `dataclasses.Field` because `dataclasses.Field` is a generic
+# class since 3.9 but is not in 3.7 and 3.8.
+if sys.version_info[:2] <= (3, 8):
+    DataclassField = dataclasses.Field
+else:
+    DataclassField = dataclasses.Field[Any]
+
 try:
     if sys.version_info[:2] <= (3, 8):
         import numpy as np
