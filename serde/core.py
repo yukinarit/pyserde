@@ -13,13 +13,13 @@ from typing import (
     Callable,
     Dict,
     List,
-    Mapping,
     Optional,
     Union,
     Generic,
     TypeVar,
     Tuple,
     overload,
+    Mapping,
 )
 
 import casefy
@@ -27,6 +27,7 @@ import jinja2
 from typing_extensions import Type, get_type_hints
 
 from .compat import (
+    DataclassField,
     T,
     SerdeError,
     dataclass_fields,
@@ -344,7 +345,7 @@ def add_func(serde_scope: Scope, func_name: str, func_code: str, globals: Dict[s
         serde_scope.code[func_name] = code
 
 
-def is_instance(obj: Any, typ: Type[Any]) -> bool:
+def is_instance(obj: Any, typ: Any) -> bool:
     """
     Type check function that works like `isinstance` but it accepts
     Subscripted Generics e.g. `List[int]`.
@@ -372,10 +373,13 @@ def is_instance(obj: Any, typ: Type[Any]) -> bool:
     elif is_generic(typ):
         return is_generic_instance(obj, typ)
     elif is_literal(typ):
-        return True  # TODO
+        return True
     elif is_new_type_primitive(typ):
-        inner = typ.__supertype__
-        return isinstance(obj, inner)
+        inner = getattr(typ, "__supertype__", None)
+        if type(inner) is type:
+            return isinstance(obj, inner)
+        else:
+            return False
     elif typ is Ellipsis:
         return True
     else:
@@ -460,13 +464,13 @@ class Func:
     multiple fields receives `skip_if` attribute.
     """
 
-    inner: Callable
+    inner: Callable[[Any], Any]
     """ Function to wrap in """
 
     mangeld: str = ""
     """ Mangled function name """
 
-    def __call__(self, v):
+    def __call__(self, v: Any) -> None:
         return self.inner(v)  # type: ignore
 
     @property
@@ -477,12 +481,12 @@ class Func:
         return self.mangeld
 
 
-def skip_if_false(v):
+def skip_if_false(v: Any) -> Any:
     return not bool(v)
 
 
-def skip_if_default(v, default=None):
-    return v == default
+def skip_if_default(v: Any, default: Optional[Any] = None) -> Any:
+    return v == default  # Why return type is deduced to be Any?
 
 
 @dataclass
@@ -493,19 +497,19 @@ class FlattenOpts:
 
 
 def field(
-    *args,
+    *args: Any,
     rename: Optional[str] = None,
     alias: Optional[List[str]] = None,
     skip: Optional[bool] = None,
-    skip_if: Optional[Callable] = None,
+    skip_if: Optional[Callable[[Any], Any]] = None,
     skip_if_false: Optional[bool] = None,
     skip_if_default: Optional[bool] = None,
-    serializer=None,
-    deserializer=None,
+    serializer: Optional[Callable[..., Any]] = None,
+    deserializer: Optional[Callable[..., Any]] = None,
     flatten: Optional[Union[FlattenOpts, bool]] = None,
-    metadata=None,
-    **kwargs,
-):
+    metadata: Optional[Dict[str, Any]] = None,
+    **kwargs: Any,
+) -> Any:
     """
     Declare a field with parameters.
     """
@@ -557,6 +561,7 @@ class Field(Generic[T]):
     hash: Any = field(default_factory=dataclasses._MISSING_TYPE)
     compare: Any = field(default_factory=dataclasses._MISSING_TYPE)
     metadata: Mapping[str, Any] = field(default_factory=dict)
+    kw_only: bool = False
     case: Optional[str] = None
     alias: List[str] = field(default_factory=list)
     rename: Optional[str] = None
@@ -571,9 +576,7 @@ class Field(Generic[T]):
     type_args: Optional[List[str]] = None
 
     @classmethod
-    def from_dataclass(
-        cls: Type[T], f: dataclasses.Field, parent: Optional[Type[Any]] = None
-    ) -> Field[T]:
+    def from_dataclass(cls, f: DataclassField, parent: Optional[Type[Any]] = None) -> Field[T]:
         """
         Create `Field` object from `dataclasses.Field`.
         """
@@ -626,7 +629,7 @@ class Field(Generic[T]):
             parent=parent,
         )
 
-    def to_dataclass(self) -> dataclasses.Field:
+    def to_dataclass(self) -> DataclassField:
         f = dataclasses.Field(
             default=self.default,
             default_factory=self.default_factory,
@@ -635,6 +638,7 @@ class Field(Generic[T]):
             hash=self.hash,
             compare=self.compare,
             metadata=self.metadata,
+            kw_only=self.kw_only,
         )
         assert self.name
         f.name = self.name
@@ -649,7 +653,7 @@ class Field(Generic[T]):
         return self.type == self.parent
 
     @staticmethod
-    def mangle(field: Field[T], name: str) -> str:
+    def mangle(field: DataclassField, name: str) -> str:
         """
         Get mangled name based on field name.
         """
@@ -781,13 +785,13 @@ class Tagging:
         wrapper dataclass and stored in `Cache`.
         """
         if self.is_internal():
-            tag = casefy.pascalcase(self.tag)
+            tag = casefy.pascalcase(self.tag)  # type: ignore
             if not tag:
                 raise SerdeError('"tag" must be specified in InternalTagging')
             return f"Internal{tag}"
         elif self.is_adjacent():
-            tag = casefy.pascalcase(self.tag)
-            content = casefy.pascalcase(self.content)
+            tag = casefy.pascalcase(self.tag)  # type: ignore
+            content = casefy.pascalcase(self.content)  # type: ignore
             if not tag:
                 raise SerdeError('"tag" must be specified in AdjacentTagging')
             if not content:

@@ -83,8 +83,9 @@ from .numpy import (
 
 __all__ = ["serialize", "is_serializable", "to_dict", "to_tuple"]
 
-# Interface of Custom serialize function.
+
 SerializeFunc = Callable[[Type[Any], Any], Any]
+""" Interface of Custom serialize function. """
 
 
 def default_serializer(_cls: Type[Any], obj):
