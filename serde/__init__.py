@@ -61,7 +61,6 @@ from .se import (
     to_dict,
     to_tuple,
 )
-from . import inspect, json, msgpack, numpy, toml, pickle, yaml
 
 __all__ = [
     "serde",
