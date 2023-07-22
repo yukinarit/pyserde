@@ -7,6 +7,9 @@ import pytest
 from serde import deserialize, from_dict
 
 
+@pytest.mark.skipif(
+    sys.version_info < (3, 10), reason="dataclasses `kw_only` requires python3.10 or higher"
+)
 def test_simple():
     @deserialize
     @dataclass(kw_only=True)
