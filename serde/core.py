@@ -6,6 +6,7 @@ import dataclasses
 import enum
 import functools
 import logging
+import sys
 import re
 from dataclasses import dataclass
 from typing import (
@@ -609,6 +610,8 @@ class Field(Generic[T]):
         if flatten is True:
             flatten = FlattenOpts()
 
+        kw_only = bool(f.kw_only) if sys.version_info >= (3, 10) else False
+
         return cls(
             f.type,
             f.name,
@@ -627,7 +630,7 @@ class Field(Generic[T]):
             deserializer=deserializer,
             flatten=flatten,
             parent=parent,
-            kw_only=bool(f.kw_only),
+            kw_only=kw_only,
         )
 
     def to_dataclass(self) -> DataclassField:
