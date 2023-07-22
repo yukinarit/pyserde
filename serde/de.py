@@ -1065,7 +1065,7 @@ def {{func}}(cls=cls, maybe_generic=None, maybe_generic_type_vars=None, data=Non
   try:
     rv = cls(
     {% for f in fields %}
-    __{{f.name}},
+    {{f.name}}=__{{f.name}},
     {% endfor %}
     )
   except Exception as e:
