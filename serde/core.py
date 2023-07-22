@@ -627,6 +627,7 @@ class Field(Generic[T]):
             deserializer=deserializer,
             flatten=flatten,
             parent=parent,
+            kw_only=bool(f.kw_only),
         )
 
     def to_dataclass(self) -> DataclassField:

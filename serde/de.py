@@ -1065,7 +1065,11 @@ def {{func}}(cls=cls, maybe_generic=None, maybe_generic_type_vars=None, data=Non
   try:
     rv = cls(
     {% for f in fields %}
+    {% if f.kw_only %}
     {{f.name}}=__{{f.name}},
+    {% else %}
+    __{{f.name}},
+    {% endif %}
     {% endfor %}
     )
   except Exception as e:
