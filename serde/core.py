@@ -881,9 +881,6 @@ def should_impl_dataclass(cls: Type[Any]) -> bool:
     if not annotations:
         return False
 
-    if len(annotations) != len(dataclasses.fields(cls)):
-        return True
-
     field_names = [field.name for field in dataclass_fields(cls)]
     for field_name in annotations:
         if field_name not in field_names:
