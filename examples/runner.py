@@ -99,8 +99,10 @@ def run_all() -> None:
     run(primitive_subclass)
     if PY310:
         import union_operator
+        import kw_only
 
         run(union_operator)
+        run(kw_only)
 
 
 def run(module: typing.Any) -> None:

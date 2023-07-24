@@ -2,7 +2,31 @@
 
 Class attributes can be specified as arguments in the `serialize`/`deserialize` decorators in order to customize the (de)serialization behaviour of the class entirely. If you want to customize a field, please consider using [Field Attributes](field-attributes.md).
 
-## **`rename_all`**
+## Attributes offered by dataclasses
+
+### **`frozen`**
+
+dataclass `frozen` class attribute works as expected.
+
+### **`kw_only`**
+
+New in v0.12.2. dataclass `kw_only` class attribute works as expected.
+
+```python
+@serde
+@dataclass(kw_only=True)
+class Foo:
+    i: int
+    s: str
+    f: float
+    b: bool
+```
+
+See [examples/kw_only.py](https://github.com/yukinarit/pyserde/blob/main/examples/kw_only.py) for the complete example.
+
+## Attributes offered by pyserde
+
+### **`rename_all`**
 
 `rename_all` can converts field names into the specified string case. The following example converts camel case field names into snake case names. Case coversion depends on [python-casefy](https://github.com/dmlls/python-casefy). You can find the list of supported cases in [the python-casefy's docs](https://dmlls.github.io/python-casefy/api.html).
 
@@ -42,11 +66,11 @@ print(to_json(f))
 
 See [examples/rename_all.py](https://github.com/yukinarit/pyserde/blob/main/examples/rename_all.py) for the complete example.
 
-## **`tagging`**
+### **`tagging`**
 
 New in v0.7.0. See [Union](union.md).
 
-## **`serializer`** / **`deserializer`**
+### **`serializer`** / **`deserializer`**
 
 If you want to use a custom (de)serializer at class level, you can pass your (de)serializer methods n `serializer` and `deserializer` class attributes.
 
@@ -71,11 +95,11 @@ class Foo:
 
 See [examples/custom_class_serializer.py](https://github.com/yukinarit/pyserde/blob/main/examples/custom_class_serializer.py) for complete example.
 
-## **`type_check`**
+### **`type_check`**
 
 New in v0.9.0. See [Type Check](#type-check.md).
 
-## **`serialize_class_var`**
+### **`serialize_class_var`**
 
 New in v0.9.8. Since `dataclasses.fields` doesn't include a class variable [^1], pyserde doesn't serialize class variable as default. This option allows a field of `typing.ClassVar` to be serialized.
 
