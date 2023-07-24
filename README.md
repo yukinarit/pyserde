@@ -134,6 +134,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
     </tr>
     <tr>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/gpetrovic-meltin"><img src="https://avatars.githubusercontent.com/u/72957645?v=4?s=60" width="60px;" alt="Gajo Petrovic"/><br /><sub><b>Gajo Petrovic</b></sub></a><br /><a href="https://github.com/yukinarit/pyserde/commits?author=gpetrovic-meltin" title="Documentation">📖</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/m472"><img src="https://avatars.githubusercontent.com/u/6155240?v=4?s=60" width="60px;" alt="m472"/><br /><sub><b>m472</b></sub></a><br /><a href="https://github.com/yukinarit/pyserde/commits?author=m472" title="Code">💻</a></td>
     </tr>
   </tbody>
   <tfoot>
