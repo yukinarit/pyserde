@@ -1271,3 +1271,18 @@ def test_deserialize_from_incompatible_value() -> None:
         assert serde.from_dict(Foo, "")
     with pytest.raises(serde.SerdeError):
         assert serde.from_dict(Foo, 10)
+
+
+def test_frozen_dataclass() -> None:
+    @serde.serde
+    @dataclasses.dataclass(frozen=True)
+    class Foo:
+        a: int
+
+    @serde.serde
+    @dataclasses.dataclass(frozen=True)
+    class Bar(Foo):
+        b: int
+
+    bar = Bar(a=10, b=20)
+    assert bar == serde.from_dict(Bar, serde.to_dict(bar))
