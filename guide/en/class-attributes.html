@@ -174,7 +174,22 @@
                     <main>
                         <h1 id="class-attributes"><a class="header" href="#class-attributes">Class Attributes</a></h1>
 <p>Class attributes can be specified as arguments in the <code>serialize</code>/<code>deserialize</code> decorators in order to customize the (de)serialization behaviour of the class entirely. If you want to customize a field, please consider using <a href="field-attributes.html">Field Attributes</a>.</p>
-<h2 id="rename_all"><a class="header" href="#rename_all"><strong><code>rename_all</code></strong></a></h2>
+<h2 id="attributes-offered-by-dataclasses"><a class="header" href="#attributes-offered-by-dataclasses">Attributes offered by dataclasses</a></h2>
+<h3 id="frozen"><a class="header" href="#frozen"><strong><code>frozen</code></strong></a></h3>
+<p>dataclass <code>frozen</code> class attribute works as expected.</p>
+<h3 id="kw_only"><a class="header" href="#kw_only"><strong><code>kw_only</code></strong></a></h3>
+<p>New in v0.12.2. dataclass <code>kw_only</code> class attribute works as expected.</p>
+<pre><code class="language-python">@serde
+@dataclass(kw_only=True)
+class Foo:
+    i: int
+    s: str
+    f: float
+    b: bool
+</code></pre>
+<p>See <a href="https://github.com/yukinarit/pyserde/blob/main/examples/kw_only.py">examples/kw_only.py</a> for the complete example.</p>
+<h2 id="attributes-offered-by-pyserde"><a class="header" href="#attributes-offered-by-pyserde">Attributes offered by pyserde</a></h2>
+<h3 id="rename_all"><a class="header" href="#rename_all"><strong><code>rename_all</code></strong></a></h3>
 <p><code>rename_all</code> can converts field names into the specified string case. The following example converts camel case field names into snake case names. Case coversion depends on <a href="https://github.com/dmlls/python-casefy">python-casefy</a>. You can find the list of supported cases in <a href="https://dmlls.github.io/python-casefy/api.html">the python-casefy's docs</a>.</p>
 <pre><code class="language-python">@serde(rename_all = 'camelcase')
 @dataclass
@@ -204,9 +219,9 @@ print(to_json(f))
 </code></pre>
 </blockquote>
 <p>See <a href="https://github.com/yukinarit/pyserde/blob/main/examples/rename_all.py">examples/rename_all.py</a> for the complete example.</p>
-<h2 id="tagging"><a class="header" href="#tagging"><strong><code>tagging</code></strong></a></h2>
+<h3 id="tagging"><a class="header" href="#tagging"><strong><code>tagging</code></strong></a></h3>
 <p>New in v0.7.0. See <a href="union.html">Union</a>.</p>
-<h2 id="serializer--deserializer"><a class="header" href="#serializer--deserializer"><strong><code>serializer</code></strong> / <strong><code>deserializer</code></strong></a></h2>
+<h3 id="serializer--deserializer"><a class="header" href="#serializer--deserializer"><strong><code>serializer</code></strong> / <strong><code>deserializer</code></strong></a></h3>
 <p>If you want to use a custom (de)serializer at class level, you can pass your (de)serializer methods n <code>serializer</code> and <code>deserializer</code> class attributes.</p>
 <pre><code class="language-python">def serializer(cls, o):
     if cls is datetime:
@@ -226,9 +241,9 @@ class Foo:
     a: datetime
 </code></pre>
 <p>See <a href="https://github.com/yukinarit/pyserde/blob/main/examples/custom_class_serializer.py">examples/custom_class_serializer.py</a> for complete example.</p>
-<h2 id="type_check"><a class="header" href="#type_check"><strong><code>type_check</code></strong></a></h2>
+<h3 id="type_check"><a class="header" href="#type_check"><strong><code>type_check</code></strong></a></h3>
 <p>New in v0.9.0. See <a href="#type-check.md">Type Check</a>.</p>
-<h2 id="serialize_class_var"><a class="header" href="#serialize_class_var"><strong><code>serialize_class_var</code></strong></a></h2>
+<h3 id="serialize_class_var"><a class="header" href="#serialize_class_var"><strong><code>serialize_class_var</code></strong></a></h3>
 <p>New in v0.9.8. Since <code>dataclasses.fields</code> doesn't include a class variable <sup class="footnote-reference"><a href="#1">1</a></sup>, pyserde doesn't serialize class variable as default. This option allows a field of <code>typing.ClassVar</code> to be serialized.</p>
 <pre><code class="language-python">@serde(serialize_class_var=True)
 @dataclass
