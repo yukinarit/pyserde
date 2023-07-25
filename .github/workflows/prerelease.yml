@@ -1,0 +1,26 @@
+name: Build package
+
+on:
+  release:
+    types: [prereleased]
+
+jobs:
+  prerelease:
+    name: Pre Release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        fetch-depth: 0
+      - name: Install poetry
+        run: pip install poetry poetry-dynamic-versioning
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+          cache: poetry
+          cache-dependency-path: pyproject.toml
+      - name: Install dependencies
+        run: make setup
+      - name: Build package to make sure dynamic versioning works
+        run: |
+          poetry publish --build --dry-run
