@@ -1,12 +1,12 @@
-name: Publish
+name: Release to PyPI
 
 on:
   release:
     types: [released]
 
 jobs:
-  publish:
-    name: Publish
+  release:
+    name: Release
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
