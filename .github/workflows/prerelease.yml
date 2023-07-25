@@ -10,7 +10,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-        fetch-depth: 0
+        with:
+          fetch-depth: 0
       - name: Install poetry
         run: pip install poetry poetry-dynamic-versioning
       - name: Set up Python 3.10
