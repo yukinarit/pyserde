@@ -626,7 +626,7 @@
 </span><span id="L-465"><a href="#L-465"><span class="linenos"> 465</span></a><span class="sd">    multiple fields receives `skip_if` attribute.</span>
 </span><span id="L-466"><a href="#L-466"><span class="linenos"> 466</span></a><span class="sd">    &quot;&quot;&quot;</span>
 </span><span id="L-467"><a href="#L-467"><span class="linenos"> 467</span></a>
-</span><span id="L-468"><a href="#L-468"><span class="linenos"> 468</span></a>    <span class="n">inner</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Any</span><span class="p">],</span> <span class="n">Any</span><span class="p">]</span>
+</span><span id="L-468"><a href="#L-468"><span class="linenos"> 468</span></a>    <span class="n">inner</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span>
 </span><span id="L-469"><a href="#L-469"><span class="linenos"> 469</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot; Function to wrap in &quot;&quot;&quot;</span>
 </span><span id="L-470"><a href="#L-470"><span class="linenos"> 470</span></a>
 </span><span id="L-471"><a href="#L-471"><span class="linenos"> 471</span></a>    <span class="n">mangeld</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
@@ -873,7 +873,7 @@
 </span><span id="L-712"><a href="#L-712"><span class="linenos"> 712</span></a>    <span class="k">return</span> <span class="n">name</span>
 </span><span id="L-713"><a href="#L-713"><span class="linenos"> 713</span></a>
 </span><span id="L-714"><a href="#L-714"><span class="linenos"> 714</span></a>
-</span><span id="L-715"><a href="#L-715"><span class="linenos"> 715</span></a><span class="k">def</span> <span class="nf">union_func_name</span><span class="p">(</span><span class="n">prefix</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">union_args</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Type</span><span class="p">[</span><span class="n">Any</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+</span><span id="L-715"><a href="#L-715"><span class="linenos"> 715</span></a><span class="k">def</span> <span class="nf">union_func_name</span><span class="p">(</span><span class="n">prefix</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">union_args</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 </span><span id="L-716"><a href="#L-716"><span class="linenos"> 716</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 </span><span id="L-717"><a href="#L-717"><span class="linenos"> 717</span></a><span class="sd">    Generate a function name that contains all union types</span>
 </span><span id="L-718"><a href="#L-718"><span class="linenos"> 718</span></a>
@@ -1461,7 +1461,7 @@
 </span><span id="Func-466"><a href="#Func-466"><span class="linenos">466</span></a><span class="sd">    multiple fields receives `skip_if` attribute.</span>
 </span><span id="Func-467"><a href="#Func-467"><span class="linenos">467</span></a><span class="sd">    &quot;&quot;&quot;</span>
 </span><span id="Func-468"><a href="#Func-468"><span class="linenos">468</span></a>
-</span><span id="Func-469"><a href="#Func-469"><span class="linenos">469</span></a>    <span class="n">inner</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Any</span><span class="p">],</span> <span class="n">Any</span><span class="p">]</span>
+</span><span id="Func-469"><a href="#Func-469"><span class="linenos">469</span></a>    <span class="n">inner</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span>
 </span><span id="Func-470"><a href="#Func-470"><span class="linenos">470</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot; Function to wrap in &quot;&quot;&quot;</span>
 </span><span id="Func-471"><a href="#Func-471"><span class="linenos">471</span></a>
 </span><span id="Func-472"><a href="#Func-472"><span class="linenos">472</span></a>    <span class="n">mangeld</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
@@ -1491,7 +1491,7 @@ multiple fields receives <code>skip_if</code> attribute.</p>
                             <div id="Func.__init__" class="classattr">
                                 <div class="attr function">
             
-        <span class="name">Func</span><span class="signature pdoc-code condensed">(<span class="param"><span class="n">inner</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Any</span><span class="p">],</span> <span class="n">Any</span><span class="p">]</span>, </span><span class="param"><span class="n">mangeld</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span></span>)</span>
+        <span class="name">Func</span><span class="signature pdoc-code condensed">(<span class="param"><span class="n">inner</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span>, </span><span class="param"><span class="n">mangeld</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span></span>)</span>
 
         
     </div>
@@ -1502,7 +1502,7 @@ multiple fields receives <code>skip_if</code> attribute.</p>
                             </div>
                             <div id="Func.inner" class="classattr">
                                 <div class="attr variable">
-            <span class="name">inner</span><span class="annotation">: Callable[[Any], Any]</span>
+            <span class="name">inner</span><span class="annotation">: Callable[..., Any]</span>
 
         
     </div>
@@ -2061,13 +2061,13 @@ are made. Use <code><a href="#Field.name">name</a></code> property to get a fiel
 <div class="attr function">
             
         <span class="def">def</span>
-        <span class="name">union_func_name</span><span class="signature pdoc-code condensed">(<span class="param"><span class="n">prefix</span><span class="p">:</span> <span class="nb">str</span>, </span><span class="param"><span class="n">union_args</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Type</span><span class="p">[</span><span class="n">Any</span><span class="p">]]</span></span><span class="return-annotation">) -> <span class="nb">str</span>:</span></span>
+        <span class="name">union_func_name</span><span class="signature pdoc-code condensed">(<span class="param"><span class="n">prefix</span><span class="p">:</span> <span class="nb">str</span>, </span><span class="param"><span class="n">union_args</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span></span><span class="return-annotation">) -> <span class="nb">str</span>:</span></span>
 
                 <label class="view-source-button" for="union_func_name-view-source"><span>View Source</span></label>
 
     </div>
     <a class="headerlink" href="#union_func_name"></a>
-            <div class="pdoc-code codehilite"><pre><span></span><span id="union_func_name-716"><a href="#union_func_name-716"><span class="linenos">716</span></a><span class="k">def</span> <span class="nf">union_func_name</span><span class="p">(</span><span class="n">prefix</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">union_args</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Type</span><span class="p">[</span><span class="n">Any</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="union_func_name-716"><a href="#union_func_name-716"><span class="linenos">716</span></a><span class="k">def</span> <span class="nf">union_func_name</span><span class="p">(</span><span class="n">prefix</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">union_args</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 </span><span id="union_func_name-717"><a href="#union_func_name-717"><span class="linenos">717</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 </span><span id="union_func_name-718"><a href="#union_func_name-718"><span class="linenos">718</span></a><span class="sd">    Generate a function name that contains all union types</span>
 </span><span id="union_func_name-719"><a href="#union_func_name-719"><span class="linenos">719</span></a>
