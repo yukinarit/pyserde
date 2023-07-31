@@ -176,7 +176,7 @@ def get_args(typ: Any) -> Tuple[Any, ...]:
         return typing_extensions.get_args(typ) or get_np_args(typ)
 
 
-def typename(typ: Type[Any], with_typing_module: bool = False) -> str:
+def typename(typ: Any, with_typing_module: bool = False) -> str:
     """
     >>> from typing import List, Dict, Set, Any
     >>> typename(int)
@@ -285,7 +285,11 @@ def typename(typ: Type[Any], with_typing_module: bool = False) -> str:
         if name:
             return name
         else:
-            return typ.__name__
+            name = getattr(typ, "__name__", None)
+            if isinstance(name, str):
+                return name
+            else:
+                raise SerdeError(f"Could not get a type name from: {typ}")
 
 
 def type_args(typ: Any) -> Tuple[Type[Any], ...]:

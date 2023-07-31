@@ -10,7 +10,20 @@ import dataclasses
 import functools
 import typing
 from dataclasses import dataclass, is_dataclass
-from typing import Any, Callable, Dict, Generic, Iterator, List, Optional, Tuple, Type, TypeVar
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    Generic,
+    Iterator,
+    List,
+    Optional,
+    Tuple,
+    Type,
+    TypeVar,
+    Iterable,
+    Union,
+)
 
 import jinja2
 from typing_extensions import dataclass_transform
@@ -88,7 +101,7 @@ SerializeFunc = Callable[[Type[Any], Any], Any]
 """ Interface of Custom serialize function. """
 
 
-def default_serializer(_cls: Type[Any], obj):
+def default_serializer(_cls: Type[Any], obj: Any) -> Any:
     """
     Marker function to tell serde to use the default serializer. It's used when custom serializer
     is specified at the class but you want to override a field with the default serializer.
@@ -96,8 +109,8 @@ def default_serializer(_cls: Type[Any], obj):
 
 
 def serde_custom_class_serializer(
-    cls: Type[Any], obj: Any, custom: SerializeFunc, default: Callable
-):
+    cls: Type[Any], obj: Any, custom: SerializeFunc, default: Callable[[], Any]
+) -> Any:
     try:
         return custom(cls, obj)
     except SerdeSkip:
@@ -119,17 +132,17 @@ class Serializer(Generic[T], metaclass=abc.ABCMeta):
 
 def _make_serialize(
     cls_name: str,
-    fields,
-    *args,
+    fields: Iterable[Union[str, Tuple[str, Type[Any]], Tuple[str, Type[Any], Any]]],
+    *args: Any,
     rename_all: Optional[str] = None,
-    reuse_instances_default: bool = True,
+    reuse_instances_default: bool = False,
     convert_sets_default: bool = False,
     serializer: Optional[SerializeFunc] = None,
     tagging: Tagging = DefaultTagging,
     type_check: TypeCheck = NoCheck,
     serialize_class_var: bool = False,
-    **kwargs,
-):
+    **kwargs: Any,
+) -> Type[Any]:
     """
     Create a serializable class programatically.
     """
@@ -158,7 +171,7 @@ GENERATION_STACK = []
 def serialize(
     _cls: Optional[Type[T]] = None,
     rename_all: Optional[str] = None,
-    reuse_instances_default: bool = True,
+    reuse_instances_default: bool = False,
     convert_sets_default: bool = False,
     serializer: Optional[SerializeFunc] = None,
     tagging: Tagging = DefaultTagging,
@@ -242,7 +255,7 @@ def serialize(
 
         # render all union functions
         for union in iter_unions(cls):
-            union_args = type_args(union)
+            union_args = list(type_args(union))
             union_key = union_func_name(UNION_SE_PREFIX, union_args)
             add_func(scope, union_key, render_union_func(cls, union_args, tagging), g)
             scope.union_se_args[union_key] = union_args
@@ -269,7 +282,7 @@ def serialize(
         return cls
 
     if _cls is None:
-        return wrap
+        return wrap  # type: ignore
 
     if _cls in GENERATION_STACK:
         return _cls
@@ -306,11 +319,19 @@ def is_dataclass_without_se(cls: Type[Any]) -> bool:
     if not hasattr(cls, SERDE_SCOPE):
         return True
     scope: Optional[Scope] = getattr(cls, SERDE_SCOPE)
+    if not scope:
+        return True
     return TO_DICT not in scope.funcs
 
 
-def to_obj(o, named: bool, reuse_instances: bool, convert_sets: bool, c: Optional[Any] = None):
-    def serializable_to_obj(object):
+def to_obj(
+    o: Any,
+    named: bool,
+    reuse_instances: Optional[bool] = None,
+    convert_sets: Optional[bool] = None,
+    c: Optional[Any] = None,
+) -> Any:
+    def serializable_to_obj(object: Any) -> Any:
         serde_scope: Scope = getattr(object, SERDE_SCOPE)
         func_name = TO_DICT if named else TO_ITER
         return serde_scope.funcs[func_name](
@@ -365,7 +386,10 @@ def astuple(v: Any) -> Tuple[Any, ...]:
 
 
 def to_tuple(
-    o: Any, c: Optional[Type[Any]] = None, reuse_instances: bool = ..., convert_sets: bool = ...
+    o: Any,
+    c: Optional[Type[Any]] = None,
+    reuse_instances: Optional[bool] = None,
+    convert_sets: Optional[bool] = None,
 ) -> Tuple[Any, ...]:
     """
     Serialize object into tuple.
@@ -386,7 +410,9 @@ def to_tuple(
     >>> to_tuple(lst)
     [(10, 'foo', 100.0, True), (20, 'foo', 100.0, True)]
     """
-    return to_obj(o, named=False, c=c, reuse_instances=reuse_instances, convert_sets=convert_sets)
+    return to_obj(  # type: ignore
+        o, named=False, c=c, reuse_instances=reuse_instances, convert_sets=convert_sets
+    )
 
 
 def asdict(v: Any) -> Dict[Any, Any]:
@@ -397,7 +423,10 @@ def asdict(v: Any) -> Dict[Any, Any]:
 
 
 def to_dict(
-    o: Any, c: Optional[Type[Any]] = None, reuse_instances: bool = ..., convert_sets: bool = ...
+    o: Any,
+    c: Optional[Type[Any]] = None,
+    reuse_instances: Optional[bool] = None,
+    convert_sets: Optional[bool] = None,
 ) -> Dict[Any, Any]:
     """
     Serialize object into dictionary.
@@ -418,7 +447,9 @@ def to_dict(
     >>> to_dict(lst)
     [{'i': 10, 's': 'foo', 'f': 100.0, 'b': True}, {'i': 20, 's': 'foo', 'f': 100.0, 'b': True}]
     """
-    return to_obj(o, named=True, c=c, reuse_instances=reuse_instances, convert_sets=convert_sets)
+    return to_obj(  # type: ignore
+        o, named=True, c=c, reuse_instances=reuse_instances, convert_sets=convert_sets
+    )
 
 
 @dataclass
@@ -432,7 +463,7 @@ class SeField(Field[T]):
         """
         Get variable name in the generated code e.g. obj.a.b
         """
-        var = self.parent.varname if self.parent else None
+        var = getattr(self.parent, "varname", None) if self.parent else None
         if var:
             return f"{var}.{self.name}"
         else:
@@ -461,13 +492,11 @@ def render_to_tuple(
     serialize_class_var: bool = False,
 ) -> str:
     template = """
-def {{func}}(obj, reuse_instances = {{serde_scope.reuse_instances_default}},
-             convert_sets = {{serde_scope.convert_sets_default}}):
-  if reuse_instances is Ellipsis:
+def {{func}}(obj, reuse_instances=None, convert_sets=None):
+  if reuse_instances is None:
     reuse_instances = {{serde_scope.reuse_instances_default}}
-  if convert_sets is Ellipsis:
+  if convert_sets is None:
     convert_sets = {{serde_scope.convert_sets_default}}
-
   if not is_dataclass(obj):
     return copy.deepcopy(obj)
 
@@ -508,13 +537,11 @@ def render_to_dict(
     serialize_class_var: bool = False,
 ) -> str:
     template = """
-def {{func}}(obj, reuse_instances = {{serde_scope.reuse_instances_default}},
-             convert_sets = {{serde_scope.convert_sets_default}}):
-  if reuse_instances is Ellipsis:
+def {{func}}(obj, reuse_instances = None, convert_sets = None):
+  if reuse_instances is None:
     reuse_instances = {{serde_scope.reuse_instances_default}}
-  if convert_sets is Ellipsis:
+  if convert_sets is None:
     convert_sets = {{serde_scope.convert_sets_default}}
-
   if not is_dataclass(obj):
     return copy.deepcopy(obj)
 
@@ -753,7 +780,7 @@ convert_sets=convert_sets), coerce(int, foo[2]),)"
             flattened = []
             for f in sefields(arg.type, self.serialize_class_var):
                 f.parent = arg  # type: ignore
-                flattened.append(self.render(f))  # type: ignore
+                flattened.append(self.render(f))
             return ", ".join(flattened)
         else:
             return (
@@ -846,7 +873,7 @@ convert_sets=convert_sets), coerce(int, foo[2]),)"
         return f"str({arg.varname})"
 
     def union_func(self, arg: SeField[Any]) -> str:
-        func_name = union_func_name(UNION_SE_PREFIX, type_args(arg.type))
+        func_name = union_func_name(UNION_SE_PREFIX, list(type_args(arg.type)))
         return f"serde_scope.funcs['{func_name}']({arg.varname}, reuse_instances, convert_sets)"
 
     def literal(self, arg: SeField[Any]) -> str:

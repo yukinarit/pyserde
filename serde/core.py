@@ -465,7 +465,7 @@ class Func:
     multiple fields receives `skip_if` attribute.
     """
 
-    inner: Callable[[Any], Any]
+    inner: Callable[..., Any]
     """ Function to wrap in """
 
     mangeld: str = ""
@@ -712,7 +712,7 @@ def conv(f: Field[Any], case: Optional[str] = None) -> str:
     return name
 
 
-def union_func_name(prefix: str, union_args: List[Type[Any]]) -> str:
+def union_func_name(prefix: str, union_args: List[Any]) -> str:
     """
     Generate a function name that contains all union types
 
