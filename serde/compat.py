@@ -796,7 +796,7 @@ def is_new_type_primitive(typ: Type[Any]) -> bool:
         return any(isinstance(typ, ty) for ty in PRIMITIVES)
 
 
-def is_generic(typ: Type[Any]) -> bool:
+def is_generic(typ: Any) -> bool:
     """
     Test if the type is derived from `typing.Generic`.
 
@@ -856,7 +856,9 @@ def is_str_serializable(typ: Type[Any]) -> bool:
     return typ in StrSerializableTypes
 
 
-def is_datetime(typ: Type[Any]) -> bool:
+def is_datetime(
+    typ: Type[Any],
+) -> TypeGuard[Union[datetime.date, datetime.time, datetime.datetime]]:
     """
     Test if the type is any of the datetime types..
     """

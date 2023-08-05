@@ -10,7 +10,7 @@ import dataclasses
 import functools
 import typing
 from dataclasses import dataclass, is_dataclass
-from typing import Any, Callable, Dict, Generic, List, Optional, TypeVar, overload, Union
+from typing import Any, Callable, Dict, Generic, List, Optional, TypeVar, overload, Union, Sequence
 
 import jinja2
 from typing_extensions import Type, dataclass_transform
@@ -97,8 +97,8 @@ DeserializeFunc = Callable[[Type[Any], Any], Any]
 
 
 def serde_custom_class_deserializer(
-    cls: Type[Any], datavar, value, custom: DeserializeFunc, default: Callable
-):
+    cls: Type[Any], datavar: Any, value: Any, custom: DeserializeFunc, default: Callable[[], Any]
+) -> Any:
     """
     Handle custom deserialization. Use default deserialization logic if it receives `SerdeSkip`
     exception.
@@ -334,6 +334,8 @@ def is_dataclass_without_de(cls: Type[Any]) -> bool:
     if not hasattr(cls, SERDE_SCOPE):
         return True
     scope: Optional[Scope] = getattr(cls, SERDE_SCOPE)
+    if not scope:
+        return True
     return FROM_DICT not in scope.funcs
 
 
@@ -357,19 +359,21 @@ class Deserializer(Generic[T], metaclass=abc.ABCMeta):
         raise NotImplementedError
 
 
-def from_obj(c: Type[T], o: Any, named: bool, reuse_instances: bool) -> T:
+def from_obj(c: Type[T], o: Any, named: bool, reuse_instances: Optional[bool]) -> T:
     """
     Deserialize from an object into an instance of the type specified as arg `c`.
     `c` can be either primitive type, `List`, `Tuple`, `Dict` or `deserialize` class.
     """
 
-    def deserializable_to_obj(cls):
+    res: Any
+
+    def deserializable_to_obj(cls: Type[T]) -> T:
         serde_scope: Scope = getattr(cls, SERDE_SCOPE)
         func_name = FROM_DICT if named else FROM_ITER
         res = serde_scope.funcs[func_name](
             cls, maybe_generic=maybe_generic, data=o, reuse_instances=reuse_instances
         )
-        return res
+        return res  # type: ignore
 
     if is_union(c) and not is_opt(c):
         # If a class in the argument is a non-dataclass class e.g. Union[Foo, Bar],
@@ -383,45 +387,41 @@ def from_obj(c: Type[T], o: Any, named: bool, reuse_instances: bool) -> T:
         # are not a subclass of "type", use "c" for type inspection, and pass
         # "maybe_generic" in deserialize functions.
         maybe_generic = c
-        c = get_origin(c)
+        c = get_origin(c)  # type: ignore
     else:
         maybe_generic = c
     try:
         thisfunc = functools.partial(from_obj, named=named, reuse_instances=reuse_instances)
         if is_dataclass_without_de(c):
             deserialize(c)
-            return deserializable_to_obj(c)
+            res = deserializable_to_obj(c)
         elif is_deserializable(c):
-            return deserializable_to_obj(c)
+            res = deserializable_to_obj(c)
         elif is_opt(c):
             if o is None:
-                return None
+                res = None
             else:
-                return thisfunc(type_args(c)[0], o)
+                res = thisfunc(type_args(c)[0], o)
         elif is_list(c):
             if is_bare_list(c):
-                return list(o)
+                res = list(o)
             else:
                 res = [thisfunc(type_args(c)[0], e) for e in o]
-                return res
         elif is_set(c):
             if is_bare_set(c):
-                return set(o)
+                res = set(o)
             elif is_frozen_set(c):
                 res = frozenset(thisfunc(type_args(c)[0], e) for e in o)
-                return res
             else:
                 res = {thisfunc(type_args(c)[0], e) for e in o}
-                return res
         elif is_tuple(c):
             if is_bare_tuple(c) or is_variable_tuple(c):
-                return tuple(e for e in o)
+                res = tuple(e for e in o)
             else:
                 res = tuple(thisfunc(type_args(c)[i], e) for i, e in enumerate(o))
-                return res
         elif is_dict(c):
             if is_bare_dict(c):
-                return {k: v for k, v in o.items()}
+                res = o
             elif is_default_dict(c):
                 f = DeField(c, "")
                 v = f.value_field()
@@ -437,15 +437,16 @@ def from_obj(c: Type[T], o: Any, named: bool, reuse_instances: bool) -> T:
                 res = {
                     thisfunc(type_args(c)[0], k): thisfunc(type_args(c)[1], v) for k, v in o.items()
                 }
-            return res
         elif is_numpy_array(c):
-            return deserialize_numpy_array_direct(c, o)
+            res = deserialize_numpy_array_direct(c, o)
         elif is_datetime(c):
-            return c.fromisoformat(o)
+            res = c.fromisoformat(o)
         elif is_any(c) or is_ellipsis(c):
-            return o
+            res = o
+        else:
+            res = c(o)  # type: ignore
 
-        return c(o)
+        return res  # type: ignore
 
     except UserError as e:
         raise e.inner from None
@@ -455,16 +456,16 @@ def from_obj(c: Type[T], o: Any, named: bool, reuse_instances: bool) -> T:
 
 
 @overload
-def from_dict(cls: Type[T], o: Dict[str, Any], reuse_instances: bool = ...) -> T:
+def from_dict(cls: Type[T], o: Dict[str, Any], reuse_instances: Optional[bool] = None) -> T:
     ...
 
 
 @overload
-def from_dict(cls: Any, o: Dict[str, Any], reuse_instances: bool = ...) -> Any:
+def from_dict(cls: Any, o: Dict[str, Any], reuse_instances: Optional[bool] = None) -> Any:
     ...
 
 
-def from_dict(cls: Any, o: Dict[str, Any], reuse_instances: bool = ...) -> Any:
+def from_dict(cls: Any, o: Dict[str, Any], reuse_instances: Optional[bool] = None) -> Any:
     """
     Deserialize dictionary into object.
 
@@ -489,16 +490,16 @@ def from_dict(cls: Any, o: Dict[str, Any], reuse_instances: bool = ...) -> Any:
 
 
 @overload
-def from_tuple(cls: Type[T], o: Any, reuse_instances: bool = ...) -> T:
+def from_tuple(cls: Type[T], o: Any, reuse_instances: Optional[bool] = None) -> T:
     ...
 
 
 @overload
-def from_tuple(cls: Any, o: Any, reuse_instances: bool = ...) -> Any:
+def from_tuple(cls: Any, o: Any, reuse_instances: Optional[bool] = None) -> Any:
     ...
 
 
-def from_tuple(cls: Any, o: Any, reuse_instances: bool = ...) -> Any:
+def from_tuple(cls: Any, o: Any, reuse_instances: Optional[bool] = None) -> Any:
     """
     Deserialize tuple into object.
 
@@ -663,8 +664,10 @@ class Renderer:
         if arg.deserializer and arg.deserializer.inner is not default_deserializer:
             res = self.custom_field_deserializer(arg)
         elif is_generic(arg.type):
-            arg.type_args = get_args(arg.type)
-            arg.type = get_origin(arg.type)
+            arg.type_args = list(get_args(arg.type))
+            origin = get_origin(arg.type)
+            assert origin
+            arg.type = origin
             res = self.render(arg)
         elif is_dataclass(arg.type):
             res = self.dataclass(arg)
@@ -702,6 +705,8 @@ class Renderer:
             # For subclasses for primitives e.g. class FooStr(str), coercing is always enabled
             res = self.primitive(arg, not is_primitive_subclass(arg.type))
         elif isinstance(arg.type, TypeVar):
+            if not self.cls:
+                raise SerdeError("Missing cls")
             index = find_generic_arg(self.cls, arg.type)
             res = (
                 f"from_obj(get_generic_arg(maybe_generic, maybe_generic_type_vars, "
@@ -1004,8 +1009,8 @@ def render_from_iter(
 ) -> str:
     template = """
 def {{func}}(cls=cls, maybe_generic=None, maybe_generic_type_vars=None, data=None,
-             variable_type_args=None, reuse_instances = {{serde_scope.reuse_instances_default}}):
-  if reuse_instances is Ellipsis:
+             variable_type_args=None, reuse_instances=None):
+  if reuse_instances is None:
     reuse_instances = {{serde_scope.reuse_instances_default}}
 
   maybe_generic_type_vars = maybe_generic_type_vars or {{cls_type_vars}}
@@ -1052,8 +1057,8 @@ def render_from_dict(
 ) -> str:
     template = """
 def {{func}}(cls=cls, maybe_generic=None, maybe_generic_type_vars=None, data=None,
-             variable_type_args=None, reuse_instances = {{serde_scope.reuse_instances_default}}):
-  if reuse_instances is Ellipsis:
+             variable_type_args=None, reuse_instances=None):
+  if reuse_instances is None:
     reuse_instances = {{serde_scope.reuse_instances_default}}
 
   maybe_generic_type_vars = maybe_generic_type_vars or {{cls_type_vars}}
@@ -1104,7 +1109,7 @@ def {{func}}(cls=cls, maybe_generic=None, maybe_generic_type_vars=None, data=Non
 
 
 def render_union_func(
-    cls: Type[Any], union_args: List[Type[Any]], tagging: Tagging = DefaultTagging
+    cls: Type[Any], union_args: Sequence[Type[Any]], tagging: Tagging = DefaultTagging
 ) -> str:
     template = """
 def {{func}}(cls=cls, maybe_generic=None, maybe_generic_type_vars=None, data=None,
@@ -1165,7 +1170,7 @@ def {{func}}(cls=cls, maybe_generic=None, maybe_generic_type_vars=None, data=Non
 
 
 def render_literal_func(
-    cls: Type[Any], literal_args: List[Any], tagging: Tagging = DefaultTagging
+    cls: Type[Any], literal_args: Sequence[Any], tagging: Tagging = DefaultTagging
 ) -> str:
     template = """
 def {{func}}(cls=cls, maybe_generic=None, maybe_generic_type_vars=None, data=None,

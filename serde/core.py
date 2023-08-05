@@ -21,6 +21,7 @@ from typing import (
     Tuple,
     overload,
     Mapping,
+    Sequence,
 )
 
 import casefy
@@ -712,7 +713,7 @@ def conv(f: Field[Any], case: Optional[str] = None) -> str:
     return name
 
 
-def union_func_name(prefix: str, union_args: List[Any]) -> str:
+def union_func_name(prefix: str, union_args: Sequence[Any]) -> str:
     """
     Generate a function name that contains all union types
 
@@ -727,7 +728,7 @@ def union_func_name(prefix: str, union_args: List[Any]) -> str:
     return re.sub(r"[^A-Za-z0-9]", "_", f"{prefix}_{'_'.join([typename(e) for e in union_args])}")
 
 
-def literal_func_name(literal_args: List[Any]) -> str:
+def literal_func_name(literal_args: Sequence[Any]) -> str:
     """
     Generate a function name with all literals and corresponding types specified with Literal[...]
 
