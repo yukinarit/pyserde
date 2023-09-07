@@ -63,7 +63,7 @@ try:
     def serialize_numpy_scalar(arg) -> str:
         return f"{arg.varname}.item()"
 
-    def deserialize_numpy_scalar(arg):
+    def deserialize_numpy_scalar(arg: Any) -> str:
         return f"{fullname(arg.type)}({arg.data})"
 
     def is_numpy_array(typ) -> bool:
@@ -85,7 +85,7 @@ try:
         dtype = fullname(arg[1][0].type)
         return f"numpy.array({arg.data}, dtype={dtype})"
 
-    def deserialize_numpy_array_direct(typ, arg):
+    def deserialize_numpy_array_direct(typ: Any, arg: Any) -> Any:
         if is_bare_numpy_array(typ):
             return np.array(arg)
 
@@ -119,5 +119,5 @@ except ImportError:
     def deserialize_numpy_array(arg) -> str:
         return ""
 
-    def deserialize_numpy_array_direct(typ, arg):
+    def deserialize_numpy_array_direct(typ: Any, arg: Any) -> Any:
         return arg

@@ -94,13 +94,13 @@ include = [
   "serde/inspect.py",
   "serde/json.py",
   "serde/se.py",
+  "serde/de.py",
   "serde/msgpack.py",
   "serde/toml.py",
   "serde/yaml.py",
   "serde/pickle.py"
 ]
 exclude = [
-  "serde/de.py",
   "serde/numpy.py",
   "bench",
   "tests",
@@ -113,7 +113,6 @@ reportMissingImports = false
 strict = true
 ignore_missing_imports = true
 exclude = [
-  "serde/de.py",
   "serde/numpy.py",
   "bench",
   "tests"
