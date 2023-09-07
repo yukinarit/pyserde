@@ -159,7 +159,7 @@
 </span><span id="L-63"><a href="#L-63"><span class="linenos"> 63</span></a>    <span class="k">def</span> <span class="nf">serialize_numpy_scalar</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 </span><span id="L-64"><a href="#L-64"><span class="linenos"> 64</span></a>        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">arg</span><span class="o">.</span><span class="n">varname</span><span class="si">}</span><span class="s2">.item()&quot;</span>
 </span><span id="L-65"><a href="#L-65"><span class="linenos"> 65</span></a>
-</span><span id="L-66"><a href="#L-66"><span class="linenos"> 66</span></a>    <span class="k">def</span> <span class="nf">deserialize_numpy_scalar</span><span class="p">(</span><span class="n">arg</span><span class="p">):</span>
+</span><span id="L-66"><a href="#L-66"><span class="linenos"> 66</span></a>    <span class="k">def</span> <span class="nf">deserialize_numpy_scalar</span><span class="p">(</span><span class="n">arg</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 </span><span id="L-67"><a href="#L-67"><span class="linenos"> 67</span></a>        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">fullname</span><span class="p">(</span><span class="n">arg</span><span class="o">.</span><span class="n">type</span><span class="p">)</span><span class="si">}</span><span class="s2">(</span><span class="si">{</span><span class="n">arg</span><span class="o">.</span><span class="n">data</span><span class="si">}</span><span class="s2">)&quot;</span>
 </span><span id="L-68"><a href="#L-68"><span class="linenos"> 68</span></a>
 </span><span id="L-69"><a href="#L-69"><span class="linenos"> 69</span></a>    <span class="k">def</span> <span class="nf">is_numpy_array</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
@@ -181,7 +181,7 @@
 </span><span id="L-85"><a href="#L-85"><span class="linenos"> 85</span></a>        <span class="n">dtype</span> <span class="o">=</span> <span class="n">fullname</span><span class="p">(</span><span class="n">arg</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">type</span><span class="p">)</span>
 </span><span id="L-86"><a href="#L-86"><span class="linenos"> 86</span></a>        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;numpy.array(</span><span class="si">{</span><span class="n">arg</span><span class="o">.</span><span class="n">data</span><span class="si">}</span><span class="s2">, dtype=</span><span class="si">{</span><span class="n">dtype</span><span class="si">}</span><span class="s2">)&quot;</span>
 </span><span id="L-87"><a href="#L-87"><span class="linenos"> 87</span></a>
-</span><span id="L-88"><a href="#L-88"><span class="linenos"> 88</span></a>    <span class="k">def</span> <span class="nf">deserialize_numpy_array_direct</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="n">arg</span><span class="p">):</span>
+</span><span id="L-88"><a href="#L-88"><span class="linenos"> 88</span></a>    <span class="k">def</span> <span class="nf">deserialize_numpy_array_direct</span><span class="p">(</span><span class="n">typ</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">arg</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
 </span><span id="L-89"><a href="#L-89"><span class="linenos"> 89</span></a>        <span class="k">if</span> <span class="n">is_bare_numpy_array</span><span class="p">(</span><span class="n">typ</span><span class="p">):</span>
 </span><span id="L-90"><a href="#L-90"><span class="linenos"> 90</span></a>            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span>
 </span><span id="L-91"><a href="#L-91"><span class="linenos"> 91</span></a>
@@ -215,7 +215,7 @@
 </span><span id="L-119"><a href="#L-119"><span class="linenos">119</span></a>    <span class="k">def</span> <span class="nf">deserialize_numpy_array</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 </span><span id="L-120"><a href="#L-120"><span class="linenos">120</span></a>        <span class="k">return</span> <span class="s2">&quot;&quot;</span>
 </span><span id="L-121"><a href="#L-121"><span class="linenos">121</span></a>
-</span><span id="L-122"><a href="#L-122"><span class="linenos">122</span></a>    <span class="k">def</span> <span class="nf">deserialize_numpy_array_direct</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="n">arg</span><span class="p">):</span>
+</span><span id="L-122"><a href="#L-122"><span class="linenos">122</span></a>    <span class="k">def</span> <span class="nf">deserialize_numpy_array_direct</span><span class="p">(</span><span class="n">typ</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">arg</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
 </span><span id="L-123"><a href="#L-123"><span class="linenos">123</span></a>        <span class="k">return</span> <span class="n">arg</span>
 </span></pre></div>
 
@@ -419,13 +419,13 @@
 <div class="attr function">
             
         <span class="def">def</span>
-        <span class="name">deserialize_numpy_scalar</span><span class="signature pdoc-code condensed">(<span class="param"><span class="n">arg</span></span><span class="return-annotation">):</span></span>
+        <span class="name">deserialize_numpy_scalar</span><span class="signature pdoc-code condensed">(<span class="param"><span class="n">arg</span><span class="p">:</span> <span class="n">Any</span></span><span class="return-annotation">) -> <span class="nb">str</span>:</span></span>
 
                 <label class="view-source-button" for="deserialize_numpy_scalar-view-source"><span>View Source</span></label>
 
     </div>
     <a class="headerlink" href="#deserialize_numpy_scalar"></a>
-            <div class="pdoc-code codehilite"><pre><span></span><span id="deserialize_numpy_scalar-67"><a href="#deserialize_numpy_scalar-67"><span class="linenos">67</span></a>    <span class="k">def</span> <span class="nf">deserialize_numpy_scalar</span><span class="p">(</span><span class="n">arg</span><span class="p">):</span>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="deserialize_numpy_scalar-67"><a href="#deserialize_numpy_scalar-67"><span class="linenos">67</span></a>    <span class="k">def</span> <span class="nf">deserialize_numpy_scalar</span><span class="p">(</span><span class="n">arg</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 </span><span id="deserialize_numpy_scalar-68"><a href="#deserialize_numpy_scalar-68"><span class="linenos">68</span></a>        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">fullname</span><span class="p">(</span><span class="n">arg</span><span class="o">.</span><span class="n">type</span><span class="p">)</span><span class="si">}</span><span class="s2">(</span><span class="si">{</span><span class="n">arg</span><span class="o">.</span><span class="n">data</span><span class="si">}</span><span class="s2">)&quot;</span>
 </span></pre></div>
 
@@ -521,13 +521,13 @@
 <div class="attr function">
             
         <span class="def">def</span>
-        <span class="name">deserialize_numpy_array_direct</span><span class="signature pdoc-code condensed">(<span class="param"><span class="n">typ</span>, </span><span class="param"><span class="n">arg</span></span><span class="return-annotation">):</span></span>
+        <span class="name">deserialize_numpy_array_direct</span><span class="signature pdoc-code condensed">(<span class="param"><span class="n">typ</span><span class="p">:</span> <span class="n">Any</span>, </span><span class="param"><span class="n">arg</span><span class="p">:</span> <span class="n">Any</span></span><span class="return-annotation">) -> <span class="n">Any</span>:</span></span>
 
                 <label class="view-source-button" for="deserialize_numpy_array_direct-view-source"><span>View Source</span></label>
 
     </div>
     <a class="headerlink" href="#deserialize_numpy_array_direct"></a>
-            <div class="pdoc-code codehilite"><pre><span></span><span id="deserialize_numpy_array_direct-89"><a href="#deserialize_numpy_array_direct-89"><span class="linenos">89</span></a>    <span class="k">def</span> <span class="nf">deserialize_numpy_array_direct</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="n">arg</span><span class="p">):</span>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="deserialize_numpy_array_direct-89"><a href="#deserialize_numpy_array_direct-89"><span class="linenos">89</span></a>    <span class="k">def</span> <span class="nf">deserialize_numpy_array_direct</span><span class="p">(</span><span class="n">typ</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">arg</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
 </span><span id="deserialize_numpy_array_direct-90"><a href="#deserialize_numpy_array_direct-90"><span class="linenos">90</span></a>        <span class="k">if</span> <span class="n">is_bare_numpy_array</span><span class="p">(</span><span class="n">typ</span><span class="p">):</span>
 </span><span id="deserialize_numpy_array_direct-91"><a href="#deserialize_numpy_array_direct-91"><span class="linenos">91</span></a>            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span>
 </span><span id="deserialize_numpy_array_direct-92"><a href="#deserialize_numpy_array_direct-92"><span class="linenos">92</span></a>
