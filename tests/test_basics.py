@@ -560,6 +560,17 @@ def test_rename_and_alias():
     assert ff.a == 10
 
 
+def test_rename_all_and_alias():
+    @serde.serde(rename_all="pascalcase")
+    class Foo:
+        a_field: int = serde.field(alias=["b_field"])
+
+    f = Foo(1)
+    assert '{"AField":1}' == serde.json.to_json(f)
+    ff = serde.json.from_json(Foo, '{"b_field":1}')  # alias is not renamed
+    assert f == ff
+
+
 def test_default_and_alias():
     @serde.serde
     class Foo:
