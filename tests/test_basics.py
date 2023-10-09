@@ -573,6 +573,15 @@ def test_default_and_alias():
     assert ff.a == 2
 
 
+def test_optional_and_alias():
+    @serde.serde
+    class Foo:
+        a: Optional[int] = serde.field(alias=["b"])
+
+    assert Foo(1) == serde.json.from_json(Foo, '{"b":1}')
+    assert Foo(None) == serde.json.from_json(Foo, '{"c":1}')
+
+
 def test_default_and_rename():
     @serde.serde
     class Foo:

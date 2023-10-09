@@ -123,13 +123,18 @@ def default_deserializer(_cls: Type[Any], obj: Any) -> Any:
     """
 
 
-def _get_by_aliases(d: Dict[str, str], aliases: List[str]) -> str:
+def _get_by_aliases(
+    d: Dict[str, str], aliases: List[str], raise_error: bool = True
+) -> Optional[str]:
     if not aliases:
-        raise KeyError("Tried all aliases, but key not found")
+        if raise_error:
+            raise KeyError("Tried all aliases, but key not found")
+        else:
+            return None
     if aliases[0] in d:
         return d[aliases[0]]
     else:
-        return _get_by_aliases(d, aliases[1:])
+        return _get_by_aliases(d, aliases[1:], raise_error=raise_error)
 
 
 def _exists_by_aliases(d: Dict[str, str], aliases: List[str]) -> bool:
@@ -804,7 +809,13 @@ reuse_instances=reuse_instances)) if data.get("f") is not None else None'
         if arg.iterbased:
             exists = f"{arg.data} is not None"
         else:
-            exists = f'{arg.datavar}.get("{arg.conv_name()}") is not None'
+            name = arg.conv_name()
+            if arg.alias:
+                aliases = (f'"{s}"' for s in [name, *arg.alias])
+                get = f"_get_by_aliases(data, [{','.join(aliases)}], raise_error=False)"
+            else:
+                get = f'{arg.datavar}.get("{name}")'
+            exists = f"{get} is not None"
         return f"({self.render(value_arg)}) if {exists} else None"
 
     def list(self, arg: DeField[Any]) -> str:
