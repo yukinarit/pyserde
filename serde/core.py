@@ -413,7 +413,7 @@ def is_list_instance(obj: Any, typ: Type[Any]) -> bool:
 
 
 def is_set_instance(obj: Any, typ: Type[Any]) -> bool:
-    if not isinstance(obj, set):
+    if not isinstance(obj, (set, frozenset)):
         return False
     if len(obj) == 0 or is_bare_set(typ):
         return True
