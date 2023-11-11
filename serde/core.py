@@ -44,6 +44,7 @@ from .compat import (
     is_list,
     is_literal,
     is_new_type_primitive,
+    is_any,
     is_opt,
     is_set,
     is_tuple,
@@ -382,6 +383,8 @@ def is_instance(obj: Any, typ: Any) -> bool:
             return isinstance(obj, inner)
         else:
             return False
+    elif is_any(typ):
+        return True
     elif typ is Ellipsis:
         return True
     else:
