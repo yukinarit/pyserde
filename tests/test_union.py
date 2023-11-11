@@ -2,7 +2,7 @@ import logging
 import sys
 from dataclasses import dataclass
 from ipaddress import IPv4Address
-from typing import Dict, FrozenSet, Generic, List, NewType, Optional, Tuple, TypeVar, Union
+from typing import Dict, FrozenSet, Generic, List, NewType, Optional, Tuple, TypeVar, Union, Any
 from uuid import UUID
 
 import pytest
@@ -772,3 +772,21 @@ def test_union_frozenset_with_prim():
         a: Union[FrozenSet[int], int]
 
     assert to_dict(Foo(frozenset({1}))) == {"a": {1}}
+
+
+def test_union_with_any():
+    @dataclass
+    class FooWithString:
+        foo: str
+
+    @dataclass
+    class BarWithDict:
+        bar: Dict[str, Any]
+
+    @serde(tagging=Untagged)
+    @dataclass
+    class Class:
+        foobars: List[Union[FooWithString, BarWithDict]]
+
+    c = Class([FooWithString("string"), BarWithDict({"key": "value"})])
+    assert c == from_json(Class, to_json(c))
