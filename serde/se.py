@@ -5,6 +5,7 @@ and functions associated with serialization.
 
 from __future__ import annotations
 import abc
+import plum
 import copy
 import dataclasses
 import functools
@@ -63,6 +64,7 @@ from .compat import (
     typename,
 )
 from .core import (
+    ClassSerializer,
     CACHE,
     SERDE_SCOPE,
     TO_DICT,
@@ -108,7 +110,7 @@ def default_serializer(_cls: Type[Any], obj: Any) -> Any:
     """
 
 
-def serde_custom_class_serializer(
+def serde_legacy_custom_class_serializer(
     cls: Type[Any], obj: Any, custom: SerializeFunc, default: Callable[[], Any]
 ) -> Any:
     try:
@@ -141,6 +143,7 @@ def _make_serialize(
     tagging: Tagging = DefaultTagging,
     type_check: TypeCheck = NoCheck,
     serialize_class_var: bool = False,
+    class_serializer: Optional[ClassSerializer] = None,
     **kwargs: Any,
 ) -> Type[Any]:
     """
@@ -177,6 +180,7 @@ def serialize(
     tagging: Tagging = DefaultTagging,
     type_check: TypeCheck = NoCheck,
     serialize_class_var: bool = False,
+    class_serializer: Optional[ClassSerializer] = None,
     **kwargs: Any,
 ) -> Type[T]:
     """
@@ -235,9 +239,10 @@ def serialize(
         g["TypeCheck"] = TypeCheck
         g["NoCheck"] = NoCheck
         g["coerce"] = coerce
+        g["class_serializer"] = class_serializer
         if serializer:
-            g["serde_custom_class_serializer"] = functools.partial(
-                serde_custom_class_serializer, custom=serializer
+            g["serde_legacy_custom_class_serializer"] = functools.partial(
+                serde_legacy_custom_class_serializer, custom=serializer
             )
 
         # Collect types used in the generated code.
@@ -267,12 +272,17 @@ def serialize(
                 g[f.serializer.name] = f.serializer
 
         add_func(
-            scope, TO_ITER, render_to_tuple(cls, serializer, type_check, serialize_class_var), g
+            scope,
+            TO_ITER,
+            render_to_tuple(cls, serializer, type_check, serialize_class_var, class_serializer),
+            g,
         )
         add_func(
             scope,
             TO_DICT,
-            render_to_dict(cls, rename_all, serializer, type_check, serialize_class_var),
+            render_to_dict(
+                cls, rename_all, serializer, type_check, serialize_class_var, class_serializer
+            ),
             g,
         )
         add_func(scope, TYPE_CHECK, render_type_check(cls), g)
@@ -487,9 +497,10 @@ def sefields(cls: Type[Any], serialize_class_var: bool = False) -> Iterator[SeFi
 
 def render_to_tuple(
     cls: Type[Any],
-    custom: Optional[SerializeFunc] = None,
+    legacy_class_serializer: Optional[SerializeFunc] = None,
     type_check: TypeCheck = NoCheck,
     serialize_class_var: bool = False,
+    class_serializer: Optional[ClassSerializer] = None,
 ) -> str:
     template = """
 def {{func}}(obj, reuse_instances=None, convert_sets=None):
@@ -515,9 +526,10 @@ def {{func}}(obj, reuse_instances=None, convert_sets=None):
 
     renderer = Renderer(
         TO_ITER,
-        custom,
+        legacy_class_serializer,
         suppress_coerce=(not type_check.is_coerce()),
         serialize_class_var=serialize_class_var,
+        class_serializer=class_serializer,
     )
     env = jinja2.Environment(loader=jinja2.DictLoader({"iter": template}))
     env.filters.update({"rvalue": renderer.render})
@@ -532,9 +544,10 @@ def {{func}}(obj, reuse_instances=None, convert_sets=None):
 def render_to_dict(
     cls: Type[Any],
     case: Optional[str] = None,
-    custom: Optional[SerializeFunc] = None,
+    legacy_class_serializer: Optional[SerializeFunc] = None,
     type_check: TypeCheck = NoCheck,
     serialize_class_var: bool = False,
+    class_serializer: Optional[ClassSerializer] = None,
 ) -> str:
     template = """
 def {{func}}(obj, reuse_instances = None, convert_sets = None):
@@ -564,7 +577,12 @@ def {{func}}(obj, reuse_instances = None, convert_sets = None):
   {% endfor -%}
   return res
     """
-    renderer = Renderer(TO_DICT, custom, suppress_coerce=(not type_check.is_coerce()))
+    renderer = Renderer(
+        TO_DICT,
+        legacy_class_serializer,
+        suppress_coerce=(not type_check.is_coerce()),
+        class_serializer=class_serializer,
+    )
     lrenderer = LRenderer(case, serialize_class_var)
     env = jinja2.Environment(loader=jinja2.DictLoader({"dict": template}))
     env.filters.update({"rvalue": renderer.render})
@@ -665,10 +683,11 @@ class Renderer:
     """
 
     func: str
-    custom: Optional[SerializeFunc] = None  # Custom class level serializer.
+    legacy_class_serializer: Optional[SerializeFunc] = None
     suppress_coerce: bool = False
     """ Suppress type coercing because generated union serializer has its own type checking """
     serialize_class_var: bool = False
+    class_serializer: Optional[ClassSerializer] = None
 
     def render(self, arg: SeField[Any]) -> str:
         """
@@ -708,7 +727,17 @@ convert_sets=convert_sets) for k, v in foo.items()}"
 (coerce(str, foo[0]), foo[1].__serde__.funcs['to_iter'](foo[1], reuse_instances=reuse_instances, \
 convert_sets=convert_sets), coerce(int, foo[2]),)"
         """
-        if arg.serializer and arg.serializer.inner is not default_serializer:
+        implemented_methods: Dict[Type[Any], plum.Signature] = {}
+        if self.class_serializer:
+            implemented_methods = {
+                sig.types[1]: sig
+                for sig in self.class_serializer.__class__.serialize.methods  # type: ignore
+            }
+
+        custom_serializer_available = arg.type in implemented_methods
+        if custom_serializer_available and not arg.serializer:
+            res = f"class_serializer.serialize({arg.varname})"
+        elif arg.serializer and arg.serializer.inner is not default_serializer:
             res = self.custom_field_serializer(arg)
         elif is_dataclass(arg.type):
             res = self.dataclass(arg)
@@ -756,9 +785,9 @@ convert_sets=convert_sets), coerce(int, foo[2]),)"
             res = f"raise_unsupported_type({arg.varname})"
 
         # Custom field serializer overrides custom class serializer.
-        if self.custom and not arg.serializer:
+        if self.legacy_class_serializer and not arg.serializer and not custom_serializer_available:
             return (
-                "serde_custom_class_serializer("
+                "serde_legacy_custom_class_serializer("
                 f"{typename(arg.type)}, "
                 f"{arg.varname}, "
                 f"default=lambda: {res})"

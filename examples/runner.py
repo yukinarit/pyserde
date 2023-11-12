@@ -6,6 +6,7 @@ import class_var
 import primitive_subclass
 import collection
 import custom_class_serializer
+import custom_legacy_class_serializer
 import custom_field_serializer
 import default
 import default_dict
@@ -69,6 +70,7 @@ def run_all() -> None:
     run(yamlfile)
     run(union)
     run(custom_class_serializer)
+    run(custom_legacy_class_serializer)
     run(custom_field_serializer)
     run(forward_reference)
     run(type_decimal)

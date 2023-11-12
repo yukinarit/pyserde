@@ -10,6 +10,7 @@ import sys
 import re
 from dataclasses import dataclass
 from typing import (
+    Protocol,
     Any,
     Callable,
     Dict,
@@ -1018,3 +1019,41 @@ def has_default_factory(field: Field[Any]) -> bool:
     True
     """
     return not isinstance(field.default_factory, dataclasses._MISSING_TYPE)
+
+
+class ClassSerializer(Protocol):
+    """
+    Interface for custom class serializer.
+
+    This protocol is intended to be used for custom class serializer.
+
+    >>> from datetime import datetime
+    >>> from serde import serde
+    >>> from plum import dispatch
+    >>> class MySerializer(ClassSerializer):
+    ...     @dispatch
+    ...     def serialize(self, value: datetime) -> str:
+    ...         return value.strftime("%d/%m/%y")
+    """
+
+    def serialize(self, value: Any) -> Any:
+        pass
+
+
+class ClassDeserializer(Protocol):
+    """
+    Interface for custom class deserializer.
+
+    This protocol is intended to be used for custom class deserializer.
+
+    >>> from datetime import datetime
+    >>> from serde import serde
+    >>> from plum import dispatch
+    >>> class MyDeserializer(ClassDeserializer):
+    ...     @dispatch
+    ...     def deserialize(self, cls: Type[datetime], value: Any) -> datetime:
+    ...         return datetime.strptime(value, "%d/%m/%y")
+    """
+
+    def deserialize(self, cls: Any, value: Any) -> Any:
+        pass

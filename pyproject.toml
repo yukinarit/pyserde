@@ -14,19 +14,19 @@ classifiers=[
         "Development Status :: 4 - Beta",
         "Intended Audience :: Developers",
         "License :: OSI Approved :: MIT License",
-        "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
         "Programming Language :: Python :: Implementation :: CPython",
 		"Programming Language :: Python :: Implementation :: PyPy",
     ]
 
 [tool.poetry.dependencies]
-python = "^3.7.0"
+python = "^3.8.0"
 typing_inspect = ">=0.4.0"
-typing_extensions = { version = ">=4.1.0", markers = "python_version ~= '3.7.0'" }
+typing_extensions = { version = ">=4.1.0" }
 casefy = "*"
 jinja2 = "*"
 msgpack = { version = "*", markers = "extra == 'msgpack' or extra == 'all'", optional = true }
@@ -34,12 +34,12 @@ tomli = { version = "*", markers = "extra == 'toml' or extra == 'all'", optional
 tomli-w = { version = "*", markers = "extra == 'toml' or extra == 'all'", optional = true }
 pyyaml = { version = "*", markers = "extra == 'yaml' or extra == 'all'", optional = true }
 numpy = [
-    { version = ">1.21.0", markers = "python_version ~= '3.7.0' and (extra == 'numpy' or extra == 'all')", optional = true },
     { version = ">1.21.0", markers = "python_version ~= '3.8.0' and (extra == 'numpy' or extra == 'all')", optional = true },
     { version = ">1.21.0", markers = "python_version ~= '3.9.0' and (extra == 'numpy' or extra == 'all')", optional = true },
     { version = ">1.22.0", markers = "python_version ~= '3.10' and (extra == 'numpy' or extra == 'all')", optional = true },
 ]
 orjson = { version = "*", markers = "extra == 'orjson' or extra == 'all'", optional = true }
+plum-dispatch = "^2"
 
 [tool.poetry.dev-dependencies]
 pyyaml = "*"
@@ -47,7 +47,6 @@ tomli = { version = "*", markers = "python_version <= '3.11.0'" }
 tomli-w = "*"
 msgpack = "*"
 numpy = [
-    { version = ">1.21.0", markers = "python_version ~= '3.7.0'" },
     { version = ">1.21.0", markers = "python_version ~= '3.8.0'" },
     { version = ">1.21.0", markers = "python_version ~= '3.9.0'" },
     { version = ">1.22.0", markers = "python_version ~= '3.10'" },
@@ -98,12 +97,27 @@ include = [
   "serde/msgpack.py",
   "serde/toml.py",
   "serde/yaml.py",
-  "serde/pickle.py"
+  "serde/pickle.py",
+  "tests/test_custom.py",
 ]
 exclude = [
   "serde/numpy.py",
   "bench",
-  "tests",
+  "tests/common.py",
+  "tests/data.py",
+  "tests/imported.py",
+  "tests/test_basics.py",
+  "tests/test_compat.py",
+  "tests/test_core.py",
+  "tests/test_de.py",
+  "tests/test_flatten.py",
+  "tests/test_kwonly.py",
+  "tests/test_lazy_type_evaluation.py",
+  "tests/test_legacy_custom.py",
+  "tests/test_literal.py",
+  "tests/test_numpy.py",
+  "tests/test_se.py",
+  "tests/test_union.py",
   "serde/__init__.py"
 ]
 pythonVersion = "3.11"
@@ -117,7 +131,21 @@ exclude = [
   "examples/alias.py",
   "examples/field_order.py",
   "bench",
-  "tests"
+  "tests/common.py",
+  "tests/data.py",
+  "tests/imported.py",
+  "tests/test_basics.py",
+  "tests/test_compat.py",
+  "tests/test_core.py",
+  "tests/test_de.py",
+  "tests/test_flatten.py",
+  "tests/test_kwonly.py",
+  "tests/test_lazy_type_evaluation.py",
+  "tests/test_legacy_custom.py",
+  "tests/test_literal.py",
+  "tests/test_numpy.py",
+  "tests/test_se.py",
+  "tests/test_union.py",
 ]
 
 [tool.ruff]

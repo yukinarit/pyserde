@@ -13,6 +13,7 @@ from dataclasses import dataclass, is_dataclass
 from typing import Any, Callable, Dict, Generic, List, Optional, TypeVar, overload, Union, Sequence
 
 import jinja2
+import plum
 from typing_extensions import Type, dataclass_transform
 
 from .compat import (
@@ -56,6 +57,7 @@ from .compat import (
     typename,
 )
 from .core import (
+    ClassDeserializer,
     FROM_DICT,
     FROM_ITER,
     SERDE_SCOPE,
@@ -96,7 +98,7 @@ DeserializeFunc = Callable[[Type[Any], Any], Any]
 """ Interface of Custom deserialize function. """
 
 
-def serde_custom_class_deserializer(
+def serde_legacy_custom_class_deserializer(
     cls: Type[Any], datavar: Any, value: Any, custom: DeserializeFunc, default: Callable[[], Any]
 ) -> Any:
     """
@@ -151,7 +153,9 @@ def _make_deserialize(
     rename_all: Optional[str] = None,
     reuse_instances_default: bool = True,
     convert_sets_default: bool = False,
-    serializer: Optional[DeserializeFunc] = None,
+    deserializer: Optional[DeserializeFunc] = None,
+    type_check: TypeCheck = NoCheck,
+    class_deserializer: Optional[ClassDeserializer] = None,
     **kwargs: Any,
 ) -> Type[Any]:
     """
@@ -183,6 +187,7 @@ def deserialize(
     deserializer: Optional[DeserializeFunc] = None,
     tagging: Tagging = DefaultTagging,
     type_check: TypeCheck = NoCheck,
+    class_deserializer: Optional[ClassDeserializer] = None,
     **kwargs: Any,
 ) -> Type[T]:
     """
@@ -245,9 +250,10 @@ def deserialize(
         g["coerce"] = coerce
         g["_exists_by_aliases"] = _exists_by_aliases
         g["_get_by_aliases"] = _get_by_aliases
+        g["class_deserializer"] = class_deserializer
         if deserializer:
-            g["serde_custom_class_deserializer"] = functools.partial(
-                serde_custom_class_deserializer, custom=deserializer
+            g["serde_legacy_custom_class_deserializer"] = functools.partial(
+                serde_legacy_custom_class_deserializer, custom=deserializer
             )
 
         # Collect types used in the generated code.
@@ -297,8 +303,20 @@ def deserialize(
             if f.deserializer:
                 g[f.deserializer.name] = f.deserializer
 
-        add_func(scope, FROM_ITER, render_from_iter(cls, deserializer, type_check), g)
-        add_func(scope, FROM_DICT, render_from_dict(cls, rename_all, deserializer, type_check), g)
+        add_func(
+            scope,
+            FROM_ITER,
+            render_from_iter(cls, deserializer, type_check, class_deserializer=class_deserializer),
+            g,
+        )
+        add_func(
+            scope,
+            FROM_DICT,
+            render_from_dict(
+                cls, rename_all, deserializer, type_check, class_deserializer=class_deserializer
+            ),
+            g,
+        )
         add_func(scope, TYPE_CHECK, render_type_check(cls), g)
 
         logger.debug(f"{typename(cls)}: {SERDE_SCOPE} {scope}")
@@ -657,16 +675,27 @@ class Renderer:
 
     func: str
     cls: Optional[Type[Any]] = None
-    custom: Optional[DeserializeFunc] = None  # Custom class level deserializer.
+    legacy_class_deserializer: Optional[DeserializeFunc] = None
     import_numpy: bool = False
     suppress_coerce: bool = False
     """ Disable type coercing in codegen """
+    class_deserializer: Optional[ClassDeserializer] = None
 
     def render(self, arg: DeField[Any]) -> str:
         """
         Render rvalue
         """
-        if arg.deserializer and arg.deserializer.inner is not default_deserializer:
+        implemented_methods: Dict[Type[Any], plum.Signature] = {}
+        if self.class_deserializer:
+            implemented_methods = {
+                get_args(sig.types[1])[0]: sig
+                for sig in self.class_deserializer.__class__.deserialize.methods  # type: ignore
+            }
+
+        custom_deserializer_available = arg.type in implemented_methods
+        if custom_deserializer_available and not arg.deserializer:
+            res = f"class_deserializer.deserialize({typename(arg.type)}, {arg.data})"
+        elif arg.deserializer and arg.deserializer.inner is not default_deserializer:
             res = self.custom_field_deserializer(arg)
         elif is_generic(arg.type):
             arg.type_args = list(get_args(arg.type))
@@ -726,7 +755,11 @@ class Renderer:
         if arg.supports_default():
             res = self.default(arg, res)
 
-        if self.custom and not arg.deserializer:
+        if (
+            self.legacy_class_deserializer
+            and not arg.deserializer
+            and not custom_deserializer_available
+        ):
             # Rerender the code for default deserializer.
             default = Renderer(
                 self.func, self.cls, None, suppress_coerce=self.suppress_coerce
@@ -749,7 +782,7 @@ class Renderer:
         """
         # The function takes a closure in order to execute the default value lazily.
         return (
-            "serde_custom_class_deserializer("
+            "serde_legacy_custom_class_deserializer("
             f"{typename(arg.type)}, "
             f"{arg.datavar}, "
             f"{arg.data_or()}, "
@@ -1016,7 +1049,10 @@ def renderable(f: DeField[Any]) -> bool:
 
 
 def render_from_iter(
-    cls: Type[Any], custom: Optional[DeserializeFunc] = None, type_check: TypeCheck = NoCheck
+    cls: Type[Any],
+    legacy_class_deserializer: Optional[DeserializeFunc] = None,
+    type_check: TypeCheck = NoCheck,
+    class_deserializer: Optional[ClassDeserializer] = None,
 ) -> str:
     template = """
 def {{func}}(cls=cls, maybe_generic=None, maybe_generic_type_vars=None, data=None,
@@ -1041,7 +1077,11 @@ def {{func}}(cls=cls, maybe_generic=None, maybe_generic_type_vars=None, data=Non
     """
 
     renderer = Renderer(
-        FROM_ITER, cls=cls, custom=custom, suppress_coerce=(not type_check.is_coerce())
+        FROM_ITER,
+        cls=cls,
+        legacy_class_deserializer=legacy_class_deserializer,
+        suppress_coerce=(not type_check.is_coerce()),
+        class_deserializer=class_deserializer,
     )
     env = jinja2.Environment(loader=jinja2.DictLoader({"iter": template}))
     env.filters.update({"rvalue": renderer.render})
@@ -1063,8 +1103,9 @@ def {{func}}(cls=cls, maybe_generic=None, maybe_generic_type_vars=None, data=Non
 def render_from_dict(
     cls: Type[Any],
     rename_all: Optional[str] = None,
-    custom: Optional[DeserializeFunc] = None,
+    legacy_class_deserializer: Optional[DeserializeFunc] = None,
     type_check: TypeCheck = NoCheck,
+    class_deserializer: Optional[ClassDeserializer] = None,
 ) -> str:
     template = """
 def {{func}}(cls=cls, maybe_generic=None, maybe_generic_type_vars=None, data=None,
@@ -1099,7 +1140,11 @@ def {{func}}(cls=cls, maybe_generic=None, maybe_generic_type_vars=None, data=Non
     """
 
     renderer = Renderer(
-        FROM_DICT, cls=cls, custom=custom, suppress_coerce=(not type_check.is_coerce())
+        FROM_DICT,
+        cls=cls,
+        legacy_class_deserializer=legacy_class_deserializer,
+        suppress_coerce=(not type_check.is_coerce()),
+        class_deserializer=class_deserializer,
     )
     env = jinja2.Environment(loader=jinja2.DictLoader({"dict": template}))
     env.filters.update({"rvalue": renderer.render})

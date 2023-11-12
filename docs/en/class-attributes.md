@@ -70,7 +70,40 @@ See [examples/rename_all.py](https://github.com/yukinarit/pyserde/blob/main/exam
 
 New in v0.7.0. See [Union](union.md).
 
+### **`class_serializer`** / **`class_deserializer`**
+
+If you want to use a custom (de)serializer at class level, you can pass your (de)serializer object in `class_serializer` and `class_deserializer` class attributes. Class custom (de)serializer depends on a python library [plum](https://github.com/beartype/plum) which allows multiple method overloading like C++. With plum, you can write robust custom (de)serializer in a quite neat way.
+
+```python
+class MySerializer(ClassSerializer):
+    @dispatch
+    def serialize(self, value: datetime) -> str:
+        return value.strftime("%d/%m/%y")
+
+class MyDeserializer(ClassDeserializer):
+    @dispatch
+    def deserialize(self, cls: Type[datetime], value: Any) -> datetime:
+        return datetime.strptime(value, "%d/%m/%y")
+
+@serde(class_serializer=MySerializer(), class_deserializer=MyDeserializer())
+@dataclass
+class Foo:
+    v: datetime
+```
+
+One big difference from legacy `serializer` and `deserializer` is the fact that new `class_serializer` and `class_deserializer` are more deeply integrated at the pyserde's code generator level. You no longer need to handle Optional, List and Nested dataclass by yourself. Custom class (de)serializer will be used at all level of (de)serialization so you can extend pyserde to support third party types just like builtin types.
+
+Also,
+* If both field and class serializer specified, field serializer is prioritized
+* If both legacy and new class serializer specified, new class serializer is prioritized
+
+See [examples/custom_class_serializer.py](https://github.com/yukinarit/pyserde/blob/main/examples/custom_class_serializer.py) for complete example.
+
+New in v0.13.0.
+
 ### **`serializer`** / **`deserializer`**
+
+> **NOTE:** Deprecated since v0.13.0. Consider using `class_serializer` and `class_deserializer`.
 
 If you want to use a custom (de)serializer at class level, you can pass your (de)serializer methods n `serializer` and `deserializer` class attributes.
 
@@ -93,7 +126,7 @@ class Foo:
     a: datetime
 ```
 
-See [examples/custom_class_serializer.py](https://github.com/yukinarit/pyserde/blob/main/examples/custom_class_serializer.py) for complete example.
+See [examples/custom_legacy_class_serializer.py](https://github.com/yukinarit/pyserde/blob/main/examples/custom_legacy_class_serializer.py) for complete example.
 
 ### **`type_check`**
 

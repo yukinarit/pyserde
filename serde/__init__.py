@@ -28,6 +28,8 @@ from typing_extensions import dataclass_transform
 
 from .compat import SerdeError, SerdeSkip, T
 from .core import (
+    ClassSerializer,
+    ClassDeserializer,
     AdjacentTagging,
     Coerce,
     DefaultTagging,
@@ -99,6 +101,8 @@ __all__ = [
     "yaml",
     "init",
     "logger",
+    "ClassSerializer",
+    "ClassDeserializer",
 ]
 
 
@@ -113,6 +117,8 @@ def serde(
     tagging: Tagging = DefaultTagging,
     type_check: TypeCheck = NoCheck,
     serialize_class_var: bool = False,
+    class_serializer: Optional[ClassSerializer] = None,
+    class_deserializer: Optional[ClassDeserializer] = None,
 ) -> Type[T]:
     ...
 
@@ -127,6 +133,8 @@ def serde(
     tagging: Tagging = DefaultTagging,
     type_check: TypeCheck = NoCheck,
     serialize_class_var: bool = False,
+    class_serializer: Optional[ClassSerializer] = None,
+    class_deserializer: Optional[ClassDeserializer] = None,
 ) -> Callable[[Type[T]], Type[T]]:
     ...
 
@@ -142,6 +150,8 @@ def serde(
     tagging: Tagging = DefaultTagging,
     type_check: TypeCheck = NoCheck,
     serialize_class_var: bool = False,
+    class_serializer: Optional[ClassSerializer] = None,
+    class_deserializer: Optional[ClassDeserializer] = None,
 ) -> Any:
     """
     serde decorator. Keyword arguments are passed in `serialize` and `deserialize`.
@@ -160,6 +170,7 @@ def serde(
             tagging=tagging,
             type_check=type_check,
             serialize_class_var=serialize_class_var,
+            class_serializer=class_serializer,
         )
         deserialize(
             cls,
@@ -171,6 +182,7 @@ def serde(
             tagging=tagging,
             type_check=type_check,
             serialize_class_var=serialize_class_var,
+            class_deserializer=class_deserializer,
         )
         return cls
 
