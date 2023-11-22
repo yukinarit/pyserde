@@ -111,7 +111,7 @@ def test_iter_types():
         d: Optional[str] = None
         e: Union[str, int] = 10
         f: List[int] = serde.field(default_factory=list)
-        g: Set = serde.field(default_factory=set)
+        g: Set[int] = serde.field(default_factory=set)
 
     assert {Foo, datetime, Optional, str, Union, List, Set, int} == set(iter_types(Foo))
 

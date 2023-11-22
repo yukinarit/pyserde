@@ -92,7 +92,7 @@ def test_custom_class_serializer():
         d: Optional[str] = None
         e: Union[str, int] = 10
         f: List[int] = field(default_factory=list)
-        g: Set[str] = field(default_factory=set)
+        g: Set[int] = field(default_factory=set)
 
     dt = datetime(2021, 1, 1, 0, 0, 0)
     f = Foo(10, dt, dt, f=[1, 2, 3], g={4, 5, 6})
