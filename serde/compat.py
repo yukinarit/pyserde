@@ -385,8 +385,14 @@ def iter_types(cls: TypeLike) -> List[TypeLike]:
             lst.add(Union)
             for arg in type_args(cls):
                 recursive(arg)
-        elif is_list(cls) or is_set(cls):
+        elif is_list(cls):
             lst.add(List)
+            args = type_args(cls)
+            if args:
+                recursive(args[0])
+        elif is_set(cls):
+            lst.add(List)
+            lst.add(Set)
             args = type_args(cls)
             if args:
                 recursive(args[0])
