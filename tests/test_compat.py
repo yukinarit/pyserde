@@ -98,7 +98,7 @@ def test_iter_types():
     assert {Pri, int, str, float, bool} == set(iter_types(Pri))
     assert {Dict, str, Pri, int, float, bool} == set(iter_types(Dict[str, Pri]))
     assert {List, str} == set(iter_types(List[str]))
-    assert {List, Set, str} == set(iter_types(Set[str]))
+    assert {Set, str} == set(iter_types(Set[str]))
     assert {Tuple, int, str, bool, float} == set(iter_types(Tuple[int, str, bool, float]))
     assert {Tuple, int, Ellipsis} == set(iter_types(Tuple[int, ...]))
     assert {PriOpt, Optional, int, str, float, bool} == set(iter_types(PriOpt))

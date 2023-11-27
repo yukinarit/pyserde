@@ -391,7 +391,6 @@ def iter_types(cls: TypeLike) -> List[TypeLike]:
             if args:
                 recursive(args[0])
         elif is_set(cls):
-            lst.add(List)
             lst.add(Set)
             args = type_args(cls)
             if args:
