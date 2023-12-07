@@ -553,8 +553,9 @@ def {{func}}(obj, reuse_instances = None, convert_sets = None):
   {% for f in fields -%}
   {% if not f.skip -%}
     {% if f.skip_if -%}
-  if not {{f.skip_if.name}}({{f|rvalue}}):
-    {{f|lvalue}} = {{f|rvalue}}
+  subres = {{f|rvalue}}
+  if not {{f.skip_if.name}}(subres):
+    {{f|lvalue}} = subres
     {% else -%}
   {{f|lvalue}} = {{f|rvalue}}
     {% endif -%}
