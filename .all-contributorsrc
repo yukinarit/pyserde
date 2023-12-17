@@ -235,6 +235,15 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "gschaffner",
+      "name": "Ganden Schaffner",
+      "avatar_url": "https://avatars.githubusercontent.com/u/11418203?v=4",
+      "profile": "https://github.com/gschaffner",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,
