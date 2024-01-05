@@ -829,7 +829,7 @@ class Foo:
 <p>Note that <code>Bar</code> and <code>Baz</code> have the same field name and type. If you serialize <code>Foo(Baz(10))</code> into dict, you get <code>{&quot;a&quot;: {&quot;b&quot;: 10}}</code>. But if you deserialize <code>{&quot;a&quot;: {&quot;b&quot;: 10}}</code>, you get <code>Foo(Bar(10))</code> instead of <code>Foo(Baz(10))</code>. This means pyserde <strong>can't correctly (de)serialize dataclasses of Union with <code>Untagged</code></strong>. This is why pyserde offers other kinds of union representation options.</p>
 <h2 id="externaltagging"><a class="header" href="#externaltagging"><code>ExternalTagging</code></a></h2>
 <p>This is the default Union representation since 0.7. A class declaration with <code>ExternalTagging</code> looks like below. If you serialize <code>Foo(Baz(10))</code> into dict, you get <code>{&quot;a&quot;: {&quot;Baz&quot;: {&quot;b&quot;: 10}}}</code> and you can deserialize it back to <code>Foo(Baz(10))</code>. </p>
-<pre><code>@serde(tagging=ExternalTagging)
+<pre><code class="language-python">@serde(tagging=ExternalTagging)
 @dataclass
 class Foo:
     a: Union[Bar, Baz]
@@ -888,7 +888,7 @@ class Bar:
     a: int
 
 bar = Bar(10)
-s = to_json(bar)
+s = to_json(bar, cls=Union[Foo, Bar])
 print(s)
 # prints {&quot;Bar&quot; {&quot;a&quot;: 10}}
 print(from_json(Union[Foo, Bar], s))
