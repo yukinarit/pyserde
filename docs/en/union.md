@@ -29,7 +29,7 @@ Note that `Bar` and `Baz` have the same field name and type. If you serialize `F
 
 This is the default Union representation since 0.7. A class declaration with `ExternalTagging` looks like below. If you serialize `Foo(Baz(10))` into dict, you get `{"a": {"Baz": {"b": 10}}}` and you can deserialize it back to `Foo(Baz(10))`. 
 
-```
+```python
 @serde(tagging=ExternalTagging)
 @dataclass
 class Foo:
@@ -106,7 +106,7 @@ class Bar:
     a: int
 
 bar = Bar(10)
-s = to_json(bar)
+s = to_json(bar, cls=Union[Foo, Bar])
 print(s)
 # prints {"Bar" {"a": 10}}
 print(from_json(Union[Foo, Bar], s))
