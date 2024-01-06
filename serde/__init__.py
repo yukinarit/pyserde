@@ -131,7 +131,7 @@ def serde(
     ...
 
 
-@dataclass_transform()  # type: ignore
+@dataclass_transform(field_specifiers=(field,))  # type: ignore
 def serde(
     _cls: Any = None,
     rename_all: Optional[str] = None,

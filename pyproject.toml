@@ -114,6 +114,8 @@ strict = true
 ignore_missing_imports = true
 exclude = [
   "serde/numpy.py",
+  "examples/alias.py",
+  "examples/field_order.py",
   "bench",
   "tests"
 ]
