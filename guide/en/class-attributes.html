@@ -228,7 +228,35 @@ print(to_json(f))
 <p>See <a href="https://github.com/yukinarit/pyserde/blob/main/examples/rename_all.py">examples/rename_all.py</a> for the complete example.</p>
 <h3 id="tagging"><a class="header" href="#tagging"><strong><code>tagging</code></strong></a></h3>
 <p>New in v0.7.0. See <a href="union.html">Union</a>.</p>
+<h3 id="class_serializer--class_deserializer"><a class="header" href="#class_serializer--class_deserializer"><strong><code>class_serializer</code></strong> / <strong><code>class_deserializer</code></strong></a></h3>
+<p>If you want to use a custom (de)serializer at class level, you can pass your (de)serializer object in <code>class_serializer</code> and <code>class_deserializer</code> class attributes. Class custom (de)serializer depends on a python library <a href="https://github.com/beartype/plum">plum</a> which allows multiple method overloading like C++. With plum, you can write robust custom (de)serializer in a quite neat way.</p>
+<pre><code class="language-python">class MySerializer(ClassSerializer):
+    @dispatch
+    def serialize(self, value: datetime) -&gt; str:
+        return value.strftime(&quot;%d/%m/%y&quot;)
+
+class MyDeserializer(ClassDeserializer):
+    @dispatch
+    def deserialize(self, cls: Type[datetime], value: Any) -&gt; datetime:
+        return datetime.strptime(value, &quot;%d/%m/%y&quot;)
+
+@serde(class_serializer=MySerializer(), class_deserializer=MyDeserializer())
+@dataclass
+class Foo:
+    v: datetime
+</code></pre>
+<p>One big difference from legacy <code>serializer</code> and <code>deserializer</code> is the fact that new <code>class_serializer</code> and <code>class_deserializer</code> are more deeply integrated at the pyserde's code generator level. You no longer need to handle Optional, List and Nested dataclass by yourself. Custom class (de)serializer will be used at all level of (de)serialization so you can extend pyserde to support third party types just like builtin types.</p>
+<p>Also,</p>
+<ul>
+<li>If both field and class serializer specified, field serializer is prioritized</li>
+<li>If both legacy and new class serializer specified, new class serializer is prioritized</li>
+</ul>
+<p>See <a href="https://github.com/yukinarit/pyserde/blob/main/examples/custom_class_serializer.py">examples/custom_class_serializer.py</a> for complete example.</p>
+<p>New in v0.13.0.</p>
 <h3 id="serializer--deserializer"><a class="header" href="#serializer--deserializer"><strong><code>serializer</code></strong> / <strong><code>deserializer</code></strong></a></h3>
+<blockquote>
+<p><strong>NOTE:</strong> Deprecated since v0.13.0. Consider using <code>class_serializer</code> and <code>class_deserializer</code>.</p>
+</blockquote>
 <p>If you want to use a custom (de)serializer at class level, you can pass your (de)serializer methods n <code>serializer</code> and <code>deserializer</code> class attributes.</p>
 <pre><code class="language-python">def serializer(cls, o):
     if cls is datetime:
@@ -247,7 +275,7 @@ def deserializer(cls, o):
 class Foo:
     a: datetime
 </code></pre>
-<p>See <a href="https://github.com/yukinarit/pyserde/blob/main/examples/custom_class_serializer.py">examples/custom_class_serializer.py</a> for complete example.</p>
+<p>See <a href="https://github.com/yukinarit/pyserde/blob/main/examples/custom_legacy_class_serializer.py">examples/custom_legacy_class_serializer.py</a> for complete example.</p>
 <h3 id="type_check"><a class="header" href="#type_check"><strong><code>type_check</code></strong></a></h3>
 <p>New in v0.9.0. See <a href="#type-check.md">Type Check</a>.</p>
 <h3 id="serialize_class_var"><a class="header" href="#serialize_class_var"><strong><code>serialize_class_var</code></strong></a></h3>
