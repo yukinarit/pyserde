@@ -280,6 +280,10 @@ print(to_json(f))
 print(from_json(Foo, s))
 </code></pre>
 <p>That's it! pyserde offers many more features. If you're interested, please read the rest of the documentation.</p>
+<blockquote>
+<p><strong>NOTE:</strong> which type checker should be used?
+pyserde depends on <a href="https://peps.python.org/pep-0681/">PEP681 dataclass_transform</a>. <a href="https://github.com/python/mypy">mypy</a> does not fully support dataclass_transform as of Jan. 2024. <a href="https://github.com/microsoft/pyright">pyright</a> is recommended for codebase using pyserde.</p>
+</blockquote>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="data-formats"><a class="header" href="#data-formats">Data Formats</a></h1>
 <p>Currently <code>dict</code>, <code>tuple</code>, <code>JSON</code>, <code>Yaml</code>, <code>Toml</code>, <code>MsgPack</code> and <code>Pickle</code> are supported. Each Serialize/Deserialize API can take additional keyword arguments. Keyword arguements are forwared to the packages which is used by pyserde to encode data internally.</p>
 <p>e.g. If you want to preserve the field order in YAML, you can pass <code>sort_key=True</code> in <code>serde.yaml.to_yaml</code></p>

@@ -264,6 +264,10 @@ print(to_json(f))
 print(from_json(Foo, s))
 </code></pre>
 <p>That's it! pyserde offers many more features. If you're interested, please read the rest of the documentation.</p>
+<blockquote>
+<p><strong>NOTE:</strong> which type checker should be used?
+pyserde depends on <a href="https://peps.python.org/pep-0681/">PEP681 dataclass_transform</a>. <a href="https://github.com/python/mypy">mypy</a> does not fully support dataclass_transform as of Jan. 2024. <a href="https://github.com/microsoft/pyright">pyright</a> is recommended for codebase using pyserde.</p>
+</blockquote>
 
                     </main>
 
