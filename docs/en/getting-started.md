@@ -2,7 +2,7 @@
 
 ## Installation
 
-Install pyserde from PyPI. pyserde requires Python>=3.7.
+Install pyserde from PyPI. pyserde requires Python>=3.8.
 
 ```
 pip install pyserde
