@@ -200,7 +200,7 @@ class Foo:
 <h2 id="custom-global-deserializer"><a class="header" href="#custom-global-deserializer">Custom global (de)serializer</a></h2>
 <p>You apply the custom (de)serialization for entire codebase by registering class (de)serializer by <code>add_serializer</code> and <code>add_deserializer</code>. Registered class (de)serializers are stacked in pyserde's global space and automatically used for all the pyserde classes.</p>
 <p>e.g. Implementing custom (de)serialization for <code>datetime.timedelta</code> using <a href="https://pypi.org/project/isodate/">isodate</a> package.</p>
-<p>Here is the code of registering class (de)serializer for <code>datetime.timedelta</code>.</p>
+<p>Here is the code of registering class (de)serializer for <code>datetime.timedelta</code>. This package is actually published in PyPI as <a href="https://pypi.org/project/pyserde-timedelta/">pyserde-timedelta</a>.</p>
 <pre><code class="language-python">from datetime import timedelta
 from plum import dispatch
 from typing import Type, Any
