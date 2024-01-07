@@ -5,15 +5,27 @@ and functions associated with deserialization.
 
 from __future__ import annotations
 import abc
+import itertools
 import collections
 import dataclasses
 import functools
 import typing
 from dataclasses import dataclass, is_dataclass
-from typing import Any, Callable, Dict, Generic, List, Optional, TypeVar, overload, Union, Sequence
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    Generic,
+    List,
+    Optional,
+    TypeVar,
+    overload,
+    Union,
+    Sequence,
+    Iterable,
+)
 
 import jinja2
-import plum
 from typing_extensions import Type, dataclass_transform
 
 from .compat import (
@@ -57,6 +69,7 @@ from .compat import (
     typename,
 )
 from .core import (
+    GLOBAL_CLASS_DESERIALIZER,
     ClassDeserializer,
     FROM_DICT,
     FROM_ITER,
@@ -231,6 +244,12 @@ def deserialize(
             scope = Scope(cls, reuse_instances_default=reuse_instances_default)
             setattr(cls, SERDE_SCOPE, scope)
 
+        class_deserializers: List[ClassDeserializer] = list(
+            itertools.chain(
+                GLOBAL_CLASS_DESERIALIZER, [class_deserializer] if class_deserializer else []
+            )
+        )
+
         # Set some globals for all generated functions
         g["cls"] = cls
         g["serde_scope"] = scope
@@ -250,7 +269,7 @@ def deserialize(
         g["coerce"] = coerce
         g["_exists_by_aliases"] = _exists_by_aliases
         g["_get_by_aliases"] = _get_by_aliases
-        g["class_deserializer"] = class_deserializer
+        g["class_deserializers"] = class_deserializers
         if deserializer:
             g["serde_legacy_custom_class_deserializer"] = functools.partial(
                 serde_legacy_custom_class_deserializer, custom=deserializer
@@ -685,16 +704,20 @@ class Renderer:
         """
         Render rvalue
         """
-        implemented_methods: Dict[Type[Any], plum.Signature] = {}
-        if self.class_deserializer:
-            implemented_methods = {
-                get_args(sig.types[1])[0]: sig
-                for sig in self.class_deserializer.__class__.deserialize.methods  # type: ignore
-            }
+        implemented_methods: Dict[Type[Any], int] = {}
+        class_deserializers: Iterable[ClassDeserializer] = itertools.chain(
+            GLOBAL_CLASS_DESERIALIZER, [self.class_deserializer] if self.class_deserializer else []
+        )
+        for n, class_deserializer in enumerate(class_deserializers):
+            for sig in class_deserializer.__class__.deserialize.methods:  # type: ignore
+                implemented_methods[get_args(sig.types[1])[0]] = n
 
         custom_deserializer_available = arg.type in implemented_methods
         if custom_deserializer_available and not arg.deserializer:
-            res = f"class_deserializer.deserialize({typename(arg.type)}, {arg.data})"
+            res = (
+                f"class_deserializers[{implemented_methods[arg.type]}].deserialize("
+                f"{typename(arg.type)}, {arg.data})"
+            )
         elif arg.deserializer and arg.deserializer.inner is not default_deserializer:
             res = self.custom_field_deserializer(arg)
         elif is_generic(arg.type):

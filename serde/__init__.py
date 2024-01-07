@@ -44,6 +44,8 @@ from .core import (
     init,
     logger,
     should_impl_dataclass,
+    add_serializer,
+    add_deserializer,
 )
 from .de import (
     DeserializeFunc,
@@ -103,6 +105,8 @@ __all__ = [
     "logger",
     "ClassSerializer",
     "ClassDeserializer",
+    "add_serializer",
+    "add_deserializer",
 ]
 
 

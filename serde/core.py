@@ -1057,3 +1057,22 @@ class ClassDeserializer(Protocol):
 
     def deserialize(self, cls: Any, value: Any) -> Any:
         pass
+
+
+GLOBAL_CLASS_SERIALIZER: List[ClassSerializer] = []
+
+GLOBAL_CLASS_DESERIALIZER: List[ClassDeserializer] = []
+
+
+def add_serializer(serializer: ClassSerializer) -> None:
+    """
+    Register custom global serializer.
+    """
+    GLOBAL_CLASS_SERIALIZER.append(serializer)
+
+
+def add_deserializer(deserializer: ClassDeserializer) -> None:
+    """
+    Register custom global deserializer.
+    """
+    GLOBAL_CLASS_DESERIALIZER.append(deserializer)
