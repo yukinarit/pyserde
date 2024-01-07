@@ -88,7 +88,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded "><a href="introduction.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="getting-started.html"><strong aria-hidden="true">2.</strong> Getting Started</a></li><li class="chapter-item expanded "><a href="data-formats.html"><strong aria-hidden="true">3.</strong> Data Formats</a></li><li class="chapter-item expanded "><a href="types.html"><strong aria-hidden="true">4.</strong> Types</a></li><li class="chapter-item expanded "><a href="decorators.html"><strong aria-hidden="true">5.</strong> Decorators</a></li><li class="chapter-item expanded "><a href="class-attributes.html" class="active"><strong aria-hidden="true">6.</strong> Class Attributes</a></li><li class="chapter-item expanded "><a href="field-attributes.html"><strong aria-hidden="true">7.</strong> Field Attributes</a></li><li class="chapter-item expanded "><a href="union.html"><strong aria-hidden="true">8.</strong> Union</a></li><li class="chapter-item expanded "><a href="type-check.html"><strong aria-hidden="true">9.</strong> Type Check</a></li><li class="chapter-item expanded "><a href="faq.html"><strong aria-hidden="true">10.</strong> FAQ</a></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded "><a href="introduction.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="getting-started.html"><strong aria-hidden="true">2.</strong> Getting Started</a></li><li class="chapter-item expanded "><a href="data-formats.html"><strong aria-hidden="true">3.</strong> Data Formats</a></li><li class="chapter-item expanded "><a href="types.html"><strong aria-hidden="true">4.</strong> Types</a></li><li class="chapter-item expanded "><a href="decorators.html"><strong aria-hidden="true">5.</strong> Decorators</a></li><li class="chapter-item expanded "><a href="class-attributes.html" class="active"><strong aria-hidden="true">6.</strong> Class Attributes</a></li><li class="chapter-item expanded "><a href="field-attributes.html"><strong aria-hidden="true">7.</strong> Field Attributes</a></li><li class="chapter-item expanded "><a href="union.html"><strong aria-hidden="true">8.</strong> Union</a></li><li class="chapter-item expanded "><a href="type-check.html"><strong aria-hidden="true">9.</strong> Type Check</a></li><li class="chapter-item expanded "><a href="extension.html"><strong aria-hidden="true">10.</strong> Extension</a></li><li class="chapter-item expanded "><a href="faq.html"><strong aria-hidden="true">11.</strong> FAQ</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle">
                 <div class="sidebar-resize-indicator"></div>
@@ -230,12 +230,12 @@ print(to_json(f))
 <p>New in v0.7.0. See <a href="union.html">Union</a>.</p>
 <h3 id="class_serializer--class_deserializer"><a class="header" href="#class_serializer--class_deserializer"><strong><code>class_serializer</code></strong> / <strong><code>class_deserializer</code></strong></a></h3>
 <p>If you want to use a custom (de)serializer at class level, you can pass your (de)serializer object in <code>class_serializer</code> and <code>class_deserializer</code> class attributes. Class custom (de)serializer depends on a python library <a href="https://github.com/beartype/plum">plum</a> which allows multiple method overloading like C++. With plum, you can write robust custom (de)serializer in a quite neat way.</p>
-<pre><code class="language-python">class MySerializer(ClassSerializer):
+<pre><code class="language-python">class MySerializer:
     @dispatch
     def serialize(self, value: datetime) -&gt; str:
         return value.strftime(&quot;%d/%m/%y&quot;)
 
-class MyDeserializer(ClassDeserializer):
+class MyDeserializer:
     @dispatch
     def deserialize(self, cls: Type[datetime], value: Any) -&gt; datetime:
         return datetime.strptime(value, &quot;%d/%m/%y&quot;)
@@ -251,6 +251,27 @@ class Foo:
 <li>If both field and class serializer specified, field serializer is prioritized</li>
 <li>If both legacy and new class serializer specified, new class serializer is prioritized</li>
 </ul>
+<blockquote>
+<p>💡 Tip: If you implements multiple <code>serialize</code> methods, you will receive &quot;Redefinition of unused <code>serialize</code>&quot; warning from type checker. In such case, try using <code>plum.overload</code> and <code>plum.dispatch</code> to workaround it. See <a href="https://beartype.github.io/plum/integration.html">plum's documentation</a> for more information.</p>
+<pre><code class="language-python">from plum import dispatch, overload
+
+class Serializer:
+   # use @overload
+   @overload
+   def serialize(self, value: int) -&gt; Any:
+       return str(value)
+
+   # use @overload
+   @overload
+   def serialize(self, value: float) -&gt; Any:
+       return int(value)
+
+   # Add method time and make sure to add @dispatch. Plum will do all the magic to erase warnings from type checker.
+   @dispatch
+   def serialize(self, value: Any) -&gt; Any:
+       ...
+</code></pre>
+</blockquote>
 <p>See <a href="https://github.com/yukinarit/pyserde/blob/main/examples/custom_class_serializer.py">examples/custom_class_serializer.py</a> for complete example.</p>
 <p>New in v0.13.0.</p>
 <h3 id="serializer--deserializer"><a class="header" href="#serializer--deserializer"><strong><code>serializer</code></strong> / <strong><code>deserializer</code></strong></a></h3>

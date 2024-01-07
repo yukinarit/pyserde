@@ -89,7 +89,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded "><a href="introduction.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="getting-started.html"><strong aria-hidden="true">2.</strong> Getting Started</a></li><li class="chapter-item expanded "><a href="data-formats.html"><strong aria-hidden="true">3.</strong> Data Formats</a></li><li class="chapter-item expanded "><a href="types.html"><strong aria-hidden="true">4.</strong> Types</a></li><li class="chapter-item expanded "><a href="decorators.html"><strong aria-hidden="true">5.</strong> Decorators</a></li><li class="chapter-item expanded "><a href="class-attributes.html"><strong aria-hidden="true">6.</strong> Class Attributes</a></li><li class="chapter-item expanded "><a href="field-attributes.html"><strong aria-hidden="true">7.</strong> Field Attributes</a></li><li class="chapter-item expanded "><a href="union.html"><strong aria-hidden="true">8.</strong> Union</a></li><li class="chapter-item expanded "><a href="type-check.html"><strong aria-hidden="true">9.</strong> Type Check</a></li><li class="chapter-item expanded "><a href="faq.html"><strong aria-hidden="true">10.</strong> FAQ</a></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded "><a href="introduction.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="getting-started.html"><strong aria-hidden="true">2.</strong> Getting Started</a></li><li class="chapter-item expanded "><a href="data-formats.html"><strong aria-hidden="true">3.</strong> Data Formats</a></li><li class="chapter-item expanded "><a href="types.html"><strong aria-hidden="true">4.</strong> Types</a></li><li class="chapter-item expanded "><a href="decorators.html"><strong aria-hidden="true">5.</strong> Decorators</a></li><li class="chapter-item expanded "><a href="class-attributes.html"><strong aria-hidden="true">6.</strong> Class Attributes</a></li><li class="chapter-item expanded "><a href="field-attributes.html"><strong aria-hidden="true">7.</strong> Field Attributes</a></li><li class="chapter-item expanded "><a href="union.html"><strong aria-hidden="true">8.</strong> Union</a></li><li class="chapter-item expanded "><a href="type-check.html"><strong aria-hidden="true">9.</strong> Type Check</a></li><li class="chapter-item expanded "><a href="extension.html"><strong aria-hidden="true">10.</strong> Extension</a></li><li class="chapter-item expanded "><a href="faq.html"><strong aria-hidden="true">11.</strong> FAQ</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle">
                 <div class="sidebar-resize-indicator"></div>
@@ -673,12 +673,12 @@ print(to_json(f))
 <p>New in v0.7.0. See <a href="union.html">Union</a>.</p>
 <h3 id="class_serializer--class_deserializer"><a class="header" href="#class_serializer--class_deserializer"><strong><code>class_serializer</code></strong> / <strong><code>class_deserializer</code></strong></a></h3>
 <p>If you want to use a custom (de)serializer at class level, you can pass your (de)serializer object in <code>class_serializer</code> and <code>class_deserializer</code> class attributes. Class custom (de)serializer depends on a python library <a href="https://github.com/beartype/plum">plum</a> which allows multiple method overloading like C++. With plum, you can write robust custom (de)serializer in a quite neat way.</p>
-<pre><code class="language-python">class MySerializer(ClassSerializer):
+<pre><code class="language-python">class MySerializer:
     @dispatch
     def serialize(self, value: datetime) -&gt; str:
         return value.strftime(&quot;%d/%m/%y&quot;)
 
-class MyDeserializer(ClassDeserializer):
+class MyDeserializer:
     @dispatch
     def deserialize(self, cls: Type[datetime], value: Any) -&gt; datetime:
         return datetime.strptime(value, &quot;%d/%m/%y&quot;)
@@ -694,6 +694,27 @@ class Foo:
 <li>If both field and class serializer specified, field serializer is prioritized</li>
 <li>If both legacy and new class serializer specified, new class serializer is prioritized</li>
 </ul>
+<blockquote>
+<p>💡 Tip: If you implements multiple <code>serialize</code> methods, you will receive &quot;Redefinition of unused <code>serialize</code>&quot; warning from type checker. In such case, try using <code>plum.overload</code> and <code>plum.dispatch</code> to workaround it. See <a href="https://beartype.github.io/plum/integration.html">plum's documentation</a> for more information.</p>
+<pre><code class="language-python">from plum import dispatch, overload
+
+class Serializer:
+   # use @overload
+   @overload
+   def serialize(self, value: int) -&gt; Any:
+       return str(value)
+
+   # use @overload
+   @overload
+   def serialize(self, value: float) -&gt; Any:
+       return int(value)
+
+   # Add method time and make sure to add @dispatch. Plum will do all the magic to erase warnings from type checker.
+   @dispatch
+   def serialize(self, value: Any) -&gt; Any:
+       ...
+</code></pre>
+</blockquote>
 <p>See <a href="https://github.com/yukinarit/pyserde/blob/main/examples/custom_class_serializer.py">examples/custom_class_serializer.py</a> for complete example.</p>
 <p>New in v0.13.0.</p>
 <h3 id="serializer--deserializer"><a class="header" href="#serializer--deserializer"><strong><code>serializer</code></strong> / <strong><code>deserializer</code></strong></a></h3>
@@ -1016,6 +1037,80 @@ class Foo
 f = Foo(100) # beartype raises an error
 </code></pre>
 </blockquote>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="extending-pyserde"><a class="header" href="#extending-pyserde">Extending pyserde</a></h1>
+<p>pyserde offers three ways to extend pyserde to support non builtin types.</p>
+<h2 id="custom-field-deserializer"><a class="header" href="#custom-field-deserializer">Custom field (de)serializer</a></h2>
+<p>See <a href="./field-attributes.html#serializerdeserializer">custom field serializer</a>.</p>
+<blockquote>
+<p>💡 Tip: wrapping <code>serde.field</code> with your own field function makes </p>
+<pre><code class="language-python">import serde
+
+def field(*args, **kwargs):
+    serde.field(*args, **kwargs, serializer=str)
+
+@serde
+class Foo:
+    a: int = field(default=0)  # Configuring field serializer
+</code></pre>
+</blockquote>
+<h2 id="custom-class-deserializer"><a class="header" href="#custom-class-deserializer">Custom class (de)serializer</a></h2>
+<p>See <a href="./class-attributes.html#class_serializer--class_deserializer">custom class serializer</a>.</p>
+<h2 id="custom-global-deserializer"><a class="header" href="#custom-global-deserializer">Custom global (de)serializer</a></h2>
+<p>You apply the custom (de)serialization for entire codebase by registering class (de)serializer by <code>add_serializer</code> and <code>add_deserializer</code>. Registered class (de)serializers are stacked in pyserde's global space and automatically used for all the pyserde classes.</p>
+<p>e.g. Implementing custom (de)serialization for <code>datetime.timedelta</code> using <a href="https://pypi.org/project/isodate/">isodate</a> package.</p>
+<p>Here is the code of registering class (de)serializer for <code>datetime.timedelta</code>.</p>
+<pre><code class="language-python">from datetime import timedelta
+from plum import dispatch
+from typing import Type, Any
+import isodate
+import serde
+
+class Serializer:
+    @dispatch
+    def serialize(self, value: timedelta) -&gt; Any:
+        return isodate.duration_isoformat(value)
+
+class Deserializer:
+    @dispatch
+    def deserialize(self, cls: Type[timedelta], value: Any) -&gt; timedelta:
+        return isodate.parse_duration(value)
+
+def init() -&gt; None:
+    serde.add_serializer(Serializer())
+    serde.add_deserializer(Deserializer())
+</code></pre>
+<p>Users of this package can reuse custom (de)serialization functionality for <code>datetime.timedelta</code> just by calling <code>serde_timedelta.init()</code>.</p>
+<pre><code class="language-python">import serde_timedelta
+from serde import serde
+from serde.json import to_json, from_json
+from datetime import timedelta
+
+serde_timedelta.init()
+
+@serde
+class Foo:
+    a: timedelta
+
+f = Foo(timedelta(hours=10))
+json = to_json(f)
+print(json)
+print(from_json(Foo, json))
+</code></pre>
+<p>and you get <code>datetime.timedelta</code> to be serialized in ISO 8601 duration format!</p>
+<pre><code class="language-bash">{&quot;a&quot;:&quot;PT10H&quot;}
+Foo(a=datetime.timedelta(seconds=36000))
+</code></pre>
+<blockquote>
+<p>💡 Tip: You can register as many class (de)serializer as you want. This means you can use as many pyserde extensions as you want.
+Registered (de)serializers are stacked in the memory. A (de)serializer can be overridden by another (de)serializer.</p>
+<p>e.g. If you register 3 custom serializers in this order, the first serializer will completely overridden by the 3rd one. 2nd one works because it is implemented for a different type.</p>
+<ol>
+<li>Register Serializer for <code>int</code></li>
+<li>Register Serializer for <code>float</code></li>
+<li>Register Serializer for <code>int</code></li>
+</ol>
+</blockquote>
+<p>New in v0.13.0.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="faq"><a class="header" href="#faq">FAQ</a></h1>
 <h2 id="how-can-i-see-the-code-generated-by-pyserde"><a class="header" href="#how-can-i-see-the-code-generated-by-pyserde">How can I see the code generated by pyserde?</a></h2>
 <p>pyserde provides <code>inspect</code> submodule that works as commandline:</p>

@@ -1218,6 +1218,25 @@
 </span><span id="L-1057"><a href="#L-1057"><span class="linenos">1057</span></a>
 </span><span id="L-1058"><a href="#L-1058"><span class="linenos">1058</span></a>    <span class="k">def</span> <span class="nf">deserialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">cls</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
 </span><span id="L-1059"><a href="#L-1059"><span class="linenos">1059</span></a>        <span class="k">pass</span>
+</span><span id="L-1060"><a href="#L-1060"><span class="linenos">1060</span></a>
+</span><span id="L-1061"><a href="#L-1061"><span class="linenos">1061</span></a>
+</span><span id="L-1062"><a href="#L-1062"><span class="linenos">1062</span></a><span class="n">GLOBAL_CLASS_SERIALIZER</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">ClassSerializer</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+</span><span id="L-1063"><a href="#L-1063"><span class="linenos">1063</span></a>
+</span><span id="L-1064"><a href="#L-1064"><span class="linenos">1064</span></a><span class="n">GLOBAL_CLASS_DESERIALIZER</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">ClassDeserializer</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+</span><span id="L-1065"><a href="#L-1065"><span class="linenos">1065</span></a>
+</span><span id="L-1066"><a href="#L-1066"><span class="linenos">1066</span></a>
+</span><span id="L-1067"><a href="#L-1067"><span class="linenos">1067</span></a><span class="k">def</span> <span class="nf">add_serializer</span><span class="p">(</span><span class="n">serializer</span><span class="p">:</span> <span class="n">ClassSerializer</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="L-1068"><a href="#L-1068"><span class="linenos">1068</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+</span><span id="L-1069"><a href="#L-1069"><span class="linenos">1069</span></a><span class="sd">    Register custom global serializer.</span>
+</span><span id="L-1070"><a href="#L-1070"><span class="linenos">1070</span></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="L-1071"><a href="#L-1071"><span class="linenos">1071</span></a>    <span class="n">GLOBAL_CLASS_SERIALIZER</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">serializer</span><span class="p">)</span>
+</span><span id="L-1072"><a href="#L-1072"><span class="linenos">1072</span></a>
+</span><span id="L-1073"><a href="#L-1073"><span class="linenos">1073</span></a>
+</span><span id="L-1074"><a href="#L-1074"><span class="linenos">1074</span></a><span class="k">def</span> <span class="nf">add_deserializer</span><span class="p">(</span><span class="n">deserializer</span><span class="p">:</span> <span class="n">ClassDeserializer</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="L-1075"><a href="#L-1075"><span class="linenos">1075</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+</span><span id="L-1076"><a href="#L-1076"><span class="linenos">1076</span></a><span class="sd">    Register custom global deserializer.</span>
+</span><span id="L-1077"><a href="#L-1077"><span class="linenos">1077</span></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="L-1078"><a href="#L-1078"><span class="linenos">1078</span></a>    <span class="n">GLOBAL_CLASS_DESERIALIZER</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">deserializer</span><span class="p">)</span>
 </span></pre></div>
 
 

@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Type Check - pyserde documentation</title>
+        <title>Extension - pyserde documentation</title>
 
 
         <!-- Custom HTML head -->
@@ -88,7 +88,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded "><a href="introduction.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="getting-started.html"><strong aria-hidden="true">2.</strong> Getting Started</a></li><li class="chapter-item expanded "><a href="data-formats.html"><strong aria-hidden="true">3.</strong> Data Formats</a></li><li class="chapter-item expanded "><a href="types.html"><strong aria-hidden="true">4.</strong> Types</a></li><li class="chapter-item expanded "><a href="decorators.html"><strong aria-hidden="true">5.</strong> Decorators</a></li><li class="chapter-item expanded "><a href="class-attributes.html"><strong aria-hidden="true">6.</strong> Class Attributes</a></li><li class="chapter-item expanded "><a href="field-attributes.html"><strong aria-hidden="true">7.</strong> Field Attributes</a></li><li class="chapter-item expanded "><a href="union.html"><strong aria-hidden="true">8.</strong> Union</a></li><li class="chapter-item expanded "><a href="type-check.html" class="active"><strong aria-hidden="true">9.</strong> Type Check</a></li><li class="chapter-item expanded "><a href="extension.html"><strong aria-hidden="true">10.</strong> Extension</a></li><li class="chapter-item expanded "><a href="faq.html"><strong aria-hidden="true">11.</strong> FAQ</a></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded "><a href="introduction.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="getting-started.html"><strong aria-hidden="true">2.</strong> Getting Started</a></li><li class="chapter-item expanded "><a href="data-formats.html"><strong aria-hidden="true">3.</strong> Data Formats</a></li><li class="chapter-item expanded "><a href="types.html"><strong aria-hidden="true">4.</strong> Types</a></li><li class="chapter-item expanded "><a href="decorators.html"><strong aria-hidden="true">5.</strong> Decorators</a></li><li class="chapter-item expanded "><a href="class-attributes.html"><strong aria-hidden="true">6.</strong> Class Attributes</a></li><li class="chapter-item expanded "><a href="field-attributes.html"><strong aria-hidden="true">7.</strong> Field Attributes</a></li><li class="chapter-item expanded "><a href="union.html"><strong aria-hidden="true">8.</strong> Union</a></li><li class="chapter-item expanded "><a href="type-check.html"><strong aria-hidden="true">9.</strong> Type Check</a></li><li class="chapter-item expanded "><a href="extension.html" class="active"><strong aria-hidden="true">10.</strong> Extension</a></li><li class="chapter-item expanded "><a href="faq.html"><strong aria-hidden="true">11.</strong> FAQ</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle">
                 <div class="sidebar-resize-indicator"></div>
@@ -150,7 +150,7 @@
                         <a href="https://github.com/yukinarit/pyserde" title="Git repository" aria-label="Git repository">
                             <i id="git-repository-button" class="fa fa-github"></i>
                         </a>
-                        <a href="https://github.com/yukinarit/pyserde/edit/main/.//type-check.md" title="Suggest an edit" aria-label="Suggest an edit">
+                        <a href="https://github.com/yukinarit/pyserde/edit/main/.//extension.md" title="Suggest an edit" aria-label="Suggest an edit">
                             <i id="git-edit-button" class="fa fa-edit"></i>
                         </a>
 
@@ -179,72 +179,90 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="type-checking"><a class="header" href="#type-checking">Type Checking</a></h1>
-<p>This is one of the most awaited features. <code>pyserde</code> v0.9 adds the experimental type checkers. As this feature is still experimental, the type checking is not perfect. Also, <a href="https://github.com/tbsexton">@tbsexton</a> is looking into <a href="https://github.com/yukinarit/pyserde/issues/237#issuecomment-1191714102">more beautiful solution</a>, the entire backend of type checker may be replaced by <a href="https://github.com/beartype/beartype">beartype</a> in the future.</p>
-<h3 id="nocheck"><a class="header" href="#nocheck"><code>NoCheck</code></a></h3>
-<p>This is the default behavior until pyserde v0.8.3 and v0.9.x. No type coercion or checks are run. Even if a user puts a wrong value, pyserde doesn't complain anything.</p>
-<pre><code class="language-python">@serde
-@dataclass
-class Foo
-    s: str
-
-foo = Foo(10)
-# pyserde doesn't complain anything. {&quot;s&quot;: 10} will be printed.
-print(to_json(foo))
-</code></pre>
-<h3 id="coerce"><a class="header" href="#coerce"><code>Coerce</code></a></h3>
-<p>Type coercing automatically converts a value into the declared type during (de)serialization. If the value is incompatible e.g. value is &quot;foo&quot; and type is int, pyserde raises an <code>SerdeError</code>.</p>
-<pre><code class="language-python">@serde(type_check=Coerce)
-@dataclass
-class Foo
-    s: str
-
-foo = Foo(10)
-# pyserde automatically coerce the int value 10 into &quot;10&quot;.
-# {&quot;s&quot;: &quot;10&quot;} will be printed.
-print(to_json(foo))
-</code></pre>
-<h3 id="strict"><a class="header" href="#strict"><code>Strict</code></a></h3>
-<p>Strict type checking is to check every value against the declared type during (de)serialization. We plan to make <code>Strict</code> a default type checker in the future release.</p>
-<pre><code class="language-python">@serde(type_check=Strict)
-@dataclass
-class Foo
-    s: str
-
-foo = Foo(10)
-# pyserde checks the value 10 is instance of `str`.
-# SerdeError will be raised in this case because of the type mismatch.
-print(to_json(foo))
-</code></pre>
+                        <h1 id="extending-pyserde"><a class="header" href="#extending-pyserde">Extending pyserde</a></h1>
+<p>pyserde offers three ways to extend pyserde to support non builtin types.</p>
+<h2 id="custom-field-deserializer"><a class="header" href="#custom-field-deserializer">Custom field (de)serializer</a></h2>
+<p>See <a href="./field-attributes.html#serializerdeserializer">custom field serializer</a>.</p>
 <blockquote>
-<p><strong>NOTE:</strong> Since pyserde is a serialization framework, it provides type checks or coercing only during (de)serialization. For example, pyserde doesn't complain even if incompatible value is assigned in the object below.</p>
-<pre><code class="language-python">@serde(type_check=Strict)
-@dataclass
-class Foo
-    s: str
+<p>💡 Tip: wrapping <code>serde.field</code> with your own field function makes </p>
+<pre><code class="language-python">import serde
 
-f = Foo(100) # pyserde doesn't raise an error
-</code></pre>
-<p>If you want to detect runtime type errors, I recommend to use <a href="https://github.com/beartype/beartype">beartype</a>.</p>
-<pre><code class="language-python">@beartype
-@serde(type_check=Strict)
-@dataclass
-class Foo
-    s: str
+def field(*args, **kwargs):
+    serde.field(*args, **kwargs, serializer=str)
 
-f = Foo(100) # beartype raises an error
+@serde
+class Foo:
+    a: int = field(default=0)  # Configuring field serializer
 </code></pre>
 </blockquote>
+<h2 id="custom-class-deserializer"><a class="header" href="#custom-class-deserializer">Custom class (de)serializer</a></h2>
+<p>See <a href="./class-attributes.html#class_serializer--class_deserializer">custom class serializer</a>.</p>
+<h2 id="custom-global-deserializer"><a class="header" href="#custom-global-deserializer">Custom global (de)serializer</a></h2>
+<p>You apply the custom (de)serialization for entire codebase by registering class (de)serializer by <code>add_serializer</code> and <code>add_deserializer</code>. Registered class (de)serializers are stacked in pyserde's global space and automatically used for all the pyserde classes.</p>
+<p>e.g. Implementing custom (de)serialization for <code>datetime.timedelta</code> using <a href="https://pypi.org/project/isodate/">isodate</a> package.</p>
+<p>Here is the code of registering class (de)serializer for <code>datetime.timedelta</code>.</p>
+<pre><code class="language-python">from datetime import timedelta
+from plum import dispatch
+from typing import Type, Any
+import isodate
+import serde
+
+class Serializer:
+    @dispatch
+    def serialize(self, value: timedelta) -&gt; Any:
+        return isodate.duration_isoformat(value)
+
+class Deserializer:
+    @dispatch
+    def deserialize(self, cls: Type[timedelta], value: Any) -&gt; timedelta:
+        return isodate.parse_duration(value)
+
+def init() -&gt; None:
+    serde.add_serializer(Serializer())
+    serde.add_deserializer(Deserializer())
+</code></pre>
+<p>Users of this package can reuse custom (de)serialization functionality for <code>datetime.timedelta</code> just by calling <code>serde_timedelta.init()</code>.</p>
+<pre><code class="language-python">import serde_timedelta
+from serde import serde
+from serde.json import to_json, from_json
+from datetime import timedelta
+
+serde_timedelta.init()
+
+@serde
+class Foo:
+    a: timedelta
+
+f = Foo(timedelta(hours=10))
+json = to_json(f)
+print(json)
+print(from_json(Foo, json))
+</code></pre>
+<p>and you get <code>datetime.timedelta</code> to be serialized in ISO 8601 duration format!</p>
+<pre><code class="language-bash">{&quot;a&quot;:&quot;PT10H&quot;}
+Foo(a=datetime.timedelta(seconds=36000))
+</code></pre>
+<blockquote>
+<p>💡 Tip: You can register as many class (de)serializer as you want. This means you can use as many pyserde extensions as you want.
+Registered (de)serializers are stacked in the memory. A (de)serializer can be overridden by another (de)serializer.</p>
+<p>e.g. If you register 3 custom serializers in this order, the first serializer will completely overridden by the 3rd one. 2nd one works because it is implemented for a different type.</p>
+<ol>
+<li>Register Serializer for <code>int</code></li>
+<li>Register Serializer for <code>float</code></li>
+<li>Register Serializer for <code>int</code></li>
+</ol>
+</blockquote>
+<p>New in v0.13.0.</p>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="union.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="type-check.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="extension.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="faq.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -254,11 +272,11 @@ f = Foo(100) # beartype raises an error
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="union.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="type-check.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="extension.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="faq.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>
