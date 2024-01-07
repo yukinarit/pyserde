@@ -29,7 +29,7 @@ You apply the custom (de)serialization for entire codebase by registering class 
 
 e.g. Implementing custom (de)serialization for `datetime.timedelta` using [isodate](https://pypi.org/project/isodate/) package.
 
-Here is the code of registering class (de)serializer for `datetime.timedelta`.
+Here is the code of registering class (de)serializer for `datetime.timedelta`. This package is actually published in PyPI as [pyserde-timedelta](https://pypi.org/project/pyserde-timedelta/).
 
 ```python
 from datetime import timedelta

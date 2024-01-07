@@ -97,6 +97,10 @@ Foo(i=10, s='foo', f=100.0, b=True)
 - [Custom global (de)serializer](https://github.com/yukinarit/pyserde/blob/main/docs/en/extension.md#custom-global-deserializer)
 - [Flatten](https://github.com/yukinarit/pyserde/blob/main/docs/en/field-attributes.md#flatten)
 
+## Extensions
+
+* [pyserde-timedelta](https://github.com/yukinarit/pyserde-timedelta): (de)serializing datetime.timedelta in ISO 8601 duration format.
+
 ## Contributors ✨
 
 Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/docs/en/emoji-key)):
