@@ -22,6 +22,7 @@ from typing import (
     overload,
     Union,
     Sequence,
+    Literal,
     Iterable,
 )
 
@@ -29,7 +30,6 @@ import jinja2
 from typing_extensions import Type, dataclass_transform
 
 from .compat import (
-    Literal,
     SerdeError,
     SerdeSkip,
     T,

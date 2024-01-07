@@ -24,13 +24,13 @@ from typing import (
     TypeVar,
     Iterable,
     Union,
+    Literal,
 )
 
 import jinja2
 from typing_extensions import dataclass_transform
 
 from .compat import (
-    Literal,
     SerdeError,
     SerdeSkip,
     T,

@@ -2,7 +2,19 @@ import logging
 import sys
 from dataclasses import dataclass
 from ipaddress import IPv4Address
-from typing import Dict, FrozenSet, Generic, List, NewType, Optional, Tuple, TypeVar, Union, Any
+from typing import (
+    Dict,
+    FrozenSet,
+    Generic,
+    List,
+    NewType,
+    Optional,
+    Tuple,
+    TypeVar,
+    Union,
+    Any,
+    Literal,
+)
 from uuid import UUID
 
 import pytest
@@ -20,7 +32,6 @@ from serde import (
     AdjacentTagging,
     Untagged,
 )
-from serde.compat import Literal
 from serde.json import from_json, to_json
 
 logging.basicConfig(level=logging.WARNING)

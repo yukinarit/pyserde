@@ -1,13 +1,12 @@
 import sys
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Any, Dict, Generic, List, NewType, Optional, Set, Tuple, TypeVar, Union
+from typing import Any, Dict, Generic, List, NewType, Optional, Set, Tuple, TypeVar, Union, Literal
 
 import pytest
 
 import serde
 from serde.compat import (
-    Literal,
     get_generic_arg,
     is_dict,
     is_generic,

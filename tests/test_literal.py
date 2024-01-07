@@ -1,12 +1,6 @@
 import logging
-import sys
 from dataclasses import dataclass
-from typing import Dict, List, Tuple
-
-if sys.version_info[:2] == (3, 7):
-    from typing_extensions import Literal
-else:
-    from typing import Literal
+from typing import Dict, List, Tuple, Literal
 
 import pytest
 
