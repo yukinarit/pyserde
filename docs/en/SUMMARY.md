@@ -9,4 +9,5 @@
 - [Field Attributes](field-attributes.md)
 - [Union](union.md)
 - [Type Check](type-check.md)
+- [Extension](extension.md)
 - [FAQ](faq.md)

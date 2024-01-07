@@ -92,8 +92,9 @@ Foo(i=10, s='foo', f=100.0, b=True)
 - [Rename](https://github.com/yukinarit/pyserde/blob/main/docs/en/field-attributes.md#rename)
 - [Alias](https://github.com/yukinarit/pyserde/blob/main/docs/en/field-attributes.md#alias)
 - Skip (de)serialization ([skip](https://github.com/yukinarit/pyserde/blob/main/docs/en/field-attributes.md#skip), [skip_if](https://github.com/yukinarit/pyserde/blob/main/docs/en/field-attributes.md#skip_if), [skip_if_false](https://github.com/yukinarit/pyserde/blob/main/docs/en/field-attributes.md#skip_if_false), [skip_if_default](https://github.com/yukinarit/pyserde/blob/main/docs/en/field-attributes.md#skip_if_default))
-- [Custom class (de)serializer](https://github.com/yukinarit/pyserde/blob/main/docs/en/class-attributes.md#serializer--deserializer)
 - [Custom field (de)serializer](https://github.com/yukinarit/pyserde/blob/main/docs/en/field-attributes.md#serializerdeserializer)
+- [Custom class (de)serializer](https://github.com/yukinarit/pyserde/blob/main/docs/en/class-attributes.md#class_serializer--class_deserializer)
+- [Custom global (de)serializer](https://github.com/yukinarit/pyserde/blob/main/docs/en/extension.md#custom-global-deserializer)
 - [Flatten](https://github.com/yukinarit/pyserde/blob/main/docs/en/field-attributes.md#flatten)
 
 ## Contributors ✨

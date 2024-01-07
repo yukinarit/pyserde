@@ -5,11 +5,11 @@ and functions associated with serialization.
 
 from __future__ import annotations
 import abc
-import plum
 import copy
 import dataclasses
 import functools
 import typing
+import itertools
 from dataclasses import dataclass, is_dataclass
 from typing import (
     Any,
@@ -86,6 +86,7 @@ from .core import (
     raise_unsupported_type,
     render_type_check,
     union_func_name,
+    GLOBAL_CLASS_SERIALIZER,
 )
 from .numpy import (
     is_numpy_array,
@@ -223,6 +224,10 @@ def serialize(
             )
             setattr(cls, SERDE_SCOPE, scope)
 
+        class_serializers: List[ClassSerializer] = list(
+            itertools.chain(GLOBAL_CLASS_SERIALIZER, [class_serializer] if class_serializer else [])
+        )
+
         # Set some globals for all generated functions
         g["cls"] = cls
         g["copy"] = copy
@@ -239,7 +244,7 @@ def serialize(
         g["TypeCheck"] = TypeCheck
         g["NoCheck"] = NoCheck
         g["coerce"] = coerce
-        g["class_serializer"] = class_serializer
+        g["class_serializers"] = class_serializers
         if serializer:
             g["serde_legacy_custom_class_serializer"] = functools.partial(
                 serde_legacy_custom_class_serializer, custom=serializer
@@ -727,16 +732,17 @@ convert_sets=convert_sets) for k, v in foo.items()}"
 (coerce(str, foo[0]), foo[1].__serde__.funcs['to_iter'](foo[1], reuse_instances=reuse_instances, \
 convert_sets=convert_sets), coerce(int, foo[2]),)"
         """
-        implemented_methods: Dict[Type[Any], plum.Signature] = {}
-        if self.class_serializer:
-            implemented_methods = {
-                sig.types[1]: sig
-                for sig in self.class_serializer.__class__.serialize.methods  # type: ignore
-            }
+        implemented_methods: Dict[Type[Any], int] = {}
+        class_serializers: Iterable[ClassSerializer] = itertools.chain(
+            GLOBAL_CLASS_SERIALIZER, [self.class_serializer] if self.class_serializer else []
+        )
+        for n, class_serializer in enumerate(class_serializers):
+            for sig in class_serializer.__class__.serialize.methods:  # type: ignore
+                implemented_methods[sig.types[1]] = n
 
         custom_serializer_available = arg.type in implemented_methods
         if custom_serializer_available and not arg.serializer:
-            res = f"class_serializer.serialize({arg.varname})"
+            res = f"class_serializers[{implemented_methods[arg.type]}].serialize({arg.varname})"
         elif arg.serializer and arg.serializer.inner is not default_serializer:
             res = self.custom_field_serializer(arg)
         elif is_dataclass(arg.type):

@@ -3,21 +3,19 @@ from dataclasses import dataclass
 from datetime import datetime
 from serde import (
     serde,
-    ClassSerializer,
-    ClassDeserializer,
     field,
 )
 from serde.json import from_json, to_json
 from typing import Type, Any, List
 
 
-class MySerializer(ClassSerializer):
+class MySerializer:
     @dispatch
     def serialize(self, value: datetime) -> str:
         return value.strftime("%d/%m/%y")
 
 
-class MyDeserializer(ClassDeserializer):
+class MyDeserializer:
     @dispatch
     def deserialize(self, cls: Type[datetime], value: Any) -> datetime:
         return datetime.strptime(value, "%d/%m/%y")
