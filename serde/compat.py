@@ -35,11 +35,6 @@ import typing_extensions
 import typing_inspect
 from typing_extensions import Type, TypeGuard
 
-if sys.version_info[:2] == (3, 7):
-    Literal = typing_extensions.Literal
-else:
-    Literal = typing.Literal
-
 # Create alias for `dataclasses.Field` because `dataclasses.Field` is a generic
 # class since 3.9 but is not in 3.7 and 3.8.
 if sys.version_info[:2] <= (3, 8):
@@ -842,8 +837,6 @@ def is_literal(typ: Type[Any]) -> bool:
     False
     """
     origin = get_origin(typ)
-    if sys.version_info[:2] == (3, 7):
-        return origin is typing_extensions.Literal
     return origin is not None and origin is typing.Literal
 
 

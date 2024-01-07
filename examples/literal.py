@@ -1,12 +1,7 @@
-import sys
 from dataclasses import dataclass
 
 from serde.compat import SerdeError
-
-if sys.version_info[:2] == (3, 7):
-    from typing_extensions import Literal
-else:
-    from typing import Literal
+from typing import Literal
 
 from serde import serde
 from serde.json import from_json, to_json
