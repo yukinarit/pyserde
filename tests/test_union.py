@@ -44,7 +44,7 @@ if sys.version_info[:3] >= (3, 10, 0):
 
     @serde
     @dataclass(unsafe_hash=True)
-    class PriUnion:
+    class PriUnion:  # type: ignore
         """
         Union Primitives.
         """
@@ -55,7 +55,7 @@ else:
 
     @serde
     @dataclass(unsafe_hash=True)
-    class PriUnion:
+    class PriUnion:  # type: ignore
         """
         Union Primitives.
         """
@@ -103,7 +103,7 @@ class LitUnion:
     v: Union[int, Literal["foo", "bar", "*"]]  # noqa
 
 
-def test_union():
+def test_union() -> None:
     v = PriUnion(10)
     s = '{"v":10}'
     assert s == to_json(v)
@@ -125,7 +125,7 @@ def test_union():
     assert v == from_json(PriUnion, s)
 
 
-def test_union_optional():
+def test_union_optional() -> None:
     v = PriOptUnion(10)
     s = '{"v":10}'
     assert s == to_json(v)
@@ -155,7 +155,7 @@ def test_union_optional():
     assert OptionalUnion(None) == from_json(OptionalUnion, "{}")
 
 
-def test_union_containers():
+def test_union_containers() -> None:
     v = ContUnion([1, 2, 3])
     s = '{"v":[1,2,3]}'
     assert s == to_json(v)
@@ -173,7 +173,7 @@ def test_union_containers():
     assert v == from_json(ContUnion, s)
 
 
-def test_union_with_literal():
+def test_union_with_literal() -> None:
     v = LitUnion(10)
     s = '{"v":10}'
     assert s == to_json(v)
@@ -200,7 +200,7 @@ def test_union_with_literal():
         from_json(LitUnion, s)
 
 
-def test_union_with_complex_types():
+def test_union_with_complex_types() -> None:
     @serde
     class A:
         v: Union[int, IPv4Address, UUID]
@@ -224,7 +224,7 @@ def test_union_with_complex_types():
     assert a_uid == from_dict(A, to_dict(a_uid))
 
 
-def test_union_with_complex_types_and_reuse_instances():
+def test_union_with_complex_types_and_reuse_instances() -> None:
     @serde(reuse_instances_default=True)
     class A:
         v: Union[int, IPv4Address, UUID]
@@ -245,7 +245,7 @@ def test_union_with_complex_types_and_reuse_instances():
     assert a_uid.v is a_uid_roundtrip.v
 
 
-def test_optional_union_with_complex_types():
+def test_optional_union_with_complex_types() -> None:
     @serde
     class A:
         v: Optional[Union[int, IPv4Address, UUID]]
@@ -259,7 +259,7 @@ def test_optional_union_with_complex_types():
     assert a_none == from_dict(A, to_dict(a_none, reuse_instances=True), reuse_instances=True)
 
 
-def test_optional_complex_type_with_default():
+def test_optional_complex_type_with_default() -> None:
     for T, default in [
         (IPv4Address, IPv4Address("127.0.0.1")),
         (UUID, UUID("9c244009-c60d-452b-a378-b8afdc0c2d90")),
@@ -286,7 +286,7 @@ def test_optional_complex_type_with_default():
         )
 
 
-def test_union_with_complex_types_in_containers():
+def test_union_with_complex_types_in_containers() -> None:
     @serde
     class A:
         v: Union[List[IPv4Address], List[UUID]]
@@ -306,7 +306,7 @@ def test_union_with_complex_types_in_containers():
     assert a_empty == from_dict(A, to_dict(a_empty, reuse_instances=True), reuse_instances=True)
 
 
-def test_union_exception_if_nothing_matches():
+def test_union_exception_if_nothing_matches() -> None:
     @serde
     class A:
         v: Union[IPv4Address, UUID]
@@ -355,7 +355,7 @@ def test_union_exception_if_nothing_matches():
     assert str(ex6.value) == "Can not serialize None of type NoneType for Union[IPv4Address, UUID]"
 
 
-def test_union_in_union():
+def test_union_in_union() -> None:
     @serde
     class A:
         v: Union[UUID, Union[int, str]]
@@ -373,7 +373,7 @@ def test_union_in_union():
     assert a_str == from_dict(A, to_dict(a_str, reuse_instances=True), reuse_instances=True)
 
 
-def test_union_in_other_type():
+def test_union_in_other_type() -> None:
     @serde
     class A:
         v: Dict[str, Union[UUID, int]]
@@ -387,7 +387,7 @@ def test_union_in_other_type():
     assert a_int == from_dict(A, to_dict(a_int, reuse_instances=True), reuse_instances=True)
 
 
-def test_union_rename_all():
+def test_union_rename_all() -> None:
     @serde(rename_all="pascalcase")
     class Foo:
         bar_baz: Union[int, str]
@@ -396,7 +396,7 @@ def test_union_rename_all():
     assert from_dict(Foo, {"BarBaz": "foo"}) == Foo("foo")
 
 
-def test_union_with_list_of_other_class():
+def test_union_with_list_of_other_class() -> None:
     @serde
     class A:
         a: int
@@ -412,7 +412,7 @@ def test_union_with_list_of_other_class():
 
 
 # relates to https://github.com/yukinarit/pyserde/issues/113
-def test_union_with_union_in_nested_types():
+def test_union_with_union_in_nested_types() -> None:
     @serde
     class A:
         v: Union[UUID, List[Union[UUID, int]]]
@@ -429,7 +429,7 @@ def test_union_with_union_in_nested_types():
 
 
 # relates to https://github.com/yukinarit/pyserde/issues/113
-def test_union_with_union_in_nested_tuple():
+def test_union_with_union_in_nested_tuple() -> None:
     @serde
     class A:
         v: Union[bool, Tuple[Union[str, int]]]
@@ -450,7 +450,7 @@ def test_union_with_union_in_nested_tuple():
     assert from_dict(A, a_int_dict) == a_int
 
 
-def test_generic_union():
+def test_generic_union() -> None:
     T = TypeVar("T")
     U = TypeVar("U")
 
@@ -488,7 +488,7 @@ def test_generic_union():
     # assert b == from_dict(B[Foo[int], Bar[str]], to_dict(b))
 
 
-def test_external_tagging():
+def test_external_tagging() -> None:
     @serde
     class Bar:
         b: int
@@ -544,7 +544,7 @@ def test_external_tagging():
         assert from_dict(Foo, {"a": {"Bar": {"c": 10}}})
 
 
-def test_internal_tagging():
+def test_internal_tagging() -> None:
     from serde import InternalTagging
 
     @serde
@@ -600,7 +600,7 @@ def test_internal_tagging():
             pass
 
 
-def test_adjacent_tagging():
+def test_adjacent_tagging() -> None:
     from serde import AdjacentTagging
 
     @serde
@@ -672,7 +672,7 @@ def test_adjacent_tagging():
             pass
 
 
-def test_untagged():
+def test_untagged() -> None:
     from serde import Untagged
 
     @serde
@@ -776,7 +776,7 @@ def test_union_directly() -> None:
     assert bar == from_json(Untagged(Union[Foo, Bar]), s)
 
 
-def test_union_frozenset_with_prim():
+def test_union_frozenset_with_prim() -> None:
     @serde
     @dataclass
     class Foo:
@@ -785,7 +785,7 @@ def test_union_frozenset_with_prim():
     assert to_dict(Foo(frozenset({1}))) == {"a": {1}}
 
 
-def test_union_with_any():
+def test_union_with_any() -> None:
     @dataclass
     class FooWithString:
         foo: str

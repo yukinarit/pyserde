@@ -30,7 +30,7 @@ T = TypeVar("T")
 U = TypeVar("U")
 
 
-def test_types():
+def test_types() -> None:
     assert is_list(List[int])
     assert is_list(List)
     assert is_set(Set[int])
@@ -68,7 +68,7 @@ def test_types():
         assert is_opt(str | None)
 
 
-def test_typename():
+def test_typename() -> None:
     @serde.serde
     class Bar(Generic[T]):
         v: T
@@ -87,13 +87,13 @@ def test_typename():
     assert typename(Tuple[int, str]) == "Tuple[int, str]"
     assert typename(Tuple[int, ...]) == "Tuple[int, ...]"
     assert typename(Dict) == "Dict"
-    assert typename(Dict[str, Foo]) == "Dict[str, Foo]"
+    assert typename(Dict[str, Foo]) == "Dict[str, Foo]"  # type: ignore
     assert typename(Set) == "Set"
     assert typename(Set[int]) == "Set[int]"
-    assert typename(Literal[1, 1.0, "Hey"]) == "Literal[1, 1.0, Hey]"
+    assert typename(Literal[1, True, "Hey"]) == "Literal[1, True, Hey]"
 
 
-def test_iter_types():
+def test_iter_types() -> None:
     assert {Pri, int, str, float, bool} == set(iter_types(Pri))
     assert {Dict, str, Pri, int, float, bool} == set(iter_types(Dict[str, Pri]))
     assert {List, str} == set(iter_types(List[str]))
@@ -115,7 +115,7 @@ def test_iter_types():
     assert {Foo, datetime, Optional, str, Union, List, Set, int} == set(iter_types(Foo))
 
 
-def test_iter_unions():
+def test_iter_unions() -> None:
     assert [Union[str, int]] == list(iter_unions(Union[str, int]))
     assert [Union[str, int]] == list(iter_unions(Dict[str, Union[str, int]]))
     assert [Union[str, int]] == list(iter_unions(Tuple[Union[str, int]]))
@@ -134,7 +134,7 @@ def test_iter_unions():
     )
 
 
-def test_type_args():
+def test_type_args() -> None:
     assert (int,) == type_args(List[int])
     assert (int, str) == type_args(Dict[int, str])
     assert (int, type(None)) == type_args(Optional[int])
@@ -151,13 +151,13 @@ def test_type_args():
         assert (int, Ellipsis) == type_args(tuple[int, ...])
 
 
-def test_union_args():
+def test_union_args() -> None:
     assert (int, str) == union_args(Union[int, str])
     assert (List[int], Dict[int, str]) == union_args(Union[List[int], Dict[int, str]])
     assert (Optional[int], str) == union_args(Union[Optional[int], str])
 
 
-def test_is_instance():
+def test_is_instance() -> None:
     # Primitive
     assert is_instance(10, int)
     assert is_instance("str", str)
@@ -257,7 +257,7 @@ class GenericFoo(Generic[T]):
     t: T
 
 
-def test_is_generic():
+def test_is_generic() -> None:
     assert not is_generic(int)
     assert not is_generic(List[int])
     assert not is_generic(List)
@@ -272,7 +272,7 @@ def test_is_generic():
     assert not serde.is_deserializable(GenericFoo[List[int]])
 
 
-def test_get_generic_arg():
+def test_get_generic_arg() -> None:
     class GenericFoo(Generic[T, U]):
         pass
 

@@ -19,7 +19,9 @@ from typing import (
     Set,
     Tuple,
     TypeVar,
+    Union,
 )
+from typing_extensions import TypeAlias
 
 import more_itertools
 
@@ -31,21 +33,23 @@ from serde.toml import from_toml, to_toml
 from serde.yaml import from_yaml, to_yaml
 from tests import data
 
-format_dict: List = [(to_dict, from_dict)]
+FormatFuncs: TypeAlias = List[Tuple[Callable[..., Any], Callable[..., Any]]]
 
-format_tuple: List = [(to_tuple, from_tuple)]
+format_dict: FormatFuncs = [(to_dict, from_dict)]
 
-format_json: List = [(to_json, from_json)]
+format_tuple: FormatFuncs = [(to_tuple, from_tuple)]
 
-format_msgpack: List = [(to_msgpack, from_msgpack)]
+format_json: FormatFuncs = [(to_json, from_json)]
 
-format_yaml: List = [(to_yaml, from_yaml)]
+format_msgpack: FormatFuncs = [(to_msgpack, from_msgpack)]
 
-format_toml: List = [(to_toml, from_toml)]
+format_yaml: FormatFuncs = [(to_yaml, from_yaml)]
 
-format_pickle: List = [(to_pickle, from_pickle)]
+format_toml: FormatFuncs = [(to_toml, from_toml)]
 
-all_formats: List = (
+format_pickle: FormatFuncs = [(to_pickle, from_pickle)]
+
+all_formats: FormatFuncs = (
     format_dict
     + format_tuple
     + format_json
@@ -79,7 +83,10 @@ class NestedGenericClass(Generic[U, V]):
     b: Inner[V]
 
 
-def param(val, typ, filter: Optional[Callable] = None):
+Filter: TypeAlias = Callable[..., bool]
+
+
+def param(val: T, typ: U, filter: Optional[Filter] = None) -> Tuple[T, U, Filter]:
     """
     Create a test parameter
 
@@ -98,7 +105,7 @@ def yaml_not_supported(se: Any, de: Any, opt: Any) -> bool:
     return se is to_yaml
 
 
-types: List = [
+types: List[Tuple[Any, Any, Optional[Filter]]] = [
     param(10, int),  # Primitive
     param("foo", str),
     param(100.0, float),
@@ -179,14 +186,14 @@ types_combinations: List = [
     list(more_itertools.flatten(c)) for c in itertools.combinations(types, 2)
 ]
 
-opt_case: List = [
+opt_case: List[Dict[str, Union[bool, str]]] = [
     {"reuse_instances_default": False},
     {"reuse_instances_default": False, "rename_all": "camelcase"},
     {"reuse_instances_default": False, "rename_all": "snakecase"},
 ]
 
 
-def make_id_from_dict(d: Dict) -> str:
+def make_id_from_dict(d: Dict[str, str]) -> str:
     if not d:
         return "none"
     else:
