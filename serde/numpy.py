@@ -1,4 +1,5 @@
-from typing import Any, Callable, Optional
+from beartype.typing import Callable
+from typing import Any, Optional
 
 from serde.compat import get_args, get_origin
 

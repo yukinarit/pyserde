@@ -10,24 +10,26 @@ import sys
 import re
 from dataclasses import dataclass
 from typing import (
-    Protocol,
-    Any,
-    Callable,
-    Dict,
-    List,
-    Optional,
-    Union,
-    Generic,
-    TypeVar,
-    Tuple,
     overload,
+    Dict,
+    Type,
+    TypeVar,
+    Generic,
+    Optional,
+    Any,
+    Protocol,
     Mapping,
     Sequence,
 )
+from beartype.typing import (
+    Callable,
+    List,
+    Union,
+    Tuple,
+)
 
 import casefy
-import jinja2
-from typing_extensions import Type, get_type_hints
+from typing_extensions import get_type_hints
 
 from .compat import (
     DataclassField,
@@ -55,7 +57,6 @@ from .compat import (
     typename,
     _WithTagging,
 )
-from .numpy import is_numpy_available, is_numpy_type
 
 __all__ = [
     "Scope",
@@ -355,12 +356,6 @@ def is_instance(obj: Any, typ: Any) -> bool:
     Subscripted Generics e.g. `List[int]`.
     """
     if dataclasses.is_dataclass(typ):
-        serde_scope: Optional[Scope] = getattr(typ, SERDE_SCOPE, None)
-        if serde_scope:
-            try:
-                serde_scope.funcs[TYPE_CHECK](obj)
-            except Exception:
-                return False
         return isinstance(obj, typ)
     elif is_opt(typ):
         return is_opt_instance(obj, typ)
@@ -898,51 +893,6 @@ def should_impl_dataclass(cls: Type[Any]) -> bool:
     return False
 
 
-def render_type_check(cls: Type[Any]) -> str:
-    import serde.compat
-
-    template = """
-def {{type_check_func}}(self):
-  {% for f in fields -%}
-
-  {% if ((is_numpy_available() and is_numpy_type(f.type)) or
-         compat.is_enum(f.type) or
-         compat.is_literal(f.type)) %}
-
-  {% elif is_dataclass(f.type) %}
-  self.{{f.name}}.__serde__.funcs['{{type_check_func}}'](self.{{f.name}})
-
-  {% elif (compat.is_set(f.type) or
-           compat.is_list(f.type) or
-           compat.is_dict(f.type) or
-           compat.is_tuple(f.type) or
-           compat.is_opt(f.type) or
-           compat.is_primitive(f.type) or
-           compat.is_str_serializable(f.type) or
-           compat.is_datetime(f.type)) %}
-  if not is_instance(self.{{f.name}}, {{f.type|typename}}):
-    raise SerdeError(f"{{cls|typename}}.{{f.name}} is not instance of {{f.type|typename}}")
-
-  {% endif %}
-  {% endfor %}
-
-  return
-    """
-
-    env = jinja2.Environment(loader=jinja2.DictLoader({"check": template}))
-    env.filters.update({"typename": functools.partial(typename, with_typing_module=True)})
-    return env.get_template("check").render(
-        cls=cls,
-        fields=dataclasses.fields(cls),
-        compat=serde.compat,
-        is_dataclass=dataclasses.is_dataclass,
-        type_check_func=TYPE_CHECK,
-        is_instance=is_instance,
-        is_numpy_available=is_numpy_available,
-        is_numpy_type=is_numpy_type,
-    )
-
-
 @dataclass
 class TypeCheck:
     """
@@ -950,7 +900,7 @@ class TypeCheck:
     """
 
     class Kind(enum.Enum):
-        NoCheck = enum.auto()
+        Disabled = enum.auto()
         """ No check performed """
 
         Coerce = enum.auto()
@@ -971,14 +921,14 @@ class TypeCheck:
         return self
 
 
-NoCheck = TypeCheck(kind=TypeCheck.Kind.NoCheck)
+disabled = TypeCheck(kind=TypeCheck.Kind.Disabled)
 
-Coerce = TypeCheck(kind=TypeCheck.Kind.Coerce)
+coerce = TypeCheck(kind=TypeCheck.Kind.Coerce)
 
-Strict = TypeCheck(kind=TypeCheck.Kind.Strict)
+strict = TypeCheck(kind=TypeCheck.Kind.Strict)
 
 
-def coerce(typ: Type[Any], obj: Any) -> Any:
+def coerce_object(typ: Type[Any], obj: Any) -> Any:
     return typ(obj) if is_coercible(typ, obj) else obj
 
 

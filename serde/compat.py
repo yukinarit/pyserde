@@ -11,37 +11,30 @@ import itertools
 import pathlib
 import sys
 import types
-import typing
 import uuid
 from collections import defaultdict
 from dataclasses import is_dataclass
-from typing import (
-    NewType,
-    Any,
-    ClassVar,
+import typing
+from typing import TypeVar, Generic, Any, ClassVar, Iterator, Optional, NewType
+from beartype.typing import (
     DefaultDict,
     Dict,
     FrozenSet,
-    Generic,
-    Iterator,
     List,
-    Optional,
     Set,
     Tuple,
-    TypeVar,
     Union,
 )
 
 import typing_extensions
 import typing_inspect
-from typing_extensions import Type, TypeGuard
+from typing_extensions import Type, TypeGuard, TypeAlias
 
 # Create alias for `dataclasses.Field` because `dataclasses.Field` is a generic
 # class since 3.9 but is not in 3.7 and 3.8.
-if sys.version_info[:2] <= (3, 8):
-    DataclassField = dataclasses.Field
-else:
-    DataclassField = dataclasses.Field[Any]
+DataclassField: TypeAlias = (
+    dataclasses.Field if sys.version_info[:2] <= (3, 8) else dataclasses.Field[Any]  # type: ignore
+)
 
 try:
     if sys.version_info[:2] <= (3, 8):
@@ -337,13 +330,6 @@ def dataclass_fields(cls: Type[Any]) -> Iterator[dataclasses.Field]:  # type: ig
 
     for f in raw_fields:
         real_type = resolved_hints.get(f.name)
-        # python <= 3.6 has no typing.ForwardRef so we need to skip the check
-        if sys.version_info[:2] != (3, 6) and isinstance(real_type, typing.ForwardRef):
-            raise SerdeError(
-                f"Failed to resolve {real_type} for {typename(cls)}.\n\n"
-                f"Make sure you are calling deserialize & serialize after all classes are "
-                "globally visible."
-            )
         if real_type is not None:
             f.type = real_type
 
@@ -593,7 +579,7 @@ def is_bare_list(typ: Type[Any]) -> bool:
     >>> is_bare_list(List)
     True
     """
-    return typ in (List, list)
+    return typ in (typing.List, List, list)
 
 
 def is_tuple(typ: Any) -> bool:
@@ -616,7 +602,7 @@ def is_bare_tuple(typ: Type[Any]) -> bool:
     >>> is_bare_tuple(Tuple)
     True
     """
-    return typ in (Tuple, tuple)
+    return typ in (typing.Tuple, Tuple, tuple)
 
 
 def is_variable_tuple(typ: Type[Any]) -> bool:
@@ -664,7 +650,7 @@ def is_bare_set(typ: Type[Any]) -> bool:
     >>> is_bare_set(Set)
     True
     """
-    return typ in (Set, set)
+    return typ in (typing.Set, Set, set)
 
 
 def is_frozen_set(typ: Type[Any]) -> bool:
@@ -711,7 +697,7 @@ def is_bare_dict(typ: Type[Any]) -> bool:
     >>> is_bare_dict(Dict)
     True
     """
-    return typ in (Dict, dict)
+    return typ in (typing.Dict, Dict, dict)
 
 
 def is_default_dict(typ: Type[Any]) -> bool:

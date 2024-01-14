@@ -1,3 +1,4 @@
+from __future__ import annotations
 from dataclasses import dataclass
 
 from serde import serde
@@ -8,7 +9,7 @@ from serde.json import from_json, to_json
 class Foo:
     i: int
     s: str
-    bar: "Bar"  # Specify type annotation in string.
+    bar: Bar
 
 
 @serde

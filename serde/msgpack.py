@@ -2,7 +2,8 @@
 Serialize and Deserialize in MsgPack format. This module depends on
 [msgpack](https://pypi.org/project/msgpack/) package.
 """
-from typing import Any, Dict, Type, Optional, overload
+from typing import Any, Type, Optional, overload
+from beartype.typing import Dict
 
 import msgpack
 

@@ -42,6 +42,7 @@ numpy = [
 ]
 orjson = { version = "*", markers = "extra == 'orjson' or extra == 'all'", optional = true }
 plum-dispatch = ">=2,<2.3"
+beartype = "*"
 
 [tool.poetry.dev-dependencies]
 pyyaml = "*"
@@ -53,7 +54,7 @@ numpy = [
     { version = ">1.21.0", markers = "python_version ~= '3.9.0'" },
     { version = ">1.22.0", markers = "python_version ~= '3.10'" },
 ]
-mypy = "==1.3.0"
+mypy = "==1.8.0"
 pytest = "*"
 pytest-cov = "*"
 pytest-watch = "*"
@@ -104,6 +105,7 @@ include = [
   "tests/test_kwonly.py",
   "tests/test_flatten.py",
   "tests/test_lazy_type_evaluation.py",
+  "tests/test_type_check.py",
   "tests/data.py",
 ]
 exclude = [

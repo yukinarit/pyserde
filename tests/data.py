@@ -1,15 +1,42 @@
+from __future__ import annotations
 import enum
 from dataclasses import dataclass
-from typing import Dict, List, Optional, Tuple
+from typing import Optional, Any
+from beartype.typing import Dict, List, Tuple
 
-from serde import field, serde
+from serde import field, serde, disabled
 
 from . import imported
 
 
 @serde
+@dataclass
+class Inner:
+    i: int
+
+
+@serde
 @dataclass(unsafe_hash=True)
 class Int:
+    """
+    Integer.
+    """
+
+    i: int
+
+    @staticmethod
+    def uncheck_new(value: Any) -> Int:
+        """
+        Bypass runtime type checker by mutating inner value.
+        """
+        obj = Int(0)
+        obj.i = value
+        return obj
+
+
+@serde(type_check=disabled)
+@dataclass(unsafe_hash=True)
+class UncheckedInt:
     """
     Integer.
     """
@@ -108,7 +135,6 @@ class PriTuple:
     b: Tuple[bool, bool, bool, bool, bool, bool]
 
 
-@serde
 @dataclass(unsafe_hash=True)
 class NestedInt:
     """
@@ -228,21 +254,19 @@ class EnumInClass:
 
 @dataclass(unsafe_hash=True)
 class Recur:
-    a: Optional["Recur"]
-    b: Optional[List["Recur"]]
-    c: Optional[Dict[str, "Recur"]]
-
-
-serde(Recur)
+    a: Optional[Recur]
+    b: Optional[List[Recur]]
+    c: Optional[Dict[str, Recur]]
 
 
 @dataclass(unsafe_hash=True)
 class RecurContainer:
-    a: List["RecurContainer"]
-    b: Dict[str, "RecurContainer"]
+    a: List[RecurContainer]
+    b: Dict[str, RecurContainer]
 
 
 serde(Recur)
+serde(RecurContainer)
 
 
 ListPri = List[Pri]

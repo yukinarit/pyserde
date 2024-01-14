@@ -2,7 +2,7 @@ from __future__ import annotations  # this is the line this test file is all abo
 
 import dataclasses
 from enum import Enum
-from typing import List, Tuple
+from beartype.typing import List, Tuple
 
 import pytest
 
@@ -95,7 +95,7 @@ def test_unresolved_forward_reference_throws() -> None:
 
 # trying to use string forward reference will throw
 def test_string_forward_reference_throws() -> None:
-    with pytest.raises(SerdeError) as e:
+    with pytest.raises(SerdeError):
 
         @serde
         class UnresolvedStringForwardFoo:
@@ -105,6 +105,3 @@ def test_string_forward_reference_throws() -> None:
         @serde
         class UnresolvedStringForwardBar:
             i: int
-
-    # message is different between <= 3.8 & >= 3.9
-    assert "Failed to resolve " in str(e.value)

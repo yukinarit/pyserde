@@ -2,7 +2,8 @@
 Tests for flatten attribute.
 """
 
-from typing import Dict, List, Any
+from typing import Any
+from beartype.typing import Dict, List
 
 import pytest
 

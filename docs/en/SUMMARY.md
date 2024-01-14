@@ -8,6 +8,6 @@
 - [Class Attributes](class-attributes.md)
 - [Field Attributes](field-attributes.md)
 - [Union](union.md)
-- [Type Check](type-check.md)
+- [Type Checking](type-check.md)
 - [Extension](extension.md)
 - [FAQ](faq.md)

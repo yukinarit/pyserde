@@ -2,7 +2,7 @@
 Serialize and Deserialize in Pickle format.
 """
 import pickle
-from typing import Type, Any, overload, Optional
+from typing import overload, Type, Any, Optional
 
 from .compat import T
 from .de import Deserializer, from_dict

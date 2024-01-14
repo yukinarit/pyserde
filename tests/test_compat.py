@@ -1,7 +1,8 @@
 import sys
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Any, Dict, Generic, List, NewType, Optional, Set, Tuple, TypeVar, Union, Literal
+from typing import Any, Generic, NewType, Optional, TypeVar, Union, Literal
+from beartype.typing import Dict, List, Set, Tuple
 
 import pytest
 
@@ -170,8 +171,8 @@ def test_is_instance() -> None:
     # Dataclass
     p = Pri(i=10, s="foo", f=100.0, b=True)
     assert is_instance(p, Pri)
-    p.i = 10.0
-    assert not is_instance(p, Pri)
+    p.i = 10.0  # type: ignore
+    assert is_instance(p, Pri)  # there is no way to check mulated properties.
 
     # Dataclass (Nested)
     @dataclass
@@ -180,7 +181,7 @@ def test_is_instance() -> None:
 
     h = Foo(Pri(i=10, s="foo", f=100.0, b=True))
     assert is_instance(h, Foo)
-    h.p.i = 10.0
+    h.p.i = 10.0  # type: ignore
     assert is_instance(h, Foo)
 
     # List

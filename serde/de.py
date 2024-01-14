@@ -9,21 +9,17 @@ import itertools
 import collections
 import dataclasses
 import functools
-import typing
+import beartype
+from beartype import typing
+from beartype.roar import BeartypeCallHintParamViolation
 from dataclasses import dataclass, is_dataclass
-from typing import (
-    Any,
+from typing import overload, TypeVar, Generic, Any, Optional, Sequence, Iterable
+from beartype.typing import (
     Callable,
     Dict,
-    Generic,
     List,
-    Optional,
-    TypeVar,
-    overload,
     Union,
-    Sequence,
     Literal,
-    Iterable,
 )
 
 import jinja2
@@ -75,16 +71,16 @@ from .core import (
     FROM_ITER,
     SERDE_SCOPE,
     CACHE,
-    TYPE_CHECK,
     UNION_DE_PREFIX,
     DefaultTagging,
     Field,
-    NoCheck,
+    disabled,
     Scope,
     Tagging,
     TypeCheck,
     add_func,
-    coerce,
+    coerce_object,
+    strict,
     has_default,
     has_default_factory,
     ensure,
@@ -93,7 +89,6 @@ from .core import (
     literal_func_name,
     logger,
     raise_unsupported_type,
-    render_type_check,
     union_func_name,
 )
 from .numpy import (
@@ -167,7 +162,7 @@ def _make_deserialize(
     reuse_instances_default: bool = True,
     convert_sets_default: bool = False,
     deserializer: Optional[DeserializeFunc] = None,
-    type_check: TypeCheck = NoCheck,
+    type_check: TypeCheck = strict,
     class_deserializer: Optional[ClassDeserializer] = None,
     **kwargs: Any,
 ) -> Type[Any]:
@@ -199,7 +194,7 @@ def deserialize(
     convert_sets_default: bool = False,
     deserializer: Optional[DeserializeFunc] = None,
     tagging: Tagging = DefaultTagging,
-    type_check: TypeCheck = NoCheck,
+    type_check: TypeCheck = strict,
     class_deserializer: Optional[ClassDeserializer] = None,
     **kwargs: Any,
 ) -> Type[T]:
@@ -234,6 +229,9 @@ def deserialize(
         if not is_dataclass(cls):
             dataclass(cls)
 
+        if type_check.is_strict():
+            beartype.beartype(cls)
+
         g: Dict[str, Any] = {}
 
         # Create a scope storage used by serde.
@@ -265,11 +263,12 @@ def deserialize(
         g["get_generic_arg"] = get_generic_arg
         g["is_instance"] = is_instance
         g["TypeCheck"] = TypeCheck
-        g["NoCheck"] = NoCheck
-        g["coerce"] = coerce
+        g["disabled"] = disabled
+        g["coerce_object"] = coerce_object
         g["_exists_by_aliases"] = _exists_by_aliases
         g["_get_by_aliases"] = _get_by_aliases
         g["class_deserializers"] = class_deserializers
+        g["BeartypeCallHintParamViolation"] = BeartypeCallHintParamViolation
         if deserializer:
             g["serde_legacy_custom_class_deserializer"] = functools.partial(
                 serde_legacy_custom_class_deserializer, custom=deserializer
@@ -336,7 +335,6 @@ def deserialize(
             ),
             g,
         )
-        add_func(scope, TYPE_CHECK, render_type_check(cls), g)
 
         logger.debug(f"{typename(cls)}: {SERDE_SCOPE} {scope}")
 
@@ -845,13 +843,13 @@ class Renderer:
 
         >>> from typing import List
         >>> Renderer('foo').render(DeField(Optional[int], 'o', datavar='data'))
-        '(coerce(int, data["o"])) if data.get("o") is not None else None'
+        '(coerce_object(int, data["o"])) if data.get("o") is not None else None'
 
         >>> Renderer('foo').render(DeField(Optional[List[int]], 'o', datavar='data'))
-        '([coerce(int, v) for v in data["o"]]) if data.get("o") is not None else None'
+        '([coerce_object(int, v) for v in data["o"]]) if data.get("o") is not None else None'
 
         >>> Renderer('foo').render(DeField(Optional[List[int]], 'o', datavar='data'))
-        '([coerce(int, v) for v in data["o"]]) if data.get("o") is not None else None'
+        '([coerce_object(int, v) for v in data["o"]]) if data.get("o") is not None else None'
 
         >>> @deserialize
         ... class Foo:
@@ -880,10 +878,10 @@ reuse_instances=reuse_instances)) if data.get("f") is not None else None'
 
         >>> from typing import List
         >>> Renderer('foo').render(DeField(List[int], 'l', datavar='data'))
-        '[coerce(int, v) for v in data["l"]]'
+        '[coerce_object(int, v) for v in data["l"]]'
 
         >>> Renderer('foo').render(DeField(List[List[int]], 'l', datavar='data'))
-        '[[coerce(int, v) for v in v] for v in data["l"]]'
+        '[[coerce_object(int, v) for v in v] for v in data["l"]]'
         """
         if is_bare_list(arg.type):
             return f"list({arg.data})"
@@ -896,10 +894,10 @@ reuse_instances=reuse_instances)) if data.get("f") is not None else None'
 
         >>> from typing import Set
         >>> Renderer('foo').render(DeField(Set[int], 'l', datavar='data'))
-        'set(coerce(int, v) for v in data["l"])'
+        'set(coerce_object(int, v) for v in data["l"])'
 
         >>> Renderer('foo').render(DeField(Set[Set[int]], 'l', datavar='data'))
-        'set(set(coerce(int, v) for v in v) for v in data["l"])'
+        'set(set(coerce_object(int, v) for v in v) for v in data["l"])'
         """
         if is_bare_set(arg.type):
             return f"set({arg.data})"
@@ -916,8 +914,8 @@ reuse_instances=reuse_instances)) if data.get("f") is not None else None'
         >>> @deserialize
         ... class Foo: pass
         >>> Renderer('foo').render(DeField(Tuple[str, int, List[int], Foo], 'd', datavar='data'))
-        '(coerce(str, data["d"][0]), coerce(int, data["d"][1]), \
-[coerce(int, v) for v in data["d"][2]], \
+        '(coerce_object(str, data["d"][0]), coerce_object(int, data["d"][1]), \
+[coerce_object(int, v) for v in data["d"][2]], \
 Foo.__serde__.funcs[\\'foo\\'](data=data["d"][3], maybe_generic=maybe_generic, \
 maybe_generic_type_vars=maybe_generic_type_vars, variable_type_args=None, \
 reuse_instances=reuse_instances),)'
@@ -928,8 +926,8 @@ reuse_instances=reuse_instances),)'
         ...                 index=0,
         ...                 iterbased=True)
         >>> Renderer('foo').render(field)
-        "(coerce(str, data[0][0]), coerce(int, data[0][1]), \
-[coerce(int, v) for v in data[0][2]], Foo.__serde__.funcs['foo'](data=data[0][3], \
+        "(coerce_object(str, data[0][0]), coerce_object(int, data[0][1]), \
+[coerce_object(int, v) for v in data[0][2]], Foo.__serde__.funcs['foo'](data=data[0][3], \
 maybe_generic=maybe_generic, maybe_generic_type_vars=maybe_generic_type_vars, \
 variable_type_args=None, reuse_instances=reuse_instances),)"
         """
@@ -952,7 +950,7 @@ variable_type_args=None, reuse_instances=reuse_instances),)"
 
         >>> from typing import List
         >>> Renderer('foo').render(DeField(Dict[str, int], 'd', datavar='data'))
-        '{coerce(str, k): coerce(int, v) for k, v in data["d"].items()}'
+        '{coerce_object(str, k): coerce_object(int, v) for k, v in data["d"].items()}'
 
         >>> @deserialize
         ... class Foo: pass
@@ -996,13 +994,13 @@ for k, v in data["f"].items()}'
         * `suppress_coerce`: Overrides "suppress_coerce" in the Renderer's field
 
         >>> Renderer('foo').render(DeField(int, 'i', datavar='data'))
-        'coerce(int, data["i"])'
+        'coerce_object(int, data["i"])'
 
         >>> Renderer('foo').render(DeField(int, 'int_field', datavar='data', case='camelcase'))
-        'coerce(int, data["intField"])'
+        'coerce_object(int, data["intField"])'
 
         >>> Renderer('foo').render(DeField(int, 'i', datavar='data', index=1, iterbased=True))
-        'coerce(int, data[1])'
+        'coerce_object(int, data[1])'
         """
         typ = typename(arg.type)
         dat = arg.data
@@ -1012,7 +1010,7 @@ for k, v in data["f"].items()}'
         if self.suppress_coerce and suppress_coerce:
             return dat
         else:
-            return f"coerce({typ}, {dat})"
+            return f"coerce_object({typ}, {dat})"
 
     def c_tor(self, arg: DeField[Any]) -> str:
         return f"{typename(arg.type)}({arg.data})"
@@ -1074,7 +1072,7 @@ def renderable(f: DeField[Any]) -> bool:
 def render_from_iter(
     cls: Type[Any],
     legacy_class_deserializer: Optional[DeserializeFunc] = None,
-    type_check: TypeCheck = NoCheck,
+    type_check: TypeCheck = strict,
     class_deserializer: Optional[ClassDeserializer] = None,
 ) -> str:
     template = """
@@ -1095,6 +1093,8 @@ def {{func}}(cls=cls, maybe_generic=None, maybe_generic_type_vars=None, data=Non
       __{{f.name}},
       {% endfor %}
     )
+  except BeartypeCallHintParamViolation as e:
+    raise SerdeError(e)
   except Exception as e:
     raise UserError(e)
     """
@@ -1127,7 +1127,7 @@ def render_from_dict(
     cls: Type[Any],
     rename_all: Optional[str] = None,
     legacy_class_deserializer: Optional[DeserializeFunc] = None,
-    type_check: TypeCheck = NoCheck,
+    type_check: TypeCheck = strict,
     class_deserializer: Optional[ClassDeserializer] = None,
 ) -> str:
     template = """
@@ -1143,7 +1143,7 @@ def {{func}}(cls=cls, maybe_generic=None, maybe_generic_type_vars=None, data=Non
   {% endfor %}
 
   try:
-    rv = cls(
+    return cls(
     {% for f in fields %}
     {% if f.kw_only %}
     {{f.name}}=__{{f.name}},
@@ -1152,14 +1152,10 @@ def {{func}}(cls=cls, maybe_generic=None, maybe_generic_type_vars=None, data=Non
     {% endif %}
     {% endfor %}
     )
+  except BeartypeCallHintParamViolation as e:
+    raise SerdeError(e)
   except Exception as e:
     raise UserError(e)
-
-  {% if type_check.is_strict() %}
-  rv.__serde__.funcs['typecheck'](rv)
-  {% endif %}
-
-  return rv
     """
 
     renderer = Renderer(

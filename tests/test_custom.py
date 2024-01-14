@@ -2,7 +2,8 @@
 Tests for custom serializer/deserializer.
 """
 from datetime import datetime
-from typing import List, Optional, Any, Dict, Type, Union
+from typing import Optional, Any, Type, Union
+from beartype.typing import List, Dict
 from plum import dispatch
 
 import pytest
