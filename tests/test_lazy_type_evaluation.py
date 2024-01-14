@@ -30,7 +30,7 @@ class B:
 
 
 # only works with global classes
-def test_serde_with_lazy_type_annotations():
+def test_serde_with_lazy_type_annotations() -> None:
     a = A(1, Status.ERR, ["foo"])
     a_dict = {"a": 1, "b": "err", "c": ["foo"]}
 
@@ -57,7 +57,8 @@ class ForwardReferenceBar:
 
 
 # assert type is str
-assert "ForwardReferenceBar" == dataclasses.fields(ForwardReferenceFoo)[0].type
+typ = dataclasses.fields(ForwardReferenceFoo)[0].type
+assert isinstance(typ, str) and "ForwardReferenceBar" == typ
 
 # setup pyserde for Foo after Bar becomes visible to global scope
 deserialize(ForwardReferenceFoo)
@@ -69,7 +70,7 @@ assert ForwardReferenceBar == next(dataclass_fields(ForwardReferenceFoo)).type
 
 
 # verify usage works
-def test_forward_reference_works():
+def test_forward_reference_works() -> None:
     h = ForwardReferenceFoo(bar=ForwardReferenceBar(i=10))
     h_dict = {"bar": {"i": 10}}
 
@@ -78,7 +79,7 @@ def test_forward_reference_works():
 
 
 # trying to use forward reference normally will throw
-def test_unresolved_forward_reference_throws():
+def test_unresolved_forward_reference_throws() -> None:
     with pytest.raises(SerdeError) as e:
 
         @serde
@@ -93,7 +94,7 @@ def test_unresolved_forward_reference_throws():
 
 
 # trying to use string forward reference will throw
-def test_string_forward_reference_throws():
+def test_string_forward_reference_throws() -> None:
     with pytest.raises(SerdeError) as e:
 
         @serde

@@ -2,7 +2,7 @@
 Tests for flatten attribute.
 """
 
-from typing import Dict, List
+from typing import Dict, List, Any
 
 import pytest
 
@@ -12,7 +12,7 @@ from serde.json import from_json, to_json
 from .common import all_formats
 
 
-def test_flatten_simple():
+def test_flatten_simple() -> None:
     @serde
     class Bar:
         c: float
@@ -31,7 +31,7 @@ def test_flatten_simple():
 
 
 @pytest.mark.parametrize("se,de", all_formats)
-def test_flatten(se, de):
+def test_flatten(se: Any, de: Any) -> None:
     @serde
     class Baz:
         e: List[int]

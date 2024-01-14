@@ -16,6 +16,7 @@ import uuid
 from collections import defaultdict
 from dataclasses import is_dataclass
 from typing import (
+    NewType,
     Any,
     ClassVar,
     DefaultDict,
@@ -595,7 +596,7 @@ def is_bare_list(typ: Type[Any]) -> bool:
     return typ in (List, list)
 
 
-def is_tuple(typ: Type[Any]) -> bool:
+def is_tuple(typ: Any) -> bool:
     """
     Test if the type is `typing.Tuple`.
     """
@@ -768,7 +769,7 @@ def is_primitive_subclass(typ: Type[Any]) -> bool:
     return is_primitive(typ) and typ not in PRIMITIVES and not is_new_type_primitive(typ)
 
 
-def is_primitive(typ: Type[Any]) -> bool:
+def is_primitive(typ: Union[Type[Any], NewType]) -> bool:
     """
     Test if the type is primitive.
 
@@ -780,12 +781,12 @@ def is_primitive(typ: Type[Any]) -> bool:
     True
     """
     try:
-        return any(issubclass(typ, ty) for ty in PRIMITIVES)
+        return any(issubclass(typ, ty) for ty in PRIMITIVES)  # type: ignore
     except TypeError:
         return is_new_type_primitive(typ)
 
 
-def is_new_type_primitive(typ: Type[Any]) -> bool:
+def is_new_type_primitive(typ: Union[Type[Any], NewType]) -> bool:
     """
     Test if the type is a NewType of primitives.
     """
