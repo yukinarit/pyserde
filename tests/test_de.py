@@ -1,5 +1,6 @@
 from decimal import Decimal
-from typing import List, Tuple, Union
+from typing import Union
+from beartype.typing import List, Tuple
 
 from serde.de import from_obj
 

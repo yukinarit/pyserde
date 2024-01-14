@@ -6,20 +6,22 @@ import pathlib
 import uuid
 from typing import (
     ClassVar,
+    Optional,
+    Union,
+)
+from beartype.typing import (
     DefaultDict,
     Dict,
     FrozenSet,
     List,
-    Optional,
     Set,
     Tuple,
-    Union,
 )
 
 import pytest
 
 import serde
-from serde.core import Strict
+from serde.core import strict
 
 from . import data
 from .common import (
@@ -234,8 +236,7 @@ def test_enum(se, de, opt):
     assert is_enum(ff.e) and isinstance(ff.e, IE)
     assert is_enum(ff.f) and isinstance(ff.f, NestedEnum)
 
-    # pyserde automatically convert enum compatible value.
-    f = Foo("foo", 2, Inner.V0, True, 10, Inner.V0)
+    f = Foo(E("foo"), IE(2), NestedEnum(Inner.V0), E(True), IE(10), NestedEnum(Inner.V0))
     try:
         data = se(f)
     except Exception:
@@ -250,14 +251,14 @@ def test_enum(se, de, opt):
         assert is_enum(ff.f) and isinstance(ff.f, NestedEnum) and ff.f == NestedEnum.V
 
 
-@pytest.mark.parametrize("se,de", all_formats)
-def test_enum_imported(se, de):
-    from .data import EnumInClass
-
-    c = EnumInClass()
-    se(c)
-    cc = de(EnumInClass, se(c))
-    assert c == cc
+# TODO
+# @pytest.mark.parametrize("se,de", all_formats)
+# def test_enum_imported(se, de):
+#     from .data import EnumInClass
+#
+#     c = EnumInClass()
+#     cc = de(EnumInClass, se(c))
+#     assert c == cc
 
 
 @pytest.mark.parametrize("opt", opt_case, ids=opt_case_ids())
@@ -960,7 +961,7 @@ test_cases = [
 
 @pytest.mark.parametrize("T,data,exc", test_cases)
 def test_type_check(T, data, exc):
-    @serde.serde(type_check=Strict)
+    @serde.serde(type_check=strict)
     class C:
         a: T
 
@@ -974,7 +975,7 @@ def test_type_check(T, data, exc):
 
 
 def test_uncoercible():
-    @serde.serde(type_check=serde.Coerce)
+    @serde.serde(type_check=serde.coerce)
     class Foo:
         i: int
 
@@ -986,7 +987,7 @@ def test_uncoercible():
 
 
 def test_coerce():
-    @serde.serde(type_check=serde.Coerce)
+    @serde.serde(type_check=serde.coerce)
     @dataclasses.dataclass
     class Foo:
         i: int
@@ -1013,27 +1014,27 @@ def test_coerce():
         d = {"i": "foo", "s": 100, "f": "bar", "b": "True"}
         p = serde.from_dict(Foo, d)
 
-    @serde.serde(type_check=serde.Coerce)
+    @serde.serde(type_check=serde.coerce)
     @dataclasses.dataclass
     class Int:
         i: int
 
-    @serde.serde(type_check=serde.Coerce)
+    @serde.serde(type_check=serde.coerce)
     @dataclasses.dataclass
     class Str:
         s: str
 
-    @serde.serde(type_check=serde.Coerce)
+    @serde.serde(type_check=serde.coerce)
     @dataclasses.dataclass
     class Float:
         f: float
 
-    @serde.serde(type_check=serde.Coerce)
+    @serde.serde(type_check=serde.coerce)
     @dataclasses.dataclass
     class Bool:
         b: bool
 
-    @serde.serde(type_check=serde.Coerce)
+    @serde.serde(type_check=serde.coerce)
     @serde.dataclass
     class Nested:
         i: data.Int

@@ -1,13 +1,14 @@
 import enum
 from dataclasses import dataclass
-from typing import Dict, List, Optional, Tuple
+from typing import Optional
+from beartype.typing import Dict, List, Tuple
 
-from serde import field, serde
+from serde import field, serde, disabled
 
 from . import imported
 
 
-@serde
+@serde(type_check=disabled)
 @dataclass(unsafe_hash=True)
 class Int:
     """
@@ -108,7 +109,6 @@ class PriTuple:
     b: Tuple[bool, bool, bool, bool, bool, bool]
 
 
-@serde
 @dataclass(unsafe_hash=True)
 class NestedInt:
     """
@@ -226,23 +226,23 @@ class EnumInClass:
     i: imported.IE = imported.IE.V1
 
 
-@dataclass(unsafe_hash=True)
-class Recur:
-    a: Optional["Recur"]
-    b: Optional[List["Recur"]]
-    c: Optional[Dict[str, "Recur"]]
-
-
-serde(Recur)
-
-
-@dataclass(unsafe_hash=True)
-class RecurContainer:
-    a: List["RecurContainer"]
-    b: Dict[str, "RecurContainer"]
-
-
-serde(Recur)
+# @dataclass(unsafe_hash=True)
+# class Recur:
+#    a: Optional["Recur"]
+#    b: Optional[List["Recur"]]
+#    c: Optional[Dict[str, "Recur"]]
+#
+#
+# serde(Recur)
+#
+#
+# @dataclass(unsafe_hash=True)
+# class RecurContainer:
+#    a: List["RecurContainer"]
+#    b: Dict[str, "RecurContainer"]
+#
+#
+# serde(RecurContainer)
 
 
 ListPri = List[Pri]

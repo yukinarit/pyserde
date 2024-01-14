@@ -1,6 +1,6 @@
 import logging
 from dataclasses import fields
-from typing import List
+from beartype.typing import List
 
 import numpy as np
 import numpy.typing as npt

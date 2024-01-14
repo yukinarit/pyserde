@@ -1,5 +1,4 @@
-from typing import Set
-
+from beartype.typing import Set
 from serde import asdict, astuple, serialize, to_dict, to_tuple
 from serde.json import to_json
 from serde.msgpack import to_msgpack

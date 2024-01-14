@@ -2,7 +2,7 @@ from __future__ import annotations  # this is the line this test file is all abo
 
 import dataclasses
 from enum import Enum
-from typing import List, Tuple
+from beartype.typing import List, Tuple
 
 import pytest
 

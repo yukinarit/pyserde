@@ -1,6 +1,7 @@
 import logging
 from dataclasses import dataclass
-from typing import Dict, List, Tuple, Literal
+from typing import Literal
+from beartype.typing import Dict, List, Tuple
 
 import pytest
 

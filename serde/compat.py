@@ -11,37 +11,30 @@ import itertools
 import pathlib
 import sys
 import types
-import typing
+from beartype import typing
 import uuid
 from collections import defaultdict
 from dataclasses import is_dataclass
-from typing import (
-    NewType,
-    Any,
-    ClassVar,
+from typing import TypeVar, Generic, Any, ClassVar, Iterator, Optional, NewType
+from beartype.typing import (
     DefaultDict,
     Dict,
     FrozenSet,
-    Generic,
-    Iterator,
     List,
-    Optional,
     Set,
     Tuple,
-    TypeVar,
     Union,
 )
 
 import typing_extensions
 import typing_inspect
-from typing_extensions import Type, TypeGuard
+from typing_extensions import Type, TypeGuard, TypeAlias
 
 # Create alias for `dataclasses.Field` because `dataclasses.Field` is a generic
 # class since 3.9 but is not in 3.7 and 3.8.
-if sys.version_info[:2] <= (3, 8):
-    DataclassField = dataclasses.Field
-else:
-    DataclassField = dataclasses.Field[Any]
+DataclassField: TypeAlias = (
+    dataclasses.Field if sys.version_info[:2] <= (3, 8) else dataclasses.Field[Any]  # type: ignore
+)
 
 try:
     if sys.version_info[:2] <= (3, 8):

@@ -14,7 +14,7 @@ repos:
         args:
           - .
   - repo: https://github.com/RobertCraigie/pyright-python
-    rev: v1.1.309
+    rev: v1.1.345
     hooks:
     - id: pyright
       additional_dependencies: ['pyyaml', 'msgpack', 'msgpack-types']
