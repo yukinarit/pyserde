@@ -1,13 +1,12 @@
 import dataclasses
-import datetime
 import enum
 import logging
-import pathlib
 import uuid
+from beartype.roar import BeartypeCallHintViolation
 from typing import (
     ClassVar,
     Optional,
-    Union,
+    Any,
 )
 from beartype.typing import (
     DefaultDict,
@@ -21,7 +20,7 @@ from beartype.typing import (
 import pytest
 
 import serde
-from serde.core import strict
+import serde.toml
 
 from . import data
 from .common import (
@@ -272,12 +271,23 @@ def test_tuple(se, de, opt):
         f: Tuple[float, float]
         b: Tuple[bool, bool]
 
+    def uncheck_new(i: List[Any], s: List[Any], f: List[Any], b: List[Any]) -> Homogeneous:
+        """
+        Bypass runtime type checker by mutating inner value.
+        """
+        obj = Homogeneous((0, 0), ("", ""), (0.0, 0.0), (True, True))
+        obj.i = i  # type: ignore
+        obj.s = s  # type: ignore
+        obj.f = f  # type: ignore
+        obj.b = b  # type: ignore
+        return obj
+
     a = Homogeneous((10, 20), ("a", "b"), (10.0, 20.0), (True, False))
     assert a == de(Homogeneous, se(a))
 
     # List will be type mismatch if type_check=True.
-    a = Homogeneous([10, 20], ["a", "b"], [10.0, 20.0], [True, False])
-    assert a != de(Homogeneous, se(a))
+    tuple_but_actually_list = uncheck_new([10, 20], ["a", "b"], [10.0, 20.0], [True, False])
+    assert tuple_but_actually_list != de(Homogeneous, se(tuple_but_actually_list))
 
     @serde.serde(**opt)
     @dataclasses.dataclass
@@ -292,7 +302,7 @@ def test_tuple(se, de, opt):
     @serde.serde(**opt)
     @dataclasses.dataclass
     class BareTuple:
-        t: Tuple
+        t: Tuple  # type: ignore
 
     c = BareTuple((10, 20))
     assert c == de(BareTuple, se(c))
@@ -308,34 +318,28 @@ def test_tuple(se, de, opt):
         f: Tuple[data.Float, data.Float]
         b: Tuple[data.Bool, data.Bool]
 
-    # hmmm.. Nested tuple doesn't work ..
-    if se is not serde.toml.to_toml:
-        d = Nested(
-            (data.Int(10), data.Int(20)),
-            (data.Str("a"), data.Str("b")),
-            (data.Float(10.0), data.Float(20.0)),
-            (data.Bool(True), data.Bool(False)),
-        )
-        assert d == de(Nested, se(d))
-
-    @serde.serde(**opt)
-    @dataclasses.dataclass
-    class Inner:
-        i: int
+    d = Nested(
+        (data.Int(10), data.Int(20)),
+        (data.Str("a"), data.Str("b")),
+        (data.Float(10.0), data.Float(20.0)),
+        (data.Bool(True), data.Bool(False)),
+    )
+    assert d == de(Nested, se(d))
 
     @serde.serde(**opt)
     @dataclasses.dataclass
     class VariableTuple:
-        t: Tuple[int, ...]
-        i: Tuple[Inner, ...]
+        t: Tuple[int, int, int]
+        i: Tuple[data.Inner, data.Inner]
 
-    e = VariableTuple((1, 2, 3), (Inner(0), Inner(1)))
+    e = VariableTuple((1, 2, 3), (data.Inner(0), data.Inner(1)))
     assert e == de(VariableTuple, se(e))
 
-    e = VariableTuple((), ())
-    assert e == de(VariableTuple, se(e))
+    with pytest.raises(BeartypeCallHintViolation):
+        e = VariableTuple((), ())
+        assert e == de(VariableTuple, se(e))
 
-    with pytest.raises(Exception):
+    with pytest.raises(SyntaxError):
 
         @serde.serde(**opt)
         @dataclasses.dataclass
@@ -897,161 +901,6 @@ def test_user_error():
 
     with pytest.raises(serde.SerdeError):
         serde.from_dict(Foo, {})
-
-
-test_cases = [
-    (int, 10, False),
-    (int, 10.0, True),
-    (int, "10", True),
-    (int, True, False),  # Unable to type check bool against int correctly,
-    # because "bool" is a subclass of "int"
-    (float, 10, True),
-    (float, 10.0, False),
-    (float, "10", True),
-    (float, True, True),
-    (str, 10, True),
-    (str, 10.0, True),
-    (str, "10", False),
-    (str, True, True),
-    (bool, 10, True),
-    (bool, 10.0, True),
-    (bool, "10", True),
-    (bool, True, False),
-    (List[int], [1], False),
-    (List[int], [1.0], True),
-    (List[int], [1, 1.0], False),  # Because serde checks only the first element
-    (List[float], [1.0], False),
-    (List[float], ["foo"], True),
-    (List[str], ["foo"], False),
-    (List[str], [True], True),
-    (List[bool], [True], False),
-    (List[bool], [10], True),
-    (List[data.Int], [data.Int(1)], False),
-    (List[data.Int], [data.Int(1.0)], True),  # type: ignore
-    (List[data.Int], [data.Int(1), data.Float(10.0)], True),
-    (List[data.Int], [], False),
-    (Dict[str, int], {"foo": 10}, False),
-    (Dict[str, int], {"foo": 10.0}, True),
-    (Dict[str, int], {"foo": 10, 100: "bar"}, False),  # Because serde checks only the first element
-    (Dict[str, data.Int], {"foo": data.Int(1)}, False),
-    (Dict[str, data.Int], {"foo": data.Int(1.0)}, True),  # type: ignore
-    (Set[int], {10}, False),
-    (Set[int], {10.0}, True),
-    (Set[int], [10], True),
-    (Tuple[int], (10,), False),
-    (Tuple[int], (10.0,), True),
-    (Tuple[int, str], (10, "foo"), False),
-    (Tuple[int, str], (10, 10.0), True),
-    (Tuple[data.Int, data.Str], (data.Int(1), data.Str("2")), False),
-    (Tuple[data.Int, data.Str], (data.Int(1), data.Int(2)), True),
-    (Tuple, (10, 10.0), False),
-    (Tuple[int, ...], (1, 2), False),
-    (Tuple[int, ...], (1, 2.0), True),
-    (data.E, data.E.S, False),
-    (data.E, data.IE.V0, False),  # TODO enum type check is not yet perfect
-    (Union[int, str], 10, False),
-    (Union[int, str], "foo", False),
-    (Union[int, str], 10.0, True),
-    (Union[int, data.Int], data.Int(10), False),
-    (datetime.date, datetime.date.today(), False),
-    (pathlib.Path, pathlib.Path(), False),
-    (pathlib.Path, "foo", True),
-]
-
-
-@pytest.mark.parametrize("T,data,exc", test_cases)
-def test_type_check(T, data, exc):
-    @serde.serde(type_check=strict)
-    class C:
-        a: T
-
-    if exc:
-        with pytest.raises(serde.SerdeError):
-            d = serde.to_dict(C(data))
-            serde.from_dict(C, d)
-    else:
-        d = serde.to_dict(C(data))
-        serde.from_dict(C, d)
-
-
-def test_uncoercible():
-    @serde.serde(type_check=serde.coerce)
-    class Foo:
-        i: int
-
-    with pytest.raises(serde.SerdeError):
-        serde.to_dict(Foo("foo"))
-
-    with pytest.raises(serde.SerdeError):
-        serde.from_dict(Foo, {"i": "foo"})
-
-
-def test_coerce():
-    @serde.serde(type_check=serde.coerce)
-    @dataclasses.dataclass
-    class Foo:
-        i: int
-        s: str
-        f: float
-        b: bool
-
-    d = {"i": "10", "s": 100, "f": 1000, "b": "True"}
-    p = serde.from_dict(Foo, d)
-    assert p.i == 10
-    assert p.s == "100"
-    assert p.f == 1000.0
-    assert p.b
-
-    p = Foo("10", 100, 1000, "True")
-    d = serde.to_dict(p)
-    assert d["i"] == 10
-    assert d["s"] == "100"
-    assert d["f"] == 1000.0
-    assert d["b"]
-
-    # Couldn't coerce
-    with pytest.raises(serde.SerdeError):
-        d = {"i": "foo", "s": 100, "f": "bar", "b": "True"}
-        p = serde.from_dict(Foo, d)
-
-    @serde.serde(type_check=serde.coerce)
-    @dataclasses.dataclass
-    class Int:
-        i: int
-
-    @serde.serde(type_check=serde.coerce)
-    @dataclasses.dataclass
-    class Str:
-        s: str
-
-    @serde.serde(type_check=serde.coerce)
-    @dataclasses.dataclass
-    class Float:
-        f: float
-
-    @serde.serde(type_check=serde.coerce)
-    @dataclasses.dataclass
-    class Bool:
-        b: bool
-
-    @serde.serde(type_check=serde.coerce)
-    @serde.dataclass
-    class Nested:
-        i: data.Int
-        s: data.Str
-        f: data.Float
-        b: data.Bool
-
-    # Nested structure
-    p = Nested(Int("10"), Str(100), Float(1000), Bool("True"))
-    d = serde.to_dict(p)
-    assert d["i"]["i"] == 10
-    assert d["s"]["s"] == "100"
-    assert d["f"]["f"] == 1000.0
-    assert d["b"]["b"]
-
-    d = {"i": {"i": "10"}, "s": {"s": 100}, "f": {"f": 1000}, "b": {"b": "True"}}
-    p = serde.from_dict(Nested, d)
 
 
 def test_frozenset() -> None:

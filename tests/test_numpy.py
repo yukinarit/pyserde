@@ -113,9 +113,33 @@ def test_encode_numpy(se, de, opt):
         d: List[float]
         e: List[bool]
 
+    def unchecked_new(
+        a: np.int32,
+        b: np.float32,
+        h: np.bool_,
+        c: npt.NDArray[np.int32],
+        d: npt.NDArray[np.float32],
+        e: npt.NDArray[np.bool_],
+    ) -> MisTyped:
+        obj = MisTyped(
+            0,
+            0.0,
+            True,
+            [],
+            [],
+            [],
+        )
+        obj.a = a  # type: ignore
+        obj.b = b  # type: ignore
+        obj.h = h  # type: ignore
+        obj.c = c  # type: ignore
+        obj.d = d  # type: ignore
+        obj.e = e  # type: ignore
+        return obj
+
     expected = MisTyped(1, 3.0, False, [1, 2], [5.0, 6.0], [True, False])
 
-    test1 = MisTyped(
+    test1 = unchecked_new(
         np.int32(1),
         np.float32(3.0),
         np.bool_(False),
@@ -126,7 +150,7 @@ def test_encode_numpy(se, de, opt):
 
     assert de(MisTyped, se(test1)) == expected
 
-    test2 = MisTyped(
+    test2 = unchecked_new(
         np.int64(1),
         np.float64(3.0),
         np.bool_(False),
@@ -137,7 +161,7 @@ def test_encode_numpy(se, de, opt):
 
     assert de(MisTyped, se(test2)) == expected
 
-    test3 = MisTyped(
+    test3 = unchecked_new(
         np.int64(1),
         np.float64(3.0),
         np.bool_(False),
@@ -198,7 +222,31 @@ def test_encode_numpy_with_no_default_encoder(se, de):
         d: List[float]
         e: List[bool]
 
-    test1 = MisTypedNoDefaultEncoder(
+    def unchecked_new(
+        a: np.int32,
+        b: np.float32,
+        h: np.bool_,
+        c: npt.NDArray[np.int32],
+        d: npt.NDArray[np.float32],
+        e: npt.NDArray[np.bool_],
+    ) -> MisTypedNoDefaultEncoder:
+        obj = MisTypedNoDefaultEncoder(
+            0,
+            0.0,
+            True,
+            [],
+            [],
+            [],
+        )
+        obj.a = a  # type: ignore
+        obj.b = b  # type: ignore
+        obj.h = h  # type: ignore
+        obj.c = c  # type: ignore
+        obj.d = d  # type: ignore
+        obj.e = e  # type: ignore
+        return obj
+
+    test1 = unchecked_new(
         np.int32(1),
         np.float32(3.0),
         np.bool_(False),
@@ -210,7 +258,7 @@ def test_encode_numpy_with_no_default_encoder(se, de):
     with pytest.raises(TypeError):
         se(test1, default=None, option=None)
 
-    test2 = MisTypedNoDefaultEncoder(
+    test2 = unchecked_new(
         np.int64(1),
         np.float64(3.0),
         np.bool_(False),

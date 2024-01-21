@@ -1,6 +1,7 @@
+from __future__ import annotations
 import enum
 from dataclasses import dataclass
-from typing import Optional
+from typing import Optional, Any
 from beartype.typing import Dict, List, Tuple
 
 from serde import field, serde, disabled
@@ -8,9 +9,34 @@ from serde import field, serde, disabled
 from . import imported
 
 
-@serde(type_check=disabled)
+@serde
+@dataclass
+class Inner:
+    i: int
+
+
+@serde
 @dataclass(unsafe_hash=True)
 class Int:
+    """
+    Integer.
+    """
+
+    i: int
+
+    @staticmethod
+    def uncheck_new(value: Any) -> Int:
+        """
+        Bypass runtime type checker by mutating inner value.
+        """
+        obj = Int(0)
+        obj.i = value
+        return obj
+
+
+@serde(type_check=disabled)
+@dataclass(unsafe_hash=True)
+class UncheckedInt:
     """
     Integer.
     """
