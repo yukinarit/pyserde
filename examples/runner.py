@@ -36,8 +36,7 @@ import simple
 import skip
 import tomlfile
 import type_check_coerce
-
-# import type_check_strict
+import type_check_disabled
 import type_datetime
 import type_decimal
 import union
@@ -83,8 +82,8 @@ def run_all() -> None:
     run(nested)
     run(lazy_type_evaluation)
     run(literal)
-    # run(type_check_strict)
     run(type_check_coerce)
+    run(type_check_disabled)
     run(user_exception)
     run(pep681)
     run(variable_length_tuple)

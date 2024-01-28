@@ -11,10 +11,10 @@ import itertools
 import pathlib
 import sys
 import types
-from beartype import typing
 import uuid
 from collections import defaultdict
 from dataclasses import is_dataclass
+import typing
 from typing import TypeVar, Generic, Any, ClassVar, Iterator, Optional, NewType
 from beartype.typing import (
     DefaultDict,
@@ -330,13 +330,6 @@ def dataclass_fields(cls: Type[Any]) -> Iterator[dataclasses.Field]:  # type: ig
 
     for f in raw_fields:
         real_type = resolved_hints.get(f.name)
-        # python <= 3.6 has no typing.ForwardRef so we need to skip the check
-        if sys.version_info[:2] != (3, 6) and isinstance(real_type, typing.ForwardRef):
-            raise SerdeError(
-                f"Failed to resolve {real_type} for {typename(cls)}.\n\n"
-                f"Make sure you are calling deserialize & serialize after all classes are "
-                "globally visible."
-            )
         if real_type is not None:
             f.type = real_type
 
@@ -586,7 +579,7 @@ def is_bare_list(typ: Type[Any]) -> bool:
     >>> is_bare_list(List)
     True
     """
-    return typ in (List, list)
+    return typ in (typing.List, List, list)
 
 
 def is_tuple(typ: Any) -> bool:
@@ -609,7 +602,7 @@ def is_bare_tuple(typ: Type[Any]) -> bool:
     >>> is_bare_tuple(Tuple)
     True
     """
-    return typ in (Tuple, tuple)
+    return typ in (typing.Tuple, Tuple, tuple)
 
 
 def is_variable_tuple(typ: Type[Any]) -> bool:
@@ -657,7 +650,7 @@ def is_bare_set(typ: Type[Any]) -> bool:
     >>> is_bare_set(Set)
     True
     """
-    return typ in (Set, set)
+    return typ in (typing.Set, Set, set)
 
 
 def is_frozen_set(typ: Type[Any]) -> bool:
@@ -704,7 +697,7 @@ def is_bare_dict(typ: Type[Any]) -> bool:
     >>> is_bare_dict(Dict)
     True
     """
-    return typ in (Dict, dict)
+    return typ in (typing.Dict, Dict, dict)
 
 
 def is_default_dict(typ: Type[Any]) -> bool:

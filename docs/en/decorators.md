@@ -91,11 +91,13 @@ class Wrapper(External):
 pyserde supports forward references. If you replace a nested class name with with string, pyserde looks up and evaluate the decorator after nested class is defined.
 
 ```python
+from __future__ import annotations # make sure to import annotations
+
 @dataclass
 class Foo:
     i: int
     s: str
-    bar: 'Bar'  # Specify type annotation in string.
+    bar: Bar  # Bar can be specified although it's declared afterward.
 
 @serde
 @dataclass

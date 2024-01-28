@@ -1,4 +1,5 @@
 from __future__ import annotations
+import sys
 import enum
 from dataclasses import dataclass
 from typing import Optional, Any
@@ -25,7 +26,7 @@ class Int:
     i: int
 
     @staticmethod
-    def uncheck_new(value: Any) -> Int:
+    def uncheck_new(value: Any) -> "Int":
         """
         Bypass runtime type checker by mutating inner value.
         """
@@ -252,23 +253,38 @@ class EnumInClass:
     i: imported.IE = imported.IE.V1
 
 
-# @dataclass(unsafe_hash=True)
-# class Recur:
-#    a: Optional["Recur"]
-#    b: Optional[List["Recur"]]
-#    c: Optional[Dict[str, "Recur"]]
-#
-#
-# serde(Recur)
-#
-#
-# @dataclass(unsafe_hash=True)
-# class RecurContainer:
-#    a: List["RecurContainer"]
-#    b: Dict[str, "RecurContainer"]
-#
-#
-# serde(RecurContainer)
+if sys.version_info[:2] <= (3, 8):
+
+    @dataclass(unsafe_hash=True)
+    class Recur38:
+        a: Optional["Recur38"]
+        b: Optional[List["Recur38"]]
+        c: Optional[Dict[str, "Recur38"]]
+
+    @dataclass(unsafe_hash=True)
+    class RecurContainer38:
+        a: List["RecurContainer38"]
+        b: Dict[str, "RecurContainer38"]
+
+    serde(Recur38)
+    serde(RecurContainer38)
+
+
+@dataclass(unsafe_hash=True)
+class Recur:
+    a: Optional[Recur]
+    b: Optional[list[Recur]]
+    c: Optional[dict[str, Recur]]
+
+
+@dataclass(unsafe_hash=True)
+class RecurContainer:
+    a: list[RecurContainer]
+    b: dict[str, RecurContainer]
+
+
+serde(Recur)
+serde(RecurContainer)
 
 
 ListPri = List[Pri]

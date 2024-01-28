@@ -598,8 +598,6 @@ def render_union_func(
     template = """
 def {{func}}(obj, reuse_instances, convert_sets):
   union_args = serde_scope.union_se_args['{{func}}']
-  print(union_args)
-  print(obj)
 
   {% for t in union_args %}
   if is_instance(obj, union_args[{{loop.index0}}]):
@@ -709,19 +707,21 @@ foo.__serde__.funcs['to_iter'](foo, reuse_instances=reuse_instances, convert_set
 convert_sets=convert_sets) for v in foo]"
 
         >>> Renderer(TO_ITER).render(SeField(Dict[str, Foo], 'foo'))
-        "{coerce_object(str, k): v.__serde__.funcs['to_iter'](v, reuse_instances=reuse_instances, \
+        "\
+{coerce_object(str, k): v.__serde__.funcs['to_iter'](v, reuse_instances=reuse_instances, \
 convert_sets=convert_sets) for k, v in foo.items()}"
 
         >>> Renderer(TO_ITER).render(SeField(Dict[Foo, Foo], 'foo'))
-        "{k.__serde__.funcs['to_iter'](k, reuse_instances=reuse_instances, \
+        "\
+{k.__serde__.funcs['to_iter'](k, reuse_instances=reuse_instances, \
 convert_sets=convert_sets): v.__serde__.funcs['to_iter'](v, reuse_instances=reuse_instances, \
 convert_sets=convert_sets) for k, v in foo.items()}"
 
         >>> Renderer(TO_ITER).render(SeField(Tuple[str, Foo, int], 'foo'))
         "\
-(coerce_object(str, foo[0]), foo[1].__serde__.funcs['to_iter'](foo[1],
-reuse_instances=reuse_instances, \
-convert_sets=convert_sets), coerce_object(int, foo[2]),)"
+(coerce_object(str, foo[0]), foo[1].__serde__.funcs['to_iter'](foo[1], \
+reuse_instances=reuse_instances, convert_sets=convert_sets), \
+coerce_object(int, foo[2]),)"
         """
         implemented_methods: Dict[Type[Any], int] = {}
         class_serializers: Iterable[ClassSerializer] = itertools.chain(

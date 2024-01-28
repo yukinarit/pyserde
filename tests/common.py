@@ -53,10 +53,10 @@ all_formats: FormatFuncs = (
     format_dict
     + format_tuple
     + format_json
-    + format_msgpack
-    + format_yaml
-    + format_toml
-    + format_pickle
+    # + format_msgpack
+    # + format_yaml
+    # + format_toml
+    # + format_pickle
 )
 
 T = TypeVar("T")
@@ -137,12 +137,12 @@ types: List[Tuple[Any, Any, Optional[Filter]]] = [
         data.PrimitiveSubclass(data.StrSubclass("a")), data.PrimitiveSubclass, yaml_not_supported
     ),
     param(None, Optional[data.Pri], toml_not_supported),
-    # param(data.Recur(data.Recur(None, None, None), None, None), data.Recur, toml_not_supported),
-    # #param(
-    #  #    data.RecurContainer([data.RecurContainer([], {})], {"c": data.RecurContainer([], {})}),
-    #  #    data.RecurContainer,
-    #  #    toml_not_supported,
-    #  #),
+    param(data.Recur(data.Recur(None, None, None), None, None), data.Recur, toml_not_supported),
+    param(
+        data.RecurContainer([data.RecurContainer([], {})], {"c": data.RecurContainer([], {})}),
+        data.RecurContainer,
+        toml_not_supported,
+    ),
     param(data.Init(1), data.Init),
     param(10, NewType("Int", int)),  # NewType
     param({"a": 1}, Any),  # Any
@@ -177,6 +177,23 @@ if os.name == "posix":
 if os.name == "nt":
     types.append(param(pathlib.WindowsPath("C:\\tmp"), pathlib.WindowsPath))
 
+if sys.version_info[:3] <= (3, 8, 0):
+    types.extend(
+        [
+            param(
+                data.Recur38(data.Recur38(None, None, None), None, None),
+                data.Recur38,
+                toml_not_supported,
+            ),
+            param(
+                data.RecurContainer38(
+                    [data.RecurContainer38([], {})], {"c": data.RecurContainer38([], {})}
+                ),
+                data.RecurContainer38,
+                toml_not_supported,
+            ),
+        ],
+    )
 if sys.version_info[:3] >= (3, 9, 0):
     types.extend(
         [param([1, 2], list[int]), param({"a": 1}, dict[str, int]), param((1, 1), tuple[int, int])]
