@@ -41,7 +41,7 @@ numpy = [
     { version = ">1.22.0", markers = "python_version ~= '3.12' and (extra == 'numpy' or extra == 'all')", optional = true },
 ]
 orjson = { version = "*", markers = "extra == 'orjson' or extra == 'all'", optional = true }
-plum-dispatch = "^2"
+plum-dispatch = ">=2,<2.3"
 
 [tool.poetry.dev-dependencies]
 pyyaml = "*"
