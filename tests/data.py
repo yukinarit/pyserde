@@ -255,14 +255,14 @@ class EnumInClass:
 @dataclass(unsafe_hash=True)
 class Recur:
     a: Optional[Recur]
-    b: Optional[list[Recur]]
-    c: Optional[dict[str, Recur]]
+    b: Optional[List[Recur]]
+    c: Optional[Dict[str, Recur]]
 
 
 @dataclass(unsafe_hash=True)
 class RecurContainer:
-    a: list[RecurContainer]
-    b: dict[str, RecurContainer]
+    a: List[RecurContainer]
+    b: Dict[str, RecurContainer]
 
 
 serde(Recur)

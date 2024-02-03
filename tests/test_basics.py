@@ -335,11 +335,11 @@ def test_tuple(se, de, opt):
     e = VariableTuple((1, 2, 3), (data.Inner(0), data.Inner(1)))
     assert e == de(VariableTuple, se(e))
 
-    with pytest.raises(BeartypeCallHintViolation):
+    with pytest.raises((serde.SerdeError, BeartypeCallHintViolation)):
         e = VariableTuple((), ())
         assert e == de(VariableTuple, se(e))
 
-    with pytest.raises(SyntaxError):
+    with pytest.raises((serde.SerdeError, SyntaxError)):
 
         @serde.serde(**opt)
         @dataclasses.dataclass
