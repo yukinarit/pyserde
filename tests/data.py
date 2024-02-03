@@ -1,5 +1,4 @@
 from __future__ import annotations
-import sys
 import enum
 from dataclasses import dataclass
 from typing import Optional, Any
@@ -251,23 +250,6 @@ class EnumInClass:
     e: IE = IE.V2
     o: Optional[E] = E.S
     i: imported.IE = imported.IE.V1
-
-
-if sys.version_info[:2] <= (3, 8):
-
-    @dataclass(unsafe_hash=True)
-    class Recur38:
-        a: Optional["Recur38"]
-        b: Optional[List["Recur38"]]
-        c: Optional[Dict[str, "Recur38"]]
-
-    @dataclass(unsafe_hash=True)
-    class RecurContainer38:
-        a: List["RecurContainer38"]
-        b: Dict[str, "RecurContainer38"]
-
-    serde(Recur38)
-    serde(RecurContainer38)
 
 
 @dataclass(unsafe_hash=True)
