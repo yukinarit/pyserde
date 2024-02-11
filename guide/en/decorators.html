@@ -224,8 +224,8 @@ class Foo:
 <li>You only need either serialization or deserialization functionality</li>
 <li>You want to have different class attributes as below</li>
 </ul>
-<pre><code class="language-python">@deserialize(rename_all = &quot;snakecase&quot;)
-@serialize(rename_all = &quot;camelcase&quot;)
+<pre><code class="language-python">@deserialize(rename_all = "snakecase")
+@serialize(rename_all = "camelcase")
 class Foo:
     ...
 </code></pre>
@@ -243,7 +243,7 @@ to_dict(External()) # works without @serde
 class External:
     some_value: int
 
-@serde(rename_all=&quot;kebabcase&quot;)
+@serde(rename_all="kebabcase")
 @dataclass
 class Wrapper(External):
     pass
@@ -279,7 +279,7 @@ class Foo:
     f: float
     b: bool
 
-    def foo(self, cls: Foo):  # You can use &quot;Foo&quot; type before it's defined.
+    def foo(self, cls: Foo):  # You can use "Foo" type before it's defined.
         print('foo')
 </code></pre>
 <p>See <a href="https://github.com/yukinarit/pyserde/blob/main/examples/lazy_type_evaluation.py">examples/lazy_type_evaluation.py</a> for complete example.</p>

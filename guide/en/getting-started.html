@@ -188,13 +188,13 @@
 <pre><code>poetry add pyserde
 </code></pre>
 <p>Additional data formats besides JSON and Pickle need additional dependencies installed. Install <code>msgpack</code>, <code>toml</code>, or <code>yaml</code> extras to work with the appropriate data formats; you can skip formats that you don't plan to use. For example, if you want to use Toml and YAML:</p>
-<pre><code>pip install &quot;pyserde[toml,yaml]&quot;
+<pre><code>pip install "pyserde[toml,yaml]"
 </code></pre>
 <p>With poetry</p>
 <pre><code>poetry add pyserde -E toml -E yaml
 </code></pre>
 <p>Or all at once:</p>
-<pre><code>pip install &quot;pyserde[all]&quot;
+<pre><code>pip install "pyserde[all]"
 </code></pre>
 <p>With poetry</p>
 <pre><code>poetry add pyserde -E all
@@ -260,7 +260,7 @@ class Foo:
 print(to_json(f))
 </code></pre>
 <p>Pass <code>Foo</code> class and JSON string in <code>from_json</code> to deserialize JSON into the object.</p>
-<pre><code class="language-python">s = '{&quot;i&quot;: 10, &quot;s&quot;: &quot;foo&quot;, &quot;f&quot;: 100.0, &quot;b&quot;: true}'
+<pre><code class="language-python">s = '{"i": 10, "s": "foo", "f": 100.0, "b": true}'
 print(from_json(Foo, s))
 </code></pre>
 <p>That's it! pyserde offers many more features. If you're interested, please read the rest of the documentation.</p>

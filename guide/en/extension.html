@@ -184,7 +184,7 @@
 <h2 id="custom-field-deserializer"><a class="header" href="#custom-field-deserializer">Custom field (de)serializer</a></h2>
 <p>See <a href="./field-attributes.html#serializerdeserializer">custom field serializer</a>.</p>
 <blockquote>
-<p>💡 Tip: wrapping <code>serde.field</code> with your own field function makes </p>
+<p>💡 Tip: wrapping <code>serde.field</code> with your own field function makes</p>
 <pre><code class="language-python">import serde
 
 def field(*args, **kwargs):
@@ -239,7 +239,7 @@ print(json)
 print(from_json(Foo, json))
 </code></pre>
 <p>and you get <code>datetime.timedelta</code> to be serialized in ISO 8601 duration format!</p>
-<pre><code class="language-bash">{&quot;a&quot;:&quot;PT10H&quot;}
+<pre><code class="language-bash">{"a":"PT10H"}
 Foo(a=datetime.timedelta(seconds=36000))
 </code></pre>
 <blockquote>

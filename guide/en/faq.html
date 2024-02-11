@@ -207,7 +207,7 @@ def to_iter(obj, reuse_instances=True, convert_sets=False):
     if not is_dataclass(obj):
         return copy.deepcopy(obj)
 
-    Foo = serde_scope.types[&quot;Foo&quot;]
+    Foo = serde_scope.types["Foo"]
     res = []
     res.append(obj.i)
     res.append(obj.s)

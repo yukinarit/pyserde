@@ -189,9 +189,9 @@
 <pre><code class="language-python">&gt;&gt;&gt; from serde import to_dict, from_dict
 
 &gt;&gt;&gt; to_dict(Foo(i=10, s='foo', f=100.0, b=True))
-from_dict(Foo, {&quot;i&quot;: 10, &quot;s&quot;: &quot;foo&quot;, &quot;f&quot;: 100.0, &quot;b&quot;: True})
+from_dict(Foo, {"i": 10, "s": "foo", "f": 100.0, "b": True})
 
-&gt;&gt;&gt; from_dict(Foo, {&quot;i&quot;: 10, &quot;s&quot;: &quot;foo&quot;, &quot;f&quot;: 100.0, &quot;b&quot;: True})
+&gt;&gt;&gt; from_dict(Foo, {"i": 10, "s": "foo", "f": 100.0, "b": True})
 Foo(i=10, s='foo', f=100.0, b=True)
 </code></pre>
 <p>See <a href="https://yukinarit.github.io/pyserde/api/serde/se.html#to_dict">serde.to_dict</a> / <a href="https://yukinarit.github.io/pyserde/api/serde/de.html#from_dict">serde.from_dict</a> for more information.</p>
@@ -209,9 +209,9 @@ Foo(i=10, s='foo', f=100.0, b=True)
 <pre><code class="language-python">&gt;&gt;&gt; from serde.json import to_json, from_json
 
 &gt;&gt;&gt; to_json(Foo(i=10, s='foo', f=100.0, b=True))
-'{&quot;i&quot;:10,&quot;s&quot;:&quot;foo&quot;,&quot;f&quot;:100.0,&quot;b&quot;:true}'
+'{"i":10,"s":"foo","f":100.0,"b":true}'
 
-&gt;&gt;&gt; from_json(Foo, '{&quot;i&quot;: 10, &quot;s&quot;: &quot;foo&quot;, &quot;f&quot;: 100.0, &quot;b&quot;: true}')
+&gt;&gt;&gt; from_json(Foo, '{"i": 10, "s": "foo", "f": 100.0, "b": true}')
 Foo(i=10, s='foo', f=100.0, b=True)
 </code></pre>
 <p>See <a href="https://yukinarit.github.io/pyserde/api/serde/json.html#to_json">serde.json.to_json</a> / <a href="https://yukinarit.github.io/pyserde/api/serde/json.html#from_json">serde.json.from_json</a> for more information.</p>
@@ -233,11 +233,11 @@ Foo(i=10, s='foo', f=100.0, b=True)
 
 &gt;&gt;&gt; to_toml(Foo(i=10, s='foo', f=100.0, b=True))
 i = 10
-s = &quot;foo&quot;
+s = "foo"
 f = 100.0
 b = true
 
-&gt;&gt;&gt; from_toml(Foo, 'i = 10\ns = &quot;foo&quot;\nf = 100.0\nb = true')
+&gt;&gt;&gt; from_toml(Foo, 'i = 10\ns = "foo"\nf = 100.0\nb = true')
 Foo(i=10, s='foo', f=100.0, b=True)
 </code></pre>
 <p>See <a href="https://yukinarit.github.io/pyserde/api/serde/toml.html#to_toml">serde.toml.to_toml</a> / <a href="https://yukinarit.github.io/pyserde/api/serde/toml.html#from_toml">serde.toml.from_toml</a> for more information.</p>
@@ -257,9 +257,9 @@ Foo(i=10, s='foo', f=100.0, b=True)
 <pre><code class="language-python">&gt;&gt;&gt; from serde.pickle import from_pickle, to_pickle
 
 &gt;&gt;&gt; to_pickle(Foo(i=10, s='foo', f=100.0, b=True))
-b&quot;\x80\x04\x95'\x00\x00\x00\x00\x00\x00\x00}\x94(\x8c\x01i\x94K\n\x8c\x01s\x94\x8c\x03foo\x94\x8c\x01f\x94G@Y\x00\x00\x00\x00\x00\x00\x8c\x01b\x94\x88u.&quot;
+b"\x80\x04\x95'\x00\x00\x00\x00\x00\x00\x00}\x94(\x8c\x01i\x94K\n\x8c\x01s\x94\x8c\x03foo\x94\x8c\x01f\x94G@Y\x00\x00\x00\x00\x00\x00\x8c\x01b\x94\x88u."
 
-&gt;&gt;&gt; from_pickle(Foo, b&quot;\x80\x04\x95'\x00\x00\x00\x00\x00\x00\x00}\x94(\x8c\x01i\x94K\n\x8c\x01s\x94\x8c\x03foo\x94\x8c\x01f\x94G@Y\x00\x00\x00\x00\x00\x00\x8c\x01b\x94\x88u.&quot;)
+&gt;&gt;&gt; from_pickle(Foo, b"\x80\x04\x95'\x00\x00\x00\x00\x00\x00\x00}\x94(\x8c\x01i\x94K\n\x8c\x01s\x94\x8c\x03foo\x94\x8c\x01f\x94G@Y\x00\x00\x00\x00\x00\x00\x8c\x01b\x94\x88u.")
 Foo(i=10, s='foo', f=100.0, b=True)
 </code></pre>
 <p>See <a href="https://yukinarit.github.io/pyserde/api/serde/pickle.html#to_pickle">serde.pickle.to_pickle</a> / <a href="https://yukinarit.github.io/pyserde/api/serde/pickle.html#from_pickle">serde.pickle.from_pickle</a> for more information.</p>

@@ -191,10 +191,10 @@ class Foo:
 </code></pre>
 <p>You can serialize <code>Foo</code> object into JSON.</p>
 <pre><code class="language-python">&gt;&gt;&gt; to_json(Foo(i=10, s='foo', f=100.0, b=True))
-'{&quot;i&quot;:10,&quot;s&quot;:&quot;foo&quot;,&quot;f&quot;:100.0,&quot;b&quot;:true}'
+'{"i":10,"s":"foo","f":100.0,"b":true}'
 </code></pre>
 <p>You can deserialize JSON into <code>Foo</code> object.</p>
-<pre><code class="language-python">&gt;&gt;&gt; from_json(Foo, '{&quot;i&quot;: 10, &quot;s&quot;: &quot;foo&quot;, &quot;f&quot;: 100.0, &quot;b&quot;: true}')
+<pre><code class="language-python">&gt;&gt;&gt; from_json(Foo, '{"i": 10, "s": "foo", "f": 100.0, "b": true}')
 Foo(i=10, s='foo', f=100.0, b=True)
 </code></pre>
 

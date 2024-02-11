@@ -189,10 +189,10 @@ class Foo:
 </code></pre>
 <p>You can serialize <code>Foo</code> object into JSON.</p>
 <pre><code class="language-python">&gt;&gt;&gt; to_json(Foo(i=10, s='foo', f=100.0, b=True))
-'{&quot;i&quot;:10,&quot;s&quot;:&quot;foo&quot;,&quot;f&quot;:100.0,&quot;b&quot;:true}'
+'{"i":10,"s":"foo","f":100.0,"b":true}'
 </code></pre>
 <p>You can deserialize JSON into <code>Foo</code> object.</p>
-<pre><code class="language-python">&gt;&gt;&gt; from_json(Foo, '{&quot;i&quot;: 10, &quot;s&quot;: &quot;foo&quot;, &quot;f&quot;: 100.0, &quot;b&quot;: true}')
+<pre><code class="language-python">&gt;&gt;&gt; from_json(Foo, '{"i": 10, "s": "foo", "f": 100.0, "b": true}')
 Foo(i=10, s='foo', f=100.0, b=True)
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="getting-started"><a class="header" href="#getting-started">Getting started</a></h1>
@@ -204,13 +204,13 @@ Foo(i=10, s='foo', f=100.0, b=True)
 <pre><code>poetry add pyserde
 </code></pre>
 <p>Additional data formats besides JSON and Pickle need additional dependencies installed. Install <code>msgpack</code>, <code>toml</code>, or <code>yaml</code> extras to work with the appropriate data formats; you can skip formats that you don't plan to use. For example, if you want to use Toml and YAML:</p>
-<pre><code>pip install &quot;pyserde[toml,yaml]&quot;
+<pre><code>pip install "pyserde[toml,yaml]"
 </code></pre>
 <p>With poetry</p>
 <pre><code>poetry add pyserde -E toml -E yaml
 </code></pre>
 <p>Or all at once:</p>
-<pre><code>pip install &quot;pyserde[all]&quot;
+<pre><code>pip install "pyserde[all]"
 </code></pre>
 <p>With poetry</p>
 <pre><code>poetry add pyserde -E all
@@ -276,7 +276,7 @@ class Foo:
 print(to_json(f))
 </code></pre>
 <p>Pass <code>Foo</code> class and JSON string in <code>from_json</code> to deserialize JSON into the object.</p>
-<pre><code class="language-python">s = '{&quot;i&quot;: 10, &quot;s&quot;: &quot;foo&quot;, &quot;f&quot;: 100.0, &quot;b&quot;: true}'
+<pre><code class="language-python">s = '{"i": 10, "s": "foo", "f": 100.0, "b": true}'
 print(from_json(Foo, s))
 </code></pre>
 <p>That's it! pyserde offers many more features. If you're interested, please read the rest of the documentation.</p>
@@ -294,9 +294,9 @@ pyserde depends on <a href="https://peps.python.org/pep-0681/">PEP681 dataclass_
 <pre><code class="language-python">&gt;&gt;&gt; from serde import to_dict, from_dict
 
 &gt;&gt;&gt; to_dict(Foo(i=10, s='foo', f=100.0, b=True))
-from_dict(Foo, {&quot;i&quot;: 10, &quot;s&quot;: &quot;foo&quot;, &quot;f&quot;: 100.0, &quot;b&quot;: True})
+from_dict(Foo, {"i": 10, "s": "foo", "f": 100.0, "b": True})
 
-&gt;&gt;&gt; from_dict(Foo, {&quot;i&quot;: 10, &quot;s&quot;: &quot;foo&quot;, &quot;f&quot;: 100.0, &quot;b&quot;: True})
+&gt;&gt;&gt; from_dict(Foo, {"i": 10, "s": "foo", "f": 100.0, "b": True})
 Foo(i=10, s='foo', f=100.0, b=True)
 </code></pre>
 <p>See <a href="https://yukinarit.github.io/pyserde/api/serde/se.html#to_dict">serde.to_dict</a> / <a href="https://yukinarit.github.io/pyserde/api/serde/de.html#from_dict">serde.from_dict</a> for more information.</p>
@@ -314,9 +314,9 @@ Foo(i=10, s='foo', f=100.0, b=True)
 <pre><code class="language-python">&gt;&gt;&gt; from serde.json import to_json, from_json
 
 &gt;&gt;&gt; to_json(Foo(i=10, s='foo', f=100.0, b=True))
-'{&quot;i&quot;:10,&quot;s&quot;:&quot;foo&quot;,&quot;f&quot;:100.0,&quot;b&quot;:true}'
+'{"i":10,"s":"foo","f":100.0,"b":true}'
 
-&gt;&gt;&gt; from_json(Foo, '{&quot;i&quot;: 10, &quot;s&quot;: &quot;foo&quot;, &quot;f&quot;: 100.0, &quot;b&quot;: true}')
+&gt;&gt;&gt; from_json(Foo, '{"i": 10, "s": "foo", "f": 100.0, "b": true}')
 Foo(i=10, s='foo', f=100.0, b=True)
 </code></pre>
 <p>See <a href="https://yukinarit.github.io/pyserde/api/serde/json.html#to_json">serde.json.to_json</a> / <a href="https://yukinarit.github.io/pyserde/api/serde/json.html#from_json">serde.json.from_json</a> for more information.</p>
@@ -338,11 +338,11 @@ Foo(i=10, s='foo', f=100.0, b=True)
 
 &gt;&gt;&gt; to_toml(Foo(i=10, s='foo', f=100.0, b=True))
 i = 10
-s = &quot;foo&quot;
+s = "foo"
 f = 100.0
 b = true
 
-&gt;&gt;&gt; from_toml(Foo, 'i = 10\ns = &quot;foo&quot;\nf = 100.0\nb = true')
+&gt;&gt;&gt; from_toml(Foo, 'i = 10\ns = "foo"\nf = 100.0\nb = true')
 Foo(i=10, s='foo', f=100.0, b=True)
 </code></pre>
 <p>See <a href="https://yukinarit.github.io/pyserde/api/serde/toml.html#to_toml">serde.toml.to_toml</a> / <a href="https://yukinarit.github.io/pyserde/api/serde/toml.html#from_toml">serde.toml.from_toml</a> for more information.</p>
@@ -362,9 +362,9 @@ Foo(i=10, s='foo', f=100.0, b=True)
 <pre><code class="language-python">&gt;&gt;&gt; from serde.pickle import from_pickle, to_pickle
 
 &gt;&gt;&gt; to_pickle(Foo(i=10, s='foo', f=100.0, b=True))
-b&quot;\x80\x04\x95'\x00\x00\x00\x00\x00\x00\x00}\x94(\x8c\x01i\x94K\n\x8c\x01s\x94\x8c\x03foo\x94\x8c\x01f\x94G@Y\x00\x00\x00\x00\x00\x00\x8c\x01b\x94\x88u.&quot;
+b"\x80\x04\x95'\x00\x00\x00\x00\x00\x00\x00}\x94(\x8c\x01i\x94K\n\x8c\x01s\x94\x8c\x03foo\x94\x8c\x01f\x94G@Y\x00\x00\x00\x00\x00\x00\x8c\x01b\x94\x88u."
 
-&gt;&gt;&gt; from_pickle(Foo, b&quot;\x80\x04\x95'\x00\x00\x00\x00\x00\x00\x00}\x94(\x8c\x01i\x94K\n\x8c\x01s\x94\x8c\x03foo\x94\x8c\x01f\x94G@Y\x00\x00\x00\x00\x00\x00\x8c\x01b\x94\x88u.&quot;)
+&gt;&gt;&gt; from_pickle(Foo, b"\x80\x04\x95'\x00\x00\x00\x00\x00\x00\x00}\x94(\x8c\x01i\x94K\n\x8c\x01s\x94\x8c\x03foo\x94\x8c\x01f\x94G@Y\x00\x00\x00\x00\x00\x00\x8c\x01b\x94\x88u.")
 Foo(i=10, s='foo', f=100.0, b=True)
 </code></pre>
 <p>See <a href="https://yukinarit.github.io/pyserde/api/serde/pickle.html#to_pickle">serde.pickle.to_pickle</a> / <a href="https://yukinarit.github.io/pyserde/api/serde/pickle.html#from_pickle">serde.pickle.from_pickle</a> for more information.</p>
@@ -380,22 +380,22 @@ Foo(i=10, s='foo', f=100.0, b=True)
 <li><a href="https://docs.python.org/3/library/stdtypes.html#frozenset"><code>FrozenSet</code></a>, <sup class="footnote-reference"><a href="#3">3</a></sup> <a href="https://docs.python.org/3/library/collections.html#collections.defaultdict"><code>DefaultDict</code></a> <sup class="footnote-reference"><a href="#4">4</a></sup></li>
 </ul>
 </li>
-<li><a href="https://docs.python.org/3/library/typing.html#typing.Optional"><code>typing.Optional</code></a> <sup class="footnote-reference"><a href="#5">5</a></sup></li>
-<li><a href="https://docs.python.org/3/library/typing.html#typing.Union"><code>typing.Union</code></a> <sup class="footnote-reference"><a href="#6">6</a></sup> <sup class="footnote-reference"><a href="#7">7</a></sup> <sup class="footnote-reference"><a href="#8">8</a></sup></li>
-<li>User defined class with <a href="https://docs.python.org/3/library/dataclasses.html"><code>@dataclass</code></a> <sup class="footnote-reference"><a href="#9">9</a></sup> <sup class="footnote-reference"><a href="#10">10</a></sup></li>
-<li><a href="https://docs.python.org/3/library/typing.html#newtype"><code>typing.NewType</code></a> for primitive types <sup class="footnote-reference"><a href="#11">11</a></sup></li>
-<li><a href="https://docs.python.org/3/library/typing.html#the-any-type"><code>typing.Any</code></a> <sup class="footnote-reference"><a href="#12">12</a></sup></li>
-<li><a href="https://docs.python.org/3/library/typing.html#typing.Literal"><code>typing.Literal</code></a> <sup class="footnote-reference"><a href="#13">13</a></sup></li>
-<li><a href="https://docs.python.org/3/library/typing.html#user-defined-generic-types"><code>typing.Generic</code></a> <sup class="footnote-reference"><a href="#14">14</a></sup></li>
-<li><a href="https://docs.python.org/3/library/typing.html#typing.ClassVar"><code>typing.ClassVar</code></a> <sup class="footnote-reference"><a href="#15">15</a></sup></li>
-<li><a href="https://docs.python.org/3/library/dataclasses.html#init-only-variables"><code>typing.InitVar</code></a> <sup class="footnote-reference"><a href="#16">16</a></sup></li>
-<li><a href="https://docs.python.org/3/library/enum.html#enum.Enum"><code>Enum</code></a> and <a href="https://docs.python.org/3/library/enum.html#enum.IntEnum"><code>IntEnum</code></a> <sup class="footnote-reference"><a href="#17">17</a></sup></li>
+<li><a href="https://docs.python.org/3/library/typing.html#typing.Optional"><code>typing.Optional</code></a> [^5]</li>
+<li><a href="https://docs.python.org/3/library/typing.html#typing.Union"><code>typing.Union</code></a> <sup class="footnote-reference"><a href="#6">5</a></sup> <sup class="footnote-reference"><a href="#7">6</a></sup> <sup class="footnote-reference"><a href="#8">7</a></sup></li>
+<li>User defined class with <a href="https://docs.python.org/3/library/dataclasses.html"><code>@dataclass</code></a> <sup class="footnote-reference"><a href="#9">8</a></sup> <sup class="footnote-reference"><a href="#10">9</a></sup></li>
+<li><a href="https://docs.python.org/3/library/typing.html#newtype"><code>typing.NewType</code></a> for primitive types <sup class="footnote-reference"><a href="#11">10</a></sup></li>
+<li><a href="https://docs.python.org/3/library/typing.html#the-any-type"><code>typing.Any</code></a> <sup class="footnote-reference"><a href="#12">11</a></sup></li>
+<li><a href="https://docs.python.org/3/library/typing.html#typing.Literal"><code>typing.Literal</code></a> <sup class="footnote-reference"><a href="#13">12</a></sup></li>
+<li><a href="https://docs.python.org/3/library/typing.html#user-defined-generic-types"><code>typing.Generic</code></a> <sup class="footnote-reference"><a href="#14">13</a></sup></li>
+<li><a href="https://docs.python.org/3/library/typing.html#typing.ClassVar"><code>typing.ClassVar</code></a> <sup class="footnote-reference"><a href="#15">14</a></sup></li>
+<li><a href="https://docs.python.org/3/library/dataclasses.html#init-only-variables"><code>typing.InitVar</code></a> <sup class="footnote-reference"><a href="#16">15</a></sup></li>
+<li><a href="https://docs.python.org/3/library/enum.html#enum.Enum"><code>Enum</code></a> and <a href="https://docs.python.org/3/library/enum.html#enum.IntEnum"><code>IntEnum</code></a> <sup class="footnote-reference"><a href="#17">16</a></sup></li>
 <li>Standard library
 <ul>
 <li><a href="https://docs.python.org/3/library/pathlib.html"><code>pathlib.Path</code></a></li>
-<li><a href="https://docs.python.org/3/library/decimal.html"><code>decimal.Decimal</code></a> <sup class="footnote-reference"><a href="#18">18</a></sup></li>
+<li><a href="https://docs.python.org/3/library/decimal.html"><code>decimal.Decimal</code></a> <sup class="footnote-reference"><a href="#18">17</a></sup></li>
 <li><a href="https://docs.python.org/3/library/uuid.html"><code>uuid.UUID</code></a></li>
-<li><a href="https://docs.python.org/3/library/datetime.html#date-objects"><code>datetime.date</code></a>, <a href="https://docs.python.org/3/library/datetime.html#time-objects"><code>datetime.time</code></a>, <a href="https://docs.python.org/3/library/datetime.html#datetime-objects"><code>datetime.datetime</code></a> <sup class="footnote-reference"><a href="#19">19</a></sup></li>
+<li><a href="https://docs.python.org/3/library/datetime.html#date-objects"><code>datetime.date</code></a>, <a href="https://docs.python.org/3/library/datetime.html#time-objects"><code>datetime.time</code></a>, <a href="https://docs.python.org/3/library/datetime.html#datetime-objects"><code>datetime.datetime</code></a> <sup class="footnote-reference"><a href="#19">18</a></sup></li>
 <li><a href="https://docs.python.org/3/library/ipaddress.html"><code>ipaddress</code></a></li>
 </ul>
 </li>
@@ -422,7 +422,7 @@ class Foo:
     f: Bar
 </code></pre>
 <h2 id="numpy"><a class="header" href="#numpy">Numpy</a></h2>
-<p>All of the above (de)serialization methods can transparently handle most numpy types with the &quot;numpy&quot; extras package.</p>
+<p>All of the above (de)serialization methods can transparently handle most numpy types with the "numpy" extras package.</p>
 <pre><code class="language-python">import numpy as np
 import numpy.typing as npt
 
@@ -457,7 +457,7 @@ npfoo = NPFoo(
 <pre><code class="language-python">&gt;&gt;&gt; from serde.json import to_json, from_json
 
 &gt;&gt;&gt; to_json(npfoo)
-'{&quot;i&quot;: 1, &quot;j&quot;: 2, &quot;f&quot;: 3.0, &quot;g&quot;: 4.0, &quot;h&quot;: false, &quot;u&quot;: [1, 2], &quot;v&quot;: [3, 4], &quot;w&quot;: [1, 2], &quot;x&quot;: [3, 4], &quot;y&quot;: [5.0, 6.0], &quot;z&quot;: [7.0, 8.0]}'
+'{"i": 1, "j": 2, "f": 3.0, "g": 4.0, "h": false, "u": [1, 2], "v": [3, 4], "w": [1, 2], "x": [3, 4], "y": [5.0, 6.0], "z": [7.0, 8.0]}'
 
 &gt;&gt;&gt; from_json(NPFoo, to_json(npfoo))
 NPFoo(i=1, j=2, f=3.0, g=4.0, h=False, u=array([1, 2]), v=array([3, 4]), w=array([1, 2], dtype=int32), x=array([3, 4]), y=array([5., 6.], dtype=float32), z=array([7., 8.]))
@@ -476,46 +476,46 @@ NPFoo(i=1, j=2, f=3.0, g=4.0, h=False, u=array([1, 2]), v=array([3, 4]), w=array
 <div class="footnote-definition" id="4"><sup class="footnote-definition-label">4</sup>
 <p>See <a href="https://github.com/yukinarit/pyserde/blob/main/examples/default_dict.py">examples/default_dict.py</a></p>
 </div>
-<div class="footnote-definition" id="6"><sup class="footnote-definition-label">6</sup>
+<div class="footnote-definition" id="6"><sup class="footnote-definition-label">5</sup>
 <p>See <a href="https://github.com/yukinarit/pyserde/blob/main/examples/union.py">examples/union.py</a></p>
 </div>
-<div class="footnote-definition" id="7"><sup class="footnote-definition-label">7</sup>
+<div class="footnote-definition" id="7"><sup class="footnote-definition-label">6</sup>
 <p>See <a href="https://github.com/yukinarit/pyserde/blob/main/examples/union_operator.py">examples/union_operator.py</a></p>
 </div>
-<div class="footnote-definition" id="8"><sup class="footnote-definition-label">8</sup>
+<div class="footnote-definition" id="8"><sup class="footnote-definition-label">7</sup>
 <p>See <a href="https://github.com/yukinarit/pyserde/blob/main/examples/union_tagging.py">examples/union_tagging.py</a></p>
 </div>
-<div class="footnote-definition" id="9"><sup class="footnote-definition-label">9</sup>
+<div class="footnote-definition" id="9"><sup class="footnote-definition-label">8</sup>
 <p>See <a href="https://github.com/yukinarit/pyserde/blob/main/examples/simple.py">examples/simple.py</a></p>
 </div>
-<div class="footnote-definition" id="10"><sup class="footnote-definition-label">10</sup>
+<div class="footnote-definition" id="10"><sup class="footnote-definition-label">9</sup>
 <p>See <a href="https://github.com/yukinarit/pyserde/blob/main/examples/nested.py">examples/nested.py</a></p>
 </div>
-<div class="footnote-definition" id="11"><sup class="footnote-definition-label">11</sup>
+<div class="footnote-definition" id="11"><sup class="footnote-definition-label">10</sup>
 <p>See <a href="https://github.com/yukinarit/pyserde/blob/main/examples/newtype.py">examples/newtype.py</a></p>
 </div>
-<div class="footnote-definition" id="12"><sup class="footnote-definition-label">12</sup>
+<div class="footnote-definition" id="12"><sup class="footnote-definition-label">11</sup>
 <p>See <a href="https://github.com/yukinarit/pyserde/blob/main/examples/any.py">examples/any.py</a></p>
 </div>
-<div class="footnote-definition" id="13"><sup class="footnote-definition-label">13</sup>
+<div class="footnote-definition" id="13"><sup class="footnote-definition-label">12</sup>
 <p>See <a href="https://github.com/yukinarit/pyserde/blob/main/examples/literal.py">examples/literal.py</a></p>
 </div>
-<div class="footnote-definition" id="14"><sup class="footnote-definition-label">14</sup>
+<div class="footnote-definition" id="14"><sup class="footnote-definition-label">13</sup>
 <p>See <a href="https://github.com/yukinarit/pyserde/blob/main/examples/generics.py">examples/generics.py</a></p>
 </div>
-<div class="footnote-definition" id="15"><sup class="footnote-definition-label">15</sup>
+<div class="footnote-definition" id="15"><sup class="footnote-definition-label">14</sup>
 <p>See <a href="https://github.com/yukinarit/pyserde/blob/main/examples/class_var.py">examples/class_var.py</a></p>
 </div>
-<div class="footnote-definition" id="16"><sup class="footnote-definition-label">16</sup>
+<div class="footnote-definition" id="16"><sup class="footnote-definition-label">15</sup>
 <p>See <a href="https://github.com/yukinarit/pyserde/blob/main/examples/init_var.py">examples/init_var.py</a></p>
 </div>
-<div class="footnote-definition" id="17"><sup class="footnote-definition-label">17</sup>
+<div class="footnote-definition" id="17"><sup class="footnote-definition-label">16</sup>
 <p>See <a href="https://github.com/yukinarit/pyserde/blob/main/examples/enum34.py">examples/enum34.py</a></p>
 </div>
-<div class="footnote-definition" id="18"><sup class="footnote-definition-label">18</sup>
+<div class="footnote-definition" id="18"><sup class="footnote-definition-label">17</sup>
 <p>See <a href="https://github.com/yukinarit/pyserde/blob/main/examples/type_decimal.py">examples/type_decimal.py</a></p>
 </div>
-<div class="footnote-definition" id="19"><sup class="footnote-definition-label">19</sup>
+<div class="footnote-definition" id="19"><sup class="footnote-definition-label">18</sup>
 <p>See <a href="https://github.com/yukinarit/pyserde/blob/main/examples/type_datetime.py">examples/type_datetime.py</a></p>
 </div>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="decorators"><a class="header" href="#decorators">Decorators</a></h1>
@@ -563,8 +563,8 @@ class Foo:
 <li>You only need either serialization or deserialization functionality</li>
 <li>You want to have different class attributes as below</li>
 </ul>
-<pre><code class="language-python">@deserialize(rename_all = &quot;snakecase&quot;)
-@serialize(rename_all = &quot;camelcase&quot;)
+<pre><code class="language-python">@deserialize(rename_all = "snakecase")
+@serialize(rename_all = "camelcase")
 class Foo:
     ...
 </code></pre>
@@ -582,7 +582,7 @@ to_dict(External()) # works without @serde
 class External:
     some_value: int
 
-@serde(rename_all=&quot;kebabcase&quot;)
+@serde(rename_all="kebabcase")
 @dataclass
 class Wrapper(External):
     pass
@@ -618,7 +618,7 @@ class Foo:
     f: float
     b: bool
 
-    def foo(self, cls: Foo):  # You can use &quot;Foo&quot; type before it's defined.
+    def foo(self, cls: Foo):  # You can use "Foo" type before it's defined.
         print('foo')
 </code></pre>
 <p>See <a href="https://github.com/yukinarit/pyserde/blob/main/examples/lazy_type_evaluation.py">examples/lazy_type_evaluation.py</a> for complete example.</p>
@@ -650,8 +650,8 @@ class Foo:
 f = Foo(int_field=10, str_field='foo')
 print(to_json(f))
 </code></pre>
-<p>&quot;int_field&quot; is converted to &quot;intField&quot; and &quot;str_field&quot; is converted to &quot;strField&quot;.</p>
-<pre><code class="language-json">{&quot;intField&quot;: 10, &quot;strField&quot;: &quot;foo&quot;}
+<p>"int_field" is converted to "intField" and "str_field" is converted to "strField".</p>
+<pre><code class="language-json">{"intField": 10, "strField": "foo"}
 </code></pre>
 <blockquote>
 <p><strong>NOTE:</strong> If <code>rename_all</code> class attribute and <code>rename</code> field attribute are used at the same time, <code>rename</code> will be prioritized.</p>
@@ -665,7 +665,7 @@ f = Foo(int_field=10, str_field='foo')
 print(to_json(f))
 </code></pre>
 <p>The above code prints</p>
-<pre><code>{&quot;intField&quot;: 10, &quot;str-field&quot;: &quot;foo&quot;}
+<pre><code>{"intField": 10, "str-field": "foo"}
 </code></pre>
 </blockquote>
 <p>See <a href="https://github.com/yukinarit/pyserde/blob/main/examples/rename_all.py">examples/rename_all.py</a> for the complete example.</p>
@@ -676,12 +676,12 @@ print(to_json(f))
 <pre><code class="language-python">class MySerializer:
     @dispatch
     def serialize(self, value: datetime) -&gt; str:
-        return value.strftime(&quot;%d/%m/%y&quot;)
+        return value.strftime("%d/%m/%y")
 
 class MyDeserializer:
     @dispatch
     def deserialize(self, cls: Type[datetime], value: Any) -&gt; datetime:
-        return datetime.strptime(value, &quot;%d/%m/%y&quot;)
+        return datetime.strptime(value, "%d/%m/%y")
 
 @serde(class_serializer=MySerializer(), class_deserializer=MyDeserializer())
 @dataclass
@@ -695,7 +695,7 @@ class Foo:
 <li>If both legacy and new class serializer specified, new class serializer is prioritized</li>
 </ul>
 <blockquote>
-<p>💡 Tip: If you implements multiple <code>serialize</code> methods, you will receive &quot;Redefinition of unused <code>serialize</code>&quot; warning from type checker. In such case, try using <code>plum.overload</code> and <code>plum.dispatch</code> to workaround it. See <a href="https://beartype.github.io/plum/integration.html">plum's documentation</a> for more information.</p>
+<p>💡 Tip: If you implements multiple <code>serialize</code> methods, you will receive "Redefinition of unused <code>serialize</code>" warning from type checker. In such case, try using <code>plum.overload</code> and <code>plum.dispatch</code> to workaround it. See <a href="https://beartype.github.io/plum/integration.html">plum's documentation</a> for more information.</p>
 <pre><code class="language-python">from plum import dispatch, overload
 
 class Serializer:
@@ -760,7 +760,7 @@ class Foo:
 <p><code>default</code> and <code>default_factory</code> work as expected. If a field has <code>default</code> or <code>default_factory</code> attribute, it behaves like an optional field. If the field is found in the data, the value is fetched from the data and set in the deserialized object. If the field is not found in the data, the specified default value is set in the deserialized object.</p>
 <pre><code class="language-python">class Foo:
     a: int = 10
-    b: int = field(default=10)  # same as field &quot;a&quot;
+    b: int = field(default=10)  # same as field "a"
     c: Dict[str, int] = field(default_factory=dict)
 
 print(from_dict(Foo, {}))  # prints Foo(a=10, b=10, c={})
@@ -775,15 +775,15 @@ Here is an example specifying <code>rename</code> attribute in both <code>serde.
 <pre><code class="language-python">@serde.serde
 @dataclass.dataclass
 class Foo:
-    a: str = serde.field(rename=&quot;A&quot;)
-    b: str = dataclasses.field(metadata={&quot;serde_rename&quot;=&quot;B&quot;})
+    a: str = serde.field(rename="A")
+    b: str = dataclasses.field(metadata={"serde_rename"="B"})
 </code></pre>
 <h3 id="rename"><a class="header" href="#rename"><strong><code>rename</code></strong></a></h3>
 <p><code>rename</code> is used to rename field name during (de)serialization. This attribute is convenient when you want to use a python keyword in field name. For example, this code renames field name <code>id</code> to <code>ID</code>.</p>
 <pre><code class="language-python">@serde
 @dataclass
 class Foo:
-    id: int = field(rename=&quot;ID&quot;)
+    id: int = field(rename="ID")
 </code></pre>
 <p>See <a href="https://github.com/yukinarit/pyserde/blob/main/examples/rename.py">examples/rename.py</a> for the complete example.</p>
 <h3 id="skip"><a class="header" href="#skip"><strong><code>skip</code></strong></a></h3>
@@ -825,9 +825,9 @@ class World:
 <pre><code class="language-python">@serde
 @dataclass
 class Foo:
-    a: str = field(alias=[&quot;b&quot;, &quot;c&quot;])
+    a: str = field(alias=["b", "c"])
 </code></pre>
-<p><code>Foo</code> can be deserialized from either <code>{&quot;a&quot;: &quot;...&quot;}</code>, <code>{&quot;b&quot;: &quot;...&quot;}</code> or <code>{&quot;c&quot;: &quot;...&quot;}</code>.</p>
+<p><code>Foo</code> can be deserialized from either <code>{"a": "..."}</code>, <code>{"b": "..."}</code> or <code>{"c": "..."}</code>.</p>
 <p>See <a href="https://github.com/yukinarit/pyserde/blob/main/examples/alias.py">examples/alias.py</a> for complete example.</p>
 <h2 id="serializerdeserializer"><a class="header" href="#serializerdeserializer"><strong><code>serializer</code></strong>/<strong><code>deserializer</code></strong></a></h2>
 <p>Sometimes you want to customize (de)serializer for a particular field, such as</p>
@@ -835,7 +835,7 @@ class Foo:
 <li>You want to serialize datetime into a different format</li>
 <li>You want to serialize a type in a third party package</li>
 </ul>
-<p>In the following example, field <code>a</code> is serialized into <code>&quot;2021-01-01T00:00:00&quot;</code> by the default serializer for <code>datetime</code>, whereas field <code>b</code> is serialized into <code>&quot;01/01/21&quot;</code> by the custom serializer.</p>
+<p>In the following example, field <code>a</code> is serialized into <code>"2021-01-01T00:00:00"</code> by the default serializer for <code>datetime</code>, whereas field <code>b</code> is serialized into <code>"01/01/21"</code> by the custom serializer.</p>
 <pre><code class="language-python">@serde
 @dataclass
 class Foo:
@@ -858,7 +858,7 @@ class Foo:
     b: str
     bar: Bar = field(flatten=True)
 </code></pre>
-<p>Bar's c, d fields are deserialized as if they are defined in Foo. So you will get <code>{&quot;a&quot;:10,&quot;b&quot;:&quot;foo&quot;,&quot;c&quot;:100.0,&quot;d&quot;:true}</code> if you serialize <code>Foo</code> into JSON.</p>
+<p>Bar's c, d fields are deserialized as if they are defined in Foo. So you will get <code>{"a":10,"b":"foo","c":100.0,"d":true}</code> if you serialize <code>Foo</code> into JSON.</p>
 <p>See <a href="https://github.com/yukinarit/pyserde/blob/main/examples/flatten.py">examples/flatten.py</a> for complete example.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="union-representation"><a class="header" href="#union-representation">Union Representation</a></h1>
 <p><code>pyserde</code>&gt;=0.7 offers attributes to control how Union is (de)serialized. This concept is the very same as the one in <a href="https://serde.rs/enum-representations.html">serde-rs</a>. Note these representations only apply to the dataclass, non dataclass objects are (de)serialized with <code>Untagged</code> always.</p>
@@ -879,16 +879,16 @@ class Baz:
 class Foo:
     a: Union[Bar, Baz]
 </code></pre>
-<p>Note that <code>Bar</code> and <code>Baz</code> have the same field name and type. If you serialize <code>Foo(Baz(10))</code> into dict, you get <code>{&quot;a&quot;: {&quot;b&quot;: 10}}</code>. But if you deserialize <code>{&quot;a&quot;: {&quot;b&quot;: 10}}</code>, you get <code>Foo(Bar(10))</code> instead of <code>Foo(Baz(10))</code>. This means pyserde <strong>can't correctly (de)serialize dataclasses of Union with <code>Untagged</code></strong>. This is why pyserde offers other kinds of union representation options.</p>
+<p>Note that <code>Bar</code> and <code>Baz</code> have the same field name and type. If you serialize <code>Foo(Baz(10))</code> into dict, you get <code>{"a": {"b": 10}}</code>. But if you deserialize <code>{"a": {"b": 10}}</code>, you get <code>Foo(Bar(10))</code> instead of <code>Foo(Baz(10))</code>. This means pyserde <strong>can't correctly (de)serialize dataclasses of Union with <code>Untagged</code></strong>. This is why pyserde offers other kinds of union representation options.</p>
 <h2 id="externaltagging"><a class="header" href="#externaltagging"><code>ExternalTagging</code></a></h2>
-<p>This is the default Union representation since 0.7. A class declaration with <code>ExternalTagging</code> looks like below. If you serialize <code>Foo(Baz(10))</code> into dict, you get <code>{&quot;a&quot;: {&quot;Baz&quot;: {&quot;b&quot;: 10}}}</code> and you can deserialize it back to <code>Foo(Baz(10))</code>. </p>
+<p>This is the default Union representation since 0.7. A class declaration with <code>ExternalTagging</code> looks like below. If you serialize <code>Foo(Baz(10))</code> into dict, you get <code>{"a": {"Baz": {"b": 10}}}</code> and you can deserialize it back to <code>Foo(Baz(10))</code>.</p>
 <pre><code class="language-python">@serde(tagging=ExternalTagging)
 @dataclass
 class Foo:
     a: Union[Bar, Baz]
 </code></pre>
 <blockquote>
-<p><strong>NOTE:</strong> Non dataclass objects are alreays (de)serialized with <code>Untagged</code> regardless of <code>tagging</code> attribute because there is no information which can be used for tag. The drawback of <code>Untagged</code> is pyserde can't correctly deserialize certain types. For example, <code>Foo({1, 2, 3})</code> of below class is serialized into <code>{&quot;a&quot;: [1, 2, 3]}</code>, but you get <code>Foo([1, 2, 3])</code> by deserializing.</p>
+<p><strong>NOTE:</strong> Non dataclass objects are alreays (de)serialized with <code>Untagged</code> regardless of <code>tagging</code> attribute because there is no information which can be used for tag. The drawback of <code>Untagged</code> is pyserde can't correctly deserialize certain types. For example, <code>Foo({1, 2, 3})</code> of below class is serialized into <code>{"a": [1, 2, 3]}</code>, but you get <code>Foo([1, 2, 3])</code> by deserializing.</p>
 <pre><code class="language-python">@serde(tagging=ExternalTagging)
 @dataclass
 class Foo:
@@ -896,15 +896,15 @@ class Foo:
 </code></pre>
 </blockquote>
 <h2 id="internaltagging"><a class="header" href="#internaltagging"><code>InternalTagging</code></a></h2>
-<p>A class declaration with <code>InternalTagging</code> looks like below. If you serialize <code>Foo(Baz(10))</code> into dict, you will get <code>{&quot;a&quot;: {&quot;type&quot;: &quot;Baz&quot;, &quot;b&quot;: 10}}</code> and you can deserialize it back to <code>Foo(Baz(10))</code>. <code>type</code> tag is encoded inside the <code>Baz</code>'s dictionary.</p>
-<pre><code class="language-python">@serde(tagging=InternalTagging(&quot;type&quot;))
+<p>A class declaration with <code>InternalTagging</code> looks like below. If you serialize <code>Foo(Baz(10))</code> into dict, you will get <code>{"a": {"type": "Baz", "b": 10}}</code> and you can deserialize it back to <code>Foo(Baz(10))</code>. <code>type</code> tag is encoded inside the <code>Baz</code>'s dictionary.</p>
+<pre><code class="language-python">@serde(tagging=InternalTagging("type"))
 @dataclass
 class Foo:
     a: Union[Bar, Baz]
 </code></pre>
 <h2 id="adjacenttagging"><a class="header" href="#adjacenttagging"><code>AdjacentTagging</code></a></h2>
-<p>A class declaration with <code>AdjacentTagging</code> looks like below. If you serialize <code>Foo(Baz(10))</code> into dict, you will get <code>{&quot;a&quot;: {&quot;type&quot;: &quot;Baz&quot;, &quot;content&quot;: {&quot;b&quot;: 10}}}</code> and you can deserialize it back to <code>Foo(Baz(10))</code>. <code>type</code> tag is encoded inside <code>Baz</code>'s dictionary and <code>Baz</code>s fields are encoded inside <code>content</code>.</p>
-<pre><code class="language-python">@serde(tagging=AdjacentTagging(&quot;type&quot;, &quot;content&quot;))
+<p>A class declaration with <code>AdjacentTagging</code> looks like below. If you serialize <code>Foo(Baz(10))</code> into dict, you will get <code>{"a": {"type": "Baz", "content": {"b": 10}}}</code> and you can deserialize it back to <code>Foo(Baz(10))</code>. <code>type</code> tag is encoded inside <code>Baz</code>'s dictionary and <code>Baz</code>s fields are encoded inside <code>content</code>.</p>
+<pre><code class="language-python">@serde(tagging=AdjacentTagging("type", "content"))
 @dataclass
 class Foo:
     a: Union[Bar, Baz]
@@ -925,7 +925,7 @@ class Bar:
 bar = Bar(10)
 s = to_json(bar)
 print(s)
-# prints {&quot;a&quot;: 10}
+# prints {"a": 10}
 print(from_json(Union[Foo, Bar], s))
 # prints Foo(10)
 </code></pre>
@@ -943,7 +943,7 @@ class Bar:
 bar = Bar(10)
 s = to_json(bar, cls=Union[Foo, Bar])
 print(s)
-# prints {&quot;Bar&quot; {&quot;a&quot;: 10}}
+# prints {"Bar" {"a": 10}}
 print(from_json(Union[Foo, Bar], s))
 # prints Bar(10)
 </code></pre>
@@ -953,20 +953,20 @@ print(from_json(Union[Foo, Bar], s))
 <li>InternalTagging
 <pre><code class="language-python">from serde import InternalTagging
 
-s = to_json(bar, cls=InternalTagging(&quot;type&quot;, Union[Foo, Bar]))
+s = to_json(bar, cls=InternalTagging("type", Union[Foo, Bar]))
 print(s)
-# prints {&quot;type&quot;: &quot;Bar&quot;, &quot;a&quot;: 10}
-print(from_json(InternalTagging(&quot;type&quot;, Union[Foo, Bar]), s))
+# prints {"type": "Bar", "a": 10}
+print(from_json(InternalTagging("type", Union[Foo, Bar]), s))
 # prints Bar(10)
 </code></pre>
 </li>
 <li>AdjacentTagging
 <pre><code class="language-python">from serde import AdjacentTagging
 
-s = to_json(bar, cls=AdjacentTagging(&quot;type&quot;, &quot;content&quot;, Union[Foo, Bar]))
+s = to_json(bar, cls=AdjacentTagging("type", "content", Union[Foo, Bar]))
 print(s)
-# prints {&quot;type&quot;: &quot;Bar&quot;, &quot;content&quot;: {&quot;a&quot;: 10}}
-print(from_json(AdjacentTagging(&quot;type&quot;, &quot;content&quot;, Union[Foo, Bar]), s))
+# prints {"type": "Bar", "content": {"a": 10}}
+print(from_json(AdjacentTagging("type", "content", Union[Foo, Bar]), s))
 # prints Bar(10)
 </code></pre>
 </li>
@@ -975,7 +975,7 @@ print(from_json(AdjacentTagging(&quot;type&quot;, &quot;content&quot;, Union[Foo
 
 s = to_json(bar, cls=Untagged(Union[Foo, Bar]))
 print(s)
-# prints {&quot;a&quot;: 10}
+# prints {"a": 10}
 print(from_json(Untagged(Union[Foo, Bar]), s))
 # prints Foo(10)
 </code></pre>
@@ -991,19 +991,19 @@ class Foo
     s: str
 
 foo = Foo(10)
-# pyserde doesn't complain anything. {&quot;s&quot;: 10} will be printed.
+# pyserde doesn't complain anything. {"s": 10} will be printed.
 print(to_json(foo))
 </code></pre>
 <h3 id="coerce"><a class="header" href="#coerce"><code>Coerce</code></a></h3>
-<p>Type coercing automatically converts a value into the declared type during (de)serialization. If the value is incompatible e.g. value is &quot;foo&quot; and type is int, pyserde raises an <code>SerdeError</code>.</p>
+<p>Type coercing automatically converts a value into the declared type during (de)serialization. If the value is incompatible e.g. value is "foo" and type is int, pyserde raises an <code>SerdeError</code>.</p>
 <pre><code class="language-python">@serde(type_check=Coerce)
 @dataclass
 class Foo
     s: str
 
 foo = Foo(10)
-# pyserde automatically coerce the int value 10 into &quot;10&quot;.
-# {&quot;s&quot;: &quot;10&quot;} will be printed.
+# pyserde automatically coerce the int value 10 into "10".
+# {"s": "10"} will be printed.
 print(to_json(foo))
 </code></pre>
 <h3 id="strict"><a class="header" href="#strict"><code>Strict</code></a></h3>
@@ -1042,7 +1042,7 @@ f = Foo(100) # beartype raises an error
 <h2 id="custom-field-deserializer"><a class="header" href="#custom-field-deserializer">Custom field (de)serializer</a></h2>
 <p>See <a href="./field-attributes.html#serializerdeserializer">custom field serializer</a>.</p>
 <blockquote>
-<p>💡 Tip: wrapping <code>serde.field</code> with your own field function makes </p>
+<p>💡 Tip: wrapping <code>serde.field</code> with your own field function makes</p>
 <pre><code class="language-python">import serde
 
 def field(*args, **kwargs):
@@ -1097,7 +1097,7 @@ print(json)
 print(from_json(Foo, json))
 </code></pre>
 <p>and you get <code>datetime.timedelta</code> to be serialized in ISO 8601 duration format!</p>
-<pre><code class="language-bash">{&quot;a&quot;:&quot;PT10H&quot;}
+<pre><code class="language-bash">{"a":"PT10H"}
 Foo(a=datetime.timedelta(seconds=36000))
 </code></pre>
 <blockquote>
@@ -1139,7 +1139,7 @@ def to_iter(obj, reuse_instances=True, convert_sets=False):
     if not is_dataclass(obj):
         return copy.deepcopy(obj)
 
-    Foo = serde_scope.types[&quot;Foo&quot;]
+    Foo = serde_scope.types["Foo"]
     res = []
     res.append(obj.i)
     res.append(obj.s)
