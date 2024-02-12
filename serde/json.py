@@ -1,7 +1,7 @@
 """
 Serialize and Deserialize in JSON format.
 """
-from typing import Any, overload, Optional
+from typing import Any, AnyStr, overload, Optional, Union
 
 from typing_extensions import Type
 
@@ -18,7 +18,7 @@ try:  # pragma: no cover
             opts["option"] = orjson.OPT_SERIALIZE_NUMPY
         return orjson.dumps(obj, **opts).decode()  # type: ignore
 
-    def json_loads(s: str, **opts: Any) -> Any:
+    def json_loads(s: Union[str, bytes], **opts: Any) -> Any:
         return orjson.loads(s, **opts)
 
 except ImportError:
@@ -32,7 +32,7 @@ except ImportError:
         separators = opts.pop("separators", (",", ":"))
         return json.dumps(obj, ensure_ascii=ensure_ascii, separators=separators, **opts)
 
-    def json_loads(s: str, **opts: Any) -> Any:
+    def json_loads(s: Union[str, bytes], **opts: Any) -> Any:
         return json.loads(s, **opts)
 
 
@@ -45,9 +45,9 @@ class JsonSerializer(Serializer[str]):
         return json_dumps(obj, **opts)
 
 
-class JsonDeserializer(Deserializer[str]):
+class JsonDeserializer(Deserializer[AnyStr]):
     @classmethod
-    def deserialize(cls, data: str, **opts: Any) -> Any:
+    def deserialize(cls, data: AnyStr, **opts: Any) -> Any:
         return json_loads(data, **opts)
 
 
@@ -71,17 +71,23 @@ def to_json(
 
 
 @overload
-def from_json(c: Type[T], s: str, de: Type[Deserializer[str]] = JsonDeserializer, **opts: Any) -> T:
+def from_json(
+    c: Type[T], s: AnyStr, de: Type[Deserializer[AnyStr]] = JsonDeserializer, **opts: Any
+) -> T:
     ...
 
 
 # For Union, Optional etc.
 @overload
-def from_json(c: Any, s: str, de: Type[Deserializer[str]] = JsonDeserializer, **opts: Any) -> Any:
+def from_json(
+    c: Any, s: AnyStr, de: Type[Deserializer[AnyStr]] = JsonDeserializer, **opts: Any
+) -> Any:
     ...
 
 
-def from_json(c: Any, s: str, de: Type[Deserializer[str]] = JsonDeserializer, **opts: Any) -> Any:
+def from_json(
+    c: Any, s: AnyStr, de: Type[Deserializer[AnyStr]] = JsonDeserializer, **opts: Any
+) -> Any:
     """
     Deserialize from JSON into the object. [orjson](https://github.com/ijl/orjson) will be used
     if installed.

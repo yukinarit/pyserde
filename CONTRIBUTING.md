@@ -36,7 +36,7 @@ Thank you for considering contributing to pyserde!
 
   For macOS / Linux / WSL
   ```bash
-  curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/main/get-poetry.py | python -
+  curl -sSL https://install.python-poetry.org/ | python -
   ```
   For Windows Powershell
   ```bash
