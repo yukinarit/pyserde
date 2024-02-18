@@ -89,7 +89,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded "><a href="introduction.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="getting-started.html"><strong aria-hidden="true">2.</strong> Getting Started</a></li><li class="chapter-item expanded "><a href="data-formats.html"><strong aria-hidden="true">3.</strong> Data Formats</a></li><li class="chapter-item expanded "><a href="types.html"><strong aria-hidden="true">4.</strong> Types</a></li><li class="chapter-item expanded "><a href="decorators.html"><strong aria-hidden="true">5.</strong> Decorators</a></li><li class="chapter-item expanded "><a href="class-attributes.html"><strong aria-hidden="true">6.</strong> Class Attributes</a></li><li class="chapter-item expanded "><a href="field-attributes.html"><strong aria-hidden="true">7.</strong> Field Attributes</a></li><li class="chapter-item expanded "><a href="union.html"><strong aria-hidden="true">8.</strong> Union</a></li><li class="chapter-item expanded "><a href="type-check.html"><strong aria-hidden="true">9.</strong> Type Check</a></li><li class="chapter-item expanded "><a href="extension.html"><strong aria-hidden="true">10.</strong> Extension</a></li><li class="chapter-item expanded "><a href="faq.html"><strong aria-hidden="true">11.</strong> FAQ</a></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded "><a href="introduction.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="getting-started.html"><strong aria-hidden="true">2.</strong> Getting Started</a></li><li class="chapter-item expanded "><a href="data-formats.html"><strong aria-hidden="true">3.</strong> Data Formats</a></li><li class="chapter-item expanded "><a href="types.html"><strong aria-hidden="true">4.</strong> Types</a></li><li class="chapter-item expanded "><a href="decorators.html"><strong aria-hidden="true">5.</strong> Decorators</a></li><li class="chapter-item expanded "><a href="class-attributes.html"><strong aria-hidden="true">6.</strong> Class Attributes</a></li><li class="chapter-item expanded "><a href="field-attributes.html"><strong aria-hidden="true">7.</strong> Field Attributes</a></li><li class="chapter-item expanded "><a href="union.html"><strong aria-hidden="true">8.</strong> Union</a></li><li class="chapter-item expanded "><a href="type-check.html"><strong aria-hidden="true">9.</strong> Type Checking</a></li><li class="chapter-item expanded "><a href="extension.html"><strong aria-hidden="true">10.</strong> Extension</a></li><li class="chapter-item expanded "><a href="faq.html"><strong aria-hidden="true">11.</strong> FAQ</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle">
                 <div class="sidebar-resize-indicator"></div>
@@ -589,11 +589,13 @@ class Wrapper(External):
 </code></pre>
 <h2 id="how-can-i-use-forward-references"><a class="header" href="#how-can-i-use-forward-references">How can I use forward references?</a></h2>
 <p>pyserde supports forward references. If you replace a nested class name with with string, pyserde looks up and evaluate the decorator after nested class is defined.</p>
-<pre><code class="language-python">@dataclass
+<pre><code class="language-python">from __future__ import annotations # make sure to import annotations
+
+@dataclass
 class Foo:
     i: int
     s: str
-    bar: 'Bar'  # Specify type annotation in string.
+    bar: Bar  # Bar can be specified although it's declared afterward.
 
 @serde
 @dataclass
@@ -982,19 +984,47 @@ print(from_json(Untagged(Union[Foo, Bar]), s))
 </li>
 </ul>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="type-checking"><a class="header" href="#type-checking">Type Checking</a></h1>
-<p>This is one of the most awaited features. <code>pyserde</code> v0.9 adds the experimental type checkers. As this feature is still experimental, the type checking is not perfect. Also, <a href="https://github.com/tbsexton">@tbsexton</a> is looking into <a href="https://github.com/yukinarit/pyserde/issues/237#issuecomment-1191714102">more beautiful solution</a>, the entire backend of type checker may be replaced by <a href="https://github.com/beartype/beartype">beartype</a> in the future.</p>
-<h3 id="nocheck"><a class="header" href="#nocheck"><code>NoCheck</code></a></h3>
-<p>This is the default behavior until pyserde v0.8.3 and v0.9.x. No type coercion or checks are run. Even if a user puts a wrong value, pyserde doesn't complain anything.</p>
+<p>pyserde offers runtime type checking since v0.9. It was completely reworked at v0.14 using <a href="https://github.com/beartype/beartype">beartype</a> and it became more sophisticated and reliable. It is highly recommended to enable type checking always as it helps writing type-safe and robust programs.</p>
+<h2 id="strict"><a class="header" href="#strict"><code>strict</code></a></h2>
+<p>Strict type checking is to check every field value against the declared type during (de)serialization and object construction. This is the default type check mode since v0.14. What will happen with this mode is if you declare a class with <code>@serde</code> decorator without any class attributes, <code>@serde(type_check=strict)</code> is assumed and strict type checking is enabled.</p>
 <pre><code class="language-python">@serde
-@dataclass
+class Foo
+    s: str
+</code></pre>
+<p>If you call <code>Foo</code> with wrong type of object,</p>
+<pre><code class="language-python">foo = Foo(10)
+</code></pre>
+<p>you get an error</p>
+<pre><code class="language-python">beartype.roar.BeartypeCallHintParamViolation: Method __main__.Foo.__init__() parameter s=10 violates type hint &lt;class 'str'&gt;, as int 10 not instance of str.
+</code></pre>
+<blockquote>
+<p><strong>NOTE:</strong> beartype exception instead of SerdeError is raised from constructor because beartype does not provide post validation hook as of Feb. 2024.</p>
+</blockquote>
+<p>similarly, if you call (de)serialize APIs with wrong type of object,</p>
+<pre><code class="language-python">print(to_json(foo))
+</code></pre>
+<p>again you get an error</p>
+<pre><code class="language-python">serde.compat.SerdeError: Method __main__.Foo.__init__() parameter s=10 violates type hint &lt;class 'str'&gt;, as int 10 not instance of str.
+</code></pre>
+<blockquote>
+<p><strong>NOTE:</strong> There are several caveats regarding type checks by beartype.</p>
+<ol>
+<li>beartype can not validate on mutated properties</li>
+</ol>
+<p>The following code mutates the property "s" at the bottom. beartype can not detect this case.</p>
+<pre><code class="language-python">@serde
 class Foo
     s: str
 
-foo = Foo(10)
-# pyserde doesn't complain anything. {"s": 10} will be printed.
-print(to_json(foo))
+f = Foo("foo")
+f.s = 100
 </code></pre>
-<h3 id="coerce"><a class="header" href="#coerce"><code>Coerce</code></a></h3>
+<ol start="2">
+<li>beartype can not validate every one of elements in containers. This is not a bug. This is desgin principle of beartype. See [Does beartype actually do anything?](https://beartype.readthedocs.io/en/latest/faq/#faq-o1].</li>
+</ol>
+<pre><code></code></pre>
+</blockquote>
+<h2 id="coerce"><a class="header" href="#coerce"><code>coerce</code></a></h2>
 <p>Type coercing automatically converts a value into the declared type during (de)serialization. If the value is incompatible e.g. value is "foo" and type is int, pyserde raises an <code>SerdeError</code>.</p>
 <pre><code class="language-python">@serde(type_check=Coerce)
 @dataclass
@@ -1006,37 +1036,17 @@ foo = Foo(10)
 # {"s": "10"} will be printed.
 print(to_json(foo))
 </code></pre>
-<h3 id="strict"><a class="header" href="#strict"><code>Strict</code></a></h3>
-<p>Strict type checking is to check every value against the declared type during (de)serialization. We plan to make <code>Strict</code> a default type checker in the future release.</p>
-<pre><code class="language-python">@serde(type_check=Strict)
+<h2 id="disabled"><a class="header" href="#disabled"><code>disabled</code></a></h2>
+<p>This is the default behavior until pyserde v0.8.3 and v0.9.x. No type coercion or checks are run. Even if a user puts a wrong value, pyserde doesn't complain anything.</p>
+<pre><code class="language-python">@serde
 @dataclass
 class Foo
     s: str
 
 foo = Foo(10)
-# pyserde checks the value 10 is instance of `str`.
-# SerdeError will be raised in this case because of the type mismatch.
+# pyserde doesn't complain anything. {"s": 10} will be printed.
 print(to_json(foo))
 </code></pre>
-<blockquote>
-<p><strong>NOTE:</strong> Since pyserde is a serialization framework, it provides type checks or coercing only during (de)serialization. For example, pyserde doesn't complain even if incompatible value is assigned in the object below.</p>
-<pre><code class="language-python">@serde(type_check=Strict)
-@dataclass
-class Foo
-    s: str
-
-f = Foo(100) # pyserde doesn't raise an error
-</code></pre>
-<p>If you want to detect runtime type errors, I recommend to use <a href="https://github.com/beartype/beartype">beartype</a>.</p>
-<pre><code class="language-python">@beartype
-@serde(type_check=Strict)
-@dataclass
-class Foo
-    s: str
-
-f = Foo(100) # beartype raises an error
-</code></pre>
-</blockquote>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="extending-pyserde"><a class="header" href="#extending-pyserde">Extending pyserde</a></h1>
 <p>pyserde offers three ways to extend pyserde to support non builtin types.</p>
 <h2 id="custom-field-deserializer"><a class="header" href="#custom-field-deserializer">Custom field (de)serializer</a></h2>
