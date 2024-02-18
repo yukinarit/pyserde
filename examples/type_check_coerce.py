@@ -1,17 +1,17 @@
 from dataclasses import dataclass
 from typing import Dict, List, Optional
 
-from serde import Coerce, serde
+from serde import coerce, serde
 from serde.json import from_json, to_json
 
 
-@serde(type_check=Coerce)
+@serde(type_check=coerce)
 @dataclass
 class Bar:
     e: int
 
 
-@serde(type_check=Coerce)
+@serde(type_check=coerce)
 @dataclass
 class Foo:
     a: int

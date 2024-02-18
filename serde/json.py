@@ -7,8 +7,8 @@ from typing_extensions import Type
 
 from .compat import T
 from .de import Deserializer, from_dict
-from .numpy import encode_numpy
 from .se import Serializer, to_dict
+from .numpy import encode_numpy
 
 try:  # pragma: no cover
     import orjson

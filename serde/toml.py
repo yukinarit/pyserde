@@ -4,7 +4,7 @@ Serialize and Deserialize in TOML format. This module depends on
 [tomli-w](https://github.com/hukkin/tomli-w) packages.
 """
 import sys
-from typing import Type, Any, overload, Optional
+from typing import Type, overload, Optional, Any
 
 import tomli_w
 

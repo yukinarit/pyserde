@@ -2,7 +2,7 @@
 Serialize and Deserialize in YAML format. This module depends on
 [pyyaml](https://pypi.org/project/PyYAML/) package.
 """
-from typing import Type, Any, overload, Optional
+from typing import overload, Type, Optional, Any
 
 import yaml
 

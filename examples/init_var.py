@@ -12,7 +12,7 @@ class Foo:
     b: Optional[int] = field(default=None, init=False)
     c: InitVar[Optional[int]] = 1000
 
-    def __post_init__(self, c: Optional[int]) -> None:
+    def __post_init__(self, c: Optional[int]) -> None:  # type: ignore
         self.b = self.a * 10
 
 

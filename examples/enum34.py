@@ -43,9 +43,7 @@ def main() -> None:
     print(f)
     s = to_json(f)
 
-    # You can also pass an enum-compabitle value (in this case True for E.B).
-    # Caveat: Foo takes any value IE accepts. e.g., Foo(True) is also valid.
-    s = to_json(Foo(3))  # type: ignore
+    s = to_json(Foo(IE(3)))
     print(s)
 
 

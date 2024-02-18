@@ -29,13 +29,12 @@ def test_inheritance() -> None:
 
     @dataclass(kw_only=True)
     class Parent:
-        value: Optional[int]
+        child_val: Optional[str]
 
     @dataclass(kw_only=True)
     class Child(Parent):
         value: int = 42
         friend: Friend = field(default_factory=Friend)
-        child_val: str
 
     # check with defaults
     assert Child(child_val="test") == from_dict(Child, {"child_val": "test"})

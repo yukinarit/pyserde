@@ -1,15 +1,18 @@
 import logging
 import sys
+import uuid
 from dataclasses import dataclass
 from ipaddress import IPv4Address
-from typing import (
+from beartype.typing import (
     Dict,
     FrozenSet,
-    Generic,
     List,
+    Tuple,
+)
+from typing import (
+    Generic,
     NewType,
     Optional,
-    Tuple,
     TypeVar,
     Union,
     Any,
@@ -337,21 +340,27 @@ def test_union_exception_if_nothing_matches() -> None:
     )
 
     with pytest.raises(SerdeError) as ex4:
-        to_dict(A("not-ip-or-uuid"))
+        a = A(uuid.uuid4())
+        a.v = "not-ip-or-uuid"  # type: ignore
+        to_dict(a)  # type: ignore
     assert (
         str(ex4.value)
         == "Can not serialize 'not-ip-or-uuid' of type str for Union[IPv4Address, UUID]"
     )
 
     with pytest.raises(SerdeError) as ex5:
-        to_dict(A("not-ip-or-uuid"), reuse_instances=True)
+        a = A(uuid.uuid4())
+        a.v = "not-ip-or-uuid"  # type: ignore
+        to_dict(a, reuse_instances=True)
     assert (
         str(ex5.value)
         == "Can not serialize 'not-ip-or-uuid' of type str for Union[IPv4Address, UUID]"
     )
 
     with pytest.raises(SerdeError) as ex6:
-        to_dict(A(None), reuse_instances=True)
+        a = A(uuid.uuid4())
+        a.v = None  # typre: ignore
+        to_dict(a, reuse_instances=True)
     assert str(ex6.value) == "Can not serialize None of type NoneType for Union[IPv4Address, UUID]"
 
 

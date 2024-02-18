@@ -2,7 +2,8 @@
 Tests for custom serializer/deserializer.
 """
 from datetime import datetime
-from typing import List, Optional, Union, Set
+from typing import Optional, Union
+from beartype.typing import List, Set
 
 import pytest
 

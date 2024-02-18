@@ -8,23 +8,18 @@ import abc
 import copy
 import dataclasses
 import functools
-import typing
+from beartype import typing
 import itertools
+import beartype
 from dataclasses import dataclass, is_dataclass
-from typing import (
-    Any,
+from typing import TypeVar, Literal, Generic, Optional, Any, Iterable, Iterator
+from beartype.typing import (
     Callable,
     Dict,
-    Generic,
-    Iterator,
     List,
-    Optional,
     Tuple,
     Type,
-    TypeVar,
-    Iterable,
     Union,
-    Literal,
 )
 
 import jinja2
@@ -69,22 +64,21 @@ from .core import (
     SERDE_SCOPE,
     TO_DICT,
     TO_ITER,
-    TYPE_CHECK,
     UNION_SE_PREFIX,
     DefaultTagging,
     Field,
-    NoCheck,
     Scope,
     Tagging,
     TypeCheck,
     add_func,
-    coerce,
+    coerce_object,
+    disabled,
+    strict,
     conv,
     fields,
     is_instance,
     logger,
     raise_unsupported_type,
-    render_type_check,
     union_func_name,
     GLOBAL_CLASS_SERIALIZER,
 )
@@ -142,7 +136,7 @@ def _make_serialize(
     convert_sets_default: bool = False,
     serializer: Optional[SerializeFunc] = None,
     tagging: Tagging = DefaultTagging,
-    type_check: TypeCheck = NoCheck,
+    type_check: TypeCheck = disabled,
     serialize_class_var: bool = False,
     class_serializer: Optional[ClassSerializer] = None,
     **kwargs: Any,
@@ -179,7 +173,7 @@ def serialize(
     convert_sets_default: bool = False,
     serializer: Optional[SerializeFunc] = None,
     tagging: Tagging = DefaultTagging,
-    type_check: TypeCheck = NoCheck,
+    type_check: TypeCheck = strict,
     serialize_class_var: bool = False,
     class_serializer: Optional[ClassSerializer] = None,
     **kwargs: Any,
@@ -209,6 +203,9 @@ def serialize(
         # If no `dataclass` found in the class, dataclassify it automatically.
         if not is_dataclass(cls):
             dataclass(cls)
+
+        if type_check.is_strict():
+            beartype.beartype(cls)
 
         g: Dict[str, Any] = {}
 
@@ -242,8 +239,8 @@ def serialize(
         g["typing"] = typing
         g["Literal"] = Literal
         g["TypeCheck"] = TypeCheck
-        g["NoCheck"] = NoCheck
-        g["coerce"] = coerce
+        g["disabled"] = disabled
+        g["coerce_object"] = coerce_object
         g["class_serializers"] = class_serializers
         if serializer:
             g["serde_legacy_custom_class_serializer"] = functools.partial(
@@ -290,7 +287,6 @@ def serialize(
             ),
             g,
         )
-        add_func(scope, TYPE_CHECK, render_type_check(cls), g)
 
         logger.debug(f"{typename(cls)}: {SERDE_SCOPE} {scope}")
 
@@ -503,7 +499,7 @@ def sefields(cls: Type[Any], serialize_class_var: bool = False) -> Iterator[SeFi
 def render_to_tuple(
     cls: Type[Any],
     legacy_class_serializer: Optional[SerializeFunc] = None,
-    type_check: TypeCheck = NoCheck,
+    type_check: TypeCheck = strict,
     serialize_class_var: bool = False,
     class_serializer: Optional[ClassSerializer] = None,
 ) -> str:
@@ -515,10 +511,6 @@ def {{func}}(obj, reuse_instances=None, convert_sets=None):
     convert_sets = {{serde_scope.convert_sets_default}}
   if not is_dataclass(obj):
     return copy.deepcopy(obj)
-
-  {% if type_check.is_strict() %}
-  obj.__serde__.funcs['typecheck'](obj)
-  {% endif %}
 
   return (
   {% for f in fields -%}
@@ -550,7 +542,7 @@ def render_to_dict(
     cls: Type[Any],
     case: Optional[str] = None,
     legacy_class_serializer: Optional[SerializeFunc] = None,
-    type_check: TypeCheck = NoCheck,
+    type_check: TypeCheck = strict,
     serialize_class_var: bool = False,
     class_serializer: Optional[ClassSerializer] = None,
 ) -> str:
@@ -562,10 +554,6 @@ def {{func}}(obj, reuse_instances = None, convert_sets = None):
     convert_sets = {{serde_scope.convert_sets_default}}
   if not is_dataclass(obj):
     return copy.deepcopy(obj)
-
-  {% if type_check.is_strict() %}
-  obj.__serde__.funcs['typecheck'](obj)
-  {% endif %}
 
   res = {}
   {% for f in fields -%}
@@ -700,10 +688,10 @@ class Renderer:
 
         >>> from typing import Tuple
         >>> Renderer(TO_ITER).render(SeField(int, 'i'))
-        'coerce(int, i)'
+        'coerce_object(int, i)'
 
         >>> Renderer(TO_ITER).render(SeField(List[int], 'l'))
-        '[coerce(int, v) for v in l]'
+        '[coerce_object(int, v) for v in l]'
 
         >>> @serialize
         ... @dataclass(unsafe_hash=True)
@@ -719,18 +707,21 @@ foo.__serde__.funcs['to_iter'](foo, reuse_instances=reuse_instances, convert_set
 convert_sets=convert_sets) for v in foo]"
 
         >>> Renderer(TO_ITER).render(SeField(Dict[str, Foo], 'foo'))
-        "{coerce(str, k): v.__serde__.funcs['to_iter'](v, reuse_instances=reuse_instances, \
+        "\
+{coerce_object(str, k): v.__serde__.funcs['to_iter'](v, reuse_instances=reuse_instances, \
 convert_sets=convert_sets) for k, v in foo.items()}"
 
         >>> Renderer(TO_ITER).render(SeField(Dict[Foo, Foo], 'foo'))
-        "{k.__serde__.funcs['to_iter'](k, reuse_instances=reuse_instances, \
+        "\
+{k.__serde__.funcs['to_iter'](k, reuse_instances=reuse_instances, \
 convert_sets=convert_sets): v.__serde__.funcs['to_iter'](v, reuse_instances=reuse_instances, \
 convert_sets=convert_sets) for k, v in foo.items()}"
 
         >>> Renderer(TO_ITER).render(SeField(Tuple[str, Foo, int], 'foo'))
         "\
-(coerce(str, foo[0]), foo[1].__serde__.funcs['to_iter'](foo[1], reuse_instances=reuse_instances, \
-convert_sets=convert_sets), coerce(int, foo[2]),)"
+(coerce_object(str, foo[0]), foo[1].__serde__.funcs['to_iter'](foo[1], \
+reuse_instances=reuse_instances, convert_sets=convert_sets), \
+coerce_object(int, foo[2]),)"
         """
         implemented_methods: Dict[Type[Any], int] = {}
         class_serializers: Iterable[ClassSerializer] = itertools.chain(
@@ -903,7 +894,7 @@ convert_sets=convert_sets), coerce(int, foo[2]),)"
         if self.suppress_coerce:
             return var
         else:
-            return f"coerce({typ}, {var})"
+            return f"coerce_object({typ}, {var})"
 
     def string(self, arg: SeField[Any]) -> str:
         return f"str({arg.varname})"

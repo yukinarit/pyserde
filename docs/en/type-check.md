@@ -1,23 +1,59 @@
 # Type Checking
 
-This is one of the most awaited features. `pyserde` v0.9 adds the experimental type checkers. As this feature is still experimental, the type checking is not perfect. Also, [@tbsexton](https://github.com/tbsexton) is looking into [more beautiful solution](https://github.com/yukinarit/pyserde/issues/237#issuecomment-1191714102), the entire backend of type checker may be replaced by [beartype](https://github.com/beartype/beartype) in the future.
+pyserde offers runtime type checking since v0.9. It was completely reworked at v0.14 using [beartype](https://github.com/beartype/beartype) and it became more sophisticated and reliable. It is highly recommended to enable type checking always as it helps writing type-safe and robust programs.
 
-### `NoCheck`
+## `strict`
 
-This is the default behavior until pyserde v0.8.3 and v0.9.x. No type coercion or checks are run. Even if a user puts a wrong value, pyserde doesn't complain anything.
+Strict type checking is to check every field value against the declared type during (de)serialization and object construction. This is the default type check mode since v0.14. What will happen with this mode is if you declare a class with `@serde` decorator without any class attributes, `@serde(type_check=strict)` is assumed and strict type checking is enabled.
 
 ```python
 @serde
-@dataclass
 class Foo
     s: str
+```
 
+If you call `Foo` with wrong type of object,
+```python
 foo = Foo(10)
-# pyserde doesn't complain anything. {"s": 10} will be printed.
+```
+
+you get an error
+```python
+beartype.roar.BeartypeCallHintParamViolation: Method __main__.Foo.__init__() parameter s=10 violates type hint <class 'str'>, as int 10 not instance of str.
+```
+
+> **NOTE:** beartype exception instead of SerdeError is raised from constructor because beartype does not provide post validation hook as of Feb. 2024.
+
+similarly, if you call (de)serialize APIs with wrong type of object,
+
+```python
 print(to_json(foo))
 ```
 
-### `Coerce`
+again you get an error
+
+```python
+serde.compat.SerdeError: Method __main__.Foo.__init__() parameter s=10 violates type hint <class 'str'>, as int 10 not instance of str.
+```
+
+> **NOTE:** There are several caveats regarding type checks by beartype.
+>
+> 1. beartype can not validate on mutated properties
+>
+> The following code mutates the property "s" at the bottom. beartype can not detect this case.
+> ```python
+> @serde
+> class Foo
+>     s: str
+>
+> f = Foo("foo")
+> f.s = 100
+> ```
+>
+> 2. beartype can not validate every one of elements in containers. This is not a bug. This is desgin principle of beartype. See [Does beartype actually do anything?](https://beartype.readthedocs.io/en/latest/faq/#faq-o1].
+> ```
+
+## `coerce`
 
 Type coercing automatically converts a value into the declared type during (de)serialization. If the value is incompatible e.g. value is "foo" and type is int, pyserde raises an `SerdeError`.
 
@@ -33,40 +69,17 @@ foo = Foo(10)
 print(to_json(foo))
 ```
 
-### `Strict`
+## `disabled`
 
-Strict type checking is to check every value against the declared type during (de)serialization. We plan to make `Strict` a default type checker in the future release.
+This is the default behavior until pyserde v0.8.3 and v0.9.x. No type coercion or checks are run. Even if a user puts a wrong value, pyserde doesn't complain anything.
 
 ```python
-@serde(type_check=Strict)
+@serde
 @dataclass
 class Foo
     s: str
 
 foo = Foo(10)
-# pyserde checks the value 10 is instance of `str`.
-# SerdeError will be raised in this case because of the type mismatch.
+# pyserde doesn't complain anything. {"s": 10} will be printed.
 print(to_json(foo))
 ```
-
-> **NOTE:** Since pyserde is a serialization framework, it provides type checks or coercing only during (de)serialization. For example, pyserde doesn't complain even if incompatible value is assigned in the object below.
->
-> ```python
-> @serde(type_check=Strict)
-> @dataclass
-> class Foo
->     s: str
->
-> f = Foo(100) # pyserde doesn't raise an error
-> ```
->
-> If you want to detect runtime type errors, I recommend to use [beartype](https://github.com/beartype/beartype).
-> ```python
-> @beartype
-> @serde(type_check=Strict)
-> @dataclass
-> class Foo
->     s: str
->
-> f = Foo(100) # beartype raises an error
-> ```
