@@ -18,7 +18,10 @@ from typing import (
     List,
     Set,
     Tuple,
+    FrozenSet,
+    DefaultDict,
 )
+from collections import defaultdict
 from typing_extensions import TypeAlias
 
 import more_itertools
@@ -103,6 +106,16 @@ def yaml_not_supported(se: Any, de: Any, opt: Any) -> bool:
     return se is to_yaml
 
 
+K = TypeVar("K")
+
+
+def defaultdict_literal(value: Dict[K, T]) -> DefaultDict[K, T]:
+    d = defaultdict(T)  # type: ignore
+    for k, v in value.items():
+        d[k] = v
+    return d
+
+
 types: List[Tuple[Any, Any, Optional[Filter]]] = [
     param(10, int),  # Primitive
     param("foo", str),
@@ -118,7 +131,7 @@ types: List[Tuple[Any, Any, Optional[Filter]]] = [
     param({1, 2}, Set, toml_not_supported),
     param({1, 2}, set, toml_not_supported),
     param(set(), Set[int], toml_not_supported),
-    # TODO param(frozenset({1, 2}), FrozenSet[int], toml_not_supported),
+    param(frozenset({1, 2}), FrozenSet[int], toml_not_supported),
     param((1, 1), Tuple[int, int]),
     param((1, 1), Tuple),
     param((1, 2, 3), Tuple[int, ...]),
@@ -127,8 +140,8 @@ types: List[Tuple[Any, Any, Optional[Filter]]] = [
     param({"a": 1}, dict),
     param({}, Dict[str, int]),
     param({"a": 1}, Dict[str, int]),
-    # TODO param({"a": 1}, DefaultDict[str, int]),
-    # TODO param({"a": [1]}, DefaultDict[str, List[int]]),
+    param(defaultdict_literal({"a": 1}), DefaultDict[str, int]),
+    param(defaultdict_literal({"a": [1]}), DefaultDict[str, List[int]]),
     param(data.Pri(10, "foo", 100.0, True), data.Pri),  # dataclass
     param(data.Pri(10, "foo", 100.0, True), Optional[data.Pri]),
     param(
