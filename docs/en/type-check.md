@@ -8,7 +8,7 @@ Strict type checking is to check every field value against the declared type dur
 
 ```python
 @serde
-class Foo
+class Foo:
     s: str
 ```
 
