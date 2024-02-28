@@ -184,7 +184,7 @@
 <h2 id="strict"><a class="header" href="#strict"><code>strict</code></a></h2>
 <p>Strict type checking is to check every field value against the declared type during (de)serialization and object construction. This is the default type check mode since v0.14. What will happen with this mode is if you declare a class with <code>@serde</code> decorator without any class attributes, <code>@serde(type_check=strict)</code> is assumed and strict type checking is enabled.</p>
 <pre><code class="language-python">@serde
-class Foo
+class Foo:
     s: str
 </code></pre>
 <p>If you call <code>Foo</code> with wrong type of object,</p>
