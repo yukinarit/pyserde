@@ -407,6 +407,11 @@ def from_obj(c: Type[T], o: Any, named: bool, reuse_instances: Optional[bool]) -
 
     res: Any
 
+    # It is possible that the parser already generates the correct data type requested
+    # by the caller. Hence, it should be checked early to avoid doing anymore work.
+    if type(o) is c:
+        return o
+
     def deserializable_to_obj(cls: Type[T]) -> T:
         serde_scope: Scope = getattr(cls, SERDE_SCOPE)
         func_name = FROM_DICT if named else FROM_ITER
