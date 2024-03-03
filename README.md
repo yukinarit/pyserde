@@ -144,6 +144,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/maallaire"><img src="https://avatars.githubusercontent.com/u/38792535?v=4?s=60" width="60px;" alt="Marc-André Allaire"/><br /><sub><b>Marc-André Allaire</b></sub></a><br /><a href="https://github.com/yukinarit/pyserde/commits?author=maallaire" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/gschaffner"><img src="https://avatars.githubusercontent.com/u/11418203?v=4?s=60" width="60px;" alt="Ganden Schaffner"/><br /><sub><b>Ganden Schaffner</b></sub></a><br /><a href="https://github.com/yukinarit/pyserde/commits?author=gschaffner" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/davetapley"><img src="https://avatars.githubusercontent.com/u/48232?v=4?s=60" width="60px;" alt="Dave Tapley"/><br /><sub><b>Dave Tapley</b></sub></a><br /><a href="https://github.com/yukinarit/pyserde/commits?author=davetapley" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/uyha"><img src="https://avatars.githubusercontent.com/u/8091245?v=4?s=60" width="60px;" alt="Beartama"/><br /><sub><b>Beartama</b></sub></a><br /><a href="https://github.com/yukinarit/pyserde/commits?author=uyha" title="Code">💻</a></td>
     </tr>
   </tbody>
   <tfoot>
