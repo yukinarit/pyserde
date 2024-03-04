@@ -21,6 +21,7 @@ from beartype.typing import (
     Type,
     Union,
 )
+from beartype.door import is_bearable
 
 import jinja2
 from typing_extensions import dataclass_transform
@@ -370,13 +371,13 @@ def to_obj(
             return serializable_to_obj(o)
         if is_serializable(o):
             return serializable_to_obj(o)
-        elif isinstance(o, list):
+        elif is_bearable(o, list):
             return [thisfunc(e) for e in o]
-        elif isinstance(o, tuple):
+        elif is_bearable(o, tuple):
             return tuple(thisfunc(e) for e in o)
-        elif isinstance(o, set):
+        elif is_bearable(o, set):
             return [thisfunc(e) for e in o]
-        elif isinstance(o, dict):
+        elif is_bearable(o, dict):
             return {k: thisfunc(v) for k, v in o.items()}
         elif is_str_serializable_instance(o):
             return str(o)
@@ -766,7 +767,7 @@ coerce_object(int, foo[2]),)"
             res = f"{arg.varname} if reuse_instances else {arg.varname}.isoformat()"
         elif is_none(arg.type):
             res = "None"
-        elif is_any(arg.type) or isinstance(arg.type, TypeVar):
+        elif is_any(arg.type) or is_bearable(arg.type, TypeVar):
             res = f"to_obj({arg.varname}, True, False, False, c=typing.Any)"
         elif is_generic(arg.type):
             origin = get_origin(arg.type)
