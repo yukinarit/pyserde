@@ -52,7 +52,12 @@ class JsonDeserializer(Deserializer[AnyStr]):
 
 
 def to_json(
-    obj: Any, cls: Optional[Any] = None, se: Type[Serializer[str]] = JsonSerializer, **opts: Any
+    obj: Any,
+    cls: Optional[Any] = None,
+    se: Type[Serializer[str]] = JsonSerializer,
+    reuse_instances: bool = False,
+    convert_sets: bool = True,
+    **opts: Any,
 ) -> str:
     """
     Serialize the object into JSON str. [orjson](https://github.com/ijl/orjson)
@@ -67,7 +72,9 @@ def to_json(
     If you want to use another json package, you can subclass `JsonSerializer` and implement
     your own logic.
     """
-    return se.serialize(to_dict(obj, c=cls, reuse_instances=False, convert_sets=True), **opts)
+    return se.serialize(
+        to_dict(obj, c=cls, reuse_instances=reuse_instances, convert_sets=convert_sets), **opts
+    )
 
 
 @overload

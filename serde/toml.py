@@ -34,7 +34,12 @@ class TomlDeserializer(Deserializer[str]):
 
 
 def to_toml(
-    obj: Any, cls: Optional[Any] = None, se: Type[Serializer[str]] = TomlSerializer, **opts: Any
+    obj: Any,
+    cls: Optional[Any] = None,
+    se: Type[Serializer[str]] = TomlSerializer,
+    reuse_instances: bool = False,
+    convert_sets: bool = True,
+    **opts: Any,
 ) -> str:
     """
     Serialize the object into TOML.
@@ -45,7 +50,9 @@ def to_toml(
     If you want to use the other toml package, you can subclass `TomlSerializer` and implement
     your own logic.
     """
-    return se.serialize(to_dict(obj, c=cls, reuse_instances=False), **opts)
+    return se.serialize(
+        to_dict(obj, c=cls, reuse_instances=reuse_instances, convert_sets=convert_sets), **opts
+    )
 
 
 @overload

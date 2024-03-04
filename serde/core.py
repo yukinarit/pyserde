@@ -150,13 +150,13 @@ class Cache:
         logger.debug(f"(de)serializing code for {class_name} was generated")
         return wrapper
 
-    def serialize(self, cls: Type[Any], obj: Any) -> Any:
+    def serialize(self, cls: Type[Any], obj: Any, **kwargs: Any) -> Any:
         """
         Serialize the specified type of object into dict or tuple.
         """
         wrapper = self._get_class(cls)
         scope: Scope = getattr(wrapper, SERDE_SCOPE)
-        data = scope.funcs[TO_DICT](wrapper(obj), reuse_instances=False, convert_sets=True)
+        data = scope.funcs[TO_DICT](wrapper(obj), **kwargs)
 
         logging.debug(f"Intermediate value: {data}")
 
