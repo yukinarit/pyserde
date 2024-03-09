@@ -366,7 +366,10 @@ def to_obj(
         if o is None:
             return None
         if is_dataclass_without_se(o):
-            serialize(type(o))
+            # Do not automatically implement beartype if dataclass without serde decorator
+            # is passed, because it is surprising for users
+            # See https://github.com/yukinarit/pyserde/issues/480
+            serialize(type(o), type_check=disabled)
             return serializable_to_obj(o)
         elif is_serializable(o):
             return serializable_to_obj(o)

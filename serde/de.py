@@ -438,7 +438,10 @@ def from_obj(c: Type[T], o: Any, named: bool, reuse_instances: Optional[bool]) -
     try:
         thisfunc = functools.partial(from_obj, named=named, reuse_instances=reuse_instances)
         if is_dataclass_without_de(c):
-            deserialize(c)
+            # Do not automatically implement beartype if dataclass without serde decorator
+            # is passed, because it is surprising for users
+            # See https://github.com/yukinarit/pyserde/issues/480
+            deserialize(c, type_check=disabled)
             res = deserializable_to_obj(c)
         elif is_deserializable(c):
             res = deserializable_to_obj(c)
