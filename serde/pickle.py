@@ -24,9 +24,16 @@ class PickleDeserializer(Deserializer[bytes]):
 
 
 def to_pickle(
-    obj: Any, cls: Optional[Any] = None, se: Type[Serializer[bytes]] = PickleSerializer, **opts: Any
+    obj: Any,
+    cls: Optional[Any] = None,
+    se: Type[Serializer[bytes]] = PickleSerializer,
+    reuse_instances: bool = False,
+    convert_sets: bool = True,
+    **opts: Any,
 ) -> bytes:
-    return se.serialize(to_dict(obj, c=cls, reuse_instances=False), **opts)
+    return se.serialize(
+        to_dict(obj, c=cls, reuse_instances=reuse_instances, convert_sets=convert_sets), **opts
+    )
 
 
 @overload

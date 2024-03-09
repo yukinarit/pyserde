@@ -45,6 +45,8 @@ def to_msgpack(
     se: Type[Serializer[bytes]] = MsgPackSerializer,
     named: bool = True,
     ext_dict: Optional[Dict[Type[Any], int]] = None,
+    reuse_instances: bool = False,
+    convert_sets: bool = True,
     **opts: Any,
 ) -> bytes:
     """
@@ -68,7 +70,7 @@ def to_msgpack(
         if ext_type_code is None:
             raise SerdeError(f"Could not find type code for {obj_type.__name__} in ext_dict")
 
-    kwargs: Any = {"c": cls, "reuse_instances": False, "convert_sets": True}
+    kwargs: Any = {"c": cls, "reuse_instances": reuse_instances, "convert_sets": convert_sets}
     dict_or_tuple = to_dict(obj, **kwargs) if named else to_tuple(obj, **kwargs)
     return se.serialize(
         dict_or_tuple,

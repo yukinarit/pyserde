@@ -2,6 +2,7 @@ import dataclasses
 import enum
 import logging
 import uuid
+import datetime
 from beartype.roar import BeartypeCallHintViolation
 from typing import (
     ClassVar,
@@ -109,6 +110,16 @@ def test_simple_with_reuse_instances(se, de, opt, t, T, filter):
 
     c = C(Nested(t))
     assert c == de(C, se(c, reuse_instances=True), reuse_instances=True)
+
+
+def test_non_dataclass_reuse_instances() -> None:
+    dt = datetime.datetime.fromisoformat("2020-01-01 00:00:00+00:00")
+    assert "2020-01-01T00:00:00+00:00" == serde.to_dict(dt, reuse_instances=False)  # type: ignore
+    assert dt == serde.to_dict(dt, reuse_instances=True)
+    assert dt is serde.to_dict(dt, reuse_instances=True)
+    assert "2020-01-01T00:00:00+00:00" == serde.to_tuple(dt, reuse_instances=False)  # type: ignore
+    assert dt == serde.to_dict(dt, reuse_instances=True)
+    assert dt is serde.to_dict(dt, reuse_instances=True)
 
 
 def test_non_dataclass():
@@ -480,10 +491,8 @@ def test_toml():
     class Foo:
         v: Set[int]
 
-    # TODO: Should raise SerdeError
-    with pytest.raises(TypeError):
-        f = Foo({1, 2, 3})
-        serde.toml.to_toml(f)
+    f = Foo({1, 2, 3})
+    serde.toml.to_toml(f)
 
 
 @pytest.mark.parametrize("se,de", all_formats)

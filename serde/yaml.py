@@ -26,7 +26,12 @@ class YamlDeserializer(Deserializer[str]):
 
 
 def to_yaml(
-    obj: Any, cls: Optional[Any] = None, se: Type[Serializer[str]] = YamlSerializer, **opts: Any
+    obj: Any,
+    cls: Optional[Any] = None,
+    se: Type[Serializer[str]] = YamlSerializer,
+    reuse_instances: bool = False,
+    convert_sets: bool = True,
+    **opts: Any,
 ) -> str:
     """
     Serialize the object into YAML.
@@ -37,7 +42,9 @@ def to_yaml(
     If you want to use the other yaml package, you can subclass `YamlSerializer` and implement
     your own logic.
     """
-    return se.serialize(to_dict(obj, c=cls, reuse_instances=False), **opts)
+    return se.serialize(
+        to_dict(obj, c=cls, reuse_instances=reuse_instances, convert_sets=convert_sets), **opts
+    )
 
 
 @overload

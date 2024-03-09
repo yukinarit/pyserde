@@ -368,7 +368,7 @@ def to_obj(
         if is_dataclass_without_se(o):
             serialize(type(o))
             return serializable_to_obj(o)
-        if is_serializable(o):
+        elif is_serializable(o):
             return serializable_to_obj(o)
         elif isinstance(o, list):
             return [thisfunc(e) for e in o]
@@ -378,10 +378,10 @@ def to_obj(
             return [thisfunc(e) for e in o]
         elif isinstance(o, dict):
             return {k: thisfunc(v) for k, v in o.items()}
-        elif is_str_serializable_instance(o):
-            return str(o)
-        elif is_datetime_instance(o):
-            return o.isoformat()
+        elif is_str_serializable_instance(o) or is_datetime_instance(o):
+            return CACHE.serialize(
+                c or o.__class__, o, reuse_instances=reuse_instances, convert_sets=convert_sets
+            )
 
         return o
 
