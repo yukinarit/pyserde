@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 import datetime
 import pathlib
 from beartype.roar import BeartypeCallHintViolation
@@ -15,6 +16,7 @@ from beartype.typing import (
 import pytest
 
 import serde
+import serde.json
 
 from . import data
 
@@ -98,6 +100,18 @@ def test_type_check_strict(T: Any, data: Any, exc: bool) -> None:
     else:
         d = serde.to_dict(C(data))
         serde.from_dict(C, d)
+
+
+def test_type_check_disabled_for_dataclass_without_serde() -> None:
+    @dataclass
+    class Foo:
+        value: int
+
+    f = Foo("100")  # type: ignore
+    data = serde.json.to_json(f)
+    assert f == serde.json.from_json(Foo, data)
+
+    f = Foo("100")  # type: ignore
 
 
 def test_uncoercible() -> None:
