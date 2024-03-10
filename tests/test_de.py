@@ -5,7 +5,7 @@ from beartype.typing import List, Tuple
 from serde.de import from_obj
 
 
-def test_from_obj():
+def test_from_obj() -> None:
     # Primitive
     assert 10 == from_obj(int, 10, False, False)
 
