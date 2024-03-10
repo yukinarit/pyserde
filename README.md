@@ -146,6 +146,9 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/davetapley"><img src="https://avatars.githubusercontent.com/u/48232?v=4?s=60" width="60px;" alt="Dave Tapley"/><br /><sub><b>Dave Tapley</b></sub></a><br /><a href="https://github.com/yukinarit/pyserde/commits?author=davetapley" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/uyha"><img src="https://avatars.githubusercontent.com/u/8091245?v=4?s=60" width="60px;" alt="Beartama"/><br /><sub><b>Beartama</b></sub></a><br /><a href="https://github.com/yukinarit/pyserde/commits?author=uyha" title="Code">💻</a></td>
     </tr>
+    <tr>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/rtbs-dev"><img src="https://avatars.githubusercontent.com/u/12550525?v=4?s=60" width="60px;" alt="Rachael Sexton"/><br /><sub><b>Rachael Sexton</b></sub></a><br /><a href="https://github.com/yukinarit/pyserde/commits?author=rtbs-dev" title="Code">💻</a></td>
+    </tr>
   </tbody>
   <tfoot>
     <tr>

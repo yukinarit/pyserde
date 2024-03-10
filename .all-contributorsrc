@@ -262,6 +262,15 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "rtbs-dev",
+      "name": "Rachael Sexton",
+      "avatar_url": "https://avatars.githubusercontent.com/u/12550525?v=4",
+      "profile": "https://github.com/rtbs-dev",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,
