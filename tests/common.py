@@ -180,7 +180,7 @@ if sys.version_info[:3] >= (3, 9, 0):
         [param([1, 2], list[int]), param({"a": 1}, dict[str, int]), param((1, 1), tuple[int, int])]
     )
 
-types_combinations: List = [
+types_combinations: List[Any] = [
     list(more_itertools.flatten(c)) for c in itertools.combinations(types, 2)
 ]
 
@@ -191,7 +191,7 @@ opt_case: List[Dict[str, Union[bool, str]]] = [
 ]
 
 
-def make_id_from_dict(d: Dict[str, str]) -> str:
+def make_id_from_dict(d: Dict[str, Union[bool, str]]) -> str:
     if not d:
         return "none"
     else:
@@ -199,24 +199,33 @@ def make_id_from_dict(d: Dict[str, str]) -> str:
         return f"{key}-{d[key]}"
 
 
-def opt_case_ids():
+def opt_case_ids() -> List[str]:
+    """
+    Create parametrize test id
+    """
     return list(map(make_id_from_dict, opt_case))
 
 
-def type_ids():
+def type_ids() -> List[str]:
+    """
+    Create parametrize test id
+    """
     from serde.compat import typename
 
-    def make_id(pair: Tuple):
+    def make_id(pair: Tuple[Any, ...]) -> str:
         t, T, _ = pair
         return f"{typename(T)}({t})"
 
     return list(map(make_id, types))
 
 
-def type_combinations_ids():
+def type_combinations_ids() -> List[str]:
+    """
+    Create parametrize test id
+    """
     from serde.compat import typename
 
-    def make_id(quad: Tuple):
+    def make_id(quad: Tuple[Any, ...]) -> str:
         t, T, u, U = quad
         return f"{typename(T)}({t})-{typename(U)}({u})"
 
