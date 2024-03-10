@@ -73,4 +73,4 @@ jobs:
       - name: Check coverage
         run: make coverage
       - name: Upload coverage report to codecov.io
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v4
