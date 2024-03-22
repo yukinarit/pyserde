@@ -2,6 +2,7 @@
 Serialize and Deserialize in MsgPack format. This module depends on
 [msgpack](https://pypi.org/project/msgpack/) package.
 """
+
 from typing import Any, Type, Optional, overload
 from beartype.typing import Dict
 
@@ -87,8 +88,7 @@ def from_msgpack(
     named: bool = True,
     ext_dict: Optional[Dict[int, Type[Any]]] = None,
     **opts: Any,
-) -> T:
-    ...
+) -> T: ...
 
 
 @overload
@@ -99,8 +99,7 @@ def from_msgpack(
     named: bool = True,
     ext_dict: Optional[Dict[int, Type[Any]]] = None,
     **opts: Any,
-) -> Any:
-    ...
+) -> Any: ...
 
 
 def from_msgpack(

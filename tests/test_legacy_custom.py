@@ -1,6 +1,7 @@
 """
 Tests for custom serializer/deserializer.
 """
+
 from datetime import datetime
 from typing import Optional, Union
 from beartype.typing import List, Set

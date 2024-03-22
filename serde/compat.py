@@ -1,6 +1,7 @@
 """
 Compatibility layer which handles mostly differences of `typing` module between python versions.
 """
+
 import dataclasses
 import datetime
 import decimal

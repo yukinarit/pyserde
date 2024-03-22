@@ -1,6 +1,7 @@
 """
 bench.py - Benchmarking pyserde.
 """
+
 from __future__ import annotations
 import json
 import timeit

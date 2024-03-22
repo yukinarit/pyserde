@@ -6,6 +6,7 @@ Usage:
     $ poetry install
     $ poetry run python rename_all.py
 """
+
 from dataclasses import dataclass
 from typing import Optional
 

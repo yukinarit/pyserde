@@ -1,6 +1,7 @@
 """
 Serialize and Deserialize in JSON format.
 """
+
 from typing import Any, AnyStr, overload, Optional, Union
 
 from typing_extensions import Type
@@ -80,16 +81,14 @@ def to_json(
 @overload
 def from_json(
     c: Type[T], s: AnyStr, de: Type[Deserializer[AnyStr]] = JsonDeserializer, **opts: Any
-) -> T:
-    ...
+) -> T: ...
 
 
 # For Union, Optional etc.
 @overload
 def from_json(
     c: Any, s: AnyStr, de: Type[Deserializer[AnyStr]] = JsonDeserializer, **opts: Any
-) -> Any:
-    ...
+) -> Any: ...
 
 
 def from_json(

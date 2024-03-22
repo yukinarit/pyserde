@@ -7,6 +7,7 @@ Usage:
     $ poetry install
     $ poetry run python jsonfile.py
 """
+
 from dataclasses import dataclass
 from typing import List, Optional
 
