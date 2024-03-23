@@ -8,32 +8,28 @@ Usage:
     $ poetry run python jsonfile.py
 """
 
-from dataclasses import dataclass
-from typing import List, Optional
+from typing import Optional
 
 from serde import serde
 from serde.json import from_json
 
 
 @serde
-@dataclass
 class Slide:
     title: str
     type: str
-    items: Optional[List[str]]
+    items: Optional[list[str]]
 
 
 @serde
-@dataclass
 class Slideshow:
     author: str
     date: str
-    slides: List[Slide]
+    slides: list[Slide]
     title: str
 
 
 @serde
-@dataclass
 class Data:
     slideshow: Slideshow
 

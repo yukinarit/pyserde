@@ -14,10 +14,6 @@ from typing import (
     TypeVar,
     Union,
     Callable,
-    Dict,
-    List,
-    Set,
-    Tuple,
 )
 from typing_extensions import TypeAlias
 
@@ -31,7 +27,7 @@ from serde.toml import from_toml, to_toml
 from serde.yaml import from_yaml, to_yaml
 from tests import data
 
-FormatFuncs: TypeAlias = List[Tuple[Callable[..., Any], Callable[..., Any]]]
+FormatFuncs: TypeAlias = list[tuple[Callable[..., Any], Callable[..., Any]]]
 
 format_dict: FormatFuncs = [(to_dict, from_dict)]
 
@@ -84,7 +80,7 @@ class NestedGenericClass(Generic[U, V]):
 Filter: TypeAlias = Callable[..., bool]
 
 
-def param(val: T, typ: U, filter: Optional[Filter] = None) -> Tuple[T, U, Filter]:
+def param(val: T, typ: U, filter: Optional[Filter] = None) -> tuple[T, U, Filter]:
     """
     Create a test parameter
 
@@ -103,30 +99,28 @@ def yaml_not_supported(se: Any, de: Any, opt: Any) -> bool:
     return se is to_yaml
 
 
-types: List[Tuple[Any, Any, Optional[Filter]]] = [
+types: list[tuple[Any, Any, Optional[Filter]]] = [
     param(10, int),  # Primitive
     param("foo", str),
     param(100.0, float),
     param(True, bool),
     param(10, Optional[int]),  # Optional
     param(None, Optional[int], toml_not_supported),
-    param([1, 2], List[int]),  # Container
-    param([1, 2], List),
+    param([1, 2], list[int]),  # Container
     param([1, 2], list),
-    param([], List[int]),
-    param({1, 2}, Set[int], toml_not_supported),
-    param({1, 2}, Set, toml_not_supported),
+    param([], list[int]),
+    param({1, 2}, set[int], toml_not_supported),
     param({1, 2}, set, toml_not_supported),
-    param(set(), Set[int], toml_not_supported),
+    param(set(), set[int], toml_not_supported),
     # TODO param(frozenset({1, 2}), FrozenSet[int], toml_not_supported),
-    param((1, 1), Tuple[int, int]),
-    param((1, 1), Tuple),
-    param((1, 2, 3), Tuple[int, ...]),
-    param({"a": 1}, Dict[str, int]),
-    param({"a": 1}, Dict),
+    param((1, 1), tuple[int, int]),
+    param((1, 1), tuple),
+    param((1, 2, 3), tuple[int, ...]),
+    param({"a": 1}, dict[str, int]),
     param({"a": 1}, dict),
-    param({}, Dict[str, int]),
-    param({"a": 1}, Dict[str, int]),
+    param({"a": 1}, dict),
+    param({}, dict[str, int]),
+    param({"a": 1}, dict[str, int]),
     # TODO param({"a": 1}, DefaultDict[str, int]),
     # TODO param({"a": [1]}, DefaultDict[str, List[int]]),
     param(data.Pri(10, "foo", 100.0, True), data.Pri),  # dataclass
@@ -180,18 +174,18 @@ if sys.version_info[:3] >= (3, 9, 0):
         [param([1, 2], list[int]), param({"a": 1}, dict[str, int]), param((1, 1), tuple[int, int])]
     )
 
-types_combinations: List[Any] = [
+types_combinations: list[Any] = [
     list(more_itertools.flatten(c)) for c in itertools.combinations(types, 2)
 ]
 
-opt_case: List[Dict[str, Union[bool, str]]] = [
+opt_case: list[dict[str, Union[bool, str]]] = [
     {"reuse_instances_default": False},
     {"reuse_instances_default": False, "rename_all": "camelcase"},
     {"reuse_instances_default": False, "rename_all": "snakecase"},
 ]
 
 
-def make_id_from_dict(d: Dict[str, Union[bool, str]]) -> str:
+def make_id_from_dict(d: dict[str, Union[bool, str]]) -> str:
     if not d:
         return "none"
     else:
@@ -199,33 +193,33 @@ def make_id_from_dict(d: Dict[str, Union[bool, str]]) -> str:
         return f"{key}-{d[key]}"
 
 
-def opt_case_ids() -> List[str]:
+def opt_case_ids() -> list[str]:
     """
     Create parametrize test id
     """
     return list(map(make_id_from_dict, opt_case))
 
 
-def type_ids() -> List[str]:
+def type_ids() -> list[str]:
     """
     Create parametrize test id
     """
     from serde.compat import typename
 
-    def make_id(pair: Tuple[Any, ...]) -> str:
+    def make_id(pair: tuple[Any, ...]) -> str:
         t, T, _ = pair
         return f"{typename(T)}({t})"
 
     return list(map(make_id, types))
 
 
-def type_combinations_ids() -> List[str]:
+def type_combinations_ids() -> list[str]:
     """
     Create parametrize test id
     """
     from serde.compat import typename
 
-    def make_id(quad: Tuple[Any, ...]) -> str:
+    def make_id(quad: tuple[Any, ...]) -> str:
         t, T, u, U = quad
         return f"{typename(T)}({t})-{typename(U)}({u})"
 

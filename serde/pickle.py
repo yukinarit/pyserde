@@ -3,7 +3,7 @@ Serialize and Deserialize in Pickle format.
 """
 
 import pickle
-from typing import overload, Type, Any, Optional
+from typing import overload, Any, Optional
 
 from .compat import T
 from .de import Deserializer, from_dict
@@ -27,7 +27,7 @@ class PickleDeserializer(Deserializer[bytes]):
 def to_pickle(
     obj: Any,
     cls: Optional[Any] = None,
-    se: Type[Serializer[bytes]] = PickleSerializer,
+    se: type[Serializer[bytes]] = PickleSerializer,
     reuse_instances: bool = False,
     convert_sets: bool = True,
     **opts: Any,
@@ -39,18 +39,18 @@ def to_pickle(
 
 @overload
 def from_pickle(
-    c: Type[T], data: bytes, de: Type[Deserializer[bytes]] = PickleDeserializer, **opts: Any
+    c: type[T], data: bytes, de: type[Deserializer[bytes]] = PickleDeserializer, **opts: Any
 ) -> T: ...
 
 
 @overload
 def from_pickle(
-    c: Any, data: bytes, de: Type[Deserializer[bytes]] = PickleDeserializer, **opts: Any
+    c: Any, data: bytes, de: type[Deserializer[bytes]] = PickleDeserializer, **opts: Any
 ) -> Any: ...
 
 
 # For Union, Optional etc.
 def from_pickle(
-    c: Any, data: bytes, de: Type[Deserializer[bytes]] = PickleDeserializer, **opts: Any
+    c: Any, data: bytes, de: type[Deserializer[bytes]] = PickleDeserializer, **opts: Any
 ) -> Any:
     return from_dict(c, de.deserialize(data, **opts), reuse_instances=False)

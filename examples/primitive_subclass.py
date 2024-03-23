@@ -1,7 +1,5 @@
-from dataclasses import dataclass
 from serde.json import from_json, to_json
 from serde import field, serde
-from typing import Dict, List
 
 
 class Id(str):
@@ -10,11 +8,10 @@ class Id(str):
 
 
 @serde
-@dataclass
 class Foo:
     a: Id = field(default_factory=Id)
-    b: Dict[Id, float] = field(default_factory=dict)
-    c: List[Id] = field(default_factory=list)
+    b: dict[Id, float] = field(default_factory=dict)
+    c: list[Id] = field(default_factory=list)
 
 
 def main() -> None:

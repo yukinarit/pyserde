@@ -3,7 +3,7 @@ Serialize and Deserialize in YAML format. This module depends on
 [pyyaml](https://pypi.org/project/PyYAML/) package.
 """
 
-from typing import overload, Type, Optional, Any
+from typing import overload, Optional, Any
 
 import yaml
 
@@ -29,7 +29,7 @@ class YamlDeserializer(Deserializer[str]):
 def to_yaml(
     obj: Any,
     cls: Optional[Any] = None,
-    se: Type[Serializer[str]] = YamlSerializer,
+    se: type[Serializer[str]] = YamlSerializer,
     reuse_instances: bool = False,
     convert_sets: bool = True,
     **opts: Any,
@@ -50,18 +50,18 @@ def to_yaml(
 
 @overload
 def from_yaml(
-    c: Type[T], s: str, de: Type[Deserializer[str]] = YamlDeserializer, **opts: Any
+    c: type[T], s: str, de: type[Deserializer[str]] = YamlDeserializer, **opts: Any
 ) -> T: ...
 
 
 # For Union, Optional etc.
 @overload
 def from_yaml(
-    c: Any, s: str, de: Type[Deserializer[str]] = YamlDeserializer, **opts: Any
+    c: Any, s: str, de: type[Deserializer[str]] = YamlDeserializer, **opts: Any
 ) -> Any: ...
 
 
-def from_yaml(c: Any, s: str, de: Type[Deserializer[str]] = YamlDeserializer, **opts: Any) -> Any:
+def from_yaml(c: Any, s: str, de: type[Deserializer[str]] = YamlDeserializer, **opts: Any) -> Any:
     """
     `c` is a class obejct and `s` is YAML string. If you supply keyword arguments other than `de`,
     they will be passed in `yaml.safe_load` function.

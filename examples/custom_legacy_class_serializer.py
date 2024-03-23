@@ -1,4 +1,3 @@
-from dataclasses import dataclass
 from datetime import datetime
 from typing import Type, Any
 
@@ -31,7 +30,6 @@ def deserializer(cls: Type[Any], o: Any) -> datetime:
 
 
 @serde(serializer=serializer, deserializer=deserializer)
-@dataclass
 class Foo:
     a: datetime
     # Override by field serializer/deserializer.

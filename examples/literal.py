@@ -1,5 +1,3 @@
-from dataclasses import dataclass
-
 from serde.compat import SerdeError
 from typing import Literal
 
@@ -8,7 +6,6 @@ from serde.json import from_json, to_json
 
 
 @serde
-@dataclass
 class Foo:
     i: Literal[1, 2]
     s: Literal["a", "b"]

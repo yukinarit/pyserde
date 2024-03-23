@@ -1,4 +1,3 @@
-from dataclasses import dataclass
 from typing import NewType
 
 from serde import serde
@@ -8,7 +7,6 @@ UserId = NewType("UserId", int)
 
 
 @serde
-@dataclass
 class Foo:
     id: UserId
 
