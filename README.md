@@ -24,7 +24,6 @@ Declare a class with pyserde's `@serde` decorator.
 
 ```python
 @serde
-@dataclass
 class Foo:
     i: int
     s: str
@@ -58,8 +57,8 @@ Foo(i=10, s='foo', f=100.0, b=True)
 - Supported types
     - Primitives (`int`, `float`, `str`, `bool`)
     - Containers
-        - `List`, `Set`, `Tuple`, `Dict`
-        - [`FrozenSet`](https://docs.python.org/3/library/stdtypes.html#frozenset), [`DefaultDict`](https://docs.python.org/3/library/collections.html#collections.defaultdict)
+        - `list`, `set`, `tuple`, `dict`
+        - [`frozenset`](https://docs.python.org/3/library/stdtypes.html#frozenset), [`defaultdict`](https://docs.python.org/3/library/collections.html#collections.defaultdict)
     - [`typing.Optional`](https://docs.python.org/3/library/typing.html#typing.Optional)
     - [`typing.Union`](https://docs.python.org/3/library/typing.html#typing.Union)
     - User defined class with [`@dataclass`](https://docs.python.org/3/library/dataclasses.html)

@@ -2,7 +2,6 @@ import sys
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Any, Generic, NewType, Optional, TypeVar, Union, Literal
-from beartype.typing import Dict, List, Set, Tuple
 
 import pytest
 
@@ -32,15 +31,15 @@ U = TypeVar("U")
 
 
 def test_types() -> None:
-    assert is_list(List[int])
-    assert is_list(List)
-    assert is_set(Set[int])
-    assert is_set(Set)
-    assert is_tuple(Tuple[int, int, int])
-    assert is_tuple(Tuple)
-    assert is_tuple(Tuple[int, ...])
-    assert is_dict(Dict[str, int])
-    assert is_dict(Dict)
+    assert is_list(list[int])
+    assert is_list(list)
+    assert is_set(set[int])
+    assert is_set(set)
+    assert is_tuple(tuple[int, int, int])
+    assert is_tuple(tuple)
+    assert is_tuple(tuple[int, ...])
+    assert is_dict(dict[str, int])
+    assert is_dict(dict)
     assert is_opt(Optional[int])
     assert is_opt(Union[int, None])
     assert is_union(Union[int, str])
@@ -80,27 +79,27 @@ def test_typename() -> None:
 
     assert typename(Foo[int]) == "Foo"
     assert typename(Foo) == "Foo"
-    assert typename(List[int]) == "List[int]"
+    assert typename(list[int]) == "list[int]"
     assert typename(Optional) == "Optional"
-    assert typename(List) == "List"
-    assert typename(List[int]) == "List[int]"
-    assert typename(Tuple) == "Tuple"
-    assert typename(Tuple[int, str]) == "Tuple[int, str]"
-    assert typename(Tuple[int, ...]) == "Tuple[int, ...]"
-    assert typename(Dict) == "Dict"
-    assert typename(Dict[str, Foo]) == "Dict[str, Foo]"  # type: ignore
-    assert typename(Set) == "Set"
-    assert typename(Set[int]) == "Set[int]"
+    assert typename(list) == "list"
+    assert typename(list[int]) == "list[int]"
+    assert typename(tuple) == "tuple"
+    assert typename(tuple[int, str]) == "tuple[int, str]"
+    assert typename(tuple[int, ...]) == "tuple[int, ...]"
+    assert typename(dict) == "dict"
+    assert typename(dict[str, Foo]) == "dict[str, Foo]"  # type: ignore
+    assert typename(set) == "set"
+    assert typename(set[int]) == "set[int]"
     assert typename(Literal[1, True, "Hey"]) == "Literal[1, True, Hey]"
 
 
 def test_iter_types() -> None:
     assert {Pri, int, str, float, bool} == set(iter_types(Pri))
-    assert {Dict, str, Pri, int, float, bool} == set(iter_types(Dict[str, Pri]))
-    assert {List, str} == set(iter_types(List[str]))
-    assert {Set, str} == set(iter_types(Set[str]))
-    assert {Tuple, int, str, bool, float} == set(iter_types(Tuple[int, str, bool, float]))
-    assert {Tuple, int, Ellipsis} == set(iter_types(Tuple[int, ...]))
+    assert {dict, str, Pri, int, float, bool} == set(iter_types(dict[str, Pri]))
+    assert {list, str} == set(iter_types(list[str]))
+    assert {set, str} == set(iter_types(set[str]))
+    assert {tuple, int, str, bool, float} == set(iter_types(tuple[int, str, bool, float]))
+    assert {tuple, int, Ellipsis} == set(iter_types(tuple[int, ...]))
     assert {PriOpt, Optional, int, str, float, bool} == set(iter_types(PriOpt))
 
     @serde.serde
@@ -110,25 +109,25 @@ def test_iter_types() -> None:
         c: datetime
         d: Optional[str] = None
         e: Union[str, int] = 10
-        f: List[int] = serde.field(default_factory=list)
-        g: Set[int] = serde.field(default_factory=set)
+        f: list[int] = serde.field(default_factory=list)
+        g: set[int] = serde.field(default_factory=set)
 
-    assert {Foo, datetime, Optional, str, Union, List, Set, int} == set(iter_types(Foo))
+    assert {Foo, datetime, Optional, str, Union, list, set, int} == set(iter_types(Foo))
 
 
 def test_iter_unions() -> None:
     assert [Union[str, int]] == list(iter_unions(Union[str, int]))
-    assert [Union[str, int]] == list(iter_unions(Dict[str, Union[str, int]]))
-    assert [Union[str, int]] == list(iter_unions(Tuple[Union[str, int]]))
-    assert [Union[str, int]] == list(iter_unions(List[Union[str, int]]))
-    assert [Union[str, int]] == list(iter_unions(Set[Union[str, int]]))
+    assert [Union[str, int]] == list(iter_unions(dict[str, Union[str, int]]))
+    assert [Union[str, int]] == list(iter_unions(tuple[Union[str, int]]))
+    assert [Union[str, int]] == list(iter_unions(list[Union[str, int]]))
+    assert [Union[str, int]] == list(iter_unions(set[Union[str, int]]))
     assert [Union[str, int, type(None)]] == list(iter_unions(Optional[Union[str, int]]))
 
     @dataclass
     class A:
-        a: List[Union[int, str]]
-        b: Dict[str, List[Union[float, int]]]
-        C: Dict[Union[bool, str], Union[float, int]]
+        a: list[Union[int, str]]
+        b: dict[str, list[Union[float, int]]]
+        C: dict[Union[bool, str], Union[float, int]]
 
     assert {Union[int, str], Union[float, int], Union[bool, str], Union[float, int]} == set(
         iter_unions(A)
@@ -136,14 +135,14 @@ def test_iter_unions() -> None:
 
 
 def test_type_args() -> None:
-    assert (int,) == type_args(List[int])
-    assert (int, str) == type_args(Dict[int, str])
+    assert (int,) == type_args(list[int])
+    assert (int, str) == type_args(dict[int, str])
     assert (int, type(None)) == type_args(Optional[int])
-    assert (Optional[int],) == type_args(List[Optional[int]])
-    assert (List[int], type(None)) == type_args(Optional[List[int]])
-    assert (List[int], Dict[str, int]) == type_args(Union[List[int], Dict[str, int]])
+    assert (Optional[int],) == type_args(list[Optional[int]])
+    assert (list[int], type(None)) == type_args(Optional[list[int]])
+    assert (list[int], dict[str, int]) == type_args(Union[list[int], dict[str, int]])
     assert (int, type(None), str) == type_args(Union[Optional[int], str])
-    assert (int, Ellipsis) == type_args(Tuple[int, ...])
+    assert (int, Ellipsis) == type_args(tuple[int, ...])
 
     if sys.version_info[:3] >= (3, 9, 0):
         assert (int,) == type_args(list[int])
@@ -154,7 +153,7 @@ def test_type_args() -> None:
 
 def test_union_args() -> None:
     assert (int, str) == union_args(Union[int, str])
-    assert (List[int], Dict[int, str]) == union_args(Union[List[int], Dict[int, str]])
+    assert (list[int], dict[int, str]) == union_args(Union[list[int], dict[int, str]])
     assert (Optional[int], str) == union_args(Union[Optional[int], str])
 
 
@@ -184,57 +183,56 @@ def test_is_instance() -> None:
     h.p.i = 10.0  # type: ignore
     assert is_instance(h, Foo)
 
-    # List
-    assert is_instance([], List[int])
-    assert is_instance([10], List)
+    # list
+    assert is_instance([], list[int])
     assert is_instance([10], list)
-    assert is_instance([10], List[int])
-    assert not is_instance([10.0], List[int])
+    assert is_instance([10], list)
+    assert is_instance([10], list[int])
+    assert not is_instance([10.0], list[int])
 
-    # List of dataclasses
-    assert is_instance([Int(n) for n in range(1, 10)], List[Int])
-    assert not is_instance([Str("foo")], List[Int])
+    # list of dataclasses
+    assert is_instance([Int(n) for n in range(1, 10)], list[Int])
+    assert not is_instance([Str("foo")], list[Int])
 
-    # Set
-    assert is_instance(set(), Set[int])
-    assert is_instance({10}, Set)
+    # set
+    assert is_instance(set(), set[int])
     assert is_instance({10}, set)
-    assert is_instance({10}, Set[int])
-    assert not is_instance({10.0}, Set[int])
+    assert is_instance({10}, set[int])
+    assert not is_instance({10.0}, set[int])
 
-    # Set of dataclasses
-    assert is_instance({Int(n) for n in range(1, 10)}, Set[Int])
-    assert not is_instance({Str("foo")}, Set[Int])
+    # set of dataclasses
+    assert is_instance({Int(n) for n in range(1, 10)}, set[Int])
+    assert not is_instance({Str("foo")}, set[Int])
 
-    # Tuple
-    assert is_instance((), Tuple[int, str, float, bool])
-    assert is_instance((10, "a"), Tuple)
+    # tuple
+    assert is_instance((), tuple[int, str, float, bool])
     assert is_instance((10, "a"), tuple)
-    assert is_instance((10, "foo", 100.0, True), Tuple[int, str, float, bool])
-    assert not is_instance((10, "foo", 100.0, "last-type-is-wrong"), Tuple[int, str, float, bool])
-    assert is_instance((10, 20), Tuple[int, ...])
-    assert is_instance((10, 20, 30), Tuple[int, ...])
-    assert is_instance((), Tuple[int, ...])
-    assert not is_instance((10, "a"), Tuple[int, ...])
+    assert is_instance((10, "a"), tuple)
+    assert is_instance((10, "foo", 100.0, True), tuple[int, str, float, bool])
+    assert not is_instance((10, "foo", 100.0, "last-type-is-wrong"), tuple[int, str, float, bool])
+    assert is_instance((10, 20), tuple[int, ...])
+    assert is_instance((10, 20, 30), tuple[int, ...])
+    assert is_instance((), tuple[int, ...])
+    assert not is_instance((10, "a"), tuple[int, ...])
 
-    # Tuple of dataclasses
+    # tuple of dataclasses
     assert is_instance(
-        (Int(10), Str("foo"), Float(100.0), Bool(True)), Tuple[Int, Str, Float, Bool]
+        (Int(10), Str("foo"), Float(100.0), Bool(True)), tuple[Int, Str, Float, Bool]
     )
     assert not is_instance(
-        (Int(10), Str("foo"), Str("wrong-class"), Bool(True)), Tuple[Int, Str, Float, Bool]
+        (Int(10), Str("foo"), Str("wrong-class"), Bool(True)), tuple[Int, Str, Float, Bool]
     )
 
-    # Dict
-    assert is_instance({}, Dict[str, int])
-    assert is_instance({"a": "b"}, Dict)
+    # dict
+    assert is_instance({}, dict[str, int])
     assert is_instance({"a": "b"}, dict)
-    assert is_instance({"foo": 10, "bar": 20}, Dict[str, int])
-    assert not is_instance({"foo": 10.0, "bar": 20}, Dict[str, int])
+    assert is_instance({"a": "b"}, dict)
+    assert is_instance({"foo": 10, "bar": 20}, dict[str, int])
+    assert not is_instance({"foo": 10.0, "bar": 20}, dict[str, int])
 
-    # Dict of dataclasses
-    assert is_instance({Str("foo"): Int(10), Str("bar"): Int(20)}, Dict[Str, Int])
-    assert not is_instance({Str("foo"): Str("wrong-type"), Str("bar"): Int(10)}, Dict[Str, Int])
+    # dict of dataclasses
+    assert is_instance({Str("foo"): Int(10), Str("bar"): Int(20)}, dict[Str, Int])
+    assert not is_instance({Str("foo"): Str("wrong-type"), Str("bar"): Int(10)}, dict[Str, Int])
 
     # Optional
     assert is_instance(None, type(None))
@@ -247,9 +245,9 @@ def test_is_instance() -> None:
     assert not is_instance("wrong-type", Optional[Int])
 
     # Nested containers
-    assert is_instance([({"a": "b"}, 10, [True])], List[Tuple[Dict[str, str], int, List[bool]]])
+    assert is_instance([({"a": "b"}, 10, [True])], list[tuple[dict[str, str], int, list[bool]]])
     assert not is_instance(
-        [({"a": "b"}, 10, ["wrong-type"])], List[Tuple[Dict[str, str], int, List[bool]]]
+        [({"a": "b"}, 10, ["wrong-type"])], list[tuple[dict[str, str], int, list[bool]]]
     )
 
 
@@ -260,17 +258,17 @@ class GenericFoo(Generic[T]):
 
 def test_is_generic() -> None:
     assert not is_generic(int)
-    assert not is_generic(List[int])
-    assert not is_generic(List)
+    assert not is_generic(list[int])
+    assert not is_generic(list)
     assert not is_generic(GenericFoo)
     assert is_generic(GenericFoo[int])
-    assert is_generic(GenericFoo[List[int]])
+    assert is_generic(GenericFoo[list[int]])
     assert not is_generic(Optional[int])
-    assert not is_generic(Optional[List[int]])
+    assert not is_generic(Optional[list[int]])
     assert serde.is_serializable(GenericFoo)
-    assert not serde.is_serializable(GenericFoo[List[int]])
+    assert not serde.is_serializable(GenericFoo[list[int]])
     assert serde.is_deserializable(GenericFoo)
-    assert not serde.is_deserializable(GenericFoo[List[int]])
+    assert not serde.is_deserializable(GenericFoo[list[int]])
 
 
 def test_get_generic_arg() -> None:

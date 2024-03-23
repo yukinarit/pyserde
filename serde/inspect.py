@@ -19,14 +19,13 @@ import os
 import sys
 
 from typing import Any
-from typing_extensions import Type
 
 from .core import SERDE_SCOPE, init, logger
 
 init(True)
 
 
-def inspect(cls: Type[Any]) -> None:
+def inspect(cls: type[Any]) -> None:
     """
     Inspect a pyserde class.
     """

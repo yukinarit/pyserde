@@ -3,7 +3,6 @@ Tests for flatten attribute.
 """
 
 from typing import Any
-from beartype.typing import Dict, List
 
 import pytest
 
@@ -35,8 +34,8 @@ def test_flatten_simple() -> None:
 def test_flatten(se: Any, de: Any) -> None:
     @serde
     class Baz:
-        e: List[int]
-        f: Dict[str, str]
+        e: list[int]
+        f: dict[str, str]
 
     @serde
     class Bar:

@@ -3,12 +3,6 @@ import sys
 import uuid
 from dataclasses import dataclass
 from ipaddress import IPv4Address
-from beartype.typing import (
-    Dict,
-    FrozenSet,
-    List,
-    Tuple,
-)
 from typing import (
     Generic,
     NewType,
@@ -93,7 +87,7 @@ class ContUnion:
     Union Containers.
     """
 
-    v: Union[Dict[str, int], List[int], List[str]]
+    v: Union[dict[str, int], list[int], list[str]]
 
 
 @serde
@@ -172,7 +166,7 @@ def test_union_containers() -> None:
     v = ContUnion({"a": 1, "b": 2, "c": 3})
     s = '{"v":{"a":1,"b":2,"c":3}}'
     assert s == to_json(v)
-    # Note: this only works because Dict[str, int] comes first in Union otherwise a List would win
+    # Note: this only works because dict[str, int] comes first in Union otherwise a list would win
     assert v == from_json(ContUnion, s)
 
 
@@ -292,7 +286,7 @@ def test_optional_complex_type_with_default() -> None:
 def test_union_with_complex_types_in_containers() -> None:
     @serde
     class A:
-        v: Union[List[IPv4Address], List[UUID]]
+        v: Union[list[IPv4Address], list[UUID]]
 
     a_ips = A([IPv4Address("127.0.0.1"), IPv4Address("10.0.0.1")])
     assert a_ips == from_dict(A, to_dict(a_ips, reuse_instances=False), reuse_instances=False)
@@ -385,7 +379,7 @@ def test_union_in_union() -> None:
 def test_union_in_other_type() -> None:
     @serde
     class A:
-        v: Dict[str, Union[UUID, int]]
+        v: dict[str, Union[UUID, int]]
 
     a_uuid = A({"key": UUID("00611ee9-7ca3-41d3-9607-ea7268e264ea")})
     assert a_uuid == from_dict(A, to_dict(a_uuid, reuse_instances=False), reuse_instances=False)
@@ -412,7 +406,7 @@ def test_union_with_list_of_other_class() -> None:
 
     @serde
     class B:
-        b: Union[List[A], str]
+        b: Union[list[A], str]
 
     b = B([A(1)])
     b_dict = {"b": [{"a": 1}]}
@@ -424,7 +418,7 @@ def test_union_with_list_of_other_class() -> None:
 def test_union_with_union_in_nested_types() -> None:
     @serde
     class A:
-        v: Union[UUID, List[Union[UUID, int]]]
+        v: Union[UUID, list[Union[UUID, int]]]
 
     a_uuid = A([UUID("00611ee9-7ca3-41d3-9607-ea7268e264ea")])
     assert to_dict(a_uuid, reuse_instances=False) == {"v": ["00611ee9-7ca3-41d3-9607-ea7268e264ea"]}
@@ -441,7 +435,7 @@ def test_union_with_union_in_nested_types() -> None:
 def test_union_with_union_in_nested_tuple() -> None:
     @serde
     class A:
-        v: Union[bool, Tuple[Union[str, int]]]
+        v: Union[bool, tuple[Union[str, int]]]
 
     a_bool = A(False)
     a_bool_dict = {"v": False}
@@ -514,7 +508,7 @@ def test_external_tagging() -> None:
     class Foo:
         a: Union[Bar, Baz]
         b: Union[int, str]
-        c: Union[Dict[int, str], List[int]]
+        c: Union[dict[int, str], list[int]]
         d: Union[int, Nested]
 
     f = Foo(Bar(10), "foo", {10: "bar"}, Nested(Baz(100)))
@@ -572,7 +566,7 @@ def test_internal_tagging() -> None:
     class Foo:
         a: Union[Bar, Baz]
         b: Union[int, str]
-        c: Union[Dict[int, str], List[int]]
+        c: Union[dict[int, str], list[int]]
         d: Union[int, Nested]
 
     f = Foo(Bar(10), "foo", {10: "bar"}, Nested(Baz(100)))
@@ -628,7 +622,7 @@ def test_adjacent_tagging() -> None:
     class Foo:
         a: Union[Bar, Baz]
         b: Union[int, str]
-        c: Union[Dict[int, str], List[int]]
+        c: Union[dict[int, str], list[int]]
         d: Union[int, Nested]
 
     f = Foo(Bar(10), "foo", {10: "bar"}, Nested(Baz(100)))
@@ -700,7 +694,7 @@ def test_untagged() -> None:
     class Foo:
         a: Union[Bar, Baz]
         b: Union[int, str]
-        c: Union[Dict[int, str], List[int]]
+        c: Union[dict[int, str], list[int]]
         d: Union[int, Nested]
 
     f = Foo(Bar(10), "foo", {10: "bar"}, Nested(Bar(100)))
@@ -718,10 +712,10 @@ def test_untagged() -> None:
     with pytest.raises(Exception):
         assert to_dict(from_dict(Foo, d)) == f
 
-    # Untaggled can't differenciate Dict and List.
+    # Untaggled can't differenciate dict and list.
     @serde
     class Foo:
-        a: Union[List[int], Dict[int, str]]
+        a: Union[list[int], dict[int, str]]
 
     f = Foo({10: "bar"})
     with pytest.raises(Exception):
@@ -747,8 +741,8 @@ def test_newtype_and_untagged_union() -> None:
 
     @serde(tagging=Untagged)
     class MyDataclass:
-        unrelateds: List[SupposedlyUnrelated]
-        buggy_field: List[Union[str, Innerclass]]
+        unrelateds: list[SupposedlyUnrelated]
+        buggy_field: list[Union[str, Innerclass]]
 
     data = {"unrelateds": [], "buggy_field": [{"inner_value": "value"}, "something"]}
     actual = from_dict(MyDataclass, data)
@@ -789,7 +783,7 @@ def test_union_frozenset_with_prim() -> None:
     @serde
     @dataclass
     class Foo:
-        a: Union[FrozenSet[int], int]
+        a: Union[frozenset[int], int]
 
     assert to_dict(Foo(frozenset({1}))) == {"a": {1}}
 
@@ -801,12 +795,12 @@ def test_union_with_any() -> None:
 
     @dataclass
     class BarWithDict:
-        bar: Dict[str, Any]
+        bar: dict[str, Any]
 
     @serde(tagging=Untagged)
     @dataclass
     class Class:
-        foobars: List[Union[FooWithString, BarWithDict]]
+        foobars: list[Union[FooWithString, BarWithDict]]
 
     c = Class([FooWithString("string"), BarWithDict({"key": "value"})])
     assert c == from_json(Class, to_json(c))

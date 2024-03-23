@@ -12,7 +12,7 @@ Field attributes are options to customize (de)serialization behaviour for a fiel
 class Foo:
     a: int = 10
     b: int = field(default=10)  # same as field "a"
-    c: Dict[str, int] = field(default_factory=dict)
+    c: dict[str, int] = field(default_factory=dict)
 
 print(from_dict(Foo, {}))  # prints Foo(a=10, b=10, c={})
 ```
@@ -32,7 +32,6 @@ Here is an example specifying `rename` attribute in both `serde.field` and `data
 
 ```python
 @serde.serde
-@dataclass.dataclass
 class Foo:
     a: str = serde.field(rename="A")
     b: str = dataclasses.field(metadata={"serde_rename"="B"})
@@ -44,7 +43,6 @@ class Foo:
 
 ```python
 @serde
-@dataclass
 class Foo:
     id: int = field(rename="ID")
 ```
@@ -57,11 +55,10 @@ See [examples/rename.py](https://github.com/yukinarit/pyserde/blob/main/examples
 
 ```python
 @serde
-@dataclass
 class Resource:
     name: str
     hash: str
-    metadata: Dict[str, str] = field(default_factory=dict, skip=True)
+    metadata: dict[str, str] = field(default_factory=dict, skip=True)
 ```
 
 See [examples/skip.py](https://github.com/yukinarit/pyserde/blob/main/examples/skip.py) for the complete example.
@@ -72,7 +69,6 @@ See [examples/skip.py](https://github.com/yukinarit/pyserde/blob/main/examples/s
 
 ```python
 @serde
-@dataclass
 class World:
     buddy: str = field(default='', skip_if=lambda v: v == 'Pikachu')
 ```
@@ -85,9 +81,8 @@ See [examples/skip.py](https://github.com/yukinarit/pyserde/blob/main/examples/s
 
 ```python
 @serde
-@dataclass
 class World:
-    enemies: List[str] = field(default_factory=list, skip_if_false=True)
+    enemies: list[str] = field(default_factory=list, skip_if_false=True)
 ```
 
 See [examples/skip.py](https://github.com/yukinarit/pyserde/blob/main/examples/skip.py) for the complete example.
@@ -98,7 +93,6 @@ See [examples/skip.py](https://github.com/yukinarit/pyserde/blob/main/examples/s
 
 ```python
 @serde
-@dataclass
 class World:
     town: str = field(default='Masara Town', skip_if_default=True)
 ```
@@ -111,7 +105,6 @@ You can set aliases for field names. Alias only works for deserialization.
 
 ```python
 @serde
-@dataclass
 class Foo:
     a: str = field(alias=["b", "c"])
 ```
@@ -130,7 +123,6 @@ In the following example, field `a` is serialized into `"2021-01-01T00:00:00"` b
 
 ```python
 @serde
-@dataclass
 class Foo:
     a: datetime
     b: datetime = field(serializer=lambda x: x.strftime('%d/%m/%y'), deserializer=lambda x: datetime.strptime(x, '%d/%m/%y'))
@@ -144,13 +136,11 @@ You can flatten the fields of the nested structure.
 
 ```python
 @serde
-@dataclass
 class Bar:
     c: float
     d: bool
 
 @serde
-@dataclass
 class Foo:
     a: int
     b: str

@@ -13,78 +13,25 @@ import pathlib
 import sys
 import types
 import uuid
-from collections import defaultdict
-from dataclasses import is_dataclass
 import typing
-from typing import TypeVar, Generic, Any, ClassVar, Iterator, Optional, NewType
-from beartype.typing import (
-    DefaultDict,
-    Dict,
-    FrozenSet,
-    List,
-    Set,
-    Tuple,
-    Union,
-)
+from collections import defaultdict
+from collections.abc import Iterator
+from dataclasses import is_dataclass
+from typing import TypeVar, Generic, Any, ClassVar, Optional, NewType, Union
 
-import typing_extensions
 import typing_inspect
-from typing_extensions import Type, TypeGuard, TypeAlias
-
-# Create alias for `dataclasses.Field` because `dataclasses.Field` is a generic
-# class since 3.9 but is not in 3.7 and 3.8.
-DataclassField: TypeAlias = (
-    dataclasses.Field if sys.version_info[:2] <= (3, 8) else dataclasses.Field[Any]  # type: ignore
-)
-
-try:
-    if sys.version_info[:2] <= (3, 8):
-        import numpy as np
-
-        def __is_nptype(tp):
-            origin = getattr(tp, "__origin__", None)
-            ndarray = getattr(np, "ndarray", None)
-            dtype = getattr(np, "dtype", None)
-            if not origin or not ndarray or not dtype:
-                return False
-            return origin in (ndarray, dtype)
-
-        # If the given type is NDArray or _DType, returns __origin__ or __args__.
-        # This should work since the only GenericAliases that current NumPy (1.23)
-        # exposes are 'NDArray' and '_DType'.
-        # Note: these functions are only needed on Python 3.8 or earlier.
-        # On Python >= 3.9, numpy.ndarray[...] and numpy.dtype[...] are instances of
-        # the builtin genericalias class.
-        def get_np_origin(tp: Type[Any]) -> Optional[Any]:
-            if __is_nptype(tp):
-                return getattr(tp, "__origin__", None)
-            else:
-                return None
-
-        def get_np_args(tp: Any) -> Tuple[Any, ...]:
-            if __is_nptype(tp):
-                return tp.__args__
-            else:
-                return ()
-
-    else:
-
-        def get_np_origin(tp: Type[Any]) -> Optional[Any]:
-            return None
-
-        def get_np_args(tp: Any) -> Tuple[Any, ...]:
-            return ()
-
-except ImportError:
-
-    def get_np_origin(tp: Type[Any]) -> Optional[Any]:
-        return None
-
-    def get_np_args(tp: Any) -> Tuple[Any, ...]:
-        return ()
+from typing_extensions import TypeGuard
 
 
-__all__: List[str] = []
+def get_np_origin(tp: type[Any]) -> Optional[Any]:
+    return None
+
+
+def get_np_args(tp: Any) -> tuple[Any, ...]:
+    return ()
+
+
+__all__: list[str] = []
 
 T = TypeVar("T")
 
@@ -148,44 +95,36 @@ def get_origin(typ: Any) -> Optional[Any]:
     """
     Provide `get_origin` that works in all python versions.
     """
-    try:
-        return typing.get_origin(typ) or get_np_origin(
-            typ
-        )  # python>=3.8 typing module has get_origin.
-    except AttributeError:
-        return typing_extensions.get_origin(typ) or get_np_origin(typ)
+    return typing.get_origin(typ) or get_np_origin(typ)
 
 
-def get_args(typ: Any) -> Tuple[Any, ...]:
+def get_args(typ: Any) -> tuple[Any, ...]:
     """
     Provide `get_args` that works in all python versions.
     """
-    try:
-        return typing.get_args(typ) or get_np_args(typ)  # python>=3.8 typing module has get_args.
-    except AttributeError:
-        return typing_extensions.get_args(typ) or get_np_args(typ)
+    return typing.get_args(typ) or get_np_args(typ)
 
 
 def typename(typ: Any, with_typing_module: bool = False) -> str:
     """
-    >>> from typing import List, Dict, Set, Any
+    >>> from typing import Any
     >>> typename(int)
     'int'
     >>> class Foo: pass
     >>> typename(Foo)
     'Foo'
-    >>> typename(List[Foo])
-    'List[Foo]'
-    >>> typename(Dict[str, Foo])
-    'Dict[str, Foo]'
-    >>> typename(Tuple[int, str, Foo, List[int], Dict[str, Foo]])
-    'Tuple[int, str, Foo, List[int], Dict[str, Foo]]'
-    >>> typename(Optional[List[Foo]])
-    'Optional[List[Foo]]'
-    >>> typename(Union[Optional[Foo], List[Foo], Union[str, int]])
-    'Union[Optional[Foo], List[Foo], str, int]'
-    >>> typename(Set[Foo])
-    'Set[Foo]'
+    >>> typename(list[Foo])
+    'list[Foo]'
+    >>> typename(dict[str, Foo])
+    'dict[str, Foo]'
+    >>> typename(tuple[int, str, Foo, list[int], dict[str, Foo]])
+    'tuple[int, str, Foo, list[int], dict[str, Foo]]'
+    >>> typename(Optional[list[Foo]])
+    'Optional[list[Foo]]'
+    >>> typename(Union[Optional[Foo], list[Foo], Union[str, int]])
+    'Union[Optional[Foo], list[Foo], str, int]'
+    >>> typename(set[Foo])
+    'set[Foo]'
     >>> typename(Any)
     'Any'
     """
@@ -204,48 +143,33 @@ def typename(typ: Any, with_typing_module: bool = False) -> str:
         else:
             return f"{mod}Union"
     elif is_list(typ):
-        # Workaround for python 3.7.
-        # get_args for the bare List returns parameter T.
-        if typ is List:
-            return f"{mod}List"
-
         args = type_args(typ)
         if args:
             et = thisfunc(args[0])
-            return f"{mod}List[{et}]"
+            return f"{mod}list[{et}]"
         else:
-            return f"{mod}List"
+            return f"{mod}list"
     elif is_set(typ):
-        # Workaround for python 3.7.
-        # get_args for the bare Set returns parameter T.
-        if typ is Set:
-            return f"{mod}Set"
-
         args = type_args(typ)
         if args:
             et = thisfunc(args[0])
-            return f"{mod}Set[{et}]"
+            return f"{mod}set[{et}]"
         else:
-            return f"{mod}Set"
+            return f"{mod}set"
     elif is_dict(typ):
-        # Workaround for python 3.7.
-        # get_args for the bare Dict returns parameter K, V.
-        if typ is Dict:
-            return f"{mod}Dict"
-
         args = type_args(typ)
         if args and len(args) == 2:
             kt = thisfunc(args[0])
             vt = thisfunc(args[1])
-            return f"{mod}Dict[{kt}, {vt}]"
+            return f"{mod}dict[{kt}, {vt}]"
         else:
-            return f"{mod}Dict"
+            return f"{mod}dict"
     elif is_tuple(typ):
         args = type_args(typ)
         if args:
-            return f'{mod}Tuple[{", ".join([thisfunc(e) for e in args])}]'
+            return f'{mod}tuple[{", ".join([thisfunc(e) for e in args])}]'
         else:
-            return f"{mod}Tuple"
+            return f"{mod}tuple"
     elif is_generic(typ):
         origin = get_origin(typ)
         if origin is None:
@@ -282,12 +206,12 @@ def typename(typ: Any, with_typing_module: bool = False) -> str:
                 raise SerdeError(f"Could not get a type name from: {typ}")
 
 
-def type_args(typ: Any) -> Tuple[Type[Any], ...]:
+def type_args(typ: Any) -> tuple[type[Any], ...]:
     """
     Wrapper to suppress type error for accessing private members.
     """
     try:
-        args: Tuple[Type[Any, ...]] = typ.__args__  # type: ignore
+        args: tuple[type[Any, ...]] = typ.__args__  # type: ignore
         if args is None:
             return ()
         else:
@@ -296,7 +220,7 @@ def type_args(typ: Any) -> Tuple[Type[Any], ...]:
         return get_args(typ)
 
 
-def union_args(typ: Any) -> Tuple[Type[Any], ...]:
+def union_args(typ: Any) -> tuple[type[Any], ...]:
     if not is_union(typ):
         raise TypeError(f"{typ} is not Union")
     args = type_args(typ)
@@ -314,7 +238,7 @@ def union_args(typ: Any) -> Tuple[Type[Any], ...]:
     return tuple(types)
 
 
-def dataclass_fields(cls: Type[Any]) -> Iterator[dataclasses.Field]:  # type: ignore
+def dataclass_fields(cls: type[Any]) -> Iterator[dataclasses.Field]:  # type: ignore
     raw_fields = dataclasses.fields(cls)
 
     try:
@@ -337,17 +261,17 @@ def dataclass_fields(cls: Type[Any]) -> Iterator[dataclasses.Field]:  # type: ig
     return iter(raw_fields)
 
 
-TypeLike = Union[Type[Any], typing.Any]
+TypeLike = Union[type[Any], typing.Any]
 
 
-def iter_types(cls: TypeLike) -> List[TypeLike]:
+def iter_types(cls: TypeLike) -> list[TypeLike]:
     """
     Iterate field types recursively.
 
     The correct return type is `Iterator[Union[Type, typing._specialform]],
     but `typing._specialform` doesn't exist for python 3.6. Use `Any` instead.
     """
-    lst: Set[TypeLike] = set()
+    lst: set[TypeLike] = set()
 
     def recursive(cls: TypeLike) -> None:
         if cls in lst:
@@ -369,21 +293,21 @@ def iter_types(cls: TypeLike) -> List[TypeLike]:
             for arg in type_args(cls):
                 recursive(arg)
         elif is_list(cls):
-            lst.add(List)
+            lst.add(list)
             args = type_args(cls)
             if args:
                 recursive(args[0])
         elif is_set(cls):
-            lst.add(Set)
+            lst.add(set)
             args = type_args(cls)
             if args:
                 recursive(args[0])
         elif is_tuple(cls):
-            lst.add(Tuple)
+            lst.add(tuple)
             for arg in type_args(cls):
                 recursive(arg)
         elif is_dict(cls):
-            lst.add(Dict)
+            lst.add(dict)
             args = type_args(cls)
             if args and len(args) >= 2:
                 recursive(args[0])
@@ -395,12 +319,12 @@ def iter_types(cls: TypeLike) -> List[TypeLike]:
     return list(lst)
 
 
-def iter_unions(cls: TypeLike) -> List[TypeLike]:
+def iter_unions(cls: TypeLike) -> list[TypeLike]:
     """
     Iterate over all unions that are used in the dataclass
     """
-    lst: Set[TypeLike] = set()
-    stack: List[TypeLike] = []  # To prevent infinite recursion
+    lst: set[TypeLike] = set()
+    stack: list[TypeLike] = []  # To prevent infinite recursion
 
     def recursive(cls: TypeLike) -> None:
         if cls in lst:
@@ -438,11 +362,11 @@ def iter_unions(cls: TypeLike) -> List[TypeLike]:
     return list(lst)
 
 
-def iter_literals(cls: TypeLike) -> List[TypeLike]:
+def iter_literals(cls: TypeLike) -> list[TypeLike]:
     """
     Iterate over all literals that are used in the dataclass
     """
-    lst: Set[TypeLike] = set()
+    lst: set[TypeLike] = set()
 
     def recursive(cls: TypeLike) -> None:
         if cls in lst:
@@ -554,68 +478,64 @@ def is_bare_opt(typ: Any) -> bool:
     return not type_args(typ) and typ is Optional
 
 
-def is_list(typ: Type[Any]) -> bool:
+def is_list(typ: type[Any]) -> bool:
     """
-    Test if the type is `typing.List`.
+    Test if the type is `list`.
 
-    >>> from typing import List
-    >>> is_list(List[int])
+    >>> is_list(list[int])
     True
-    >>> is_list(List)
+    >>> is_list(list)
     True
     """
     try:
         return issubclass(get_origin(typ), list)  # type: ignore
     except TypeError:
-        return typ in (List, list)
+        return typ is list
 
 
-def is_bare_list(typ: Type[Any]) -> bool:
+def is_bare_list(typ: type[Any]) -> bool:
     """
-    Test if the type is `typing.List` without type args.
+    Test if the type is `list` without type args.
 
-    >>> from typing import List
-    >>> is_bare_list(List[int])
+    >>> is_bare_list(list[int])
     False
-    >>> is_bare_list(List)
+    >>> is_bare_list(list)
     True
     """
-    return typ in (typing.List, List, list)
+    return typ is list
 
 
 def is_tuple(typ: Any) -> bool:
     """
-    Test if the type is `typing.Tuple`.
+    Test if the type is tuple.
     """
     try:
         return issubclass(get_origin(typ), tuple)  # type: ignore
     except TypeError:
-        return typ in (Tuple, tuple)
+        return typ is tuple
 
 
-def is_bare_tuple(typ: Type[Any]) -> bool:
+def is_bare_tuple(typ: type[Any]) -> bool:
     """
-    Test if the type is `typing.Tuple` without type args.
+    Test if the type is tuple without type args.
 
-    >>> from typing import Tuple
-    >>> is_bare_tuple(Tuple[int, str])
+    >>> is_bare_tuple(tuple[int, str])
     False
-    >>> is_bare_tuple(Tuple)
+    >>> is_bare_tuple(tuple)
     True
     """
-    return typ in (typing.Tuple, Tuple, tuple)
+    return typ is tuple
 
 
-def is_variable_tuple(typ: Type[Any]) -> bool:
+def is_variable_tuple(typ: type[Any]) -> bool:
     """
-    Test if the type is a variable length of tuple `typing.Tuple[T, ...]`.
+    Test if the type is a variable length of tuple tuple[T, ...]`.
 
-    >>> from typing import Tuple
-    >>> is_variable_tuple(Tuple[int, ...])
+    >>> is_variable_tuple(tuple[int, ...])
     True
-    >>> is_variable_tuple(Tuple[int, bool])
+    >>> is_variable_tuple(tuple[int, bool])
     False
-    >>> is_variable_tuple(Tuple[()])
+    >>> is_variable_tuple(tuple[()])
     False
     """
     istuple = is_tuple(typ) and not is_bare_tuple(typ)
@@ -623,101 +543,95 @@ def is_variable_tuple(typ: Type[Any]) -> bool:
     return istuple and len(args) == 2 and is_ellipsis(args[1])
 
 
-def is_set(typ: Type[Any]) -> bool:
+def is_set(typ: type[Any]) -> bool:
     """
-    Test if the type is `typing.Set` or `typing.FrozenSet`.
+    Test if the type is `set` or `frozenset`.
 
-    >>> from typing import Set
-    >>> is_set(Set[int])
+    >>> is_set(set[int])
     True
-    >>> is_set(Set)
+    >>> is_set(set)
     True
-    >>> is_set(FrozenSet[int])
+    >>> is_set(frozenset[int])
     True
     """
     try:
         return issubclass(get_origin(typ), (set, frozenset))  # type: ignore
     except TypeError:
-        return typ in (Set, set, FrozenSet, frozenset)
+        return typ in (set, frozenset)
 
 
-def is_bare_set(typ: Type[Any]) -> bool:
+def is_bare_set(typ: type[Any]) -> bool:
     """
-    Test if the type is `typing.Set` without type args.
+    Test if the type is `set` without type args.
 
-    >>> from typing import Set
-    >>> is_bare_set(Set[int])
+    >>> is_bare_set(set[int])
     False
-    >>> is_bare_set(Set)
+    >>> is_bare_set(set)
     True
     """
-    return typ in (typing.Set, Set, set)
+    return typ in (set, frozenset)
 
 
-def is_frozen_set(typ: Type[Any]) -> bool:
+def is_frozen_set(typ: type[Any]) -> bool:
     """
-    Test if the type is `typing.FrozenSet`.
+    Test if the type is `frozenset`.
 
-    >>> from typing import Set
-    >>> is_frozen_set(FrozenSet[int])
+    >>> is_frozen_set(frozenset[int])
     True
-    >>> is_frozen_set(Set)
+    >>> is_frozen_set(set)
     False
     """
     try:
         return issubclass(get_origin(typ), frozenset)  # type: ignore
     except TypeError:
-        return typ in (FrozenSet, frozenset)
+        return typ is frozenset
 
 
-def is_dict(typ: Type[Any]) -> bool:
+def is_dict(typ: type[Any]) -> bool:
     """
-    Test if the type is `typing.Dict`.
+    Test if the type is dict.
 
-    >>> from typing import Dict
-    >>> is_dict(Dict[int, int])
+    >>> is_dict(dict[int, int])
     True
-    >>> is_dict(Dict)
+    >>> is_dict(dict)
     True
-    >>> is_dict(DefaultDict[int, int])
+    >>> is_dict(defaultdict[int, int])
     True
     """
     try:
         return issubclass(get_origin(typ), (dict, defaultdict))  # type: ignore
     except TypeError:
-        return typ in (Dict, dict, DefaultDict, defaultdict)
+        return typ in (dict, defaultdict)
 
 
-def is_bare_dict(typ: Type[Any]) -> bool:
+def is_bare_dict(typ: type[Any]) -> bool:
     """
-    Test if the type is `typing.Dict` without type args.
+    Test if the type is `dict` without type args.
 
-    >>> from typing import Dict
-    >>> is_bare_dict(Dict[int, str])
+    >>> is_bare_dict(dict[int, str])
     False
-    >>> is_bare_dict(Dict)
+    >>> is_bare_dict(dict)
     True
     """
-    return typ in (typing.Dict, Dict, dict)
+    return typ is dict
 
 
-def is_default_dict(typ: Type[Any]) -> bool:
+def is_default_dict(typ: type[Any]) -> bool:
     """
-    Test if the type is `typing.DefaultDict`.
+    Test if the type is `defaultdict`.
 
-    >>> from typing import Dict
-    >>> is_default_dict(DefaultDict[int, int])
+    >>> is_default_dict(defaultdict[int, int])
     True
-    >>> is_default_dict(Dict[int, int])
+    >>> is_default_dict(dict[int, int])
     False
     """
     try:
         return issubclass(get_origin(typ), defaultdict)  # type: ignore
     except TypeError:
-        return typ in (DefaultDict, defaultdict)
+        return typ is defaultdict
 
 
-def is_none(typ: Type[Any]) -> bool:
+def is_none(typ: type[Any]) -> bool:
     """
     >>> is_none(int)
     False
@@ -732,7 +646,7 @@ def is_none(typ: Type[Any]) -> bool:
 PRIMITIVES = [int, float, bool, str]
 
 
-def is_enum(typ: Type[Any]) -> TypeGuard[enum.Enum]:
+def is_enum(typ: type[Any]) -> TypeGuard[enum.Enum]:
     """
     Test if the type is `enum.Enum`.
     """
@@ -742,7 +656,7 @@ def is_enum(typ: Type[Any]) -> TypeGuard[enum.Enum]:
         return isinstance(typ, enum.Enum)
 
 
-def is_primitive_subclass(typ: Type[Any]) -> bool:
+def is_primitive_subclass(typ: type[Any]) -> bool:
     """
     Test if the type is a subclass of primitive type.
 
@@ -756,7 +670,7 @@ def is_primitive_subclass(typ: Type[Any]) -> bool:
     return is_primitive(typ) and typ not in PRIMITIVES and not is_new_type_primitive(typ)
 
 
-def is_primitive(typ: Union[Type[Any], NewType]) -> bool:
+def is_primitive(typ: Union[type[Any], NewType]) -> bool:
     """
     Test if the type is primitive.
 
@@ -773,7 +687,7 @@ def is_primitive(typ: Union[Type[Any], NewType]) -> bool:
         return is_new_type_primitive(typ)
 
 
-def is_new_type_primitive(typ: Union[Type[Any], NewType]) -> bool:
+def is_new_type_primitive(typ: Union[type[Any], NewType]) -> bool:
     """
     Test if the type is a NewType of primitives.
     """
@@ -800,7 +714,7 @@ def is_generic(typ: Any) -> bool:
     return origin is not None and Generic in getattr(origin, "__bases__", ())
 
 
-def is_class_var(typ: Type[Any]) -> bool:
+def is_class_var(typ: type[Any]) -> bool:
     """
     Test if the type is `typing.ClassVar`.
 
@@ -812,7 +726,7 @@ def is_class_var(typ: Type[Any]) -> bool:
     return get_origin(typ) is ClassVar or typ is ClassVar  # type: ignore
 
 
-def is_literal(typ: Type[Any]) -> bool:
+def is_literal(typ: type[Any]) -> bool:
     """
     Test if the type is derived from `typing.Literal`.
 
@@ -828,14 +742,14 @@ def is_literal(typ: Type[Any]) -> bool:
     return origin is not None and origin is typing.Literal
 
 
-def is_any(typ: Type[Any]) -> bool:
+def is_any(typ: type[Any]) -> bool:
     """
     Test if the type is `typing.Any`.
     """
     return typ is Any
 
 
-def is_str_serializable(typ: Type[Any]) -> bool:
+def is_str_serializable(typ: type[Any]) -> bool:
     """
     Test if the type is serializable to `str`.
     """
@@ -843,7 +757,7 @@ def is_str_serializable(typ: Type[Any]) -> bool:
 
 
 def is_datetime(
-    typ: Type[Any],
+    typ: type[Any],
 ) -> TypeGuard[Union[datetime.date, datetime.time, datetime.datetime]]:
     """
     Test if the type is any of the datetime types..
@@ -863,7 +777,7 @@ def is_ellipsis(typ: Any) -> bool:
     return typ is Ellipsis
 
 
-def get_type_var_names(cls: Type[Any]) -> Optional[List[str]]:
+def get_type_var_names(cls: type[Any]) -> Optional[list[str]]:
     """
     Get type argument names of a generic class.
 
@@ -878,14 +792,14 @@ def get_type_var_names(cls: Type[Any]) -> Optional[List[str]]:
     if not bases:
         return None
 
-    type_arg_names: List[str] = []
+    type_arg_names: list[str] = []
     for base in bases:
         type_arg_names.extend(arg.__name__ for arg in get_args(base))
 
     return type_arg_names
 
 
-def find_generic_arg(cls: Type[Any], field: TypeVar) -> int:
+def find_generic_arg(cls: type[Any], field: TypeVar) -> int:
     """
     Find a type in generic parameters.
 
@@ -918,8 +832,8 @@ def find_generic_arg(cls: Type[Any], field: TypeVar) -> int:
 
 def get_generic_arg(
     typ: Any,
-    maybe_generic_type_vars: Optional[List[str]],
-    variable_type_args: Optional[List[str]],
+    maybe_generic_type_vars: Optional[list[str]],
+    variable_type_args: Optional[list[str]],
     index: int,
 ) -> Any:
     """

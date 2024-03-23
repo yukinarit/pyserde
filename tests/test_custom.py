@@ -3,8 +3,7 @@ Tests for custom serializer/deserializer.
 """
 
 from datetime import datetime
-from typing import Optional, Any, Type, Union
-from beartype.typing import List, Dict
+from typing import Optional, Any, Union
 from plum import dispatch
 
 import pytest
@@ -81,19 +80,19 @@ def test_custom_class_serializer() -> None:
 
     class MyDeserializer(ClassDeserializer):
         @dispatch
-        def deserialize(self, cls: Type[datetime], value: Any) -> datetime:
+        def deserialize(self, cls: type[datetime], value: Any) -> datetime:
             return datetime.strptime(value, "%d/%m/%y")
 
     @serde(class_serializer=MySerializer(), class_deserializer=MyDeserializer())
     class Bar:
         e: datetime
-        f: List[datetime]
+        f: list[datetime]
 
     @serde(class_serializer=MySerializer(), class_deserializer=MyDeserializer())
     class Foo:
         a: datetime
-        b: List[datetime]
-        c: Dict[str, datetime]
+        b: list[datetime]
+        c: dict[str, datetime]
         d: Bar
 
     dt = datetime(2021, 1, 1, 0, 0, 0)
@@ -123,7 +122,7 @@ def test_custom_class_serializer_dataclass() -> None:
 
     class MyDeserializer(ClassDeserializer):
         @dispatch
-        def deserialize(self, cls: Type[Bar], value: Any) -> Bar:
+        def deserialize(self, cls: type[Bar], value: Any) -> Bar:
             return Bar(int(value))
 
     @serde(class_serializer=MySerializer(), class_deserializer=MyDeserializer())
@@ -145,7 +144,7 @@ def test_custom_serializer_with_field_attributes() -> None:
 
     class MyDeserializer(ClassDeserializer):
         @dispatch
-        def deserialize(self, cls: Type[datetime], value: Any) -> datetime:
+        def deserialize(self, cls: type[datetime], value: Any) -> datetime:
             return datetime.strptime(value, "%d/%m/%y")
 
     @serde(class_serializer=MySerializer(), class_deserializer=MyDeserializer())
@@ -174,7 +173,7 @@ def test_custom_serializer_with_class_attributes() -> None:
 
     class MyDeserializer(ClassDeserializer):
         @dispatch
-        def deserialize(self, cls: Type[datetime], value: Any) -> datetime:
+        def deserialize(self, cls: type[datetime], value: Any) -> datetime:
             return datetime.strptime(value, "%d/%m/%y")
 
     @serde(
@@ -204,7 +203,7 @@ def test_field_serialize_override_class_serializer() -> None:
 
     class MyDeserializer(ClassDeserializer):
         @dispatch
-        def deserialize(self, cls: Type[datetime], value: Any) -> datetime:
+        def deserialize(self, cls: type[datetime], value: Any) -> datetime:
             return datetime.strptime(value, "%d/%m/%y")
 
     @serde(class_serializer=MySerializer(), class_deserializer=MyDeserializer())
@@ -236,7 +235,7 @@ def test_custom_serializer_union() -> None:
 
     class MyDeserializer(ClassDeserializer):
         @dispatch
-        def deserialize(self, cls: Type[datetime], value: Any) -> datetime:
+        def deserialize(self, cls: type[datetime], value: Any) -> datetime:
             return datetime.strptime(value, "%d/%m/%y")
 
     @serde(class_serializer=MySerializer(), class_deserializer=MyDeserializer())
@@ -266,7 +265,7 @@ def test_custom_class_serializer_optional() -> None:
 
     class MyDeserializer(ClassDeserializer):
         @dispatch
-        def deserialize(self, cls: Type[datetime], value: Any) -> datetime:
+        def deserialize(self, cls: type[datetime], value: Any) -> datetime:
             return datetime.strptime(value, "%d/%m/%y")
 
     @serde(class_serializer=MySerializer(), class_deserializer=MyDeserializer())

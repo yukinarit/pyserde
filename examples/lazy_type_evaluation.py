@@ -1,21 +1,17 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
-
 from serde import serde
 from serde.json import from_json, to_json
-from typing import Type
 
 
 @serde
-@dataclass
 class Foo:
     i: int
     s: str
     f: float
     b: bool
 
-    def foo(self, cls: Type[Foo]) -> None:  # You can use "Foo" type before it's defined.
+    def foo(self, cls: type[Foo]) -> None:  # You can use "Foo" type before it's defined.
         print("foo")
 
 

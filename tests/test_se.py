@@ -1,4 +1,3 @@
-from beartype.typing import Set
 from serde import asdict, astuple, serialize, to_dict, to_tuple
 from serde.json import to_json
 from serde.msgpack import to_msgpack
@@ -72,7 +71,7 @@ def test_se_func_iter():
         )
     )
 
-    # Tuple
+    # tuple
     exp = (
         (10, 10, 10),
         ("10", "10", "10", "10"),
@@ -112,7 +111,7 @@ def test_se_func_iter():
 def test_convert_sets_option():
     @serialize
     class A:
-        v: Set[str]
+        v: set[str]
 
     a = A({"a", "b"})
 

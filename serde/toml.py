@@ -5,7 +5,7 @@ Serialize and Deserialize in TOML format. This module depends on
 """
 
 import sys
-from typing import Type, overload, Optional, Any
+from typing import overload, Optional, Any
 
 import tomli_w
 
@@ -37,7 +37,7 @@ class TomlDeserializer(Deserializer[str]):
 def to_toml(
     obj: Any,
     cls: Optional[Any] = None,
-    se: Type[Serializer[str]] = TomlSerializer,
+    se: type[Serializer[str]] = TomlSerializer,
     reuse_instances: bool = False,
     convert_sets: bool = True,
     **opts: Any,
@@ -58,18 +58,18 @@ def to_toml(
 
 @overload
 def from_toml(
-    c: Type[T], s: str, de: Type[Deserializer[str]] = TomlDeserializer, **opts: Any
+    c: type[T], s: str, de: type[Deserializer[str]] = TomlDeserializer, **opts: Any
 ) -> T: ...
 
 
 # For Union, Optional etc.
 @overload
 def from_toml(
-    c: Any, s: str, de: Type[Deserializer[str]] = TomlDeserializer, **opts: Any
+    c: Any, s: str, de: type[Deserializer[str]] = TomlDeserializer, **opts: Any
 ) -> Any: ...
 
 
-def from_toml(c: Any, s: str, de: Type[Deserializer[str]] = TomlDeserializer, **opts: Any) -> Any:
+def from_toml(c: Any, s: str, de: type[Deserializer[str]] = TomlDeserializer, **opts: Any) -> Any:
     """
     Deserialize from TOML into the object.
 

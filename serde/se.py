@@ -8,22 +8,14 @@ import abc
 import copy
 import dataclasses
 import functools
-from beartype import typing
+import typing
 import itertools
 import beartype
-from dataclasses import dataclass, is_dataclass
-from typing import TypeVar, Literal, Generic, Optional, Any, Iterable, Iterator
-from beartype.typing import (
-    Callable,
-    Dict,
-    List,
-    Tuple,
-    Type,
-    Union,
-)
-from beartype.door import is_bearable
-
 import jinja2
+from dataclasses import dataclass, is_dataclass
+from typing import TypeVar, Literal, Generic, Optional, Any, Union
+from collections.abc import Callable, Iterable, Iterator
+from beartype.door import is_bearable
 from typing_extensions import dataclass_transform
 
 from .compat import (
@@ -95,11 +87,11 @@ from .numpy import (
 __all__ = ["serialize", "is_serializable", "to_dict", "to_tuple"]
 
 
-SerializeFunc = Callable[[Type[Any], Any], Any]
+SerializeFunc = Callable[[type[Any], Any], Any]
 """ Interface of Custom serialize function. """
 
 
-def default_serializer(_cls: Type[Any], obj: Any) -> Any:
+def default_serializer(_cls: type[Any], obj: Any) -> Any:
     """
     Marker function to tell serde to use the default serializer. It's used when custom serializer
     is specified at the class but you want to override a field with the default serializer.
@@ -107,7 +99,7 @@ def default_serializer(_cls: Type[Any], obj: Any) -> Any:
 
 
 def serde_legacy_custom_class_serializer(
-    cls: Type[Any], obj: Any, custom: SerializeFunc, default: Callable[[], Any]
+    cls: type[Any], obj: Any, custom: SerializeFunc, default: Callable[[], Any]
 ) -> Any:
     try:
         return custom(cls, obj)
@@ -130,7 +122,7 @@ class Serializer(Generic[T], metaclass=abc.ABCMeta):
 
 def _make_serialize(
     cls_name: str,
-    fields: Iterable[Union[str, Tuple[str, Type[Any]], Tuple[str, Type[Any], Any]]],
+    fields: Iterable[Union[str, tuple[str, type[Any]], tuple[str, type[Any], Any]]],
     *args: Any,
     rename_all: Optional[str] = None,
     reuse_instances_default: bool = False,
@@ -141,7 +133,7 @@ def _make_serialize(
     serialize_class_var: bool = False,
     class_serializer: Optional[ClassSerializer] = None,
     **kwargs: Any,
-) -> Type[Any]:
+) -> type[Any]:
     """
     Create a serializable class programatically.
     """
@@ -168,7 +160,7 @@ GENERATION_STACK = []
 
 @dataclass_transform()
 def serialize(
-    _cls: Optional[Type[T]] = None,
+    _cls: Optional[type[T]] = None,
     rename_all: Optional[str] = None,
     reuse_instances_default: bool = False,
     convert_sets_default: bool = False,
@@ -178,7 +170,7 @@ def serialize(
     serialize_class_var: bool = False,
     class_serializer: Optional[ClassSerializer] = None,
     **kwargs: Any,
-) -> Type[T]:
+) -> type[T]:
     """
     A dataclass with this decorator is serializable into any of the data formats
     supported by pyserde.
@@ -198,7 +190,7 @@ def serialize(
     '{"i":10,"s":"foo","f":100.0,"b":true}'
     """
 
-    def wrap(cls: Type[T]) -> Type[T]:
+    def wrap(cls: type[T]) -> type[T]:
         tagging.check()
 
         # If no `dataclass` found in the class, dataclassify it automatically.
@@ -208,7 +200,7 @@ def serialize(
         if type_check.is_strict():
             beartype.beartype(cls)
 
-        g: Dict[str, Any] = {}
+        g: dict[str, Any] = {}
 
         # Create a scope storage used by serde.
         # Each class should get own scope. Child classes can not share scope with parent class.
@@ -222,7 +214,7 @@ def serialize(
             )
             setattr(cls, SERDE_SCOPE, scope)
 
-        class_serializers: List[ClassSerializer] = list(
+        class_serializers: list[ClassSerializer] = list(
             itertools.chain(GLOBAL_CLASS_SERIALIZER, [class_serializer] if class_serializer else [])
         )
 
@@ -325,7 +317,7 @@ def is_serializable(instance_or_class: Any) -> bool:
     return hasattr(instance_or_class, SERDE_SCOPE)
 
 
-def is_dataclass_without_se(cls: Type[Any]) -> bool:
+def is_dataclass_without_se(cls: type[Any]) -> bool:
     if not dataclasses.is_dataclass(cls):
         return False
     if not hasattr(cls, SERDE_SCOPE):
@@ -393,7 +385,7 @@ def to_obj(
         raise SerdeError(e) from None
 
 
-def astuple(v: Any) -> Tuple[Any, ...]:
+def astuple(v: Any) -> tuple[Any, ...]:
     """
     Serialize object into tuple.
     """
@@ -402,10 +394,10 @@ def astuple(v: Any) -> Tuple[Any, ...]:
 
 def to_tuple(
     o: Any,
-    c: Optional[Type[Any]] = None,
+    c: Optional[type[Any]] = None,
     reuse_instances: Optional[bool] = None,
     convert_sets: Optional[bool] = None,
-) -> Tuple[Any, ...]:
+) -> tuple[Any, ...]:
     """
     Serialize object into tuple.
 
@@ -430,7 +422,7 @@ def to_tuple(
     )
 
 
-def asdict(v: Any) -> Dict[Any, Any]:
+def asdict(v: Any) -> dict[Any, Any]:
     """
     Serialize object into dictionary.
     """
@@ -439,10 +431,10 @@ def asdict(v: Any) -> Dict[Any, Any]:
 
 def to_dict(
     o: Any,
-    c: Optional[Type[Any]] = None,
+    c: Optional[type[Any]] = None,
     reuse_instances: Optional[bool] = None,
     convert_sets: Optional[bool] = None,
-) -> Dict[Any, Any]:
+) -> dict[Any, Any]:
     """
     Serialize object into dictionary.
 
@@ -491,7 +483,7 @@ class SeField(Field[T]):
         return SeField(typ, name=None)
 
 
-def sefields(cls: Type[Any], serialize_class_var: bool = False) -> Iterator[SeField[Any]]:
+def sefields(cls: type[Any], serialize_class_var: bool = False) -> Iterator[SeField[Any]]:
     """
     Iterate fields for serialization.
     """
@@ -501,7 +493,7 @@ def sefields(cls: Type[Any], serialize_class_var: bool = False) -> Iterator[SeFi
 
 
 def render_to_tuple(
-    cls: Type[Any],
+    cls: type[Any],
     legacy_class_serializer: Optional[SerializeFunc] = None,
     type_check: TypeCheck = strict,
     serialize_class_var: bool = False,
@@ -543,7 +535,7 @@ def {{func}}(obj, reuse_instances=None, convert_sets=None):
 
 
 def render_to_dict(
-    cls: Type[Any],
+    cls: type[Any],
     case: Optional[str] = None,
     legacy_class_serializer: Optional[SerializeFunc] = None,
     type_check: TypeCheck = strict,
@@ -594,7 +586,7 @@ def {{func}}(obj, reuse_instances = None, convert_sets = None):
 
 
 def render_union_func(
-    cls: Type[Any], union_args: List[Type[Any]], tagging: Tagging = DefaultTagging
+    cls: type[Any], union_args: list[type[Any]], tagging: Tagging = DefaultTagging
 ) -> str:
     """
     Render function that serializes a field with union type.
@@ -690,11 +682,10 @@ class Renderer:
         """
         Render rvalue
 
-        >>> from typing import Tuple
         >>> Renderer(TO_ITER).render(SeField(int, 'i'))
         'coerce_object(int, i)'
 
-        >>> Renderer(TO_ITER).render(SeField(List[int], 'l'))
+        >>> Renderer(TO_ITER).render(SeField(list[int], 'l'))
         '[coerce_object(int, v) for v in l]'
 
         >>> @serialize
@@ -705,29 +696,29 @@ class Renderer:
         "\
 foo.__serde__.funcs['to_iter'](foo, reuse_instances=reuse_instances, convert_sets=convert_sets)"
 
-        >>> Renderer(TO_ITER).render(SeField(List[Foo], 'foo'))
+        >>> Renderer(TO_ITER).render(SeField(list[Foo], 'foo'))
         "\
 [v.__serde__.funcs['to_iter'](v, reuse_instances=reuse_instances, \
 convert_sets=convert_sets) for v in foo]"
 
-        >>> Renderer(TO_ITER).render(SeField(Dict[str, Foo], 'foo'))
+        >>> Renderer(TO_ITER).render(SeField(dict[str, Foo], 'foo'))
         "\
 {coerce_object(str, k): v.__serde__.funcs['to_iter'](v, reuse_instances=reuse_instances, \
 convert_sets=convert_sets) for k, v in foo.items()}"
 
-        >>> Renderer(TO_ITER).render(SeField(Dict[Foo, Foo], 'foo'))
+        >>> Renderer(TO_ITER).render(SeField(dict[Foo, Foo], 'foo'))
         "\
 {k.__serde__.funcs['to_iter'](k, reuse_instances=reuse_instances, \
 convert_sets=convert_sets): v.__serde__.funcs['to_iter'](v, reuse_instances=reuse_instances, \
 convert_sets=convert_sets) for k, v in foo.items()}"
 
-        >>> Renderer(TO_ITER).render(SeField(Tuple[str, Foo, int], 'foo'))
+        >>> Renderer(TO_ITER).render(SeField(tuple[str, Foo, int], 'foo'))
         "\
 (coerce_object(str, foo[0]), foo[1].__serde__.funcs['to_iter'](foo[1], \
 reuse_instances=reuse_instances, convert_sets=convert_sets), \
 coerce_object(int, foo[2]),)"
         """
-        implemented_methods: Dict[Type[Any], int] = {}
+        implemented_methods: dict[type[Any], int] = {}
         class_serializers: Iterable[ClassSerializer] = itertools.chain(
             GLOBAL_CLASS_SERIALIZER, [self.class_serializer] if self.class_serializer else []
         )
@@ -810,7 +801,7 @@ coerce_object(int, foo[2]),)"
         if arg.flatten:
             flattened = []
             for f in sefields(arg.type, self.serialize_class_var):
-                f.parent = arg  # type: ignore
+                f.parent = arg
                 flattened.append(self.render(f))
             return ", ".join(flattened)
         else:

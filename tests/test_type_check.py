@@ -6,12 +6,6 @@ from typing import (
     Union,
     Any,
 )
-from beartype.typing import (
-    Dict,
-    List,
-    Set,
-    Tuple,
-)
 
 import pytest
 
@@ -20,7 +14,7 @@ import serde.json
 
 from . import data
 
-test_cases: List[Tuple[Any, Any, bool]] = [
+test_cases: list[tuple[Any, Any, bool]] = [
     (int, 10, False),
     (int, 10.0, True),
     (int, "10", True),
@@ -37,33 +31,33 @@ test_cases: List[Tuple[Any, Any, bool]] = [
     (bool, 10.0, True),
     (bool, "10", True),
     (bool, True, False),
-    (List[int], [1], False),
-    (List[int], [1.0], True),
-    (List[float], [1.0], False),
-    (List[float], [1], True),
-    (List[float], ["foo"], True),
-    (List[str], ["foo"], False),
-    (List[str], [True], True),
-    (List[bool], [True], False),
-    (List[bool], [10], True),
-    (List[data.Int], [data.Int(1)], False),
-    (List[data.Int], [data.Int.uncheck_new(1.0)], True),  # Runtime incompatible object
-    (List[data.Int], [], False),
-    (Dict[str, int], {"foo": 10}, False),
-    (Dict[str, int], {"foo": 10.0}, False),
-    (Dict[str, data.Int], {"foo": data.Int(1)}, False),
-    (Dict[str, data.Int], {"foo": data.Int.uncheck_new(1.0)}, True),  # Runtime incompatible object
-    (Set[int], {10}, False),
-    (Set[int], {10.0}, False),
-    (Set[int], [10], True),
-    (Tuple[int], (10,), False),
-    (Tuple[int], (10.0,), True),
-    (Tuple[int, str], (10, "foo"), False),
-    (Tuple[int, str], (10, 10.0), True),
-    (Tuple[data.Int, data.Str], (data.Int(1), data.Str("2")), False),
-    (Tuple[data.Int, data.Str], (data.Int(1), data.Int(2)), True),
-    (Tuple, (10, 10.0), False),
-    (Tuple[int, ...], (1, 2), False),
+    (list[int], [1], False),
+    (list[int], [1.0], True),
+    (list[float], [1.0], False),
+    (list[float], [1], True),
+    (list[float], ["foo"], True),
+    (list[str], ["foo"], False),
+    (list[str], [True], True),
+    (list[bool], [True], False),
+    (list[bool], [10], True),
+    (list[data.Int], [data.Int(1)], False),
+    (list[data.Int], [data.Int.uncheck_new(1.0)], True),  # Runtime incompatible object
+    (list[data.Int], [], False),
+    (dict[str, int], {"foo": 10}, False),
+    (dict[str, int], {"foo": 10.0}, False),
+    (dict[str, data.Int], {"foo": data.Int(1)}, False),
+    (dict[str, data.Int], {"foo": data.Int.uncheck_new(1.0)}, True),  # Runtime incompatible object
+    (set[int], {10}, False),
+    (set[int], {10.0}, False),
+    (set[int], [10], True),
+    (tuple[int], (10,), False),
+    (tuple[int], (10.0,), True),
+    (tuple[int, str], (10, "foo"), False),
+    (tuple[int, str], (10, 10.0), True),
+    (tuple[data.Int, data.Str], (data.Int(1), data.Str("2")), False),
+    (tuple[data.Int, data.Str], (data.Int(1), data.Int(2)), True),
+    (tuple, (10, 10.0), False),
+    (tuple[int, ...], (1, 2), False),
     (data.E, data.E.S, False),
     (data.E, data.IE.V0, True),
     (Union[int, str], 10, False),
@@ -79,11 +73,11 @@ test_cases: List[Tuple[Any, Any, bool]] = [
 # Those test cases have wrong runtime values against declared types.
 # This is not yet testable until beartype implements O(n) type checking
 # https://beartype.readthedocs.io/en/latest/api_decor/#beartype.BeartypeStrategy
-default_unstable_test_cases: List[Tuple[Any, Any, bool]] = [
-    (List[int], [1, 1.0], True),
-    (List[data.Int], [data.Int(1), data.Float(10.0)], True),
-    (Dict[str, int], {"foo": 10, 100: "bar"}, False),
-    (Tuple[int, ...], (1, 2.0), True),
+default_unstable_test_cases: list[tuple[Any, Any, bool]] = [
+    (list[int], [1, 1.0], True),
+    (list[data.Int], [data.Int(1), data.Float(10.0)], True),
+    (dict[str, int], {"foo": 10, 100: "bar"}, False),
+    (tuple[int, ...], (1, 2.0), True),
 ]
 
 
@@ -178,7 +172,7 @@ def test_coerce() -> None:
 
     # Nested structure
     p2 = Nested(Int("10"), Str(100), Float(1000), Bool("True"))  # type: ignore
-    d2: Dict[str, Dict[str, Any]] = serde.to_dict(p2)
+    d2: dict[str, dict[str, Any]] = serde.to_dict(p2)
     assert d2["i"]["i"] == 10
     assert d2["s"]["s"] == "100"
     assert d2["f"]["f"] == 1000.0

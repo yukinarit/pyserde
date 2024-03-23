@@ -1,6 +1,6 @@
 import json
 from functools import partial
-from typing import List, Union
+from typing import Union
 
 import attr
 import data
@@ -17,7 +17,7 @@ class Small:
 
 @attr.s(auto_attribs=True)
 class Medium:
-    inner: List[Small] = attr.Factory(list)
+    inner: list[Small] = attr.Factory(list)
 
 
 SMALL = Small(**data.args_sm)

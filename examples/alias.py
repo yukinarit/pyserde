@@ -1,11 +1,8 @@
-from dataclasses import dataclass
-
 from serde import field, serde
 from serde.json import from_json
 
 
 @serde
-@dataclass
 class Foo:
     a: int = field(alias=["b", "c", "d"])
 

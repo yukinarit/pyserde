@@ -4,8 +4,8 @@ Here is the list of the supported types. See the simple example for each type in
 
 * Primitives (int, float, str, bool) [^1]
 * Containers
-    * `List`, `Set`, `Tuple`, `Dict` [^2]
-    * [`FrozenSet`](https://docs.python.org/3/library/stdtypes.html#frozenset), [^3] [`DefaultDict`](https://docs.python.org/3/library/collections.html#collections.defaultdict) [^4]
+    * `list`, `set`, `tuple`, `dict` [^2]
+    * [`frozenset`](https://docs.python.org/3/library/stdtypes.html#frozenset), [^3] [`defaultdict`](https://docs.python.org/3/library/collections.html#collections.defaultdict) [^4]
 * [`typing.Optional`](https://docs.python.org/3/library/typing.html#typing.Optional) [^5]
 * [`typing.Union`](https://docs.python.org/3/library/typing.html#typing.Union) [^6] [^7] [^8]
 * User defined class with [`@dataclass`](https://docs.python.org/3/library/dataclasses.html) [^9] [^10]
@@ -28,12 +28,10 @@ Here is the list of the supported types. See the simple example for each type in
 You can write pretty complex class like this:
 ```python
 @serde
-@dataclass
 class bar:
     i: int
 
 @serde
-@dataclass
 class Foo:
     a: int
     b: list[str]

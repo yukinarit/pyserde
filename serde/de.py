@@ -9,21 +9,14 @@ import itertools
 import collections
 import dataclasses
 import functools
+import typing
+import jinja2
 import beartype
-from beartype import typing
+from collections.abc import Callable, Sequence, Iterable
 from beartype.roar import BeartypeCallHintParamViolation
 from dataclasses import dataclass, is_dataclass
-from typing import overload, TypeVar, Generic, Any, Optional, Sequence, Iterable
-from beartype.typing import (
-    Callable,
-    Dict,
-    List,
-    Union,
-    Literal,
-)
-
-import jinja2
-from typing_extensions import Type, dataclass_transform
+from typing import overload, TypeVar, Generic, Any, Optional, Union, Literal
+from typing_extensions import dataclass_transform
 
 from .compat import (
     SerdeError,
@@ -102,12 +95,12 @@ from .numpy import (
 __all__ = ["deserialize", "is_deserializable", "from_dict", "from_tuple"]
 
 
-DeserializeFunc = Callable[[Type[Any], Any], Any]
+DeserializeFunc = Callable[[type[Any], Any], Any]
 """ Interface of Custom deserialize function. """
 
 
 def serde_legacy_custom_class_deserializer(
-    cls: Type[Any], datavar: Any, value: Any, custom: DeserializeFunc, default: Callable[[], Any]
+    cls: type[Any], datavar: Any, value: Any, custom: DeserializeFunc, default: Callable[[], Any]
 ) -> Any:
     """
     Handle custom deserialization. Use default deserialization logic if it receives `SerdeSkip`
@@ -125,7 +118,7 @@ def serde_legacy_custom_class_deserializer(
         return default()
 
 
-def default_deserializer(_cls: Type[Any], obj: Any) -> Any:
+def default_deserializer(_cls: type[Any], obj: Any) -> Any:
     """
     Marker function to tell serde to use the default deserializer. It's used when custom
     deserializer is specified at the class but you want to override a field with the default
@@ -134,7 +127,7 @@ def default_deserializer(_cls: Type[Any], obj: Any) -> Any:
 
 
 def _get_by_aliases(
-    d: Dict[str, str], aliases: List[str], raise_error: bool = True
+    d: dict[str, str], aliases: list[str], raise_error: bool = True
 ) -> Optional[str]:
     if not aliases:
         if raise_error:
@@ -147,7 +140,7 @@ def _get_by_aliases(
         return _get_by_aliases(d, aliases[1:], raise_error=raise_error)
 
 
-def _exists_by_aliases(d: Dict[str, str], aliases: List[str]) -> bool:
+def _exists_by_aliases(d: dict[str, str], aliases: list[str]) -> bool:
     for alias in aliases:
         if alias in d:
             return True
@@ -156,7 +149,7 @@ def _exists_by_aliases(d: Dict[str, str], aliases: List[str]) -> bool:
 
 def _make_deserialize(
     cls_name: str,
-    fields: List[Any],
+    fields: list[Any],
     *args: Any,
     rename_all: Optional[str] = None,
     reuse_instances_default: bool = True,
@@ -165,7 +158,7 @@ def _make_deserialize(
     type_check: TypeCheck = strict,
     class_deserializer: Optional[ClassDeserializer] = None,
     **kwargs: Any,
-) -> Type[Any]:
+) -> type[Any]:
     """
     Create a deserializable class programatically.
     """
@@ -188,7 +181,7 @@ GENERATION_STACK = []
 
 @dataclass_transform()
 def deserialize(
-    _cls: Optional[Type[T]] = None,
+    _cls: Optional[type[T]] = None,
     rename_all: Optional[str] = None,
     reuse_instances_default: bool = True,
     convert_sets_default: bool = False,
@@ -197,7 +190,7 @@ def deserialize(
     type_check: TypeCheck = strict,
     class_deserializer: Optional[ClassDeserializer] = None,
     **kwargs: Any,
-) -> Type[T]:
+) -> type[T]:
     """
     A dataclass with this decorator is deserializable from any of the data formats supported
     by pyserde.
@@ -218,7 +211,7 @@ def deserialize(
 
     stack = []
 
-    def wrap(cls: Type[T]) -> Type[T]:
+    def wrap(cls: type[T]) -> type[T]:
         if cls in stack:
             return cls
         stack.append(cls)
@@ -232,7 +225,7 @@ def deserialize(
         if type_check.is_strict():
             beartype.beartype(cls)
 
-        g: Dict[str, Any] = {}
+        g: dict[str, Any] = {}
 
         # Create a scope storage used by serde.
         # Each class should get own scope. Child classes can not share scope with parent class.
@@ -242,7 +235,7 @@ def deserialize(
             scope = Scope(cls, reuse_instances_default=reuse_instances_default)
             setattr(cls, SERDE_SCOPE, scope)
 
-        class_deserializers: List[ClassDeserializer] = list(
+        class_deserializers: list[ClassDeserializer] = list(
             itertools.chain(
                 GLOBAL_CLASS_DESERIALIZER, [class_deserializer] if class_deserializer else []
             )
@@ -368,7 +361,7 @@ def is_deserializable(instance_or_class: Any) -> bool:
     return hasattr(instance_or_class, SERDE_SCOPE)
 
 
-def is_dataclass_without_de(cls: Type[Any]) -> bool:
+def is_dataclass_without_de(cls: type[Any]) -> bool:
     if not dataclasses.is_dataclass(cls):
         return False
     if not hasattr(cls, SERDE_SCOPE):
@@ -399,10 +392,10 @@ class Deserializer(Generic[T], metaclass=abc.ABCMeta):
         raise NotImplementedError
 
 
-def from_obj(c: Type[T], o: Any, named: bool, reuse_instances: Optional[bool]) -> T:
+def from_obj(c: type[T], o: Any, named: bool, reuse_instances: Optional[bool]) -> T:
     """
     Deserialize from an object into an instance of the type specified as arg `c`.
-    `c` can be either primitive type, `List`, `Tuple`, `Dict` or `deserialize` class.
+    `c` can be either primitive type, `list`, `tuple`, `dict` or `deserialize` class.
     """
 
     res: Any
@@ -412,7 +405,7 @@ def from_obj(c: Type[T], o: Any, named: bool, reuse_instances: Optional[bool]) -
     if type(o) is c:
         return o
 
-    def deserializable_to_obj(cls: Type[T]) -> T:
+    def deserializable_to_obj(cls: type[T]) -> T:
         serde_scope: Scope = getattr(cls, SERDE_SCOPE)
         func_name = FROM_DICT if named else FROM_ITER
         res = serde_scope.funcs[func_name](
@@ -504,14 +497,14 @@ def from_obj(c: Type[T], o: Any, named: bool, reuse_instances: Optional[bool]) -
 
 
 @overload
-def from_dict(cls: Type[T], o: Dict[str, Any], reuse_instances: Optional[bool] = None) -> T: ...
+def from_dict(cls: type[T], o: dict[str, Any], reuse_instances: Optional[bool] = None) -> T: ...
 
 
 @overload
-def from_dict(cls: Any, o: Dict[str, Any], reuse_instances: Optional[bool] = None) -> Any: ...
+def from_dict(cls: Any, o: dict[str, Any], reuse_instances: Optional[bool] = None) -> Any: ...
 
 
-def from_dict(cls: Any, o: Dict[str, Any], reuse_instances: Optional[bool] = None) -> Any:
+def from_dict(cls: Any, o: dict[str, Any], reuse_instances: Optional[bool] = None) -> Any:
     """
     Deserialize dictionary into object.
 
@@ -529,14 +522,14 @@ def from_dict(cls: Any, o: Dict[str, Any], reuse_instances: Optional[bool] = Non
 
     >>> lst = [{'i': 10, 's': 'foo', 'f': 100.0, 'b': True},
     ...        {'i': 20, 's': 'foo', 'f': 100.0, 'b': True}]
-    >>> from_dict(List[Foo], lst)
+    >>> from_dict(list[Foo], lst)
     [Foo(i=10, s='foo', f=100.0, b=True), Foo(i=20, s='foo', f=100.0, b=True)]
     """
     return from_obj(cls, o, named=True, reuse_instances=reuse_instances)
 
 
 @overload
-def from_tuple(cls: Type[T], o: Any, reuse_instances: Optional[bool] = None) -> T: ...
+def from_tuple(cls: type[T], o: Any, reuse_instances: Optional[bool] = None) -> T: ...
 
 
 @overload
@@ -560,7 +553,7 @@ def from_tuple(cls: Any, o: Any, reuse_instances: Optional[bool] = None) -> Any:
     You can pass any type supported by pyserde. For example,
 
     >>> lst = [(10, 'foo', 100.0, True), (20, 'foo', 100.0, True)]
-    >>> from_tuple(List[Foo], lst)
+    >>> from_tuple(list[Foo], lst)
     [Foo(i=10, s='foo', f=100.0, b=True), Foo(i=20, s='foo', f=100.0, b=True)]
     """
     return from_obj(cls, o, named=False, reuse_instances=reuse_instances)
@@ -585,11 +578,11 @@ class DeField(Field[T]):
         """
         Get inner `Field` from current `Field`.
 
-        `InnerField` is returned if self is of any standard collection e.g. List.
+        `InnerField` is returned if self is of any standard collection e.g. list.
         `DeField` is returned if self is Optional.
         """
         typ = type_args(self.type)[n]
-        opts: Dict[str, Any] = {
+        opts: dict[str, Any] = {
             "case": self.case,
             "rename": self.rename,
             "skip": self.skip,
@@ -616,7 +609,7 @@ class DeField(Field[T]):
 
     def key_field(self) -> DeField[Any]:
         """
-        Get inner key field for Dict like class.
+        Get inner key field for dict like class.
         """
         k = self[0]
         k.name = "k"
@@ -625,7 +618,7 @@ class DeField(Field[T]):
 
     def value_field(self) -> DeField[Any]:
         """
-        Get inner value field for Dict like class.
+        Get inner value field for dict like class.
         """
         return self[1]
 
@@ -634,7 +627,7 @@ class DeField(Field[T]):
         """
         Renders the variable name that possesses the data.
 
-        e.g. Tuple
+        e.g. tuple
             * datavar property returns "data"
             * data property returns "data[0]".
         e.g. Optional
@@ -670,8 +663,8 @@ class InnerField(DeField[T]):
     for inner type codegen.
 
     e.g.
-      T of List[T]
-      V of Dict[K, V]
+      T of list[T]
+      V of dict[K, V]
       T of Optional[T]
     """
 
@@ -684,7 +677,7 @@ class InnerField(DeField[T]):
         self.datavar = d
 
 
-def defields(cls: Type[Any]) -> List[DeField[Any]]:
+def defields(cls: type[Any]) -> list[DeField[Any]]:
     return fields(DeField, cls)
 
 
@@ -695,7 +688,7 @@ class Renderer:
     """
 
     func: str
-    cls: Optional[Type[Any]] = None
+    cls: Optional[type[Any]] = None
     legacy_class_deserializer: Optional[DeserializeFunc] = None
     import_numpy: bool = False
     suppress_coerce: bool = False
@@ -706,7 +699,7 @@ class Renderer:
         """
         Render rvalue
         """
-        implemented_methods: Dict[Type[Any], int] = {}
+        implemented_methods: dict[type[Any], int] = {}
         class_deserializers: Iterable[ClassDeserializer] = itertools.chain(
             GLOBAL_CLASS_DESERIALIZER, [self.class_deserializer] if self.class_deserializer else []
         )
@@ -845,19 +838,18 @@ class Renderer:
         """
         Render rvalue for Optional.
 
-        >>> from typing import List
         >>> Renderer('foo').render(DeField(Optional[int], 'o', datavar='data'))
         '(coerce_object(int, data["o"])) if data.get("o") is not None else None'
 
-        >>> Renderer('foo').render(DeField(Optional[List[int]], 'o', datavar='data'))
+        >>> Renderer('foo').render(DeField(Optional[list[int]], 'o', datavar='data'))
         '([coerce_object(int, v) for v in data["o"]]) if data.get("o") is not None else None'
 
-        >>> Renderer('foo').render(DeField(Optional[List[int]], 'o', datavar='data'))
+        >>> Renderer('foo').render(DeField(Optional[list[int]], 'o', datavar='data'))
         '([coerce_object(int, v) for v in data["o"]]) if data.get("o") is not None else None'
 
         >>> @deserialize
         ... class Foo:
-        ...     o: Optional[List[int]]
+        ...     o: Optional[list[int]]
         >>> Renderer('foo').render(DeField(Optional[Foo], 'f', datavar='data'))
         '(Foo.__serde__.funcs[\\'foo\\'](data=data["f"], maybe_generic=maybe_generic, \
 maybe_generic_type_vars=maybe_generic_type_vars, variable_type_args=None, \
@@ -880,11 +872,10 @@ reuse_instances=reuse_instances)) if data.get("f") is not None else None'
         """
         Render rvalue for list.
 
-        >>> from typing import List
-        >>> Renderer('foo').render(DeField(List[int], 'l', datavar='data'))
+        >>> Renderer('foo').render(DeField(list[int], 'l', datavar='data'))
         '[coerce_object(int, v) for v in data["l"]]'
 
-        >>> Renderer('foo').render(DeField(List[List[int]], 'l', datavar='data'))
+        >>> Renderer('foo').render(DeField(list[list[int]], 'l', datavar='data'))
         '[[coerce_object(int, v) for v in v] for v in data["l"]]'
         """
         if is_bare_list(arg.type):
@@ -914,17 +905,16 @@ reuse_instances=reuse_instances)) if data.get("f") is not None else None'
         """
         Render rvalue for tuple.
 
-        >>> from typing import List, Tuple
         >>> @deserialize
         ... class Foo: pass
-        >>> Renderer('foo').render(DeField(Tuple[str, int, List[int], Foo], 'd', datavar='data'))
+        >>> Renderer('foo').render(DeField(tuple[str, int, list[int], Foo], 'd', datavar='data'))
         '(coerce_object(str, data["d"][0]), coerce_object(int, data["d"][1]), \
 [coerce_object(int, v) for v in data["d"][2]], \
 Foo.__serde__.funcs[\\'foo\\'](data=data["d"][3], maybe_generic=maybe_generic, \
 maybe_generic_type_vars=maybe_generic_type_vars, variable_type_args=None, \
 reuse_instances=reuse_instances),)'
 
-        >>> field = DeField(Tuple[str, int, List[int], Foo],
+        >>> field = DeField(tuple[str, int, list[int], Foo],
         ...                'd',
         ...                 datavar='data',
         ...                 index=0,
@@ -952,13 +942,12 @@ variable_type_args=None, reuse_instances=reuse_instances),)"
         """
         Render rvalue for dict.
 
-        >>> from typing import List
-        >>> Renderer('foo').render(DeField(Dict[str, int], 'd', datavar='data'))
+        >>> Renderer('foo').render(DeField(dict[str, int], 'd', datavar='data'))
         '{coerce_object(str, k): coerce_object(int, v) for k, v in data["d"].items()}'
 
         >>> @deserialize
         ... class Foo: pass
-        >>> Renderer('foo').render(DeField(Dict[Foo, List[Foo]], 'f', datavar='data'))
+        >>> Renderer('foo').render(DeField(dict[Foo, list[Foo]], 'f', datavar='data'))
         '\
 {Foo.__serde__.funcs[\\'foo\\'](data=k, maybe_generic=maybe_generic, \
 maybe_generic_type_vars=maybe_generic_type_vars, variable_type_args=None, \
@@ -975,8 +964,8 @@ for k, v in data["f"].items()}'
             v = arg.value_field()
             origin = get_origin(v.type)
             if origin:
-                # When the callable type is of generic type e.g List.
-                # Get origin type "list" from "List[X]".
+                # When the callable type is of generic type e.g list.
+                # Get origin type "list" from "list[X]".
                 callable = origin.__name__
             else:
                 # When the callable type is non generic type e.g int, Foo.
@@ -1074,7 +1063,7 @@ def renderable(f: DeField[Any]) -> bool:
 
 
 def render_from_iter(
-    cls: Type[Any],
+    cls: type[Any],
     legacy_class_deserializer: Optional[DeserializeFunc] = None,
     type_check: TypeCheck = strict,
     class_deserializer: Optional[ClassDeserializer] = None,
@@ -1128,7 +1117,7 @@ def {{func}}(cls=cls, maybe_generic=None, maybe_generic_type_vars=None, data=Non
 
 
 def render_from_dict(
-    cls: Type[Any],
+    cls: type[Any],
     rename_all: Optional[str] = None,
     legacy_class_deserializer: Optional[DeserializeFunc] = None,
     type_check: TypeCheck = strict,
@@ -1188,7 +1177,7 @@ def {{func}}(cls=cls, maybe_generic=None, maybe_generic_type_vars=None, data=Non
 
 
 def render_union_func(
-    cls: Type[Any], union_args: Sequence[Type[Any]], tagging: Tagging = DefaultTagging
+    cls: type[Any], union_args: Sequence[type[Any]], tagging: Tagging = DefaultTagging
 ) -> str:
     template = """
 def {{func}}(cls=cls, maybe_generic=None, maybe_generic_type_vars=None, data=None,
@@ -1249,7 +1238,7 @@ def {{func}}(cls=cls, maybe_generic=None, maybe_generic_type_vars=None, data=Non
 
 
 def render_literal_func(
-    cls: Type[Any], literal_args: Sequence[Any], tagging: Tagging = DefaultTagging
+    cls: type[Any], literal_args: Sequence[Any], tagging: Tagging = DefaultTagging
 ) -> str:
     template = """
 def {{func}}(cls=cls, maybe_generic=None, maybe_generic_type_vars=None, data=None,

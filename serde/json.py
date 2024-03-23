@@ -4,8 +4,6 @@ Serialize and Deserialize in JSON format.
 
 from typing import Any, AnyStr, overload, Optional, Union
 
-from typing_extensions import Type
-
 from .compat import T
 from .de import Deserializer, from_dict
 from .se import Serializer, to_dict
@@ -55,7 +53,7 @@ class JsonDeserializer(Deserializer[AnyStr]):
 def to_json(
     obj: Any,
     cls: Optional[Any] = None,
-    se: Type[Serializer[str]] = JsonSerializer,
+    se: type[Serializer[str]] = JsonSerializer,
     reuse_instances: bool = False,
     convert_sets: bool = True,
     **opts: Any,
@@ -80,19 +78,19 @@ def to_json(
 
 @overload
 def from_json(
-    c: Type[T], s: AnyStr, de: Type[Deserializer[AnyStr]] = JsonDeserializer, **opts: Any
+    c: type[T], s: AnyStr, de: type[Deserializer[AnyStr]] = JsonDeserializer, **opts: Any
 ) -> T: ...
 
 
 # For Union, Optional etc.
 @overload
 def from_json(
-    c: Any, s: AnyStr, de: Type[Deserializer[AnyStr]] = JsonDeserializer, **opts: Any
+    c: Any, s: AnyStr, de: type[Deserializer[AnyStr]] = JsonDeserializer, **opts: Any
 ) -> Any: ...
 
 
 def from_json(
-    c: Any, s: AnyStr, de: Type[Deserializer[AnyStr]] = JsonDeserializer, **opts: Any
+    c: Any, s: AnyStr, de: type[Deserializer[AnyStr]] = JsonDeserializer, **opts: Any
 ) -> Any:
     """
     Deserialize from JSON into the object. [orjson](https://github.com/ijl/orjson) will be used

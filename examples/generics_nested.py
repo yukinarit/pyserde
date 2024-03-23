@@ -1,17 +1,14 @@
-from dataclasses import dataclass
 from typing import Generic, TypeVar
 
 from serde import from_dict, serde, to_dict
 
 
 @serde
-@dataclass
 class EventData:
     pass
 
 
 @serde
-@dataclass
 class A(EventData):
     a: str
 
@@ -22,14 +19,12 @@ Data = TypeVar("Data", bound=EventData)
 
 
 @serde
-@dataclass
 class Payload(Generic[Data]):
     id: int
     data: Data
 
 
 @serde
-@dataclass
 class Event(Generic[Data]):
     name: str
     payload: Payload[Data]

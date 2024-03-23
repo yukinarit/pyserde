@@ -1,22 +1,19 @@
-from dataclasses import dataclass
-from typing import Dict, List, Optional
+from typing import Optional
 
 from serde import coerce, serde
 from serde.json import from_json, to_json
 
 
 @serde(type_check=coerce)
-@dataclass
 class Bar:
     e: int
 
 
 @serde(type_check=coerce)
-@dataclass
 class Foo:
     a: int
-    b: List[int]
-    c: List[Dict[str, int]]
+    b: list[int]
+    c: list[dict[str, int]]
     d: Optional[Bar] = None
 
 
