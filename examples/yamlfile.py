@@ -7,6 +7,7 @@ Usage:
     $ poetry install
     $ poetry run python yamlfile.py
 """
+
 from dataclasses import dataclass
 from typing import Dict, List, Optional, Union
 

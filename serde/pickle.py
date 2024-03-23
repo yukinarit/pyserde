@@ -1,6 +1,7 @@
 """
 Serialize and Deserialize in Pickle format.
 """
+
 import pickle
 from typing import overload, Type, Any, Optional
 
@@ -39,15 +40,13 @@ def to_pickle(
 @overload
 def from_pickle(
     c: Type[T], data: bytes, de: Type[Deserializer[bytes]] = PickleDeserializer, **opts: Any
-) -> T:
-    ...
+) -> T: ...
 
 
 @overload
 def from_pickle(
     c: Any, data: bytes, de: Type[Deserializer[bytes]] = PickleDeserializer, **opts: Any
-) -> Any:
-    ...
+) -> Any: ...
 
 
 # For Union, Optional etc.

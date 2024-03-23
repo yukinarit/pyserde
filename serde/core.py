@@ -1,6 +1,7 @@
 """
 pyserde core module.
 """
+
 from __future__ import annotations
 import dataclasses
 import enum
@@ -809,13 +810,11 @@ class Tagging:
 
 
 @overload
-def InternalTagging(tag: str) -> Tagging:
-    ...
+def InternalTagging(tag: str) -> Tagging: ...
 
 
 @overload
-def InternalTagging(tag: str, cls: T) -> _WithTagging[T]:
-    ...
+def InternalTagging(tag: str, cls: T) -> _WithTagging[T]: ...
 
 
 def InternalTagging(tag: str, cls: Optional[T] = None) -> Union[Tagging, _WithTagging[T]]:
@@ -827,13 +826,11 @@ def InternalTagging(tag: str, cls: Optional[T] = None) -> Union[Tagging, _WithTa
 
 
 @overload
-def AdjacentTagging(tag: str, content: str) -> Tagging:
-    ...
+def AdjacentTagging(tag: str, content: str) -> Tagging: ...
 
 
 @overload
-def AdjacentTagging(tag: str, content: str, cls: T) -> _WithTagging[T]:
-    ...
+def AdjacentTagging(tag: str, content: str, cls: T) -> _WithTagging[T]: ...
 
 
 def AdjacentTagging(

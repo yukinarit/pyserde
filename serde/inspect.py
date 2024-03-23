@@ -11,6 +11,7 @@ $ python -m serde.inspect <PATH> <NAME>
 ```
 
 """
+
 import argparse
 import importlib
 import logging

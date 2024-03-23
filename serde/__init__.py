@@ -123,8 +123,7 @@ def serde(
     serialize_class_var: bool = False,
     class_serializer: Optional[ClassSerializer] = None,
     class_deserializer: Optional[ClassDeserializer] = None,
-) -> Type[T]:
-    ...
+) -> Type[T]: ...
 
 
 @overload
@@ -139,8 +138,7 @@ def serde(
     serialize_class_var: bool = False,
     class_serializer: Optional[ClassSerializer] = None,
     class_deserializer: Optional[ClassDeserializer] = None,
-) -> Callable[[Type[T]], Type[T]]:
-    ...
+) -> Callable[[Type[T]], Type[T]]: ...
 
 
 @dataclass_transform(field_specifiers=(field,))  # type: ignore

@@ -504,13 +504,11 @@ def from_obj(c: Type[T], o: Any, named: bool, reuse_instances: Optional[bool]) -
 
 
 @overload
-def from_dict(cls: Type[T], o: Dict[str, Any], reuse_instances: Optional[bool] = None) -> T:
-    ...
+def from_dict(cls: Type[T], o: Dict[str, Any], reuse_instances: Optional[bool] = None) -> T: ...
 
 
 @overload
-def from_dict(cls: Any, o: Dict[str, Any], reuse_instances: Optional[bool] = None) -> Any:
-    ...
+def from_dict(cls: Any, o: Dict[str, Any], reuse_instances: Optional[bool] = None) -> Any: ...
 
 
 def from_dict(cls: Any, o: Dict[str, Any], reuse_instances: Optional[bool] = None) -> Any:
@@ -538,13 +536,11 @@ def from_dict(cls: Any, o: Dict[str, Any], reuse_instances: Optional[bool] = Non
 
 
 @overload
-def from_tuple(cls: Type[T], o: Any, reuse_instances: Optional[bool] = None) -> T:
-    ...
+def from_tuple(cls: Type[T], o: Any, reuse_instances: Optional[bool] = None) -> T: ...
 
 
 @overload
-def from_tuple(cls: Any, o: Any, reuse_instances: Optional[bool] = None) -> Any:
-    ...
+def from_tuple(cls: Any, o: Any, reuse_instances: Optional[bool] = None) -> Any: ...
 
 
 def from_tuple(cls: Any, o: Any, reuse_instances: Optional[bool] = None) -> Any:

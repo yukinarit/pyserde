@@ -2,6 +2,7 @@
 Serialize and Deserialize in YAML format. This module depends on
 [pyyaml](https://pypi.org/project/PyYAML/) package.
 """
+
 from typing import overload, Type, Optional, Any
 
 import yaml
@@ -48,14 +49,16 @@ def to_yaml(
 
 
 @overload
-def from_yaml(c: Type[T], s: str, de: Type[Deserializer[str]] = YamlDeserializer, **opts: Any) -> T:
-    ...
+def from_yaml(
+    c: Type[T], s: str, de: Type[Deserializer[str]] = YamlDeserializer, **opts: Any
+) -> T: ...
 
 
 # For Union, Optional etc.
 @overload
-def from_yaml(c: Any, s: str, de: Type[Deserializer[str]] = YamlDeserializer, **opts: Any) -> Any:
-    ...
+def from_yaml(
+    c: Any, s: str, de: Type[Deserializer[str]] = YamlDeserializer, **opts: Any
+) -> Any: ...
 
 
 def from_yaml(c: Any, s: str, de: Type[Deserializer[str]] = YamlDeserializer, **opts: Any) -> Any:
