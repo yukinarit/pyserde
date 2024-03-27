@@ -1,14 +1,10 @@
-from dataclasses import dataclass
-from typing import FrozenSet
-
 from serde import serde
 from serde.json import from_json, to_json
 
 
 @serde
-@dataclass
 class Foo:
-    i: FrozenSet[int]
+    i: frozenset[int]
 
 
 def main() -> None:

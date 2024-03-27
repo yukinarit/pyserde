@@ -1,14 +1,14 @@
-from dataclasses import dataclass
-
 from envclasses import envclass, load_env
+from pathlib import Path
 
 from serde import deserialize
 from serde.yaml import from_yaml
 
+basedir = Path(__file__).parent
+
 
 @deserialize
 @envclass
-@dataclass
 class App:
     addr: str
     port: int
@@ -17,7 +17,7 @@ class App:
 
 
 def main() -> None:
-    with open("app.yml") as f:
+    with open(basedir / "app.yml") as f:
         yml = f.read()
     cfg = from_yaml(App, yml)
     print(cfg)

@@ -22,7 +22,8 @@ Other modules
 """
 
 from dataclasses import dataclass
-from typing import Callable, Optional, Type, overload, Any
+from collections.abc import Callable
+from typing import Optional, overload, Any
 
 from typing_extensions import dataclass_transform
 
@@ -112,7 +113,7 @@ __all__ = [
 
 @overload
 def serde(
-    _cls: Type[T],
+    _cls: type[T],
     rename_all: Optional[str] = None,
     reuse_instances_default: bool = True,
     convert_sets_default: bool = False,
@@ -123,7 +124,7 @@ def serde(
     serialize_class_var: bool = False,
     class_serializer: Optional[ClassSerializer] = None,
     class_deserializer: Optional[ClassDeserializer] = None,
-) -> Type[T]: ...
+) -> type[T]: ...
 
 
 @overload
@@ -138,7 +139,7 @@ def serde(
     serialize_class_var: bool = False,
     class_serializer: Optional[ClassSerializer] = None,
     class_deserializer: Optional[ClassDeserializer] = None,
-) -> Callable[[Type[T]], Type[T]]: ...
+) -> Callable[[type[T]], type[T]]: ...
 
 
 @dataclass_transform(field_specifiers=(field,))  # type: ignore

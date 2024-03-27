@@ -1,5 +1,3 @@
-from dataclasses import dataclass
-
 from serde import serde
 from serde.json import from_json
 
@@ -9,7 +7,6 @@ class MyException(Exception):
 
 
 @serde
-@dataclass
 class Foo:
     v: int
 

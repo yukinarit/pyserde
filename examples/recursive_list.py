@@ -1,5 +1,5 @@
+from __future__ import annotations
 from dataclasses import dataclass
-from typing import List
 
 from serde import serde
 from serde.json import from_json, to_json
@@ -8,7 +8,7 @@ from serde.json import from_json, to_json
 @dataclass
 class Node:
     name: str
-    children: List["Node"]
+    children: list[Node]
 
 
 serde(Node)

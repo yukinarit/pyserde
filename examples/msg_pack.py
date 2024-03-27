@@ -1,11 +1,8 @@
-from dataclasses import dataclass
-
 from serde import serde
 from serde.msgpack import from_msgpack, to_msgpack
 
 
 @serde
-@dataclass
 class Foo:
     i: int
     s: str

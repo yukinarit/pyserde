@@ -1,11 +1,8 @@
-from dataclasses import dataclass
-
 from serde import serde
 from serde.pickle import from_pickle, to_pickle
 
 
 @serde
-@dataclass
 class Foo:
     i: int
     s: str

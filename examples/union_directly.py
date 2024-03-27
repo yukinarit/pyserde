@@ -1,4 +1,3 @@
-from dataclasses import dataclass
 from typing import Union
 
 from serde import serde, Untagged, AdjacentTagging, InternalTagging
@@ -6,13 +5,11 @@ from serde.json import from_json, to_json
 
 
 @serde
-@dataclass
 class Bar:
     b: int
 
 
 @serde
-@dataclass(unsafe_hash=True)
 class Baz:
     b: int
 

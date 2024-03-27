@@ -1,4 +1,3 @@
-from dataclasses import dataclass
 from typing import Generic, TypeVar
 
 from serde import from_dict, serde, to_dict
@@ -7,19 +6,16 @@ T = TypeVar("T")
 
 
 @serde
-@dataclass
 class Bar:
     n: int
 
 
 @serde
-@dataclass
 class Foo(Generic[T]):
     inner: T
 
 
 @serde
-@dataclass
 class Baz(Generic[T]):
     foo: Foo[T]
 
