@@ -1,7 +1,6 @@
 import logging
 from dataclasses import dataclass
 from typing import Literal
-from beartype.typing import Dict, List, Tuple
 
 import pytest
 
@@ -70,10 +69,10 @@ class LitDict:
     Dict containing primitives.
     """
 
-    i: Dict[Literal[1, 2], Literal[1, 2]]
-    s: Dict[Literal["foo", "bar"], Literal["foo", "bar"]]
-    b: Dict[Literal[True], Literal[True]]
-    m: Dict[
+    i: dict[Literal[1, 2], Literal[1, 2]]
+    s: dict[Literal["foo", "bar"], Literal["foo", "bar"]]
+    b: dict[Literal[True], Literal[True]]
+    m: dict[
         Literal[1, 2, "foo", "bar", False, True],
         Literal[1, 2, "foo", "bar", False, True],
     ]
@@ -86,10 +85,10 @@ class LitStrDict:
     Dict containing primitives.
     """
 
-    i: Dict[Literal["1", "2"], Literal[1, 2]]
-    s: Dict[Literal["foo", "bar"], Literal["foo", "bar"]]
-    b: Dict[Literal["True"], Literal[True]]
-    m: Dict[
+    i: dict[Literal["1", "2"], Literal[1, 2]]
+    s: dict[Literal["foo", "bar"], Literal["foo", "bar"]]
+    b: dict[Literal["True"], Literal[True]]
+    m: dict[
         Literal["1", "2", "foo", "bar", "False", "True"],
         Literal[1, 2, "foo", "bar", False, True],
     ]
@@ -109,20 +108,20 @@ class Literals:
 
 
 @serde.serde
-class LitNestedPriTuple:
+class LitNestedPrituple:
     """
-    Tuple containing nested primitives.
+    tuple containing nested primitives.
     """
 
-    i: Tuple[LitInt, LitInt]
-    s: Tuple[LitStr, LitStr]
-    b: Tuple[LitBool, LitBool, LitBool]
-    m: Tuple[LitMixed, LitMixed]
+    i: tuple[LitInt, LitInt]
+    s: tuple[LitStr, LitStr]
+    b: tuple[LitBool, LitBool, LitBool]
+    m: tuple[LitMixed, LitMixed]
 
 
-ListLiterals = List[Literals]
+listLiterals = list[Literals]
 PRI = Literals(1, "foo", True, 2)
-DictLiterals = Dict[str, Literals]
+DictLiterals = dict[str, Literals]
 
 
 """
@@ -146,13 +145,13 @@ def test_dict(se, de, opt):
 @pytest.mark.parametrize("se,de", all_formats)
 def test_tuple(se, de, opt):
     if se is not serde.toml.to_toml:
-        p = LitNestedPriTuple(
+        p = LitNestedPrituple(
             (LitInt(1), LitInt(2)),
             (LitStr("foo"), LitStr("bar")),
             (LitBool(True), LitBool(True), LitBool(True)),
             (LitMixed(False), LitMixed("foo")),
         )
-        assert p == de(LitNestedPriTuple, se(p))
+        assert p == de(LitNestedPrituple, se(p))
 
 
 @pytest.mark.parametrize(
@@ -160,10 +159,10 @@ def test_tuple(se, de, opt):
 )
 def test_list_literals(se, de):
     p = [PRI, PRI]
-    assert p == de(ListLiterals, se(p))
+    assert p == de(listLiterals, se(p))
 
     p = []
-    assert p == de(ListLiterals, se(p))
+    assert p == de(listLiterals, se(p))
 
 
 @pytest.mark.parametrize(

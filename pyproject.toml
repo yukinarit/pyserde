@@ -14,7 +14,6 @@ classifiers=[
         "Development Status :: 4 - Beta",
         "Intended Audience :: Developers",
         "License :: OSI Approved :: MIT License",
-        "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
@@ -24,7 +23,7 @@ classifiers=[
     ]
 
 [tool.poetry.dependencies]
-python = "^3.8.0"
+python = "^3.9.0"
 typing_inspect = ">=0.4.0"
 typing_extensions = { version = ">=4.1.0" }
 casefy = "*"
@@ -34,7 +33,6 @@ tomli = { version = "*", markers = "extra == 'toml' or extra == 'all'", optional
 tomli-w = { version = "*", markers = "extra == 'toml' or extra == 'all'", optional = true }
 pyyaml = { version = "*", markers = "extra == 'yaml' or extra == 'all'", optional = true }
 numpy = [
-    { version = ">1.21.0", markers = "python_version ~= '3.8.0' and (extra == 'numpy' or extra == 'all')", optional = true },
     { version = ">1.21.0", markers = "python_version ~= '3.9.0' and (extra == 'numpy' or extra == 'all')", optional = true },
     { version = ">1.22.0", markers = "python_version ~= '3.10' and (extra == 'numpy' or extra == 'all')", optional = true },
     { version = ">1.22.0", markers = "python_version ~= '3.11' and (extra == 'numpy' or extra == 'all')", optional = true },
@@ -50,9 +48,10 @@ tomli = { version = "*", markers = "python_version <= '3.11.0'" }
 tomli-w = "*"
 msgpack = "*"
 numpy = [
-    { version = ">1.21.0", markers = "python_version ~= '3.8.0'" },
     { version = ">1.21.0", markers = "python_version ~= '3.9.0'" },
     { version = ">1.22.0", markers = "python_version ~= '3.10'" },
+    { version = ">1.22.0", markers = "python_version ~= '3.11'" },
+    { version = ">1.22.0", markers = "python_version ~= '3.12'" },
 ]
 mypy = "==1.9.0"
 pytest = "*"

@@ -9,14 +9,7 @@ from typing import (
     Optional,
     Any,
 )
-from beartype.typing import (
-    DefaultDict,
-    Dict,
-    FrozenSet,
-    List,
-    Set,
-    Tuple,
-)
+from collections import defaultdict
 
 import pytest
 
@@ -188,7 +181,7 @@ def test_unresolved_forward_reference_throws():
 def test_list(se, de, opt):
     @serde.serde(**opt)
     class Variant:
-        d: List
+        d: list
 
     # List can contain different types (except Toml).
     if se is not serde.toml.to_toml:
@@ -201,10 +194,10 @@ def test_list(se, de, opt):
 def test_dict_with_non_str_keys(se, de, opt):
     @serde.serde(**opt)
     class Foo:
-        i: Dict[int, int]
-        s: Dict[str, str]
-        f: Dict[float, float]
-        b: Dict[bool, bool]
+        i: dict[int, int]
+        s: dict[str, str]
+        f: dict[float, float]
+        b: dict[bool, bool]
 
     if se not in (serde.json.to_json, serde.msgpack.to_msgpack, serde.toml.to_toml):
         # JSON, Msgpack, Toml don't allow non string key.
@@ -275,14 +268,13 @@ def test_enum(se, de, opt):
 @pytest.mark.parametrize("se,de", all_formats)
 def test_tuple(se, de, opt):
     @serde.serde(**opt)
-    @dataclasses.dataclass
     class Homogeneous:
-        i: Tuple[int, int]
-        s: Tuple[str, str]
-        f: Tuple[float, float]
-        b: Tuple[bool, bool]
+        i: tuple[int, int]
+        s: tuple[str, str]
+        f: tuple[float, float]
+        b: tuple[bool, bool]
 
-    def uncheck_new(i: List[Any], s: List[Any], f: List[Any], b: List[Any]) -> Homogeneous:
+    def uncheck_new(i: list[Any], s: list[Any], f: list[Any], b: list[Any]) -> Homogeneous:
         """
         Bypass runtime type checker by mutating inner value.
         """
@@ -301,9 +293,8 @@ def test_tuple(se, de, opt):
     assert tuple_but_actually_list != de(Homogeneous, se(tuple_but_actually_list))
 
     @serde.serde(**opt)
-    @dataclasses.dataclass
     class Variant:
-        t: Tuple[int, str, float, bool]
+        t: tuple[int, str, float, bool]
 
     # Toml doesn't support variant type of array.
     if se is not serde.toml.to_toml:
@@ -311,23 +302,21 @@ def test_tuple(se, de, opt):
         assert b == de(Variant, se(b))
 
     @serde.serde(**opt)
-    @dataclasses.dataclass
-    class BareTuple:
-        t: Tuple  # type: ignore
+    class Baretuple:
+        t: tuple  # type: ignore
 
-    c = BareTuple((10, 20))
-    assert c == de(BareTuple, se(c))
+    c = Baretuple((10, 20))
+    assert c == de(Baretuple, se(c))
 
-    c = BareTuple(())
-    assert c == de(BareTuple, se(c))
+    c = Baretuple(())
+    assert c == de(Baretuple, se(c))
 
     @serde.serde(**opt)
-    @dataclasses.dataclass
     class Nested:
-        i: Tuple[data.Int, data.Int]
-        s: Tuple[data.Str, data.Str]
-        f: Tuple[data.Float, data.Float]
-        b: Tuple[data.Bool, data.Bool]
+        i: tuple[data.Int, data.Int]
+        s: tuple[data.Str, data.Str]
+        f: tuple[data.Float, data.Float]
+        b: tuple[data.Bool, data.Bool]
 
     d = Nested(
         (data.Int(10), data.Int(20)),
@@ -338,32 +327,30 @@ def test_tuple(se, de, opt):
     assert d == de(Nested, se(d))
 
     @serde.serde(**opt)
-    @dataclasses.dataclass
-    class VariableTuple:
-        t: Tuple[int, int, int]
-        i: Tuple[data.Inner, data.Inner]
+    class Variabletuple:
+        t: tuple[int, int, int]
+        i: tuple[data.Inner, data.Inner]
 
-    e = VariableTuple((1, 2, 3), (data.Inner(0), data.Inner(1)))
-    assert e == de(VariableTuple, se(e))
+    e = Variabletuple((1, 2, 3), (data.Inner(0), data.Inner(1)))
+    assert e == de(Variabletuple, se(e))
 
     with pytest.raises((serde.SerdeError, BeartypeCallHintViolation)):
-        e = VariableTuple((), ())
-        assert e == de(VariableTuple, se(e))
+        e = Variabletuple((), ())
+        assert e == de(Variabletuple, se(e))
 
     with pytest.raises((serde.SerdeError, SyntaxError)):
 
         @serde.serde(**opt)
-        @dataclasses.dataclass
-        class EmptyTuple:
-            t: Tuple[()]
+        class Emptytuple:
+            t: tuple[()]
 
 
 @pytest.mark.parametrize("se,de", all_formats)
 def test_single_element_tuples(se, de):
     @serde.serde
     class Foo:
-        a: Tuple[int]
-        b: Tuple[uuid.UUID]
+        a: tuple[int]
+        b: tuple[uuid.UUID]
 
     foo = Foo(a=(1,), b=(uuid.UUID("855f07da-c3cd-46f2-9557-b8dbeb99ff42"),))
     assert serde.to_dict(foo) == {"a": foo.a, "b": foo.b}
@@ -376,7 +363,7 @@ def test_dataclass_default_factory(se, de):
     @serde.serde
     class Foo:
         foo: str
-        items: Dict[str, int] = serde.field(default_factory=dict)
+        items: dict[str, int] = serde.field(default_factory=dict)
 
     f = Foo("bar")
     assert f == de(Foo, se(f))
@@ -473,7 +460,6 @@ def test_msgpack_unnamed():
 
 def test_toml():
     @serde.serde
-    @dataclasses.dataclass
     class Foo:
         v: Optional[int]
 
@@ -487,9 +473,8 @@ def test_toml():
         serde.toml.to_toml(f)
 
     @serde.serde
-    @dataclasses.dataclass
     class Foo:
-        v: Set[int]
+        v: set[int]
 
     f = Foo({1, 2, 3})
     serde.toml.to_toml(f)
@@ -640,10 +625,10 @@ def test_default_rename_and_alias():
 def test_skip_if(se, de):
     @serde.serde
     class Foo:
-        comments: Optional[List[str]] = serde.field(
+        comments: Optional[list[str]] = serde.field(
             default_factory=list, skip_if=lambda v: len(v) == 0
         )
-        attrs: Optional[Dict[str, str]] = serde.field(
+        attrs: Optional[dict[str, str]] = serde.field(
             default_factory=dict, skip_if=lambda v: v is None or len(v) == 0
         )
 
@@ -660,7 +645,7 @@ def test_skip_if(se, de):
 def test_skip_if_false(se, de):
     @serde.serde
     class Foo:
-        comments: Optional[List[str]] = serde.field(default_factory=list, skip_if_false=True)
+        comments: Optional[list[str]] = serde.field(default_factory=list, skip_if_false=True)
 
     f = Foo(["foo"])
     assert f == de(Foo, se(f))
@@ -673,7 +658,7 @@ def test_skip_if_false(se, de):
 def test_skip_if_overrides_skip_if_false(se, de):
     @serde.serde
     class Foo:
-        comments: Optional[List[str]] = serde.field(
+        comments: Optional[list[str]] = serde.field(
             default_factory=list, skip_if_false=True, skip_if=lambda v: len(v) == 1
         )
 
@@ -699,7 +684,6 @@ def test_skip_if_default(se, de):
 
 @pytest.mark.parametrize("se,de", format_msgpack)
 def test_inheritance(se, de):
-    from dataclasses import dataclass
 
     @serde.serde
     class Base:
@@ -707,7 +691,6 @@ def test_inheritance(se, de):
         b: str
 
     @serde.serde
-    @dataclass
     class Derived(Base):
         c: float
 
@@ -897,7 +880,6 @@ def test_user_error():
         pass
 
     @serde.serde
-    @dataclasses.dataclass
     class Foo:
         v: int
 
@@ -914,9 +896,8 @@ def test_user_error():
 
 def test_frozenset() -> None:
     @serde.serde
-    @dataclasses.dataclass
     class Foo:
-        d: FrozenSet[int]
+        d: frozenset[int]
 
     f = Foo(frozenset({1, 1, 2}))
     assert '{"d":[1,2]}' == serde.json.to_json(f)
@@ -926,7 +907,7 @@ def test_frozenset() -> None:
     assert isinstance(f.d, frozenset)
     assert isinstance(ff.d, frozenset)
 
-    fs = serde.json.from_json(FrozenSet[int], "[1,2]")
+    fs = serde.json.from_json(frozenset[int], "[1,2]")
     assert fs == frozenset([1, 2])
 
 
@@ -934,9 +915,8 @@ def test_defaultdict() -> None:
     from collections import defaultdict
 
     @serde.serde
-    @dataclasses.dataclass
     class Foo:
-        v: DefaultDict[str, List[int]]
+        v: defaultdict[str, list[int]]
 
     f = Foo(defaultdict(list, {"k": [1, 2]}))
     assert '{"v":{"k":[1,2]}}' == serde.json.to_json(f)
@@ -946,22 +926,21 @@ def test_defaultdict() -> None:
     assert isinstance(f.v, defaultdict)
     assert isinstance(ff.v, defaultdict)
 
-    dd = serde.json.from_json(DefaultDict[str, List[int]], '{"k":[1,2]}')
+    dd = serde.json.from_json(defaultdict[str, list[int]], '{"k":[1,2]}')
     assert isinstance(dd, defaultdict)
     assert dd == defaultdict(list, {"k": [1, 2]})
 
 
 def test_defaultdict_invalid_value_type() -> None:
     with pytest.raises(Exception):
-        serde.json.from_json(DefaultDict[str, ...], '{"k":[1,2]}')
+        serde.json.from_json(defaultdict[str, ...], '{"k":[1,2]}')
 
     with pytest.raises(Exception):
-        serde.json.from_json(DefaultDict, '{"k":[1,2]}')
+        serde.json.from_json(defaultdict, '{"k":[1,2]}')
 
 
 def test_class_var() -> None:
     @serde.serde
-    @dataclasses.dataclass
     class Disabled:
         v: ClassVar[int] = 10
 
@@ -970,7 +949,6 @@ def test_class_var() -> None:
     assert a == serde.from_dict(Disabled, {})
 
     @serde.serde(serialize_class_var=True)
-    @dataclasses.dataclass
     class Enabled:
         v: ClassVar[int] = 10
 
@@ -979,12 +957,10 @@ def test_class_var() -> None:
     assert b == serde.from_dict(Enabled, {})
 
     @serde.serde
-    @dataclasses.dataclass
     class Foo:
         v: int
 
     @serde.serde(serialize_class_var=True)
-    @dataclasses.dataclass
     class Dataclass:
         v: ClassVar[Foo] = Foo(10)
 
@@ -993,9 +969,8 @@ def test_class_var() -> None:
     assert c == serde.from_dict(Dataclass, {})
 
     @serde.serde(serialize_class_var=True)
-    @dataclasses.dataclass
     class ClassList:
-        v: ClassVar[List[Foo]] = [Foo(10), Foo(20)]
+        v: ClassVar[list[Foo]] = [Foo(10), Foo(20)]
 
     d = ClassList()
     assert {"v": [{"v": 10}, {"v": 20}]} == serde.to_dict(d)
@@ -1008,12 +983,10 @@ def test_class_var() -> None:
     assert e == serde.from_dict(Enabled, {})
 
     @serde.serde(serialize_class_var=True)
-    @dataclasses.dataclass
     class Bar:
         v: ClassVar[int] = 100
 
     @serde.serde(serialize_class_var=True)
-    @dataclasses.dataclass
     class Nested:
         v: ClassVar[Bar] = Bar()
 
@@ -1024,7 +997,6 @@ def test_class_var() -> None:
 
 def test_dataclass_without_serde() -> None:
     @serde.serde(rename_all="kebabcase")
-    @dataclasses.dataclass
     class Foo:
         myLongName: int
 
@@ -1040,12 +1012,10 @@ def test_dataclass_without_serde() -> None:
 
 def test_dataclass_add_serialize() -> None:
     @serde.serde(rename_all="kebabcase")
-    @dataclasses.dataclass
     class Foo:
         myLongName: int
 
     @serde.deserialize
-    @dataclasses.dataclass
     class Wrapper:
         foo: Foo
 
@@ -1057,12 +1027,10 @@ def test_dataclass_add_serialize() -> None:
 
 def test_dataclass_add_deserialize() -> None:
     @serde.serde(rename_all="kebabcase")
-    @dataclasses.dataclass
     class Foo:
         myLongName: int
 
     @serde.serialize
-    @dataclasses.dataclass
     class Wrapper:
         foo: Foo
 
@@ -1078,7 +1046,6 @@ def test_nested_dataclass_without_serde() -> None:
         v: int
 
     @serde.serde
-    @dataclasses.dataclass
     class Wrapper:
         foo: Foo
 
@@ -1090,12 +1057,10 @@ def test_nested_dataclass_without_serde() -> None:
 
 def test_nested_dataclass_add_deserialize() -> None:
     @serde.serialize
-    @dataclasses.dataclass
     class Foo:
         v: int
 
     @serde.serde
-    @dataclasses.dataclass
     class Wrapper:
         foo: Foo
 
@@ -1107,12 +1072,10 @@ def test_nested_dataclass_add_deserialize() -> None:
 
 def test_nested_dataclass_add_serialize() -> None:
     @serde.deserialize
-    @dataclasses.dataclass
     class Foo:
         v: int
 
     @serde.serde
-    @dataclasses.dataclass
     class Wrapper:
         foo: Foo
 
@@ -1128,7 +1091,6 @@ def test_nested_dataclass_ignore_wrapper_options() -> None:
         myLongName: int
 
     @serde.serde(rename_all="kebabcase")
-    @dataclasses.dataclass
     class Wrapper:
         foo: Foo
 
@@ -1140,7 +1102,6 @@ def test_nested_dataclass_ignore_wrapper_options() -> None:
 
 def test_deserialize_from_incompatible_value() -> None:
     @serde.deserialize
-    @dataclasses.dataclass
     class Foo:
         v: int
 

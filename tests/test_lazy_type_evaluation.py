@@ -2,7 +2,6 @@ from __future__ import annotations  # this is the line this test file is all abo
 
 import dataclasses
 from enum import Enum
-from beartype.typing import List, Tuple
 
 import pytest
 
@@ -19,13 +18,13 @@ class Status(Enum):
 class A:
     a: int
     b: Status
-    c: List[str]
+    c: list[str]
 
 
 @serde
 class B:
     a: A
-    b: Tuple[str, A]
+    b: tuple[str, A]
     c: Status
 
 

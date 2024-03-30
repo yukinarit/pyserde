@@ -51,7 +51,6 @@ print(to_json(f))
 >
 > ```python
 > @serde(rename_all = 'camelcase')
-> @dataclass
 > class Foo:
 >     int_field: int
 >     str_field: str = field(rename='str-field')
@@ -86,7 +85,6 @@ class MyDeserializer:
         return datetime.strptime(value, "%d/%m/%y")
 
 @serde(class_serializer=MySerializer(), class_deserializer=MyDeserializer())
-@dataclass
 class Foo:
     v: datetime
 ```
@@ -143,7 +141,6 @@ def deserializer(cls, o):
         raise SerdeSkip()
 
 @serde(serializer=serializer, deserializer=deserializer)
-@dataclass
 class Foo:
     a: datetime
 ```
@@ -160,7 +157,6 @@ New in v0.9.8. Since `dataclasses.fields` doesn't include a class variable [^1],
 
 ```python
 @serde(serialize_class_var=True)
-@dataclass
 class Foo:
     a: ClassVar[int] = 10
 ```

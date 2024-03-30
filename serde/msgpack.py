@@ -3,8 +3,7 @@ Serialize and Deserialize in MsgPack format. This module depends on
 [msgpack](https://pypi.org/project/msgpack/) package.
 """
 
-from typing import Any, Type, Optional, overload
-from beartype.typing import Dict
+from typing import Any, Optional, overload
 
 import msgpack
 
@@ -43,9 +42,9 @@ class MsgPackDeserializer(Deserializer[bytes]):
 def to_msgpack(
     obj: Any,
     cls: Optional[Any] = None,
-    se: Type[Serializer[bytes]] = MsgPackSerializer,
+    se: type[Serializer[bytes]] = MsgPackSerializer,
     named: bool = True,
-    ext_dict: Optional[Dict[Type[Any], int]] = None,
+    ext_dict: Optional[dict[type[Any], int]] = None,
     reuse_instances: bool = False,
     convert_sets: bool = True,
     **opts: Any,
@@ -82,11 +81,11 @@ def to_msgpack(
 
 @overload
 def from_msgpack(
-    c: Type[T],
+    c: type[T],
     s: bytes,
-    de: Type[Deserializer[bytes]] = MsgPackDeserializer,
+    de: type[Deserializer[bytes]] = MsgPackDeserializer,
     named: bool = True,
-    ext_dict: Optional[Dict[int, Type[Any]]] = None,
+    ext_dict: Optional[dict[int, type[Any]]] = None,
     **opts: Any,
 ) -> T: ...
 
@@ -95,9 +94,9 @@ def from_msgpack(
 def from_msgpack(
     c: Any,
     s: bytes,
-    de: Type[Deserializer[bytes]] = MsgPackDeserializer,
+    de: type[Deserializer[bytes]] = MsgPackDeserializer,
     named: bool = True,
-    ext_dict: Optional[Dict[int, Type[Any]]] = None,
+    ext_dict: Optional[dict[int, type[Any]]] = None,
     **opts: Any,
 ) -> Any: ...
 
@@ -105,9 +104,9 @@ def from_msgpack(
 def from_msgpack(
     c: Any,
     s: bytes,
-    de: Type[Deserializer[bytes]] = MsgPackDeserializer,
+    de: type[Deserializer[bytes]] = MsgPackDeserializer,
     named: bool = True,
-    ext_dict: Optional[Dict[int, Type[Any]]] = None,
+    ext_dict: Optional[dict[int, type[Any]]] = None,
     **opts: Any,
 ) -> Any:
     """

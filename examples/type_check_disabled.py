@@ -1,5 +1,3 @@
-from typing import Dict, List
-
 from serde import disabled, serde
 from serde.json import from_json, to_json
 
@@ -7,8 +5,8 @@ from serde.json import from_json, to_json
 @serde(type_check=disabled)
 class Foo:
     a: int
-    b: List[int]
-    c: List[Dict[str, int]]
+    b: list[int]
+    c: list[dict[str, int]]
 
 
 def main() -> None:

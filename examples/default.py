@@ -1,7 +1,4 @@
-from dataclasses import field
-from typing import Dict
-
-from serde import serde
+from serde import serde, field
 from serde.json import from_json, to_json
 
 
@@ -11,7 +8,7 @@ class Foo:
     s: str = "foo"
     f: float = field(default=100.0)  # Use dataclass field.
     b: bool = field(default=True)
-    d: Dict[str, int] = field(default_factory=dict)
+    d: dict[str, int] = field(default_factory=dict)
 
 
 def main() -> None:

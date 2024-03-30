@@ -1,31 +1,28 @@
 from collections import defaultdict
-from dataclasses import dataclass
-from typing import DefaultDict, List, Optional
+from typing import Optional
 
 from serde import serde
 from serde.json import from_json, to_json
 
 
 @serde
-@dataclass
 class Bar:
     v: Optional[int] = None
 
 
 @serde
-@dataclass
 class Foo:
-    a: DefaultDict[str, List[int]]
-    b: DefaultDict[str, int]
-    c: DefaultDict[str, Bar]
+    a: defaultdict[str, list[int]]
+    b: defaultdict[str, int]
+    c: defaultdict[str, Bar]
 
 
 def main() -> None:
-    a: DefaultDict[str, List[int]] = defaultdict(list)
+    a: defaultdict[str, list[int]] = defaultdict(list)
     a["a"].append(1)
-    b: DefaultDict[str, int] = defaultdict(int)
+    b: defaultdict[str, int] = defaultdict(int)
     b["b"]
-    c: DefaultDict[str, Bar] = defaultdict(Bar)
+    c: defaultdict[str, Bar] = defaultdict(Bar)
     c["c"].v = 10
 
     f = Foo(a, b, c)

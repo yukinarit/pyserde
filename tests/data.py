@@ -1,8 +1,7 @@
 from __future__ import annotations
-import enum
 from dataclasses import dataclass
+import enum
 from typing import Optional, Any
-from beartype.typing import Dict, List, Tuple
 
 from serde import field, serde, disabled
 
@@ -10,7 +9,6 @@ from . import imported
 
 
 @serde
-@dataclass
 class Inner:
     i: int
 
@@ -105,10 +103,10 @@ class PriList:
     List containing primitives.
     """
 
-    i: List[int]
-    s: List[str]
-    f: List[float]
-    b: List[bool]
+    i: list[int]
+    s: list[str]
+    f: list[float]
+    b: list[bool]
 
 
 @serde
@@ -117,10 +115,10 @@ class PriDict:
     Dict containing primitives.
     """
 
-    i: Dict[str, int]
-    s: Dict[str, str]
-    f: Dict[str, float]
-    b: Dict[str, bool]
+    i: dict[str, int]
+    s: dict[str, str]
+    f: dict[str, float]
+    b: dict[str, bool]
 
 
 @serde
@@ -129,10 +127,10 @@ class PriTuple:
     Tuple containing primitives.
     """
 
-    i: Tuple[int, int, int]
-    s: Tuple[str, str, str, str]
-    f: Tuple[float, float, float, float, float]
-    b: Tuple[bool, bool, bool, bool, bool, bool]
+    i: tuple[int, int, int]
+    s: tuple[str, str, str, str]
+    f: tuple[float, float, float, float, float]
+    b: tuple[bool, bool, bool, bool, bool, bool]
 
 
 @dataclass(unsafe_hash=True)
@@ -175,10 +173,10 @@ class NestedPriList:
     List containing nested primitives.
     """
 
-    i: List[Int]
-    s: List[Str]
-    f: List[Float]
-    b: List[Bool]
+    i: list[Int]
+    s: list[Str]
+    f: list[Float]
+    b: list[Bool]
 
 
 @serde
@@ -187,10 +185,10 @@ class NestedPriDict:
     Dict containing nested primitives.
     """
 
-    i: Dict[Str, Int]
-    s: Dict[Str, Str]
-    f: Dict[Str, Float]
-    b: Dict[Str, Bool]
+    i: dict[Str, Int]
+    s: dict[Str, Str]
+    f: dict[Str, Float]
+    b: dict[Str, Bool]
 
 
 @serde
@@ -199,10 +197,10 @@ class NestedPriTuple:
     Tuple containing nested primitives.
     """
 
-    i: Tuple[Int, Int, Int]
-    s: Tuple[Str, Str, Str, Str]
-    f: Tuple[Float, Float, Float, Float, Float]
-    b: Tuple[Bool, Bool, Bool, Bool, Bool, Bool]
+    i: tuple[Int, Int, Int]
+    s: tuple[Str, Str, Str, Str]
+    f: tuple[Float, Float, Float, Float, Float]
+    b: tuple[Bool, Bool, Bool, Bool, Bool, Bool]
 
 
 @serde
@@ -255,23 +253,23 @@ class EnumInClass:
 @dataclass(unsafe_hash=True)
 class Recur:
     a: Optional[Recur]
-    b: Optional[List[Recur]]
-    c: Optional[Dict[str, Recur]]
+    b: Optional[list[Recur]]
+    c: Optional[dict[str, Recur]]
 
 
 @dataclass(unsafe_hash=True)
 class RecurContainer:
-    a: List[RecurContainer]
-    b: Dict[str, RecurContainer]
+    a: list[RecurContainer]
+    b: dict[str, RecurContainer]
 
 
 serde(Recur)
 serde(RecurContainer)
 
 
-ListPri = List[Pri]
+ListPri = list[Pri]
 
-DictPri = Dict[str, Pri]
+DictPri = dict[str, Pri]
 
 INT = Int(10)
 
@@ -292,7 +290,6 @@ NESTED_PRILIST = ([INT], [STR], [FLOAT], [BOOL])
 NESTED_PRILIST_TUPLE = ([(10,)], [("foo",)], [(100.0,)], [(True,)])
 
 
-@dataclass
 @serde
 class Init:
     a: int
@@ -307,6 +304,5 @@ class StrSubclass(str):
 
 
 @serde
-@dataclass
 class PrimitiveSubclass:
     v: StrSubclass

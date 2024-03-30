@@ -9,31 +9,21 @@ import functools
 import logging
 import sys
 import re
+import casefy
 from dataclasses import dataclass
+from collections.abc import Mapping, Sequence, Callable
 from typing import (
     overload,
-    Dict,
-    Type,
     TypeVar,
     Generic,
     Optional,
     Any,
     Protocol,
-    Mapping,
-    Sequence,
-)
-from beartype.typing import (
-    Callable,
-    List,
+    get_type_hints,
     Union,
-    Tuple,
 )
-
-import casefy
-from typing_extensions import get_type_hints
 
 from .compat import (
-    DataclassField,
     T,
     SerdeError,
     dataclass_fields,
@@ -122,9 +112,9 @@ class Cache:
     should be only once.
     """
 
-    classes: Dict[str, Type[Any]] = dataclasses.field(default_factory=dict)
+    classes: dict[str, type[Any]] = dataclasses.field(default_factory=dict)
 
-    def _get_class(self, cls: Type[Any]) -> Type[Any]:
+    def _get_class(self, cls: type[Any]) -> type[Any]:
         """
         Get a wrapper class from the the cache. If not found, it will generate
         the class and store it in the cache.
@@ -133,7 +123,7 @@ class Cache:
         wrapper = self.classes.get(class_name)
         return wrapper or self._generate_class(cls)
 
-    def _generate_class(self, cls: Type[Any]) -> Type[Any]:
+    def _generate_class(self, cls: type[Any]) -> type[Any]:
         """
         Generate a wrapper dataclass then make the it (de)serializable using
         @serde decorator.
@@ -151,7 +141,7 @@ class Cache:
         logger.debug(f"(de)serializing code for {class_name} was generated")
         return wrapper
 
-    def serialize(self, cls: Type[Any], obj: Any, **kwargs: Any) -> Any:
+    def serialize(self, cls: type[Any], obj: Any, **kwargs: Any) -> Any:
         """
         Serialize the specified type of object into dict or tuple.
         """
@@ -163,7 +153,7 @@ class Cache:
 
         return data["v"]
 
-    def deserialize(self, cls: Type[T], obj: Any) -> T:
+    def deserialize(self, cls: type[T], obj: Any) -> T:
         """
         Deserialize from dict or tuple into the specified type.
         """
@@ -171,7 +161,7 @@ class Cache:
         scope: Scope = getattr(wrapper, SERDE_SCOPE)
         return scope.funcs[FROM_DICT](data={"v": obj}).v  # type: ignore
 
-    def _get_union_class(self, cls: Type[Any]) -> Optional[Type[Any]]:
+    def _get_union_class(self, cls: type[Any]) -> Optional[type[Any]]:
         """
         Get a wrapper class from the the cache. If not found, it will generate
         the class and store it in the cache.
@@ -183,7 +173,7 @@ class Cache:
         wrapper = self.classes.get(class_name)
         return wrapper or self._generate_union_class(cls)
 
-    def _generate_union_class(self, cls: Type[Any]) -> Type[Any]:
+    def _generate_union_class(self, cls: type[Any]) -> type[Any]:
         """
         Generate a wrapper dataclass then make the it (de)serializable using
         @serde decorator.
@@ -199,7 +189,7 @@ class Cache:
         self.classes[class_name] = wrapper
         return wrapper
 
-    def serialize_union(self, cls: Type[Any], obj: Any) -> Any:
+    def serialize_union(self, cls: type[Any], obj: Any) -> Any:
         """
         Serialize the specified Union into dict or tuple.
         """
@@ -209,7 +199,7 @@ class Cache:
         func_name = union_func_name(UNION_SE_PREFIX, list(type_args(union_cls)))
         return scope.funcs[func_name](obj, False, False)
 
-    def deserialize_union(self, cls: Type[T], data: Any) -> T:
+    def deserialize_union(self, cls: type[T], data: Any) -> T:
         """
         Deserialize from dict or tuple into the specified Union.
         """
@@ -220,7 +210,7 @@ class Cache:
         return scope.funcs[func_name](cls=union_cls, data=data)  # type: ignore
 
 
-def _extract_from_with_tagging(maybe_with_tagging: Any) -> Tuple[Any, Tagging]:
+def _extract_from_with_tagging(maybe_with_tagging: Any) -> tuple[Any, Tagging]:
     try:
         if isinstance(maybe_with_tagging, _WithTagging):
             union_cls = maybe_with_tagging.inner
@@ -244,20 +234,20 @@ class Scope:
     Container to store types and functions used in code generation context.
     """
 
-    cls: Type[Any]
+    cls: type[Any]
     """ The exact class this scope is for
     (needed to distinguish scopes between inherited classes) """
 
-    funcs: Dict[str, Callable[..., Any]] = dataclasses.field(default_factory=dict)
+    funcs: dict[str, Callable[..., Any]] = dataclasses.field(default_factory=dict)
     """ Generated serialize and deserialize functions """
 
-    defaults: Dict[str, Union[Callable[..., Any], Any]] = dataclasses.field(default_factory=dict)
+    defaults: dict[str, Union[Callable[..., Any], Any]] = dataclasses.field(default_factory=dict)
     """ Default values of the dataclass fields (factories & normal values) """
 
-    code: Dict[str, str] = dataclasses.field(default_factory=dict)
+    code: dict[str, str] = dataclasses.field(default_factory=dict)
     """ Generated source code (only filled when debug is True) """
 
-    union_se_args: Dict[str, List[Type[Any]]] = dataclasses.field(default_factory=dict)
+    union_se_args: dict[str, list[type[Any]]] = dataclasses.field(default_factory=dict)
     """ The union serializing functions need references to their types """
 
     reuse_instances_default: bool = True
@@ -266,7 +256,7 @@ class Scope:
     convert_sets_default: bool = False
 
     def __repr__(self) -> str:
-        res: List[str] = []
+        res: list[str] = []
 
         res.append("==================================================")
         res.append(self._justify(self.cls.__name__))
@@ -317,7 +307,7 @@ def raise_unsupported_type(obj: Any) -> None:
 
 
 def gen(
-    code: str, globals: Optional[Dict[str, Any]] = None, locals: Optional[Dict[str, Any]] = None
+    code: str, globals: Optional[dict[str, Any]] = None, locals: Optional[dict[str, Any]] = None
 ) -> str:
     """
     A wrapper of builtin `exec` function.
@@ -334,7 +324,7 @@ def gen(
     return code
 
 
-def add_func(serde_scope: Scope, func_name: str, func_code: str, globals: Dict[str, Any]) -> None:
+def add_func(serde_scope: Scope, func_name: str, func_code: str, globals: dict[str, Any]) -> None:
     """
     Generate a function and add it to a Scope's `funcs` dictionary.
 
@@ -354,7 +344,7 @@ def add_func(serde_scope: Scope, func_name: str, func_code: str, globals: Dict[s
 def is_instance(obj: Any, typ: Any) -> bool:
     """
     Type check function that works like `isinstance` but it accepts
-    Subscripted Generics e.g. `List[int]`.
+    Subscripted Generics e.g. `list[int]`.
     """
     if dataclasses.is_dataclass(typ):
         return isinstance(obj, typ)
@@ -388,21 +378,21 @@ def is_instance(obj: Any, typ: Any) -> bool:
         return isinstance(obj, typ)
 
 
-def is_opt_instance(obj: Any, typ: Type[Any]) -> bool:
+def is_opt_instance(obj: Any, typ: type[Any]) -> bool:
     if obj is None:
         return True
     opt_arg = type_args(typ)[0]
     return is_instance(obj, opt_arg)
 
 
-def is_union_instance(obj: Any, typ: Type[Any]) -> bool:
+def is_union_instance(obj: Any, typ: type[Any]) -> bool:
     for arg in type_args(typ):
         if is_instance(obj, arg):
             return True
     return False
 
 
-def is_list_instance(obj: Any, typ: Type[Any]) -> bool:
+def is_list_instance(obj: Any, typ: type[Any]) -> bool:
     if not isinstance(obj, list):
         return False
     if len(obj) == 0 or is_bare_list(typ):
@@ -412,7 +402,7 @@ def is_list_instance(obj: Any, typ: Type[Any]) -> bool:
     return is_instance(obj[0], list_arg)
 
 
-def is_set_instance(obj: Any, typ: Type[Any]) -> bool:
+def is_set_instance(obj: Any, typ: type[Any]) -> bool:
     if not isinstance(obj, (set, frozenset)):
         return False
     if len(obj) == 0 or is_bare_set(typ):
@@ -422,7 +412,7 @@ def is_set_instance(obj: Any, typ: Type[Any]) -> bool:
     return is_instance(next(iter(obj)), set_arg)
 
 
-def is_tuple_instance(obj: Any, typ: Type[Any]) -> bool:
+def is_tuple_instance(obj: Any, typ: type[Any]) -> bool:
     if not isinstance(obj, tuple):
         return False
     if is_variable_tuple(typ):
@@ -438,7 +428,7 @@ def is_tuple_instance(obj: Any, typ: Type[Any]) -> bool:
     return True
 
 
-def is_dict_instance(obj: Any, typ: Type[Any]) -> bool:
+def is_dict_instance(obj: Any, typ: type[Any]) -> bool:
     if not isinstance(obj, dict):
         return False
     if len(obj) == 0 or is_bare_dict(typ):
@@ -451,7 +441,7 @@ def is_dict_instance(obj: Any, typ: Type[Any]) -> bool:
     return False
 
 
-def is_generic_instance(obj: Any, typ: Type[Any]) -> bool:
+def is_generic_instance(obj: Any, typ: type[Any]) -> bool:
     return is_instance(obj, get_origin(typ))
 
 
@@ -501,7 +491,7 @@ class FlattenOpts:
 def field(
     *args: Any,
     rename: Optional[str] = None,
-    alias: Optional[List[str]] = None,
+    alias: Optional[list[str]] = None,
     skip: Optional[bool] = None,
     skip_if: Optional[Callable[[Any], Any]] = None,
     skip_if_false: Optional[bool] = None,
@@ -509,7 +499,7 @@ def field(
     serializer: Optional[Callable[..., Any]] = None,
     deserializer: Optional[Callable[..., Any]] = None,
     flatten: Optional[Union[FlattenOpts, bool]] = None,
-    metadata: Optional[Dict[str, Any]] = None,
+    metadata: Optional[dict[str, Any]] = None,
     **kwargs: Any,
 ) -> Any:
     """
@@ -550,7 +540,7 @@ class Field(Generic[T]):
     `type`, `name`, `default` and `default_factory` are the same members as `dataclasses.Field`.
     """
 
-    type: Type[T]
+    type: type[T]
     """ Type of Field """
     name: Optional[str]
     """ Name of Field """
@@ -565,7 +555,7 @@ class Field(Generic[T]):
     metadata: Mapping[str, Any] = field(default_factory=dict)
     kw_only: bool = False
     case: Optional[str] = None
-    alias: List[str] = field(default_factory=list)
+    alias: list[str] = field(default_factory=list)
     rename: Optional[str] = None
     skip: Optional[bool] = None
     skip_if: Optional[Func] = None
@@ -574,11 +564,11 @@ class Field(Generic[T]):
     serializer: Optional[Func] = None  # Custom field serializer.
     deserializer: Optional[Func] = None  # Custom field deserializer.
     flatten: Optional[FlattenOpts] = None
-    parent: Optional[Type[Any]] = None
-    type_args: Optional[List[str]] = None
+    parent: Optional[Any] = None
+    type_args: Optional[list[str]] = None
 
     @classmethod
-    def from_dataclass(cls, f: DataclassField, parent: Optional[Type[Any]] = None) -> Field[T]:
+    def from_dataclass(cls, f: dataclasses.Field[T], parent: Optional[Any] = None) -> Field[T]:
         """
         Create `Field` object from `dataclasses.Field`.
         """
@@ -634,7 +624,7 @@ class Field(Generic[T]):
             kw_only=kw_only,
         )
 
-    def to_dataclass(self) -> DataclassField:
+    def to_dataclass(self) -> dataclasses.Field[T]:
         f = dataclasses.Field(
             default=self.default,
             default_factory=self.default_factory,
@@ -655,10 +645,10 @@ class Field(Generic[T]):
             return False
         if self.parent is None:
             return False
-        return self.type == self.parent
+        return self.type == self.parent  # type: ignore
 
     @staticmethod
-    def mangle(field: DataclassField, name: str) -> str:
+    def mangle(field: dataclasses.Field[Any], name: str) -> str:
         """
         Get mangled name based on field name.
         """
@@ -680,7 +670,7 @@ class Field(Generic[T]):
 F = TypeVar("F", bound=Field[Any])
 
 
-def fields(field_cls: Type[F], cls: Type[Any], serialize_class_var: bool = False) -> List[F]:
+def fields(field_cls: type[F], cls: type[Any], serialize_class_var: bool = False) -> list[F]:
     """
     Iterate fields of the dataclass and returns `serde.core.Field`.
     """
@@ -721,9 +711,8 @@ def union_func_name(prefix: str, union_args: Sequence[Any]) -> str:
     * `union_args`: type arguments of a Union
 
     >>> from ipaddress import IPv4Address
-    >>> from typing import List
-    >>> union_func_name("union_se", [int, List[str], IPv4Address])
-    'union_se_int_List_str__IPv4Address'
+    >>> union_func_name("union_se", [int, list[str], IPv4Address])
+    'union_se_int_list_str__IPv4Address'
     """
     return re.sub(r"[^A-Za-z0-9]", "_", f"{prefix}_{'_'.join([typename(e) for e in union_args])}")
 
@@ -775,7 +764,7 @@ class Tagging:
         return self.kind == self.Kind.Untagged
 
     @classmethod
-    def is_taggable(cls, typ: Type[Any]) -> bool:
+    def is_taggable(cls, typ: type[Any]) -> bool:
         return dataclasses.is_dataclass(typ)
 
     def check(self) -> None:
@@ -856,7 +845,7 @@ def ensure(expr: Any, description: str) -> None:
         raise Exception(description)
 
 
-def should_impl_dataclass(cls: Type[Any]) -> bool:
+def should_impl_dataclass(cls: type[Any]) -> bool:
     """
     Test if class doesn't have @dataclass.
 
@@ -925,11 +914,11 @@ coerce = TypeCheck(kind=TypeCheck.Kind.Coerce)
 strict = TypeCheck(kind=TypeCheck.Kind.Strict)
 
 
-def coerce_object(typ: Type[Any], obj: Any) -> Any:
+def coerce_object(typ: type[Any], obj: Any) -> Any:
     return typ(obj) if is_coercible(typ, obj) else obj
 
 
-def is_coercible(typ: Type[Any], obj: Any) -> bool:
+def is_coercible(typ: type[Any], obj: Any) -> bool:
     if obj is None:
         return False
     return True
@@ -955,11 +944,10 @@ def has_default_factory(field: Field[Any]) -> bool:
     """
     Test if the field has default factory.
 
-    >>> from typing import Dict
     >>> @dataclasses.dataclass
     ... class C:
     ...     a: int
-    ...     d: Dict = dataclasses.field(default_factory=dict)
+    ...     d: dict = dataclasses.field(default_factory=dict)
     >>> has_default_factory(dataclasses.fields(C)[0])
     False
     >>> has_default_factory(dataclasses.fields(C)[1])
@@ -998,7 +986,7 @@ class ClassDeserializer(Protocol):
     >>> from plum import dispatch
     >>> class MyDeserializer(ClassDeserializer):
     ...     @dispatch
-    ...     def deserialize(self, cls: Type[datetime], value: Any) -> datetime:
+    ...     def deserialize(self, cls: type[datetime], value: Any) -> datetime:
     ...         return datetime.strptime(value, "%d/%m/%y")
     """
 
@@ -1006,9 +994,9 @@ class ClassDeserializer(Protocol):
         pass
 
 
-GLOBAL_CLASS_SERIALIZER: List[ClassSerializer] = []
+GLOBAL_CLASS_SERIALIZER: list[ClassSerializer] = []
 
-GLOBAL_CLASS_DESERIALIZER: List[ClassDeserializer] = []
+GLOBAL_CLASS_DESERIALIZER: list[ClassDeserializer] = []
 
 
 def add_serializer(serializer: ClassSerializer) -> None:

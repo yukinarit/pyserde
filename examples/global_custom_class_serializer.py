@@ -1,5 +1,4 @@
 from plum import dispatch
-from dataclasses import dataclass
 from datetime import datetime
 from serde import serde, add_serializer, add_deserializer
 from serde.json import from_json, to_json
@@ -49,7 +48,6 @@ add_deserializer(MyDeserializer2())
 
 
 @serde(class_serializer=MySerializer3(), class_deserializer=MyDeserializer3())
-@dataclass
 class Foo:
     a: datetime
     b: int

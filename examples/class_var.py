@@ -1,22 +1,19 @@
-from dataclasses import dataclass
-from typing import ClassVar, List
+from typing import ClassVar
 
 from serde import serde
 from serde.json import from_json, to_json
 
 
 @serde
-@dataclass
 class Bar:
     v: int
 
 
 @serde(serialize_class_var=True)
-@dataclass
 class Foo:
     a: ClassVar[int] = 10
     b: ClassVar[Bar] = Bar(100)
-    c: ClassVar[List[Bar]] = [Bar(1), Bar(2)]
+    c: ClassVar[list[Bar]] = [Bar(1), Bar(2)]
 
 
 def main() -> None:

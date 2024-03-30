@@ -1,9 +1,7 @@
-from dataclasses import dataclass
 from serde import serde, field
 
 
 @serde
-@dataclass
 class Foo:
     id: int = field(rename="ID")  # Field with attributes can be defined before other fields
     # thanks to dataclass_transform field_specifiers

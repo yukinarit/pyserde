@@ -1,4 +1,3 @@
-from dataclasses import dataclass
 from typing import Union
 
 from serde import AdjacentTagging, InternalTagging, Untagged, serde
@@ -6,20 +5,17 @@ from serde.json import from_json, to_json
 
 
 @serde
-@dataclass
 class Bar:
     b: int
 
 
 @serde
-@dataclass
 class Baz:
     b: int
 
 
 def external_tagging() -> None:
     @serde
-    @dataclass
     class Foo:
         a: Union[Bar, Baz]
 
@@ -32,7 +28,6 @@ def external_tagging() -> None:
 
 def internal_tagging() -> None:
     @serde(tagging=InternalTagging("type"))
-    @dataclass
     class Foo:
         a: Union[Bar, Baz]
 
@@ -45,7 +40,6 @@ def internal_tagging() -> None:
 
 def adjacent_tagging() -> None:
     @serde(tagging=AdjacentTagging(tag="type", content="content"))
-    @dataclass
     class Foo:
         a: Union[Bar, Baz]
 
@@ -58,7 +52,6 @@ def adjacent_tagging() -> None:
 
 def untagged() -> None:
     @serde(tagging=Untagged)
-    @dataclass
     class Foo:
         a: Union[Bar, Baz]
 

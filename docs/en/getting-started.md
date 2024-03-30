@@ -2,7 +2,7 @@
 
 ## Installation
 
-Install pyserde from PyPI. pyserde requires Python>=3.8.
+Install pyserde from PyPI. pyserde requires Python>=3.9.
 
 ```
 pip install pyserde
@@ -48,11 +48,9 @@ Here are the available extras
 Define your class with pyserde's `@serde` decorators. Be careful that module name is `serde`, not `pyserde`. `pyserde` heavily depends on the standard library's `dataclasses` module. If you are new to dataclass, I would recommend to read [dataclasses documentation](https://docs.python.org/3/library/dataclasses.html) first.
 
 ```python
-from dataclasses import dataclass
 from serde import serde
 
 @serde
-@dataclass
 class Foo:
     i: int
     s: str
@@ -66,11 +64,9 @@ pyserde generates methods necessary for (de)serialization by `@serde` when a cla
 >
 > e.g. If you do only serialization, you can use `@serialize` decorator. But calling deserialize API e.g. `from_json` for `Foo` will raise an error.
 > ```python
-> from dataclasses import dataclass
 > from serde import serialize
 >
 > @serialize
-> @dataclass
 > class Foo:
 >     i: int
 >     s: str
@@ -83,7 +79,6 @@ pyserde generates methods necessary for (de)serialization by `@serde` when a cla
 [PEP585](https://www.python.org/dev/peps/pep-0585/) style annotation is supported for python>=3.9. [PEP604](https://www.python.org/dev/peps/pep-0604/) Union operator is also supported for python>=3.10. With PEP585 and PEP604, you can write a pyserde class pretty neatly.
 ```python
 @serde
-@dataclass
 class Foo:
     a: int
     b: list[str]

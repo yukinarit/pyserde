@@ -1,6 +1,5 @@
 import logging
 from dataclasses import fields
-from beartype.typing import List
 
 import numpy as np
 import numpy.typing as npt
@@ -109,9 +108,9 @@ def test_encode_numpy(se, de, opt):
         a: int
         b: float
         h: bool
-        c: List[int]
-        d: List[float]
-        e: List[bool]
+        c: list[int]
+        d: list[float]
+        e: list[bool]
 
     def unchecked_new(
         a: np.int32,
@@ -218,9 +217,9 @@ def test_encode_numpy_with_no_default_encoder(se, de):
         a: int
         b: float
         h: bool
-        c: List[int]
-        d: List[float]
-        e: List[bool]
+        c: list[int]
+        d: list[float]
+        e: list[bool]
 
     def unchecked_new(
         a: np.int32,

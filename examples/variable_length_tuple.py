@@ -1,14 +1,10 @@
-from dataclasses import dataclass
-from typing import Tuple
-
 from serde import serde
 from serde.json import from_json, to_json
 
 
 @serde
-@dataclass
 class Foo:
-    v: Tuple[int, ...]
+    v: tuple[int, ...]
 
 
 def main() -> None:

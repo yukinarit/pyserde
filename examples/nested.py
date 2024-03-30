@@ -1,17 +1,13 @@
-from dataclasses import dataclass
-
 from serde import serde
 from serde.json import from_json, to_json
 
 
 @serde
-@dataclass
 class Bar:
     b: int
 
 
 @serde
-@dataclass
 class Foo:
     a: Bar
 
