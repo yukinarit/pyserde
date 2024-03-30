@@ -181,7 +181,7 @@
                     <main>
                         <h1 id="getting-started"><a class="header" href="#getting-started">Getting started</a></h1>
 <h2 id="installation"><a class="header" href="#installation">Installation</a></h2>
-<p>Install pyserde from PyPI. pyserde requires Python&gt;=3.8.</p>
+<p>Install pyserde from PyPI. pyserde requires Python&gt;=3.9.</p>
 <pre><code>pip install pyserde
 </code></pre>
 <p>If you're using poetry, run this command.</p>
@@ -213,11 +213,9 @@
 </ul>
 <h2 id="define-your-first-pyserde-class"><a class="header" href="#define-your-first-pyserde-class">Define your first pyserde class</a></h2>
 <p>Define your class with pyserde's <code>@serde</code> decorators. Be careful that module name is <code>serde</code>, not <code>pyserde</code>. <code>pyserde</code> heavily depends on the standard library's <code>dataclasses</code> module. If you are new to dataclass, I would recommend to read <a href="https://docs.python.org/3/library/dataclasses.html">dataclasses documentation</a> first.</p>
-<pre><code class="language-python">from dataclasses import dataclass
-from serde import serde
+<pre><code class="language-python">from serde import serde
 
 @serde
-@dataclass
 class Foo:
     i: int
     s: str
@@ -228,11 +226,9 @@ class Foo:
 <blockquote>
 <p><strong>NOTE:</strong> If you need only either serialization or deserialization functionality, you can use <code>@serialize</code> or <code>@deserialize</code> instead of <code>@serde</code> decorator.</p>
 <p>e.g. If you do only serialization, you can use <code>@serialize</code> decorator. But calling deserialize API e.g. <code>from_json</code> for <code>Foo</code> will raise an error.</p>
-<pre><code class="language-python">from dataclasses import dataclass
-from serde import serialize
+<pre><code class="language-python">from serde import serialize
 
 @serialize
-@dataclass
 class Foo:
     i: int
     s: str
@@ -243,7 +239,6 @@ class Foo:
 <h2 id="pep585-and-pep604"><a class="header" href="#pep585-and-pep604">PEP585 and PEP604</a></h2>
 <p><a href="https://www.python.org/dev/peps/pep-0585/">PEP585</a> style annotation is supported for python&gt;=3.9. <a href="https://www.python.org/dev/peps/pep-0604/">PEP604</a> Union operator is also supported for python&gt;=3.10. With PEP585 and PEP604, you can write a pyserde class pretty neatly.</p>
 <pre><code class="language-python">@serde
-@dataclass
 class Foo:
     a: int
     b: list[str]

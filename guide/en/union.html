@@ -184,17 +184,14 @@
 <h2 id="untagged"><a class="header" href="#untagged"><code>Untagged</code></a></h2>
 <p>This is the default Union representation for pyserde&lt;0.7. Given these dataclasses,</p>
 <pre><code class="language-python">@serde
-@dataclass
 class Bar:
     b: int
 
 @serde
-@dataclass
 class Baz:
     b: int
 
 @serde(tagging=Untagged)
-@dataclass
 class Foo:
     a: Union[Bar, Baz]
 </code></pre>
@@ -202,7 +199,6 @@ class Foo:
 <h2 id="externaltagging"><a class="header" href="#externaltagging"><code>ExternalTagging</code></a></h2>
 <p>This is the default Union representation since 0.7. A class declaration with <code>ExternalTagging</code> looks like below. If you serialize <code>Foo(Baz(10))</code> into dict, you get <code>{"a": {"Baz": {"b": 10}}}</code> and you can deserialize it back to <code>Foo(Baz(10))</code>.</p>
 <pre><code class="language-python">@serde(tagging=ExternalTagging)
-@dataclass
 class Foo:
     a: Union[Bar, Baz]
 </code></pre>
@@ -211,20 +207,18 @@ class Foo:
 <pre><code class="language-python">@serde(tagging=ExternalTagging)
 @dataclass
 class Foo:
-   a: Union[List[int], Set[int]]
+   a: Union[list[int], set[int]]
 </code></pre>
 </blockquote>
 <h2 id="internaltagging"><a class="header" href="#internaltagging"><code>InternalTagging</code></a></h2>
 <p>A class declaration with <code>InternalTagging</code> looks like below. If you serialize <code>Foo(Baz(10))</code> into dict, you will get <code>{"a": {"type": "Baz", "b": 10}}</code> and you can deserialize it back to <code>Foo(Baz(10))</code>. <code>type</code> tag is encoded inside the <code>Baz</code>'s dictionary.</p>
 <pre><code class="language-python">@serde(tagging=InternalTagging("type"))
-@dataclass
 class Foo:
     a: Union[Bar, Baz]
 </code></pre>
 <h2 id="adjacenttagging"><a class="header" href="#adjacenttagging"><code>AdjacentTagging</code></a></h2>
 <p>A class declaration with <code>AdjacentTagging</code> looks like below. If you serialize <code>Foo(Baz(10))</code> into dict, you will get <code>{"a": {"type": "Baz", "content": {"b": 10}}}</code> and you can deserialize it back to <code>Foo(Baz(10))</code>. <code>type</code> tag is encoded inside <code>Baz</code>'s dictionary and <code>Baz</code>s fields are encoded inside <code>content</code>.</p>
 <pre><code class="language-python">@serde(tagging=AdjacentTagging("type", "content"))
-@dataclass
 class Foo:
     a: Union[Bar, Baz]
 </code></pre>
@@ -232,12 +226,10 @@ class Foo:
 <p>New in v0.12.0.</p>
 <p>Passing Union types directly in (de)serialize APIs (e.g. to_json, from_json) was partially supported prior to v0.12, but the union type was always treated as untagged. Users had no way to change the union tagging. The following example code wasn't able to correctly deserialize into <code>Bar</code> due to untagged.</p>
 <pre><code class="language-python">@serde
-@dataclass
 class Foo:
     a: int
 
 @serde
-@dataclass
 class Bar:
     a: int
 
@@ -250,12 +242,10 @@ print(from_json(Union[Foo, Bar], s))
 </code></pre>
 <p>Since v0.12.0, pyserde can handle union that's passed in (de)serialize APIs a bit nicely. The union type is treated as externally tagged as that is the default tagging in pyserde. So the above example can correctly (de)serialize as <code>Bar</code>.</p>
 <pre><code class="language-python">@serde
-@dataclass
 class Foo:
     a: int
 
 @serde
-@dataclass
 class Bar:
     a: int
 

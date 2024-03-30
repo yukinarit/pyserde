@@ -187,7 +187,7 @@
 <pre><code class="language-python">class Foo:
     a: int = 10
     b: int = field(default=10)  # same as field "a"
-    c: Dict[str, int] = field(default_factory=dict)
+    c: dict[str, int] = field(default_factory=dict)
 
 print(from_dict(Foo, {}))  # prints Foo(a=10, b=10, c={})
 </code></pre>
@@ -199,7 +199,6 @@ print(from_dict(Foo, {}))  # prints Foo(a=10, b=10, c={})
 <p>Field attributes can be specified through <code>serde.field</code> or <code>dataclasses.field</code>. We recommend to use <code>serde.field</code> because it's shorter and type check works.
 Here is an example specifying <code>rename</code> attribute in both <code>serde.field</code> and <code>dataclasses.field</code>.</p>
 <pre><code class="language-python">@serde.serde
-@dataclass.dataclass
 class Foo:
     a: str = serde.field(rename="A")
     b: str = dataclasses.field(metadata={"serde_rename"="B"})
@@ -207,7 +206,6 @@ class Foo:
 <h3 id="rename"><a class="header" href="#rename"><strong><code>rename</code></strong></a></h3>
 <p><code>rename</code> is used to rename field name during (de)serialization. This attribute is convenient when you want to use a python keyword in field name. For example, this code renames field name <code>id</code> to <code>ID</code>.</p>
 <pre><code class="language-python">@serde
-@dataclass
 class Foo:
     id: int = field(rename="ID")
 </code></pre>
@@ -215,17 +213,15 @@ class Foo:
 <h3 id="skip"><a class="header" href="#skip"><strong><code>skip</code></strong></a></h3>
 <p><code>skip</code> is used to skip (de)serialization of the field with this attribute.</p>
 <pre><code class="language-python">@serde
-@dataclass
 class Resource:
     name: str
     hash: str
-    metadata: Dict[str, str] = field(default_factory=dict, skip=True)
+    metadata: dict[str, str] = field(default_factory=dict, skip=True)
 </code></pre>
 <p>See <a href="https://github.com/yukinarit/pyserde/blob/main/examples/skip.py">examples/skip.py</a> for the complete example.</p>
 <h3 id="skip_if"><a class="header" href="#skip_if"><strong><code>skip_if</code></strong></a></h3>
 <p><code>skip</code> is used to skip (de)serialization of the field if the predicate function returns <code>True</code>.</p>
 <pre><code class="language-python">@serde
-@dataclass
 class World:
     buddy: str = field(default='', skip_if=lambda v: v == 'Pikachu')
 </code></pre>
@@ -233,15 +229,13 @@ class World:
 <h3 id="skip_if_false"><a class="header" href="#skip_if_false"><strong><code>skip_if_false</code></strong></a></h3>
 <p><code>skip</code> is used to skip (de)serialization of the field if the field evaluates to <code>False</code>. For example, this code skip (de)serializing if <code>enemies</code> is empty.</p>
 <pre><code class="language-python">@serde
-@dataclass
 class World:
-    enemies: List[str] = field(default_factory=list, skip_if_false=True)
+    enemies: list[str] = field(default_factory=list, skip_if_false=True)
 </code></pre>
 <p>See <a href="https://github.com/yukinarit/pyserde/blob/main/examples/skip.py">examples/skip.py</a> for the complete example.</p>
 <h3 id="skip_if_default"><a class="header" href="#skip_if_default"><strong><code>skip_if_default</code></strong></a></h3>
 <p><code>skip</code> is used to skip (de)serialization of the field if the field is equivalent to its default value. For example, this code skip (de)serializing if <code>town</code> is <code>Masara Town</code>.</p>
 <pre><code class="language-python">@serde
-@dataclass
 class World:
     town: str = field(default='Masara Town', skip_if_default=True)
 </code></pre>
@@ -249,7 +243,6 @@ class World:
 <h3 id="alias"><a class="header" href="#alias"><strong><code>alias</code></strong></a></h3>
 <p>You can set aliases for field names. Alias only works for deserialization.</p>
 <pre><code class="language-python">@serde
-@dataclass
 class Foo:
     a: str = field(alias=["b", "c"])
 </code></pre>
@@ -263,7 +256,6 @@ class Foo:
 </ul>
 <p>In the following example, field <code>a</code> is serialized into <code>"2021-01-01T00:00:00"</code> by the default serializer for <code>datetime</code>, whereas field <code>b</code> is serialized into <code>"01/01/21"</code> by the custom serializer.</p>
 <pre><code class="language-python">@serde
-@dataclass
 class Foo:
     a: datetime
     b: datetime = field(serializer=lambda x: x.strftime('%d/%m/%y'), deserializer=lambda x: datetime.strptime(x, '%d/%m/%y'))
@@ -272,13 +264,11 @@ class Foo:
 <h2 id="flatten"><a class="header" href="#flatten"><strong><code>flatten</code></strong></a></h2>
 <p>You can flatten the fields of the nested structure.</p>
 <pre><code class="language-python">@serde
-@dataclass
 class Bar:
     c: float
     d: bool
 
 @serde
-@dataclass
 class Foo:
     a: int
     b: str

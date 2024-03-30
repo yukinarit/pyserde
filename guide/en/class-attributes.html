@@ -213,7 +213,6 @@ print(to_json(f))
 <blockquote>
 <p><strong>NOTE:</strong> If <code>rename_all</code> class attribute and <code>rename</code> field attribute are used at the same time, <code>rename</code> will be prioritized.</p>
 <pre><code class="language-python">@serde(rename_all = 'camelcase')
-@dataclass
 class Foo:
     int_field: int
     str_field: str = field(rename='str-field')
@@ -241,7 +240,6 @@ class MyDeserializer:
         return datetime.strptime(value, "%d/%m/%y")
 
 @serde(class_serializer=MySerializer(), class_deserializer=MyDeserializer())
-@dataclass
 class Foo:
     v: datetime
 </code></pre>
@@ -292,7 +290,6 @@ def deserializer(cls, o):
         raise SerdeSkip()
 
 @serde(serializer=serializer, deserializer=deserializer)
-@dataclass
 class Foo:
     a: datetime
 </code></pre>
@@ -302,7 +299,6 @@ class Foo:
 <h3 id="serialize_class_var"><a class="header" href="#serialize_class_var"><strong><code>serialize_class_var</code></strong></a></h3>
 <p>New in v0.9.8. Since <code>dataclasses.fields</code> doesn't include a class variable <sup class="footnote-reference"><a href="#1">1</a></sup>, pyserde doesn't serialize class variable as default. This option allows a field of <code>typing.ClassVar</code> to be serialized.</p>
 <pre><code class="language-python">@serde(serialize_class_var=True)
-@dataclass
 class Foo:
     a: ClassVar[int] = 10
 </code></pre>

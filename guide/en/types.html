@@ -185,8 +185,8 @@
 <li>Primitives (int, float, str, bool) <sup class="footnote-reference"><a href="#1">1</a></sup></li>
 <li>Containers
 <ul>
-<li><code>List</code>, <code>Set</code>, <code>Tuple</code>, <code>Dict</code> <sup class="footnote-reference"><a href="#2">2</a></sup></li>
-<li><a href="https://docs.python.org/3/library/stdtypes.html#frozenset"><code>FrozenSet</code></a>, <sup class="footnote-reference"><a href="#3">3</a></sup> <a href="https://docs.python.org/3/library/collections.html#collections.defaultdict"><code>DefaultDict</code></a> <sup class="footnote-reference"><a href="#4">4</a></sup></li>
+<li><code>list</code>, <code>set</code>, <code>tuple</code>, <code>dict</code> <sup class="footnote-reference"><a href="#2">2</a></sup></li>
+<li><a href="https://docs.python.org/3/library/stdtypes.html#frozenset"><code>frozenset</code></a>, <sup class="footnote-reference"><a href="#3">3</a></sup> <a href="https://docs.python.org/3/library/collections.html#collections.defaultdict"><code>defaultdict</code></a> <sup class="footnote-reference"><a href="#4">4</a></sup></li>
 </ul>
 </li>
 <li><a href="https://docs.python.org/3/library/typing.html#typing.Optional"><code>typing.Optional</code></a> [^5]</li>
@@ -216,12 +216,10 @@
 </ul>
 <p>You can write pretty complex class like this:</p>
 <pre><code class="language-python">@serde
-@dataclass
 class bar:
     i: int
 
 @serde
-@dataclass
 class Foo:
     a: int
     b: list[str]
