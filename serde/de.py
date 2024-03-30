@@ -11,8 +11,8 @@ import dataclasses
 import functools
 import typing
 import jinja2
-import beartype
 from collections.abc import Callable, Sequence, Iterable
+from beartype import beartype, BeartypeConf
 from beartype.roar import BeartypeCallHintParamViolation
 from dataclasses import dataclass, is_dataclass
 from typing import overload, TypeVar, Generic, Any, Optional, Union, Literal
@@ -223,7 +223,8 @@ def deserialize(
             dataclass(cls)
 
         if type_check.is_strict():
-            beartype.beartype(cls)
+            serde_beartype = beartype(conf=BeartypeConf(violation_type=SerdeError))
+            serde_beartype(cls)
 
         g: dict[str, Any] = {}
 
