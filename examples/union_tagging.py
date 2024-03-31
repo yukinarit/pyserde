@@ -1,5 +1,3 @@
-from typing import Union
-
 from serde import AdjacentTagging, InternalTagging, Untagged, serde
 from serde.json import from_json, to_json
 
@@ -17,7 +15,7 @@ class Baz:
 def external_tagging() -> None:
     @serde
     class Foo:
-        a: Union[Bar, Baz]
+        a: Bar | Baz
 
     f = Foo(Baz(10))
     print(f"Into Json: {to_json(f)}")
@@ -29,7 +27,7 @@ def external_tagging() -> None:
 def internal_tagging() -> None:
     @serde(tagging=InternalTagging("type"))
     class Foo:
-        a: Union[Bar, Baz]
+        a: Bar | Baz
 
     f = Foo(Baz(10))
     print(f"Into Json: {to_json(f)}")
@@ -41,7 +39,7 @@ def internal_tagging() -> None:
 def adjacent_tagging() -> None:
     @serde(tagging=AdjacentTagging(tag="type", content="content"))
     class Foo:
-        a: Union[Bar, Baz]
+        a: Bar | Baz
 
     f = Foo(Baz(10))
     print(f"Into Json: {to_json(f)}")
@@ -53,7 +51,7 @@ def adjacent_tagging() -> None:
 def untagged() -> None:
     @serde(tagging=Untagged)
     class Foo:
-        a: Union[Bar, Baz]
+        a: Bar | Baz
 
     f = Foo(Baz(10))
     print(f"Into Json: {to_json(f)}")

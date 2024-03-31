@@ -84,7 +84,7 @@ enable = true
 style = "pep440"
 
 [tool.black]
-target_version = ["py311"]
+target_version = ["py312"]
 line_length = 100
 
 [tool.pyright]
@@ -123,7 +123,7 @@ exclude = [
   "tests/test_union.py",
   "serde/__init__.py"
 ]
-pythonVersion = "3.11"
+pythonVersion = "3.12"
 reportMissingImports = false
 
 [tool.mypy]
@@ -132,8 +132,9 @@ ignore_missing_imports = true
 exclude = [
   "serde/numpy.py",
   "examples/alias.py",
-  "examples/field_order.py",
+  "examples/generics_pep695.py",
   "bench",
+  "tests/common.py",
   "tests/test_basics.py",
   "tests/test_compat.py",
   "tests/test_core.py",

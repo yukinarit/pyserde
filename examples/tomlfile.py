@@ -8,7 +8,6 @@ Usage:
     $ poetry run python tomlfile.py
 """
 
-from typing import Optional, Union
 from pathlib import Path
 
 from serde import Untagged, serde
@@ -31,16 +30,16 @@ class Requires:
 
 @serde
 class Package:
-    path: Optional[str] = None
-    version: Optional[str] = None
-    editable: Optional[bool] = False
+    path: str | None = None
+    version: str | None = None
+    editable: bool | None = False
 
 
 @serde(tagging=Untagged)
 class Pipfile:
     source: list[Source]
-    requires: Optional[Requires]
-    packages: dict[str, Union[str, Package]]
+    requires: Requires | None
+    packages: dict[str, str | Package]
 
 
 def main() -> None:

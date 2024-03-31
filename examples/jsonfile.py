@@ -8,8 +8,6 @@ Usage:
     $ poetry run python jsonfile.py
 """
 
-from typing import Optional
-
 from serde import serde
 from serde.json import from_json
 
@@ -18,7 +16,7 @@ from serde.json import from_json
 class Slide:
     title: str
     type: str
-    items: Optional[list[str]]
+    items: list[str] | None
 
 
 @serde

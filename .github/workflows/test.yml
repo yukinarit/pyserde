@@ -9,8 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        # Remove pypy-3.8 until it supports numpy
-        python-version: ["3.9", "3.10", "3.11", "3.12"]  # "pypy-3.8"
+        python-version: ["3.9", "3.10", "3.11", "3.12"]
     steps:
       - uses: actions/checkout@v4
       - name: Install poetry
@@ -26,22 +25,28 @@ jobs:
       - name: Run tests
         run: |
           make test
+      - name: Run examples
+        run: |
           make examples
-      - name: Run orjson tests
+        if: matrix.python-version == '3.12'
+      - name: Run tests (orjson)
         run: |
           pip install orjson
           make test
+      - name: Run examples (orjson)
+        run: |
           make examples
+        if: matrix.python-version == '3.12'
 
   check_formatting:
     name: Check formatting
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Set up Python 3.10
+      - name: Set up Python 3.12
         uses: actions/setup-python@v5
         with:
-          python-version: "3.10"
+          python-version: "3.12"
           cache: pip
           cache-dependency-path: .pre-commit-config.yaml
       - name: Install poetry
@@ -62,10 +67,10 @@ jobs:
       - uses: actions/checkout@v4
       - name: Install poetry
         run: pip install poetry
-      - name: Set up Python 3.10
+      - name: Set up Python 3.12
         uses: actions/setup-python@v5
         with:
-          python-version: "3.10"
+          python-version: "3.12"
           cache: poetry
           cache-dependency-path: pyproject.toml
       - name: Install dependencies
