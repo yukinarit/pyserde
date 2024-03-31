@@ -158,7 +158,7 @@ def test_union_args() -> None:
 
 
 def test_is_instance() -> None:
-    # Primitive
+    # primitive
     assert is_instance(10, int)
     assert is_instance("str", str)
     assert is_instance(1.0, float)
@@ -167,13 +167,13 @@ def test_is_instance() -> None:
     assert not is_instance("10", int)
     assert is_instance(True, int)  # see why this is true https://stackoverflow.com/a/37888668
 
-    # Dataclass
+    # dataclass
     p = Pri(i=10, s="foo", f=100.0, b=True)
     assert is_instance(p, Pri)
     p.i = 10.0  # type: ignore
     assert is_instance(p, Pri)  # there is no way to check mulated properties.
 
-    # Dataclass (Nested)
+    # dataclass (Nested)
     @dataclass
     class Foo:
         p: Pri
@@ -190,7 +190,7 @@ def test_is_instance() -> None:
     assert is_instance([10], list[int])
     assert not is_instance([10.0], list[int])
 
-    # list of dataclasses
+    # list of dataclass
     assert is_instance([Int(n) for n in range(1, 10)], list[Int])
     assert not is_instance([Str("foo")], list[Int])
 
@@ -200,18 +200,18 @@ def test_is_instance() -> None:
     assert is_instance({10}, set[int])
     assert not is_instance({10.0}, set[int])
 
-    # set of dataclasses
+    # set of dataclass
     assert is_instance({Int(n) for n in range(1, 10)}, set[Int])
     assert not is_instance({Str("foo")}, set[Int])
 
     # tuple
-    assert is_instance((), tuple[int, str, float, bool])
-    assert is_instance((10, "a"), tuple)
+    assert not is_instance((), tuple[int, str, float, bool])
     assert is_instance((10, "a"), tuple)
     assert is_instance((10, "foo", 100.0, True), tuple[int, str, float, bool])
     assert not is_instance((10, "foo", 100.0, "last-type-is-wrong"), tuple[int, str, float, bool])
     assert is_instance((10, 20), tuple[int, ...])
     assert is_instance((10, 20, 30), tuple[int, ...])
+    assert is_instance((), tuple[()])
     assert is_instance((), tuple[int, ...])
     assert not is_instance((10, "a"), tuple[int, ...])
 
@@ -230,21 +230,21 @@ def test_is_instance() -> None:
     assert is_instance({"foo": 10, "bar": 20}, dict[str, int])
     assert not is_instance({"foo": 10.0, "bar": 20}, dict[str, int])
 
-    # dict of dataclasses
+    # dict of dataclass
     assert is_instance({Str("foo"): Int(10), Str("bar"): Int(20)}, dict[Str, Int])
     assert not is_instance({Str("foo"): Str("wrong-type"), Str("bar"): Int(10)}, dict[Str, Int])
 
-    # Optional
+    # optional
     assert is_instance(None, type(None))
     assert is_instance(10, Optional[int])
     assert is_instance(None, Optional[int])
     assert not is_instance("wrong-type", Optional[int])
 
-    # Optional of dataclass
+    # optional of dataclass
     assert is_instance(Int(10), Optional[Int])
     assert not is_instance("wrong-type", Optional[Int])
 
-    # Nested containers
+    # nested containers
     assert is_instance([({"a": "b"}, 10, [True])], list[tuple[dict[str, str], int, list[bool]]])
     assert not is_instance(
         [({"a": "b"}, 10, ["wrong-type"])], list[tuple[dict[str, str], int, list[bool]]]
