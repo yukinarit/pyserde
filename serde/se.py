@@ -10,11 +10,11 @@ import dataclasses
 import functools
 import typing
 import itertools
-import beartype
 import jinja2
 from dataclasses import dataclass, is_dataclass
 from typing import TypeVar, Literal, Generic, Optional, Any, Union
 from collections.abc import Callable, Iterable, Iterator
+from beartype import beartype, BeartypeConf
 from beartype.door import is_bearable
 from typing_extensions import dataclass_transform
 
@@ -198,7 +198,8 @@ def serialize(
             dataclass(cls)
 
         if type_check.is_strict():
-            beartype.beartype(cls)
+            serde_beartype = beartype(conf=BeartypeConf(violation_type=SerdeError))
+            serde_beartype(cls)
 
         g: dict[str, Any] = {}
 
