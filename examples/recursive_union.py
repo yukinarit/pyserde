@@ -1,4 +1,4 @@
-from typing import Union
+from __future__ import annotations
 from serde import serde, to_dict, InternalTagging, from_dict
 from dataclasses import dataclass
 
@@ -12,7 +12,7 @@ class Leaf:
 @dataclass
 class Node:
     name: str
-    children: list[Union[Leaf, "Node"]]
+    children: list[Leaf | Node]
 
 
 serde(Node, tagging=InternalTagging("type"))

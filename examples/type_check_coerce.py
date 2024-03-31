@@ -1,5 +1,3 @@
-from typing import Optional
-
 from serde import coerce, serde
 from serde.json import from_json, to_json
 
@@ -14,7 +12,7 @@ class Foo:
     a: int
     b: list[int]
     c: list[dict[str, int]]
-    d: Optional[Bar] = None
+    d: Bar | None = None
 
 
 def main() -> None:

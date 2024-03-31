@@ -15,6 +15,7 @@ from serde import (
     from_tuple,
     serde,
     to_tuple,
+    SerdeError,
 )
 from serde.json import from_json, to_json
 
@@ -66,9 +67,9 @@ def test_legacy_custom_class_serializer():
     assert to_json(f) == '{"a":"foo","b":"bar"}'
     assert f == from_json(Foo, '{"a":"foo","b":"bar"}')
     assert Foo(None, "bar") == from_json(Foo, '{"b":"bar"}')
-    with pytest.raises(Exception):
+    with pytest.raises(SerdeError):
         assert Foo(None, "bar") == from_json(Foo, "{}")
-    with pytest.raises(Exception):
+    with pytest.raises(SerdeError):
         assert Foo("foo", "bar") == from_json(Foo, '{"a": "foo"}')
 
 

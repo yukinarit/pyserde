@@ -899,7 +899,7 @@ def test_frozenset() -> None:
     class Foo:
         d: frozenset[int]
 
-    f = Foo(frozenset({1, 1, 2}))
+    f = Foo(frozenset({1, 2}))
     assert '{"d":[1,2]}' == serde.json.to_json(f)
 
     ff = serde.json.from_json(Foo, '{"d":[1,2]}')
@@ -932,10 +932,10 @@ def test_defaultdict() -> None:
 
 
 def test_defaultdict_invalid_value_type() -> None:
-    with pytest.raises(Exception):
+    with pytest.raises(serde.SerdeError):
         serde.json.from_json(defaultdict[str, ...], '{"k":[1,2]}')
 
-    with pytest.raises(Exception):
+    with pytest.raises(serde.SerdeError):
         serde.json.from_json(defaultdict, '{"k":[1,2]}')
 
 

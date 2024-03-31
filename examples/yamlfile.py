@@ -8,7 +8,6 @@ Usage:
     $ poetry run python yamlfile.py
 """
 
-from typing import Optional, Union
 import pathlib
 
 from serde import Untagged, serde
@@ -42,19 +41,19 @@ class Response:
 class Path:
     description: str
     operation_id: str
-    parameters: list[Union[str, Parameter]]
-    responses: dict[Union[str, int], Response]
+    parameters: list[str | Parameter]
+    responses: dict[str | int, Response]
 
 
 @serde(rename_all="camelcase")
 class Prop:
     type: str
-    format: Optional[str]
+    format: str | None
 
 
 @serde(rename_all="camelcase")
 class Definition:
-    required: Optional[list[str]]
+    required: list[str] | None
     properties: dict[str, Prop]
 
 

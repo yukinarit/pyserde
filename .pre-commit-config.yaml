@@ -14,12 +14,12 @@ repos:
         args:
           - .
   - repo: https://github.com/RobertCraigie/pyright-python
-    rev: v1.1.345
+    rev: v1.1.356
     hooks:
     - id: pyright
       additional_dependencies: ['pyyaml', 'msgpack', 'msgpack-types']
-  - repo: https://github.com/charliermarsh/ruff-pre-commit
-    rev: v0.0.254
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.3.4
     hooks:
     - id: ruff
       args:

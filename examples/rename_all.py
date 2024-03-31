@@ -7,8 +7,6 @@ Usage:
     $ poetry run python rename_all.py
 """
 
-from typing import Optional
-
 from serde import serde
 from serde.json import from_json, to_json
 
@@ -16,7 +14,7 @@ from serde.json import from_json, to_json
 @serde(rename_all="pascalcase")
 class Foo:
     name: str
-    no: Optional[int] = None
+    no: int | None = None
 
 
 def main() -> None:

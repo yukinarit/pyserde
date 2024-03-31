@@ -1,5 +1,3 @@
-from typing import Union
-
 from serde import serde
 from serde.json import from_json, to_json
 
@@ -16,9 +14,9 @@ class Baz:
 
 @serde
 class Foo:
-    a: Union[int, str]
-    b: Union[dict[str, int], list[int]]
-    c: Union[Bar, Baz]
+    a: int | str
+    b: dict[str, int] | list[int]
+    c: Bar | Baz
 
 
 def main() -> None:

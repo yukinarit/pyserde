@@ -1,5 +1,4 @@
 from dataclasses import InitVar
-from typing import Optional
 
 from serde import serde, field
 from serde.json import from_json, to_json
@@ -8,10 +7,10 @@ from serde.json import from_json, to_json
 @serde
 class Foo:
     a: int
-    b: Optional[int] = field(default=None, init=False)
-    c: InitVar[Optional[int]] = 1000
+    b: int | None = field(default=None, init=False)
+    c: InitVar[int | None] = 1000
 
-    def __post_init__(self, c: Optional[int]) -> None:
+    def __post_init__(self, c: int | None) -> None:
         self.b = self.a * 10
 
 

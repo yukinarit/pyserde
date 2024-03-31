@@ -1,57 +1,62 @@
 import sys
-
-import alias
-import any
-import class_var
-import primitive_subclass
-import collection
-import custom_class_serializer
-import custom_legacy_class_serializer
-import custom_field_serializer
-import default
-import default_dict
-import env
-import flatten
-import forward_reference
-import frozen_set
-import generics
-import generics_nested
-import nested
-import init_var
-import jsonfile
-import lazy_type_evaluation
-import literal
-import msg_pack
-import newtype
-import pep681
-import plain_dataclass
-import plain_dataclass_class_attribute
-import python_pickle
-import recursive
-import recursive_list
-import recursive_union
-import rename
-import rename_all
-import simple
-import skip
-import tomlfile
-import type_check_coerce
-import type_check_disabled
-import type_datetime
-import type_decimal
-import union
-import union_tagging
-import union_directly
-import user_exception
-import variable_length_tuple
-import yamlfile
 import typing
-import enum34
 
-PY310 = sys.version_info[:3] >= (3, 10, 0)
+
+if sys.version_info[:3] < (3, 12, 0):
+    print("examples require at least Python 3.12")
+    sys.exit(1)
 
 
 def run_all() -> None:
+    import alias
+    import any
+    import class_var
+    import primitive_subclass
+    import collection
+    import custom_class_serializer
+    import custom_legacy_class_serializer
+    import custom_field_serializer
+    import default
+    import default_dict
+    import env
+    import flatten
+    import forward_reference
+    import frozen_set
+    import generics
+    import generics_pep695
+    import generics_nested
+    import nested
+    import init_var
+    import jsonfile
+    import lazy_type_evaluation
+    import literal
+    import msg_pack
+    import newtype
+    import pep681
+    import plain_dataclass
+    import plain_dataclass_class_attribute
+    import python_pickle
+    import recursive
+    import recursive_list
+    import recursive_union
+    import rename
+    import rename_all
+    import simple
+    import skip
+    import tomlfile
+    import type_check_coerce
+    import type_check_disabled
+    import type_datetime
+    import type_decimal
+    import union
+    import union_tagging
+    import union_directly
+    import user_exception
+    import variable_length_tuple
+    import yamlfile
+    import enum34
+    import kw_only
+
     run(any)
     run(simple)
     run(enum34)
@@ -78,6 +83,7 @@ def run_all() -> None:
     run(union_tagging)
     run(union_directly)
     run(generics)
+    run(generics_pep695)
     run(generics_nested)
     run(nested)
     run(lazy_type_evaluation)
@@ -99,12 +105,7 @@ def run_all() -> None:
     run(plain_dataclass_class_attribute)
     run(msg_pack)
     run(primitive_subclass)
-    if PY310:
-        import union_operator
-        import kw_only
-
-        run(union_operator)
-        run(kw_only)
+    run(kw_only)
 
 
 def run(module: typing.Any) -> None:

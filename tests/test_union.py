@@ -539,11 +539,11 @@ def test_external_tagging() -> None:
     f = Foo(Bar(10))
 
     # Tag not found
-    with pytest.raises(Exception):
+    with pytest.raises(SerdeError):
         assert from_dict(Foo, {"a": {"TagNotFound": {"b": 10}}})
 
     # Tag is correct, but incompatible data
-    with pytest.raises(Exception):
+    with pytest.raises(SerdeError):
         assert from_dict(Foo, {"a": {"Bar": {"c": 10}}})
 
 
@@ -589,11 +589,11 @@ def test_internal_tagging() -> None:
     f = Foo(Bar(10))
 
     # Tag not found
-    with pytest.raises(Exception):
+    with pytest.raises(SerdeError):
         assert from_dict(Foo, {"a": {"TagNotFound": "", "v": 10}})
 
     # Tag is correct, but incompatible data
-    with pytest.raises(Exception):
+    with pytest.raises(SerdeError):
         assert from_dict(Foo, {"a": {"type": "Bar", "c": 10}})
 
     with pytest.raises(TypeError):
@@ -645,15 +645,15 @@ def test_adjacent_tagging() -> None:
     f = Foo(Bar(10))
 
     # Tag not found
-    with pytest.raises(Exception):
+    with pytest.raises(SerdeError):
         assert from_dict(Foo, {"a": {"TagNotFound": "", "content": {"v": 10}}})
 
     # Content tag not found
-    with pytest.raises(Exception):
+    with pytest.raises(SerdeError):
         assert from_dict(Foo, {"a": {"type": "Bar", "TagNotFound": {"v": 10}}})
 
     # Tag is correct, but incompatible data
-    with pytest.raises(Exception):
+    with pytest.raises(SerdeError):
         assert from_dict(Foo, {"a": {"type": "Bar", "content": {"c": 10}}})
 
     with pytest.raises(TypeError):
@@ -709,7 +709,7 @@ def test_untagged() -> None:
     f = Foo(Baz(10))
 
     # Untagged can't differenciate the dataclass with similar fields
-    with pytest.raises(Exception):
+    with pytest.raises(AssertionError):
         assert to_dict(from_dict(Foo, d)) == f
 
     # Untaggled can't differenciate dict and list.
@@ -718,7 +718,7 @@ def test_untagged() -> None:
         a: Union[list[int], dict[int, str]]
 
     f = Foo({10: "bar"})
-    with pytest.raises(Exception):
+    with pytest.raises(SerdeError):
         assert to_dict(from_dict(Foo, d)) == f
 
 

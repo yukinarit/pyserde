@@ -1,12 +1,12 @@
+from __future__ import annotations
 from dataclasses import dataclass
-from typing import Optional
 
 from serde import from_dict, serde, to_dict
 
 
 @dataclass
 class Recur:
-    f: Optional["Recur"]
+    f: Recur | None
 
 
 serde(Recur)

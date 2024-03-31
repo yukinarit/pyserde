@@ -1,5 +1,4 @@
 from collections import defaultdict
-from typing import Optional
 
 from serde import serde
 from serde.json import from_json, to_json
@@ -7,7 +6,7 @@ from serde.json import from_json, to_json
 
 @serde
 class Bar:
-    v: Optional[int] = None
+    v: int | None = None
 
 
 @serde
