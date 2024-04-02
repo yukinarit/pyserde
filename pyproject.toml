@@ -156,5 +156,5 @@ select = [
 ]
 line-length = 100
 
-[tool.ruff.mccabe]
+[tool.ruff.lint.mccabe]
 max-complexity = 30

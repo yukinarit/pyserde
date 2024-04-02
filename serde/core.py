@@ -11,6 +11,7 @@ import sys
 import re
 import casefy
 from dataclasses import dataclass
+from beartype.door import is_bearable
 from collections.abc import Mapping, Sequence, Callable
 from typing import (
     overload,
@@ -343,8 +344,8 @@ def add_func(serde_scope: Scope, func_name: str, func_code: str, globals: dict[s
 
 def is_instance(obj: Any, typ: Any) -> bool:
     """
-    Type check function that works like `isinstance` but it accepts
-    Subscripted Generics e.g. `list[int]`.
+    pyserde's own `isinstance` helper. It accepts subscripted generics e.g. `list[int]` and
+    deeply check object against declared type.
     """
     if dataclasses.is_dataclass(typ):
         return isinstance(obj, typ)
@@ -375,7 +376,7 @@ def is_instance(obj: Any, typ: Any) -> bool:
     elif typ is Ellipsis:
         return True
     else:
-        return isinstance(obj, typ)
+        return is_bearable(obj, typ)
 
 
 def is_opt_instance(obj: Any, typ: type[Any]) -> bool:
@@ -413,18 +414,37 @@ def is_set_instance(obj: Any, typ: type[Any]) -> bool:
 
 
 def is_tuple_instance(obj: Any, typ: type[Any]) -> bool:
+    args = type_args(typ)
+
     if not isinstance(obj, tuple):
         return False
-    if is_variable_tuple(typ):
+
+    # empty tuple
+    if len(args) == 0 and len(obj) == 0:
+        return True
+
+    # In the form of tuple[T, ...]
+    elif is_variable_tuple(typ):
+        # Get the first type arg. Since tuple[T, ...] is homogeneous tuple,
+        # all the elements should be of this type.
         arg = type_args(typ)[0]
         for v in obj:
             if not is_instance(v, arg):
                 return False
-    if len(obj) == 0 or is_bare_tuple(typ):
         return True
-    for i, arg in enumerate(type_args(typ)):
-        if not is_instance(obj[i], arg):
-            return False
+
+    # bare tuple "tuple" is equivalent to tuple[Any, ...]
+    if is_bare_tuple(typ) and isinstance(obj, tuple):
+        return True
+
+    # All the other tuples e.g. tuple[int, str]
+    if len(obj) == len(args):
+        for element, arg in zip(obj, args):
+            if not is_instance(element, arg):
+                return False
+    else:
+        return False
+
     return True
 
 
