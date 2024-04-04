@@ -1507,14 +1507,14 @@ by pyserde.</p>
 
     </div>
     <a class="headerlink" href="#AdjacentTagging"></a>
-            <div class="pdoc-code codehilite"><pre><span></span><span id="AdjacentTagging-826"><a href="#AdjacentTagging-826"><span class="linenos">826</span></a><span class="k">def</span> <span class="nf">AdjacentTagging</span><span class="p">(</span>
-</span><span id="AdjacentTagging-827"><a href="#AdjacentTagging-827"><span class="linenos">827</span></a>    <span class="n">tag</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">content</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="bp">cls</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">T</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-</span><span id="AdjacentTagging-828"><a href="#AdjacentTagging-828"><span class="linenos">828</span></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">Tagging</span><span class="p">,</span> <span class="n">_WithTagging</span><span class="p">[</span><span class="n">T</span><span class="p">]]:</span>
-</span><span id="AdjacentTagging-829"><a href="#AdjacentTagging-829"><span class="linenos">829</span></a>    <span class="n">tagging</span> <span class="o">=</span> <span class="n">Tagging</span><span class="p">(</span><span class="n">tag</span><span class="p">,</span> <span class="n">content</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="n">Tagging</span><span class="o">.</span><span class="n">Kind</span><span class="o">.</span><span class="n">Adjacent</span><span class="p">)</span>
-</span><span id="AdjacentTagging-830"><a href="#AdjacentTagging-830"><span class="linenos">830</span></a>    <span class="k">if</span> <span class="bp">cls</span><span class="p">:</span>
-</span><span id="AdjacentTagging-831"><a href="#AdjacentTagging-831"><span class="linenos">831</span></a>        <span class="k">return</span> <span class="n">tagging</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
-</span><span id="AdjacentTagging-832"><a href="#AdjacentTagging-832"><span class="linenos">832</span></a>    <span class="k">else</span><span class="p">:</span>
-</span><span id="AdjacentTagging-833"><a href="#AdjacentTagging-833"><span class="linenos">833</span></a>        <span class="k">return</span> <span class="n">tagging</span>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="AdjacentTagging-846"><a href="#AdjacentTagging-846"><span class="linenos">846</span></a><span class="k">def</span> <span class="nf">AdjacentTagging</span><span class="p">(</span>
+</span><span id="AdjacentTagging-847"><a href="#AdjacentTagging-847"><span class="linenos">847</span></a>    <span class="n">tag</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">content</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="bp">cls</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">T</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+</span><span id="AdjacentTagging-848"><a href="#AdjacentTagging-848"><span class="linenos">848</span></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">Tagging</span><span class="p">,</span> <span class="n">_WithTagging</span><span class="p">[</span><span class="n">T</span><span class="p">]]:</span>
+</span><span id="AdjacentTagging-849"><a href="#AdjacentTagging-849"><span class="linenos">849</span></a>    <span class="n">tagging</span> <span class="o">=</span> <span class="n">Tagging</span><span class="p">(</span><span class="n">tag</span><span class="p">,</span> <span class="n">content</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="n">Tagging</span><span class="o">.</span><span class="n">Kind</span><span class="o">.</span><span class="n">Adjacent</span><span class="p">)</span>
+</span><span id="AdjacentTagging-850"><a href="#AdjacentTagging-850"><span class="linenos">850</span></a>    <span class="k">if</span> <span class="bp">cls</span><span class="p">:</span>
+</span><span id="AdjacentTagging-851"><a href="#AdjacentTagging-851"><span class="linenos">851</span></a>        <span class="k">return</span> <span class="n">tagging</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
+</span><span id="AdjacentTagging-852"><a href="#AdjacentTagging-852"><span class="linenos">852</span></a>    <span class="k">else</span><span class="p">:</span>
+</span><span id="AdjacentTagging-853"><a href="#AdjacentTagging-853"><span class="linenos">853</span></a>        <span class="k">return</span> <span class="n">tagging</span>
 </span></pre></div>
 
 
@@ -1544,12 +1544,12 @@ by pyserde.</p>
 
     </div>
     <a class="headerlink" href="#InternalTagging"></a>
-            <div class="pdoc-code codehilite"><pre><span></span><span id="InternalTagging-810"><a href="#InternalTagging-810"><span class="linenos">810</span></a><span class="k">def</span> <span class="nf">InternalTagging</span><span class="p">(</span><span class="n">tag</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="bp">cls</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">T</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">Tagging</span><span class="p">,</span> <span class="n">_WithTagging</span><span class="p">[</span><span class="n">T</span><span class="p">]]:</span>
-</span><span id="InternalTagging-811"><a href="#InternalTagging-811"><span class="linenos">811</span></a>    <span class="n">tagging</span> <span class="o">=</span> <span class="n">Tagging</span><span class="p">(</span><span class="n">tag</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="n">Tagging</span><span class="o">.</span><span class="n">Kind</span><span class="o">.</span><span class="n">Internal</span><span class="p">)</span>
-</span><span id="InternalTagging-812"><a href="#InternalTagging-812"><span class="linenos">812</span></a>    <span class="k">if</span> <span class="bp">cls</span><span class="p">:</span>
-</span><span id="InternalTagging-813"><a href="#InternalTagging-813"><span class="linenos">813</span></a>        <span class="k">return</span> <span class="n">tagging</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
-</span><span id="InternalTagging-814"><a href="#InternalTagging-814"><span class="linenos">814</span></a>    <span class="k">else</span><span class="p">:</span>
-</span><span id="InternalTagging-815"><a href="#InternalTagging-815"><span class="linenos">815</span></a>        <span class="k">return</span> <span class="n">tagging</span>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="InternalTagging-830"><a href="#InternalTagging-830"><span class="linenos">830</span></a><span class="k">def</span> <span class="nf">InternalTagging</span><span class="p">(</span><span class="n">tag</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="bp">cls</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">T</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">Tagging</span><span class="p">,</span> <span class="n">_WithTagging</span><span class="p">[</span><span class="n">T</span><span class="p">]]:</span>
+</span><span id="InternalTagging-831"><a href="#InternalTagging-831"><span class="linenos">831</span></a>    <span class="n">tagging</span> <span class="o">=</span> <span class="n">Tagging</span><span class="p">(</span><span class="n">tag</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="n">Tagging</span><span class="o">.</span><span class="n">Kind</span><span class="o">.</span><span class="n">Internal</span><span class="p">)</span>
+</span><span id="InternalTagging-832"><a href="#InternalTagging-832"><span class="linenos">832</span></a>    <span class="k">if</span> <span class="bp">cls</span><span class="p">:</span>
+</span><span id="InternalTagging-833"><a href="#InternalTagging-833"><span class="linenos">833</span></a>        <span class="k">return</span> <span class="n">tagging</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
+</span><span id="InternalTagging-834"><a href="#InternalTagging-834"><span class="linenos">834</span></a>    <span class="k">else</span><span class="p">:</span>
+</span><span id="InternalTagging-835"><a href="#InternalTagging-835"><span class="linenos">835</span></a>        <span class="k">return</span> <span class="n">tagging</span>
 </span></pre></div>
 
 
@@ -1615,48 +1615,48 @@ by pyserde.</p>
 
     </div>
     <a class="headerlink" href="#field"></a>
-            <div class="pdoc-code codehilite"><pre><span></span><span id="field-492"><a href="#field-492"><span class="linenos">492</span></a><span class="k">def</span> <span class="nf">field</span><span class="p">(</span>
-</span><span id="field-493"><a href="#field-493"><span class="linenos">493</span></a>    <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
-</span><span id="field-494"><a href="#field-494"><span class="linenos">494</span></a>    <span class="n">rename</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-</span><span id="field-495"><a href="#field-495"><span class="linenos">495</span></a>    <span class="n">alias</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-</span><span id="field-496"><a href="#field-496"><span class="linenos">496</span></a>    <span class="n">skip</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-</span><span id="field-497"><a href="#field-497"><span class="linenos">497</span></a>    <span class="n">skip_if</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Callable</span><span class="p">[[</span><span class="n">Any</span><span class="p">],</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-</span><span id="field-498"><a href="#field-498"><span class="linenos">498</span></a>    <span class="n">skip_if_false</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-</span><span id="field-499"><a href="#field-499"><span class="linenos">499</span></a>    <span class="n">skip_if_default</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-</span><span id="field-500"><a href="#field-500"><span class="linenos">500</span></a>    <span class="n">serializer</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-</span><span id="field-501"><a href="#field-501"><span class="linenos">501</span></a>    <span class="n">deserializer</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-</span><span id="field-502"><a href="#field-502"><span class="linenos">502</span></a>    <span class="n">flatten</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">FlattenOpts</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-</span><span id="field-503"><a href="#field-503"><span class="linenos">503</span></a>    <span class="n">metadata</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-</span><span id="field-504"><a href="#field-504"><span class="linenos">504</span></a>    <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
-</span><span id="field-505"><a href="#field-505"><span class="linenos">505</span></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
-</span><span id="field-506"><a href="#field-506"><span class="linenos">506</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-</span><span id="field-507"><a href="#field-507"><span class="linenos">507</span></a><span class="sd">    Declare a field with parameters.</span>
-</span><span id="field-508"><a href="#field-508"><span class="linenos">508</span></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="field-509"><a href="#field-509"><span class="linenos">509</span></a>    <span class="k">if</span> <span class="ow">not</span> <span class="n">metadata</span><span class="p">:</span>
-</span><span id="field-510"><a href="#field-510"><span class="linenos">510</span></a>        <span class="n">metadata</span> <span class="o">=</span> <span class="p">{}</span>
-</span><span id="field-511"><a href="#field-511"><span class="linenos">511</span></a>
-</span><span id="field-512"><a href="#field-512"><span class="linenos">512</span></a>    <span class="k">if</span> <span class="n">rename</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-</span><span id="field-513"><a href="#field-513"><span class="linenos">513</span></a>        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;serde_rename&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">rename</span>
-</span><span id="field-514"><a href="#field-514"><span class="linenos">514</span></a>    <span class="k">if</span> <span class="n">alias</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-</span><span id="field-515"><a href="#field-515"><span class="linenos">515</span></a>        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;serde_alias&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">alias</span>
-</span><span id="field-516"><a href="#field-516"><span class="linenos">516</span></a>    <span class="k">if</span> <span class="n">skip</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-</span><span id="field-517"><a href="#field-517"><span class="linenos">517</span></a>        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;serde_skip&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">skip</span>
-</span><span id="field-518"><a href="#field-518"><span class="linenos">518</span></a>    <span class="k">if</span> <span class="n">skip_if</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-</span><span id="field-519"><a href="#field-519"><span class="linenos">519</span></a>        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;serde_skip_if&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">skip_if</span>
-</span><span id="field-520"><a href="#field-520"><span class="linenos">520</span></a>    <span class="k">if</span> <span class="n">skip_if_false</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-</span><span id="field-521"><a href="#field-521"><span class="linenos">521</span></a>        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;serde_skip_if_false&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">skip_if_false</span>
-</span><span id="field-522"><a href="#field-522"><span class="linenos">522</span></a>    <span class="k">if</span> <span class="n">skip_if_default</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-</span><span id="field-523"><a href="#field-523"><span class="linenos">523</span></a>        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;serde_skip_if_default&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">skip_if_default</span>
-</span><span id="field-524"><a href="#field-524"><span class="linenos">524</span></a>    <span class="k">if</span> <span class="n">serializer</span><span class="p">:</span>
-</span><span id="field-525"><a href="#field-525"><span class="linenos">525</span></a>        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;serde_serializer&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">serializer</span>
-</span><span id="field-526"><a href="#field-526"><span class="linenos">526</span></a>    <span class="k">if</span> <span class="n">deserializer</span><span class="p">:</span>
-</span><span id="field-527"><a href="#field-527"><span class="linenos">527</span></a>        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;serde_deserializer&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">deserializer</span>
-</span><span id="field-528"><a href="#field-528"><span class="linenos">528</span></a>    <span class="k">if</span> <span class="n">flatten</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
-</span><span id="field-529"><a href="#field-529"><span class="linenos">529</span></a>        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;serde_flatten&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">FlattenOpts</span><span class="p">()</span>
-</span><span id="field-530"><a href="#field-530"><span class="linenos">530</span></a>    <span class="k">elif</span> <span class="n">flatten</span><span class="p">:</span>
-</span><span id="field-531"><a href="#field-531"><span class="linenos">531</span></a>        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;serde_flatten&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">flatten</span>
-</span><span id="field-532"><a href="#field-532"><span class="linenos">532</span></a>
-</span><span id="field-533"><a href="#field-533"><span class="linenos">533</span></a>    <span class="k">return</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="n">metadata</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="field-512"><a href="#field-512"><span class="linenos">512</span></a><span class="k">def</span> <span class="nf">field</span><span class="p">(</span>
+</span><span id="field-513"><a href="#field-513"><span class="linenos">513</span></a>    <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+</span><span id="field-514"><a href="#field-514"><span class="linenos">514</span></a>    <span class="n">rename</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="field-515"><a href="#field-515"><span class="linenos">515</span></a>    <span class="n">alias</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="field-516"><a href="#field-516"><span class="linenos">516</span></a>    <span class="n">skip</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="field-517"><a href="#field-517"><span class="linenos">517</span></a>    <span class="n">skip_if</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Callable</span><span class="p">[[</span><span class="n">Any</span><span class="p">],</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="field-518"><a href="#field-518"><span class="linenos">518</span></a>    <span class="n">skip_if_false</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="field-519"><a href="#field-519"><span class="linenos">519</span></a>    <span class="n">skip_if_default</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="field-520"><a href="#field-520"><span class="linenos">520</span></a>    <span class="n">serializer</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="field-521"><a href="#field-521"><span class="linenos">521</span></a>    <span class="n">deserializer</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="field-522"><a href="#field-522"><span class="linenos">522</span></a>    <span class="n">flatten</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">FlattenOpts</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="field-523"><a href="#field-523"><span class="linenos">523</span></a>    <span class="n">metadata</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="field-524"><a href="#field-524"><span class="linenos">524</span></a>    <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+</span><span id="field-525"><a href="#field-525"><span class="linenos">525</span></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+</span><span id="field-526"><a href="#field-526"><span class="linenos">526</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+</span><span id="field-527"><a href="#field-527"><span class="linenos">527</span></a><span class="sd">    Declare a field with parameters.</span>
+</span><span id="field-528"><a href="#field-528"><span class="linenos">528</span></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="field-529"><a href="#field-529"><span class="linenos">529</span></a>    <span class="k">if</span> <span class="ow">not</span> <span class="n">metadata</span><span class="p">:</span>
+</span><span id="field-530"><a href="#field-530"><span class="linenos">530</span></a>        <span class="n">metadata</span> <span class="o">=</span> <span class="p">{}</span>
+</span><span id="field-531"><a href="#field-531"><span class="linenos">531</span></a>
+</span><span id="field-532"><a href="#field-532"><span class="linenos">532</span></a>    <span class="k">if</span> <span class="n">rename</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="field-533"><a href="#field-533"><span class="linenos">533</span></a>        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;serde_rename&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">rename</span>
+</span><span id="field-534"><a href="#field-534"><span class="linenos">534</span></a>    <span class="k">if</span> <span class="n">alias</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="field-535"><a href="#field-535"><span class="linenos">535</span></a>        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;serde_alias&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">alias</span>
+</span><span id="field-536"><a href="#field-536"><span class="linenos">536</span></a>    <span class="k">if</span> <span class="n">skip</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="field-537"><a href="#field-537"><span class="linenos">537</span></a>        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;serde_skip&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">skip</span>
+</span><span id="field-538"><a href="#field-538"><span class="linenos">538</span></a>    <span class="k">if</span> <span class="n">skip_if</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="field-539"><a href="#field-539"><span class="linenos">539</span></a>        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;serde_skip_if&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">skip_if</span>
+</span><span id="field-540"><a href="#field-540"><span class="linenos">540</span></a>    <span class="k">if</span> <span class="n">skip_if_false</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="field-541"><a href="#field-541"><span class="linenos">541</span></a>        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;serde_skip_if_false&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">skip_if_false</span>
+</span><span id="field-542"><a href="#field-542"><span class="linenos">542</span></a>    <span class="k">if</span> <span class="n">skip_if_default</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="field-543"><a href="#field-543"><span class="linenos">543</span></a>        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;serde_skip_if_default&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">skip_if_default</span>
+</span><span id="field-544"><a href="#field-544"><span class="linenos">544</span></a>    <span class="k">if</span> <span class="n">serializer</span><span class="p">:</span>
+</span><span id="field-545"><a href="#field-545"><span class="linenos">545</span></a>        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;serde_serializer&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">serializer</span>
+</span><span id="field-546"><a href="#field-546"><span class="linenos">546</span></a>    <span class="k">if</span> <span class="n">deserializer</span><span class="p">:</span>
+</span><span id="field-547"><a href="#field-547"><span class="linenos">547</span></a>        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;serde_deserializer&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">deserializer</span>
+</span><span id="field-548"><a href="#field-548"><span class="linenos">548</span></a>    <span class="k">if</span> <span class="n">flatten</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+</span><span id="field-549"><a href="#field-549"><span class="linenos">549</span></a>        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;serde_flatten&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">FlattenOpts</span><span class="p">()</span>
+</span><span id="field-550"><a href="#field-550"><span class="linenos">550</span></a>    <span class="k">elif</span> <span class="n">flatten</span><span class="p">:</span>
+</span><span id="field-551"><a href="#field-551"><span class="linenos">551</span></a>        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;serde_flatten&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">flatten</span>
+</span><span id="field-552"><a href="#field-552"><span class="linenos">552</span></a>
+</span><span id="field-553"><a href="#field-553"><span class="linenos">553</span></a>    <span class="k">return</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="n">metadata</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 </span></pre></div>
 
 
@@ -1776,8 +1776,8 @@ is specified at the class but you want to override a field with the default seri
 
     </div>
     <a class="headerlink" href="#init"></a>
-            <div class="pdoc-code codehilite"><pre><span></span><span id="init-87"><a href="#init-87"><span class="linenos">87</span></a><span class="k">def</span> <span class="nf">init</span><span class="p">(</span><span class="n">debug</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-</span><span id="init-88"><a href="#init-88"><span class="linenos">88</span></a>    <span class="n">SETTINGS</span><span class="p">[</span><span class="s2">&quot;debug&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">debug</span>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="init-88"><a href="#init-88"><span class="linenos">88</span></a><span class="k">def</span> <span class="nf">init</span><span class="p">(</span><span class="n">debug</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="init-89"><a href="#init-89"><span class="linenos">89</span></a>    <span class="n">SETTINGS</span><span class="p">[</span><span class="s2">&quot;debug&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">debug</span>
 </span></pre></div>
 
 
@@ -1807,23 +1807,23 @@ is specified at the class but you want to override a field with the default seri
 
     </div>
     <a class="headerlink" href="#ClassSerializer"></a>
-            <div class="pdoc-code codehilite"><pre><span></span><span id="ClassSerializer-960"><a href="#ClassSerializer-960"><span class="linenos">960</span></a><span class="k">class</span> <span class="nc">ClassSerializer</span><span class="p">(</span><span class="n">Protocol</span><span class="p">):</span>
-</span><span id="ClassSerializer-961"><a href="#ClassSerializer-961"><span class="linenos">961</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-</span><span id="ClassSerializer-962"><a href="#ClassSerializer-962"><span class="linenos">962</span></a><span class="sd">    Interface for custom class serializer.</span>
-</span><span id="ClassSerializer-963"><a href="#ClassSerializer-963"><span class="linenos">963</span></a>
-</span><span id="ClassSerializer-964"><a href="#ClassSerializer-964"><span class="linenos">964</span></a><span class="sd">    This protocol is intended to be used for custom class serializer.</span>
-</span><span id="ClassSerializer-965"><a href="#ClassSerializer-965"><span class="linenos">965</span></a>
-</span><span id="ClassSerializer-966"><a href="#ClassSerializer-966"><span class="linenos">966</span></a><span class="sd">    &gt;&gt;&gt; from datetime import datetime</span>
-</span><span id="ClassSerializer-967"><a href="#ClassSerializer-967"><span class="linenos">967</span></a><span class="sd">    &gt;&gt;&gt; from serde import serde</span>
-</span><span id="ClassSerializer-968"><a href="#ClassSerializer-968"><span class="linenos">968</span></a><span class="sd">    &gt;&gt;&gt; from plum import dispatch</span>
-</span><span id="ClassSerializer-969"><a href="#ClassSerializer-969"><span class="linenos">969</span></a><span class="sd">    &gt;&gt;&gt; class MySerializer(ClassSerializer):</span>
-</span><span id="ClassSerializer-970"><a href="#ClassSerializer-970"><span class="linenos">970</span></a><span class="sd">    ...     @dispatch</span>
-</span><span id="ClassSerializer-971"><a href="#ClassSerializer-971"><span class="linenos">971</span></a><span class="sd">    ...     def serialize(self, value: datetime) -&gt; str:</span>
-</span><span id="ClassSerializer-972"><a href="#ClassSerializer-972"><span class="linenos">972</span></a><span class="sd">    ...         return value.strftime(&quot;%d/%m/%y&quot;)</span>
-</span><span id="ClassSerializer-973"><a href="#ClassSerializer-973"><span class="linenos">973</span></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="ClassSerializer-974"><a href="#ClassSerializer-974"><span class="linenos">974</span></a>
-</span><span id="ClassSerializer-975"><a href="#ClassSerializer-975"><span class="linenos">975</span></a>    <span class="k">def</span> <span class="nf">serialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
-</span><span id="ClassSerializer-976"><a href="#ClassSerializer-976"><span class="linenos">976</span></a>        <span class="k">pass</span>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="ClassSerializer-980"><a href="#ClassSerializer-980"><span class="linenos">980</span></a><span class="k">class</span> <span class="nc">ClassSerializer</span><span class="p">(</span><span class="n">Protocol</span><span class="p">):</span>
+</span><span id="ClassSerializer-981"><a href="#ClassSerializer-981"><span class="linenos">981</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+</span><span id="ClassSerializer-982"><a href="#ClassSerializer-982"><span class="linenos">982</span></a><span class="sd">    Interface for custom class serializer.</span>
+</span><span id="ClassSerializer-983"><a href="#ClassSerializer-983"><span class="linenos">983</span></a>
+</span><span id="ClassSerializer-984"><a href="#ClassSerializer-984"><span class="linenos">984</span></a><span class="sd">    This protocol is intended to be used for custom class serializer.</span>
+</span><span id="ClassSerializer-985"><a href="#ClassSerializer-985"><span class="linenos">985</span></a>
+</span><span id="ClassSerializer-986"><a href="#ClassSerializer-986"><span class="linenos">986</span></a><span class="sd">    &gt;&gt;&gt; from datetime import datetime</span>
+</span><span id="ClassSerializer-987"><a href="#ClassSerializer-987"><span class="linenos">987</span></a><span class="sd">    &gt;&gt;&gt; from serde import serde</span>
+</span><span id="ClassSerializer-988"><a href="#ClassSerializer-988"><span class="linenos">988</span></a><span class="sd">    &gt;&gt;&gt; from plum import dispatch</span>
+</span><span id="ClassSerializer-989"><a href="#ClassSerializer-989"><span class="linenos">989</span></a><span class="sd">    &gt;&gt;&gt; class MySerializer(ClassSerializer):</span>
+</span><span id="ClassSerializer-990"><a href="#ClassSerializer-990"><span class="linenos">990</span></a><span class="sd">    ...     @dispatch</span>
+</span><span id="ClassSerializer-991"><a href="#ClassSerializer-991"><span class="linenos">991</span></a><span class="sd">    ...     def serialize(self, value: datetime) -&gt; str:</span>
+</span><span id="ClassSerializer-992"><a href="#ClassSerializer-992"><span class="linenos">992</span></a><span class="sd">    ...         return value.strftime(&quot;%d/%m/%y&quot;)</span>
+</span><span id="ClassSerializer-993"><a href="#ClassSerializer-993"><span class="linenos">993</span></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="ClassSerializer-994"><a href="#ClassSerializer-994"><span class="linenos">994</span></a>
+</span><span id="ClassSerializer-995"><a href="#ClassSerializer-995"><span class="linenos">995</span></a>    <span class="k">def</span> <span class="nf">serialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+</span><span id="ClassSerializer-996"><a href="#ClassSerializer-996"><span class="linenos">996</span></a>        <span class="k">pass</span>
 </span></pre></div>
 
 
@@ -1898,8 +1898,8 @@ is specified at the class but you want to override a field with the default seri
 
     </div>
     <a class="headerlink" href="#ClassSerializer.serialize"></a>
-            <div class="pdoc-code codehilite"><pre><span></span><span id="ClassSerializer.serialize-975"><a href="#ClassSerializer.serialize-975"><span class="linenos">975</span></a>    <span class="k">def</span> <span class="nf">serialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
-</span><span id="ClassSerializer.serialize-976"><a href="#ClassSerializer.serialize-976"><span class="linenos">976</span></a>        <span class="k">pass</span>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="ClassSerializer.serialize-995"><a href="#ClassSerializer.serialize-995"><span class="linenos">995</span></a>    <span class="k">def</span> <span class="nf">serialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+</span><span id="ClassSerializer.serialize-996"><a href="#ClassSerializer.serialize-996"><span class="linenos">996</span></a>        <span class="k">pass</span>
 </span></pre></div>
 
 
@@ -1918,23 +1918,23 @@ is specified at the class but you want to override a field with the default seri
 
     </div>
     <a class="headerlink" href="#ClassDeserializer"></a>
-            <div class="pdoc-code codehilite"><pre><span></span><span id="ClassDeserializer-979"><a href="#ClassDeserializer-979"><span class="linenos">979</span></a><span class="k">class</span> <span class="nc">ClassDeserializer</span><span class="p">(</span><span class="n">Protocol</span><span class="p">):</span>
-</span><span id="ClassDeserializer-980"><a href="#ClassDeserializer-980"><span class="linenos">980</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-</span><span id="ClassDeserializer-981"><a href="#ClassDeserializer-981"><span class="linenos">981</span></a><span class="sd">    Interface for custom class deserializer.</span>
-</span><span id="ClassDeserializer-982"><a href="#ClassDeserializer-982"><span class="linenos">982</span></a>
-</span><span id="ClassDeserializer-983"><a href="#ClassDeserializer-983"><span class="linenos">983</span></a><span class="sd">    This protocol is intended to be used for custom class deserializer.</span>
-</span><span id="ClassDeserializer-984"><a href="#ClassDeserializer-984"><span class="linenos">984</span></a>
-</span><span id="ClassDeserializer-985"><a href="#ClassDeserializer-985"><span class="linenos">985</span></a><span class="sd">    &gt;&gt;&gt; from datetime import datetime</span>
-</span><span id="ClassDeserializer-986"><a href="#ClassDeserializer-986"><span class="linenos">986</span></a><span class="sd">    &gt;&gt;&gt; from serde import serde</span>
-</span><span id="ClassDeserializer-987"><a href="#ClassDeserializer-987"><span class="linenos">987</span></a><span class="sd">    &gt;&gt;&gt; from plum import dispatch</span>
-</span><span id="ClassDeserializer-988"><a href="#ClassDeserializer-988"><span class="linenos">988</span></a><span class="sd">    &gt;&gt;&gt; class MyDeserializer(ClassDeserializer):</span>
-</span><span id="ClassDeserializer-989"><a href="#ClassDeserializer-989"><span class="linenos">989</span></a><span class="sd">    ...     @dispatch</span>
-</span><span id="ClassDeserializer-990"><a href="#ClassDeserializer-990"><span class="linenos">990</span></a><span class="sd">    ...     def deserialize(self, cls: type[datetime], value: Any) -&gt; datetime:</span>
-</span><span id="ClassDeserializer-991"><a href="#ClassDeserializer-991"><span class="linenos">991</span></a><span class="sd">    ...         return datetime.strptime(value, &quot;%d/%m/%y&quot;)</span>
-</span><span id="ClassDeserializer-992"><a href="#ClassDeserializer-992"><span class="linenos">992</span></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="ClassDeserializer-993"><a href="#ClassDeserializer-993"><span class="linenos">993</span></a>
-</span><span id="ClassDeserializer-994"><a href="#ClassDeserializer-994"><span class="linenos">994</span></a>    <span class="k">def</span> <span class="nf">deserialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">cls</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
-</span><span id="ClassDeserializer-995"><a href="#ClassDeserializer-995"><span class="linenos">995</span></a>        <span class="k">pass</span>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="ClassDeserializer-999"><a href="#ClassDeserializer-999"><span class="linenos"> 999</span></a><span class="k">class</span> <span class="nc">ClassDeserializer</span><span class="p">(</span><span class="n">Protocol</span><span class="p">):</span>
+</span><span id="ClassDeserializer-1000"><a href="#ClassDeserializer-1000"><span class="linenos">1000</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+</span><span id="ClassDeserializer-1001"><a href="#ClassDeserializer-1001"><span class="linenos">1001</span></a><span class="sd">    Interface for custom class deserializer.</span>
+</span><span id="ClassDeserializer-1002"><a href="#ClassDeserializer-1002"><span class="linenos">1002</span></a>
+</span><span id="ClassDeserializer-1003"><a href="#ClassDeserializer-1003"><span class="linenos">1003</span></a><span class="sd">    This protocol is intended to be used for custom class deserializer.</span>
+</span><span id="ClassDeserializer-1004"><a href="#ClassDeserializer-1004"><span class="linenos">1004</span></a>
+</span><span id="ClassDeserializer-1005"><a href="#ClassDeserializer-1005"><span class="linenos">1005</span></a><span class="sd">    &gt;&gt;&gt; from datetime import datetime</span>
+</span><span id="ClassDeserializer-1006"><a href="#ClassDeserializer-1006"><span class="linenos">1006</span></a><span class="sd">    &gt;&gt;&gt; from serde import serde</span>
+</span><span id="ClassDeserializer-1007"><a href="#ClassDeserializer-1007"><span class="linenos">1007</span></a><span class="sd">    &gt;&gt;&gt; from plum import dispatch</span>
+</span><span id="ClassDeserializer-1008"><a href="#ClassDeserializer-1008"><span class="linenos">1008</span></a><span class="sd">    &gt;&gt;&gt; class MyDeserializer(ClassDeserializer):</span>
+</span><span id="ClassDeserializer-1009"><a href="#ClassDeserializer-1009"><span class="linenos">1009</span></a><span class="sd">    ...     @dispatch</span>
+</span><span id="ClassDeserializer-1010"><a href="#ClassDeserializer-1010"><span class="linenos">1010</span></a><span class="sd">    ...     def deserialize(self, cls: type[datetime], value: Any) -&gt; datetime:</span>
+</span><span id="ClassDeserializer-1011"><a href="#ClassDeserializer-1011"><span class="linenos">1011</span></a><span class="sd">    ...         return datetime.strptime(value, &quot;%d/%m/%y&quot;)</span>
+</span><span id="ClassDeserializer-1012"><a href="#ClassDeserializer-1012"><span class="linenos">1012</span></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="ClassDeserializer-1013"><a href="#ClassDeserializer-1013"><span class="linenos">1013</span></a>
+</span><span id="ClassDeserializer-1014"><a href="#ClassDeserializer-1014"><span class="linenos">1014</span></a>    <span class="k">def</span> <span class="nf">deserialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">cls</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+</span><span id="ClassDeserializer-1015"><a href="#ClassDeserializer-1015"><span class="linenos">1015</span></a>        <span class="k">pass</span>
 </span></pre></div>
 
 
@@ -2009,8 +2009,8 @@ is specified at the class but you want to override a field with the default seri
 
     </div>
     <a class="headerlink" href="#ClassDeserializer.deserialize"></a>
-            <div class="pdoc-code codehilite"><pre><span></span><span id="ClassDeserializer.deserialize-994"><a href="#ClassDeserializer.deserialize-994"><span class="linenos">994</span></a>    <span class="k">def</span> <span class="nf">deserialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">cls</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
-</span><span id="ClassDeserializer.deserialize-995"><a href="#ClassDeserializer.deserialize-995"><span class="linenos">995</span></a>        <span class="k">pass</span>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="ClassDeserializer.deserialize-1014"><a href="#ClassDeserializer.deserialize-1014"><span class="linenos">1014</span></a>    <span class="k">def</span> <span class="nf">deserialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">cls</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+</span><span id="ClassDeserializer.deserialize-1015"><a href="#ClassDeserializer.deserialize-1015"><span class="linenos">1015</span></a>        <span class="k">pass</span>
 </span></pre></div>
 
 
@@ -2029,11 +2029,11 @@ is specified at the class but you want to override a field with the default seri
 
     </div>
     <a class="headerlink" href="#add_serializer"></a>
-            <div class="pdoc-code codehilite"><pre><span></span><span id="add_serializer-1003"><a href="#add_serializer-1003"><span class="linenos">1003</span></a><span class="k">def</span> <span class="nf">add_serializer</span><span class="p">(</span><span class="n">serializer</span><span class="p">:</span> <span class="n">ClassSerializer</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-</span><span id="add_serializer-1004"><a href="#add_serializer-1004"><span class="linenos">1004</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-</span><span id="add_serializer-1005"><a href="#add_serializer-1005"><span class="linenos">1005</span></a><span class="sd">    Register custom global serializer.</span>
-</span><span id="add_serializer-1006"><a href="#add_serializer-1006"><span class="linenos">1006</span></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="add_serializer-1007"><a href="#add_serializer-1007"><span class="linenos">1007</span></a>    <span class="n">GLOBAL_CLASS_SERIALIZER</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">serializer</span><span class="p">)</span>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="add_serializer-1023"><a href="#add_serializer-1023"><span class="linenos">1023</span></a><span class="k">def</span> <span class="nf">add_serializer</span><span class="p">(</span><span class="n">serializer</span><span class="p">:</span> <span class="n">ClassSerializer</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="add_serializer-1024"><a href="#add_serializer-1024"><span class="linenos">1024</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+</span><span id="add_serializer-1025"><a href="#add_serializer-1025"><span class="linenos">1025</span></a><span class="sd">    Register custom global serializer.</span>
+</span><span id="add_serializer-1026"><a href="#add_serializer-1026"><span class="linenos">1026</span></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="add_serializer-1027"><a href="#add_serializer-1027"><span class="linenos">1027</span></a>    <span class="n">GLOBAL_CLASS_SERIALIZER</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">serializer</span><span class="p">)</span>
 </span></pre></div>
 
 
@@ -2053,11 +2053,11 @@ is specified at the class but you want to override a field with the default seri
 
     </div>
     <a class="headerlink" href="#add_deserializer"></a>
-            <div class="pdoc-code codehilite"><pre><span></span><span id="add_deserializer-1010"><a href="#add_deserializer-1010"><span class="linenos">1010</span></a><span class="k">def</span> <span class="nf">add_deserializer</span><span class="p">(</span><span class="n">deserializer</span><span class="p">:</span> <span class="n">ClassDeserializer</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-</span><span id="add_deserializer-1011"><a href="#add_deserializer-1011"><span class="linenos">1011</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-</span><span id="add_deserializer-1012"><a href="#add_deserializer-1012"><span class="linenos">1012</span></a><span class="sd">    Register custom global deserializer.</span>
-</span><span id="add_deserializer-1013"><a href="#add_deserializer-1013"><span class="linenos">1013</span></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="add_deserializer-1014"><a href="#add_deserializer-1014"><span class="linenos">1014</span></a>    <span class="n">GLOBAL_CLASS_DESERIALIZER</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">deserializer</span><span class="p">)</span>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="add_deserializer-1030"><a href="#add_deserializer-1030"><span class="linenos">1030</span></a><span class="k">def</span> <span class="nf">add_deserializer</span><span class="p">(</span><span class="n">deserializer</span><span class="p">:</span> <span class="n">ClassDeserializer</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="add_deserializer-1031"><a href="#add_deserializer-1031"><span class="linenos">1031</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+</span><span id="add_deserializer-1032"><a href="#add_deserializer-1032"><span class="linenos">1032</span></a><span class="sd">    Register custom global deserializer.</span>
+</span><span id="add_deserializer-1033"><a href="#add_deserializer-1033"><span class="linenos">1033</span></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="add_deserializer-1034"><a href="#add_deserializer-1034"><span class="linenos">1034</span></a>    <span class="n">GLOBAL_CLASS_DESERIALIZER</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">deserializer</span><span class="p">)</span>
 </span></pre></div>
 
 
