@@ -1,11 +1,10 @@
 import sys
+import pytest
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Any, Generic, NewType, Optional, TypeVar, Union, Literal
 
-import pytest
-
-import serde
+from serde import serde, field, is_serializable, is_deserializable, SerdeError
 from serde.compat import (
     get_generic_arg,
     is_dict,
@@ -56,12 +55,6 @@ def test_types() -> None:
     assert is_primitive(int)
     assert is_primitive(NewType("Int", int))
 
-    if sys.version_info[:3] >= (3, 9, 0):
-        assert is_list(list[int])
-        assert is_set(set[int])
-        assert is_tuple(tuple[int, int, int])
-        assert is_dict(dict[str, int])
-
     if sys.version_info[:3] >= (3, 10, 0):
         assert is_union(str | int)
         assert is_union(str | None)
@@ -69,11 +62,11 @@ def test_types() -> None:
 
 
 def test_typename() -> None:
-    @serde.serde
+    @serde
     class Bar(Generic[T]):
         v: T
 
-    @serde.serde
+    @serde
     class Foo(Generic[T]):
         nested: Bar[T]
 
@@ -102,15 +95,15 @@ def test_iter_types() -> None:
     assert {tuple, int, Ellipsis} == set(iter_types(tuple[int, ...]))
     assert {PriOpt, Optional, int, str, float, bool} == set(iter_types(PriOpt))
 
-    @serde.serde
+    @serde
     class Foo:
         a: int
         b: datetime
         c: datetime
         d: Optional[str] = None
         e: Union[str, int] = 10
-        f: list[int] = serde.field(default_factory=list)
-        g: set[int] = serde.field(default_factory=set)
+        f: list[int] = field(default_factory=list)
+        g: set[int] = field(default_factory=set)
 
     assert {Foo, datetime, Optional, str, Union, list, set, int} == set(iter_types(Foo))
 
@@ -142,13 +135,7 @@ def test_type_args() -> None:
     assert (list[int], type(None)) == type_args(Optional[list[int]])
     assert (list[int], dict[str, int]) == type_args(Union[list[int], dict[str, int]])
     assert (int, type(None), str) == type_args(Union[Optional[int], str])
-    assert (int, Ellipsis) == type_args(tuple[int, ...])
-
-    if sys.version_info[:3] >= (3, 9, 0):
-        assert (int,) == type_args(list[int])
-        assert (int, str) == type_args(dict[int, str])
-        assert (int, str) == type_args(tuple[int, str])
-        assert (int, Ellipsis) == type_args(tuple[int, ...])
+    assert (int, Ellipsis) == type_args(tuple[int, ...])  # type: ignore
 
 
 def test_union_args() -> None:
@@ -251,7 +238,7 @@ def test_is_instance() -> None:
     )
 
 
-@serde.serde
+@serde
 class GenericFoo(Generic[T]):
     t: T
 
@@ -265,10 +252,10 @@ def test_is_generic() -> None:
     assert is_generic(GenericFoo[list[int]])
     assert not is_generic(Optional[int])
     assert not is_generic(Optional[list[int]])
-    assert serde.is_serializable(GenericFoo)
-    assert not serde.is_serializable(GenericFoo[list[int]])
-    assert serde.is_deserializable(GenericFoo)
-    assert not serde.is_deserializable(GenericFoo[list[int]])
+    assert is_serializable(GenericFoo)
+    assert not is_serializable(GenericFoo[list[int]])
+    assert is_deserializable(GenericFoo)
+    assert not is_deserializable(GenericFoo[list[int]])
 
 
 def test_get_generic_arg() -> None:
@@ -280,8 +267,8 @@ def test_get_generic_arg() -> None:
     assert get_generic_arg(GenericFoo[int, str], ["T", "U"], ["U"], 0) == str
     assert get_generic_arg(GenericFoo[int, str], ["T", "U"], ["V"], 0) == Any
 
-    with pytest.raises(serde.SerdeError):
+    with pytest.raises(SerdeError):
         get_generic_arg(GenericFoo[int, str], ["T"], ["T"], 0)
 
-    with pytest.raises(serde.SerdeError):
+    with pytest.raises(SerdeError):
         get_generic_arg(GenericFoo[int, str], ["T"], ["U"], 0)

@@ -41,7 +41,7 @@ if sys.version_info[:3] >= (3, 10, 0):
 
     @serde
     @dataclass(unsafe_hash=True)
-    class PriUnion:  # type: ignore
+    class PriUnion:
         """
         Union Primitives.
         """

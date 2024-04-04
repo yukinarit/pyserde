@@ -8,7 +8,7 @@ def test_from_obj() -> None:
     assert 10 == from_obj(int, 10, False, False)
 
     # Union
-    assert "a" == from_obj(Union[int, str], "a", False, False)
+    assert "a" == from_obj(Union[int, str], "a", False, False)  # type: ignore
 
     # tuple
     assert ("a", "b") == from_obj(tuple[str, str], ("a", "b"), False, False)

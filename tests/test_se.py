@@ -21,13 +21,13 @@ from .data import (
 )
 
 
-def test_asdict():
+def test_asdict() -> None:
     p = Pri(10, "foo", 100.0, True)
     assert {"b": True, "f": 100.0, "i": 10, "s": "foo"} == to_dict(p)
     assert {"b": True, "f": 100.0, "i": 10, "s": "foo"} == asdict(p)
 
 
-def test_astuple():
+def test_astuple() -> None:
     assert data.PRI_TUPLE == to_tuple(data.PRI)
     assert data.PRI_TUPLE == astuple(data.PRI)
     assert data.PRILIST == to_tuple(PriList(*data.PRILIST))
@@ -36,7 +36,7 @@ def test_astuple():
     assert data.NESTED_PRILIST_TUPLE == astuple(NestedPriList(*data.NESTED_PRILIST))
 
 
-def test_se_func_iter():
+def test_se_func_iter() -> None:
     # Primitives
     assert (10,) == to_tuple(Int(10))
     assert (10.0,) == to_tuple(Float(10.0))
@@ -93,7 +93,7 @@ def test_se_func_iter():
         (("10",), ("10",), ("10",), ("10",)),
         ((10.0,), (10.0,), (10.0,), (10.0,), (10.0,)),
         ((False,), (False,), (False,), (False,), (False,), (False,)),
-    )
+    )  # type: ignore
     act = to_tuple(
         NestedPriTuple(
             (Int(10), Int(10), Int(10)),
@@ -108,7 +108,7 @@ def test_se_func_iter():
     assert (10, "10", 10.0, False) == to_tuple(PriOpt(10, "10", 10.0, False))
 
 
-def test_convert_sets_option():
+def test_convert_sets_option() -> None:
     @serialize
     class A:
         v: set[str]

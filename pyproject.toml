@@ -113,13 +113,10 @@ exclude = [
   "serde/numpy.py",
   "bench",
   "tests/test_basics.py",
-  "tests/test_compat.py",
   "tests/test_core.py",
-  "tests/test_de.py",
   "tests/test_legacy_custom.py",
   "tests/test_literal.py",
   "tests/test_numpy.py",
-  "tests/test_se.py",
   "tests/test_union.py",
   "serde/__init__.py"
 ]
@@ -136,13 +133,10 @@ exclude = [
   "bench",
   "tests/common.py",
   "tests/test_basics.py",
-  "tests/test_compat.py",
   "tests/test_core.py",
-  "tests/test_de.py",
   "tests/test_legacy_custom.py",
   "tests/test_literal.py",
   "tests/test_numpy.py",
-  "tests/test_se.py",
   "tests/test_union.py",
 ]
 
