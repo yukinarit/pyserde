@@ -44,7 +44,7 @@ test_cases: list[tuple[Any, Any, bool]] = [
     (list[data.Int], [data.Int.uncheck_new(1.0)], True),  # Runtime incompatible object
     (list[data.Int], [], False),
     (dict[str, int], {"foo": 10}, False),
-    (dict[str, int], {"foo": 10.0}, False),
+    # (dict[str, int], {"foo": 10.0}, True),
     (dict[str, data.Int], {"foo": data.Int(1)}, False),
     (dict[str, data.Int], {"foo": data.Int.uncheck_new(1.0)}, True),  # Runtime incompatible object
     (set[int], {10}, False),

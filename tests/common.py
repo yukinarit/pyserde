@@ -4,7 +4,6 @@ import ipaddress
 import itertools
 import os
 import pathlib
-import sys
 import uuid
 from typing import (
     Any,
@@ -112,7 +111,7 @@ types: list[tuple[Any, Any, Optional[Filter]]] = [
     param({1, 2}, set[int], toml_not_supported),
     param({1, 2}, set, toml_not_supported),
     param(set(), set[int], toml_not_supported),
-    # TODO param(frozenset({1, 2}), FrozenSet[int], toml_not_supported),
+    param(frozenset({1, 2}), frozenset[int], toml_not_supported),
     param((1, 1), tuple[int, int]),
     param((1, 1), tuple),
     param((1, 2, 3), tuple[int, ...]),
@@ -121,8 +120,8 @@ types: list[tuple[Any, Any, Optional[Filter]]] = [
     param({"a": 1}, dict),
     param({}, dict[str, int]),
     param({"a": 1}, dict[str, int]),
-    # TODO param({"a": 1}, DefaultDict[str, int]),
-    # TODO param({"a": [1]}, DefaultDict[str, List[int]]),
+    # param({"a": 1}, defaultdict[str, int]),
+    # param({"a": [1]}, defaultdict[str, list[int]]),
     param(data.Pri(10, "foo", 100.0, True), data.Pri),  # dataclass
     param(data.Pri(10, "foo", 100.0, True), Optional[data.Pri]),
     param(
@@ -168,11 +167,6 @@ if os.name == "posix":
     types.append(param(pathlib.PosixPath("/tmp/foo"), pathlib.PosixPath))
 if os.name == "nt":
     types.append(param(pathlib.WindowsPath("C:\\tmp"), pathlib.WindowsPath))
-
-if sys.version_info[:3] >= (3, 9, 0):
-    types.extend(
-        [param([1, 2], list[int]), param({"a": 1}, dict[str, int]), param((1, 1), tuple[int, int])]
-    )
 
 types_combinations: list[Any] = [
     list(more_itertools.flatten(c)) for c in itertools.combinations(types, 2)
