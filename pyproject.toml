@@ -40,7 +40,7 @@ numpy = [
 ]
 orjson = { version = "*", markers = "extra == 'orjson' or extra == 'all'", optional = true }
 plum-dispatch = ">=2,<2.3"
-beartype = ">=0.17.0"
+beartype = ">=0.17.0,<0.18.3"
 
 [tool.poetry.dev-dependencies]
 pyyaml = "*"
