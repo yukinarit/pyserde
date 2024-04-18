@@ -48,6 +48,10 @@ def run_all() -> None:
     import type_check_disabled
     import type_datetime
     import type_decimal
+    import type_ipaddress
+    import type_numpy
+    import type_pathlib
+    import type_uuid
     import union
     import union_tagging
     import union_directly
@@ -106,6 +110,10 @@ def run_all() -> None:
     run(msg_pack)
     run(primitive_subclass)
     run(kw_only)
+    run(type_pathlib)
+    run(type_ipaddress)
+    run(type_uuid)
+    run(type_numpy)
 
 
 def run(module: typing.Any) -> None:
