@@ -17,13 +17,13 @@ Here is the list of the supported types. See the simple example for each type in
 * [`typing.InitVar`](https://docs.python.org/3/library/dataclasses.html#init-only-variables) [^16]
 * [`Enum`](https://docs.python.org/3/library/enum.html#enum.Enum) and [`IntEnum`](https://docs.python.org/3/library/enum.html#enum.IntEnum) [^17]
 * Standard library
-    * [`pathlib.Path`](https://docs.python.org/3/library/pathlib.html)
-    * [`decimal.Decimal`](https://docs.python.org/3/library/decimal.html) [^18]
-    * [`uuid.UUID`](https://docs.python.org/3/library/uuid.html)
-    * [`datetime.date`](https://docs.python.org/3/library/datetime.html#date-objects), [`datetime.time`](https://docs.python.org/3/library/datetime.html#time-objects), [`datetime.datetime`](https://docs.python.org/3/library/datetime.html#datetime-objects) [^19]
-    * [`ipaddress`](https://docs.python.org/3/library/ipaddress.html)
+    * [`pathlib.Path`](https://docs.python.org/3/library/pathlib.html) [^18]
+    * [`decimal.Decimal`](https://docs.python.org/3/library/decimal.html) [^19]
+    * [`uuid.UUID`](https://docs.python.org/3/library/uuid.html) [^20]
+    * [`datetime.date`](https://docs.python.org/3/library/datetime.html#date-objects), [`datetime.time`](https://docs.python.org/3/library/datetime.html#time-objects), [`datetime.datetime`](https://docs.python.org/3/library/datetime.html#datetime-objects) [^21]
+    * [`ipaddress`](https://docs.python.org/3/library/ipaddress.html) [^22]
 * PyPI library
-    * [`numpy`](https://github.com/numpy/numpy) types
+    * [`numpy`](https://github.com/numpy/numpy) types [^23]
 
 You can write pretty complex class like this:
 ```python
@@ -124,6 +124,14 @@ If you need to use a type which is currently not supported in the standard libra
 
 [^17]: See [examples/enum34.py](https://github.com/yukinarit/pyserde/blob/main/examples/enum34.py)
 
-[^18]: See [examples/type_decimal.py](https://github.com/yukinarit/pyserde/blob/main/examples/type_decimal.py)
+[^18]: See [examples/type_pathlib.py](https://github.com/yukinarit/pyserde/blob/main/examples/type_pathlib.py)
 
-[^19]: See [examples/type_datetime.py](https://github.com/yukinarit/pyserde/blob/main/examples/type_datetime.py)
+[^19]: See [examples/type_decimal.py](https://github.com/yukinarit/pyserde/blob/main/examples/type_decimal.py)
+
+[^20]: See [examples/type_uuid.py](https://github.com/yukinarit/pyserde/blob/main/examples/type_uuid.py)
+
+[^21]: See [examples/type_datetime.py](https://github.com/yukinarit/pyserde/blob/main/examples/type_datetime.py)
+
+[^22]: See [examples/type_ipaddress.py](https://github.com/yukinarit/pyserde/blob/main/examples/type_ipaddress.py)
+
+[^23]: See [examples/type_numpy.py](https://github.com/yukinarit/pyserde/blob/main/examples/type_numpy.py)
