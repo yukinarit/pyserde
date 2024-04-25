@@ -67,6 +67,7 @@ pytest-xdist = "^3.5.0"
 types-PyYAML = "^6.0.9"
 msgpack-types = "^0.2"
 envclasses = "^0.3.1"
+sqlalchemy = ">2"
 
 [tool.poetry.extras]
 msgpack = ["msgpack"]
@@ -120,6 +121,7 @@ exclude = [
   "tests/test_literal.py",
   "tests/test_numpy.py",
   "tests/test_union.py",
+  "tests/test_sqlalchemy.py",
   "serde/__init__.py"
 ]
 pythonVersion = "3.12"
@@ -140,6 +142,7 @@ exclude = [
   "tests/test_literal.py",
   "tests/test_numpy.py",
   "tests/test_union.py",
+  "tests/test_sqlalchemy.py",
 ]
 
 [tool.ruff]
