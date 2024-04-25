@@ -41,6 +41,7 @@ numpy = [
 orjson = { version = "*", markers = "extra == 'orjson' or extra == 'all'", optional = true }
 plum-dispatch = ">=2,<2.3"
 beartype = ">=0.18.4"
+sqlalchemy = { version = ">2", markers = "extra == 'sqlalchemy' or extra == 'all'", optional = true }
 
 [tool.poetry.dev-dependencies]
 pyyaml = "*"
@@ -73,7 +74,8 @@ numpy = ["numpy"]
 toml = ["tomli", "tomli-w"]
 yaml = ["pyyaml"]
 orjson = ["orjson"]
-all = ["msgpack", "tomli", "tomli-w", "pyyaml", "numpy", "orjson"]
+sqlalchemy = ["sqlalchemy"]
+all = ["msgpack", "tomli", "tomli-w", "pyyaml", "numpy", "orjson", "sqlalchemy"]
 
 [build-system]
 requires = ["poetry-core>=1.0.0", "poetry-dynamic-versioning"]
