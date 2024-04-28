@@ -753,7 +753,9 @@ def is_str_serializable(typ: type[Any]) -> bool:
     """
     Test if the type is serializable to `str`.
     """
-    return typ in StrSerializableTypes
+    return typ in StrSerializableTypes or (
+        type(typ) is type and issubclass(typ, StrSerializableTypes)
+    )
 
 
 def is_datetime(
@@ -762,7 +764,7 @@ def is_datetime(
     """
     Test if the type is any of the datetime types..
     """
-    return typ in DateTimeTypes
+    return typ in DateTimeTypes or (type(typ) is type and issubclass(typ, DateTimeTypes))
 
 
 def is_str_serializable_instance(obj: Any) -> bool:
