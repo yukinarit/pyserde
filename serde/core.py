@@ -62,8 +62,6 @@ __all__ = [
     "union_func_name",
 ]
 
-from .sqlalchemy import is_sqlalchemy_inspectable, get_python_type
-
 logger = logging.getLogger("serde")
 
 
@@ -625,12 +623,8 @@ class Field(Generic[T]):
 
         kw_only = bool(f.kw_only) if sys.version_info >= (3, 10) else False
 
-        field_type = f.type
-        if is_generic(f.type) and is_sqlalchemy_inspectable(parent):
-            field_type = get_python_type(getattr(parent, f.name))
-
         return cls(
-            field_type,
+            f.type,
             f.name,
             default=f.default,
             default_factory=f.default_factory,

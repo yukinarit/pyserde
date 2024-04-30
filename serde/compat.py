@@ -22,6 +22,8 @@ from typing import TypeVar, Generic, Any, ClassVar, Optional, NewType, Union
 import typing_inspect
 from typing_extensions import TypeGuard
 
+from .sqlalchemy import is_sqlalchemy_inspectable
+
 
 def get_np_origin(tp: type[Any]) -> Optional[Any]:
     return None
@@ -257,6 +259,8 @@ def dataclass_fields(cls: type[Any]) -> Iterator[dataclasses.Field]:  # type: ig
         real_type = resolved_hints.get(f.name)
         if real_type is not None:
             f.type = real_type
+            if is_generic(real_type) and is_sqlalchemy_inspectable(cls):
+                f.type = get_args(real_type)[0]
 
     return iter(raw_fields)
 
