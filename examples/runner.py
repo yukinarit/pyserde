@@ -115,6 +115,13 @@ def run_all() -> None:
     run(type_uuid)
     run(type_numpy)
 
+    try:
+        import type_sqlalchemy
+
+        run(type_sqlalchemy)
+    except ImportError:
+        pass
+
 
 def run(module: typing.Any) -> None:
     print("-----------------")
