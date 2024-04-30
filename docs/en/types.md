@@ -24,6 +24,7 @@ Here is the list of the supported types. See the simple example for each type in
     * [`ipaddress`](https://docs.python.org/3/library/ipaddress.html) [^22]
 * PyPI library
     * [`numpy`](https://github.com/numpy/numpy) types [^23]
+    * [`SQLAlchemy`](https://github.com/sqlalchemy/sqlalchemy) Declarative Dataclass Mapping [^24]
 
 You can write pretty complex class like this:
 ```python
@@ -135,3 +136,5 @@ If you need to use a type which is currently not supported in the standard libra
 [^22]: See [examples/type_ipaddress.py](https://github.com/yukinarit/pyserde/blob/main/examples/type_ipaddress.py)
 
 [^23]: See [examples/type_numpy.py](https://github.com/yukinarit/pyserde/blob/main/examples/type_numpy.py)
+
+[^24]: See [examples/type_sqlalchemy.py](https://github.com/yukinarit/pyserde/blob/main/examples/type_sqlalchemy.py)
