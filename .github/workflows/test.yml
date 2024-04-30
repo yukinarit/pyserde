@@ -82,7 +82,7 @@ jobs:
           cache: poetry
           cache-dependency-path: pyproject.toml
       - name: Install dependencies
-        run: poetry install
+        run: poetry install --extras sqlalchemy
       - name: Check coverage
         run: make coverage
       - name: Upload coverage report to codecov.io
