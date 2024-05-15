@@ -15,6 +15,7 @@ from .common import (
     format_yaml,
     format_pickle,
     format_toml,
+    all_formats,
 )
 
 sa = pytest.importorskip("sqlalchemy", "2.0.0")
@@ -67,4 +68,32 @@ def test_sqlalchemy_simple_toml(se, de, opt):
         fullname: sa_orm.Mapped[str] = sa_orm.mapped_column(sa.String(30))
 
     user = User(1, "john", "John Doe")
+    assert user == de(User, se(user))
+
+
+@pytest.mark.parametrize("opt", opt_case, ids=opt_case_ids())
+@pytest.mark.parametrize("se,de", all_formats)
+def test_sqlalchemy_nested(se, de, opt):
+    log.info(f"Running test with se={se.__name__} de={de.__name__} opts={opt}")
+
+    class Base(sa_orm.MappedAsDataclass, sa_orm.DeclarativeBase):
+        pass
+
+    @serde.serde(**opt)
+    class Project(Base):
+        __tablename__ = "projects"
+        id: sa_orm.Mapped[int] = sa_orm.mapped_column(primary_key=True)
+        name: sa_orm.Mapped[str] = sa_orm.mapped_column(sa.Text, nullable=False)
+        owner_id: sa_orm.Mapped[int] = sa_orm.mapped_column(sa.ForeignKey("users.id"))
+
+    @serde.serde(**opt)
+    class User(Base):
+        __tablename__ = "users"
+
+        id: sa_orm.Mapped[int] = sa_orm.mapped_column(primary_key=True)
+        name: sa_orm.Mapped[str] = sa_orm.mapped_column(sa.Text, nullable=False)
+        fullname: sa_orm.Mapped[str] = sa_orm.mapped_column(sa.Text, nullable=False)
+        projects: sa_orm.Mapped[list[Project]] = sa_orm.relationship(backref="owner")
+
+    user = User(1, "john", "John Doe", [Project(1, "Dummy", 1)])
     assert user == de(User, se(user))
