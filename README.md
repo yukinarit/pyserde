@@ -77,6 +77,7 @@ Foo(i=10, s='foo', f=100.0, b=True)
         - [`ipaddress`](https://docs.python.org/3/library/ipaddress.html)
     - PyPI library
         - [`numpy`](https://github.com/numpy/numpy) types
+        - [`SQLAlchemy`](https://github.com/sqlalchemy/sqlalchemy) Declarative Dataclass Mapping (experimental)
 - [Class Attributes](https://github.com/yukinarit/pyserde/blob/main/docs/en/class-attributes.md)
 - [Field Attributes](https://github.com/yukinarit/pyserde/blob/main/docs/en/field-attributes.md)
 - [Decorators](https://github.com/yukinarit/pyserde/blob/main/docs/en/decorators.md)

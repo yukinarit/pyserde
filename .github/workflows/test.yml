@@ -37,6 +37,14 @@ jobs:
         run: |
           make examples
         if: matrix.python-version == '3.12'
+      - name: Run tests (sqlalchemy)
+        run: |
+          poetry install --extras sqlalchemy
+          make test
+      - name: Run examples (sqlalchemy)
+        run: |
+          make examples
+        if: matrix.python-version == '3.12'
 
   check_formatting:
     name: Check formatting
@@ -74,7 +82,7 @@ jobs:
           cache: poetry
           cache-dependency-path: pyproject.toml
       - name: Install dependencies
-        run: poetry install
+        run: poetry install --extras sqlalchemy
       - name: Check coverage
         run: make coverage
       - name: Upload coverage report to codecov.io

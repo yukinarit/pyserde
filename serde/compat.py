@@ -22,6 +22,8 @@ from typing import TypeVar, Generic, Any, ClassVar, Optional, NewType, Union
 import typing_inspect
 from typing_extensions import TypeGuard
 
+from .sqlalchemy import is_sqlalchemy_inspectable
+
 
 def get_np_origin(tp: type[Any]) -> Optional[Any]:
     return None
@@ -257,6 +259,8 @@ def dataclass_fields(cls: type[Any]) -> Iterator[dataclasses.Field]:  # type: ig
         real_type = resolved_hints.get(f.name)
         if real_type is not None:
             f.type = real_type
+            if is_generic(real_type) and is_sqlalchemy_inspectable(cls):
+                f.type = get_args(real_type)[0]
 
     return iter(raw_fields)
 
@@ -698,6 +702,10 @@ def is_new_type_primitive(typ: Union[type[Any], NewType]) -> bool:
         return any(isinstance(typ, ty) for ty in PRIMITIVES)
 
 
+def has_generic_base(typ: Any) -> bool:
+    return Generic in getattr(typ, "__mro__", ()) or Generic in getattr(typ, "__bases__", ())
+
+
 def is_generic(typ: Any) -> bool:
     """
     Test if the type is derived from `typing.Generic`.
@@ -711,7 +719,7 @@ def is_generic(typ: Any) -> bool:
     False
     """
     origin = get_origin(typ)
-    return origin is not None and Generic in getattr(origin, "__bases__", ())
+    return origin is not None and has_generic_base(origin)
 
 
 def is_class_var(typ: type[Any]) -> bool:
@@ -796,7 +804,7 @@ def get_type_var_names(cls: type[Any]) -> Optional[list[str]]:
 
     type_arg_names: list[str] = []
     for base in bases:
-        type_arg_names.extend(arg.__name__ for arg in get_args(base))
+        type_arg_names.extend(arg.__name__ for arg in get_args(base) if hasattr(arg, "__name__"))
 
     return type_arg_names
 

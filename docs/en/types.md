@@ -24,6 +24,7 @@ Here is the list of the supported types. See the simple example for each type in
     * [`ipaddress`](https://docs.python.org/3/library/ipaddress.html) [^22]
 * PyPI library
     * [`numpy`](https://github.com/numpy/numpy) types [^23]
+    * [`SQLAlchemy`](https://github.com/sqlalchemy/sqlalchemy) Declarative Dataclass Mapping (experimental) [^24]
 
 You can write pretty complex class like this:
 ```python
@@ -88,6 +89,11 @@ npfoo = NPFoo(
 NPFoo(i=1, j=2, f=3.0, g=4.0, h=False, u=array([1, 2]), v=array([3, 4]), w=array([1, 2], dtype=int32), x=array([3, 4]), y=array([5., 6.], dtype=float32), z=array([7., 8.]))
 ```
 
+## SQLAlchemy Declarative Dataclass Mapping (experimental)
+While experimental support for SQLAlchemy Declarative Dataclass Mapping integration has been added, certain features such as `@serde(type_check=strict)` and `serde.field()` are not currently supported.
+
+It's recommended to exercise caution when relying on experimental features in production environments. It's also advisable to thoroughly test your code and be aware of potential limitations or unexpected behavior.
+
 ## Needs a new type support?
 
 If you need to use a type which is currently not supported in the standard library, please creat a Github issue to request. For types in third party python packages, unless it's polular like numpy, we don't plan to support it to keep pyserde as simple as possible. We recommend to use custom class or field serializer.
@@ -135,3 +141,5 @@ If you need to use a type which is currently not supported in the standard libra
 [^22]: See [examples/type_ipaddress.py](https://github.com/yukinarit/pyserde/blob/main/examples/type_ipaddress.py)
 
 [^23]: See [examples/type_numpy.py](https://github.com/yukinarit/pyserde/blob/main/examples/type_numpy.py)
+
+[^24]: See [examples/type_sqlalchemy.py](https://github.com/yukinarit/pyserde/blob/main/examples/type_sqlalchemy.py)
