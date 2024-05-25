@@ -211,6 +211,7 @@
 <li>PyPI library
 <ul>
 <li><a href="https://github.com/numpy/numpy"><code>numpy</code></a> types <sup class="footnote-reference"><a href="#23">22</a></sup></li>
+<li><a href="https://github.com/sqlalchemy/sqlalchemy"><code>SQLAlchemy</code></a> Declarative Dataclass Mapping (experimental) <sup class="footnote-reference"><a href="#24">23</a></sup></li>
 </ul>
 </li>
 </ul>
@@ -269,6 +270,9 @@ npfoo = NPFoo(
 &gt;&gt;&gt; from_json(NPFoo, to_json(npfoo))
 NPFoo(i=1, j=2, f=3.0, g=4.0, h=False, u=array([1, 2]), v=array([3, 4]), w=array([1, 2], dtype=int32), x=array([3, 4]), y=array([5., 6.], dtype=float32), z=array([7., 8.]))
 </code></pre>
+<h2 id="sqlalchemy-declarative-dataclass-mapping-experimental"><a class="header" href="#sqlalchemy-declarative-dataclass-mapping-experimental">SQLAlchemy Declarative Dataclass Mapping (experimental)</a></h2>
+<p>While experimental support for SQLAlchemy Declarative Dataclass Mapping integration has been added, certain features such as <code>@serde(type_check=strict)</code> and <code>serde.field()</code> are not currently supported.</p>
+<p>It's recommended to exercise caution when relying on experimental features in production environments. It's also advisable to thoroughly test your code and be aware of potential limitations or unexpected behavior.</p>
 <h2 id="needs-a-new-type-support"><a class="header" href="#needs-a-new-type-support">Needs a new type support?</a></h2>
 <p>If you need to use a type which is currently not supported in the standard library, please creat a Github issue to request. For types in third party python packages, unless it's polular like numpy, we don't plan to support it to keep pyserde as simple as possible. We recommend to use custom class or field serializer.</p>
 <div class="footnote-definition" id="1"><sup class="footnote-definition-label">1</sup>
@@ -336,6 +340,9 @@ NPFoo(i=1, j=2, f=3.0, g=4.0, h=False, u=array([1, 2]), v=array([3, 4]), w=array
 </div>
 <div class="footnote-definition" id="23"><sup class="footnote-definition-label">22</sup>
 <p>See <a href="https://github.com/yukinarit/pyserde/blob/main/examples/type_numpy.py">examples/type_numpy.py</a></p>
+</div>
+<div class="footnote-definition" id="24"><sup class="footnote-definition-label">23</sup>
+<p>See <a href="https://github.com/yukinarit/pyserde/blob/main/examples/type_sqlalchemy.py">examples/type_sqlalchemy.py</a></p>
 </div>
 
                     </main>
