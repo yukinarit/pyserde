@@ -754,7 +754,7 @@ def literal_func_name(literal_args: Sequence[Any]) -> str:
     )
 
 
-@dataclass
+@dataclass(unsafe_hash=True)
 class Tagging:
     """
     Controls how union is (de)serialized. This is the same concept as in

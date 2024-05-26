@@ -60,7 +60,7 @@ DateTimeTypes = (datetime.date, datetime.time, datetime.datetime)
 """ List of datetime types """
 
 
-@dataclasses.dataclass
+@dataclasses.dataclass(unsafe_hash=True)
 class _WithTagging(Generic[T]):
     """
     Intermediate data structure for (de)serializaing Union without dataclass.

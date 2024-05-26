@@ -162,7 +162,7 @@ def _make_deserialize(
     """
     Create a deserializable class programatically.
     """
-    C = dataclasses.make_dataclass(cls_name, fields, *args, **kwargs)
+    C: type[Any] = dataclasses.make_dataclass(cls_name, fields, *args, **kwargs)
     C = deserialize(
         C,
         rename_all=rename_all,
@@ -1063,13 +1063,10 @@ def renderable(f: DeField[Any]) -> bool:
     return f.init
 
 
-def render_from_iter(
-    cls: type[Any],
-    legacy_class_deserializer: Optional[DeserializeFunc] = None,
-    type_check: TypeCheck = strict,
-    class_deserializer: Optional[ClassDeserializer] = None,
-) -> str:
-    template = """
+jinja2_env = jinja2.Environment(
+    loader=jinja2.DictLoader(
+        {
+            "iter": """
 def {{func}}(cls=cls, maybe_generic=None, maybe_generic_type_vars=None, data=None,
              variable_type_args=None, reuse_instances=None):
   if reuse_instances is None:
@@ -1078,7 +1075,7 @@ def {{func}}(cls=cls, maybe_generic=None, maybe_generic_type_vars=None, data=Non
   maybe_generic_type_vars = maybe_generic_type_vars or {{cls_type_vars}}
 
   {% for f in fields %}
-  __{{f.name}} = {{f|arg(loop.index-1)|rvalue}}
+  __{{f.name}} = {{rvalue(arg(f,loop.index-1))}}
   {% endfor %}
 
   try:
@@ -1091,40 +1088,8 @@ def {{func}}(cls=cls, maybe_generic=None, maybe_generic_type_vars=None, data=Non
     raise SerdeError(e)
   except Exception as e:
     raise UserError(e)
-    """
-
-    renderer = Renderer(
-        FROM_ITER,
-        cls=cls,
-        legacy_class_deserializer=legacy_class_deserializer,
-        suppress_coerce=(not type_check.is_coerce()),
-        class_deserializer=class_deserializer,
-    )
-    env = jinja2.Environment(loader=jinja2.DictLoader({"iter": template}))
-    env.filters.update({"rvalue": renderer.render})
-    env.filters.update({"arg": to_iter_arg})
-    fields = list(filter(renderable, defields(cls)))
-    res = env.get_template("iter").render(
-        func=FROM_ITER,
-        serde_scope=getattr(cls, SERDE_SCOPE),
-        fields=fields,
-        cls_type_vars=get_type_var_names(cls),
-    )
-
-    if renderer.import_numpy:
-        res = "import numpy\n" + res
-
-    return res
-
-
-def render_from_dict(
-    cls: type[Any],
-    rename_all: Optional[str] = None,
-    legacy_class_deserializer: Optional[DeserializeFunc] = None,
-    type_check: TypeCheck = strict,
-    class_deserializer: Optional[ClassDeserializer] = None,
-) -> str:
-    template = """
+""",
+            "dict": """
 def {{func}}(cls=cls, maybe_generic=None, maybe_generic_type_vars=None, data=None,
              variable_type_args=None, reuse_instances=None):
   if reuse_instances is None:
@@ -1133,7 +1098,7 @@ def {{func}}(cls=cls, maybe_generic=None, maybe_generic_type_vars=None, data=Non
   maybe_generic_type_vars = maybe_generic_type_vars or {{cls_type_vars}}
 
   {% for f in fields %}
-  __{{f.name}} = {{f|arg(loop.index-1)|rvalue}}
+  __{{f.name}} = {{rvalue(arg(f,loop.index-1))}}
   {% endfor %}
 
   try:
@@ -1150,8 +1115,85 @@ def {{func}}(cls=cls, maybe_generic=None, maybe_generic_type_vars=None, data=Non
     raise SerdeError(e)
   except Exception as e:
     raise UserError(e)
-    """
+""",
+            "union": """
+def {{func}}(cls=cls, maybe_generic=None, maybe_generic_type_vars=None, data=None,
+             variable_type_args=None, reuse_instances = {{serde_scope.reuse_instances_default}}):
+  errors = []
+  {% for t in union_args %}
+  try:
+    # create fake dict so we can reuse the normal render function
+    {% if tagging.is_external() and is_taggable(t)  %}
+    ensure("{{typename(t)}}" in data , "'{{typename(t)}}' key is not present")
+    fake_dict = {"fake_key": data["{{typename(t)}}"]}
 
+    {% elif tagging.is_internal() and is_taggable(t) %}
+    ensure("{{tagging.tag}}" in data , "'{{tagging.tag}}' key is not present")
+    ensure("{{typename(t)}}" == data["{{tagging.tag}}"], "tag '{{typename(t)}}' isn't found")
+    fake_dict = {"fake_key": data}
+
+    {% elif tagging.is_adjacent() and is_taggable(t) %}
+    ensure("{{tagging.tag}}" in data , "'{{tagging.tag}}' key is not present")
+    ensure("{{tagging.content}}" in data , "'{{tagging.content}}' key is not present")
+    ensure("{{typename(t)}}" == data["{{tagging.tag}}"], "tag '{{typename(t)}}' isn't found")
+    fake_dict = {"fake_key": data["{{tagging.content}}"]}
+
+    {% else %}
+    fake_dict = {"fake_key": data}
+    {% endif %}
+
+    {% if is_primitive(t) or is_none(t) %}
+    if not isinstance(fake_dict["fake_key"], {{typename(t)}}):
+        raise Exception("Not a type of {{typename(t)}}")
+    {% endif %}
+    return {{rvalue(arg(t))}}
+  except Exception as e:
+    errors.append(f' Failed to deserialize into {{typename(t)}}: {e}')
+  {% endfor %}
+  raise SerdeError("Can not deserialize " + repr(data) + " of type " + \
+          typename(type(data)) + " into {{union_name}}.\\nReasons:\\n" + "\\n".join(errors))
+""",
+        }
+    )
+)
+
+
+def render_from_iter(
+    cls: type[Any],
+    legacy_class_deserializer: Optional[DeserializeFunc] = None,
+    type_check: TypeCheck = strict,
+    class_deserializer: Optional[ClassDeserializer] = None,
+) -> str:
+    renderer = Renderer(
+        FROM_ITER,
+        cls=cls,
+        legacy_class_deserializer=legacy_class_deserializer,
+        suppress_coerce=(not type_check.is_coerce()),
+        class_deserializer=class_deserializer,
+    )
+    fields = list(filter(renderable, defields(cls)))
+    res = jinja2_env.get_template("iter").render(
+        func=FROM_ITER,
+        serde_scope=getattr(cls, SERDE_SCOPE),
+        fields=fields,
+        cls_type_vars=get_type_var_names(cls),
+        rvalue=renderer.render,
+        arg=to_iter_arg,
+    )
+
+    if renderer.import_numpy:
+        res = "import numpy\n" + res
+
+    return res
+
+
+def render_from_dict(
+    cls: type[Any],
+    rename_all: Optional[str] = None,
+    legacy_class_deserializer: Optional[DeserializeFunc] = None,
+    type_check: TypeCheck = strict,
+    class_deserializer: Optional[ClassDeserializer] = None,
+) -> str:
     renderer = Renderer(
         FROM_DICT,
         cls=cls,
@@ -1159,16 +1201,15 @@ def {{func}}(cls=cls, maybe_generic=None, maybe_generic_type_vars=None, data=Non
         suppress_coerce=(not type_check.is_coerce()),
         class_deserializer=class_deserializer,
     )
-    env = jinja2.Environment(loader=jinja2.DictLoader({"dict": template}))
-    env.filters.update({"rvalue": renderer.render})
-    env.filters.update({"arg": functools.partial(to_arg, rename_all=rename_all)})
     fields = list(filter(renderable, defields(cls)))
-    res = env.get_template("dict").render(
+    res = jinja2_env.get_template("dict").render(
         func=FROM_DICT,
         serde_scope=getattr(cls, SERDE_SCOPE),
         fields=fields,
         type_check=type_check,
         cls_type_vars=get_type_var_names(cls),
+        rvalue=renderer.render,
+        arg=functools.partial(to_arg, rename_all=rename_all),
     )
 
     if renderer.import_numpy:
@@ -1180,61 +1221,21 @@ def {{func}}(cls=cls, maybe_generic=None, maybe_generic_type_vars=None, data=Non
 def render_union_func(
     cls: type[Any], union_args: Sequence[type[Any]], tagging: Tagging = DefaultTagging
 ) -> str:
-    template = """
-def {{func}}(cls=cls, maybe_generic=None, maybe_generic_type_vars=None, data=None,
-             variable_type_args=None, reuse_instances = {{serde_scope.reuse_instances_default}}):
-  errors = []
-  {% for t in union_args %}
-  try:
-    # create fake dict so we can reuse the normal render function
-    {% if tagging.is_external() and is_taggable(t)  %}
-    ensure("{{t|typename}}" in data , "'{{t|typename}}' key is not present")
-    fake_dict = {"fake_key": data["{{t|typename}}"]}
-
-    {% elif tagging.is_internal() and is_taggable(t) %}
-    ensure("{{tagging.tag}}" in data , "'{{tagging.tag}}' key is not present")
-    ensure("{{t|typename}}" == data["{{tagging.tag}}"], "tag '{{t|typename}}' isn't found")
-    fake_dict = {"fake_key": data}
-
-    {% elif tagging.is_adjacent() and is_taggable(t) %}
-    ensure("{{tagging.tag}}" in data , "'{{tagging.tag}}' key is not present")
-    ensure("{{tagging.content}}" in data , "'{{tagging.content}}' key is not present")
-    ensure("{{t|typename}}" == data["{{tagging.tag}}"], "tag '{{t|typename}}' isn't found")
-    fake_dict = {"fake_key": data["{{tagging.content}}"]}
-
-    {% else %}
-    fake_dict = {"fake_key": data}
-    {% endif %}
-
-    {% if t|is_primitive or t|is_none %}
-    if not isinstance(fake_dict["fake_key"], {{t|typename}}):
-        raise Exception("Not a type of {{t|typename}}")
-    {% endif %}
-    return {{t|arg|rvalue}}
-  except Exception as e:
-    errors.append(f' Failed to deserialize into {{t|typename}}: {e}')
-  {% endfor %}
-  raise SerdeError("Can not deserialize " + repr(data) + " of type " + \
-          typename(type(data)) + " into {{union_name}}.\\nReasons:\\n" + "\\n".join(errors))
-    """
     union_name = f"Union[{', '.join([typename(a) for a in union_args])}]"
 
     renderer = Renderer(FROM_DICT, cls=cls, suppress_coerce=True)
-    env = jinja2.Environment(loader=jinja2.DictLoader({"dict": template}))
-    env.filters.update(
-        {"arg": lambda x: DeField(x, datavar="fake_dict", name="fake_key")}
-    )  # use custom to_arg for fake field
-    env.filters.update({"rvalue": renderer.render})
-    env.filters.update({"is_primitive": is_primitive})
-    env.filters.update({"is_none": is_none})
-    env.filters.update({"typename": typename})
-    return env.get_template("dict").render(
+    return jinja2_env.get_template("union").render(
         func=union_func_name(UNION_DE_PREFIX, union_args),
         serde_scope=getattr(cls, SERDE_SCOPE),
         union_args=union_args,
         union_name=union_name,
         tagging=tagging,
         is_taggable=Tagging.is_taggable,
+        arg=lambda x: DeField(x, datavar="fake_dict", name="fake_key"),
+        rvalue=renderer.render,
+        is_primitive=is_primitive,
+        is_none=is_none,
+        typename=typename,
     )
 
 
