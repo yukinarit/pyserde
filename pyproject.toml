@@ -65,7 +65,7 @@ more-itertools = "~=10.2.0"
 pre-commit = "==v3.7.1"
 pytest-xdist = "^3.5.0"
 types-PyYAML = "^6.0.9"
-msgpack-types = "^0.2"
+msgpack-types = "^0.3"
 envclasses = "^0.3.1"
 
 [tool.poetry.extras]
