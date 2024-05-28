@@ -59,7 +59,6 @@ Type coercing automatically converts a value into the declared type during (de)s
 
 ```python
 @serde(type_check=Coerce)
-@dataclass
 class Foo
     s: str
 
@@ -75,7 +74,6 @@ This is the default behavior until pyserde v0.8.3 and v0.9.x. No type coercion o
 
 ```python
 @serde
-@dataclass
 class Foo
     s: str
 

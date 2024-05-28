@@ -7,7 +7,6 @@
 This code
 ```python
 @serde
-@dataclass
 class Foo:
     ...
 ```
@@ -116,10 +115,8 @@ pyserde supports [PEP563 Postponed evaluation of annotation](https://peps.python
 ```python
 from __future__ import annotations
 from serde import serde
-from dataclasses import dataclass
 
 @serde
-@dataclass
 class Foo:
     i: int
     s: str

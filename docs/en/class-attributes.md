@@ -32,7 +32,6 @@ See [examples/kw_only.py](https://github.com/yukinarit/pyserde/blob/main/example
 
 ```python
 @serde(rename_all = 'camelcase')
-@dataclass
 class Foo:
     int_field: int
     str_field: str
