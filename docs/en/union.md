@@ -36,7 +36,6 @@ class Foo:
 >
 > ```python
 > @serde(tagging=ExternalTagging)
-> @dataclass
 > class Foo:
 >    a: Union[list[int], set[int]]
 > ```

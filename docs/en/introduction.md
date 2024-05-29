@@ -4,7 +4,6 @@
 
 ```python
 @serde
-@dataclass
 class Foo:
     i: int
     s: str
