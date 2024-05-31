@@ -67,6 +67,7 @@ pytest-xdist = "^3.5.0"
 types-PyYAML = "^6.0.9"
 msgpack-types = "^0.3"
 envclasses = "^0.3.1"
+jedi = "*"
 
 [tool.poetry.extras]
 msgpack = ["msgpack"]
