@@ -205,7 +205,6 @@ class Foo:
 <blockquote>
 <p><strong>NOTE:</strong> Non dataclass objects are alreays (de)serialized with <code>Untagged</code> regardless of <code>tagging</code> attribute because there is no information which can be used for tag. The drawback of <code>Untagged</code> is pyserde can't correctly deserialize certain types. For example, <code>Foo({1, 2, 3})</code> of below class is serialized into <code>{"a": [1, 2, 3]}</code>, but you get <code>Foo([1, 2, 3])</code> by deserializing.</p>
 <pre><code class="language-python">@serde(tagging=ExternalTagging)
-@dataclass
 class Foo:
    a: Union[list[int], set[int]]
 </code></pre>

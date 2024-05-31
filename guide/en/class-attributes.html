@@ -199,7 +199,6 @@ class Foo:
 <h3 id="rename_all"><a class="header" href="#rename_all"><strong><code>rename_all</code></strong></a></h3>
 <p><code>rename_all</code> can converts field names into the specified string case. The following example converts camel case field names into snake case names. Case coversion depends on <a href="https://github.com/dmlls/python-casefy">python-casefy</a>. You can find the list of supported cases in <a href="https://dmlls.github.io/python-casefy/api.html">the python-casefy's docs</a>.</p>
 <pre><code class="language-python">@serde(rename_all = 'camelcase')
-@dataclass
 class Foo:
     int_field: int
     str_field: str
