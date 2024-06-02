@@ -67,7 +67,6 @@ from .core import (
     coerce_object,
     disabled,
     strict,
-    conv,
     fields,
     is_instance,
     logger,
@@ -493,57 +492,10 @@ def sefields(cls: type[Any], serialize_class_var: bool = False) -> Iterator[SeFi
         yield f
 
 
-def render_to_tuple(
-    cls: type[Any],
-    legacy_class_serializer: Optional[SerializeFunc] = None,
-    type_check: TypeCheck = strict,
-    serialize_class_var: bool = False,
-    class_serializer: Optional[ClassSerializer] = None,
-) -> str:
-    template = """
-def {{func}}(obj, reuse_instances=None, convert_sets=None):
-  if reuse_instances is None:
-    reuse_instances = {{serde_scope.reuse_instances_default}}
-  if convert_sets is None:
-    convert_sets = {{serde_scope.convert_sets_default}}
-  if not is_dataclass(obj):
-    return copy.deepcopy(obj)
-
-  return (
-  {% for f in fields -%}
-  {% if not f.skip|default(False) %}
-  {{f|rvalue()}},
-  {% endif -%}
-  {% endfor -%}
-  )
-    """
-
-    renderer = Renderer(
-        TO_ITER,
-        legacy_class_serializer,
-        suppress_coerce=(not type_check.is_coerce()),
-        serialize_class_var=serialize_class_var,
-        class_serializer=class_serializer,
-    )
-    env = jinja2.Environment(loader=jinja2.DictLoader({"iter": template}))
-    env.filters.update({"rvalue": renderer.render})
-    return env.get_template("iter").render(
-        func=TO_ITER,
-        serde_scope=getattr(cls, SERDE_SCOPE),
-        fields=sefields(cls, serialize_class_var),
-        type_check=type_check,
-    )
-
-
-def render_to_dict(
-    cls: type[Any],
-    case: Optional[str] = None,
-    legacy_class_serializer: Optional[SerializeFunc] = None,
-    type_check: TypeCheck = strict,
-    serialize_class_var: bool = False,
-    class_serializer: Optional[ClassSerializer] = None,
-) -> str:
-    template = """
+jinja2_env = jinja2.Environment(
+    loader=jinja2.DictLoader(
+        {
+            "dict": """
 def {{func}}(obj, reuse_instances = None, convert_sets = None):
   if reuse_instances is None:
     reuse_instances = {{serde_scope.reuse_instances_default}}
@@ -556,17 +508,99 @@ def {{func}}(obj, reuse_instances = None, convert_sets = None):
   {% for f in fields -%}
   {% if not f.skip -%}
     {% if f.skip_if -%}
-  subres = {{f|rvalue}}
+  subres = {{rvalue(f)}}
   if not {{f.skip_if.name}}(subres):
-    {{f|lvalue}} = subres
+    {{lvalue(f)}} = subres
     {% else -%}
-  {{f|lvalue}} = {{f|rvalue}}
+  {{lvalue(f)}} = {{rvalue(f)}}
     {% endif -%}
   {% endif %}
 
   {% endfor -%}
   return res
-    """
+""",
+            "iter": """
+def {{func}}(obj, reuse_instances=None, convert_sets=None):
+  if reuse_instances is None:
+    reuse_instances = {{serde_scope.reuse_instances_default}}
+  if convert_sets is None:
+    convert_sets = {{serde_scope.convert_sets_default}}
+  if not is_dataclass(obj):
+    return copy.deepcopy(obj)
+
+  return (
+  {% for f in fields -%}
+  {% if not f.skip|default(False) %}
+  {{rvalue(f)}},
+  {% endif -%}
+  {% endfor -%}
+  )
+""",
+            "union": """
+def {{func}}(obj, reuse_instances, convert_sets):
+  union_args = serde_scope.union_se_args['{{func}}']
+
+  {% for t in union_args %}
+  if is_instance(obj, union_args[{{loop.index0}}]):
+    {% if tagging.is_external() and is_taggable(t) %}
+    return {"{{typename(t)}}": {{rvalue(arg(t))}}}
+
+    {% elif tagging.is_internal() and is_taggable(t) %}
+    res = {{rvalue(arg(t))}}
+    res["{{tagging.tag}}"] = "{{typename(t)}}"
+    return res
+
+    {% elif tagging.is_adjacent() and is_taggable(t) %}
+    res = {"{{tagging.content}}": {{rvalue(arg(t))}}}
+    res["{{tagging.tag}}"] = "{{typename(t)}}"
+    return res
+
+    {% else %}
+    return {{rvalue(arg(t))}}
+    {% endif %}
+  {% endfor %}
+  raise SerdeError("Can not serialize " + \
+                   repr(obj) + \
+                   " of type " + \
+                   typename(type(obj)) + \
+                   " for {{union_name}}")
+""",
+        }
+    )
+)
+
+
+def render_to_tuple(
+    cls: type[Any],
+    legacy_class_serializer: Optional[SerializeFunc] = None,
+    type_check: TypeCheck = strict,
+    serialize_class_var: bool = False,
+    class_serializer: Optional[ClassSerializer] = None,
+) -> str:
+    renderer = Renderer(
+        TO_ITER,
+        legacy_class_serializer,
+        suppress_coerce=(not type_check.is_coerce()),
+        serialize_class_var=serialize_class_var,
+        class_serializer=class_serializer,
+    )
+    return jinja2_env.get_template("iter").render(
+        func=TO_ITER,
+        serde_scope=getattr(cls, SERDE_SCOPE),
+        fields=sefields(cls, serialize_class_var),
+        type_check=type_check,
+        rvalue=renderer.render,
+    )
+
+
+def render_to_dict(
+    cls: type[Any],
+    case: Optional[str] = None,
+    legacy_class_serializer: Optional[SerializeFunc] = None,
+    type_check: TypeCheck = strict,
+    serialize_class_var: bool = False,
+    class_serializer: Optional[ClassSerializer] = None,
+) -> str:
     renderer = Renderer(
         TO_DICT,
         legacy_class_serializer,
@@ -574,15 +608,13 @@ def {{func}}(obj, reuse_instances = None, convert_sets = None):
         class_serializer=class_serializer,
     )
     lrenderer = LRenderer(case, serialize_class_var)
-    env = jinja2.Environment(loader=jinja2.DictLoader({"dict": template}))
-    env.filters.update({"rvalue": renderer.render})
-    env.filters.update({"lvalue": lrenderer.render})
-    env.filters.update({"case": functools.partial(conv, case=case)})
-    return env.get_template("dict").render(
+    return jinja2_env.get_template("dict").render(
         func=TO_DICT,
         serde_scope=getattr(cls, SERDE_SCOPE),
         fields=sefields(cls, serialize_class_var),
         type_check=type_check,
+        lvalue=lrenderer.render,
+        rvalue=renderer.render,
     )
 
 
@@ -592,49 +624,18 @@ def render_union_func(
     """
     Render function that serializes a field with union type.
     """
-    template = """
-def {{func}}(obj, reuse_instances, convert_sets):
-  union_args = serde_scope.union_se_args['{{func}}']
-
-  {% for t in union_args %}
-  if is_instance(obj, union_args[{{loop.index0}}]):
-    {% if tagging.is_external() and is_taggable(t) %}
-    return {"{{t|typename}}": {{t|arg|rvalue}}}
-
-    {% elif tagging.is_internal() and is_taggable(t) %}
-    res = {{t|arg|rvalue}}
-    res["{{tagging.tag}}"] = "{{t|typename}}"
-    return res
-
-    {% elif tagging.is_adjacent() and is_taggable(t) %}
-    res = {"{{tagging.content}}": {{t|arg|rvalue}}}
-    res["{{tagging.tag}}"] = "{{t|typename}}"
-    return res
-
-    {% else %}
-    return {{t|arg|rvalue}}
-    {% endif %}
-  {% endfor %}
-  raise SerdeError("Can not serialize " + \
-                   repr(obj) + \
-                   " of type " + \
-                   typename(type(obj)) + \
-                   " for {{union_name}}")
-    """
     union_name = f"Union[{', '.join([typename(a) for a in union_args])}]"
-
     renderer = Renderer(TO_DICT, suppress_coerce=True)
-    env = jinja2.Environment(loader=jinja2.DictLoader({"dict": template}))
-    env.filters.update({"arg": lambda x: SeField(x, "obj")})
-    env.filters.update({"rvalue": renderer.render})
-    env.filters.update({"typename": typename})
-    return env.get_template("dict").render(
+    return jinja2_env.get_template("union").render(
         func=union_func_name(UNION_SE_PREFIX, union_args),
         serde_scope=getattr(cls, SERDE_SCOPE),
         union_args=union_args,
         union_name=union_name,
         tagging=tagging,
         is_taggable=Tagging.is_taggable,
+        arg=lambda x: SeField(x, "obj"),
+        rvalue=renderer.render,
+        typename=typename,
     )
 
 

@@ -129,6 +129,7 @@ def serde(
 
 @overload
 def serde(
+    _cls: Any = None,
     rename_all: Optional[str] = None,
     reuse_instances_default: bool = True,
     convert_sets_default: bool = False,
@@ -142,7 +143,7 @@ def serde(
 ) -> Callable[[type[T]], type[T]]: ...
 
 
-@dataclass_transform(field_specifiers=(field,))  # type: ignore
+@dataclass_transform(field_specifiers=(field,))
 def serde(
     _cls: Any = None,
     rename_all: Optional[str] = None,
