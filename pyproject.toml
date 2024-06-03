@@ -39,7 +39,7 @@ numpy = [
     { version = ">1.22.0", markers = "python_version ~= '3.12' and (extra == 'numpy' or extra == 'all')", optional = true },
 ]
 orjson = { version = "*", markers = "extra == 'orjson' or extra == 'all'", optional = true }
-plum-dispatch = ">=2,<2.3"
+plum-dispatch = ">=2,<2.5"
 beartype = ">=0.18.4"
 sqlalchemy = { version = ">2", markers = "extra == 'sqlalchemy' or extra == 'all'", optional = true }
 
