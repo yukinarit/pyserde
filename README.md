@@ -13,6 +13,7 @@
   <a href="https://codecov.io/gh/yukinarit/pyserde">
     <img alt="CodeCov" src="https://codecov.io/gh/yukinarit/pyserde/branch/main/graph/badge.svg">
   </a>
+    <a href = "https://piptrends.com/package/pyserde" alt = "pyserde Downloads Last Month"><img alt="pyserde Downloads Last Month by pip Trends" src="https://assets.piptrends.com/get-last-month-downloads-badge/pyserde.svg"></a>
 </p>
 <p align="center">
   <a href="https://yukinarit.github.io/pyserde/guide/en">Guide</a> | <a href="https://yukinarit.github.io/pyserde/api/serde.html">API Docs</a> | <a href="https://github.com/yukinarit/pyserde/tree/main/examples">Examples</a>
