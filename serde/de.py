@@ -1153,6 +1153,13 @@ def {{func}}(cls=cls, maybe_generic=None, maybe_generic_type_vars=None, data=Non
   raise SerdeError("Can not deserialize " + repr(data) + " of type " + \
           typename(type(data)) + " into {{union_name}}.\\nReasons:\\n" + "\\n".join(errors))
 """,
+            "literal": """
+def {{func}}(cls=cls, maybe_generic=None, maybe_generic_type_vars=None, data=None,
+             variable_type_args=None, reuse_instances = {{serde_scope.reuse_instances_default}}):
+  if data in ({%- for v in literal_args -%}{{repr(v)}},{%- endfor -%}):
+    return data
+  raise SerdeError("Can not deserialize " + repr(data) + " as {{literal_name}}.")
+  """,
         }
     )
 )
@@ -1242,23 +1249,14 @@ def render_union_func(
 def render_literal_func(
     cls: type[Any], literal_args: Sequence[Any], tagging: Tagging = DefaultTagging
 ) -> str:
-    template = """
-def {{func}}(cls=cls, maybe_generic=None, maybe_generic_type_vars=None, data=None,
-             variable_type_args=None, reuse_instances = {{serde_scope.reuse_instances_default}}):
-  if data in ({%- for v in literal_args -%}{{v|repr}},{%- endfor -%}):
-    return data
-  raise SerdeError("Can not deserialize " + repr(data) + " as {{literal_name}}.")
-    """
     literal_name = f"Literal[{', '.join([repr(a) for a in literal_args])}]"
-
-    env = jinja2.Environment(loader=jinja2.DictLoader({"dict": template}))
-    env.filters.update({"repr": repr})
-    env.filters.update({"type": type})
-    return env.get_template("dict").render(
+    return jinja2_env.get_template("literal").render(
         func=literal_func_name(literal_args),
         serde_scope=getattr(cls, SERDE_SCOPE),
         literal_args=literal_args,
         literal_name=literal_name,
         tagging=tagging,
         is_taggable=Tagging.is_taggable,
+        repr=repr,
+        type=type,
     )
