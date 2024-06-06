@@ -32,6 +32,9 @@ changelog:
     - title: Documentation
       labels:
         - documentation
+    - title: Performance improvements
+      labels:
+        - performance
     - title: Other changes
       labels:
         - "*"
