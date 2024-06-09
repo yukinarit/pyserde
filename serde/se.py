@@ -480,7 +480,20 @@ class SeField(Field[T]):
 
     def __getitem__(self, n: int) -> SeField[Any]:
         typ = type_args(self.type)[n]
-        return SeField(typ, name=None)
+        opts: dict[str, Any] = {
+            "kw_only": self.kw_only,
+            "case": self.case,
+            "alias": self.alias,
+            "rename": self.rename,
+            "skip": self.skip,
+            "skip_if": self.skip_if,
+            "skip_if_false": self.skip_if_false,
+            "skip_if_default": self.skip_if_default,
+            "serializer": self.serializer,
+            "deserializer": self.deserializer,
+            "flatten": self.flatten,
+        }
+        return SeField(typ, name=None, **opts)
 
 
 def sefields(cls: type[Any], serialize_class_var: bool = False) -> Iterator[SeField[Any]]:
@@ -654,8 +667,12 @@ class LRenderer:
         """
         if is_dataclass(arg.type) and arg.flatten:
             return self.flatten(arg)
-        else:
-            return f'res["{arg.conv_name(self.case)}"]'
+        elif is_opt(arg.type) and arg.flatten:
+            inner = arg[0]
+            if is_dataclass(inner.type):
+                return self.flatten(inner)
+
+        return f'res["{arg.conv_name(self.case)}"]'
 
     def flatten(self, arg: SeField[Any]) -> str:
         """
@@ -818,9 +835,12 @@ coerce_object(int, foo[2]),)"
         """
         if is_bare_opt(arg.type):
             return f"{arg.varname} if {arg.varname} is not None else None"
+
+        inner = arg[0]
+        inner.name = arg.varname
+        if arg.flatten:
+            return self.render(inner)
         else:
-            inner = arg[0]
-            inner.name = arg.varname
             return f"({self.render(inner)}) if {arg.varname} is not None else None"
 
     def list(self, arg: SeField[Any]) -> str:

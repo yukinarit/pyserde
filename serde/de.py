@@ -584,13 +584,17 @@ class DeField(Field[T]):
         """
         typ = type_args(self.type)[n]
         opts: dict[str, Any] = {
+            "kw_only": self.kw_only,
             "case": self.case,
+            "alias": self.alias,
             "rename": self.rename,
             "skip": self.skip,
             "skip_if": self.skip_if,
             "skip_if_false": self.skip_if_false,
+            "skip_if_default": self.skip_if_default,
+            "serializer": self.serializer,
+            "deserializer": self.deserializer,
             "flatten": self.flatten,
-            "alias": self.alias,
             "parent": self.parent,
         }
         if is_list(self.type) or is_dict(self.type) or is_set(self.type):
@@ -856,9 +860,17 @@ class Renderer:
 maybe_generic_type_vars=maybe_generic_type_vars, variable_type_args=None, \
 reuse_instances=reuse_instances)) if data.get("f") is not None else None'
         """
-        value_arg = arg[0]
+        inner = arg[0]
         if arg.iterbased:
             exists = f"{arg.data} is not None"
+        elif arg.flatten:
+            # Check nullabilities of all nested fields.
+            exists = " and ".join(
+                [
+                    f'{arg.datavar}.get("{f.name}") is not None'
+                    for f in dataclasses.fields(inner.type)
+                ]
+            )
         else:
             name = arg.conv_name()
             if arg.alias:
@@ -867,7 +879,7 @@ reuse_instances=reuse_instances)) if data.get("f") is not None else None'
             else:
                 get = f'{arg.datavar}.get("{name}")'
             exists = f"{get} is not None"
-        return f"({self.render(value_arg)}) if {exists} else None"
+        return f"({self.render(inner)}) if {exists} else None"
 
     def list(self, arg: DeField[Any]) -> str:
         """
