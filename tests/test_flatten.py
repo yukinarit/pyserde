@@ -2,7 +2,7 @@
 Tests for flatten attribute.
 """
 
-from typing import Any
+from typing import Any, Optional
 
 import pytest
 
@@ -50,4 +50,21 @@ def test_flatten(se: Any, de: Any) -> None:
         bar: Bar = field(flatten=True)
 
     f = Foo(a=10, b="foo", bar=Bar(c=100.0, d=True, baz=Baz([1, 2], {"a": "10"})))
+    assert de(Foo, se(f)) == f
+
+
+@pytest.mark.parametrize("se,de", all_formats)
+def test_flatten_optional(se: Any, de: Any) -> None:
+    @serde
+    class Bar:
+        c: float
+        d: bool
+
+    @serde
+    class Foo:
+        a: int
+        b: str
+        bar: Optional[Bar] = field(flatten=True)
+
+    f = Foo(a=10, b="foo", bar=Bar(c=100.0, d=True))
     assert de(Foo, se(f)) == f
