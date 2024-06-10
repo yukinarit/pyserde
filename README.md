@@ -16,7 +16,7 @@
     <a href = "https://piptrends.com/package/pyserde" alt = "pyserde Downloads Last Month"><img alt="pyserde Downloads Last Month by pip Trends" src="https://assets.piptrends.com/get-last-month-downloads-badge/pyserde.svg"></a>
 </p>
 <p align="center">
-  <a href="https://yukinarit.github.io/pyserde/guide/en">Guide</a> | <a href="https://yukinarit.github.io/pyserde/api/serde.html">API Docs</a> | <a href="https://github.com/yukinarit/pyserde/tree/main/examples">Examples</a>
+  <a href="https://yukinarit.github.io/pyserde/guide/en">Guide🇬🇧</a> | <a href="https://yukinarit.github.io/pyserde/guide/ja">ガイド🇯🇵</a> | <a href="https://yukinarit.github.io/pyserde/api/serde.html">API Docs</a> | <a href="https://github.com/yukinarit/pyserde/tree/main/examples">Examples</a>
 </p>
 
 ## Overview
