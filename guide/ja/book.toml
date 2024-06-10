@@ -1,0 +1,10 @@
+[book]
+authors = ["yukinarit"]
+language = "ja"
+multilingual = true
+src = "./"
+title = "pyserde documentation"
+
+[output.html]
+git-repository-url = "https://github.com/yukinarit/pyserde"
+edit-url-template = "https://github.com/yukinarit/pyserde/edit/main/ja/{path}"
