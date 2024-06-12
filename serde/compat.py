@@ -514,6 +514,25 @@ def is_bare_opt(typ: Any) -> bool:
 
 
 @cache
+def is_opt_dataclass(typ: Any) -> bool:
+    """
+    Test if the type is optional dataclass.
+
+    >>> is_opt_dataclass(Optional[int])
+    False
+    >>> @dataclasses.dataclass
+    ... class Foo:
+    ...     pass
+    >>> is_opt_dataclass(Foo)
+    False
+    >>> is_opt_dataclass(Optional[Foo])
+    False
+    """
+    args = get_args(typ)
+    return is_opt(typ) and len(args) > 0 and is_dataclass(args[0])
+
+
+@cache
 def is_list(typ: type[Any]) -> bool:
     """
     Test if the type is `list`.

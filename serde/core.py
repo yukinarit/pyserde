@@ -41,6 +41,7 @@ from .compat import (
     is_new_type_primitive,
     is_any,
     is_opt,
+    is_opt_dataclass,
     is_set,
     is_tuple,
     is_union,
@@ -620,6 +621,8 @@ class Field(Generic[T]):
         flatten = f.metadata.get("serde_flatten")
         if flatten is True:
             flatten = FlattenOpts()
+        if flatten and not (dataclasses.is_dataclass(f.type) or is_opt_dataclass(f.type)):
+            raise SerdeError(f"pyserde does not support flatten attribute for {typename(f.type)}")
 
         kw_only = bool(f.kw_only) if sys.version_info >= (3, 10) else False
 
