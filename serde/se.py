@@ -436,9 +436,22 @@ def to_dict(
     convert_sets: Optional[bool] = None,
 ) -> dict[Any, Any]:
     """
-    Serialize object into dictionary.
+    Serialize object into python dictionary. This function ensures that the dataclass's fields are
+    accurately represented as key-value pairs in the resulting dictionary.
 
-    >>> @serialize
+    * `o`: Any pyserde object that you want to convert to `dict`
+    * `c`: Optional class argument
+    * `reuse_instances`: pyserde will pass instances (e.g. Path, datetime) directly to serializer
+    instead of converting them to serializable representation e.g. string. This behaviour allows
+    to delegate serializtation to underlying data format packages e.g. `pyyaml` and potentially
+    improve performance.
+    * `convert_sets`: This option controls how sets are handled during serialization and
+    deserialization. When `convert_sets` is set to True, pyserde will convert sets to lists during
+    serialization and back to sets during deserialization. This is useful for data formats that
+    do not natively support sets.
+
+    >>> from serde import serde
+    >>> @serde
     ... class Foo:
     ...     i: int
     ...     s: str = 'foo'
@@ -448,7 +461,8 @@ def to_dict(
     >>> to_dict(Foo(i=10))
     {'i': 10, 's': 'foo', 'f': 100.0, 'b': True}
 
-    You can pass any type supported by pyserde. For example,
+    You can serialize not only pyserde objects but also objects of any supported types. For example,
+    the following example serializes list of pyserde objects into dict.
 
     >>> lst = [Foo(i=10), Foo(i=20)]
     >>> to_dict(lst)
