@@ -109,5 +109,5 @@ print(from_json(Foo, s))
 
 That's it! pyserde offers many more features. If you're interested, please read the rest of the documentation.
 
-> **NOTE:** which type checker should be used?
-> pyserde depends on [PEP681 dataclass_transform](https://peps.python.org/pep-0681/). [mypy](https://github.com/python/mypy) does not fully support dataclass_transform as of Jan. 2024. [pyright](https://github.com/microsoft/pyright) is recommended for codebase using pyserde.
+> 💡 Tip: which type checker should I use?
+> pyserde depends on [PEP681 dataclass_transform](https://peps.python.org/pep-0681/). [mypy](https://github.com/python/mypy) does not fully support dataclass_transform as of Jan. 2024. My personal recommendation is [pyright](https://github.com/microsoft/pyright).
