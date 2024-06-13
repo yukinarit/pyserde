@@ -6,7 +6,7 @@ from typing import Any, Optional
 
 import pytest
 
-from serde import field, serde
+from serde import field, serde, SerdeError
 from serde.json import from_json, to_json
 
 from .common import all_formats
@@ -68,3 +68,16 @@ def test_flatten_optional(se: Any, de: Any) -> None:
 
     f = Foo(a=10, b="foo", bar=Bar(c=100.0, d=True))
     assert de(Foo, se(f)) == f
+
+
+@pytest.mark.parametrize("se,de", all_formats)
+def test_flatten_not_supported(se: Any, de: Any) -> None:
+    @serde
+    class Bar:
+        pass
+
+    with pytest.raises(SerdeError):
+
+        @serde
+        class Foo:
+            bar: list[Bar] = field(flatten=True)
