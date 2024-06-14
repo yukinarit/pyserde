@@ -13,7 +13,7 @@ If you're using poetry, run this command.
 poetry add pyserde
 ```
 
-Additional data formats besides JSON and Pickle need additional dependencies installed. Install `msgpack`, `toml`, or `yaml` extras to work with the appropriate data formats; you can skip formats that you don't plan to use. For example, if you want to use Toml and YAML:
+Additional data formats besides JSON and Pickle need additional dependencies installed. Install `msgpack`, `toml`, `yaml` or `numpy` extras to work with the appropriate data formats; you can skip formats that you don't plan to use. For example, if you want to use Toml and YAML:
 
 ```
 pip install "pyserde[toml,yaml]"
