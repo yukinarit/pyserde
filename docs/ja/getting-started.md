@@ -14,7 +14,7 @@ poetry add pyserde
 ```
 
 JSONとPickle以外のデータ形式を扱う場合は、追加の依存関係をインストールする必要があります。  
-適切なデータ形式で動作するには、`msgpack`、`toml`、`yaml`、`numpy`の追加パッケージをインストールしてください。  
+適切なデータ形式で動作するには、`msgpack`、`toml`、`yaml` の追加パッケージをインストールしてください。  
 使用しない場合はスキップして構いません。  
 例えば、TomlとYAMLを使用する場合は以下のようにします。
 
@@ -39,12 +39,15 @@ poetry add pyserde -E all
 ```
 
 利用可能な追加パッケージ
-* `all`：`msgpack`、`toml`、`yaml`、`numpy`をインストール
+* `all`：`msgpack`、`toml`、`yaml`、`numpy`、`orjson`、`sqlalchemy` をインストール
 * `msgpack`：[msgpack](https://github.com/msgpack/msgpack-python) をインストール
 * `toml`：[tomli](https://github.com/hukkin/tomli) と [tomli-w](https://github.com/hukkin/tomli-w) をインストール
 	* 注記：python 3.11以降は [tomllib](https://docs.python.org/3/library/tomllib.html) を使用
 * `yaml`：[pyyaml](https://github.com/yaml/pyyaml) をインストール
 * `numpy`：[numpy](https://github.com/numpy/numpy) をインストール
+* `orjson`：[orjson](https://github.com/ijl/orjson) をインストール
+* `sqlalchemy`：[sqlalchemy](https://github.com/sqlalchemy/sqlalchemy) をインストール
+
 
 ## 最初のpyserdeクラスを定義
 
