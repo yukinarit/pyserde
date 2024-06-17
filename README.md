@@ -160,6 +160,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/JWSong"><img src="https://avatars.githubusercontent.com/u/4515331?v=4?s=60" width="60px;" alt="JWSong"/><br /><sub><b>JWSong</b></sub></a><br /><a href="https://github.com/yukinarit/pyserde/commits?author=JWSong" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://www.mechanicus.it/"><img src="https://avatars.githubusercontent.com/u/13484760?v=4?s=60" width="60px;" alt="Emanuele Barsanti"/><br /><sub><b>Emanuele Barsanti</b></sub></a><br /><a href="https://github.com/yukinarit/pyserde/commits?author=barsa-net" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://aman-clement-aranha.vercel.app/"><img src="https://avatars.githubusercontent.com/u/90409059?v=4?s=60" width="60px;" alt="Aman Clement Aranha"/><br /><sub><b>Aman Clement Aranha</b></sub></a><br /><a href="https://github.com/yukinarit/pyserde/commits?author=Aman-Clement" title="Documentation">📖</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://qiita.com/inetcpl"><img src="https://avatars.githubusercontent.com/u/51281148?v=4?s=60" width="60px;" alt="𝕂'"/><br /><sub><b>𝕂'</b></sub></a><br /><a href="https://github.com/yukinarit/pyserde/commits?author=K-dash" title="Documentation">📖</a></td>
     </tr>
   </tbody>
   <tfoot>
