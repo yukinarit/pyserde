@@ -5,7 +5,8 @@ Here is the list of the supported types. See the simple example for each type in
 * Primitives (int, float, str, bool) [^1]
 * Containers
     * `list`, `set`, `tuple`, `dict` [^2]
-    * [`frozenset`](https://docs.python.org/3/library/stdtypes.html#frozenset), [^3] [`defaultdict`](https://docs.python.org/3/library/collections.html#collections.defaultdict) [^4]
+    * [`frozenset`](https://docs.python.org/3/library/stdtypes.html#frozenset), [^3]
+    * [`defaultdict`](https://docs.python.org/3/library/collections.html#collections.defaultdict) [^4]
 * [`typing.Optional`](https://docs.python.org/3/library/typing.html#typing.Optional) [^5]
 * [`typing.Union`](https://docs.python.org/3/library/typing.html#typing.Union) [^6] [^7] [^8]
 * User defined class with [`@dataclass`](https://docs.python.org/3/library/dataclasses.html) [^9] [^10]
@@ -105,6 +106,8 @@ If you need to use a type which is currently not supported in the standard libra
 [^3]: See [examples/frozen_set.py](https://github.com/yukinarit/pyserde/blob/main/examples/frozen_set.py)
 
 [^4]: See [examples/default_dict.py](https://github.com/yukinarit/pyserde/blob/main/examples/default_dict.py)
+
+[^5]: See [examples/union.py](https://github.com/yukinarit/pyserde/blob/main/examples/union.py)
 
 [^6]: See [examples/union.py](https://github.com/yukinarit/pyserde/blob/main/examples/union.py)
 
