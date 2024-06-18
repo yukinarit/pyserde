@@ -24,7 +24,7 @@ class Foo:
 `@serde` デコレータは以下を行います。
 * クラスに `@serialize` と `@deserialize` デコレータを追加します。
 * クラスが `@dataclass` を持っていない場合、`@dataclass` デコレータを追加します。
-* 両方のデシリアライズ属性をデコレータに渡すことができます。
+* 両方の（デ）シリアライズ属性をデコレータに渡すことができます。
     * `serializer` 属性は `@deserialize` で無視され、`deserializer` 属性は `@serialize` で無視されます。
 
 ```python
@@ -61,9 +61,9 @@ class Foo:
 ```
 上記に当てはまらない場合は `@serde` の使用を推奨します。
 
-## `@serde` なしでクラスをデシリアライズする
+## `@serde` なしでクラスを（デ）シリアライズする
 
-pyserdeは v0.10.0 以降、`@serde` なしでデータクラスをデシリアライズできます。  
+pyserdeは v0.10.0 以降、`@serde` なしでデータクラスを（デ）シリアライズできます。  
 この機能は、外部ライブラリで宣言されたクラスを使用したい場合や、`@serde` デコレータが型チェッカーで機能しない場合に便利です。[この例](https://github.com/yukinarit/pyserde/blob/main/examples/plain_dataclass.py)を参照してください。
 
 どのように動作するのでしょうか？  
