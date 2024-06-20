@@ -150,7 +150,7 @@
                         <a href="https://github.com/yukinarit/pyserde" title="Git repository" aria-label="Git repository">
                             <i id="git-repository-button" class="fa fa-github"></i>
                         </a>
-                        <a href="https://github.com/yukinarit/pyserde/edit/main/ja/.//type-check.md" title="Suggest an edit" aria-label="Suggest an edit">
+                        <a href="https://github.com/yukinarit/pyserde/edit/main/docs/ja/.//type-check.md" title="Suggest an edit" aria-label="Suggest an edit">
                             <i id="git-edit-button" class="fa fa-edit"></i>
                         </a>
 
@@ -179,7 +179,75 @@
 
                 <div id="content" class="content">
                     <main>
-                        
+                        <h1 id="type-checking"><a class="header" href="#type-checking">Type Checking</a></h1>
+<p>pyserdeはv0.9からランタイム型チェックを提供しています。<br />
+v0.14で完全に作り直され、<a href="https://github.com/beartype/beartype">beartype</a>を使用してより洗練され信頼性の高いものとなりました。<br />
+型安全で堅牢なプログラムを書くためには、型チェックを常に有効にすることを強く推奨します。</p>
+<h2 id="strict"><a class="header" href="#strict"><code>strict</code></a></h2>
+<p>厳格な型チェック <code>strict</code> は、（デ）シリアライズとオブジェクト構築の際にすべてのフィールド値を宣言された型と照合します。<br />
+これはv0.14以降のデフォルトの型チェックモードです。</p>
+<p>このモードでは、クラス属性を指定せずに <code>@serde</code> デコレータを使用してクラスを宣言した場合、<code>@serde(type_check=strict)</code> と見なされ、厳格な型チェックが有効になります。</p>
+<pre><code class="language-python">@serde
+class Foo:
+    s: str
+</code></pre>
+<p>例えば、以下のように間違った型のオブジェクトで<code>Foo</code>を呼び出すと、</p>
+<pre><code class="language-python">foo = Foo(10)
+</code></pre>
+<p>以下のエラーが発生します。</p>
+<pre><code class="language-python">beartype.roar.BeartypeCallHintParamViolation: Method __main__.Foo.__init__() parameter s=10 violates type hint &lt;class 'str'&gt;, as int 10 not instance of str.
+</code></pre>
+<blockquote>
+<p><strong>注記:</strong> 2024年2月時点でbeartypeは検証フックを提供していないため、コンストラクターからはSerdeErrorではなくbeartypeの例外が発生します。</p>
+</blockquote>
+<p>同様に、間違った型のオブジェクトで（デ）シリアライズAPIを呼び出すと、</p>
+<pre><code class="language-python">print(to_json(foo))
+</code></pre>
+<p>再びエラーが発生します。</p>
+<pre><code class="language-python">serde.compat.SerdeError: Method __main__.Foo.__init__() parameter s=10 violates type hint &lt;class 'str'&gt;, as int 10 not instance of str.
+</code></pre>
+<blockquote>
+<p><strong>注記:</strong> beartypeによる型チェックにはいくつかの注意点があります。</p>
+<ol>
+<li>beartypeは変更されたプロパティを検証できません。</li>
+</ol>
+<p>以下のコードでは、プロパティ <code>s</code> が最後に変更されていますが、beartypeはこのケースを検出できません。</p>
+<pre><code class="language-python">@serde
+class Foo:
+    s: str
+
+f = Foo("foo")
+f.s = 100
+</code></pre>
+<ol start="2">
+<li>beartypeはコンテナ内の各要素を検証することはできません。これはバグではなく、beartypeの設計原則です。<a href="https://beartype.readthedocs.io/en/latest/faq/#faq-o1">Does beartype actually do anything?</a>を参照してください。</li>
+</ol>
+</blockquote>
+<h2 id="coerce"><a class="header" href="#coerce"><code>coerce</code></a></h2>
+<p>型強制 <code>coerce</code> は、（デ）シリアライズ中に値を宣言された型に自動的に変換します。</p>
+<pre><code class="language-python">@serde(type_check=Coerce)
+class Foo:
+    s: str
+
+foo = Foo(10)
+# pyserdeは自動的に int 値の 10 を str の "10" に変換します
+# {"s": "10"}が出力されます
+print(to_json(foo))
+</code></pre>
+<p>しかし、値が宣言された型に変換できない場合（例えば、値が <code>foo</code> で型が <code>int</code> の場合）、pyserde は<code>SerdeError</code> を発生させます。</p>
+<h2 id="disabled"><a class="header" href="#disabled"><code>disabled</code></a></h2>
+<p>これはpyserde v0.8.3およびv0.9.xまでのデフォルトの挙動です。<br />
+型強制またはチェックは実行されません。</p>
+<p>利用者が間違った値を入力しても、pyserdeは型の不整合を無視して処理を続行します。</p>
+<pre><code class="language-python">@serde
+class Foo:
+    s: str
+
+foo = Foo(10)
+# pyserdeは型の整合性を確認しないため、{"s": 10} が出力されます
+print(to_json(foo))
+</code></pre>
+
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">

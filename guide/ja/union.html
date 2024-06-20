@@ -150,7 +150,7 @@
                         <a href="https://github.com/yukinarit/pyserde" title="Git repository" aria-label="Git repository">
                             <i id="git-repository-button" class="fa fa-github"></i>
                         </a>
-                        <a href="https://github.com/yukinarit/pyserde/edit/main/ja/.//union.md" title="Suggest an edit" aria-label="Suggest an edit">
+                        <a href="https://github.com/yukinarit/pyserde/edit/main/docs/ja/.//union.md" title="Suggest an edit" aria-label="Suggest an edit">
                             <i id="git-edit-button" class="fa fa-edit"></i>
                         </a>
 
@@ -179,7 +179,137 @@
 
                 <div id="content" class="content">
                     <main>
-                        
+                        <h1 id="union-representation"><a class="header" href="#union-representation">Union Representation</a></h1>
+<p><code>pyserde&gt;=0.7</code> では、Union が（デ）シリアライズされる方法を制御するための属性が提供されています。この概念は <a href="https://serde.rs/enum-representations.html">serde-rs</a> にあるものと同じです。</p>
+<p>これらの表現は dataclass にのみ適用され、dataclassではないオブジェクトは常に <code>Untagged</code> で（デ）シリアライズされます。</p>
+<h2 id="untagged"><a class="header" href="#untagged"><code>Untagged</code></a></h2>
+<p>以下は、 <code>pyserde&lt;0.7</code> におけるデフォルトの Union 表現です。dataclass が与えられた場合を例に上げます。</p>
+<pre><code class="language-python">@serde
+class Bar:
+    b: int
+
+@serde
+class Baz:
+    b: int
+
+@serde(tagging=Untagged)
+class Foo:
+    a: Union[Bar, Baz]
+</code></pre>
+<p>注意点として、<code>Bar</code> と <code>Baz</code> は同じフィールド名と型を持っています。<br />
+<code>Foo(Baz(10))</code> を辞書にシリアライズすると、<code>{"a": {"b": 10}}</code> が得られます。</p>
+<p>しかし、<code>{"a": {"b": 10}}</code> をデシリアライズすると、 <code>Foo(Baz(10))</code> ではなく <code>Foo(Bar(10))</code> が得られます。<br />
+これは、pyserde が <code>Untagged</code> を使った Union の dataclass を正しく（デ）シリアライズ<strong>できない</strong>ことを意味します。</p>
+<p>このため、pyserde は他の Union 表現オプションを提供しています。</p>
+<h2 id="externaltagging"><a class="header" href="#externaltagging"><code>ExternalTagging</code></a></h2>
+<p>これは 0.7 以降のデフォルトの Union 表現です。<code>ExternalTagging</code> を使用したクラス宣言は以下のようになります。</p>
+<pre><code class="language-python">@serde(tagging=ExternalTagging)
+class Foo:
+    a: Union[Bar, Baz]
+</code></pre>
+<p><code>Foo(Baz(10))</code> を辞書にシリアライズすると、 <code>{"a": {"Baz": {"b": 10}}}</code> が得られ、デシリアライズすると <code>Foo(Baz(10))</code> になります。</p>
+<blockquote>
+<p><strong>注意:</strong> dataclass でないオブジェクトは、<code>tagging</code> 属性に関わらず常に <code>Untagged</code> で（デ）シリアライズされます。<br />
+これはタグに使用できる情報がないためです。<code>Untagged</code> の欠点は、特定のタイプを正しく非シリアライズできないことです。</p>
+<p>例えば、以下のクラスの <code>Foo({1, 2, 3})</code> は <code>{"a": [1, 2, 3]}</code> にシリアライズされますが、デシリアライズすると <code>Foo([1, 2, 3])</code> になります。</p>
+<pre><code class="language-python">@serde(tagging=ExternalTagging)
+class Foo:
+   a: Union[list[int], set[int]]
+</code></pre>
+</blockquote>
+<h2 id="internaltagging"><a class="header" href="#internaltagging"><code>InternalTagging</code></a></h2>
+<p><code>InternalTagging</code> を使用したクラス宣言は以下のようになります。</p>
+<pre><code class="language-python">@serde(tagging=InternalTagging("type"))
+class Foo:
+    a: Union[Bar, Baz]
+</code></pre>
+<p><code>Foo(Baz(10))</code> を辞書にシリアライズすると、<code>{"a": {"type": "Baz", "b": 10}}</code> が得られ、それを <code>Foo(Baz(10))</code> にデシリアライズできます。<br />
+<code>type</code> タグは <code>Baz</code> の辞書内にエンコードされます。</p>
+<h2 id="adjacenttagging"><a class="header" href="#adjacenttagging"><code>AdjacentTagging</code></a></h2>
+<p><code>AdjacentTagging</code> を使用したクラス宣言は以下のようになります。</p>
+<pre><code class="language-python">@serde(tagging=AdjacentTagging("type", "content"))
+class Foo:
+    a: Union[Bar, Baz]
+</code></pre>
+<p><code>Foo(Baz(10))</code> を辞書にシリアライズすると、<code>{"a": {"type": "Baz", "content": {"b": 10}}}</code> が得られ、それを <code>Foo(Baz(10))</code> にデシリアライズできます。<code>type</code> タグは <code>Baz</code> の辞書内にエンコードされ、<code>Baz</code> のフィールドは <code>content</code> 内にエンコードされます。</p>
+<h2 id="union-型の直接的なデシリアライズ"><a class="header" href="#union-型の直接的なデシリアライズ">Union 型の直接的な（デ）シリアライズ</a></h2>
+<p>v0.12.0 で新しく追加されました。</p>
+<p>v0.12 以前において、（デ）シリアライズ API（例： <code>to_json</code>, <code>from_json</code>）に直接 Union 型のデータを渡すことは部分的にサポートされていましたが、Union 型は常にタグ無しとして扱われました。<br />
+これは、利用者側で Union タグを変更することができなかったことを意味します。</p>
+<p>以下の例は、タグ無しのため <code>Bar</code> に正しくデシリアライズできません。</p>
+<pre><code class="language-python">@serde
+class Foo:
+    a: int
+
+@serde
+class Bar:
+    a: int
+
+bar = Bar(10)
+s = to_json(bar)
+print(s)
+# {"a": 10} を出力
+print(from_json(Union[Foo, Bar], s))
+# Foo(10) を出力
+</code></pre>
+<p>v0.12.0 以降、pyserde は（デ）シリアライズ API で渡された Union 型を適切に扱えます。<br />
+Union 型は、pyserde のデフォルトのタグ付けである外部タグ付けとして扱われます。</p>
+<p>以下の例は <code>Bar</code> として正しく（デ）シリアライズできます。</p>
+<pre><code class="language-python">@serde
+class Foo:
+    a: int
+
+@serde
+class Bar:
+    a: int
+
+bar = Bar(10)
+s = to_json(bar, cls=Union[Foo, Bar])
+print(s)
+# {"Bar" {"a": 10}} を出力
+print(from_json(Union[Foo, Bar], s))
+# Bar(10) を出力
+</code></pre>
+<p>また、<code>serde.InternalTagging</code>、<code>serde.AdjacentTagging</code>、および <code>serde.Untagged</code> を使用してタグ付けを変更できます。</p>
+<p>それでは、上記の例を用いてタグ付けを変更してみましょう。</p>
+<p>タグ付けを変更するには、 <code>to_json</code> に新しい引数 <code>cls</code> を渡す必要があります。<br />
+また、Unionクラスは <code>InternalTagging</code>、<code>AdjacentTagging</code>、または <code>Untagged</code> で必要なパラメータと共にラップされる必要があります。</p>
+<ul>
+<li>
+<p>InternalTagging</p>
+<pre><code class="language-python">from serde import InternalTagging
+
+s = to_json(bar, cls=InternalTagging("type", Union[Foo, Bar]))
+print(s)
+# {"type": "Bar", "a": 10} を出力
+print(from_json(InternalTagging("type", Union[Foo, Bar]), s))
+# Bar(10) を出力
+</code></pre>
+</li>
+<li>
+<p>AdjacentTagging</p>
+<pre><code class="language-python">from serde
+
+s = to_json(bar, cls=AdjacentTagging("type", "content", Union[Foo, Bar]))
+print(s)
+# {"type": "Bar", "content": {"a": 10}} を出力
+print(from_json(AdjacentTagging("type", "content", Union[Foo, Bar]), s))
+# Bar(10) を出力
+</code></pre>
+</li>
+<li>
+<p>Untagged</p>
+<pre><code class="language-python">from serde import Untagged
+
+s = to_json(bar, cls=Untagged(Union[Foo, Bar]))
+print(s)
+# {"a": 10} を出力
+print(from_json(Untagged(Union[Foo, Bar]), s))
+# Foo(10) を出力
+</code></pre>
+</li>
+</ul>
+
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">

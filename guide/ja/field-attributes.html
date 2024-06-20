@@ -150,7 +150,7 @@
                         <a href="https://github.com/yukinarit/pyserde" title="Git repository" aria-label="Git repository">
                             <i id="git-repository-button" class="fa fa-github"></i>
                         </a>
-                        <a href="https://github.com/yukinarit/pyserde/edit/main/ja/.//field-attributes.md" title="Suggest an edit" aria-label="Suggest an edit">
+                        <a href="https://github.com/yukinarit/pyserde/edit/main/docs/ja/.//field-attributes.md" title="Suggest an edit" aria-label="Suggest an edit">
                             <i id="git-edit-button" class="fa fa-edit"></i>
                         </a>
 
@@ -179,7 +179,116 @@
 
                 <div id="content" class="content">
                     <main>
-                        
+                        <h1 id="field-attributes"><a class="header" href="#field-attributes">Field Attributes</a></h1>
+<p>フィールド属性は、データクラスのフィールドの（デ）シリアライズ動作をカスタマイズするためのオプションです。</p>
+<h2 id="dataclassesによって提供される属性"><a class="header" href="#dataclassesによって提供される属性">dataclassesによって提供される属性</a></h2>
+<h3 id="default-と-default_factory"><a class="header" href="#default-と-default_factory"><strong><code>default</code></strong> と <strong><code>default_factory</code></strong></a></h3>
+<p>dataclassesの <code>default</code> と <code>default_factory</code> は期待通りに動作します。<br />
+フィールドが <code>default</code> または <code>default_factory</code> 属性を持つ場合、そのフィールドはオプショナルフィールドのように振る舞います。<br />
+フィールドがデータ内に存在する場合、当該フィールドの値がデシリアライズされたオブジェクトに設定されます。<br />
+フィールドがデータ内に存在しない場合、指定されたデフォルト値がデシリアライズされたオブジェクトに設定されます。</p>
+<pre><code class="language-python">class Foo:
+    a: int = 10
+    b: int = field(default=10)  # field "a"と同じ
+    c: dict[str, int] = field(default_factory=dict)
+
+print(from_dict(Foo, {}))  # Foo(a=10, b=10, c={}) を出力
+</code></pre>
+<p>完全な例については、<a href="https://github.com/yukinarit/pyserde/blob/main/examples/default.py">examples/default.py</a>を参照してください。</p>
+<h3 id="classvar"><a class="header" href="#classvar"><strong><code>ClassVar</code></strong></a></h3>
+<p><code>dataclasses.ClassVar</code> はデータクラスのクラス変数であり、dataclassはClassVarを擬似的なフィールドとして扱います。<br />
+<code>dataclasses.field</code> はクラス変数を含まないため、pyserdeはデフォルトの動作として <code>ClassVar</code> フィールドを（デ）シリアライズしません。<br />
+ClassVarフィールドをシリアライズする場合は、<a href="class-attributes.html#serialize_class_var">serialize_class_var</a>クラス属性の使用を検討してください。</p>
+<p>完全な例については、<a href="https://github.com/yukinarit/pyserde/blob/main/examples/class_var.py">examples/class_var.py</a>を参照してください。</p>
+<h2 id="pyserdeによって提供される属性"><a class="header" href="#pyserdeによって提供される属性">pyserdeによって提供される属性</a></h2>
+<p>フィールド属性は <code>serde.field</code> または <code>dataclasses.field</code> を通じて指定することができます。<br />
+型チェックが機能するため、 <code>serde.field</code> の使用を推奨します。</p>
+<p>以下は、<code>rename</code> 属性を <code>serde.field</code> と <code>dataclasses.field</code> の両方で指定する例です。</p>
+<pre><code class="language-python">@serde.serde
+class Foo:
+    a: str = serde.field(rename="A")
+    b: str = dataclasses.field(metadata={"serde_rename"="B"})
+</code></pre>
+<h3 id="rename"><a class="header" href="#rename"><strong><code>rename</code></strong></a></h3>
+<p><code>rename</code> は（デ）シリアライズ中にフィールド名を変更するために使用されます。<br />
+この属性は、フィールド名にPythonのキーワード（予約語）を使用したい場合に便利です。</p>
+<p>以下のコードはフィールド名 <code>id</code> を <code>ID</code> に変更する例です。</p>
+<pre><code class="language-python">@serde
+class Foo:
+    id: int = field(rename="ID")
+</code></pre>
+<p>完全な例については、<a href="https://github.com/yukinarit/pyserde/blob/main/examples/rename.py">examples/rename.py</a>を参照してください。</p>
+<h3 id="skip"><a class="header" href="#skip"><strong><code>skip</code></strong></a></h3>
+<p><code>skip</code> はこの属性を持つフィールドの（デ）シリアライズをスキップします。</p>
+<pre><code class="language-python">@serde
+class Resource:
+    name: str
+    hash: str
+    metadata: dict[str, str] = field(default_factory=dict, skip=True)
+</code></pre>
+<p>完全な例については、<a href="https://github.com/yukinarit/pyserde/blob/main/examples/skip.py">examples/skip.py</a>を参照してください。</p>
+<h3 id="skip_if"><a class="header" href="#skip_if"><strong><code>skip_if</code></strong></a></h3>
+<p><code>skip_if</code> は条件関数が <code>True</code> を返す場合にフィールドの（デ）シリアライズをスキップします。</p>
+<pre><code class="language-python">@serde
+class World:
+    buddy: str = field(default='', skip_if=lambda v: v == 'Pikachu')
+</code></pre>
+<p>完全な例については、<a href="https://github.com/yukinarit/pyserde/blob/main/examples/skip.py">examples/skip.py</a>を参照してください。</p>
+<h3 id="skip_if_false"><a class="header" href="#skip_if_false"><strong><code>skip_if_false</code></strong></a></h3>
+<p><code>skip_if_false</code> はフィールドが <code>False</code> と評価される場合にフィールドの（デ）シリアライズをスキップします。</p>
+<p>例えば、以下のコードは <code>enemies</code> が空であれば（デ）シリアライズをスキップします。</p>
+<pre><code class="language-python">@serde
+class World:
+    enemies: list[str] = field(default_factory=list, skip_if_false=True)
+</code></pre>
+<p>完全な例については、<a href="https://github.com/yukinarit/pyserde/blob/main/examples/skip.py">examples/skip.py</a>を参照してください。</p>
+<h3 id="skip_if_default"><a class="header" href="#skip_if_default"><strong><code>skip_if_default</code></strong></a></h3>
+<p><code>skip_if_default</code> はフィールドがデフォルト値とイコールである場合にフィールドの（デ）シリアライズをスキップします。</p>
+<p>例えば、以下のコードは <code>town</code> が <code>Masara Town</code> であれば（デ）シリアライズをスキップします。</p>
+<pre><code class="language-python">@serde
+class World:
+    town: str = field(default='Masara Town', skip_if_default=True)
+</code></pre>
+<p>完全な例については、<a href="https://github.com/yukinarit/pyserde/blob/main/examples/skip.py">examples/skip.py</a>を参照してください。</p>
+<h3 id="alias"><a class="header" href="#alias"><strong><code>alias</code></strong></a></h3>
+<p>フィールド名に別名を設定できます。エイリアスはデシリアライズ時にのみ機能します。</p>
+<pre><code class="language-python">@serde
+class Foo:
+    a: str = field(alias=["b", "c"])
+</code></pre>
+<p>上記の例では、 <code>Foo</code> は <code>{"a": "..."}</code> , <code>{"b": "..."}</code> 、または <code>{"c": "..."}</code> のいずれかからデシリアライズできます。</p>
+<p>完全な例については、<a href="https://github.com/yukinarit/pyserde/blob/main/examples/alias.py">examples/alias.py</a>を参照してください。</p>
+<h2 id="serializer-と-deserializer"><a class="header" href="#serializer-と-deserializer"><strong><code>serializer</code></strong> と <strong><code>deserializer</code></strong></a></h2>
+<p>特定のフィールドに対してカスタム（デ）シリアライザを使用したい場合があります。</p>
+<p>例えば、以下のようなケースです。</p>
+<ul>
+<li>datetimeを異なる形式でシリアライズしたい。</li>
+<li>サードパーティパッケージの型をシリアライズしたい。</li>
+</ul>
+<p>以下の例では、フィールド <code>a</code> はデフォルトのシリアライザで <code>"2021-01-01T00:00:00"</code> にシリアライズされますが、フィールド <code>b</code> はカスタムシリアライザで <code>"01/01/21"</code> にシリアライズされます。</p>
+<pre><code class="language-python">@serde
+class Foo:
+    a: datetime
+    b: datetime = field(serializer=lambda x: x.strftime('%d/%m/%y'), deserializer=lambda x: datetime.strptime(x, '%d/%m/%y'))
+</code></pre>
+<p>完全な例については、<a href="https://github.com/yukinarit/pyserde/blob/main/examples/custom_field_serializer.py">examples/custom_field_serializer.py</a>を参照してください。</p>
+<h2 id="flatten"><a class="header" href="#flatten"><strong><code>flatten</code></strong></a></h2>
+<p>ネストされた構造のフィールドをフラットにできます。</p>
+<pre><code class="language-python">@serde
+class Bar:
+    c: float
+    d: bool
+
+@serde
+class Foo:
+    a: int
+    b: str
+    bar: Bar = field(flatten=True)
+</code></pre>
+<p>上記の例では、<code>Bar</code> の <code>c</code> および <code>d</code> フィールドが <code>Foo</code> で定義されているかのようにデシリアライズされます。<br />
+<code>Foo</code> をJSON形式にシリアライズすると <code>{"a":10,"b":"foo","c":100.0,"d":true}</code> を取得します。</p>
+<p>完全な例については、<a href="https://github.com/yukinarit/pyserde/blob/main/examples/flatten.py">examples/flatten.py</a>を参照してください。</p>
+
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">

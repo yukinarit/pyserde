@@ -150,7 +150,7 @@
                         <a href="https://github.com/yukinarit/pyserde" title="Git repository" aria-label="Git repository">
                             <i id="git-repository-button" class="fa fa-github"></i>
                         </a>
-                        <a href="https://github.com/yukinarit/pyserde/edit/main/ja/.//class-attributes.md" title="Suggest an edit" aria-label="Suggest an edit">
+                        <a href="https://github.com/yukinarit/pyserde/edit/main/docs/ja/.//class-attributes.md" title="Suggest an edit" aria-label="Suggest an edit">
                             <i id="git-edit-button" class="fa fa-edit"></i>
                         </a>
 
@@ -179,7 +179,148 @@
 
                 <div id="content" class="content">
                     <main>
-                        
+                        <h1 id="class-attributes"><a class="header" href="#class-attributes">Class Attributes</a></h1>
+<p>クラス属性は、クラスの（デ）シリアライズの動作をカスタマイズするために <code>serialize</code> / <code>deserialize</code> デコレータの引数として指定できます。<br />
+フィールドをカスタマイズしたい場合は、<a href="field-attributes.html">フィールド属性</a>の使用を検討してください。</p>
+<h2 id="dataclassesの属性"><a class="header" href="#dataclassesの属性">dataclassesの属性</a></h2>
+<h3 id="frozen"><a class="header" href="#frozen"><strong><code>frozen</code></strong></a></h3>
+<p>dataclassの <code>frozen</code> クラス属性は期待通りに機能します。</p>
+<h3 id="kw_only"><a class="header" href="#kw_only"><strong><code>kw_only</code></strong></a></h3>
+<p>バージョン0.12.2で新規追加。dataclassの <code>kw_only</code> クラス属性は期待通りに機能します。</p>
+<pre><code class="language-python">@serde
+@dataclass(kw_only=True)
+class Foo:
+    i: int
+    s: str
+    f: float
+    b: bool
+</code></pre>
+<p>完全な例については、<a href="https://github.com/yukinarit/pyserde/blob/main/examples/kw_only.py">examples/kw_only.py</a>を参照してください。</p>
+<h2 id="pyserdeの属性"><a class="header" href="#pyserdeの属性">pyserdeの属性</a></h2>
+<h3 id="rename_all"><a class="header" href="#rename_all"><strong><code>rename_all</code></strong></a></h3>
+<p><code>rename_all</code> を使うと、フィールド名を指定されたケーススタイルに変換できます。<br />
+以下の例では、キャメルケースのフィールド名をスネークケースに変換しています。
+ケーススタイルの変換処理は <a href="https://github.com/dmlls/python-casefy">python-casefy</a> パッケージに依存しています。<br />
+サポートされるケーススタイルの一覧は <a href="https://dmlls.github.io/python-casefy/api.html">python-casefy のドキュメント</a>を参照してください。</p>
+<pre><code class="language-python">@serde(rename_all = 'camelcase')
+class Foo:
+    int_field: int
+    str_field: str
+
+f = Foo(int_field=10, str_field='foo')
+print(to_json(f))
+</code></pre>
+<p>上記のコードを実行すると、<code>int_field</code> は <code>intField</code> に、<code>str_field</code> は <code>strField</code> に変換されます。</p>
+<pre><code class="language-json">{"intField": 10, "strField": "foo"}
+</code></pre>
+<blockquote>
+<p><strong>注記:</strong> <code>rename_all</code> クラス属性と <code>rename</code> フィールド属性が同時に使用される場合、<code>rename</code> が優先されます。</p>
+<pre><code class="language-python">@serde(rename_all = 'camelcase')
+class Foo:
+    int_field: int
+    str_field: str = field(rename='str-field')
+
+f = Foo(int_field=10, str_field='foo')
+print(to_json(f))
+</code></pre>
+<p>上記のコードは以下を出力します。</p>
+<pre><code>{"intField": 10, "str-field": "foo"}
+</code></pre>
+</blockquote>
+<p>完全な例については、<a href="https://github.com/yukinarit/pyserde/blob/main/examples/rename_all.py">examples/rename_all.py</a>を参照してください。</p>
+<h3 id="tagging"><a class="header" href="#tagging"><strong><code>tagging</code></strong></a></h3>
+<p>バージョン0.7.0で新規追加。詳細は <a href="union.html">Union</a> を参照してください。</p>
+<h3 id="class_serializer-と-class_deserializer"><a class="header" href="#class_serializer-と-class_deserializer"><strong><code>class_serializer</code></strong> と <strong><code>class_deserializer</code></strong></a></h3>
+<p>バージョン0.13.0で新規追加。</p>
+<p>クラスレベルでカスタム(デ)シリアライザを使用したい場合、<code>class_serializer</code> および <code>class_deserializer</code> 属性に(デ)シリアライザオブジェクトを渡すことができます。<br />
+カスタム(デ)シリアライザは、C++のように複数のメソッドのオーバーロードを可能にするPythonライブラリ <a href="https://github.com/beartype/plum">plum</a> に依存しています。<br />
+plumを使用すると、堅牢なカスタム(デ)シリアライザを簡単に書くことができます。</p>
+<pre><code class="language-python">class MySerializer:
+    @dispatch
+    def serialize(self, value: datetime) -&gt; str:
+        return value.strftime("%d/%m/%y")
+
+class MyDeserializer:
+    @dispatch
+    def deserialize(self, cls: Type[datetime], value:
+
+ Any) -&gt; datetime:
+        return datetime.strptime(value, "%d/%m/%y")
+
+@serde(class_serializer=MySerializer(), class_deserializer=MyDeserializer())
+class Foo:
+    v: datetime
+</code></pre>
+<p>旧来の <code>serializer</code> と <code>deserializer</code> との大きな違いは、 新しい<code>class_serializer</code> と <code>class_deserializer</code> が pyserde のコード生成レベルでより深く統合されていることです。<br />
+これにより Optional や List、ネストされた dataclass を自分で処理する必要はありません。</p>
+<p>カスタムクラスの(デ)シリアライザはすべての(デ)シリアライズのレベル（単純なデータ型から複雑なネストされたデータ構造まで、あらゆる種類の(デ)シリアライズ処理）で使用されるため、サードパーティ製の型もビルトイン型のように扱うことが可能です。</p>
+<p>また、</p>
+<ul>
+<li>フィールドシリアライザとクラスシリアライザの両方が指定されている場合、フィールドシリアライザが優先されます。</li>
+<li>旧と新のクラスシリアライザの両方が指定されている場合、新しいクラスシリアライザが優先されます。</li>
+</ul>
+<blockquote>
+<p>💡 ヒント：複数の <code>serialize</code> メソッドを実装する場合、型チェッカーから、<code>Redefinition of unused serialize</code>という警告が出ることがあります。<br />
+その場合は、<code>plum.overload</code> と <code>plum.dispatch</code> を使用して回避してください。<br />
+詳細は <a href="https://beartype.github.io/plum/integration.html">plumのドキュメント</a> を参照してください。</p>
+<pre><code class="language-python">from plum import dispatch, overload
+
+class Serializer:
+   # @overload を使用
+   @overload
+   def serialize(self, value: int) -&gt; Any:
+       return str(value)
+
+   # @overload を使用
+   @overload
+   def serialize(self, value: float) -&gt; Any:
+       return int(value)
+
+   # メソッド追加時は必ず @dispatch を追加してください。Plumが型チェッカーからの警告を消してくれます
+   @dispatch
+   def serialize(self, value: Any) -&gt; Any:
+       ...
+</code></pre>
+</blockquote>
+<p>完全な例については、<a href="https://github.com/yukinarit/pyserde/blob/main/examples/custom_class_serializer.py">examples/custom_class_serializer.py</a>を参照してください。</p>
+<h3 id="serializer-と-deserializer"><a class="header" href="#serializer-と-deserializer"><strong><code>serializer</code></strong> と <strong><code>deserializer</code></strong></a></h3>
+<blockquote>
+<p><strong>注記:</strong> <code>serializer</code>** と **<code>deserializer</code>は、バージョン0.13.0以降、非推奨となりました。<br />
+<code>class_serializer</code> および <code>class_deserializer</code> の使用を検討してください。</p>
+</blockquote>
+<p>クラスレベルでカスタムの(デ)シリアライザを使用したい場合、<code>serializer</code> および <code>deserializer</code> 属性に(デ)シリアライザメソッドを渡すことができます。</p>
+<pre><code class="language-python">def serializer(cls, o):
+    if cls is datetime:
+        return o.strftime('%d/%m/%y')
+    else:
+        raise SerdeSkip()
+
+def deserializer(cls, o):
+    if cls is datetime:
+        return datetime.strptime(o, '%d/%m/%y')
+    else:
+        raise SerdeSkip()
+
+@serde(serializer=serializer, deserializer=deserializer)
+class Foo:
+    a: datetime
+</code></pre>
+<p>完全な例については、<a href="https://github.com/yukinarit/pyserde/blob/main/examples/custom_legacy_class_serializer.py">examples/custom_legacy_class_serializer.py</a> を参照してください。</p>
+<h3 id="type_check"><a class="header" href="#type_check"><strong><code>type_check</code></strong></a></h3>
+<p>バージョン0.9.0で新規追加。詳細は <a href="type-check.html">Type Check</a> を参照してください。</p>
+<h3 id="serialize_class_var"><a class="header" href="#serialize_class_var"><strong><code>serialize_class_var</code></strong></a></h3>
+<p>バージョン0.9.8で新規追加。</p>
+<p><code>dataclasses.fields</code> はクラス変数を含まないため<sup class="footnote-reference"><a href="#1">1</a></sup>、pyserdeはデフォルトでクラス変数をシリアライズしません。<br />
+<code>serialize_class_var</code> を使用することで <code>typing.ClassVar</code> のフィールドをシリアライズすることができます。</p>
+<pre><code class="language-python">@serde(serialize_class_var=True)
+class Foo:
+    a: ClassVar[int] = 10
+</code></pre>
+<p>完全な例については、<a href="https://github.com/yukinarit/pyserde/blob/main/examples/class_var.py">examples/class_var.py</a> を参照してください。</p>
+<div class="footnote-definition" id="1"><sup class="footnote-definition-label">1</sup>
+<p><a href="https://docs.python.org/3/library/dataclasses.html#dataclasses.fields">dataclasses.fields</a></p>
+</div>
+
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">

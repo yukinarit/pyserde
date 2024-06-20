@@ -150,7 +150,7 @@
                         <a href="https://github.com/yukinarit/pyserde" title="Git repository" aria-label="Git repository">
                             <i id="git-repository-button" class="fa fa-github"></i>
                         </a>
-                        <a href="https://github.com/yukinarit/pyserde/edit/main/en/.//getting-started.md" title="Suggest an edit" aria-label="Suggest an edit">
+                        <a href="https://github.com/yukinarit/pyserde/edit/main/docs/en/.//getting-started.md" title="Suggest an edit" aria-label="Suggest an edit">
                             <i id="git-edit-button" class="fa fa-edit"></i>
                         </a>
 
@@ -187,7 +187,7 @@
 <p>If you're using poetry, run this command.</p>
 <pre><code>poetry add pyserde
 </code></pre>
-<p>Additional data formats besides JSON and Pickle need additional dependencies installed. Install <code>msgpack</code>, <code>toml</code>, or <code>yaml</code> extras to work with the appropriate data formats; you can skip formats that you don't plan to use. For example, if you want to use Toml and YAML:</p>
+<p>Additional data formats besides JSON and Pickle need additional dependencies installed. Install <code>msgpack</code>, <code>toml</code> or <code>yaml</code> extras to work with the appropriate data formats; you can skip formats that you don't plan to use. For example, if you want to use Toml and YAML:</p>
 <pre><code>pip install "pyserde[toml,yaml]"
 </code></pre>
 <p>With poetry</p>
@@ -201,7 +201,7 @@
 </code></pre>
 <p>Here are the available extras</p>
 <ul>
-<li><code>all</code>: Install <code>msgpack</code>, <code>toml</code>, <code>yaml</code> and <code>numpy</code> extras</li>
+<li><code>all</code>: Install <code>msgpack</code>, <code>toml</code>, <code>yaml</code>, <code>numpy</code>, <code>orjson</code>, and <code>sqlalchemy</code> extras</li>
 <li><code>msgpack</code>: Install <a href="https://github.com/msgpack/msgpack-python">msgpack</a></li>
 <li><code>toml</code>: Install <a href="https://github.com/hukkin/tomli">tomli</a> and <a href="https://github.com/hukkin/tomli-w">tomli-w</a>
 <ul>
@@ -210,6 +210,8 @@
 </li>
 <li><code>yaml</code>: Install <a href="https://github.com/yaml/pyyaml">pyyaml</a></li>
 <li><code>numpy</code>: Install <a href="https://github.com/numpy/numpy">numpy</a></li>
+<li><code>orjson</code>: Install <a href="https://github.com/ijl/orjson">orjson</a></li>
+<li><code>sqlalchemy</code>: Install <a href="https://github.com/sqlalchemy/sqlalchemy">sqlalchemy</a></li>
 </ul>
 <h2 id="define-your-first-pyserde-class"><a class="header" href="#define-your-first-pyserde-class">Define your first pyserde class</a></h2>
 <p>Define your class with pyserde's <code>@serde</code> decorators. Be careful that module name is <code>serde</code>, not <code>pyserde</code>. <code>pyserde</code> heavily depends on the standard library's <code>dataclasses</code> module. If you are new to dataclass, I would recommend to read <a href="https://docs.python.org/3/library/dataclasses.html">dataclasses documentation</a> first.</p>
@@ -260,8 +262,8 @@ print(from_json(Foo, s))
 </code></pre>
 <p>That's it! pyserde offers many more features. If you're interested, please read the rest of the documentation.</p>
 <blockquote>
-<p><strong>NOTE:</strong> which type checker should be used?
-pyserde depends on <a href="https://peps.python.org/pep-0681/">PEP681 dataclass_transform</a>. <a href="https://github.com/python/mypy">mypy</a> does not fully support dataclass_transform as of Jan. 2024. <a href="https://github.com/microsoft/pyright">pyright</a> is recommended for codebase using pyserde.</p>
+<p>💡 Tip: which type checker should I use?
+pyserde depends on <a href="https://peps.python.org/pep-0681/">PEP681 dataclass_transform</a>. <a href="https://github.com/python/mypy">mypy</a> does not fully support dataclass_transform as of Jan. 2024. My personal recommendation is <a href="https://github.com/microsoft/pyright">pyright</a>.</p>
 </blockquote>
 
                     </main>

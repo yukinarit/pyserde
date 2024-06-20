@@ -150,7 +150,7 @@
                         <a href="https://github.com/yukinarit/pyserde" title="Git repository" aria-label="Git repository">
                             <i id="git-repository-button" class="fa fa-github"></i>
                         </a>
-                        <a href="https://github.com/yukinarit/pyserde/edit/main/en/.//data-formats.md" title="Suggest an edit" aria-label="Suggest an edit">
+                        <a href="https://github.com/yukinarit/pyserde/edit/main/docs/en/.//data-formats.md" title="Suggest an edit" aria-label="Suggest an edit">
                             <i id="git-edit-button" class="fa fa-edit"></i>
                         </a>
 
@@ -180,7 +180,7 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="data-formats"><a class="header" href="#data-formats">Data Formats</a></h1>
-<p>Currently <code>dict</code>, <code>tuple</code>, <code>JSON</code>, <code>Yaml</code>, <code>Toml</code>, <code>MsgPack</code> and <code>Pickle</code> are supported. Each Serialize/Deserialize API can take additional keyword arguments. Keyword arguements are forwared to the packages which is used by pyserde to encode data internally.</p>
+<p>pyserde supports several data formats for serialization and deserialization, including <code>dict</code>, <code>tuple</code>, <code>JSON</code>, <code>YAML</code>, <code>TOML</code>, <code>MsgPack</code>, and <code>Pickle</code>. Each API can take additional keyword arguments, which are forwarded to the underlying packages used by pyserde.</p>
 <p>e.g. If you want to preserve the field order in YAML, you can pass <code>sort_key=True</code> in <code>serde.yaml.to_yaml</code></p>
 <pre><code class="language-python">serde.yaml.to_yaml(foo, sort_key=True)
 </code></pre>

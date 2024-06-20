@@ -150,7 +150,7 @@
                         <a href="https://github.com/yukinarit/pyserde" title="Git repository" aria-label="Git repository">
                             <i id="git-repository-button" class="fa fa-github"></i>
                         </a>
-                        <a href="https://github.com/yukinarit/pyserde/edit/main/en/.//introduction.md" title="Suggest an edit" aria-label="Suggest an edit">
+                        <a href="https://github.com/yukinarit/pyserde/edit/main/docs/en/.//introduction.md" title="Suggest an edit" aria-label="Suggest an edit">
                             <i id="git-edit-button" class="fa fa-edit"></i>
                         </a>
 
@@ -180,8 +180,11 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="introduction"><a class="header" href="#introduction">Introduction</a></h1>
-<p><code>pyserde</code> is a simple yet powerful serialization library on top of <a href="https://docs.python.org/3/library/dataclasses.html">dataclasses</a>. Simply adding pyserde's <code>@serde</code> decorator makes your class (de)serializable from/to many data formats.</p>
-<pre><code class="language-python">@serde
+<p><code>pyserde</code> is a simple yet powerful serialization library on top of <a href="https://docs.python.org/3/library/dataclasses.html">dataclasses</a>. It allows you to convert Python objects to and from JSON, YAML, and other formats easily and efficiently.</p>
+<p>Declare your class with <code>@serde</code> decorator and annotate fields using <a href="https://peps.python.org/pep-0484/">PEP484</a> as below.</p>
+<pre><code class="language-python">from serde import serde
+
+@serde
 class Foo:
     i: int
     s: str
@@ -189,13 +192,22 @@ class Foo:
     b: bool
 </code></pre>
 <p>You can serialize <code>Foo</code> object into JSON.</p>
-<pre><code class="language-python">&gt;&gt;&gt; to_json(Foo(i=10, s='foo', f=100.0, b=True))
+<pre><code class="language-python">&gt;&gt;&gt; from serde.json import to_json
+&gt;&gt;&gt; to_json(Foo(i=10, s='foo', f=100.0, b=True))
 '{"i":10,"s":"foo","f":100.0,"b":true}'
 </code></pre>
 <p>You can deserialize JSON into <code>Foo</code> object.</p>
-<pre><code class="language-python">&gt;&gt;&gt; from_json(Foo, '{"i": 10, "s": "foo", "f": 100.0, "b": true}')
+<pre><code class="language-python">&gt;&gt;&gt; from serde.json import from_json
+&gt;&gt;&gt; from_json(Foo, '{"i": 10, "s": "foo", "f": 100.0, "b": true}')
 Foo(i=10, s='foo', f=100.0, b=True)
 </code></pre>
+<h2 id="next-steps"><a class="header" href="#next-steps">Next Steps</a></h2>
+<ul>
+<li><a href="getting-started.html">Getting started</a></li>
+<li><a href="https://yukinarit.github.io/pyserde/api/serde.html">API Reference</a></li>
+<li><a href="https://github.com/yukinarit/pyserde/tree/main/examples">Examples</a></li>
+<li><a href="faq.html">FAQ</a></li>
+</ul>
 
                     </main>
 

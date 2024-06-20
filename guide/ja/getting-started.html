@@ -150,7 +150,7 @@
                         <a href="https://github.com/yukinarit/pyserde" title="Git repository" aria-label="Git repository">
                             <i id="git-repository-button" class="fa fa-github"></i>
                         </a>
-                        <a href="https://github.com/yukinarit/pyserde/edit/main/ja/.//getting-started.md" title="Suggest an edit" aria-label="Suggest an edit">
+                        <a href="https://github.com/yukinarit/pyserde/edit/main/docs/ja/.//getting-started.md" title="Suggest an edit" aria-label="Suggest an edit">
                             <i id="git-edit-button" class="fa fa-edit"></i>
                         </a>
 
@@ -179,7 +179,106 @@
 
                 <div id="content" class="content">
                     <main>
-                        
+                        <h1 id="getting-started"><a class="header" href="#getting-started">Getting Started</a></h1>
+<h2 id="インストール"><a class="header" href="#インストール">インストール</a></h2>
+<p>PyPIからpyserdeをインストールしてください。pyserdeにはPython&gt;=3.9が必要です。</p>
+<pre><code>pip install pyserde
+</code></pre>
+<p>poetryを使用している場合は、以下のコマンドを実行してください。</p>
+<pre><code>poetry add pyserde
+</code></pre>
+<p>JSONとPickle以外のデータ形式を扱う場合は、追加の依存関係をインストールする必要があります。<br />
+適切なデータ形式で動作するには、<code>msgpack</code>、<code>toml</code>、<code>yaml</code> の追加パッケージをインストールしてください。<br />
+使用しない場合はスキップして構いません。<br />
+例えば、TomlとYAMLを使用する場合は以下のようにします。</p>
+<pre><code>pip install "pyserde[toml,yaml]"
+</code></pre>
+<p>poetryを使用している場合</p>
+<pre><code>poetry add pyserde -E toml -E yaml
+</code></pre>
+<p>一度にすべてをインストールする場合</p>
+<pre><code>pip install "pyserde[all]"
+</code></pre>
+<p>poetryを使用している場合</p>
+<pre><code>poetry add pyserde -E all
+</code></pre>
+<p>利用可能な追加パッケージ</p>
+<ul>
+<li><code>all</code>：<code>msgpack</code>、<code>toml</code>、<code>yaml</code>、<code>numpy</code>、<code>orjson</code>、<code>sqlalchemy</code> をインストール</li>
+<li><code>msgpack</code>：<a href="https://github.com/msgpack/msgpack-python">msgpack</a> をインストール</li>
+<li><code>toml</code>：<a href="https://github.com/hukkin/tomli">tomli</a> と <a href="https://github.com/hukkin/tomli-w">tomli-w</a> をインストール
+<ul>
+<li>注記：python 3.11以降は <a href="https://docs.python.org/3/library/tomllib.html">tomllib</a> を使用</li>
+</ul>
+</li>
+<li><code>yaml</code>：<a href="https://github.com/yaml/pyyaml">pyyaml</a> をインストール</li>
+<li><code>numpy</code>：<a href="https://github.com/numpy/numpy">numpy</a> をインストール</li>
+<li><code>orjson</code>：<a href="https://github.com/ijl/orjson">orjson</a> をインストール</li>
+<li><code>sqlalchemy</code>：<a href="https://github.com/sqlalchemy/sqlalchemy">sqlalchemy</a> をインストール</li>
+</ul>
+<h2 id="最初のpyserdeクラスを定義"><a class="header" href="#最初のpyserdeクラスを定義">最初のpyserdeクラスを定義</a></h2>
+<p>pyserdeの<code>@serde</code>デコレータを使用してクラスを定義します。<br />
+モジュール名が <code>pyserde</code> ではなく <code>serde</code> であることに注意してください。<br />
+<code>pyserde</code>は標準ライブラリの<code>dataclasses</code>モジュールに大きく依存しています。<br />
+そのため、dataclassに慣れていない場合はまず<a href="https://docs.python.org/3/library/dataclasses.html">dataclassesのドキュメント</a>を読むことをおすすめします。</p>
+<pre><code class="language-python">from serde import serde
+
+@serde
+class Foo:
+    i: int
+    s: str
+    f: float
+    b: bool
+</code></pre>
+<p>クラスがPythonインタプリタにロードされると、pyserdeは<code>@serde</code>によって（デ）シリアライズに必要なメソッドを生成します。<br />
+コード生成は一度だけ行われ、クラスを使用する際にオーバーヘッドはありません。<br />
+これにより、クラスはpyserdeがサポートするすべてのデータ形式でシリアライズおよびデシリアライズ可能になります。</p>
+<blockquote>
+<p><strong>注記：</strong> シリアライズまたはデシリアライズの機能のみが必要な場合、<code>@serde</code>デコレータの代わりに<code>@serialize</code>や<code>@deserialize</code>を使用できます。</p>
+<p>例：シリアライズのみを行う場合、<code>@serialize</code>デコレータを使用できます。しかし、<code>Foo</code>のデシリアライズAPI（例：<code>from_json</code>）を呼び出すとエラーが発生します。</p>
+<pre><code class="language-python">from serde import serialize
+
+@serialize
+class Foo:
+    i: int
+    s: str
+    f: float
+    b: bool
+</code></pre>
+</blockquote>
+<h2 id="pep585とpep604"><a class="header" href="#pep585とpep604">PEP585とPEP604</a></h2>
+<p>python&gt;=3.9用の<a href="https://www.python.org/dev/peps/pep-0585/">PEP585</a>スタイルのアノテーションと、python&gt;=3.10用の<a href="https://www.python.org/dev/peps/pep-0604/">PEP604</a> Unionオペレータがサポートされています。<br />
+PEP585とPEP604を使用すると、pyserdeクラスをきれいに書くことができます。</p>
+<pre><code class="language-python">@serde
+class Foo:
+    a: int
+    b: list[str]
+    c: tuple[int, float, str, bool]
+    d: dict[str, list[tuple[str, int]]]
+    e: str | None
+</code></pre>
+<h2 id="pyserdeクラスの使用"><a class="header" href="#pyserdeクラスの使用">pyserdeクラスの使用</a></h2>
+<p>次に、pyserdeの（デ）シリアライズAPIをインポートします。<br />
+JSONの場合は以下のようにします。</p>
+<pre><code class="language-python">from serde.json import from_json, to_json
+</code></pre>
+<p><code>to_json</code>を使用してオブジェクトをJSONにシリアライズします。</p>
+<pre><code class="language-python">f = Foo(i=10, s='foo', f=100.0, b=True)
+print(to_json(f))
+</code></pre>
+<p><code>from_json</code>に<code>Foo</code>クラスとJSON文字列を渡して、JSONをオブジェクトにデシリアライズします。</p>
+<pre><code class="language-python">s = '{"i": 10, "s": "foo", "f": 100.0, "b": true}'
+print(from_json(Foo, s))
+</code></pre>
+<p>以上です！<br />
+pyserdeには他にも多くの機能があります。興味があれば、残りのドキュメントをお読みください。</p>
+<blockquote>
+<p>💡 ヒント：どのタイプチェッカーを使用すべきか？<br />
+pyserdeは<a href="https://peps.python.org/pep-0681/">PEP681 dataclass_transform</a>に依存しています。<br />
+2024年1月現在、<a href="https://github.com/python/mypy">mypy</a>はdataclass_transformを完全にはサポートしていません。<br />
+私の個人的なおすすめは<a href="https://github.com/microsoft/pyright">pyright</a>です。</p>
+</blockquote>
+
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">

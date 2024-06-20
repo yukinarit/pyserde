@@ -178,8 +178,11 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="introduction"><a class="header" href="#introduction">Introduction</a></h1>
-<p><code>pyserde</code> is a simple yet powerful serialization library on top of <a href="https://docs.python.org/3/library/dataclasses.html">dataclasses</a>. Simply adding pyserde's <code>@serde</code> decorator makes your class (de)serializable from/to many data formats.</p>
-<pre><code class="language-python">@serde
+<p><code>pyserde</code> is a simple yet powerful serialization library on top of <a href="https://docs.python.org/3/library/dataclasses.html">dataclasses</a>. It allows you to convert Python objects to and from JSON, YAML, and other formats easily and efficiently.</p>
+<p>Declare your class with <code>@serde</code> decorator and annotate fields using <a href="https://peps.python.org/pep-0484/">PEP484</a> as below.</p>
+<pre><code class="language-python">from serde import serde
+
+@serde
 class Foo:
     i: int
     s: str
@@ -187,13 +190,22 @@ class Foo:
     b: bool
 </code></pre>
 <p>You can serialize <code>Foo</code> object into JSON.</p>
-<pre><code class="language-python">&gt;&gt;&gt; to_json(Foo(i=10, s='foo', f=100.0, b=True))
+<pre><code class="language-python">&gt;&gt;&gt; from serde.json import to_json
+&gt;&gt;&gt; to_json(Foo(i=10, s='foo', f=100.0, b=True))
 '{"i":10,"s":"foo","f":100.0,"b":true}'
 </code></pre>
 <p>You can deserialize JSON into <code>Foo</code> object.</p>
-<pre><code class="language-python">&gt;&gt;&gt; from_json(Foo, '{"i": 10, "s": "foo", "f": 100.0, "b": true}')
+<pre><code class="language-python">&gt;&gt;&gt; from serde.json import from_json
+&gt;&gt;&gt; from_json(Foo, '{"i": 10, "s": "foo", "f": 100.0, "b": true}')
 Foo(i=10, s='foo', f=100.0, b=True)
 </code></pre>
+<h2 id="next-steps"><a class="header" href="#next-steps">Next Steps</a></h2>
+<ul>
+<li><a href="getting-started.html">Getting started</a></li>
+<li><a href="https://yukinarit.github.io/pyserde/api/serde.html">API Reference</a></li>
+<li><a href="https://github.com/yukinarit/pyserde/tree/main/examples">Examples</a></li>
+<li><a href="faq.html">FAQ</a></li>
+</ul>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="getting-started"><a class="header" href="#getting-started">Getting started</a></h1>
 <h2 id="installation"><a class="header" href="#installation">Installation</a></h2>
 <p>Install pyserde from PyPI. pyserde requires Python&gt;=3.9.</p>
@@ -202,7 +214,7 @@ Foo(i=10, s='foo', f=100.0, b=True)
 <p>If you're using poetry, run this command.</p>
 <pre><code>poetry add pyserde
 </code></pre>
-<p>Additional data formats besides JSON and Pickle need additional dependencies installed. Install <code>msgpack</code>, <code>toml</code>, or <code>yaml</code> extras to work with the appropriate data formats; you can skip formats that you don't plan to use. For example, if you want to use Toml and YAML:</p>
+<p>Additional data formats besides JSON and Pickle need additional dependencies installed. Install <code>msgpack</code>, <code>toml</code> or <code>yaml</code> extras to work with the appropriate data formats; you can skip formats that you don't plan to use. For example, if you want to use Toml and YAML:</p>
 <pre><code>pip install "pyserde[toml,yaml]"
 </code></pre>
 <p>With poetry</p>
@@ -216,7 +228,7 @@ Foo(i=10, s='foo', f=100.0, b=True)
 </code></pre>
 <p>Here are the available extras</p>
 <ul>
-<li><code>all</code>: Install <code>msgpack</code>, <code>toml</code>, <code>yaml</code> and <code>numpy</code> extras</li>
+<li><code>all</code>: Install <code>msgpack</code>, <code>toml</code>, <code>yaml</code>, <code>numpy</code>, <code>orjson</code>, and <code>sqlalchemy</code> extras</li>
 <li><code>msgpack</code>: Install <a href="https://github.com/msgpack/msgpack-python">msgpack</a></li>
 <li><code>toml</code>: Install <a href="https://github.com/hukkin/tomli">tomli</a> and <a href="https://github.com/hukkin/tomli-w">tomli-w</a>
 <ul>
@@ -225,6 +237,8 @@ Foo(i=10, s='foo', f=100.0, b=True)
 </li>
 <li><code>yaml</code>: Install <a href="https://github.com/yaml/pyyaml">pyyaml</a></li>
 <li><code>numpy</code>: Install <a href="https://github.com/numpy/numpy">numpy</a></li>
+<li><code>orjson</code>: Install <a href="https://github.com/ijl/orjson">orjson</a></li>
+<li><code>sqlalchemy</code>: Install <a href="https://github.com/sqlalchemy/sqlalchemy">sqlalchemy</a></li>
 </ul>
 <h2 id="define-your-first-pyserde-class"><a class="header" href="#define-your-first-pyserde-class">Define your first pyserde class</a></h2>
 <p>Define your class with pyserde's <code>@serde</code> decorators. Be careful that module name is <code>serde</code>, not <code>pyserde</code>. <code>pyserde</code> heavily depends on the standard library's <code>dataclasses</code> module. If you are new to dataclass, I would recommend to read <a href="https://docs.python.org/3/library/dataclasses.html">dataclasses documentation</a> first.</p>
@@ -275,11 +289,11 @@ print(from_json(Foo, s))
 </code></pre>
 <p>That's it! pyserde offers many more features. If you're interested, please read the rest of the documentation.</p>
 <blockquote>
-<p><strong>NOTE:</strong> which type checker should be used?
-pyserde depends on <a href="https://peps.python.org/pep-0681/">PEP681 dataclass_transform</a>. <a href="https://github.com/python/mypy">mypy</a> does not fully support dataclass_transform as of Jan. 2024. <a href="https://github.com/microsoft/pyright">pyright</a> is recommended for codebase using pyserde.</p>
+<p>💡 Tip: which type checker should I use?
+pyserde depends on <a href="https://peps.python.org/pep-0681/">PEP681 dataclass_transform</a>. <a href="https://github.com/python/mypy">mypy</a> does not fully support dataclass_transform as of Jan. 2024. My personal recommendation is <a href="https://github.com/microsoft/pyright">pyright</a>.</p>
 </blockquote>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="data-formats"><a class="header" href="#data-formats">Data Formats</a></h1>
-<p>Currently <code>dict</code>, <code>tuple</code>, <code>JSON</code>, <code>Yaml</code>, <code>Toml</code>, <code>MsgPack</code> and <code>Pickle</code> are supported. Each Serialize/Deserialize API can take additional keyword arguments. Keyword arguements are forwared to the packages which is used by pyserde to encode data internally.</p>
+<p>pyserde supports several data formats for serialization and deserialization, including <code>dict</code>, <code>tuple</code>, <code>JSON</code>, <code>YAML</code>, <code>TOML</code>, <code>MsgPack</code>, and <code>Pickle</code>. Each API can take additional keyword arguments, which are forwarded to the underlying packages used by pyserde.</p>
 <p>e.g. If you want to preserve the field order in YAML, you can pass <code>sort_key=True</code> in <code>serde.yaml.to_yaml</code></p>
 <pre><code class="language-python">serde.yaml.to_yaml(foo, sort_key=True)
 </code></pre>
@@ -371,32 +385,33 @@ Foo(i=10, s='foo', f=100.0, b=True)
 <li>Containers
 <ul>
 <li><code>list</code>, <code>set</code>, <code>tuple</code>, <code>dict</code> <sup class="footnote-reference"><a href="#2">2</a></sup></li>
-<li><a href="https://docs.python.org/3/library/stdtypes.html#frozenset"><code>frozenset</code></a>, <sup class="footnote-reference"><a href="#3">3</a></sup> <a href="https://docs.python.org/3/library/collections.html#collections.defaultdict"><code>defaultdict</code></a> <sup class="footnote-reference"><a href="#4">4</a></sup></li>
+<li><a href="https://docs.python.org/3/library/stdtypes.html#frozenset"><code>frozenset</code></a>, <sup class="footnote-reference"><a href="#3">3</a></sup></li>
+<li><a href="https://docs.python.org/3/library/collections.html#collections.defaultdict"><code>defaultdict</code></a> <sup class="footnote-reference"><a href="#4">4</a></sup></li>
 </ul>
 </li>
-<li><a href="https://docs.python.org/3/library/typing.html#typing.Optional"><code>typing.Optional</code></a> [^5]</li>
-<li><a href="https://docs.python.org/3/library/typing.html#typing.Union"><code>typing.Union</code></a> <sup class="footnote-reference"><a href="#6">5</a></sup> <sup class="footnote-reference"><a href="#7">6</a></sup> <sup class="footnote-reference"><a href="#8">7</a></sup></li>
-<li>User defined class with <a href="https://docs.python.org/3/library/dataclasses.html"><code>@dataclass</code></a> <sup class="footnote-reference"><a href="#9">8</a></sup> <sup class="footnote-reference"><a href="#10">9</a></sup></li>
-<li><a href="https://docs.python.org/3/library/typing.html#newtype"><code>typing.NewType</code></a> for primitive types <sup class="footnote-reference"><a href="#11">10</a></sup></li>
-<li><a href="https://docs.python.org/3/library/typing.html#the-any-type"><code>typing.Any</code></a> <sup class="footnote-reference"><a href="#12">11</a></sup></li>
-<li><a href="https://docs.python.org/3/library/typing.html#typing.Literal"><code>typing.Literal</code></a> <sup class="footnote-reference"><a href="#13">12</a></sup></li>
-<li><a href="https://docs.python.org/3/library/typing.html#user-defined-generic-types"><code>typing.Generic</code></a> <sup class="footnote-reference"><a href="#14">13</a></sup></li>
-<li><a href="https://docs.python.org/3/library/typing.html#typing.ClassVar"><code>typing.ClassVar</code></a> <sup class="footnote-reference"><a href="#15">14</a></sup></li>
-<li><a href="https://docs.python.org/3/library/dataclasses.html#init-only-variables"><code>typing.InitVar</code></a> <sup class="footnote-reference"><a href="#16">15</a></sup></li>
-<li><a href="https://docs.python.org/3/library/enum.html#enum.Enum"><code>Enum</code></a> and <a href="https://docs.python.org/3/library/enum.html#enum.IntEnum"><code>IntEnum</code></a> <sup class="footnote-reference"><a href="#17">16</a></sup></li>
+<li><a href="https://docs.python.org/3/library/typing.html#typing.Optional"><code>typing.Optional</code></a> <sup class="footnote-reference"><a href="#5">5</a></sup></li>
+<li><a href="https://docs.python.org/3/library/typing.html#typing.Union"><code>typing.Union</code></a> <sup class="footnote-reference"><a href="#6">6</a></sup> <sup class="footnote-reference"><a href="#7">7</a></sup> <sup class="footnote-reference"><a href="#8">8</a></sup></li>
+<li>User defined class with <a href="https://docs.python.org/3/library/dataclasses.html"><code>@dataclass</code></a> <sup class="footnote-reference"><a href="#9">9</a></sup> <sup class="footnote-reference"><a href="#10">10</a></sup></li>
+<li><a href="https://docs.python.org/3/library/typing.html#newtype"><code>typing.NewType</code></a> for primitive types <sup class="footnote-reference"><a href="#11">11</a></sup></li>
+<li><a href="https://docs.python.org/3/library/typing.html#the-any-type"><code>typing.Any</code></a> <sup class="footnote-reference"><a href="#12">12</a></sup></li>
+<li><a href="https://docs.python.org/3/library/typing.html#typing.Literal"><code>typing.Literal</code></a> <sup class="footnote-reference"><a href="#13">13</a></sup></li>
+<li><a href="https://docs.python.org/3/library/typing.html#user-defined-generic-types"><code>typing.Generic</code></a> <sup class="footnote-reference"><a href="#14">14</a></sup></li>
+<li><a href="https://docs.python.org/3/library/typing.html#typing.ClassVar"><code>typing.ClassVar</code></a> <sup class="footnote-reference"><a href="#15">15</a></sup></li>
+<li><a href="https://docs.python.org/3/library/dataclasses.html#init-only-variables"><code>typing.InitVar</code></a> <sup class="footnote-reference"><a href="#16">16</a></sup></li>
+<li><a href="https://docs.python.org/3/library/enum.html#enum.Enum"><code>Enum</code></a> and <a href="https://docs.python.org/3/library/enum.html#enum.IntEnum"><code>IntEnum</code></a> <sup class="footnote-reference"><a href="#17">17</a></sup></li>
 <li>Standard library
 <ul>
-<li><a href="https://docs.python.org/3/library/pathlib.html"><code>pathlib.Path</code></a> <sup class="footnote-reference"><a href="#18">17</a></sup></li>
-<li><a href="https://docs.python.org/3/library/decimal.html"><code>decimal.Decimal</code></a> <sup class="footnote-reference"><a href="#19">18</a></sup></li>
-<li><a href="https://docs.python.org/3/library/uuid.html"><code>uuid.UUID</code></a> <sup class="footnote-reference"><a href="#20">19</a></sup></li>
-<li><a href="https://docs.python.org/3/library/datetime.html#date-objects"><code>datetime.date</code></a>, <a href="https://docs.python.org/3/library/datetime.html#time-objects"><code>datetime.time</code></a>, <a href="https://docs.python.org/3/library/datetime.html#datetime-objects"><code>datetime.datetime</code></a> <sup class="footnote-reference"><a href="#21">20</a></sup></li>
-<li><a href="https://docs.python.org/3/library/ipaddress.html"><code>ipaddress</code></a> <sup class="footnote-reference"><a href="#22">21</a></sup></li>
+<li><a href="https://docs.python.org/3/library/pathlib.html"><code>pathlib.Path</code></a> <sup class="footnote-reference"><a href="#18">18</a></sup></li>
+<li><a href="https://docs.python.org/3/library/decimal.html"><code>decimal.Decimal</code></a> <sup class="footnote-reference"><a href="#19">19</a></sup></li>
+<li><a href="https://docs.python.org/3/library/uuid.html"><code>uuid.UUID</code></a> <sup class="footnote-reference"><a href="#20">20</a></sup></li>
+<li><a href="https://docs.python.org/3/library/datetime.html#date-objects"><code>datetime.date</code></a>, <a href="https://docs.python.org/3/library/datetime.html#time-objects"><code>datetime.time</code></a>, <a href="https://docs.python.org/3/library/datetime.html#datetime-objects"><code>datetime.datetime</code></a> <sup class="footnote-reference"><a href="#21">21</a></sup></li>
+<li><a href="https://docs.python.org/3/library/ipaddress.html"><code>ipaddress</code></a> <sup class="footnote-reference"><a href="#22">22</a></sup></li>
 </ul>
 </li>
 <li>PyPI library
 <ul>
-<li><a href="https://github.com/numpy/numpy"><code>numpy</code></a> types <sup class="footnote-reference"><a href="#23">22</a></sup></li>
-<li><a href="https://github.com/sqlalchemy/sqlalchemy"><code>SQLAlchemy</code></a> Declarative Dataclass Mapping (experimental) <sup class="footnote-reference"><a href="#24">23</a></sup></li>
+<li><a href="https://github.com/numpy/numpy"><code>numpy</code></a> types <sup class="footnote-reference"><a href="#23">23</a></sup></li>
+<li><a href="https://github.com/sqlalchemy/sqlalchemy"><code>SQLAlchemy</code></a> Declarative Dataclass Mapping (experimental) <sup class="footnote-reference"><a href="#24">24</a></sup></li>
 </ul>
 </li>
 </ul>
@@ -472,61 +487,64 @@ NPFoo(i=1, j=2, f=3.0, g=4.0, h=False, u=array([1, 2]), v=array([3, 4]), w=array
 <div class="footnote-definition" id="4"><sup class="footnote-definition-label">4</sup>
 <p>See <a href="https://github.com/yukinarit/pyserde/blob/main/examples/default_dict.py">examples/default_dict.py</a></p>
 </div>
-<div class="footnote-definition" id="6"><sup class="footnote-definition-label">5</sup>
+<div class="footnote-definition" id="5"><sup class="footnote-definition-label">5</sup>
 <p>See <a href="https://github.com/yukinarit/pyserde/blob/main/examples/union.py">examples/union.py</a></p>
 </div>
-<div class="footnote-definition" id="7"><sup class="footnote-definition-label">6</sup>
+<div class="footnote-definition" id="6"><sup class="footnote-definition-label">6</sup>
+<p>See <a href="https://github.com/yukinarit/pyserde/blob/main/examples/union.py">examples/union.py</a></p>
+</div>
+<div class="footnote-definition" id="7"><sup class="footnote-definition-label">7</sup>
 <p>See <a href="https://github.com/yukinarit/pyserde/blob/main/examples/union_operator.py">examples/union_operator.py</a></p>
 </div>
-<div class="footnote-definition" id="8"><sup class="footnote-definition-label">7</sup>
+<div class="footnote-definition" id="8"><sup class="footnote-definition-label">8</sup>
 <p>See <a href="https://github.com/yukinarit/pyserde/blob/main/examples/union_tagging.py">examples/union_tagging.py</a></p>
 </div>
-<div class="footnote-definition" id="9"><sup class="footnote-definition-label">8</sup>
+<div class="footnote-definition" id="9"><sup class="footnote-definition-label">9</sup>
 <p>See <a href="https://github.com/yukinarit/pyserde/blob/main/examples/simple.py">examples/simple.py</a></p>
 </div>
-<div class="footnote-definition" id="10"><sup class="footnote-definition-label">9</sup>
+<div class="footnote-definition" id="10"><sup class="footnote-definition-label">10</sup>
 <p>See <a href="https://github.com/yukinarit/pyserde/blob/main/examples/nested.py">examples/nested.py</a></p>
 </div>
-<div class="footnote-definition" id="11"><sup class="footnote-definition-label">10</sup>
+<div class="footnote-definition" id="11"><sup class="footnote-definition-label">11</sup>
 <p>See <a href="https://github.com/yukinarit/pyserde/blob/main/examples/newtype.py">examples/newtype.py</a></p>
 </div>
-<div class="footnote-definition" id="12"><sup class="footnote-definition-label">11</sup>
+<div class="footnote-definition" id="12"><sup class="footnote-definition-label">12</sup>
 <p>See <a href="https://github.com/yukinarit/pyserde/blob/main/examples/any.py">examples/any.py</a></p>
 </div>
-<div class="footnote-definition" id="13"><sup class="footnote-definition-label">12</sup>
+<div class="footnote-definition" id="13"><sup class="footnote-definition-label">13</sup>
 <p>See <a href="https://github.com/yukinarit/pyserde/blob/main/examples/literal.py">examples/literal.py</a></p>
 </div>
-<div class="footnote-definition" id="14"><sup class="footnote-definition-label">13</sup>
+<div class="footnote-definition" id="14"><sup class="footnote-definition-label">14</sup>
 <p>See <a href="https://github.com/yukinarit/pyserde/blob/main/examples/generics.py">examples/generics.py</a></p>
 </div>
-<div class="footnote-definition" id="15"><sup class="footnote-definition-label">14</sup>
+<div class="footnote-definition" id="15"><sup class="footnote-definition-label">15</sup>
 <p>See <a href="https://github.com/yukinarit/pyserde/blob/main/examples/class_var.py">examples/class_var.py</a></p>
 </div>
-<div class="footnote-definition" id="16"><sup class="footnote-definition-label">15</sup>
+<div class="footnote-definition" id="16"><sup class="footnote-definition-label">16</sup>
 <p>See <a href="https://github.com/yukinarit/pyserde/blob/main/examples/init_var.py">examples/init_var.py</a></p>
 </div>
-<div class="footnote-definition" id="17"><sup class="footnote-definition-label">16</sup>
+<div class="footnote-definition" id="17"><sup class="footnote-definition-label">17</sup>
 <p>See <a href="https://github.com/yukinarit/pyserde/blob/main/examples/enum34.py">examples/enum34.py</a></p>
 </div>
-<div class="footnote-definition" id="18"><sup class="footnote-definition-label">17</sup>
+<div class="footnote-definition" id="18"><sup class="footnote-definition-label">18</sup>
 <p>See <a href="https://github.com/yukinarit/pyserde/blob/main/examples/type_pathlib.py">examples/type_pathlib.py</a></p>
 </div>
-<div class="footnote-definition" id="19"><sup class="footnote-definition-label">18</sup>
+<div class="footnote-definition" id="19"><sup class="footnote-definition-label">19</sup>
 <p>See <a href="https://github.com/yukinarit/pyserde/blob/main/examples/type_decimal.py">examples/type_decimal.py</a></p>
 </div>
-<div class="footnote-definition" id="20"><sup class="footnote-definition-label">19</sup>
+<div class="footnote-definition" id="20"><sup class="footnote-definition-label">20</sup>
 <p>See <a href="https://github.com/yukinarit/pyserde/blob/main/examples/type_uuid.py">examples/type_uuid.py</a></p>
 </div>
-<div class="footnote-definition" id="21"><sup class="footnote-definition-label">20</sup>
+<div class="footnote-definition" id="21"><sup class="footnote-definition-label">21</sup>
 <p>See <a href="https://github.com/yukinarit/pyserde/blob/main/examples/type_datetime.py">examples/type_datetime.py</a></p>
 </div>
-<div class="footnote-definition" id="22"><sup class="footnote-definition-label">21</sup>
+<div class="footnote-definition" id="22"><sup class="footnote-definition-label">22</sup>
 <p>See <a href="https://github.com/yukinarit/pyserde/blob/main/examples/type_ipaddress.py">examples/type_ipaddress.py</a></p>
 </div>
-<div class="footnote-definition" id="23"><sup class="footnote-definition-label">22</sup>
+<div class="footnote-definition" id="23"><sup class="footnote-definition-label">23</sup>
 <p>See <a href="https://github.com/yukinarit/pyserde/blob/main/examples/type_numpy.py">examples/type_numpy.py</a></p>
 </div>
-<div class="footnote-definition" id="24"><sup class="footnote-definition-label">23</sup>
+<div class="footnote-definition" id="24"><sup class="footnote-definition-label">24</sup>
 <p>See <a href="https://github.com/yukinarit/pyserde/blob/main/examples/type_sqlalchemy.py">examples/type_sqlalchemy.py</a></p>
 </div>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="decorators"><a class="header" href="#decorators">Decorators</a></h1>
@@ -747,7 +765,7 @@ class Foo:
 </code></pre>
 <p>See <a href="https://github.com/yukinarit/pyserde/blob/main/examples/custom_legacy_class_serializer.py">examples/custom_legacy_class_serializer.py</a> for complete example.</p>
 <h3 id="type_check"><a class="header" href="#type_check"><strong><code>type_check</code></strong></a></h3>
-<p>New in v0.9.0. See <a href="class-attributes.html#type-check.md">Type Check</a>.</p>
+<p>New in v0.9.0. See <a href="type-check.html">Type Check</a>.</p>
 <h3 id="serialize_class_var"><a class="header" href="#serialize_class_var"><strong><code>serialize_class_var</code></strong></a></h3>
 <p>New in v0.9.8. Since <code>dataclasses.fields</code> doesn't include a class variable <sup class="footnote-reference"><a href="#1">1</a></sup>, pyserde doesn't serialize class variable as default. This option allows a field of <code>typing.ClassVar</code> to be serialized.</p>
 <pre><code class="language-python">@serde(serialize_class_var=True)
@@ -756,7 +774,7 @@ class Foo:
 </code></pre>
 <p>See <a href="https://github.com/yukinarit/pyserde/blob/main/examples/class_var.py">examples/class_var.py</a> for complete example.</p>
 <div class="footnote-definition" id="1"><sup class="footnote-definition-label">1</sup>
-<p>https://docs.python.org/3/library/dataclasses.html#dataclasses.fields</p>
+<p><a href="https://docs.python.org/3/library/dataclasses.html#dataclasses.fields">dataclasses.fields</a></p>
 </div>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="field-attributes"><a class="header" href="#field-attributes">Field Attributes</a></h1>
 <p>Field attributes are options to customize (de)serialization behaviour for a field of a dataclass.</p>

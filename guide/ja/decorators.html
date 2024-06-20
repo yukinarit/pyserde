@@ -150,7 +150,7 @@
                         <a href="https://github.com/yukinarit/pyserde" title="Git repository" aria-label="Git repository">
                             <i id="git-repository-button" class="fa fa-github"></i>
                         </a>
-                        <a href="https://github.com/yukinarit/pyserde/edit/main/ja/.//decorators.md" title="Suggest an edit" aria-label="Suggest an edit">
+                        <a href="https://github.com/yukinarit/pyserde/edit/main/docs/ja/.//decorators.md" title="Suggest an edit" aria-label="Suggest an edit">
                             <i id="git-edit-button" class="fa fa-edit"></i>
                         </a>
 
@@ -179,7 +179,120 @@
 
                 <div id="content" class="content">
                     <main>
-                        
+                        <h1 id="decorators"><a class="header" href="#decorators">Decorators</a></h1>
+<h2 id="serde"><a class="header" href="#serde"><code>@serde</code></a></h2>
+<p><code>@serde</code> は <code>@serialize</code> と <code>@deserialize</code> デコレータのラッパーです。</p>
+<p>以下のコードがあるとします。</p>
+<pre><code class="language-python">@serde
+class Foo:
+    ...
+</code></pre>
+<p>上記のコードは、以下のコードと同等です。</p>
+<pre><code class="language-python">@deserialize
+@serialize
+@dataclass
+class Foo:
+    ...
+</code></pre>
+<p><code>@serde</code> デコレータは以下を行います。</p>
+<ul>
+<li>クラスに <code>@serialize</code> と <code>@deserialize</code> デコレータを追加します。</li>
+<li>クラスが <code>@dataclass</code> を持っていない場合、<code>@dataclass</code> デコレータを追加します。</li>
+<li>両方の（デ）シリアライズ属性をデコレータに渡すことができます。
+<ul>
+<li><code>serializer</code> 属性は <code>@deserialize</code> で無視され、<code>deserializer</code> 属性は <code>@serialize</code> で無視されます。</li>
+</ul>
+</li>
+</ul>
+<pre><code class="language-python">@serde(serializer=serializer, deserializer=deserializer)
+@dataclass
+class Foo:
+    ...
+</code></pre>
+<blockquote>
+<p><strong>注記:</strong> <code>@serde</code> は <code>@dataclass</code> デコレータなしで動作します。<br />
+これはserdeが <code>@dataclass</code> を自動的に検出し、宣言されたクラスに追加するからです。<br />
+しかし <code>@dataclass</code> を定義しない場合、mypy では <code>Too many arguments</code> または <code>Unexpected keyword argument</code> というエラーが発生します。これは <a href="https://mypy.readthedocs.io/en/stable/additional_features.html#caveats-known-issues">mypy の制限</a>によるものです。</p>
+<pre><code class="language-python">@serde
+class Foo:
+    ...
+</code></pre>
+<p>しかし、PEP681に準拠した型チェッカー（例：pyright）を使用すると、pyserdeが <a href="https://peps.python.org/pep-0681/">PEP681 dataclass_transform</a> をサポートしているため、型エラーは発生しません。</p>
+</blockquote>
+<h2 id="serialize-と-deserialize"><a class="header" href="#serialize-と-deserialize"><code>@serialize</code> と <code>@deserialize</code></a></h2>
+<p><code>@serialize</code> および <code>@deserialize</code> は内部的に <code>@serde</code> によって使用されます。<br />
+以下に該当する場合、これら2つのデコレータを使用することを推奨します。</p>
+<ul>
+<li>シリアライズまたはデシリアライズの機能のみが必要な場合</li>
+<li>以下のように異なるクラス属性を持つことを望む場合</li>
+</ul>
+<pre><code class="language-python">@deserialize(rename_all = "snakecase")
+@serialize(rename_all = "camelcase")
+class Foo:
+    ...
+</code></pre>
+<p>上記に当てはまらない場合は <code>@serde</code> の使用を推奨します。</p>
+<h2 id="serde-なしでクラスをデシリアライズする"><a class="header" href="#serde-なしでクラスをデシリアライズする"><code>@serde</code> なしでクラスを（デ）シリアライズする</a></h2>
+<p>pyserdeは v0.10.0 以降、<code>@serde</code> なしでデータクラスを（デ）シリアライズできます。<br />
+この機能は、外部ライブラリで宣言されたクラスを使用したい場合や、<code>@serde</code> デコレータが型チェッカーで機能しない場合に便利です。<a href="https://github.com/yukinarit/pyserde/blob/main/examples/plain_dataclass.py">この例</a>を参照してください。</p>
+<p>どのように動作するのでしょうか？<br />
+それは非常に単純で、クラスが<code>@serde</code>デコレータを持っていない場合、pyserdeは <code>@serde</code> デコレータを追加します。<br />
+最初のAPI呼び出しには時間がかかるかもしれませんが、生成されたコードは内部的にキャッシュされるため問題にはなりません。</p>
+<p>以下にサードパーティパッケージのクラスをデシリアライズする例を示します。</p>
+<pre><code class="language-python">@dataclass
+class External:
+    ...
+
+to_dict(External()) # "@serde" なしで動作します
+</code></pre>
+<p>この場合、<code>rename_all</code> などのクラス属性を指定することはできません。<br />
+外部のデータクラスにクラス属性を追加したい場合は、データクラスを拡張することでそれを行う方法があります。<a href="https://github.com/yukinarit/pyserde/blob/main/examples/plain_dataclass_class_attribute.py">この例</a>を参照してください。</p>
+<pre><code class="language-python">@dataclass
+class External:
+    some_value: int
+
+@serde(rename_all="kebabcase")
+@dataclass
+class Wrapper(External):
+    pass
+</code></pre>
+<h2 id="前方参照をどのように使用するか"><a class="header" href="#前方参照をどのように使用するか">前方参照をどのように使用するか？</a></h2>
+<p>pyserdeは前方参照をサポートしています。<br />
+ネストされたクラス名を文字列で置き換えると、pyserdeはネストされたクラスが定義された後にデコレータを探して評価します。</p>
+<pre><code class="language-python">from __future__ import annotations # annotationsをインポート
+
+@dataclass
+class Foo:
+    i: int
+    s: str
+    bar: Bar  # "Bar" は後で宣言されていても指定できます
+
+@serde
+@dataclass
+class Bar:
+    f: float
+    b: bool
+
+# "Bar" が定義された後に pyserde デコレータを評価します
+serde(Foo)
+</code></pre>
+<h2 id="pep563-annotationsによる遅延評価"><a class="header" href="#pep563-annotationsによる遅延評価">PEP563 Annotationsによる遅延評価</a></h2>
+<p>pyserdeは <a href="https://peps.python.org/pep-0563/">PEP563 Annotationsによる遅延評価</a>をサポートしています。</p>
+<pre><code class="language-python">from __future__ import annotations
+from serde import serde
+
+@serde
+class Foo:
+    i: int
+    s: str
+    f: float
+    b: bool
+
+    def foo(self, cls: Foo):  # 定義される前に "Foo" 型を使用できます
+        print('foo')
+</code></pre>
+<p>完全な例については <a href="https://github.com/yukinarit/pyserde/blob/main/examples/lazy_type_evaluation.py">examples/lazy_type_evaluation.py</a> を参照してください。</p>
+
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">

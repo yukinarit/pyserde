@@ -178,24 +178,1074 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="introduction"><a class="header" href="#introduction">Introduction</a></h1>
-<p><code>pyserde</code>は<a href="https://docs.python.org/3/library/dataclasses.html">dataclasses</a>ベースのシンプルで強力なシリアライゼーションライブラリです。</p>
-<p>クラスに<code>@serde</code>デコレータを付けるだけで、クラスを様々なデータフォーマットに変換可能になります。</p>
-<pre><code class="language-python">@serde
+<p><code>pyserde</code>は<a href="https://docs.python.org/3/library/dataclasses.html">dataclasses</a>ベースのシンプルで強力なシリアライゼーションライブラリで、クラスをJSONやYAML等の様々なデータフォーマットに簡単に効率的に変換可能になります。</p>
+<p>クラスに<code>@serde</code>デコレータを付け、<a href="https://peps.python.org/pep-0484/">PEP484</a>形式でフィールドに型アノテーションを付けます。</p>
+<pre><code class="language-python">from serde import serde
+
+@serde
 class Foo:
     i: int
     s: str
     f: float
     b: bool
 </code></pre>
-<p><code>Foo</code>クラスは以下のようにJSONにシリアライズ出来るようになります。</p>
-<pre><code class="language-python">&gt;&gt;&gt; to_json(Foo(i=10, s='foo', f=100.0, b=True))
+<p>すると、<code>Foo</code>クラスは以下のようにJSONにシリアライズ出来るようになります。</p>
+<pre><code class="language-python">&gt;&gt;&gt; from serde.json import to_json
+&gt;&gt;&gt; to_json(Foo(i=10, s='foo', f=100.0, b=True))
 '{"i":10,"s":"foo","f":100.0,"b":true}'
 </code></pre>
 <p>また、JSONから<code>Foo</code>クラスにデシリアライズも出来るようになります。</p>
-<pre><code class="language-python">&gt;&gt;&gt; from_json(Foo, '{"i": 10, "s": "foo", "f": 100.0, "b": true}')
+<pre><code class="language-python">&gt;&gt;&gt; from serde.json import from_json
+&gt;&gt;&gt; from_json(Foo, '{"i": 10, "s": "foo", "f": 100.0, "b": true}')
 Foo(i=10, s='foo', f=100.0, b=True)
 </code></pre>
-<div style="break-before: page; page-break-before: always;"></div><div style="break-before: page; page-break-before: always;"></div><div style="break-before: page; page-break-before: always;"></div><div style="break-before: page; page-break-before: always;"></div><div style="break-before: page; page-break-before: always;"></div><div style="break-before: page; page-break-before: always;"></div><div style="break-before: page; page-break-before: always;"></div><div style="break-before: page; page-break-before: always;"></div><div style="break-before: page; page-break-before: always;"></div><div style="break-before: page; page-break-before: always;"></div>
+<h2 id="next-steps"><a class="header" href="#next-steps">Next Steps</a></h2>
+<ul>
+<li><a href="getting-started.html">Getting started</a></li>
+<li><a href="https://yukinarit.github.io/pyserde/api/serde.html">API Reference</a></li>
+<li><a href="https://github.com/yukinarit/pyserde/tree/main/examples">Examples</a></li>
+<li><a href="faq.html">FAQ</a></li>
+</ul>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="getting-started"><a class="header" href="#getting-started">Getting Started</a></h1>
+<h2 id="インストール"><a class="header" href="#インストール">インストール</a></h2>
+<p>PyPIからpyserdeをインストールしてください。pyserdeにはPython&gt;=3.9が必要です。</p>
+<pre><code>pip install pyserde
+</code></pre>
+<p>poetryを使用している場合は、以下のコマンドを実行してください。</p>
+<pre><code>poetry add pyserde
+</code></pre>
+<p>JSONとPickle以外のデータ形式を扱う場合は、追加の依存関係をインストールする必要があります。<br />
+適切なデータ形式で動作するには、<code>msgpack</code>、<code>toml</code>、<code>yaml</code> の追加パッケージをインストールしてください。<br />
+使用しない場合はスキップして構いません。<br />
+例えば、TomlとYAMLを使用する場合は以下のようにします。</p>
+<pre><code>pip install "pyserde[toml,yaml]"
+</code></pre>
+<p>poetryを使用している場合</p>
+<pre><code>poetry add pyserde -E toml -E yaml
+</code></pre>
+<p>一度にすべてをインストールする場合</p>
+<pre><code>pip install "pyserde[all]"
+</code></pre>
+<p>poetryを使用している場合</p>
+<pre><code>poetry add pyserde -E all
+</code></pre>
+<p>利用可能な追加パッケージ</p>
+<ul>
+<li><code>all</code>：<code>msgpack</code>、<code>toml</code>、<code>yaml</code>、<code>numpy</code>、<code>orjson</code>、<code>sqlalchemy</code> をインストール</li>
+<li><code>msgpack</code>：<a href="https://github.com/msgpack/msgpack-python">msgpack</a> をインストール</li>
+<li><code>toml</code>：<a href="https://github.com/hukkin/tomli">tomli</a> と <a href="https://github.com/hukkin/tomli-w">tomli-w</a> をインストール
+<ul>
+<li>注記：python 3.11以降は <a href="https://docs.python.org/3/library/tomllib.html">tomllib</a> を使用</li>
+</ul>
+</li>
+<li><code>yaml</code>：<a href="https://github.com/yaml/pyyaml">pyyaml</a> をインストール</li>
+<li><code>numpy</code>：<a href="https://github.com/numpy/numpy">numpy</a> をインストール</li>
+<li><code>orjson</code>：<a href="https://github.com/ijl/orjson">orjson</a> をインストール</li>
+<li><code>sqlalchemy</code>：<a href="https://github.com/sqlalchemy/sqlalchemy">sqlalchemy</a> をインストール</li>
+</ul>
+<h2 id="最初のpyserdeクラスを定義"><a class="header" href="#最初のpyserdeクラスを定義">最初のpyserdeクラスを定義</a></h2>
+<p>pyserdeの<code>@serde</code>デコレータを使用してクラスを定義します。<br />
+モジュール名が <code>pyserde</code> ではなく <code>serde</code> であることに注意してください。<br />
+<code>pyserde</code>は標準ライブラリの<code>dataclasses</code>モジュールに大きく依存しています。<br />
+そのため、dataclassに慣れていない場合はまず<a href="https://docs.python.org/3/library/dataclasses.html">dataclassesのドキュメント</a>を読むことをおすすめします。</p>
+<pre><code class="language-python">from serde import serde
+
+@serde
+class Foo:
+    i: int
+    s: str
+    f: float
+    b: bool
+</code></pre>
+<p>クラスがPythonインタプリタにロードされると、pyserdeは<code>@serde</code>によって（デ）シリアライズに必要なメソッドを生成します。<br />
+コード生成は一度だけ行われ、クラスを使用する際にオーバーヘッドはありません。<br />
+これにより、クラスはpyserdeがサポートするすべてのデータ形式でシリアライズおよびデシリアライズ可能になります。</p>
+<blockquote>
+<p><strong>注記：</strong> シリアライズまたはデシリアライズの機能のみが必要な場合、<code>@serde</code>デコレータの代わりに<code>@serialize</code>や<code>@deserialize</code>を使用できます。</p>
+<p>例：シリアライズのみを行う場合、<code>@serialize</code>デコレータを使用できます。しかし、<code>Foo</code>のデシリアライズAPI（例：<code>from_json</code>）を呼び出すとエラーが発生します。</p>
+<pre><code class="language-python">from serde import serialize
+
+@serialize
+class Foo:
+    i: int
+    s: str
+    f: float
+    b: bool
+</code></pre>
+</blockquote>
+<h2 id="pep585とpep604"><a class="header" href="#pep585とpep604">PEP585とPEP604</a></h2>
+<p>python&gt;=3.9用の<a href="https://www.python.org/dev/peps/pep-0585/">PEP585</a>スタイルのアノテーションと、python&gt;=3.10用の<a href="https://www.python.org/dev/peps/pep-0604/">PEP604</a> Unionオペレータがサポートされています。<br />
+PEP585とPEP604を使用すると、pyserdeクラスをきれいに書くことができます。</p>
+<pre><code class="language-python">@serde
+class Foo:
+    a: int
+    b: list[str]
+    c: tuple[int, float, str, bool]
+    d: dict[str, list[tuple[str, int]]]
+    e: str | None
+</code></pre>
+<h2 id="pyserdeクラスの使用"><a class="header" href="#pyserdeクラスの使用">pyserdeクラスの使用</a></h2>
+<p>次に、pyserdeの（デ）シリアライズAPIをインポートします。<br />
+JSONの場合は以下のようにします。</p>
+<pre><code class="language-python">from serde.json import from_json, to_json
+</code></pre>
+<p><code>to_json</code>を使用してオブジェクトをJSONにシリアライズします。</p>
+<pre><code class="language-python">f = Foo(i=10, s='foo', f=100.0, b=True)
+print(to_json(f))
+</code></pre>
+<p><code>from_json</code>に<code>Foo</code>クラスとJSON文字列を渡して、JSONをオブジェクトにデシリアライズします。</p>
+<pre><code class="language-python">s = '{"i": 10, "s": "foo", "f": 100.0, "b": true}'
+print(from_json(Foo, s))
+</code></pre>
+<p>以上です！<br />
+pyserdeには他にも多くの機能があります。興味があれば、残りのドキュメントをお読みください。</p>
+<blockquote>
+<p>💡 ヒント：どのタイプチェッカーを使用すべきか？<br />
+pyserdeは<a href="https://peps.python.org/pep-0681/">PEP681 dataclass_transform</a>に依存しています。<br />
+2024年1月現在、<a href="https://github.com/python/mypy">mypy</a>はdataclass_transformを完全にはサポートしていません。<br />
+私の個人的なおすすめは<a href="https://github.com/microsoft/pyright">pyright</a>です。</p>
+</blockquote>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="data-formats"><a class="header" href="#data-formats">Data Formats</a></h1>
+<p>pyserdeは、<code>dict</code>、<code>tuple</code>、<code>JSON</code>、<code>YAML</code>、<code>TOML</code>、<code>MsgPack</code>、<code>Pickle</code> などのさまざまなデータ形式をシリアライズおよびデシリアライズできます。<br />
+各APIは追加のキーワード引数を取ることができ、これらの引数はpyserdeで使用されるベースパッケージへと渡されます。</p>
+<p>例えば、YAMLでフィールドの順序を保持したい場合、<code>serde.yaml.to_yaml</code>に<code>sort_key=True</code>を渡すことができます。</p>
+<pre><code class="language-python">serde.yaml.to_yaml(foo, sort_key=True)
+</code></pre>
+<p><code>sort_key=True</code>は<a href="https://github.com/yukinarit/pyserde/blob/a9f44d52d109144a4c3bb93965f831e91d13960b/serde/yaml.py#L18">yaml.safedump</a>に渡されます。</p>
+<h2 id="dict"><a class="header" href="#dict">dict</a></h2>
+<pre><code class="language-python">&gt;&gt;&gt; from serde import to_dict, from_dict
+
+&gt;&gt;&gt; to_dict(Foo(i=10, s='foo', f=100.0, b=True))
+from_dict(Foo, {"i": 10, "s": "foo", "f": 100.0, "b": True})
+
+&gt;&gt;&gt; from_dict(Foo, {"i": 10, "s": "foo", "f": 100.0, "b": True})
+Foo(i=10, s='foo', f=100.0, b=True)
+</code></pre>
+<p>詳細は<a href="https://yukinarit.github.io/pyserde/api/serde/se.html#to_dict">serde.to_dict</a> / <a href="https://yukinarit.github.io/pyserde/api/serde/de.html#from_dict">serde.from_dict</a>をご覧ください。</p>
+<h2 id="tuple"><a class="header" href="#tuple">tuple</a></h2>
+<pre><code class="language-python">&gt;&gt;&gt; from serde import to_tuple, from_tuple
+
+&gt;&gt;&gt; to_tuple(Foo(i=10, s='foo', f=100.0, b=True))
+(10, 'foo', 100.0, True)
+
+&gt;&gt;&gt; from_tuple(Foo, (10, 'foo', 100.0, True))
+Foo(i=10, s='foo', f=100.0, b=True)
+</code></pre>
+<p>詳細は<a href="https://yukinarit.github.io/pyserde/api/serde/se.html#to_tuple">serde.to_tuple</a> / <a href="https://yukinarit.github.io/pyserde/api/serde/de.html#from_tuple">serde.from_tuple</a>をご覧ください。</p>
+<h2 id="json"><a class="header" href="#json">JSON</a></h2>
+<pre><code class="language-python">&gt;&gt;&gt; from serde.json import to_json, from_json
+
+&gt;&gt;&gt; to_json(Foo(i=10, s='foo', f=100.0, b=True))
+'{"i":10,"s":"foo","f":100.0,"b":true}'
+
+&gt;&gt;&gt; from_json(Foo, '{"i": 10, "s": "foo", "f": 100.0, "b": true}')
+Foo(i=10, s='foo', f=100.0, b=True)
+</code></pre>
+<p>詳細は<a href="https://yukinarit.github.io/pyserde/api/serde/json.html#to_json">serde.json.to_json</a> / <a href="https://yukinarit.github.io/pyserde/api/serde/json.html#from_json">serde.json.from_json</a>をご覧ください。</p>
+<h2 id="yaml"><a class="header" href="#yaml">Yaml</a></h2>
+<pre><code class="language-python">&gt;&gt;&gt; from serde.yaml import from_yaml, to_yaml
+
+&gt;&gt;&gt; to_yaml(Foo(i=10, s='foo', f=100.0, b=True))
+b: true
+f: 100.0
+i: 10
+s: foo
+
+&gt;&gt;&gt; from_yaml(Foo, 'b: true\nf: 100.0\ni: 10\ns: foo')
+Foo(i=10, s='foo', f=100.0, b=True)
+</code></pre>
+<p>詳細は<a href="https://yukinarit.github.io/pyserde/api/serde/yaml.html#to_yaml">serde.yaml.to_yaml</a> / <a href="https://yukinarit.github.io/pyserde/api/serde/yaml.html#from_yaml">serde.yaml.from_yaml</a>をご覧ください。</p>
+<h2 id="toml"><a class="header" href="#toml">Toml</a></h2>
+<pre><code class="language-python">&gt;&gt;&gt; from serde.toml from_toml, to_toml
+
+&gt;&gt;&gt; to_toml(Foo(i=10, s='foo', f=100.0, b=True))
+i = 10
+s = "foo"
+f = 100.0
+b = true
+
+&gt;&gt;&gt; from_toml(Foo, 'i = 10\ns = "foo"\nf = 100.0\n
+
+b = true')
+Foo(i=10, s='foo', f=100.0, b=True)
+</code></pre>
+<p>詳細は<a href="https://yukinarit.github.io/pyserde/api/serde/toml.html#to_toml">serde.toml.to_toml</a> / <a href="https://yukinarit.github.io/pyserde/api/serde/toml.html#from_toml">serde.toml.from_toml</a>をご覧ください。</p>
+<h2 id="msgpack"><a class="header" href="#msgpack">MsgPack</a></h2>
+<pre><code class="language-python">&gt;&gt;&gt; from serde.msgpack import from_msgpack, to_msgpack
+
+&gt;&gt;&gt; to_msgpack(Foo(i=10, s='foo', f=100.0, b=True))
+b'\x84\xa1i\n\xa1s\xa3foo\xa1f\xcb@Y\x00\x00\x00\x00\x00\x00\xa1b\xc3'
+
+&gt;&gt;&gt; from_msgpack(Foo, b'\x84\xa1i\n\xa1s\xa3foo\xa1f\xcb@Y\x00\x00\x00\x00\x00\x00\xa1b\xc3')
+Foo(i=10, s='foo', f=100.0, b=True)
+</code></pre>
+<p>詳細は<a href="https://yukinarit.github.io/pyserde/api/serde/msgpack.html#to_msgpack">serde.msgpack.to_msgpack</a> / <a href="https://yukinarit.github.io/pyserde/api/serde/msgpack.html#from_msgpack">serde.msgpack.from_msgpack</a>をご覧ください。</p>
+<h2 id="pickle"><a class="header" href="#pickle">Pickle</a></h2>
+<p>v0.9.6で新しく追加されました</p>
+<pre><code class="language-python">&gt;&gt;&gt; from serde.pickle import from_pickle, to_pickle
+
+&gt;&gt;&gt; to_pickle(Foo(i=10, s='foo', f=100.0, b=True))
+b"\x80\x04\x95'\x00\x00\x00\x00\x00\x00\x00}\x94(\x8c\x01i\x94K\n\x8c\x01s\x94\x8c\x03foo\x94\x8c\x01f\x94G@Y\x00\x00\x00\x00\x00\x00\x8c\x01b\x94\x88u."
+
+&gt;&gt;&gt; from_pickle(Foo, b"\x80\x04\x95'\x00\x00\x00\x00\x00\x00\x00}\x94(\x8c\x01i\x94K\n\x8c\x01s\x94\x8c\x03foo\x94\x8c\x01f\x94G@Y\x00\x00\x00\x00\x00\x00\x8c\x01b\x94\x88u.")
+Foo(i=10, s='foo', f=100.0, b=True)
+</code></pre>
+<p>詳細は<a href="https://yukinarit.github.io/pyserde/api/serde/pickle.html#to_pickle">serde.pickle.to_pickle</a> / <a href="https://yukinarit.github.io/pyserde/api/serde/pickle.html#from_pickle">serde.pickle.from_pickle</a>をご覧ください。</p>
+<h2 id="新しいデータ形式のサポートが必要ですか"><a class="header" href="#新しいデータ形式のサポートが必要ですか">新しいデータ形式のサポートが必要ですか？</a></h2>
+<p>pyserde をできるだけシンプルに保つため、XML のようなデータフォーマットをサポートする予定はありません。<br />
+新しいデータ形式のサポートが必要な場合は、別のPythonパッケージを作成することをお勧めします。<br />
+データ形式がdictやtupleに変換可能であれば、シリアライズ/デシリアライズAPIの実装はそれほど難しくありません。<br />
+実装方法を知りたい場合は、<a href="https://github.com/yukinarit/pyserde/blob/main/serde/yaml.py">YAMLの実装</a>をご覧ください。</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="types"><a class="header" href="#types">Types</a></h1>
+<p>以下はサポートされている型のリストです。各型の簡単な例は脚注にあります。</p>
+<ul>
+<li>プリミティブ（<code>int</code>, <code>float</code>, <code>str</code>, <code>bool</code>）<sup class="footnote-reference"><a href="#1">1</a></sup></li>
+<li>コンテナ
+<ul>
+<li><code>list</code>, <code>set</code>, <code>tuple</code>, <code>dict</code> <sup class="footnote-reference"><a href="#2">2</a></sup></li>
+<li><a href="https://docs.python.org/3/library/stdtypes.html#frozenset"><code>frozenset</code></a> <sup class="footnote-reference"><a href="#3">3</a></sup></li>
+<li><a href="https://docs.python.org/3/library/collections.html#collections.defaultdict"><code>defaultdict</code></a> <sup class="footnote-reference"><a href="#4">4</a></sup></li>
+</ul>
+</li>
+<li><a href="https://docs.python.org/3/library/typing.html#typing.Optional"><code>typing.Optional</code></a><sup class="footnote-reference"><a href="#5">5</a></sup></li>
+<li><a href="https://docs.python.org/3/library/typing.html#typing.Union"><code>typing.Union</code></a> <sup class="footnote-reference"><a href="#6">6</a></sup> <sup class="footnote-reference"><a href="#7">7</a></sup> <sup class="footnote-reference"><a href="#8">8</a></sup></li>
+<li><a href="https://docs.python.org/3/library/dataclasses.html"><code>@dataclass</code></a> を用いたユーザ定義クラス <sup class="footnote-reference"><a href="#9">9</a></sup> <sup class="footnote-reference"><a href="#10">10</a></sup></li>
+<li><a href="https://docs.python.org/3/library/typing.html#newtype"><code>typing.NewType</code></a> を用いたプリミティブ型 <sup class="footnote-reference"><a href="#11">11</a></sup></li>
+<li><a href="https://docs.python.org/3/library/typing.html#the-any-type"><code>typing.Any</code></a> <sup class="footnote-reference"><a href="#12">12</a></sup></li>
+<li><a href="https://docs.python.org/3/library/typing.html#typing.Literal"><code>typing.Literal</code></a> <sup class="footnote-reference"><a href="#13">13</a></sup></li>
+<li><a href="https://docs.python.org/3/library/typing.html#user-defined-generic-types"><code>typing.Generic</code></a> <sup class="footnote-reference"><a href="#14">14</a></sup></li>
+<li><a href="https://docs.python.org/3/library/typing.html#typing.ClassVar"><code>typing.ClassVar</code></a> <sup class="footnote-reference"><a href="#15">15</a></sup></li>
+<li><a href="https://docs.python.org/3/library/dataclasses.html#init-only-variables"><code>typing.InitVar</code></a> <sup class="footnote-reference"><a href="#16">16</a></sup></li>
+<li><a href="https://docs.python.org/3/library/enum.html#enum.Enum"><code>Enum</code></a> および <a href="https://docs.python.org/3/library/enum.html#enum.IntEnum"><code>IntEnum</code></a> <sup class="footnote-reference"><a href="#17">17</a></sup></li>
+<li>標準ライブラリ
+<ul>
+<li><a href="https://docs.python.org/3/library/pathlib.html"><code>pathlib.Path</code></a> <sup class="footnote-reference"><a href="#18">18</a></sup></li>
+<li><a href="https://docs.python.org/3/library/decimal.html"><code>decimal.Decimal</code></a> <sup class="footnote-reference"><a href="#19">19</a></sup></li>
+<li><a href="https://docs.python.org/3/library/uuid.html"><code>uuid.UUID</code></a> <sup class="footnote-reference"><a href="#20">20</a></sup></li>
+<li><a href="https://docs.python.org/3/library/datetime.html#date-objects"><code>datetime.date</code></a>、<a href="https://docs.python.org/3/library/datetime.html#time-objects"><code>datetime.time</code></a>、<a href="https://docs.python.org/3/library/datetime.html#datetime-objects"><code>datetime.datetime</code></a> <sup class="footnote-reference"><a href="#21">21</a></sup></li>
+<li><a href="https://docs.python.org/3/library/ipaddress.html"><code>ipaddress</code></a> <sup class="footnote-reference"><a href="#22">22</a></sup></li>
+</ul>
+</li>
+<li>PyPIライブラリ
+<ul>
+<li><a href="https://github.com/numpy/numpy"><code>numpy</code></a> データ型 <sup class="footnote-reference"><a href="#23">23</a></sup></li>
+<li>宣言的データクラスマッピングを用いた <a href="https://github.com/sqlalchemy/sqlalchemy"><code>SQLAlchemy</code></a>（実験的）<sup class="footnote-reference"><a href="#24">24</a></sup></li>
+</ul>
+</li>
+</ul>
+<p>このように複雑なクラスを記述することができます。</p>
+<pre><code class="language-python">@serde
+class bar:
+    i: int
+
+@serde
+class Foo:
+    a: int
+    b: list[str]
+    c: tuple[int, float, str, bool]
+    d: dict[str, list[tuple[str, int]]]
+    e: str | None
+    f: Bar
+</code></pre>
+<h2 id="numpy"><a class="header" href="#numpy">Numpy</a></h2>
+<p>上記のすべての（デ）シリアライズ方法は、<code>numpy</code>追加パッケージを使用することで、ほとんどのnumpyデータ型を透過的に扱うことができます。</p>
+<pre><code class="language-python">import numpy as np
+import numpy.typing as npt
+
+@serde
+class NPFoo:
+    i: np.int32
+    j: np.int64
+    f: np.float32
+    g: np.float64
+    h: np.bool_
+    u: np.ndarray
+    v: npt.NDArray
+    w: npt.NDArray[np.int32]
+    x: npt.NDArray[np.int64]
+    y: npt.NDArray[np.float32]
+    z: npt.NDArray[np.float64]
+
+npfoo = NPFoo(
+    np.int32(1),
+    np.int64(2),
+    np.float32(3.0),
+    np.float64(4.0),
+    np.bool_(False),
+
+
+ np.array([1, 2]),
+    np.array([3, 4]),
+    np.array([np.int32(i) for i in [1, 2]]),
+    np.array([np.int64(i) for i in [3, 4]]),
+    np.array([np.float32(i) for i in [5.0, 6.0]]),
+    np.array([np.float64(i) for i in [7.0, 8.0]]),
+)
+</code></pre>
+<pre><code class="language-python">&gt;&gt;&gt; from serde.json import to_json, from_json
+
+&gt;&gt;&gt; to_json(npfoo)
+'{"i": 1, "j": 2, "f": 3.0, "g": 4.0, "h": false, "u": [1, 2], "v": [3, 4], "w": [1, 2], "x": [3, 4], "y": [5.0, 6.0], "z": [7.0, 8.0]}'
+
+&gt;&gt;&gt; from_json(NPFoo, to_json(npfoo))
+NPFoo(i=1, j=2, f=3.0, g=4.0, h=False, u=array([1, 2]), v=array([3, 4]), w=array([1, 2], dtype=int32), x=array([3, 4]), y=array([5., 6.], dtype=float32), z=array([7., 8.]))
+</code></pre>
+<h2 id="sqlalchemy宣言的データクラスマッピング実験的"><a class="header" href="#sqlalchemy宣言的データクラスマッピング実験的">SQLAlchemy宣言的データクラスマッピング（実験的）</a></h2>
+<p>SQLAlchemy宣言的データクラスマッピング統合の実験的サポートが追加されましたが、<code>@serde(type_check=strict)</code>や<code>serde.field()</code>などの特定の機能は現在サポートされていません。</p>
+<p>実験的な機能に依存する場合、本番環境での使用には注意が必要です。<br />
+コードを徹底的にテストし、潜在的な制限や予期せぬ動作に注意することを推奨します。</p>
+<h2 id="新しい型のサポートが必要ですか"><a class="header" href="#新しい型のサポートが必要ですか">新しい型のサポートが必要ですか？</a></h2>
+<p>標準ライブラリに現在サポートされていない型を使用する必要がある場合は、Githubでissueを作成してリクエストしてください。<br />
+なお、サードパーティのPythonパッケージの型については、numpyのような人気のあるパッケージの型を除き、pyserdeをできるだけシンプルに保つためにサポートする予定はありません。<br />
+カスタムクラスやフィールドシリアライザの使用を推奨します。</p>
+<div class="footnote-definition" id="1"><sup class="footnote-definition-label">1</sup>
+<p><a href="https://github.com/yukinarit/pyserde/blob/main/examples/simple.py">examples/simple.py</a> を参照</p>
+</div>
+<div class="footnote-definition" id="2"><sup class="footnote-definition-label">2</sup>
+<p><a href="https://github.com/yukinarit/pyserde/blob/main/examples/collection.py">examples/collection.py</a> を参照</p>
+</div>
+<div class="footnote-definition" id="3"><sup class="footnote-definition-label">3</sup>
+<p><a href="https://github.com/yukinarit/pyserde/blob/main/examples/frozen_set.py">examples/frozen_set.py</a> を参照</p>
+</div>
+<div class="footnote-definition" id="4"><sup class="footnote-definition-label">4</sup>
+<p><a href="https://github.com/yukinarit/pyserde/blob/main/examples/default_dict.py">examples/default_dict.py</a> を参照</p>
+</div>
+<div class="footnote-definition" id="5"><sup class="footnote-definition-label">5</sup>
+<p><a href="https://github.com/yukinarit/pyserde/blob/main/examples/union.py">examples/union.py</a> を参照</p>
+</div>
+<div class="footnote-definition" id="6"><sup class="footnote-definition-label">6</sup>
+<p><a href="https://github.com/yukinarit/pyserde/blob/main/examples/union.py">examples/union.py</a> を参照</p>
+</div>
+<div class="footnote-definition" id="7"><sup class="footnote-definition-label">7</sup>
+<p><a href="https://github.com/yukinarit/pyserde/blob/main/examples/union_operator.py">examples/union_operator.py</a> を参照</p>
+</div>
+<div class="footnote-definition" id="8"><sup class="footnote-definition-label">8</sup>
+<p><a href="https://github.com/yukinarit/pyserde/blob/main/examples/union_tagging.py">examples/union_tagging.py</a> を参照</p>
+</div>
+<div class="footnote-definition" id="9"><sup class="footnote-definition-label">9</sup>
+<p><a href="https://github.com/yukinarit/pyserde/blob/main/examples/simple.py">examples/simple.py</a> を参照</p>
+</div>
+<div class="footnote-definition" id="10"><sup class="footnote-definition-label">10</sup>
+<p><a href="https://github.com/yukinarit/pyserde/blob/main/examples/nested.py">examples/nested.py</a> を参照</p>
+</div>
+<div class="footnote-definition" id="11"><sup class="footnote-definition-label">11</sup>
+<p><a href="https://github.com/yukinarit/pyserde/blob/main/examples/newtype.py">examples/newtype.py</a> を参照</p>
+</div>
+<div class="footnote-definition" id="12"><sup class="footnote-definition-label">12</sup>
+<p><a href="https://github.com/yukinarit/pyserde/blob/main/examples/any.py">examples/any.py</a> を参照</p>
+</div>
+<div class="footnote-definition" id="13"><sup class="footnote-definition-label">13</sup>
+<p><a href="https://github.com/yukinarit/pyserde/blob/main/examples/literal.py">examples/literal.py</a> を参照</p>
+</div>
+<div class="footnote-definition" id="14"><sup class="footnote-definition-label">14</sup>
+<p><a href="https://github.com/yukinarit/pyserde/blob/main/examples/generics.py">examples/generics.py</a> を参照</p>
+</div>
+<div class="footnote-definition" id="15"><sup class="footnote-definition-label">15</sup>
+<p><a href="https://github.com/yukinarit/pyserde/blob/main/examples/class_var.py">examples/class_var.py</a> を参照</p>
+</div>
+<div class="footnote-definition" id="16"><sup class="footnote-definition-label">16</sup>
+<p><a href="https://github.com/yukinarit/pyserde/blob/main/examples/init_var.py">examples/init_var.py</a> を参照</p>
+</div>
+<div class="footnote-definition" id="17"><sup class="footnote-definition-label">17</sup>
+<p><a href="https://github.com/yukinarit/pyserde/blob/main/examples/enum34.py">examples/enum34.py</a> を参照</p>
+</div>
+<div class="footnote-definition" id="18"><sup class="footnote-definition-label">18</sup>
+<p><a href="https://github.com/yukinarit/pyserde/blob/main/examples/type_pathlib.py">examples/type_pathlib.py</a> を参照</p>
+</div>
+<div class="footnote-definition" id="19"><sup class="footnote-definition-label">19</sup>
+<p><a href="https://github.com/yukinarit/pyserde/blob/main/examples/type_decimal.py">examples/type_decimal.py</a> を参照</p>
+</div>
+<div class="footnote-definition" id="20"><sup class="footnote-definition-label">20</sup>
+<p><a href="https://github.com/yukinarit/pyserde/blob/main/examples/type_uuid.py">examples/type_uuid.py</a> を参照</p>
+</div>
+<div class="footnote-definition" id="21"><sup class="footnote-definition-label">21</sup>
+<p><a href="https://github.com/yukinarit/pyserde/blob/main/examples/type_datetime.py">examples/type_datetime.py</a> を参照</p>
+</div>
+<div class="footnote-definition" id="22"><sup class="footnote-definition-label">22</sup>
+<p><a href="https://github.com/yukinarit/pyserde/blob/main/examples/type_ipaddress.py">examples/type_ipaddress.py</a> を参照</p>
+</div>
+<div class="footnote-definition" id="23"><sup class="footnote-definition-label">23</sup>
+<p><a href="https://github.com/yukinarit/pyserde/blob/main/examples/type_numpy.py">examples/type_numpy.py</a> を参照</p>
+</div>
+<div class="footnote-definition" id="24"><sup class="footnote-definition-label">24</sup>
+<p><a href="https://github.com/yukinarit/pyserde/blob/main/examples/type_sqlalchemy.py">examples/type_sqlalchemy.py</a> を参照</p>
+</div>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="decorators"><a class="header" href="#decorators">Decorators</a></h1>
+<h2 id="serde"><a class="header" href="#serde"><code>@serde</code></a></h2>
+<p><code>@serde</code> は <code>@serialize</code> と <code>@deserialize</code> デコレータのラッパーです。</p>
+<p>以下のコードがあるとします。</p>
+<pre><code class="language-python">@serde
+class Foo:
+    ...
+</code></pre>
+<p>上記のコードは、以下のコードと同等です。</p>
+<pre><code class="language-python">@deserialize
+@serialize
+@dataclass
+class Foo:
+    ...
+</code></pre>
+<p><code>@serde</code> デコレータは以下を行います。</p>
+<ul>
+<li>クラスに <code>@serialize</code> と <code>@deserialize</code> デコレータを追加します。</li>
+<li>クラスが <code>@dataclass</code> を持っていない場合、<code>@dataclass</code> デコレータを追加します。</li>
+<li>両方の（デ）シリアライズ属性をデコレータに渡すことができます。
+<ul>
+<li><code>serializer</code> 属性は <code>@deserialize</code> で無視され、<code>deserializer</code> 属性は <code>@serialize</code> で無視されます。</li>
+</ul>
+</li>
+</ul>
+<pre><code class="language-python">@serde(serializer=serializer, deserializer=deserializer)
+@dataclass
+class Foo:
+    ...
+</code></pre>
+<blockquote>
+<p><strong>注記:</strong> <code>@serde</code> は <code>@dataclass</code> デコレータなしで動作します。<br />
+これはserdeが <code>@dataclass</code> を自動的に検出し、宣言されたクラスに追加するからです。<br />
+しかし <code>@dataclass</code> を定義しない場合、mypy では <code>Too many arguments</code> または <code>Unexpected keyword argument</code> というエラーが発生します。これは <a href="https://mypy.readthedocs.io/en/stable/additional_features.html#caveats-known-issues">mypy の制限</a>によるものです。</p>
+<pre><code class="language-python">@serde
+class Foo:
+    ...
+</code></pre>
+<p>しかし、PEP681に準拠した型チェッカー（例：pyright）を使用すると、pyserdeが <a href="https://peps.python.org/pep-0681/">PEP681 dataclass_transform</a> をサポートしているため、型エラーは発生しません。</p>
+</blockquote>
+<h2 id="serialize-と-deserialize"><a class="header" href="#serialize-と-deserialize"><code>@serialize</code> と <code>@deserialize</code></a></h2>
+<p><code>@serialize</code> および <code>@deserialize</code> は内部的に <code>@serde</code> によって使用されます。<br />
+以下に該当する場合、これら2つのデコレータを使用することを推奨します。</p>
+<ul>
+<li>シリアライズまたはデシリアライズの機能のみが必要な場合</li>
+<li>以下のように異なるクラス属性を持つことを望む場合</li>
+</ul>
+<pre><code class="language-python">@deserialize(rename_all = "snakecase")
+@serialize(rename_all = "camelcase")
+class Foo:
+    ...
+</code></pre>
+<p>上記に当てはまらない場合は <code>@serde</code> の使用を推奨します。</p>
+<h2 id="serde-なしでクラスをデシリアライズする"><a class="header" href="#serde-なしでクラスをデシリアライズする"><code>@serde</code> なしでクラスを（デ）シリアライズする</a></h2>
+<p>pyserdeは v0.10.0 以降、<code>@serde</code> なしでデータクラスを（デ）シリアライズできます。<br />
+この機能は、外部ライブラリで宣言されたクラスを使用したい場合や、<code>@serde</code> デコレータが型チェッカーで機能しない場合に便利です。<a href="https://github.com/yukinarit/pyserde/blob/main/examples/plain_dataclass.py">この例</a>を参照してください。</p>
+<p>どのように動作するのでしょうか？<br />
+それは非常に単純で、クラスが<code>@serde</code>デコレータを持っていない場合、pyserdeは <code>@serde</code> デコレータを追加します。<br />
+最初のAPI呼び出しには時間がかかるかもしれませんが、生成されたコードは内部的にキャッシュされるため問題にはなりません。</p>
+<p>以下にサードパーティパッケージのクラスをデシリアライズする例を示します。</p>
+<pre><code class="language-python">@dataclass
+class External:
+    ...
+
+to_dict(External()) # "@serde" なしで動作します
+</code></pre>
+<p>この場合、<code>rename_all</code> などのクラス属性を指定することはできません。<br />
+外部のデータクラスにクラス属性を追加したい場合は、データクラスを拡張することでそれを行う方法があります。<a href="https://github.com/yukinarit/pyserde/blob/main/examples/plain_dataclass_class_attribute.py">この例</a>を参照してください。</p>
+<pre><code class="language-python">@dataclass
+class External:
+    some_value: int
+
+@serde(rename_all="kebabcase")
+@dataclass
+class Wrapper(External):
+    pass
+</code></pre>
+<h2 id="前方参照をどのように使用するか"><a class="header" href="#前方参照をどのように使用するか">前方参照をどのように使用するか？</a></h2>
+<p>pyserdeは前方参照をサポートしています。<br />
+ネストされたクラス名を文字列で置き換えると、pyserdeはネストされたクラスが定義された後にデコレータを探して評価します。</p>
+<pre><code class="language-python">from __future__ import annotations # annotationsをインポート
+
+@dataclass
+class Foo:
+    i: int
+    s: str
+    bar: Bar  # "Bar" は後で宣言されていても指定できます
+
+@serde
+@dataclass
+class Bar:
+    f: float
+    b: bool
+
+# "Bar" が定義された後に pyserde デコレータを評価します
+serde(Foo)
+</code></pre>
+<h2 id="pep563-annotationsによる遅延評価"><a class="header" href="#pep563-annotationsによる遅延評価">PEP563 Annotationsによる遅延評価</a></h2>
+<p>pyserdeは <a href="https://peps.python.org/pep-0563/">PEP563 Annotationsによる遅延評価</a>をサポートしています。</p>
+<pre><code class="language-python">from __future__ import annotations
+from serde import serde
+
+@serde
+class Foo:
+    i: int
+    s: str
+    f: float
+    b: bool
+
+    def foo(self, cls: Foo):  # 定義される前に "Foo" 型を使用できます
+        print('foo')
+</code></pre>
+<p>完全な例については <a href="https://github.com/yukinarit/pyserde/blob/main/examples/lazy_type_evaluation.py">examples/lazy_type_evaluation.py</a> を参照してください。</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="class-attributes"><a class="header" href="#class-attributes">Class Attributes</a></h1>
+<p>クラス属性は、クラスの（デ）シリアライズの動作をカスタマイズするために <code>serialize</code> / <code>deserialize</code> デコレータの引数として指定できます。<br />
+フィールドをカスタマイズしたい場合は、<a href="field-attributes.html">フィールド属性</a>の使用を検討してください。</p>
+<h2 id="dataclassesの属性"><a class="header" href="#dataclassesの属性">dataclassesの属性</a></h2>
+<h3 id="frozen"><a class="header" href="#frozen"><strong><code>frozen</code></strong></a></h3>
+<p>dataclassの <code>frozen</code> クラス属性は期待通りに機能します。</p>
+<h3 id="kw_only"><a class="header" href="#kw_only"><strong><code>kw_only</code></strong></a></h3>
+<p>バージョン0.12.2で新規追加。dataclassの <code>kw_only</code> クラス属性は期待通りに機能します。</p>
+<pre><code class="language-python">@serde
+@dataclass(kw_only=True)
+class Foo:
+    i: int
+    s: str
+    f: float
+    b: bool
+</code></pre>
+<p>完全な例については、<a href="https://github.com/yukinarit/pyserde/blob/main/examples/kw_only.py">examples/kw_only.py</a>を参照してください。</p>
+<h2 id="pyserdeの属性"><a class="header" href="#pyserdeの属性">pyserdeの属性</a></h2>
+<h3 id="rename_all"><a class="header" href="#rename_all"><strong><code>rename_all</code></strong></a></h3>
+<p><code>rename_all</code> を使うと、フィールド名を指定されたケーススタイルに変換できます。<br />
+以下の例では、キャメルケースのフィールド名をスネークケースに変換しています。
+ケーススタイルの変換処理は <a href="https://github.com/dmlls/python-casefy">python-casefy</a> パッケージに依存しています。<br />
+サポートされるケーススタイルの一覧は <a href="https://dmlls.github.io/python-casefy/api.html">python-casefy のドキュメント</a>を参照してください。</p>
+<pre><code class="language-python">@serde(rename_all = 'camelcase')
+class Foo:
+    int_field: int
+    str_field: str
+
+f = Foo(int_field=10, str_field='foo')
+print(to_json(f))
+</code></pre>
+<p>上記のコードを実行すると、<code>int_field</code> は <code>intField</code> に、<code>str_field</code> は <code>strField</code> に変換されます。</p>
+<pre><code class="language-json">{"intField": 10, "strField": "foo"}
+</code></pre>
+<blockquote>
+<p><strong>注記:</strong> <code>rename_all</code> クラス属性と <code>rename</code> フィールド属性が同時に使用される場合、<code>rename</code> が優先されます。</p>
+<pre><code class="language-python">@serde(rename_all = 'camelcase')
+class Foo:
+    int_field: int
+    str_field: str = field(rename='str-field')
+
+f = Foo(int_field=10, str_field='foo')
+print(to_json(f))
+</code></pre>
+<p>上記のコードは以下を出力します。</p>
+<pre><code>{"intField": 10, "str-field": "foo"}
+</code></pre>
+</blockquote>
+<p>完全な例については、<a href="https://github.com/yukinarit/pyserde/blob/main/examples/rename_all.py">examples/rename_all.py</a>を参照してください。</p>
+<h3 id="tagging"><a class="header" href="#tagging"><strong><code>tagging</code></strong></a></h3>
+<p>バージョン0.7.0で新規追加。詳細は <a href="union.html">Union</a> を参照してください。</p>
+<h3 id="class_serializer-と-class_deserializer"><a class="header" href="#class_serializer-と-class_deserializer"><strong><code>class_serializer</code></strong> と <strong><code>class_deserializer</code></strong></a></h3>
+<p>バージョン0.13.0で新規追加。</p>
+<p>クラスレベルでカスタム(デ)シリアライザを使用したい場合、<code>class_serializer</code> および <code>class_deserializer</code> 属性に(デ)シリアライザオブジェクトを渡すことができます。<br />
+カスタム(デ)シリアライザは、C++のように複数のメソッドのオーバーロードを可能にするPythonライブラリ <a href="https://github.com/beartype/plum">plum</a> に依存しています。<br />
+plumを使用すると、堅牢なカスタム(デ)シリアライザを簡単に書くことができます。</p>
+<pre><code class="language-python">class MySerializer:
+    @dispatch
+    def serialize(self, value: datetime) -&gt; str:
+        return value.strftime("%d/%m/%y")
+
+class MyDeserializer:
+    @dispatch
+    def deserialize(self, cls: Type[datetime], value:
+
+ Any) -&gt; datetime:
+        return datetime.strptime(value, "%d/%m/%y")
+
+@serde(class_serializer=MySerializer(), class_deserializer=MyDeserializer())
+class Foo:
+    v: datetime
+</code></pre>
+<p>旧来の <code>serializer</code> と <code>deserializer</code> との大きな違いは、 新しい<code>class_serializer</code> と <code>class_deserializer</code> が pyserde のコード生成レベルでより深く統合されていることです。<br />
+これにより Optional や List、ネストされた dataclass を自分で処理する必要はありません。</p>
+<p>カスタムクラスの(デ)シリアライザはすべての(デ)シリアライズのレベル（単純なデータ型から複雑なネストされたデータ構造まで、あらゆる種類の(デ)シリアライズ処理）で使用されるため、サードパーティ製の型もビルトイン型のように扱うことが可能です。</p>
+<p>また、</p>
+<ul>
+<li>フィールドシリアライザとクラスシリアライザの両方が指定されている場合、フィールドシリアライザが優先されます。</li>
+<li>旧と新のクラスシリアライザの両方が指定されている場合、新しいクラスシリアライザが優先されます。</li>
+</ul>
+<blockquote>
+<p>💡 ヒント：複数の <code>serialize</code> メソッドを実装する場合、型チェッカーから、<code>Redefinition of unused serialize</code>という警告が出ることがあります。<br />
+その場合は、<code>plum.overload</code> と <code>plum.dispatch</code> を使用して回避してください。<br />
+詳細は <a href="https://beartype.github.io/plum/integration.html">plumのドキュメント</a> を参照してください。</p>
+<pre><code class="language-python">from plum import dispatch, overload
+
+class Serializer:
+   # @overload を使用
+   @overload
+   def serialize(self, value: int) -&gt; Any:
+       return str(value)
+
+   # @overload を使用
+   @overload
+   def serialize(self, value: float) -&gt; Any:
+       return int(value)
+
+   # メソッド追加時は必ず @dispatch を追加してください。Plumが型チェッカーからの警告を消してくれます
+   @dispatch
+   def serialize(self, value: Any) -&gt; Any:
+       ...
+</code></pre>
+</blockquote>
+<p>完全な例については、<a href="https://github.com/yukinarit/pyserde/blob/main/examples/custom_class_serializer.py">examples/custom_class_serializer.py</a>を参照してください。</p>
+<h3 id="serializer-と-deserializer"><a class="header" href="#serializer-と-deserializer"><strong><code>serializer</code></strong> と <strong><code>deserializer</code></strong></a></h3>
+<blockquote>
+<p><strong>注記:</strong> <code>serializer</code>** と **<code>deserializer</code>は、バージョン0.13.0以降、非推奨となりました。<br />
+<code>class_serializer</code> および <code>class_deserializer</code> の使用を検討してください。</p>
+</blockquote>
+<p>クラスレベルでカスタムの(デ)シリアライザを使用したい場合、<code>serializer</code> および <code>deserializer</code> 属性に(デ)シリアライザメソッドを渡すことができます。</p>
+<pre><code class="language-python">def serializer(cls, o):
+    if cls is datetime:
+        return o.strftime('%d/%m/%y')
+    else:
+        raise SerdeSkip()
+
+def deserializer(cls, o):
+    if cls is datetime:
+        return datetime.strptime(o, '%d/%m/%y')
+    else:
+        raise SerdeSkip()
+
+@serde(serializer=serializer, deserializer=deserializer)
+class Foo:
+    a: datetime
+</code></pre>
+<p>完全な例については、<a href="https://github.com/yukinarit/pyserde/blob/main/examples/custom_legacy_class_serializer.py">examples/custom_legacy_class_serializer.py</a> を参照してください。</p>
+<h3 id="type_check"><a class="header" href="#type_check"><strong><code>type_check</code></strong></a></h3>
+<p>バージョン0.9.0で新規追加。詳細は <a href="type-check.html">Type Check</a> を参照してください。</p>
+<h3 id="serialize_class_var"><a class="header" href="#serialize_class_var"><strong><code>serialize_class_var</code></strong></a></h3>
+<p>バージョン0.9.8で新規追加。</p>
+<p><code>dataclasses.fields</code> はクラス変数を含まないため<sup class="footnote-reference"><a href="#1">1</a></sup>、pyserdeはデフォルトでクラス変数をシリアライズしません。<br />
+<code>serialize_class_var</code> を使用することで <code>typing.ClassVar</code> のフィールドをシリアライズすることができます。</p>
+<pre><code class="language-python">@serde(serialize_class_var=True)
+class Foo:
+    a: ClassVar[int] = 10
+</code></pre>
+<p>完全な例については、<a href="https://github.com/yukinarit/pyserde/blob/main/examples/class_var.py">examples/class_var.py</a> を参照してください。</p>
+<div class="footnote-definition" id="1"><sup class="footnote-definition-label">1</sup>
+<p><a href="https://docs.python.org/3/library/dataclasses.html#dataclasses.fields">dataclasses.fields</a></p>
+</div>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="field-attributes"><a class="header" href="#field-attributes">Field Attributes</a></h1>
+<p>フィールド属性は、データクラスのフィールドの（デ）シリアライズ動作をカスタマイズするためのオプションです。</p>
+<h2 id="dataclassesによって提供される属性"><a class="header" href="#dataclassesによって提供される属性">dataclassesによって提供される属性</a></h2>
+<h3 id="default-と-default_factory"><a class="header" href="#default-と-default_factory"><strong><code>default</code></strong> と <strong><code>default_factory</code></strong></a></h3>
+<p>dataclassesの <code>default</code> と <code>default_factory</code> は期待通りに動作します。<br />
+フィールドが <code>default</code> または <code>default_factory</code> 属性を持つ場合、そのフィールドはオプショナルフィールドのように振る舞います。<br />
+フィールドがデータ内に存在する場合、当該フィールドの値がデシリアライズされたオブジェクトに設定されます。<br />
+フィールドがデータ内に存在しない場合、指定されたデフォルト値がデシリアライズされたオブジェクトに設定されます。</p>
+<pre><code class="language-python">class Foo:
+    a: int = 10
+    b: int = field(default=10)  # field "a"と同じ
+    c: dict[str, int] = field(default_factory=dict)
+
+print(from_dict(Foo, {}))  # Foo(a=10, b=10, c={}) を出力
+</code></pre>
+<p>完全な例については、<a href="https://github.com/yukinarit/pyserde/blob/main/examples/default.py">examples/default.py</a>を参照してください。</p>
+<h3 id="classvar"><a class="header" href="#classvar"><strong><code>ClassVar</code></strong></a></h3>
+<p><code>dataclasses.ClassVar</code> はデータクラスのクラス変数であり、dataclassはClassVarを擬似的なフィールドとして扱います。<br />
+<code>dataclasses.field</code> はクラス変数を含まないため、pyserdeはデフォルトの動作として <code>ClassVar</code> フィールドを（デ）シリアライズしません。<br />
+ClassVarフィールドをシリアライズする場合は、<a href="class-attributes.html#serialize_class_var">serialize_class_var</a>クラス属性の使用を検討してください。</p>
+<p>完全な例については、<a href="https://github.com/yukinarit/pyserde/blob/main/examples/class_var.py">examples/class_var.py</a>を参照してください。</p>
+<h2 id="pyserdeによって提供される属性"><a class="header" href="#pyserdeによって提供される属性">pyserdeによって提供される属性</a></h2>
+<p>フィールド属性は <code>serde.field</code> または <code>dataclasses.field</code> を通じて指定することができます。<br />
+型チェックが機能するため、 <code>serde.field</code> の使用を推奨します。</p>
+<p>以下は、<code>rename</code> 属性を <code>serde.field</code> と <code>dataclasses.field</code> の両方で指定する例です。</p>
+<pre><code class="language-python">@serde.serde
+class Foo:
+    a: str = serde.field(rename="A")
+    b: str = dataclasses.field(metadata={"serde_rename"="B"})
+</code></pre>
+<h3 id="rename"><a class="header" href="#rename"><strong><code>rename</code></strong></a></h3>
+<p><code>rename</code> は（デ）シリアライズ中にフィールド名を変更するために使用されます。<br />
+この属性は、フィールド名にPythonのキーワード（予約語）を使用したい場合に便利です。</p>
+<p>以下のコードはフィールド名 <code>id</code> を <code>ID</code> に変更する例です。</p>
+<pre><code class="language-python">@serde
+class Foo:
+    id: int = field(rename="ID")
+</code></pre>
+<p>完全な例については、<a href="https://github.com/yukinarit/pyserde/blob/main/examples/rename.py">examples/rename.py</a>を参照してください。</p>
+<h3 id="skip"><a class="header" href="#skip"><strong><code>skip</code></strong></a></h3>
+<p><code>skip</code> はこの属性を持つフィールドの（デ）シリアライズをスキップします。</p>
+<pre><code class="language-python">@serde
+class Resource:
+    name: str
+    hash: str
+    metadata: dict[str, str] = field(default_factory=dict, skip=True)
+</code></pre>
+<p>完全な例については、<a href="https://github.com/yukinarit/pyserde/blob/main/examples/skip.py">examples/skip.py</a>を参照してください。</p>
+<h3 id="skip_if"><a class="header" href="#skip_if"><strong><code>skip_if</code></strong></a></h3>
+<p><code>skip_if</code> は条件関数が <code>True</code> を返す場合にフィールドの（デ）シリアライズをスキップします。</p>
+<pre><code class="language-python">@serde
+class World:
+    buddy: str = field(default='', skip_if=lambda v: v == 'Pikachu')
+</code></pre>
+<p>完全な例については、<a href="https://github.com/yukinarit/pyserde/blob/main/examples/skip.py">examples/skip.py</a>を参照してください。</p>
+<h3 id="skip_if_false"><a class="header" href="#skip_if_false"><strong><code>skip_if_false</code></strong></a></h3>
+<p><code>skip_if_false</code> はフィールドが <code>False</code> と評価される場合にフィールドの（デ）シリアライズをスキップします。</p>
+<p>例えば、以下のコードは <code>enemies</code> が空であれば（デ）シリアライズをスキップします。</p>
+<pre><code class="language-python">@serde
+class World:
+    enemies: list[str] = field(default_factory=list, skip_if_false=True)
+</code></pre>
+<p>完全な例については、<a href="https://github.com/yukinarit/pyserde/blob/main/examples/skip.py">examples/skip.py</a>を参照してください。</p>
+<h3 id="skip_if_default"><a class="header" href="#skip_if_default"><strong><code>skip_if_default</code></strong></a></h3>
+<p><code>skip_if_default</code> はフィールドがデフォルト値とイコールである場合にフィールドの（デ）シリアライズをスキップします。</p>
+<p>例えば、以下のコードは <code>town</code> が <code>Masara Town</code> であれば（デ）シリアライズをスキップします。</p>
+<pre><code class="language-python">@serde
+class World:
+    town: str = field(default='Masara Town', skip_if_default=True)
+</code></pre>
+<p>完全な例については、<a href="https://github.com/yukinarit/pyserde/blob/main/examples/skip.py">examples/skip.py</a>を参照してください。</p>
+<h3 id="alias"><a class="header" href="#alias"><strong><code>alias</code></strong></a></h3>
+<p>フィールド名に別名を設定できます。エイリアスはデシリアライズ時にのみ機能します。</p>
+<pre><code class="language-python">@serde
+class Foo:
+    a: str = field(alias=["b", "c"])
+</code></pre>
+<p>上記の例では、 <code>Foo</code> は <code>{"a": "..."}</code> , <code>{"b": "..."}</code> 、または <code>{"c": "..."}</code> のいずれかからデシリアライズできます。</p>
+<p>完全な例については、<a href="https://github.com/yukinarit/pyserde/blob/main/examples/alias.py">examples/alias.py</a>を参照してください。</p>
+<h2 id="serializer-と-deserializer-1"><a class="header" href="#serializer-と-deserializer-1"><strong><code>serializer</code></strong> と <strong><code>deserializer</code></strong></a></h2>
+<p>特定のフィールドに対してカスタム（デ）シリアライザを使用したい場合があります。</p>
+<p>例えば、以下のようなケースです。</p>
+<ul>
+<li>datetimeを異なる形式でシリアライズしたい。</li>
+<li>サードパーティパッケージの型をシリアライズしたい。</li>
+</ul>
+<p>以下の例では、フィールド <code>a</code> はデフォルトのシリアライザで <code>"2021-01-01T00:00:00"</code> にシリアライズされますが、フィールド <code>b</code> はカスタムシリアライザで <code>"01/01/21"</code> にシリアライズされます。</p>
+<pre><code class="language-python">@serde
+class Foo:
+    a: datetime
+    b: datetime = field(serializer=lambda x: x.strftime('%d/%m/%y'), deserializer=lambda x: datetime.strptime(x, '%d/%m/%y'))
+</code></pre>
+<p>完全な例については、<a href="https://github.com/yukinarit/pyserde/blob/main/examples/custom_field_serializer.py">examples/custom_field_serializer.py</a>を参照してください。</p>
+<h2 id="flatten"><a class="header" href="#flatten"><strong><code>flatten</code></strong></a></h2>
+<p>ネストされた構造のフィールドをフラットにできます。</p>
+<pre><code class="language-python">@serde
+class Bar:
+    c: float
+    d: bool
+
+@serde
+class Foo:
+    a: int
+    b: str
+    bar: Bar = field(flatten=True)
+</code></pre>
+<p>上記の例では、<code>Bar</code> の <code>c</code> および <code>d</code> フィールドが <code>Foo</code> で定義されているかのようにデシリアライズされます。<br />
+<code>Foo</code> をJSON形式にシリアライズすると <code>{"a":10,"b":"foo","c":100.0,"d":true}</code> を取得します。</p>
+<p>完全な例については、<a href="https://github.com/yukinarit/pyserde/blob/main/examples/flatten.py">examples/flatten.py</a>を参照してください。</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="union-representation"><a class="header" href="#union-representation">Union Representation</a></h1>
+<p><code>pyserde&gt;=0.7</code> では、Union が（デ）シリアライズされる方法を制御するための属性が提供されています。この概念は <a href="https://serde.rs/enum-representations.html">serde-rs</a> にあるものと同じです。</p>
+<p>これらの表現は dataclass にのみ適用され、dataclassではないオブジェクトは常に <code>Untagged</code> で（デ）シリアライズされます。</p>
+<h2 id="untagged"><a class="header" href="#untagged"><code>Untagged</code></a></h2>
+<p>以下は、 <code>pyserde&lt;0.7</code> におけるデフォルトの Union 表現です。dataclass が与えられた場合を例に上げます。</p>
+<pre><code class="language-python">@serde
+class Bar:
+    b: int
+
+@serde
+class Baz:
+    b: int
+
+@serde(tagging=Untagged)
+class Foo:
+    a: Union[Bar, Baz]
+</code></pre>
+<p>注意点として、<code>Bar</code> と <code>Baz</code> は同じフィールド名と型を持っています。<br />
+<code>Foo(Baz(10))</code> を辞書にシリアライズすると、<code>{"a": {"b": 10}}</code> が得られます。</p>
+<p>しかし、<code>{"a": {"b": 10}}</code> をデシリアライズすると、 <code>Foo(Baz(10))</code> ではなく <code>Foo(Bar(10))</code> が得られます。<br />
+これは、pyserde が <code>Untagged</code> を使った Union の dataclass を正しく（デ）シリアライズ<strong>できない</strong>ことを意味します。</p>
+<p>このため、pyserde は他の Union 表現オプションを提供しています。</p>
+<h2 id="externaltagging"><a class="header" href="#externaltagging"><code>ExternalTagging</code></a></h2>
+<p>これは 0.7 以降のデフォルトの Union 表現です。<code>ExternalTagging</code> を使用したクラス宣言は以下のようになります。</p>
+<pre><code class="language-python">@serde(tagging=ExternalTagging)
+class Foo:
+    a: Union[Bar, Baz]
+</code></pre>
+<p><code>Foo(Baz(10))</code> を辞書にシリアライズすると、 <code>{"a": {"Baz": {"b": 10}}}</code> が得られ、デシリアライズすると <code>Foo(Baz(10))</code> になります。</p>
+<blockquote>
+<p><strong>注意:</strong> dataclass でないオブジェクトは、<code>tagging</code> 属性に関わらず常に <code>Untagged</code> で（デ）シリアライズされます。<br />
+これはタグに使用できる情報がないためです。<code>Untagged</code> の欠点は、特定のタイプを正しく非シリアライズできないことです。</p>
+<p>例えば、以下のクラスの <code>Foo({1, 2, 3})</code> は <code>{"a": [1, 2, 3]}</code> にシリアライズされますが、デシリアライズすると <code>Foo([1, 2, 3])</code> になります。</p>
+<pre><code class="language-python">@serde(tagging=ExternalTagging)
+class Foo:
+   a: Union[list[int], set[int]]
+</code></pre>
+</blockquote>
+<h2 id="internaltagging"><a class="header" href="#internaltagging"><code>InternalTagging</code></a></h2>
+<p><code>InternalTagging</code> を使用したクラス宣言は以下のようになります。</p>
+<pre><code class="language-python">@serde(tagging=InternalTagging("type"))
+class Foo:
+    a: Union[Bar, Baz]
+</code></pre>
+<p><code>Foo(Baz(10))</code> を辞書にシリアライズすると、<code>{"a": {"type": "Baz", "b": 10}}</code> が得られ、それを <code>Foo(Baz(10))</code> にデシリアライズできます。<br />
+<code>type</code> タグは <code>Baz</code> の辞書内にエンコードされます。</p>
+<h2 id="adjacenttagging"><a class="header" href="#adjacenttagging"><code>AdjacentTagging</code></a></h2>
+<p><code>AdjacentTagging</code> を使用したクラス宣言は以下のようになります。</p>
+<pre><code class="language-python">@serde(tagging=AdjacentTagging("type", "content"))
+class Foo:
+    a: Union[Bar, Baz]
+</code></pre>
+<p><code>Foo(Baz(10))</code> を辞書にシリアライズすると、<code>{"a": {"type": "Baz", "content": {"b": 10}}}</code> が得られ、それを <code>Foo(Baz(10))</code> にデシリアライズできます。<code>type</code> タグは <code>Baz</code> の辞書内にエンコードされ、<code>Baz</code> のフィールドは <code>content</code> 内にエンコードされます。</p>
+<h2 id="union-型の直接的なデシリアライズ"><a class="header" href="#union-型の直接的なデシリアライズ">Union 型の直接的な（デ）シリアライズ</a></h2>
+<p>v0.12.0 で新しく追加されました。</p>
+<p>v0.12 以前において、（デ）シリアライズ API（例： <code>to_json</code>, <code>from_json</code>）に直接 Union 型のデータを渡すことは部分的にサポートされていましたが、Union 型は常にタグ無しとして扱われました。<br />
+これは、利用者側で Union タグを変更することができなかったことを意味します。</p>
+<p>以下の例は、タグ無しのため <code>Bar</code> に正しくデシリアライズできません。</p>
+<pre><code class="language-python">@serde
+class Foo:
+    a: int
+
+@serde
+class Bar:
+    a: int
+
+bar = Bar(10)
+s = to_json(bar)
+print(s)
+# {"a": 10} を出力
+print(from_json(Union[Foo, Bar], s))
+# Foo(10) を出力
+</code></pre>
+<p>v0.12.0 以降、pyserde は（デ）シリアライズ API で渡された Union 型を適切に扱えます。<br />
+Union 型は、pyserde のデフォルトのタグ付けである外部タグ付けとして扱われます。</p>
+<p>以下の例は <code>Bar</code> として正しく（デ）シリアライズできます。</p>
+<pre><code class="language-python">@serde
+class Foo:
+    a: int
+
+@serde
+class Bar:
+    a: int
+
+bar = Bar(10)
+s = to_json(bar, cls=Union[Foo, Bar])
+print(s)
+# {"Bar" {"a": 10}} を出力
+print(from_json(Union[Foo, Bar], s))
+# Bar(10) を出力
+</code></pre>
+<p>また、<code>serde.InternalTagging</code>、<code>serde.AdjacentTagging</code>、および <code>serde.Untagged</code> を使用してタグ付けを変更できます。</p>
+<p>それでは、上記の例を用いてタグ付けを変更してみましょう。</p>
+<p>タグ付けを変更するには、 <code>to_json</code> に新しい引数 <code>cls</code> を渡す必要があります。<br />
+また、Unionクラスは <code>InternalTagging</code>、<code>AdjacentTagging</code>、または <code>Untagged</code> で必要なパラメータと共にラップされる必要があります。</p>
+<ul>
+<li>
+<p>InternalTagging</p>
+<pre><code class="language-python">from serde import InternalTagging
+
+s = to_json(bar, cls=InternalTagging("type", Union[Foo, Bar]))
+print(s)
+# {"type": "Bar", "a": 10} を出力
+print(from_json(InternalTagging("type", Union[Foo, Bar]), s))
+# Bar(10) を出力
+</code></pre>
+</li>
+<li>
+<p>AdjacentTagging</p>
+<pre><code class="language-python">from serde
+
+s = to_json(bar, cls=AdjacentTagging("type", "content", Union[Foo, Bar]))
+print(s)
+# {"type": "Bar", "content": {"a": 10}} を出力
+print(from_json(AdjacentTagging("type", "content", Union[Foo, Bar]), s))
+# Bar(10) を出力
+</code></pre>
+</li>
+<li>
+<p>Untagged</p>
+<pre><code class="language-python">from serde import Untagged
+
+s = to_json(bar, cls=Untagged(Union[Foo, Bar]))
+print(s)
+# {"a": 10} を出力
+print(from_json(Untagged(Union[Foo, Bar]), s))
+# Foo(10) を出力
+</code></pre>
+</li>
+</ul>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="type-checking"><a class="header" href="#type-checking">Type Checking</a></h1>
+<p>pyserdeはv0.9からランタイム型チェックを提供しています。<br />
+v0.14で完全に作り直され、<a href="https://github.com/beartype/beartype">beartype</a>を使用してより洗練され信頼性の高いものとなりました。<br />
+型安全で堅牢なプログラムを書くためには、型チェックを常に有効にすることを強く推奨します。</p>
+<h2 id="strict"><a class="header" href="#strict"><code>strict</code></a></h2>
+<p>厳格な型チェック <code>strict</code> は、（デ）シリアライズとオブジェクト構築の際にすべてのフィールド値を宣言された型と照合します。<br />
+これはv0.14以降のデフォルトの型チェックモードです。</p>
+<p>このモードでは、クラス属性を指定せずに <code>@serde</code> デコレータを使用してクラスを宣言した場合、<code>@serde(type_check=strict)</code> と見なされ、厳格な型チェックが有効になります。</p>
+<pre><code class="language-python">@serde
+class Foo:
+    s: str
+</code></pre>
+<p>例えば、以下のように間違った型のオブジェクトで<code>Foo</code>を呼び出すと、</p>
+<pre><code class="language-python">foo = Foo(10)
+</code></pre>
+<p>以下のエラーが発生します。</p>
+<pre><code class="language-python">beartype.roar.BeartypeCallHintParamViolation: Method __main__.Foo.__init__() parameter s=10 violates type hint &lt;class 'str'&gt;, as int 10 not instance of str.
+</code></pre>
+<blockquote>
+<p><strong>注記:</strong> 2024年2月時点でbeartypeは検証フックを提供していないため、コンストラクターからはSerdeErrorではなくbeartypeの例外が発生します。</p>
+</blockquote>
+<p>同様に、間違った型のオブジェクトで（デ）シリアライズAPIを呼び出すと、</p>
+<pre><code class="language-python">print(to_json(foo))
+</code></pre>
+<p>再びエラーが発生します。</p>
+<pre><code class="language-python">serde.compat.SerdeError: Method __main__.Foo.__init__() parameter s=10 violates type hint &lt;class 'str'&gt;, as int 10 not instance of str.
+</code></pre>
+<blockquote>
+<p><strong>注記:</strong> beartypeによる型チェックにはいくつかの注意点があります。</p>
+<ol>
+<li>beartypeは変更されたプロパティを検証できません。</li>
+</ol>
+<p>以下のコードでは、プロパティ <code>s</code> が最後に変更されていますが、beartypeはこのケースを検出できません。</p>
+<pre><code class="language-python">@serde
+class Foo:
+    s: str
+
+f = Foo("foo")
+f.s = 100
+</code></pre>
+<ol start="2">
+<li>beartypeはコンテナ内の各要素を検証することはできません。これはバグではなく、beartypeの設計原則です。<a href="https://beartype.readthedocs.io/en/latest/faq/#faq-o1">Does beartype actually do anything?</a>を参照してください。</li>
+</ol>
+</blockquote>
+<h2 id="coerce"><a class="header" href="#coerce"><code>coerce</code></a></h2>
+<p>型強制 <code>coerce</code> は、（デ）シリアライズ中に値を宣言された型に自動的に変換します。</p>
+<pre><code class="language-python">@serde(type_check=Coerce)
+class Foo:
+    s: str
+
+foo = Foo(10)
+# pyserdeは自動的に int 値の 10 を str の "10" に変換します
+# {"s": "10"}が出力されます
+print(to_json(foo))
+</code></pre>
+<p>しかし、値が宣言された型に変換できない場合（例えば、値が <code>foo</code> で型が <code>int</code> の場合）、pyserde は<code>SerdeError</code> を発生させます。</p>
+<h2 id="disabled"><a class="header" href="#disabled"><code>disabled</code></a></h2>
+<p>これはpyserde v0.8.3およびv0.9.xまでのデフォルトの挙動です。<br />
+型強制またはチェックは実行されません。</p>
+<p>利用者が間違った値を入力しても、pyserdeは型の不整合を無視して処理を続行します。</p>
+<pre><code class="language-python">@serde
+class Foo:
+    s: str
+
+foo = Foo(10)
+# pyserdeは型の整合性を確認しないため、{"s": 10} が出力されます
+print(to_json(foo))
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="extending-pyserde"><a class="header" href="#extending-pyserde">Extending pyserde</a></h1>
+<p>pyserde はビルトイン型以外をサポートするために pyserde を拡張する 3 つの方法を提供しています。</p>
+<h2 id="カスタムフィールドデシリアライザ"><a class="header" href="#カスタムフィールドデシリアライザ">カスタムフィールド（デ）シリアライザ</a></h2>
+<p>詳細は<a href="./field-attributes.html#serializerdeserializer">カスタムフィールドシリアライザ</a>を参照してください。</p>
+<blockquote>
+<p>💡 ヒント：<code>serde.field</code> を独自のフィールド関数でラップすると以下のようになります。</p>
+<pre><code class="language-python">import serde
+
+def field(*args, **kwargs):
+    serde.field(*args, **kwargs, serializer=str)
+
+@serde
+class Foo:
+    a: int = field(default=0)  # フィールドシリアライザの設定
+</code></pre>
+</blockquote>
+<h2 id="カスタムクラスデシリアライザ"><a class="header" href="#カスタムクラスデシリアライザ">カスタムクラス（デ）シリアライザ</a></h2>
+<p>詳細は<a href="./class-attributes.html#class_serializer--class_deserializer">カスタムクラスシリアライザ</a>を参照してください。</p>
+<h2 id="カスタムグローバルデシリアライザ"><a class="header" href="#カスタムグローバルデシリアライザ">カスタムグローバル（デ）シリアライザ</a></h2>
+<p><code>add_serializer</code> と <code>add_deserializer</code> を使ってクラス（デ）シリアライザを登録することで、コードベース全体でカスタム（デ）シリアライザを適用できます。</p>
+<p>登録されたクラス（デ）シリアライザは pyserde のグローバル空間にスタックされ、すべての pyserde クラスで自動的に使用されます。</p>
+<p>例：<a href="https://pypi.org/project/isodate/">isodate</a>パッケージを使用して <code>datetime.timedelta</code> のカスタム（デ）シリアライザを実装する。</p>
+<p>以下は、<code>datetime.timedelta</code> のためのクラス（デ）シリアライザを登録するコードです。<br />
+このパッケージは実際に PyPI で <a href="https://pypi.org/project/pyserde-timedelta/">pyserde-timedelta</a> として公開されています。</p>
+<pre><code class="language-python">from datetime import timedelta
+from plum import dispatch
+from typing import Type, Any
+import isodate
+import serde
+
+class Serializer:
+    @dispatch
+    def serialize(self, value: timedelta) -&gt; Any:
+        return isodate.duration_isoformat(value)
+
+class Deserializer:
+    @dispatch
+    def deserialize(self, cls: Type[timedelta], value: Any) -&gt; timedelta:
+        return isodate.parse_duration(value)
+
+def init() -&gt; None:
+    serde.add_serializer(Serializer())
+    serde.add_deserializer(Deserializer())
+</code></pre>
+<p>このパッケージの利用者は、 <code>serde_timedelta.init()</code> を呼び出すだけで <code>datetime.timedelta</code> のカスタム（デ）シリアライザの機能を再利用できます。</p>
+<pre><code class="language-python">import serde_timedelta
+from serde import serde
+from serde.json import to_json, from_json
+from datetime import timedelta
+
+serde_timedelta.init()
+
+@serde
+class Foo:
+    a: timedelta
+
+f = Foo(timedelta(hours=10))
+json = to_json(f)
+print(json)
+print(from_json(Foo, json))
+</code></pre>
+<p>以下のように <code>datetime.timedelta</code> がISO 8601 形式でシリアライズされます！</p>
+<pre><code class="language-bash">{"a":"PT10H"}
+Foo(a=datetime.timedelta(seconds=36000))
+</code></pre>
+<blockquote>
+<p>💡 ヒント：クラス（デ）シリアライザはいくつでも登録できます。これは、好きなだけpyserde拡張を使用できることを意味します。
+登録された（デ）シリアライザはメモリにスタックされます。</p>
+<p>なお、1つの（デ）シリアライザは他の（デ）シリアライザによってオーバーライドされる可能性があります。</p>
+<p>例：次の順序で3つのカスタムシリアライザを登録すると、最初のシリアライザは3番目によって完全に上書きされます。2番目は異なる型用に実装されているため機能します。</p>
+<ol>
+<li><code>int</code> 用のシリアライザを登録</li>
+<li><code>float</code> 用のシリアライザを登録</li>
+<li><code>int</code> 用のシリアライザを登録</li>
+</ol>
+</blockquote>
+<p>こちらは、v0.13.0 で新しく追加されました。</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="faq"><a class="header" href="#faq">FAQ</a></h1>
+<h2 id="pyserdeによって生成されたコードをどのように確認できますか"><a class="header" href="#pyserdeによって生成されたコードをどのように確認できますか">pyserdeによって生成されたコードをどのように確認できますか？</a></h2>
+<p>pyserdeはコマンドラインとして動作する <code>inspect</code> サブモジュールを提供しています。</p>
+<pre><code>python -m serde.inspect &lt;PATH_TO_FILE&gt; &lt;CLASS&gt;
+</code></pre>
+<p>例：pyserdeプロジェクト内で以下を実行します。</p>
+<pre><code>cd pyserde
+poetry shell
+python -m serde.inspect examples/simple.py Foo
+</code></pre>
+<p>出力</p>
+<pre><code class="language-python">Loading simple.Foo from examples.
+
+==================================================
+                       Foo
+==================================================
+
+--------------------------------------------------
+          Functions generated by pyserde
+--------------------------------------------------
+def to_iter(obj, reuse_instances=True, convert_sets=False):
+    if reuse_instances is Ellipsis:
+        reuse_instances = True
+    if convert_sets is Ellipsis:
+        convert_sets = False
+    if not is_dataclass(obj):
+        return copy.deepcopy(obj)
+
+    Foo = serde_scope.types["Foo"]
+    res = []
+    res.append(obj.i)
+    res.append(obj.s)
+    res.append(obj.f)
+    res.append(obj.b)
+    return tuple(res)
+...
+</code></pre>
+
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">

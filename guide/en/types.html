@@ -150,7 +150,7 @@
                         <a href="https://github.com/yukinarit/pyserde" title="Git repository" aria-label="Git repository">
                             <i id="git-repository-button" class="fa fa-github"></i>
                         </a>
-                        <a href="https://github.com/yukinarit/pyserde/edit/main/en/.//types.md" title="Suggest an edit" aria-label="Suggest an edit">
+                        <a href="https://github.com/yukinarit/pyserde/edit/main/docs/en/.//types.md" title="Suggest an edit" aria-label="Suggest an edit">
                             <i id="git-edit-button" class="fa fa-edit"></i>
                         </a>
 
@@ -186,32 +186,33 @@
 <li>Containers
 <ul>
 <li><code>list</code>, <code>set</code>, <code>tuple</code>, <code>dict</code> <sup class="footnote-reference"><a href="#2">2</a></sup></li>
-<li><a href="https://docs.python.org/3/library/stdtypes.html#frozenset"><code>frozenset</code></a>, <sup class="footnote-reference"><a href="#3">3</a></sup> <a href="https://docs.python.org/3/library/collections.html#collections.defaultdict"><code>defaultdict</code></a> <sup class="footnote-reference"><a href="#4">4</a></sup></li>
+<li><a href="https://docs.python.org/3/library/stdtypes.html#frozenset"><code>frozenset</code></a>, <sup class="footnote-reference"><a href="#3">3</a></sup></li>
+<li><a href="https://docs.python.org/3/library/collections.html#collections.defaultdict"><code>defaultdict</code></a> <sup class="footnote-reference"><a href="#4">4</a></sup></li>
 </ul>
 </li>
-<li><a href="https://docs.python.org/3/library/typing.html#typing.Optional"><code>typing.Optional</code></a> [^5]</li>
-<li><a href="https://docs.python.org/3/library/typing.html#typing.Union"><code>typing.Union</code></a> <sup class="footnote-reference"><a href="#6">5</a></sup> <sup class="footnote-reference"><a href="#7">6</a></sup> <sup class="footnote-reference"><a href="#8">7</a></sup></li>
-<li>User defined class with <a href="https://docs.python.org/3/library/dataclasses.html"><code>@dataclass</code></a> <sup class="footnote-reference"><a href="#9">8</a></sup> <sup class="footnote-reference"><a href="#10">9</a></sup></li>
-<li><a href="https://docs.python.org/3/library/typing.html#newtype"><code>typing.NewType</code></a> for primitive types <sup class="footnote-reference"><a href="#11">10</a></sup></li>
-<li><a href="https://docs.python.org/3/library/typing.html#the-any-type"><code>typing.Any</code></a> <sup class="footnote-reference"><a href="#12">11</a></sup></li>
-<li><a href="https://docs.python.org/3/library/typing.html#typing.Literal"><code>typing.Literal</code></a> <sup class="footnote-reference"><a href="#13">12</a></sup></li>
-<li><a href="https://docs.python.org/3/library/typing.html#user-defined-generic-types"><code>typing.Generic</code></a> <sup class="footnote-reference"><a href="#14">13</a></sup></li>
-<li><a href="https://docs.python.org/3/library/typing.html#typing.ClassVar"><code>typing.ClassVar</code></a> <sup class="footnote-reference"><a href="#15">14</a></sup></li>
-<li><a href="https://docs.python.org/3/library/dataclasses.html#init-only-variables"><code>typing.InitVar</code></a> <sup class="footnote-reference"><a href="#16">15</a></sup></li>
-<li><a href="https://docs.python.org/3/library/enum.html#enum.Enum"><code>Enum</code></a> and <a href="https://docs.python.org/3/library/enum.html#enum.IntEnum"><code>IntEnum</code></a> <sup class="footnote-reference"><a href="#17">16</a></sup></li>
+<li><a href="https://docs.python.org/3/library/typing.html#typing.Optional"><code>typing.Optional</code></a> <sup class="footnote-reference"><a href="#5">5</a></sup></li>
+<li><a href="https://docs.python.org/3/library/typing.html#typing.Union"><code>typing.Union</code></a> <sup class="footnote-reference"><a href="#6">6</a></sup> <sup class="footnote-reference"><a href="#7">7</a></sup> <sup class="footnote-reference"><a href="#8">8</a></sup></li>
+<li>User defined class with <a href="https://docs.python.org/3/library/dataclasses.html"><code>@dataclass</code></a> <sup class="footnote-reference"><a href="#9">9</a></sup> <sup class="footnote-reference"><a href="#10">10</a></sup></li>
+<li><a href="https://docs.python.org/3/library/typing.html#newtype"><code>typing.NewType</code></a> for primitive types <sup class="footnote-reference"><a href="#11">11</a></sup></li>
+<li><a href="https://docs.python.org/3/library/typing.html#the-any-type"><code>typing.Any</code></a> <sup class="footnote-reference"><a href="#12">12</a></sup></li>
+<li><a href="https://docs.python.org/3/library/typing.html#typing.Literal"><code>typing.Literal</code></a> <sup class="footnote-reference"><a href="#13">13</a></sup></li>
+<li><a href="https://docs.python.org/3/library/typing.html#user-defined-generic-types"><code>typing.Generic</code></a> <sup class="footnote-reference"><a href="#14">14</a></sup></li>
+<li><a href="https://docs.python.org/3/library/typing.html#typing.ClassVar"><code>typing.ClassVar</code></a> <sup class="footnote-reference"><a href="#15">15</a></sup></li>
+<li><a href="https://docs.python.org/3/library/dataclasses.html#init-only-variables"><code>typing.InitVar</code></a> <sup class="footnote-reference"><a href="#16">16</a></sup></li>
+<li><a href="https://docs.python.org/3/library/enum.html#enum.Enum"><code>Enum</code></a> and <a href="https://docs.python.org/3/library/enum.html#enum.IntEnum"><code>IntEnum</code></a> <sup class="footnote-reference"><a href="#17">17</a></sup></li>
 <li>Standard library
 <ul>
-<li><a href="https://docs.python.org/3/library/pathlib.html"><code>pathlib.Path</code></a> <sup class="footnote-reference"><a href="#18">17</a></sup></li>
-<li><a href="https://docs.python.org/3/library/decimal.html"><code>decimal.Decimal</code></a> <sup class="footnote-reference"><a href="#19">18</a></sup></li>
-<li><a href="https://docs.python.org/3/library/uuid.html"><code>uuid.UUID</code></a> <sup class="footnote-reference"><a href="#20">19</a></sup></li>
-<li><a href="https://docs.python.org/3/library/datetime.html#date-objects"><code>datetime.date</code></a>, <a href="https://docs.python.org/3/library/datetime.html#time-objects"><code>datetime.time</code></a>, <a href="https://docs.python.org/3/library/datetime.html#datetime-objects"><code>datetime.datetime</code></a> <sup class="footnote-reference"><a href="#21">20</a></sup></li>
-<li><a href="https://docs.python.org/3/library/ipaddress.html"><code>ipaddress</code></a> <sup class="footnote-reference"><a href="#22">21</a></sup></li>
+<li><a href="https://docs.python.org/3/library/pathlib.html"><code>pathlib.Path</code></a> <sup class="footnote-reference"><a href="#18">18</a></sup></li>
+<li><a href="https://docs.python.org/3/library/decimal.html"><code>decimal.Decimal</code></a> <sup class="footnote-reference"><a href="#19">19</a></sup></li>
+<li><a href="https://docs.python.org/3/library/uuid.html"><code>uuid.UUID</code></a> <sup class="footnote-reference"><a href="#20">20</a></sup></li>
+<li><a href="https://docs.python.org/3/library/datetime.html#date-objects"><code>datetime.date</code></a>, <a href="https://docs.python.org/3/library/datetime.html#time-objects"><code>datetime.time</code></a>, <a href="https://docs.python.org/3/library/datetime.html#datetime-objects"><code>datetime.datetime</code></a> <sup class="footnote-reference"><a href="#21">21</a></sup></li>
+<li><a href="https://docs.python.org/3/library/ipaddress.html"><code>ipaddress</code></a> <sup class="footnote-reference"><a href="#22">22</a></sup></li>
 </ul>
 </li>
 <li>PyPI library
 <ul>
-<li><a href="https://github.com/numpy/numpy"><code>numpy</code></a> types <sup class="footnote-reference"><a href="#23">22</a></sup></li>
-<li><a href="https://github.com/sqlalchemy/sqlalchemy"><code>SQLAlchemy</code></a> Declarative Dataclass Mapping (experimental) <sup class="footnote-reference"><a href="#24">23</a></sup></li>
+<li><a href="https://github.com/numpy/numpy"><code>numpy</code></a> types <sup class="footnote-reference"><a href="#23">23</a></sup></li>
+<li><a href="https://github.com/sqlalchemy/sqlalchemy"><code>SQLAlchemy</code></a> Declarative Dataclass Mapping (experimental) <sup class="footnote-reference"><a href="#24">24</a></sup></li>
 </ul>
 </li>
 </ul>
@@ -287,61 +288,64 @@ NPFoo(i=1, j=2, f=3.0, g=4.0, h=False, u=array([1, 2]), v=array([3, 4]), w=array
 <div class="footnote-definition" id="4"><sup class="footnote-definition-label">4</sup>
 <p>See <a href="https://github.com/yukinarit/pyserde/blob/main/examples/default_dict.py">examples/default_dict.py</a></p>
 </div>
-<div class="footnote-definition" id="6"><sup class="footnote-definition-label">5</sup>
+<div class="footnote-definition" id="5"><sup class="footnote-definition-label">5</sup>
 <p>See <a href="https://github.com/yukinarit/pyserde/blob/main/examples/union.py">examples/union.py</a></p>
 </div>
-<div class="footnote-definition" id="7"><sup class="footnote-definition-label">6</sup>
+<div class="footnote-definition" id="6"><sup class="footnote-definition-label">6</sup>
+<p>See <a href="https://github.com/yukinarit/pyserde/blob/main/examples/union.py">examples/union.py</a></p>
+</div>
+<div class="footnote-definition" id="7"><sup class="footnote-definition-label">7</sup>
 <p>See <a href="https://github.com/yukinarit/pyserde/blob/main/examples/union_operator.py">examples/union_operator.py</a></p>
 </div>
-<div class="footnote-definition" id="8"><sup class="footnote-definition-label">7</sup>
+<div class="footnote-definition" id="8"><sup class="footnote-definition-label">8</sup>
 <p>See <a href="https://github.com/yukinarit/pyserde/blob/main/examples/union_tagging.py">examples/union_tagging.py</a></p>
 </div>
-<div class="footnote-definition" id="9"><sup class="footnote-definition-label">8</sup>
+<div class="footnote-definition" id="9"><sup class="footnote-definition-label">9</sup>
 <p>See <a href="https://github.com/yukinarit/pyserde/blob/main/examples/simple.py">examples/simple.py</a></p>
 </div>
-<div class="footnote-definition" id="10"><sup class="footnote-definition-label">9</sup>
+<div class="footnote-definition" id="10"><sup class="footnote-definition-label">10</sup>
 <p>See <a href="https://github.com/yukinarit/pyserde/blob/main/examples/nested.py">examples/nested.py</a></p>
 </div>
-<div class="footnote-definition" id="11"><sup class="footnote-definition-label">10</sup>
+<div class="footnote-definition" id="11"><sup class="footnote-definition-label">11</sup>
 <p>See <a href="https://github.com/yukinarit/pyserde/blob/main/examples/newtype.py">examples/newtype.py</a></p>
 </div>
-<div class="footnote-definition" id="12"><sup class="footnote-definition-label">11</sup>
+<div class="footnote-definition" id="12"><sup class="footnote-definition-label">12</sup>
 <p>See <a href="https://github.com/yukinarit/pyserde/blob/main/examples/any.py">examples/any.py</a></p>
 </div>
-<div class="footnote-definition" id="13"><sup class="footnote-definition-label">12</sup>
+<div class="footnote-definition" id="13"><sup class="footnote-definition-label">13</sup>
 <p>See <a href="https://github.com/yukinarit/pyserde/blob/main/examples/literal.py">examples/literal.py</a></p>
 </div>
-<div class="footnote-definition" id="14"><sup class="footnote-definition-label">13</sup>
+<div class="footnote-definition" id="14"><sup class="footnote-definition-label">14</sup>
 <p>See <a href="https://github.com/yukinarit/pyserde/blob/main/examples/generics.py">examples/generics.py</a></p>
 </div>
-<div class="footnote-definition" id="15"><sup class="footnote-definition-label">14</sup>
+<div class="footnote-definition" id="15"><sup class="footnote-definition-label">15</sup>
 <p>See <a href="https://github.com/yukinarit/pyserde/blob/main/examples/class_var.py">examples/class_var.py</a></p>
 </div>
-<div class="footnote-definition" id="16"><sup class="footnote-definition-label">15</sup>
+<div class="footnote-definition" id="16"><sup class="footnote-definition-label">16</sup>
 <p>See <a href="https://github.com/yukinarit/pyserde/blob/main/examples/init_var.py">examples/init_var.py</a></p>
 </div>
-<div class="footnote-definition" id="17"><sup class="footnote-definition-label">16</sup>
+<div class="footnote-definition" id="17"><sup class="footnote-definition-label">17</sup>
 <p>See <a href="https://github.com/yukinarit/pyserde/blob/main/examples/enum34.py">examples/enum34.py</a></p>
 </div>
-<div class="footnote-definition" id="18"><sup class="footnote-definition-label">17</sup>
+<div class="footnote-definition" id="18"><sup class="footnote-definition-label">18</sup>
 <p>See <a href="https://github.com/yukinarit/pyserde/blob/main/examples/type_pathlib.py">examples/type_pathlib.py</a></p>
 </div>
-<div class="footnote-definition" id="19"><sup class="footnote-definition-label">18</sup>
+<div class="footnote-definition" id="19"><sup class="footnote-definition-label">19</sup>
 <p>See <a href="https://github.com/yukinarit/pyserde/blob/main/examples/type_decimal.py">examples/type_decimal.py</a></p>
 </div>
-<div class="footnote-definition" id="20"><sup class="footnote-definition-label">19</sup>
+<div class="footnote-definition" id="20"><sup class="footnote-definition-label">20</sup>
 <p>See <a href="https://github.com/yukinarit/pyserde/blob/main/examples/type_uuid.py">examples/type_uuid.py</a></p>
 </div>
-<div class="footnote-definition" id="21"><sup class="footnote-definition-label">20</sup>
+<div class="footnote-definition" id="21"><sup class="footnote-definition-label">21</sup>
 <p>See <a href="https://github.com/yukinarit/pyserde/blob/main/examples/type_datetime.py">examples/type_datetime.py</a></p>
 </div>
-<div class="footnote-definition" id="22"><sup class="footnote-definition-label">21</sup>
+<div class="footnote-definition" id="22"><sup class="footnote-definition-label">22</sup>
 <p>See <a href="https://github.com/yukinarit/pyserde/blob/main/examples/type_ipaddress.py">examples/type_ipaddress.py</a></p>
 </div>
-<div class="footnote-definition" id="23"><sup class="footnote-definition-label">22</sup>
+<div class="footnote-definition" id="23"><sup class="footnote-definition-label">23</sup>
 <p>See <a href="https://github.com/yukinarit/pyserde/blob/main/examples/type_numpy.py">examples/type_numpy.py</a></p>
 </div>
-<div class="footnote-definition" id="24"><sup class="footnote-definition-label">23</sup>
+<div class="footnote-definition" id="24"><sup class="footnote-definition-label">24</sup>
 <p>See <a href="https://github.com/yukinarit/pyserde/blob/main/examples/type_sqlalchemy.py">examples/type_sqlalchemy.py</a></p>
 </div>
 

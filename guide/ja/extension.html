@@ -150,7 +150,7 @@
                         <a href="https://github.com/yukinarit/pyserde" title="Git repository" aria-label="Git repository">
                             <i id="git-repository-button" class="fa fa-github"></i>
                         </a>
-                        <a href="https://github.com/yukinarit/pyserde/edit/main/ja/.//extension.md" title="Suggest an edit" aria-label="Suggest an edit">
+                        <a href="https://github.com/yukinarit/pyserde/edit/main/docs/ja/.//extension.md" title="Suggest an edit" aria-label="Suggest an edit">
                             <i id="git-edit-button" class="fa fa-edit"></i>
                         </a>
 
@@ -179,7 +179,84 @@
 
                 <div id="content" class="content">
                     <main>
-                        
+                        <h1 id="extending-pyserde"><a class="header" href="#extending-pyserde">Extending pyserde</a></h1>
+<p>pyserde はビルトイン型以外をサポートするために pyserde を拡張する 3 つの方法を提供しています。</p>
+<h2 id="カスタムフィールドデシリアライザ"><a class="header" href="#カスタムフィールドデシリアライザ">カスタムフィールド（デ）シリアライザ</a></h2>
+<p>詳細は<a href="./field-attributes.html#serializerdeserializer">カスタムフィールドシリアライザ</a>を参照してください。</p>
+<blockquote>
+<p>💡 ヒント：<code>serde.field</code> を独自のフィールド関数でラップすると以下のようになります。</p>
+<pre><code class="language-python">import serde
+
+def field(*args, **kwargs):
+    serde.field(*args, **kwargs, serializer=str)
+
+@serde
+class Foo:
+    a: int = field(default=0)  # フィールドシリアライザの設定
+</code></pre>
+</blockquote>
+<h2 id="カスタムクラスデシリアライザ"><a class="header" href="#カスタムクラスデシリアライザ">カスタムクラス（デ）シリアライザ</a></h2>
+<p>詳細は<a href="./class-attributes.html#class_serializer--class_deserializer">カスタムクラスシリアライザ</a>を参照してください。</p>
+<h2 id="カスタムグローバルデシリアライザ"><a class="header" href="#カスタムグローバルデシリアライザ">カスタムグローバル（デ）シリアライザ</a></h2>
+<p><code>add_serializer</code> と <code>add_deserializer</code> を使ってクラス（デ）シリアライザを登録することで、コードベース全体でカスタム（デ）シリアライザを適用できます。</p>
+<p>登録されたクラス（デ）シリアライザは pyserde のグローバル空間にスタックされ、すべての pyserde クラスで自動的に使用されます。</p>
+<p>例：<a href="https://pypi.org/project/isodate/">isodate</a>パッケージを使用して <code>datetime.timedelta</code> のカスタム（デ）シリアライザを実装する。</p>
+<p>以下は、<code>datetime.timedelta</code> のためのクラス（デ）シリアライザを登録するコードです。<br />
+このパッケージは実際に PyPI で <a href="https://pypi.org/project/pyserde-timedelta/">pyserde-timedelta</a> として公開されています。</p>
+<pre><code class="language-python">from datetime import timedelta
+from plum import dispatch
+from typing import Type, Any
+import isodate
+import serde
+
+class Serializer:
+    @dispatch
+    def serialize(self, value: timedelta) -&gt; Any:
+        return isodate.duration_isoformat(value)
+
+class Deserializer:
+    @dispatch
+    def deserialize(self, cls: Type[timedelta], value: Any) -&gt; timedelta:
+        return isodate.parse_duration(value)
+
+def init() -&gt; None:
+    serde.add_serializer(Serializer())
+    serde.add_deserializer(Deserializer())
+</code></pre>
+<p>このパッケージの利用者は、 <code>serde_timedelta.init()</code> を呼び出すだけで <code>datetime.timedelta</code> のカスタム（デ）シリアライザの機能を再利用できます。</p>
+<pre><code class="language-python">import serde_timedelta
+from serde import serde
+from serde.json import to_json, from_json
+from datetime import timedelta
+
+serde_timedelta.init()
+
+@serde
+class Foo:
+    a: timedelta
+
+f = Foo(timedelta(hours=10))
+json = to_json(f)
+print(json)
+print(from_json(Foo, json))
+</code></pre>
+<p>以下のように <code>datetime.timedelta</code> がISO 8601 形式でシリアライズされます！</p>
+<pre><code class="language-bash">{"a":"PT10H"}
+Foo(a=datetime.timedelta(seconds=36000))
+</code></pre>
+<blockquote>
+<p>💡 ヒント：クラス（デ）シリアライザはいくつでも登録できます。これは、好きなだけpyserde拡張を使用できることを意味します。
+登録された（デ）シリアライザはメモリにスタックされます。</p>
+<p>なお、1つの（デ）シリアライザは他の（デ）シリアライザによってオーバーライドされる可能性があります。</p>
+<p>例：次の順序で3つのカスタムシリアライザを登録すると、最初のシリアライザは3番目によって完全に上書きされます。2番目は異なる型用に実装されているため機能します。</p>
+<ol>
+<li><code>int</code> 用のシリアライザを登録</li>
+<li><code>float</code> 用のシリアライザを登録</li>
+<li><code>int</code> 用のシリアライザを登録</li>
+</ol>
+</blockquote>
+<p>こちらは、v0.13.0 で新しく追加されました。</p>
+
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
