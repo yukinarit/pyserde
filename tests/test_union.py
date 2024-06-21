@@ -804,3 +804,21 @@ def test_union_with_any() -> None:
 
     c = Class([FooWithString("string"), BarWithDict({"key": "value"})])
     assert c == from_json(Class, to_json(c))
+
+
+def test_union_with_different_ordering() -> None:
+
+    @serde
+    class Expr:
+        expr: str
+
+    @serde
+    class Foo:
+        a: Union[str, Expr]
+        b: Union[Expr, str]
+        c: Union[Expr, str]
+
+    f = Foo("1", Expr("2"), "3")
+    s = '{"a":"1","b":{"Expr":{"expr":"2"}},"c":"3"}'
+    assert s == to_json(f)
+    assert f == from_json(Foo, s)
