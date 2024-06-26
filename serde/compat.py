@@ -214,7 +214,7 @@ def typename(typ: Any, with_typing_module: bool = False) -> str:
         args = type_args(typ)
         if not args:
             raise TypeError("Literal type requires at least one literal argument")
-        return f'Literal[{", ".join(str(e) for e in args)}]'
+        return f'Literal[{", ".join(stringify_literal(e) for e in args)}]'
     elif typ is Any:
         return f"{mod}Any"
     elif is_ellipsis(typ):
@@ -234,6 +234,13 @@ def typename(typ: Any, with_typing_module: bool = False) -> str:
                 return name
             else:
                 raise SerdeError(f"Could not get a type name from: {typ}")
+
+
+def stringify_literal(v: Any) -> str:
+    if isinstance(v, str):
+        return f"'{v}'"
+    else:
+        return str(v)
 
 
 def type_args(typ: Any) -> tuple[type[Any], ...]:

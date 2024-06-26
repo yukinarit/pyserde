@@ -822,3 +822,19 @@ def test_union_with_different_ordering() -> None:
     s = '{"a":"1","b":{"Expr":{"expr":"2"}},"c":"3"}'
     assert s == to_json(f)
     assert f == from_json(Foo, s)
+
+
+def test_union_internal_tagging_for_non_dataclass() -> None:
+    @serde
+    class Bar:
+        a: int
+
+    @serde(tagging=InternalTagging("type"))
+    class Foo:
+        x: Union[list[int], Bar]
+
+    f = Foo(Bar(1))
+    assert f == from_json(Foo, to_json(f))
+
+    f = Foo([10])
+    assert f == from_json(Foo, to_json(f))

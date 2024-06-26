@@ -83,7 +83,7 @@ def test_typename() -> None:
     assert typename(dict[str, Foo]) == "dict[str, Foo]"  # type: ignore
     assert typename(set) == "set"
     assert typename(set[int]) == "set[int]"
-    assert typename(Literal[1, True, "Hey"]) == "Literal[1, True, Hey]"
+    assert typename(Literal[1, True, "Hey"]) == "Literal[1, True, 'Hey']"
 
 
 def test_iter_types() -> None:

@@ -13,6 +13,7 @@ import typing
 import jinja2
 from collections.abc import Callable, Sequence, Iterable
 from beartype import beartype, BeartypeConf
+from beartype.door import is_bearable
 from beartype.roar import BeartypeCallHintParamViolation
 from dataclasses import dataclass, is_dataclass
 from typing import overload, TypeVar, Generic, Any, Optional, Union, Literal
@@ -263,6 +264,7 @@ def deserialize(
         g["_get_by_aliases"] = _get_by_aliases
         g["class_deserializers"] = class_deserializers
         g["BeartypeCallHintParamViolation"] = BeartypeCallHintParamViolation
+        g["is_bearable"] = is_bearable
         if deserializer:
             g["serde_legacy_custom_class_deserializer"] = functools.partial(
                 serde_legacy_custom_class_deserializer, custom=deserializer
@@ -1158,9 +1160,11 @@ def {{func}}(cls=cls, maybe_generic=None, maybe_generic_type_vars=None, data=Non
     if not isinstance(fake_dict["fake_key"], {{typename(t)}}):
         raise Exception("Not a type of {{typename(t)}}")
     {% endif %}
-    return {{rvalue(arg(t))}}
+    res = {{rvalue(arg(t))}}
+    ensure(is_bearable(res, {{typename(t)}}), "object is not of type '{{typename(t)}}'")
+    return res
   except Exception as e:
-    errors.append(f' Failed to deserialize into {{typename(t)}}: {e}')
+    errors.append(f" Failed to deserialize into {{typename(t)}}: {e}")
   {% endfor %}
   raise SerdeError("Can not deserialize " + repr(data) + " of type " + \
           typename(type(data)) + " into {{union_name}}.\\nReasons:\\n" + "\\n".join(errors))
