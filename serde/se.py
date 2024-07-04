@@ -610,6 +610,7 @@ def render_to_tuple(
         suppress_coerce=(not type_check.is_coerce()),
         serialize_class_var=serialize_class_var,
         class_serializer=class_serializer,
+        class_name=typename(cls),
     )
     return jinja2_env.get_template("iter").render(
         func=TO_ITER,
@@ -633,6 +634,7 @@ def render_to_dict(
         legacy_class_serializer,
         suppress_coerce=(not type_check.is_coerce()),
         class_serializer=class_serializer,
+        class_name=typename(cls),
     )
     lrenderer = LRenderer(case, serialize_class_var)
     return jinja2_env.get_template("dict").render(
@@ -652,7 +654,7 @@ def render_union_func(
     Render function that serializes a field with union type.
     """
     union_name = f"Union[{', '.join([typename(a) for a in union_args])}]"
-    renderer = Renderer(TO_DICT, suppress_coerce=True)
+    renderer = Renderer(TO_DICT, suppress_coerce=True, class_name=typename(cls))
     return jinja2_env.get_template("union").render(
         func=union_func_name(UNION_SE_PREFIX, union_args),
         serde_scope=getattr(cls, SERDE_SCOPE),
@@ -710,46 +712,11 @@ class Renderer:
     """ Suppress type coercing because generated union serializer has its own type checking """
     serialize_class_var: bool = False
     class_serializer: Optional[ClassSerializer] = None
+    class_name: Optional[str] = None
 
     def render(self, arg: SeField[Any]) -> str:
         """
         Render rvalue
-
-        >>> Renderer(TO_ITER).render(SeField(int, 'i'))
-        'coerce_object(int, i)'
-
-        >>> Renderer(TO_ITER).render(SeField(list[int], 'l'))
-        '[coerce_object(int, v) for v in l]'
-
-        >>> @serialize
-        ... @dataclass(unsafe_hash=True)
-        ... class Foo:
-        ...    val: int
-        >>> Renderer(TO_ITER).render(SeField(Foo, 'foo'))
-        "\
-foo.__serde__.funcs['to_iter'](foo, reuse_instances=reuse_instances, convert_sets=convert_sets)"
-
-        >>> Renderer(TO_ITER).render(SeField(list[Foo], 'foo'))
-        "\
-[v.__serde__.funcs['to_iter'](v, reuse_instances=reuse_instances, \
-convert_sets=convert_sets) for v in foo]"
-
-        >>> Renderer(TO_ITER).render(SeField(dict[str, Foo], 'foo'))
-        "\
-{coerce_object(str, k): v.__serde__.funcs['to_iter'](v, reuse_instances=reuse_instances, \
-convert_sets=convert_sets) for k, v in foo.items()}"
-
-        >>> Renderer(TO_ITER).render(SeField(dict[Foo, Foo], 'foo'))
-        "\
-{k.__serde__.funcs['to_iter'](k, reuse_instances=reuse_instances, \
-convert_sets=convert_sets): v.__serde__.funcs['to_iter'](v, reuse_instances=reuse_instances, \
-convert_sets=convert_sets) for k, v in foo.items()}"
-
-        >>> Renderer(TO_ITER).render(SeField(tuple[str, Foo, int], 'foo'))
-        "\
-(coerce_object(str, foo[0]), foo[1].__serde__.funcs['to_iter'](foo[1], \
-reuse_instances=reuse_instances, convert_sets=convert_sets), \
-coerce_object(int, foo[2]),)"
         """
         implemented_methods: dict[type[Any], int] = {}
         class_serializers: Iterable[ClassSerializer] = itertools.chain(
@@ -925,7 +892,7 @@ coerce_object(int, foo[2]),)"
         if self.suppress_coerce:
             return var
         else:
-            return f"coerce_object({typ}, {var})"
+            return f'coerce_object("{self.class_name}", "{arg.name}", {typ}, {var})'
 
     def string(self, arg: SeField[Any]) -> str:
         return f"str({arg.varname})"

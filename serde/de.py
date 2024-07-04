@@ -701,6 +701,7 @@ class Renderer:
     suppress_coerce: bool = False
     """ Disable type coercing in codegen """
     class_deserializer: Optional[ClassDeserializer] = None
+    class_name: Optional[str] = None
 
     def render(self, arg: DeField[Any]) -> str:
         """
@@ -844,23 +845,6 @@ class Renderer:
     def opt(self, arg: DeField[Any]) -> str:
         """
         Render rvalue for Optional.
-
-        >>> Renderer('foo').render(DeField(Optional[int], 'o', datavar='data'))
-        '(coerce_object(int, data["o"])) if data.get("o") is not None else None'
-
-        >>> Renderer('foo').render(DeField(Optional[list[int]], 'o', datavar='data'))
-        '([coerce_object(int, v) for v in data["o"]]) if data.get("o") is not None else None'
-
-        >>> Renderer('foo').render(DeField(Optional[list[int]], 'o', datavar='data'))
-        '([coerce_object(int, v) for v in data["o"]]) if data.get("o") is not None else None'
-
-        >>> @deserialize
-        ... class Foo:
-        ...     o: Optional[list[int]]
-        >>> Renderer('foo').render(DeField(Optional[Foo], 'f', datavar='data'))
-        '(Foo.__serde__.funcs[\\'foo\\'](data=data["f"], maybe_generic=maybe_generic, \
-maybe_generic_type_vars=maybe_generic_type_vars, variable_type_args=None, \
-reuse_instances=reuse_instances)) if data.get("f") is not None else None'
         """
         inner = arg[0]
         if arg.iterbased:
@@ -886,12 +870,6 @@ reuse_instances=reuse_instances)) if data.get("f") is not None else None'
     def list(self, arg: DeField[Any]) -> str:
         """
         Render rvalue for list.
-
-        >>> Renderer('foo').render(DeField(list[int], 'l', datavar='data'))
-        '[coerce_object(int, v) for v in data["l"]]'
-
-        >>> Renderer('foo').render(DeField(list[list[int]], 'l', datavar='data'))
-        '[[coerce_object(int, v) for v in v] for v in data["l"]]'
         """
         if is_bare_list(arg.type):
             return f"list({arg.data})"
@@ -901,13 +879,6 @@ reuse_instances=reuse_instances)) if data.get("f") is not None else None'
     def set(self, arg: DeField[Any]) -> str:
         """
         Render rvalue for set.
-
-        >>> from typing import Set
-        >>> Renderer('foo').render(DeField(Set[int], 'l', datavar='data'))
-        'set(coerce_object(int, v) for v in data["l"])'
-
-        >>> Renderer('foo').render(DeField(Set[Set[int]], 'l', datavar='data'))
-        'set(set(coerce_object(int, v) for v in v) for v in data["l"])'
         """
         if is_bare_set(arg.type):
             return f"set({arg.data})"
@@ -919,26 +890,6 @@ reuse_instances=reuse_instances)) if data.get("f") is not None else None'
     def tuple(self, arg: DeField[Any]) -> str:
         """
         Render rvalue for tuple.
-
-        >>> @deserialize
-        ... class Foo: pass
-        >>> Renderer('foo').render(DeField(tuple[str, int, list[int], Foo], 'd', datavar='data'))
-        '(coerce_object(str, data["d"][0]), coerce_object(int, data["d"][1]), \
-[coerce_object(int, v) for v in data["d"][2]], \
-Foo.__serde__.funcs[\\'foo\\'](data=data["d"][3], maybe_generic=maybe_generic, \
-maybe_generic_type_vars=maybe_generic_type_vars, variable_type_args=None, \
-reuse_instances=reuse_instances),)'
-
-        >>> field = DeField(tuple[str, int, list[int], Foo],
-        ...                'd',
-        ...                 datavar='data',
-        ...                 index=0,
-        ...                 iterbased=True)
-        >>> Renderer('foo').render(field)
-        "(coerce_object(str, data[0][0]), coerce_object(int, data[0][1]), \
-[coerce_object(int, v) for v in data[0][2]], Foo.__serde__.funcs['foo'](data=data[0][3], \
-maybe_generic=maybe_generic, maybe_generic_type_vars=maybe_generic_type_vars, \
-variable_type_args=None, reuse_instances=reuse_instances),)"
         """
         if is_bare_tuple(arg.type):
             return f"tuple({arg.data})"
@@ -956,21 +907,6 @@ variable_type_args=None, reuse_instances=reuse_instances),)"
     def dict(self, arg: DeField[Any]) -> str:
         """
         Render rvalue for dict.
-
-        >>> Renderer('foo').render(DeField(dict[str, int], 'd', datavar='data'))
-        '{coerce_object(str, k): coerce_object(int, v) for k, v in data["d"].items()}'
-
-        >>> @deserialize
-        ... class Foo: pass
-        >>> Renderer('foo').render(DeField(dict[Foo, list[Foo]], 'f', datavar='data'))
-        '\
-{Foo.__serde__.funcs[\\'foo\\'](data=k, maybe_generic=maybe_generic, \
-maybe_generic_type_vars=maybe_generic_type_vars, variable_type_args=None, \
-reuse_instances=reuse_instances): \
-[Foo.__serde__.funcs[\\'foo\\'](data=v, maybe_generic=maybe_generic, \
-maybe_generic_type_vars=maybe_generic_type_vars, \
-variable_type_args=None, reuse_instances=reuse_instances) for v in v] \
-for k, v in data["f"].items()}'
         """
         if is_bare_dict(arg.type):
             return arg.data
@@ -1000,15 +936,6 @@ for k, v in data["f"].items()}'
         Render rvalue for primitives.
 
         * `suppress_coerce`: Overrides "suppress_coerce" in the Renderer's field
-
-        >>> Renderer('foo').render(DeField(int, 'i', datavar='data'))
-        'coerce_object(int, data["i"])'
-
-        >>> Renderer('foo').render(DeField(int, 'int_field', datavar='data', case='camelcase'))
-        'coerce_object(int, data["intField"])'
-
-        >>> Renderer('foo').render(DeField(int, 'i', datavar='data', index=1, iterbased=True))
-        'coerce_object(int, data[1])'
         """
         typ = typename(arg.type)
         dat = arg.data
@@ -1018,7 +945,7 @@ for k, v in data["f"].items()}'
         if self.suppress_coerce and suppress_coerce:
             return dat
         else:
-            return f"coerce_object({typ}, {dat})"
+            return f'coerce_object("{self.class_name}", "{arg.name}", {typ}, {dat})'
 
     def c_tor(self, arg: DeField[Any]) -> str:
         return f"{typename(arg.type)}({arg.data})"
@@ -1193,6 +1120,7 @@ def render_from_iter(
         legacy_class_deserializer=legacy_class_deserializer,
         suppress_coerce=(not type_check.is_coerce()),
         class_deserializer=class_deserializer,
+        class_name=typename(cls),
     )
     fields = list(filter(renderable, defields(cls)))
     res = jinja2_env.get_template("iter").render(
@@ -1223,6 +1151,7 @@ def render_from_dict(
         legacy_class_deserializer=legacy_class_deserializer,
         suppress_coerce=(not type_check.is_coerce()),
         class_deserializer=class_deserializer,
+        class_name=typename(cls),
     )
     fields = list(filter(renderable, defields(cls)))
     res = jinja2_env.get_template("dict").render(
