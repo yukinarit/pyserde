@@ -1155,103 +1155,108 @@
 </span><span id="L-937"><a href="#L-937"><span class="linenos"> 937</span></a><span class="n">strict</span> <span class="o">=</span> <span class="n">TypeCheck</span><span class="p">(</span><span class="n">kind</span><span class="o">=</span><span class="n">TypeCheck</span><span class="o">.</span><span class="n">Kind</span><span class="o">.</span><span class="n">Strict</span><span class="p">)</span>
 </span><span id="L-938"><a href="#L-938"><span class="linenos"> 938</span></a>
 </span><span id="L-939"><a href="#L-939"><span class="linenos"> 939</span></a>
-</span><span id="L-940"><a href="#L-940"><span class="linenos"> 940</span></a><span class="k">def</span> <span class="nf">coerce_object</span><span class="p">(</span><span class="n">typ</span><span class="p">:</span> <span class="nb">type</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span> <span class="n">obj</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
-</span><span id="L-941"><a href="#L-941"><span class="linenos"> 941</span></a>    <span class="k">return</span> <span class="n">typ</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span> <span class="k">if</span> <span class="n">is_coercible</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="n">obj</span><span class="p">)</span> <span class="k">else</span> <span class="n">obj</span>
-</span><span id="L-942"><a href="#L-942"><span class="linenos"> 942</span></a>
-</span><span id="L-943"><a href="#L-943"><span class="linenos"> 943</span></a>
-</span><span id="L-944"><a href="#L-944"><span class="linenos"> 944</span></a><span class="k">def</span> <span class="nf">is_coercible</span><span class="p">(</span><span class="n">typ</span><span class="p">:</span> <span class="nb">type</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span> <span class="n">obj</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-</span><span id="L-945"><a href="#L-945"><span class="linenos"> 945</span></a>    <span class="k">if</span> <span class="n">obj</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-</span><span id="L-946"><a href="#L-946"><span class="linenos"> 946</span></a>        <span class="k">return</span> <span class="kc">False</span>
-</span><span id="L-947"><a href="#L-947"><span class="linenos"> 947</span></a>    <span class="k">return</span> <span class="kc">True</span>
+</span><span id="L-940"><a href="#L-940"><span class="linenos"> 940</span></a><span class="k">def</span> <span class="nf">coerce_object</span><span class="p">(</span><span class="bp">cls</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">field</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">typ</span><span class="p">:</span> <span class="nb">type</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span> <span class="n">obj</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+</span><span id="L-941"><a href="#L-941"><span class="linenos"> 941</span></a>    <span class="k">try</span><span class="p">:</span>
+</span><span id="L-942"><a href="#L-942"><span class="linenos"> 942</span></a>        <span class="k">return</span> <span class="n">typ</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span> <span class="k">if</span> <span class="n">is_coercible</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="n">obj</span><span class="p">)</span> <span class="k">else</span> <span class="n">obj</span>
+</span><span id="L-943"><a href="#L-943"><span class="linenos"> 943</span></a>    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+</span><span id="L-944"><a href="#L-944"><span class="linenos"> 944</span></a>        <span class="k">raise</span> <span class="n">SerdeError</span><span class="p">(</span>
+</span><span id="L-945"><a href="#L-945"><span class="linenos"> 945</span></a>            <span class="sa">f</span><span class="s2">&quot;failed to coerce the field </span><span class="si">{</span><span class="bp">cls</span><span class="si">}</span><span class="s2">.</span><span class="si">{</span><span class="n">field</span><span class="si">}</span><span class="s2"> value </span><span class="si">{</span><span class="n">obj</span><span class="si">}</span><span class="s2"> into </span><span class="si">{</span><span class="n">typename</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span id="L-946"><a href="#L-946"><span class="linenos"> 946</span></a>        <span class="p">)</span>
+</span><span id="L-947"><a href="#L-947"><span class="linenos"> 947</span></a>
 </span><span id="L-948"><a href="#L-948"><span class="linenos"> 948</span></a>
-</span><span id="L-949"><a href="#L-949"><span class="linenos"> 949</span></a>
-</span><span id="L-950"><a href="#L-950"><span class="linenos"> 950</span></a><span class="k">def</span> <span class="nf">has_default</span><span class="p">(</span><span class="n">field</span><span class="p">:</span> <span class="n">Field</span><span class="p">[</span><span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-</span><span id="L-951"><a href="#L-951"><span class="linenos"> 951</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-</span><span id="L-952"><a href="#L-952"><span class="linenos"> 952</span></a><span class="sd">    Test if the field has default value.</span>
+</span><span id="L-949"><a href="#L-949"><span class="linenos"> 949</span></a><span class="k">def</span> <span class="nf">is_coercible</span><span class="p">(</span><span class="n">typ</span><span class="p">:</span> <span class="nb">type</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span> <span class="n">obj</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+</span><span id="L-950"><a href="#L-950"><span class="linenos"> 950</span></a>    <span class="k">if</span> <span class="n">obj</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="L-951"><a href="#L-951"><span class="linenos"> 951</span></a>        <span class="k">return</span> <span class="kc">False</span>
+</span><span id="L-952"><a href="#L-952"><span class="linenos"> 952</span></a>    <span class="k">return</span> <span class="kc">True</span>
 </span><span id="L-953"><a href="#L-953"><span class="linenos"> 953</span></a>
-</span><span id="L-954"><a href="#L-954"><span class="linenos"> 954</span></a><span class="sd">    &gt;&gt;&gt; @dataclasses.dataclass</span>
-</span><span id="L-955"><a href="#L-955"><span class="linenos"> 955</span></a><span class="sd">    ... class C:</span>
-</span><span id="L-956"><a href="#L-956"><span class="linenos"> 956</span></a><span class="sd">    ...     a: int</span>
-</span><span id="L-957"><a href="#L-957"><span class="linenos"> 957</span></a><span class="sd">    ...     d: int = 10</span>
-</span><span id="L-958"><a href="#L-958"><span class="linenos"> 958</span></a><span class="sd">    &gt;&gt;&gt; has_default(dataclasses.fields(C)[0])</span>
-</span><span id="L-959"><a href="#L-959"><span class="linenos"> 959</span></a><span class="sd">    False</span>
-</span><span id="L-960"><a href="#L-960"><span class="linenos"> 960</span></a><span class="sd">    &gt;&gt;&gt; has_default(dataclasses.fields(C)[1])</span>
-</span><span id="L-961"><a href="#L-961"><span class="linenos"> 961</span></a><span class="sd">    True</span>
-</span><span id="L-962"><a href="#L-962"><span class="linenos"> 962</span></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="L-963"><a href="#L-963"><span class="linenos"> 963</span></a>    <span class="k">return</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">,</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">_MISSING_TYPE</span><span class="p">)</span>
-</span><span id="L-964"><a href="#L-964"><span class="linenos"> 964</span></a>
-</span><span id="L-965"><a href="#L-965"><span class="linenos"> 965</span></a>
-</span><span id="L-966"><a href="#L-966"><span class="linenos"> 966</span></a><span class="k">def</span> <span class="nf">has_default_factory</span><span class="p">(</span><span class="n">field</span><span class="p">:</span> <span class="n">Field</span><span class="p">[</span><span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-</span><span id="L-967"><a href="#L-967"><span class="linenos"> 967</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-</span><span id="L-968"><a href="#L-968"><span class="linenos"> 968</span></a><span class="sd">    Test if the field has default factory.</span>
+</span><span id="L-954"><a href="#L-954"><span class="linenos"> 954</span></a>
+</span><span id="L-955"><a href="#L-955"><span class="linenos"> 955</span></a><span class="k">def</span> <span class="nf">has_default</span><span class="p">(</span><span class="n">field</span><span class="p">:</span> <span class="n">Field</span><span class="p">[</span><span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+</span><span id="L-956"><a href="#L-956"><span class="linenos"> 956</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+</span><span id="L-957"><a href="#L-957"><span class="linenos"> 957</span></a><span class="sd">    Test if the field has default value.</span>
+</span><span id="L-958"><a href="#L-958"><span class="linenos"> 958</span></a>
+</span><span id="L-959"><a href="#L-959"><span class="linenos"> 959</span></a><span class="sd">    &gt;&gt;&gt; @dataclasses.dataclass</span>
+</span><span id="L-960"><a href="#L-960"><span class="linenos"> 960</span></a><span class="sd">    ... class C:</span>
+</span><span id="L-961"><a href="#L-961"><span class="linenos"> 961</span></a><span class="sd">    ...     a: int</span>
+</span><span id="L-962"><a href="#L-962"><span class="linenos"> 962</span></a><span class="sd">    ...     d: int = 10</span>
+</span><span id="L-963"><a href="#L-963"><span class="linenos"> 963</span></a><span class="sd">    &gt;&gt;&gt; has_default(dataclasses.fields(C)[0])</span>
+</span><span id="L-964"><a href="#L-964"><span class="linenos"> 964</span></a><span class="sd">    False</span>
+</span><span id="L-965"><a href="#L-965"><span class="linenos"> 965</span></a><span class="sd">    &gt;&gt;&gt; has_default(dataclasses.fields(C)[1])</span>
+</span><span id="L-966"><a href="#L-966"><span class="linenos"> 966</span></a><span class="sd">    True</span>
+</span><span id="L-967"><a href="#L-967"><span class="linenos"> 967</span></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="L-968"><a href="#L-968"><span class="linenos"> 968</span></a>    <span class="k">return</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">,</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">_MISSING_TYPE</span><span class="p">)</span>
 </span><span id="L-969"><a href="#L-969"><span class="linenos"> 969</span></a>
-</span><span id="L-970"><a href="#L-970"><span class="linenos"> 970</span></a><span class="sd">    &gt;&gt;&gt; @dataclasses.dataclass</span>
-</span><span id="L-971"><a href="#L-971"><span class="linenos"> 971</span></a><span class="sd">    ... class C:</span>
-</span><span id="L-972"><a href="#L-972"><span class="linenos"> 972</span></a><span class="sd">    ...     a: int</span>
-</span><span id="L-973"><a href="#L-973"><span class="linenos"> 973</span></a><span class="sd">    ...     d: dict = dataclasses.field(default_factory=dict)</span>
-</span><span id="L-974"><a href="#L-974"><span class="linenos"> 974</span></a><span class="sd">    &gt;&gt;&gt; has_default_factory(dataclasses.fields(C)[0])</span>
-</span><span id="L-975"><a href="#L-975"><span class="linenos"> 975</span></a><span class="sd">    False</span>
-</span><span id="L-976"><a href="#L-976"><span class="linenos"> 976</span></a><span class="sd">    &gt;&gt;&gt; has_default_factory(dataclasses.fields(C)[1])</span>
-</span><span id="L-977"><a href="#L-977"><span class="linenos"> 977</span></a><span class="sd">    True</span>
-</span><span id="L-978"><a href="#L-978"><span class="linenos"> 978</span></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="L-979"><a href="#L-979"><span class="linenos"> 979</span></a>    <span class="k">return</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">default_factory</span><span class="p">,</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">_MISSING_TYPE</span><span class="p">)</span>
-</span><span id="L-980"><a href="#L-980"><span class="linenos"> 980</span></a>
-</span><span id="L-981"><a href="#L-981"><span class="linenos"> 981</span></a>
-</span><span id="L-982"><a href="#L-982"><span class="linenos"> 982</span></a><span class="k">class</span> <span class="nc">ClassSerializer</span><span class="p">(</span><span class="n">Protocol</span><span class="p">):</span>
-</span><span id="L-983"><a href="#L-983"><span class="linenos"> 983</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-</span><span id="L-984"><a href="#L-984"><span class="linenos"> 984</span></a><span class="sd">    Interface for custom class serializer.</span>
+</span><span id="L-970"><a href="#L-970"><span class="linenos"> 970</span></a>
+</span><span id="L-971"><a href="#L-971"><span class="linenos"> 971</span></a><span class="k">def</span> <span class="nf">has_default_factory</span><span class="p">(</span><span class="n">field</span><span class="p">:</span> <span class="n">Field</span><span class="p">[</span><span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+</span><span id="L-972"><a href="#L-972"><span class="linenos"> 972</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+</span><span id="L-973"><a href="#L-973"><span class="linenos"> 973</span></a><span class="sd">    Test if the field has default factory.</span>
+</span><span id="L-974"><a href="#L-974"><span class="linenos"> 974</span></a>
+</span><span id="L-975"><a href="#L-975"><span class="linenos"> 975</span></a><span class="sd">    &gt;&gt;&gt; @dataclasses.dataclass</span>
+</span><span id="L-976"><a href="#L-976"><span class="linenos"> 976</span></a><span class="sd">    ... class C:</span>
+</span><span id="L-977"><a href="#L-977"><span class="linenos"> 977</span></a><span class="sd">    ...     a: int</span>
+</span><span id="L-978"><a href="#L-978"><span class="linenos"> 978</span></a><span class="sd">    ...     d: dict = dataclasses.field(default_factory=dict)</span>
+</span><span id="L-979"><a href="#L-979"><span class="linenos"> 979</span></a><span class="sd">    &gt;&gt;&gt; has_default_factory(dataclasses.fields(C)[0])</span>
+</span><span id="L-980"><a href="#L-980"><span class="linenos"> 980</span></a><span class="sd">    False</span>
+</span><span id="L-981"><a href="#L-981"><span class="linenos"> 981</span></a><span class="sd">    &gt;&gt;&gt; has_default_factory(dataclasses.fields(C)[1])</span>
+</span><span id="L-982"><a href="#L-982"><span class="linenos"> 982</span></a><span class="sd">    True</span>
+</span><span id="L-983"><a href="#L-983"><span class="linenos"> 983</span></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="L-984"><a href="#L-984"><span class="linenos"> 984</span></a>    <span class="k">return</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">default_factory</span><span class="p">,</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">_MISSING_TYPE</span><span class="p">)</span>
 </span><span id="L-985"><a href="#L-985"><span class="linenos"> 985</span></a>
-</span><span id="L-986"><a href="#L-986"><span class="linenos"> 986</span></a><span class="sd">    This protocol is intended to be used for custom class serializer.</span>
-</span><span id="L-987"><a href="#L-987"><span class="linenos"> 987</span></a>
-</span><span id="L-988"><a href="#L-988"><span class="linenos"> 988</span></a><span class="sd">    &gt;&gt;&gt; from datetime import datetime</span>
-</span><span id="L-989"><a href="#L-989"><span class="linenos"> 989</span></a><span class="sd">    &gt;&gt;&gt; from serde import serde</span>
-</span><span id="L-990"><a href="#L-990"><span class="linenos"> 990</span></a><span class="sd">    &gt;&gt;&gt; from plum import dispatch</span>
-</span><span id="L-991"><a href="#L-991"><span class="linenos"> 991</span></a><span class="sd">    &gt;&gt;&gt; class MySerializer(ClassSerializer):</span>
-</span><span id="L-992"><a href="#L-992"><span class="linenos"> 992</span></a><span class="sd">    ...     @dispatch</span>
-</span><span id="L-993"><a href="#L-993"><span class="linenos"> 993</span></a><span class="sd">    ...     def serialize(self, value: datetime) -&gt; str:</span>
-</span><span id="L-994"><a href="#L-994"><span class="linenos"> 994</span></a><span class="sd">    ...         return value.strftime(&quot;%d/%m/%y&quot;)</span>
-</span><span id="L-995"><a href="#L-995"><span class="linenos"> 995</span></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="L-996"><a href="#L-996"><span class="linenos"> 996</span></a>
-</span><span id="L-997"><a href="#L-997"><span class="linenos"> 997</span></a>    <span class="k">def</span> <span class="nf">serialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
-</span><span id="L-998"><a href="#L-998"><span class="linenos"> 998</span></a>        <span class="k">pass</span>
-</span><span id="L-999"><a href="#L-999"><span class="linenos"> 999</span></a>
-</span><span id="L-1000"><a href="#L-1000"><span class="linenos">1000</span></a>
-</span><span id="L-1001"><a href="#L-1001"><span class="linenos">1001</span></a><span class="k">class</span> <span class="nc">ClassDeserializer</span><span class="p">(</span><span class="n">Protocol</span><span class="p">):</span>
-</span><span id="L-1002"><a href="#L-1002"><span class="linenos">1002</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-</span><span id="L-1003"><a href="#L-1003"><span class="linenos">1003</span></a><span class="sd">    Interface for custom class deserializer.</span>
+</span><span id="L-986"><a href="#L-986"><span class="linenos"> 986</span></a>
+</span><span id="L-987"><a href="#L-987"><span class="linenos"> 987</span></a><span class="k">class</span> <span class="nc">ClassSerializer</span><span class="p">(</span><span class="n">Protocol</span><span class="p">):</span>
+</span><span id="L-988"><a href="#L-988"><span class="linenos"> 988</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+</span><span id="L-989"><a href="#L-989"><span class="linenos"> 989</span></a><span class="sd">    Interface for custom class serializer.</span>
+</span><span id="L-990"><a href="#L-990"><span class="linenos"> 990</span></a>
+</span><span id="L-991"><a href="#L-991"><span class="linenos"> 991</span></a><span class="sd">    This protocol is intended to be used for custom class serializer.</span>
+</span><span id="L-992"><a href="#L-992"><span class="linenos"> 992</span></a>
+</span><span id="L-993"><a href="#L-993"><span class="linenos"> 993</span></a><span class="sd">    &gt;&gt;&gt; from datetime import datetime</span>
+</span><span id="L-994"><a href="#L-994"><span class="linenos"> 994</span></a><span class="sd">    &gt;&gt;&gt; from serde import serde</span>
+</span><span id="L-995"><a href="#L-995"><span class="linenos"> 995</span></a><span class="sd">    &gt;&gt;&gt; from plum import dispatch</span>
+</span><span id="L-996"><a href="#L-996"><span class="linenos"> 996</span></a><span class="sd">    &gt;&gt;&gt; class MySerializer(ClassSerializer):</span>
+</span><span id="L-997"><a href="#L-997"><span class="linenos"> 997</span></a><span class="sd">    ...     @dispatch</span>
+</span><span id="L-998"><a href="#L-998"><span class="linenos"> 998</span></a><span class="sd">    ...     def serialize(self, value: datetime) -&gt; str:</span>
+</span><span id="L-999"><a href="#L-999"><span class="linenos"> 999</span></a><span class="sd">    ...         return value.strftime(&quot;%d/%m/%y&quot;)</span>
+</span><span id="L-1000"><a href="#L-1000"><span class="linenos">1000</span></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="L-1001"><a href="#L-1001"><span class="linenos">1001</span></a>
+</span><span id="L-1002"><a href="#L-1002"><span class="linenos">1002</span></a>    <span class="k">def</span> <span class="nf">serialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+</span><span id="L-1003"><a href="#L-1003"><span class="linenos">1003</span></a>        <span class="k">pass</span>
 </span><span id="L-1004"><a href="#L-1004"><span class="linenos">1004</span></a>
-</span><span id="L-1005"><a href="#L-1005"><span class="linenos">1005</span></a><span class="sd">    This protocol is intended to be used for custom class deserializer.</span>
-</span><span id="L-1006"><a href="#L-1006"><span class="linenos">1006</span></a>
-</span><span id="L-1007"><a href="#L-1007"><span class="linenos">1007</span></a><span class="sd">    &gt;&gt;&gt; from datetime import datetime</span>
-</span><span id="L-1008"><a href="#L-1008"><span class="linenos">1008</span></a><span class="sd">    &gt;&gt;&gt; from serde import serde</span>
-</span><span id="L-1009"><a href="#L-1009"><span class="linenos">1009</span></a><span class="sd">    &gt;&gt;&gt; from plum import dispatch</span>
-</span><span id="L-1010"><a href="#L-1010"><span class="linenos">1010</span></a><span class="sd">    &gt;&gt;&gt; class MyDeserializer(ClassDeserializer):</span>
-</span><span id="L-1011"><a href="#L-1011"><span class="linenos">1011</span></a><span class="sd">    ...     @dispatch</span>
-</span><span id="L-1012"><a href="#L-1012"><span class="linenos">1012</span></a><span class="sd">    ...     def deserialize(self, cls: type[datetime], value: Any) -&gt; datetime:</span>
-</span><span id="L-1013"><a href="#L-1013"><span class="linenos">1013</span></a><span class="sd">    ...         return datetime.strptime(value, &quot;%d/%m/%y&quot;)</span>
-</span><span id="L-1014"><a href="#L-1014"><span class="linenos">1014</span></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="L-1015"><a href="#L-1015"><span class="linenos">1015</span></a>
-</span><span id="L-1016"><a href="#L-1016"><span class="linenos">1016</span></a>    <span class="k">def</span> <span class="nf">deserialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">cls</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
-</span><span id="L-1017"><a href="#L-1017"><span class="linenos">1017</span></a>        <span class="k">pass</span>
-</span><span id="L-1018"><a href="#L-1018"><span class="linenos">1018</span></a>
-</span><span id="L-1019"><a href="#L-1019"><span class="linenos">1019</span></a>
-</span><span id="L-1020"><a href="#L-1020"><span class="linenos">1020</span></a><span class="n">GLOBAL_CLASS_SERIALIZER</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">ClassSerializer</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
-</span><span id="L-1021"><a href="#L-1021"><span class="linenos">1021</span></a>
-</span><span id="L-1022"><a href="#L-1022"><span class="linenos">1022</span></a><span class="n">GLOBAL_CLASS_DESERIALIZER</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">ClassDeserializer</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+</span><span id="L-1005"><a href="#L-1005"><span class="linenos">1005</span></a>
+</span><span id="L-1006"><a href="#L-1006"><span class="linenos">1006</span></a><span class="k">class</span> <span class="nc">ClassDeserializer</span><span class="p">(</span><span class="n">Protocol</span><span class="p">):</span>
+</span><span id="L-1007"><a href="#L-1007"><span class="linenos">1007</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+</span><span id="L-1008"><a href="#L-1008"><span class="linenos">1008</span></a><span class="sd">    Interface for custom class deserializer.</span>
+</span><span id="L-1009"><a href="#L-1009"><span class="linenos">1009</span></a>
+</span><span id="L-1010"><a href="#L-1010"><span class="linenos">1010</span></a><span class="sd">    This protocol is intended to be used for custom class deserializer.</span>
+</span><span id="L-1011"><a href="#L-1011"><span class="linenos">1011</span></a>
+</span><span id="L-1012"><a href="#L-1012"><span class="linenos">1012</span></a><span class="sd">    &gt;&gt;&gt; from datetime import datetime</span>
+</span><span id="L-1013"><a href="#L-1013"><span class="linenos">1013</span></a><span class="sd">    &gt;&gt;&gt; from serde import serde</span>
+</span><span id="L-1014"><a href="#L-1014"><span class="linenos">1014</span></a><span class="sd">    &gt;&gt;&gt; from plum import dispatch</span>
+</span><span id="L-1015"><a href="#L-1015"><span class="linenos">1015</span></a><span class="sd">    &gt;&gt;&gt; class MyDeserializer(ClassDeserializer):</span>
+</span><span id="L-1016"><a href="#L-1016"><span class="linenos">1016</span></a><span class="sd">    ...     @dispatch</span>
+</span><span id="L-1017"><a href="#L-1017"><span class="linenos">1017</span></a><span class="sd">    ...     def deserialize(self, cls: type[datetime], value: Any) -&gt; datetime:</span>
+</span><span id="L-1018"><a href="#L-1018"><span class="linenos">1018</span></a><span class="sd">    ...         return datetime.strptime(value, &quot;%d/%m/%y&quot;)</span>
+</span><span id="L-1019"><a href="#L-1019"><span class="linenos">1019</span></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="L-1020"><a href="#L-1020"><span class="linenos">1020</span></a>
+</span><span id="L-1021"><a href="#L-1021"><span class="linenos">1021</span></a>    <span class="k">def</span> <span class="nf">deserialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">cls</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+</span><span id="L-1022"><a href="#L-1022"><span class="linenos">1022</span></a>        <span class="k">pass</span>
 </span><span id="L-1023"><a href="#L-1023"><span class="linenos">1023</span></a>
 </span><span id="L-1024"><a href="#L-1024"><span class="linenos">1024</span></a>
-</span><span id="L-1025"><a href="#L-1025"><span class="linenos">1025</span></a><span class="k">def</span> <span class="nf">add_serializer</span><span class="p">(</span><span class="n">serializer</span><span class="p">:</span> <span class="n">ClassSerializer</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-</span><span id="L-1026"><a href="#L-1026"><span class="linenos">1026</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-</span><span id="L-1027"><a href="#L-1027"><span class="linenos">1027</span></a><span class="sd">    Register custom global serializer.</span>
-</span><span id="L-1028"><a href="#L-1028"><span class="linenos">1028</span></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="L-1029"><a href="#L-1029"><span class="linenos">1029</span></a>    <span class="n">GLOBAL_CLASS_SERIALIZER</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">serializer</span><span class="p">)</span>
-</span><span id="L-1030"><a href="#L-1030"><span class="linenos">1030</span></a>
-</span><span id="L-1031"><a href="#L-1031"><span class="linenos">1031</span></a>
-</span><span id="L-1032"><a href="#L-1032"><span class="linenos">1032</span></a><span class="k">def</span> <span class="nf">add_deserializer</span><span class="p">(</span><span class="n">deserializer</span><span class="p">:</span> <span class="n">ClassDeserializer</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-</span><span id="L-1033"><a href="#L-1033"><span class="linenos">1033</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-</span><span id="L-1034"><a href="#L-1034"><span class="linenos">1034</span></a><span class="sd">    Register custom global deserializer.</span>
-</span><span id="L-1035"><a href="#L-1035"><span class="linenos">1035</span></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="L-1036"><a href="#L-1036"><span class="linenos">1036</span></a>    <span class="n">GLOBAL_CLASS_DESERIALIZER</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">deserializer</span><span class="p">)</span>
+</span><span id="L-1025"><a href="#L-1025"><span class="linenos">1025</span></a><span class="n">GLOBAL_CLASS_SERIALIZER</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">ClassSerializer</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+</span><span id="L-1026"><a href="#L-1026"><span class="linenos">1026</span></a>
+</span><span id="L-1027"><a href="#L-1027"><span class="linenos">1027</span></a><span class="n">GLOBAL_CLASS_DESERIALIZER</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">ClassDeserializer</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+</span><span id="L-1028"><a href="#L-1028"><span class="linenos">1028</span></a>
+</span><span id="L-1029"><a href="#L-1029"><span class="linenos">1029</span></a>
+</span><span id="L-1030"><a href="#L-1030"><span class="linenos">1030</span></a><span class="k">def</span> <span class="nf">add_serializer</span><span class="p">(</span><span class="n">serializer</span><span class="p">:</span> <span class="n">ClassSerializer</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="L-1031"><a href="#L-1031"><span class="linenos">1031</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+</span><span id="L-1032"><a href="#L-1032"><span class="linenos">1032</span></a><span class="sd">    Register custom global serializer.</span>
+</span><span id="L-1033"><a href="#L-1033"><span class="linenos">1033</span></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="L-1034"><a href="#L-1034"><span class="linenos">1034</span></a>    <span class="n">GLOBAL_CLASS_SERIALIZER</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">serializer</span><span class="p">)</span>
+</span><span id="L-1035"><a href="#L-1035"><span class="linenos">1035</span></a>
+</span><span id="L-1036"><a href="#L-1036"><span class="linenos">1036</span></a>
+</span><span id="L-1037"><a href="#L-1037"><span class="linenos">1037</span></a><span class="k">def</span> <span class="nf">add_deserializer</span><span class="p">(</span><span class="n">deserializer</span><span class="p">:</span> <span class="n">ClassDeserializer</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="L-1038"><a href="#L-1038"><span class="linenos">1038</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+</span><span id="L-1039"><a href="#L-1039"><span class="linenos">1039</span></a><span class="sd">    Register custom global deserializer.</span>
+</span><span id="L-1040"><a href="#L-1040"><span class="linenos">1040</span></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="L-1041"><a href="#L-1041"><span class="linenos">1041</span></a>    <span class="n">GLOBAL_CLASS_DESERIALIZER</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">deserializer</span><span class="p">)</span>
 </span></pre></div>
 
 
