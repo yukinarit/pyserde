@@ -937,8 +937,13 @@ coerce = TypeCheck(kind=TypeCheck.Kind.Coerce)
 strict = TypeCheck(kind=TypeCheck.Kind.Strict)
 
 
-def coerce_object(typ: type[Any], obj: Any) -> Any:
-    return typ(obj) if is_coercible(typ, obj) else obj
+def coerce_object(cls: str, field: str, typ: type[Any], obj: Any) -> Any:
+    try:
+        return typ(obj) if is_coercible(typ, obj) else obj
+    except Exception as e:
+        raise SerdeError(
+            f"failed to coerce the field {cls}.{field} value {obj} into {typename(typ)}: {e}"
+        )
 
 
 def is_coercible(typ: type[Any], obj: Any) -> bool:
