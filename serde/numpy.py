@@ -73,6 +73,12 @@ try:
             typ = origin
         return typ is np.ndarray
 
+    def is_numpy_jaxtyping(typ) -> bool:
+        origin = get_origin(typ)
+        if origin is not None:
+            typ = origin
+        return issubclass(typ, np.ndarray)
+
     def serialize_numpy_array(arg) -> str:
         return f"{arg.varname}.tolist()"
 
@@ -84,6 +90,10 @@ try:
             return f"numpy.array({arg.data})"
 
         dtype = fullname(arg[1][0].type)
+        return f"numpy.array({arg.data}, dtype={dtype})"
+
+    def deserialize_numpy_jaxtyping_array(arg) -> str:
+        dtype = f"numpy.{arg.type.dtypes[-1]}"
         return f"numpy.array({arg.data}, dtype={dtype})"
 
     def deserialize_numpy_array_direct(typ: Any, arg: Any) -> Any:
@@ -111,6 +121,9 @@ except ImportError:
     def is_numpy_array(typ) -> bool:
         return False
 
+    def is_numpy_jaxtyping(typ) -> bool:
+        return False
+
     def serialize_numpy_array(arg) -> str:
         return ""
 
@@ -118,6 +131,9 @@ except ImportError:
         return ""
 
     def deserialize_numpy_array(arg) -> str:
+        return ""
+
+    def deserialize_numpy_jaxtyping_array(arg) -> str:
         return ""
 
     def deserialize_numpy_array_direct(typ: Any, arg: Any) -> Any:

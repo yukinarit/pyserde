@@ -76,6 +76,7 @@ from .core import (
 )
 from .numpy import (
     is_numpy_array,
+    is_numpy_jaxtyping,
     is_numpy_datetime,
     is_numpy_scalar,
     serialize_numpy_array,
@@ -750,6 +751,8 @@ class Renderer:
         elif is_numpy_scalar(arg.type):
             res = serialize_numpy_scalar(arg)
         elif is_numpy_array(arg.type):
+            res = serialize_numpy_array(arg)
+        elif is_numpy_jaxtyping(arg.type):
             res = serialize_numpy_array(arg)
         elif is_primitive(arg.type):
             res = self.primitive(arg)

@@ -89,7 +89,9 @@ from .numpy import (
     deserialize_numpy_array,
     deserialize_numpy_scalar,
     deserialize_numpy_array_direct,
+    deserialize_numpy_jaxtyping_array,
     is_numpy_array,
+    is_numpy_jaxtyping,
     is_numpy_scalar,
 )
 
@@ -749,6 +751,9 @@ class Renderer:
         elif is_numpy_array(arg.type):
             self.import_numpy = True
             res = deserialize_numpy_array(arg)
+        elif is_numpy_jaxtyping(arg.type):
+            self.import_numpy = True
+            res = deserialize_numpy_jaxtyping_array(arg)
         elif is_union(arg.type):
             res = self.union_func(arg)
         elif is_str_serializable(arg.type):
