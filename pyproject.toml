@@ -11,16 +11,16 @@ packages = [
     { include = "serde" },
 ]
 classifiers=[
-        "Development Status :: 4 - Beta",
-        "Intended Audience :: Developers",
-        "License :: OSI Approved :: MIT License",
-        "Programming Language :: Python :: 3.9",
-        "Programming Language :: Python :: 3.10",
-        "Programming Language :: Python :: 3.11",
-        "Programming Language :: Python :: 3.12",
-        "Programming Language :: Python :: Implementation :: CPython",
-		"Programming Language :: Python :: Implementation :: PyPy",
-    ]
+  "Development Status :: 4 - Beta",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: Implementation :: CPython",
+  "Programming Language :: Python :: Implementation :: PyPy",
+]
 
 [tool.poetry.dependencies]
 python = "^3.9.0"
@@ -33,10 +33,10 @@ tomli = { version = "*", markers = "extra == 'toml' or extra == 'all'", optional
 tomli-w = { version = "*", markers = "extra == 'toml' or extra == 'all'", optional = true }
 pyyaml = { version = "*", markers = "extra == 'yaml' or extra == 'all'", optional = true }
 numpy = [
-    { version = ">1.21.0,<2.0.0", markers = "python_version ~= '3.9.0' and (extra == 'numpy' or extra == 'all')", optional = true },
-    { version = ">1.22.0,<2.0.0", markers = "python_version ~= '3.10' and (extra == 'numpy' or extra == 'all')", optional = true },
-    { version = ">1.22.0,<2.0.0", markers = "python_version ~= '3.11' and (extra == 'numpy' or extra == 'all')", optional = true },
-    { version = ">1.22.0,<2.0.0", markers = "python_version ~= '3.12' and (extra == 'numpy' or extra == 'all')", optional = true },
+  { version = ">1.21.0,<2.0.0", markers = "python_version ~= '3.9.0' and (extra == 'numpy' or extra == 'all')", optional = true },
+  { version = ">1.22.0,<2.0.0", markers = "python_version ~= '3.10' and (extra == 'numpy' or extra == 'all')", optional = true },
+  { version = ">1.22.0,<2.0.0", markers = "python_version ~= '3.11' and (extra == 'numpy' or extra == 'all')", optional = true },
+  { version = ">1.22.0,<2.0.0", markers = "python_version ~= '3.12' and (extra == 'numpy' or extra == 'all')", optional = true },
 ]
 orjson = { version = "*", markers = "extra == 'orjson' or extra == 'all'", optional = true }
 plum-dispatch = ">=2,<2.3"
@@ -49,10 +49,10 @@ tomli = { version = "*", markers = "python_version <= '3.11.0'" }
 tomli-w = "*"
 msgpack = "*"
 numpy = [
-    { version = ">1.21.0,<2.0.0", markers = "python_version ~= '3.9.0'" },
-    { version = ">1.22.0,<2.0.0", markers = "python_version ~= '3.10'" },
-    { version = ">1.22.0,<2.0.0", markers = "python_version ~= '3.11'" },
-    { version = ">1.22.0,<2.0.0", markers = "python_version ~= '3.12'" },
+  { version = ">1.21.0,<2.0.0", markers = "python_version ~= '3.9.0'" },
+  { version = ">1.22.0,<2.0.0", markers = "python_version ~= '3.10'" },
+  { version = ">1.22.0,<2.0.0", markers = "python_version ~= '3.11'" },
+  { version = ">1.22.0,<2.0.0", markers = "python_version ~= '3.12'" },
 ]
 mypy = "==1.10.1"
 pytest = "*"
@@ -68,6 +68,7 @@ types-PyYAML = "^6.0.9"
 msgpack-types = "^0.3"
 envclasses = "^0.3.1"
 jedi = "*"
+jaxtyping = "*"
 
 [tool.poetry.extras]
 msgpack = ["msgpack"]
@@ -76,7 +77,8 @@ toml = ["tomli", "tomli-w"]
 yaml = ["pyyaml"]
 orjson = ["orjson"]
 sqlalchemy = ["sqlalchemy"]
-all = ["msgpack", "tomli", "tomli-w", "pyyaml", "numpy", "orjson", "sqlalchemy"]
+jaxtyping = ["jaxtyping"]
+all = ["msgpack", "tomli", "tomli-w", "pyyaml", "numpy", "orjson", "sqlalchemy", "jaxtyping"]
 
 [build-system]
 requires = ["poetry-core>=1.0.0", "poetry-dynamic-versioning"]
@@ -145,16 +147,25 @@ exclude = [
   "tests/test_sqlalchemy.py",
 ]
 
+[[tool.mypy.overrides]]
+# to avoid complaints about generic type ndarray
+module = "examples.type_numpy_jaxtyping"
+ignore_errors = true
+
 [tool.ruff]
 select = [
-    "E",  # pycodestyle errors
-    "W",  # pycodestyle warnings
-    "F",  # pyflakes
-    "C",  # flake8-comprehensions
-    "B",  # flake8-bugbear
+  "E", # pycodestyle errors
+  "W", # pycodestyle warnings
+  "F", # pyflakes
+  "C", # flake8-comprehensions
+  "B", # flake8-bugbear
 ]
 ignore = ["B904"]
 line-length = 100
 
 [tool.ruff.lint.mccabe]
 max-complexity = 30
+
+[tool.ruff.per-file-ignores]
+# https://docs.kidger.site/jaxtyping/faq/#flake8-or-ruff-are-throwing-an-error
+"examples/type_numpy_jaxtyping.py" = ["F722"]
