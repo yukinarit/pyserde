@@ -74,10 +74,13 @@ try:
         return typ is np.ndarray
 
     def is_numpy_jaxtyping(typ) -> bool:
-        origin = get_origin(typ)
-        if origin is not None:
-            typ = origin
-        return issubclass(typ, np.ndarray)
+        try:
+            origin = get_origin(typ)
+            if origin is not None:
+                typ = origin
+            return issubclass(typ, np.ndarray)
+        except TypeError:
+            return False
 
     def serialize_numpy_array(arg) -> str:
         return f"{arg.varname}.tolist()"
