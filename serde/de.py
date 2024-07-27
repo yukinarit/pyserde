@@ -274,7 +274,7 @@ def deserialize(
         for typ in iter_types(cls):
             # When we encounter a dataclass not marked with deserialize, then also generate
             # deserialize functions for it.
-            if is_dataclass_without_de(typ):
+            if is_dataclass_without_de(typ) and typ is not cls:
                 # We call deserialize and not wrap to make sure that we will use the default serde
                 # configuration for generating the deserialization function.
                 deserialize(typ)

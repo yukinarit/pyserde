@@ -244,7 +244,7 @@ def serialize(
         for typ in iter_types(cls):
             # When we encounter a dataclass not marked with serialize, then also generate serialize
             # functions for it.
-            if is_dataclass_without_se(typ):
+            if is_dataclass_without_se(typ) and typ is not cls:
                 # We call serialize and not wrap to make sure that we will use the default serde
                 # configuration for generating the serialization function.
                 serialize(typ)
