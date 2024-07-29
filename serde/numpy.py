@@ -78,7 +78,7 @@ try:
             origin = get_origin(typ)
             if origin is not None:
                 typ = origin
-            return issubclass(typ, np.ndarray)
+            return typ is not np.ndarray and issubclass(typ, np.ndarray)
         except TypeError:
             return False
 

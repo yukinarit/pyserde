@@ -38,6 +38,7 @@ numpy = [
   { version = ">1.22.0,<2.0.0", markers = "python_version ~= '3.11' and (extra == 'numpy' or extra == 'all')", optional = true },
   { version = ">1.22.0,<2.0.0", markers = "python_version ~= '3.12' and (extra == 'numpy' or extra == 'all')", optional = true },
 ]
+jaxtyping = { version = "*", markers = "extra == 'jaxtyping' or extra == 'all'", optional = true }
 orjson = { version = "*", markers = "extra == 'orjson' or extra == 'all'", optional = true }
 plum-dispatch = ">=2,<2.3"
 beartype = ">=0.18.4"
