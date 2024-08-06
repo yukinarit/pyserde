@@ -1,6 +1,6 @@
 # Data Formats
 
-Currently `dict`, `tuple`, `JSON`, `Yaml`, `Toml`, `MsgPack` and `Pickle` are supported. Each Serialize/Deserialize API can take additional keyword arguments. Keyword arguements are forwared to the packages which is used by pyserde to encode data internally.
+pyserde supports several data formats for serialization and deserialization, including `dict`, `tuple`, `JSON`, `YAML`, `TOML`, `MsgPack`, and `Pickle`. Each API can take additional keyword arguments, which are forwarded to the underlying packages used by pyserde.
 
 e.g. If you want to preserve the field order in YAML, you can pass `sort_key=True` in `serde.yaml.to_yaml`
 

@@ -148,7 +148,7 @@ See [examples/custom_legacy_class_serializer.py](https://github.com/yukinarit/py
 
 ### **`type_check`**
 
-New in v0.9.0. See [Type Check](#type-check.md).
+New in v0.9.0. See [Type Check](type-check.md).
 
 ### **`serialize_class_var`**
 
@@ -162,4 +162,4 @@ class Foo:
 
 See [examples/class_var.py](https://github.com/yukinarit/pyserde/blob/main/examples/class_var.py) for complete example.
 
-[^1]: https://docs.python.org/3/library/dataclasses.html#dataclasses.fields
+[^1]: [dataclasses.fields](https://docs.python.org/3/library/dataclasses.html#dataclasses.fields)

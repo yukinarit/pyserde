@@ -214,7 +214,7 @@ def typename(typ: Any, with_typing_module: bool = False) -> str:
         args = type_args(typ)
         if not args:
             raise TypeError("Literal type requires at least one literal argument")
-        return f'Literal[{", ".join(str(e) for e in args)}]'
+        return f'Literal[{", ".join(stringify_literal(e) for e in args)}]'
     elif typ is Any:
         return f"{mod}Any"
     elif is_ellipsis(typ):
@@ -234,6 +234,13 @@ def typename(typ: Any, with_typing_module: bool = False) -> str:
                 return name
             else:
                 raise SerdeError(f"Could not get a type name from: {typ}")
+
+
+def stringify_literal(v: Any) -> str:
+    if isinstance(v, str):
+        return f"'{v}'"
+    else:
+        return str(v)
 
 
 def type_args(typ: Any) -> tuple[type[Any], ...]:
@@ -355,17 +362,15 @@ def iter_unions(cls: TypeLike) -> list[TypeLike]:
     """
     Iterate over all unions that are used in the dataclass
     """
-    lst: set[TypeLike] = set()
+    lst: list[TypeLike] = []
     stack: list[TypeLike] = []  # To prevent infinite recursion
 
     def recursive(cls: TypeLike) -> None:
-        if cls in lst:
-            return
         if cls in stack:
             return
 
         if is_union(cls):
-            lst.add(cls)
+            lst.append(cls)
             for arg in type_args(cls):
                 recursive(arg)
         if is_dataclass(cls):
@@ -391,7 +396,7 @@ def iter_unions(cls: TypeLike) -> list[TypeLike]:
                 recursive(args[1])
 
     recursive(cls)
-    return list(lst)
+    return lst
 
 
 def iter_literals(cls: type[Any]) -> list[TypeLike]:
@@ -511,6 +516,25 @@ def is_bare_opt(typ: Any) -> bool:
     False
     """
     return not type_args(typ) and typ is Optional
+
+
+@cache
+def is_opt_dataclass(typ: Any) -> bool:
+    """
+    Test if the type is optional dataclass.
+
+    >>> is_opt_dataclass(Optional[int])
+    False
+    >>> @dataclasses.dataclass
+    ... class Foo:
+    ...     pass
+    >>> is_opt_dataclass(Foo)
+    False
+    >>> is_opt_dataclass(Optional[Foo])
+    False
+    """
+    args = get_args(typ)
+    return is_opt(typ) and len(args) > 0 and is_dataclass(args[0])
 
 
 @cache

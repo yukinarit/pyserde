@@ -13,15 +13,16 @@
   <a href="https://codecov.io/gh/yukinarit/pyserde">
     <img alt="CodeCov" src="https://codecov.io/gh/yukinarit/pyserde/branch/main/graph/badge.svg">
   </a>
-    <a href = "https://piptrends.com/package/pyserde" alt = "pyserde Downloads Last Month"><img alt="pyserde Downloads Last Month by pip Trends" src="https://assets.piptrends.com/get-last-month-downloads-badge/pyserde.svg"></a>
 </p>
 <p align="center">
-  <a href="https://yukinarit.github.io/pyserde/guide/en">Guide</a> | <a href="https://yukinarit.github.io/pyserde/api/serde.html">API Docs</a> | <a href="https://github.com/yukinarit/pyserde/tree/main/examples">Examples</a>
+  <a href="https://yukinarit.github.io/pyserde/guide/en">Guide🇬🇧</a> | <a href="https://yukinarit.github.io/pyserde/guide/ja">ガイド🇯🇵</a> | <a href="https://yukinarit.github.io/pyserde/api/serde.html">API Reference</a> | <a href="https://github.com/yukinarit/pyserde/tree/main/examples">Examples</a>
 </p>
 
 ## Overview
 
-Declare a class with pyserde's `@serde` decorator.
+`pyserde` is a simple yet powerful serialization library on top of [dataclasses](https://docs.python.org/3/library/dataclasses.html). It allows you to convert Python objects to and from JSON, YAML, and other formats easily and efficiently.
+
+Declare your class with `@serde` decorator and annotate fields using [PEP484](https://peps.python.org/pep-0484/) as below.
 
 ```python
 @serde
@@ -44,6 +45,12 @@ You can deserialize JSON into `Foo` object.
 >>> from_json(Foo, '{"i": 10, "s": "foo", "f": 100.0, "b": true}')
 Foo(i=10, s='foo', f=100.0, b=True)
 ```
+
+That's it!  If you're interested in pyserde, please check our documentation!
+Happy coding with pyserde! 🚀
+* [Getting started](https://yukinarit.github.io/pyserde/guide/en/getting-started.html)
+* [API Reference](https://yukinarit.github.io/pyserde/api/serde.html)
+* [Examples](https://github.com/yukinarit/pyserde/tree/main/examples)
 
 ## Features
 
@@ -152,6 +159,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/JWSong"><img src="https://avatars.githubusercontent.com/u/4515331?v=4?s=60" width="60px;" alt="JWSong"/><br /><sub><b>JWSong</b></sub></a><br /><a href="https://github.com/yukinarit/pyserde/commits?author=JWSong" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://www.mechanicus.it/"><img src="https://avatars.githubusercontent.com/u/13484760?v=4?s=60" width="60px;" alt="Emanuele Barsanti"/><br /><sub><b>Emanuele Barsanti</b></sub></a><br /><a href="https://github.com/yukinarit/pyserde/commits?author=barsa-net" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://aman-clement-aranha.vercel.app/"><img src="https://avatars.githubusercontent.com/u/90409059?v=4?s=60" width="60px;" alt="Aman Clement Aranha"/><br /><sub><b>Aman Clement Aranha</b></sub></a><br /><a href="https://github.com/yukinarit/pyserde/commits?author=Aman-Clement" title="Documentation">📖</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://qiita.com/inetcpl"><img src="https://avatars.githubusercontent.com/u/51281148?v=4?s=60" width="60px;" alt="𝕂'"/><br /><sub><b>𝕂'</b></sub></a><br /><a href="https://github.com/yukinarit/pyserde/commits?author=K-dash" title="Documentation">📖</a></td>
     </tr>
   </tbody>
   <tfoot>

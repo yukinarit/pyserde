@@ -37,6 +37,7 @@ docs:
 	mkdir -p docs out/api out/guide/en
 	$(POETRY) run pdoc -e serde=https://github.com/yukinarit/pyserde/tree/main/serde/ serde -o out/api
 	mdbook build -d ../../out/guide/en ./docs/en
+	mdbook build -d ../../out/guide/ja ./docs/ja
 
 open-docs:
 	$(POETRY) run pdoc -e serde=https://github.com/yukinarit/pyserde/tree/main/serde serde

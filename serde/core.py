@@ -41,6 +41,7 @@ from .compat import (
     is_new_type_primitive,
     is_any,
     is_opt,
+    is_opt_dataclass,
     is_set,
     is_tuple,
     is_union,
@@ -620,6 +621,8 @@ class Field(Generic[T]):
         flatten = f.metadata.get("serde_flatten")
         if flatten is True:
             flatten = FlattenOpts()
+        if flatten and not (dataclasses.is_dataclass(f.type) or is_opt_dataclass(f.type)):
+            raise SerdeError(f"pyserde does not support flatten attribute for {typename(f.type)}")
 
         kw_only = bool(f.kw_only) if sys.version_info >= (3, 10) else False
 
@@ -934,8 +937,13 @@ coerce = TypeCheck(kind=TypeCheck.Kind.Coerce)
 strict = TypeCheck(kind=TypeCheck.Kind.Strict)
 
 
-def coerce_object(typ: type[Any], obj: Any) -> Any:
-    return typ(obj) if is_coercible(typ, obj) else obj
+def coerce_object(cls: str, field: str, typ: type[Any], obj: Any) -> Any:
+    try:
+        return typ(obj) if is_coercible(typ, obj) else obj
+    except Exception as e:
+        raise SerdeError(
+            f"failed to coerce the field {cls}.{field} value {obj} into {typename(typ)}: {e}"
+        )
 
 
 def is_coercible(typ: type[Any], obj: Any) -> bool:

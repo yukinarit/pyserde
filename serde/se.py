@@ -76,6 +76,7 @@ from .core import (
 )
 from .numpy import (
     is_numpy_array,
+    is_numpy_jaxtyping,
     is_numpy_datetime,
     is_numpy_scalar,
     serialize_numpy_array,
@@ -244,7 +245,7 @@ def serialize(
         for typ in iter_types(cls):
             # When we encounter a dataclass not marked with serialize, then also generate serialize
             # functions for it.
-            if is_dataclass_without_se(typ):
+            if is_dataclass_without_se(typ) and typ is not cls:
                 # We call serialize and not wrap to make sure that we will use the default serde
                 # configuration for generating the serialization function.
                 serialize(typ)
@@ -436,9 +437,22 @@ def to_dict(
     convert_sets: Optional[bool] = None,
 ) -> dict[Any, Any]:
     """
-    Serialize object into dictionary.
+    Serialize object into python dictionary. This function ensures that the dataclass's fields are
+    accurately represented as key-value pairs in the resulting dictionary.
 
-    >>> @serialize
+    * `o`: Any pyserde object that you want to convert to `dict`
+    * `c`: Optional class argument
+    * `reuse_instances`: pyserde will pass instances (e.g. Path, datetime) directly to serializer
+    instead of converting them to serializable representation e.g. string. This behaviour allows
+    to delegate serializtation to underlying data format packages e.g. `pyyaml` and potentially
+    improve performance.
+    * `convert_sets`: This option controls how sets are handled during serialization and
+    deserialization. When `convert_sets` is set to True, pyserde will convert sets to lists during
+    serialization and back to sets during deserialization. This is useful for data formats that
+    do not natively support sets.
+
+    >>> from serde import serde
+    >>> @serde
     ... class Foo:
     ...     i: int
     ...     s: str = 'foo'
@@ -448,7 +462,8 @@ def to_dict(
     >>> to_dict(Foo(i=10))
     {'i': 10, 's': 'foo', 'f': 100.0, 'b': True}
 
-    You can pass any type supported by pyserde. For example,
+    You can serialize not only pyserde objects but also objects of any supported types. For example,
+    the following example serializes list of pyserde objects into dict.
 
     >>> lst = [Foo(i=10), Foo(i=20)]
     >>> to_dict(lst)
@@ -480,7 +495,20 @@ class SeField(Field[T]):
 
     def __getitem__(self, n: int) -> SeField[Any]:
         typ = type_args(self.type)[n]
-        return SeField(typ, name=None)
+        opts: dict[str, Any] = {
+            "kw_only": self.kw_only,
+            "case": self.case,
+            "alias": self.alias,
+            "rename": self.rename,
+            "skip": self.skip,
+            "skip_if": self.skip_if,
+            "skip_if_false": self.skip_if_false,
+            "skip_if_default": self.skip_if_default,
+            "serializer": self.serializer,
+            "deserializer": self.deserializer,
+            "flatten": self.flatten,
+        }
+        return SeField(typ, name=None, **opts)
 
 
 def sefields(cls: type[Any], serialize_class_var: bool = False) -> Iterator[SeField[Any]]:
@@ -583,6 +611,7 @@ def render_to_tuple(
         suppress_coerce=(not type_check.is_coerce()),
         serialize_class_var=serialize_class_var,
         class_serializer=class_serializer,
+        class_name=typename(cls),
     )
     return jinja2_env.get_template("iter").render(
         func=TO_ITER,
@@ -606,6 +635,7 @@ def render_to_dict(
         legacy_class_serializer,
         suppress_coerce=(not type_check.is_coerce()),
         class_serializer=class_serializer,
+        class_name=typename(cls),
     )
     lrenderer = LRenderer(case, serialize_class_var)
     return jinja2_env.get_template("dict").render(
@@ -625,7 +655,7 @@ def render_union_func(
     Render function that serializes a field with union type.
     """
     union_name = f"Union[{', '.join([typename(a) for a in union_args])}]"
-    renderer = Renderer(TO_DICT, suppress_coerce=True)
+    renderer = Renderer(TO_DICT, suppress_coerce=True, class_name=typename(cls))
     return jinja2_env.get_template("union").render(
         func=union_func_name(UNION_SE_PREFIX, union_args),
         serde_scope=getattr(cls, SERDE_SCOPE),
@@ -654,8 +684,12 @@ class LRenderer:
         """
         if is_dataclass(arg.type) and arg.flatten:
             return self.flatten(arg)
-        else:
-            return f'res["{arg.conv_name(self.case)}"]'
+        elif is_opt(arg.type) and arg.flatten:
+            inner = arg[0]
+            if is_dataclass(inner.type):
+                return self.flatten(inner)
+
+        return f'res["{arg.conv_name(self.case)}"]'
 
     def flatten(self, arg: SeField[Any]) -> str:
         """
@@ -679,46 +713,11 @@ class Renderer:
     """ Suppress type coercing because generated union serializer has its own type checking """
     serialize_class_var: bool = False
     class_serializer: Optional[ClassSerializer] = None
+    class_name: Optional[str] = None
 
     def render(self, arg: SeField[Any]) -> str:
         """
         Render rvalue
-
-        >>> Renderer(TO_ITER).render(SeField(int, 'i'))
-        'coerce_object(int, i)'
-
-        >>> Renderer(TO_ITER).render(SeField(list[int], 'l'))
-        '[coerce_object(int, v) for v in l]'
-
-        >>> @serialize
-        ... @dataclass(unsafe_hash=True)
-        ... class Foo:
-        ...    val: int
-        >>> Renderer(TO_ITER).render(SeField(Foo, 'foo'))
-        "\
-foo.__serde__.funcs['to_iter'](foo, reuse_instances=reuse_instances, convert_sets=convert_sets)"
-
-        >>> Renderer(TO_ITER).render(SeField(list[Foo], 'foo'))
-        "\
-[v.__serde__.funcs['to_iter'](v, reuse_instances=reuse_instances, \
-convert_sets=convert_sets) for v in foo]"
-
-        >>> Renderer(TO_ITER).render(SeField(dict[str, Foo], 'foo'))
-        "\
-{coerce_object(str, k): v.__serde__.funcs['to_iter'](v, reuse_instances=reuse_instances, \
-convert_sets=convert_sets) for k, v in foo.items()}"
-
-        >>> Renderer(TO_ITER).render(SeField(dict[Foo, Foo], 'foo'))
-        "\
-{k.__serde__.funcs['to_iter'](k, reuse_instances=reuse_instances, \
-convert_sets=convert_sets): v.__serde__.funcs['to_iter'](v, reuse_instances=reuse_instances, \
-convert_sets=convert_sets) for k, v in foo.items()}"
-
-        >>> Renderer(TO_ITER).render(SeField(tuple[str, Foo, int], 'foo'))
-        "\
-(coerce_object(str, foo[0]), foo[1].__serde__.funcs['to_iter'](foo[1], \
-reuse_instances=reuse_instances, convert_sets=convert_sets), \
-coerce_object(int, foo[2]),)"
         """
         implemented_methods: dict[type[Any], int] = {}
         class_serializers: Iterable[ClassSerializer] = itertools.chain(
@@ -752,6 +751,8 @@ coerce_object(int, foo[2]),)"
         elif is_numpy_scalar(arg.type):
             res = serialize_numpy_scalar(arg)
         elif is_numpy_array(arg.type):
+            res = serialize_numpy_array(arg)
+        elif is_numpy_jaxtyping(arg.type):
             res = serialize_numpy_array(arg)
         elif is_primitive(arg.type):
             res = self.primitive(arg)
@@ -818,9 +819,12 @@ coerce_object(int, foo[2]),)"
         """
         if is_bare_opt(arg.type):
             return f"{arg.varname} if {arg.varname} is not None else None"
+
+        inner = arg[0]
+        inner.name = arg.varname
+        if arg.flatten:
+            return self.render(inner)
         else:
-            inner = arg[0]
-            inner.name = arg.varname
             return f"({self.render(inner)}) if {arg.varname} is not None else None"
 
     def list(self, arg: SeField[Any]) -> str:
@@ -891,7 +895,7 @@ coerce_object(int, foo[2]),)"
         if self.suppress_coerce:
             return var
         else:
-            return f"coerce_object({typ}, {var})"
+            return f'coerce_object("{self.class_name}", "{arg.name}", {typ}, {var})'
 
     def string(self, arg: SeField[Any]) -> str:
         return f"str({arg.varname})"

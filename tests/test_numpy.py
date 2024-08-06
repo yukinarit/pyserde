@@ -3,6 +3,7 @@ from dataclasses import fields
 
 import numpy as np
 import numpy.typing as npt
+import jaxtyping
 import pytest
 
 import serde
@@ -88,6 +89,66 @@ def test_numpy_simple(se, de, opt):
     date_test = NumpyDate(np.datetime64(10, "Y"))
 
     assert de(NumpyDate, se(date_test)) == date_test
+
+    @serde.serde(**opt)
+    class NumpyJaxtyping:
+        float_: jaxtyping.Float[np.ndarray, "2 2"]  # noqa: F722
+        float16: jaxtyping.Float16[np.ndarray, "2 2"]  # noqa: F722
+        float32: jaxtyping.Float32[np.ndarray, "2 2"]  # noqa: F722
+        float64: jaxtyping.Float64[np.ndarray, "2 2"]  # noqa: F722
+        inexact: jaxtyping.Inexact[np.ndarray, "2 2"]  # noqa: F722
+        int_: jaxtyping.Int[np.ndarray, "2 2"]  # noqa: F722
+        int8: jaxtyping.Int8[np.ndarray, "2 2"]  # noqa: F722
+        int16: jaxtyping.Int16[np.ndarray, "2 2"]  # noqa: F722
+        int32: jaxtyping.Int32[np.ndarray, "2 2"]  # noqa: F722
+        int64: jaxtyping.Int64[np.ndarray, "2 2"]  # noqa: F722
+        integer: jaxtyping.Integer[np.ndarray, "2 2"]  # noqa: F722
+        uint: jaxtyping.UInt[np.ndarray, "2 2"]  # noqa: F722
+        uint8: jaxtyping.UInt8[np.ndarray, "2 2"]  # noqa: F722
+        uint16: jaxtyping.UInt16[np.ndarray, "2 2"]  # noqa: F722
+        uint32: jaxtyping.UInt32[np.ndarray, "2 2"]  # noqa: F722
+        uint64: jaxtyping.UInt64[np.ndarray, "2 2"]  # noqa: F722
+
+        def __eq__(self, other):
+            return (
+                (self.float_ == other.float_).all()
+                and (self.float16 == other.float16).all()
+                and (self.float32 == other.float32).all()
+                and (self.float64 == other.float64).all()
+                and (self.inexact == other.inexact).all()
+                and (self.int_ == other.int_).all()
+                and (self.int8 == other.int8).all()
+                and (self.int16 == other.int16).all()
+                and (self.int32 == other.int32).all()
+                and (self.int64 == other.int64).all()
+                and (self.integer == other.integer).all()
+                and (self.uint == other.uint).all()
+                and (self.uint8 == other.uint8).all()
+                and (self.uint16 == other.uint16).all()
+                and (self.uint32 == other.uint32).all()
+                and (self.uint64 == other.uint64).all()
+            )
+
+    jaxtyping_test = NumpyJaxtyping(
+        float_=np.array([[1, 2], [3, 4]], dtype=np.float_),
+        float16=np.array([[5, 6], [7, 8]], dtype=np.float16),
+        float32=np.array([[9, 10], [11, 12]], dtype=np.float32),
+        float64=np.array([[13, 14], [15, 16]], dtype=np.float64),
+        inexact=np.array([[17, 18], [19, 20]], dtype=np.float_),
+        int_=np.array([[21, 22], [23, 24]], dtype=np.int_),
+        int8=np.array([[25, 26], [27, 28]], dtype=np.int8),
+        int16=np.array([[29, 30], [31, 32]], dtype=np.int16),
+        int32=np.array([[33, 34], [35, 36]], dtype=np.int32),
+        int64=np.array([[37, 38], [39, 40]], dtype=np.int64),
+        integer=np.array([[41, 42], [43, 44]], dtype=np.int_),
+        uint=np.array([[45, 46], [47, 48]], dtype=np.uint),
+        uint8=np.array([[49, 50], [51, 52]], dtype=np.uint8),
+        uint16=np.array([[53, 54], [55, 56]], dtype=np.uint16),
+        uint32=np.array([[57, 58], [59, 60]], dtype=np.uint32),
+        uint64=np.array([[61, 62], [63, 64]], dtype=np.uint64),
+    )
+
+    assert de(NumpyJaxtyping, se(jaxtyping_test)) == jaxtyping_test
 
 
 @pytest.mark.parametrize("opt", opt_case, ids=opt_case_ids())

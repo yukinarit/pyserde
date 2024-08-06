@@ -13,7 +13,7 @@ If you're using poetry, run this command.
 poetry add pyserde
 ```
 
-Additional data formats besides JSON and Pickle need additional dependencies installed. Install `msgpack`, `toml`, or `yaml` extras to work with the appropriate data formats; you can skip formats that you don't plan to use. For example, if you want to use Toml and YAML:
+Additional data formats besides JSON and Pickle need additional dependencies installed. Install `msgpack`, `toml` or `yaml` extras to work with the appropriate data formats; you can skip formats that you don't plan to use. For example, if you want to use Toml and YAML:
 
 ```
 pip install "pyserde[toml,yaml]"
@@ -36,12 +36,14 @@ poetry add pyserde -E all
 ```
 
 Here are the available extras
-* `all`: Install `msgpack`, `toml`, `yaml` and `numpy` extras
+* `all`: Install `msgpack`, `toml`, `yaml`, `numpy`, `orjson`, and `sqlalchemy` extras
 * `msgpack`: Install [msgpack](https://github.com/msgpack/msgpack-python)
 * `toml`: Install [tomli](https://github.com/hukkin/tomli) and [tomli-w](https://github.com/hukkin/tomli-w)
 	* NOTE: [tomllib](https://docs.python.org/3/library/tomllib.html) is used for python 3.11 onwards
 * `yaml`: Install [pyyaml](https://github.com/yaml/pyyaml)
 * `numpy`: Install [numpy](https://github.com/numpy/numpy)
+* `orjson`: Install [orjson](https://github.com/ijl/orjson)
+* `sqlalchemy`: Install [sqlalchemy](https://github.com/sqlalchemy/sqlalchemy)
 
 ## Define your first pyserde class
 
@@ -109,5 +111,5 @@ print(from_json(Foo, s))
 
 That's it! pyserde offers many more features. If you're interested, please read the rest of the documentation.
 
-> **NOTE:** which type checker should be used?
-> pyserde depends on [PEP681 dataclass_transform](https://peps.python.org/pep-0681/). [mypy](https://github.com/python/mypy) does not fully support dataclass_transform as of Jan. 2024. [pyright](https://github.com/microsoft/pyright) is recommended for codebase using pyserde.
+> 💡 Tip: which type checker should I use?
+> pyserde depends on [PEP681 dataclass_transform](https://peps.python.org/pep-0681/). [mypy](https://github.com/python/mypy) does not fully support dataclass_transform as of Jan. 2024. My personal recommendation is [pyright](https://github.com/microsoft/pyright).

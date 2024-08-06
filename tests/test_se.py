@@ -1,6 +1,8 @@
 from serde import asdict, astuple, serialize, to_dict, to_tuple
 from serde.json import to_json
 from serde.msgpack import to_msgpack
+from serde.se import SeField, Renderer
+from serde.core import TO_ITER
 
 from . import data
 from .data import (
@@ -128,3 +130,51 @@ def test_convert_sets_option() -> None:
     assert a_dict == {"v": ["a", "b"]} or a_dict == {"v": ["b", "a"]}
 
     assert {"v": {"a", "b"}} == to_dict(a, convert_sets=False)
+
+
+@serialize
+class Foo:
+    val: int
+
+
+kwargs = "reuse_instances=reuse_instances, convert_sets=convert_sets"
+
+
+def test_render_primitives() -> None:
+    rendered = Renderer(TO_ITER).render(SeField(int, "i"))
+    assert rendered == 'coerce_object("None", "i", int, i)'
+
+
+def test_render_list() -> None:
+
+    rendered = Renderer(TO_ITER).render(SeField(list[int], "l"))
+    assert rendered == '[coerce_object("None", "v", int, v) for v in l]'
+
+    rendered = Renderer(TO_ITER).render(SeField(list[Foo], "foo"))
+    assert rendered == f"[v.__serde__.funcs['to_iter'](v, {kwargs}) for v in foo]"
+
+
+def test_render_dict() -> None:
+    rendered = Renderer(TO_ITER).render(SeField(dict[str, Foo], "foo"))
+    rendered_key = 'coerce_object("None", "k", str, k)'
+    rendered_val = f"v.__serde__.funcs['to_iter'](v, {kwargs})"
+    assert rendered == f"{{{rendered_key}: {rendered_val} for k, v in foo.items()}}"
+
+    rendered = Renderer(TO_ITER).render(SeField(dict[Foo, Foo], "foo"))
+    rendered_key = f"k.__serde__.funcs['to_iter'](k, {kwargs})"
+    rendered_val = f"v.__serde__.funcs['to_iter'](v, {kwargs})"
+    assert rendered == f"{{{rendered_key}: {rendered_val} for k, v in foo.items()}}"
+
+
+def test_render_tuple() -> None:
+    rendered = Renderer(TO_ITER).render(SeField(tuple[str, Foo, int], "foo"))
+    rendered_str = 'coerce_object("None", "foo[0]", str, foo[0])'
+    rendered_foo = f"foo[1].__serde__.funcs['to_iter'](foo[1], {kwargs})"
+    rendered_int = 'coerce_object("None", "foo[2]", int, foo[2])'
+    assert rendered == f"({rendered_str}, {rendered_foo}, {rendered_int},)"
+
+
+def test_render_dataclass() -> None:
+    rendered = Renderer(TO_ITER).render(SeField(Foo, "foo"))
+    rendered_foo = f"foo.__serde__.funcs['to_iter'](foo, {kwargs})"
+    assert rendered_foo == rendered
