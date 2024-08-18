@@ -1855,23 +1855,23 @@ is specified at the class but you want to override a field with the default seri
 
     </div>
     <a class="headerlink" href="#ClassSerializer"></a>
-            <div class="pdoc-code codehilite"><pre><span></span><span id="ClassSerializer-988"><a href="#ClassSerializer-988"><span class="linenos"> 988</span></a><span class="k">class</span> <span class="nc">ClassSerializer</span><span class="p">(</span><span class="n">Protocol</span><span class="p">):</span>
-</span><span id="ClassSerializer-989"><a href="#ClassSerializer-989"><span class="linenos"> 989</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-</span><span id="ClassSerializer-990"><a href="#ClassSerializer-990"><span class="linenos"> 990</span></a><span class="sd">    Interface for custom class serializer.</span>
-</span><span id="ClassSerializer-991"><a href="#ClassSerializer-991"><span class="linenos"> 991</span></a>
-</span><span id="ClassSerializer-992"><a href="#ClassSerializer-992"><span class="linenos"> 992</span></a><span class="sd">    This protocol is intended to be used for custom class serializer.</span>
-</span><span id="ClassSerializer-993"><a href="#ClassSerializer-993"><span class="linenos"> 993</span></a>
-</span><span id="ClassSerializer-994"><a href="#ClassSerializer-994"><span class="linenos"> 994</span></a><span class="sd">    &gt;&gt;&gt; from datetime import datetime</span>
-</span><span id="ClassSerializer-995"><a href="#ClassSerializer-995"><span class="linenos"> 995</span></a><span class="sd">    &gt;&gt;&gt; from serde import serde</span>
-</span><span id="ClassSerializer-996"><a href="#ClassSerializer-996"><span class="linenos"> 996</span></a><span class="sd">    &gt;&gt;&gt; from plum import dispatch</span>
-</span><span id="ClassSerializer-997"><a href="#ClassSerializer-997"><span class="linenos"> 997</span></a><span class="sd">    &gt;&gt;&gt; class MySerializer(ClassSerializer):</span>
-</span><span id="ClassSerializer-998"><a href="#ClassSerializer-998"><span class="linenos"> 998</span></a><span class="sd">    ...     @dispatch</span>
-</span><span id="ClassSerializer-999"><a href="#ClassSerializer-999"><span class="linenos"> 999</span></a><span class="sd">    ...     def serialize(self, value: datetime) -&gt; str:</span>
-</span><span id="ClassSerializer-1000"><a href="#ClassSerializer-1000"><span class="linenos">1000</span></a><span class="sd">    ...         return value.strftime(&quot;%d/%m/%y&quot;)</span>
-</span><span id="ClassSerializer-1001"><a href="#ClassSerializer-1001"><span class="linenos">1001</span></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="ClassSerializer-1002"><a href="#ClassSerializer-1002"><span class="linenos">1002</span></a>
-</span><span id="ClassSerializer-1003"><a href="#ClassSerializer-1003"><span class="linenos">1003</span></a>    <span class="k">def</span> <span class="nf">serialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
-</span><span id="ClassSerializer-1004"><a href="#ClassSerializer-1004"><span class="linenos">1004</span></a>        <span class="k">pass</span>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="ClassSerializer-998"><a href="#ClassSerializer-998"><span class="linenos"> 998</span></a><span class="k">class</span> <span class="nc">ClassSerializer</span><span class="p">(</span><span class="n">Protocol</span><span class="p">):</span>
+</span><span id="ClassSerializer-999"><a href="#ClassSerializer-999"><span class="linenos"> 999</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+</span><span id="ClassSerializer-1000"><a href="#ClassSerializer-1000"><span class="linenos">1000</span></a><span class="sd">    Interface for custom class serializer.</span>
+</span><span id="ClassSerializer-1001"><a href="#ClassSerializer-1001"><span class="linenos">1001</span></a>
+</span><span id="ClassSerializer-1002"><a href="#ClassSerializer-1002"><span class="linenos">1002</span></a><span class="sd">    This protocol is intended to be used for custom class serializer.</span>
+</span><span id="ClassSerializer-1003"><a href="#ClassSerializer-1003"><span class="linenos">1003</span></a>
+</span><span id="ClassSerializer-1004"><a href="#ClassSerializer-1004"><span class="linenos">1004</span></a><span class="sd">    &gt;&gt;&gt; from datetime import datetime</span>
+</span><span id="ClassSerializer-1005"><a href="#ClassSerializer-1005"><span class="linenos">1005</span></a><span class="sd">    &gt;&gt;&gt; from serde import serde</span>
+</span><span id="ClassSerializer-1006"><a href="#ClassSerializer-1006"><span class="linenos">1006</span></a><span class="sd">    &gt;&gt;&gt; from plum import dispatch</span>
+</span><span id="ClassSerializer-1007"><a href="#ClassSerializer-1007"><span class="linenos">1007</span></a><span class="sd">    &gt;&gt;&gt; class MySerializer(ClassSerializer):</span>
+</span><span id="ClassSerializer-1008"><a href="#ClassSerializer-1008"><span class="linenos">1008</span></a><span class="sd">    ...     @dispatch</span>
+</span><span id="ClassSerializer-1009"><a href="#ClassSerializer-1009"><span class="linenos">1009</span></a><span class="sd">    ...     def serialize(self, value: datetime) -&gt; str:</span>
+</span><span id="ClassSerializer-1010"><a href="#ClassSerializer-1010"><span class="linenos">1010</span></a><span class="sd">    ...         return value.strftime(&quot;%d/%m/%y&quot;)</span>
+</span><span id="ClassSerializer-1011"><a href="#ClassSerializer-1011"><span class="linenos">1011</span></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="ClassSerializer-1012"><a href="#ClassSerializer-1012"><span class="linenos">1012</span></a>
+</span><span id="ClassSerializer-1013"><a href="#ClassSerializer-1013"><span class="linenos">1013</span></a>    <span class="k">def</span> <span class="nf">serialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+</span><span id="ClassSerializer-1014"><a href="#ClassSerializer-1014"><span class="linenos">1014</span></a>        <span class="k">pass</span>
 </span></pre></div>
 
 
@@ -1946,8 +1946,8 @@ is specified at the class but you want to override a field with the default seri
 
     </div>
     <a class="headerlink" href="#ClassSerializer.serialize"></a>
-            <div class="pdoc-code codehilite"><pre><span></span><span id="ClassSerializer.serialize-1003"><a href="#ClassSerializer.serialize-1003"><span class="linenos">1003</span></a>    <span class="k">def</span> <span class="nf">serialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
-</span><span id="ClassSerializer.serialize-1004"><a href="#ClassSerializer.serialize-1004"><span class="linenos">1004</span></a>        <span class="k">pass</span>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="ClassSerializer.serialize-1013"><a href="#ClassSerializer.serialize-1013"><span class="linenos">1013</span></a>    <span class="k">def</span> <span class="nf">serialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+</span><span id="ClassSerializer.serialize-1014"><a href="#ClassSerializer.serialize-1014"><span class="linenos">1014</span></a>        <span class="k">pass</span>
 </span></pre></div>
 
 
@@ -1966,23 +1966,23 @@ is specified at the class but you want to override a field with the default seri
 
     </div>
     <a class="headerlink" href="#ClassDeserializer"></a>
-            <div class="pdoc-code codehilite"><pre><span></span><span id="ClassDeserializer-1007"><a href="#ClassDeserializer-1007"><span class="linenos">1007</span></a><span class="k">class</span> <span class="nc">ClassDeserializer</span><span class="p">(</span><span class="n">Protocol</span><span class="p">):</span>
-</span><span id="ClassDeserializer-1008"><a href="#ClassDeserializer-1008"><span class="linenos">1008</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-</span><span id="ClassDeserializer-1009"><a href="#ClassDeserializer-1009"><span class="linenos">1009</span></a><span class="sd">    Interface for custom class deserializer.</span>
-</span><span id="ClassDeserializer-1010"><a href="#ClassDeserializer-1010"><span class="linenos">1010</span></a>
-</span><span id="ClassDeserializer-1011"><a href="#ClassDeserializer-1011"><span class="linenos">1011</span></a><span class="sd">    This protocol is intended to be used for custom class deserializer.</span>
-</span><span id="ClassDeserializer-1012"><a href="#ClassDeserializer-1012"><span class="linenos">1012</span></a>
-</span><span id="ClassDeserializer-1013"><a href="#ClassDeserializer-1013"><span class="linenos">1013</span></a><span class="sd">    &gt;&gt;&gt; from datetime import datetime</span>
-</span><span id="ClassDeserializer-1014"><a href="#ClassDeserializer-1014"><span class="linenos">1014</span></a><span class="sd">    &gt;&gt;&gt; from serde import serde</span>
-</span><span id="ClassDeserializer-1015"><a href="#ClassDeserializer-1015"><span class="linenos">1015</span></a><span class="sd">    &gt;&gt;&gt; from plum import dispatch</span>
-</span><span id="ClassDeserializer-1016"><a href="#ClassDeserializer-1016"><span class="linenos">1016</span></a><span class="sd">    &gt;&gt;&gt; class MyDeserializer(ClassDeserializer):</span>
-</span><span id="ClassDeserializer-1017"><a href="#ClassDeserializer-1017"><span class="linenos">1017</span></a><span class="sd">    ...     @dispatch</span>
-</span><span id="ClassDeserializer-1018"><a href="#ClassDeserializer-1018"><span class="linenos">1018</span></a><span class="sd">    ...     def deserialize(self, cls: type[datetime], value: Any) -&gt; datetime:</span>
-</span><span id="ClassDeserializer-1019"><a href="#ClassDeserializer-1019"><span class="linenos">1019</span></a><span class="sd">    ...         return datetime.strptime(value, &quot;%d/%m/%y&quot;)</span>
-</span><span id="ClassDeserializer-1020"><a href="#ClassDeserializer-1020"><span class="linenos">1020</span></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="ClassDeserializer-1021"><a href="#ClassDeserializer-1021"><span class="linenos">1021</span></a>
-</span><span id="ClassDeserializer-1022"><a href="#ClassDeserializer-1022"><span class="linenos">1022</span></a>    <span class="k">def</span> <span class="nf">deserialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">cls</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
-</span><span id="ClassDeserializer-1023"><a href="#ClassDeserializer-1023"><span class="linenos">1023</span></a>        <span class="k">pass</span>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="ClassDeserializer-1017"><a href="#ClassDeserializer-1017"><span class="linenos">1017</span></a><span class="k">class</span> <span class="nc">ClassDeserializer</span><span class="p">(</span><span class="n">Protocol</span><span class="p">):</span>
+</span><span id="ClassDeserializer-1018"><a href="#ClassDeserializer-1018"><span class="linenos">1018</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+</span><span id="ClassDeserializer-1019"><a href="#ClassDeserializer-1019"><span class="linenos">1019</span></a><span class="sd">    Interface for custom class deserializer.</span>
+</span><span id="ClassDeserializer-1020"><a href="#ClassDeserializer-1020"><span class="linenos">1020</span></a>
+</span><span id="ClassDeserializer-1021"><a href="#ClassDeserializer-1021"><span class="linenos">1021</span></a><span class="sd">    This protocol is intended to be used for custom class deserializer.</span>
+</span><span id="ClassDeserializer-1022"><a href="#ClassDeserializer-1022"><span class="linenos">1022</span></a>
+</span><span id="ClassDeserializer-1023"><a href="#ClassDeserializer-1023"><span class="linenos">1023</span></a><span class="sd">    &gt;&gt;&gt; from datetime import datetime</span>
+</span><span id="ClassDeserializer-1024"><a href="#ClassDeserializer-1024"><span class="linenos">1024</span></a><span class="sd">    &gt;&gt;&gt; from serde import serde</span>
+</span><span id="ClassDeserializer-1025"><a href="#ClassDeserializer-1025"><span class="linenos">1025</span></a><span class="sd">    &gt;&gt;&gt; from plum import dispatch</span>
+</span><span id="ClassDeserializer-1026"><a href="#ClassDeserializer-1026"><span class="linenos">1026</span></a><span class="sd">    &gt;&gt;&gt; class MyDeserializer(ClassDeserializer):</span>
+</span><span id="ClassDeserializer-1027"><a href="#ClassDeserializer-1027"><span class="linenos">1027</span></a><span class="sd">    ...     @dispatch</span>
+</span><span id="ClassDeserializer-1028"><a href="#ClassDeserializer-1028"><span class="linenos">1028</span></a><span class="sd">    ...     def deserialize(self, cls: type[datetime], value: Any) -&gt; datetime:</span>
+</span><span id="ClassDeserializer-1029"><a href="#ClassDeserializer-1029"><span class="linenos">1029</span></a><span class="sd">    ...         return datetime.strptime(value, &quot;%d/%m/%y&quot;)</span>
+</span><span id="ClassDeserializer-1030"><a href="#ClassDeserializer-1030"><span class="linenos">1030</span></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="ClassDeserializer-1031"><a href="#ClassDeserializer-1031"><span class="linenos">1031</span></a>
+</span><span id="ClassDeserializer-1032"><a href="#ClassDeserializer-1032"><span class="linenos">1032</span></a>    <span class="k">def</span> <span class="nf">deserialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">cls</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+</span><span id="ClassDeserializer-1033"><a href="#ClassDeserializer-1033"><span class="linenos">1033</span></a>        <span class="k">pass</span>
 </span></pre></div>
 
 
@@ -2057,8 +2057,8 @@ is specified at the class but you want to override a field with the default seri
 
     </div>
     <a class="headerlink" href="#ClassDeserializer.deserialize"></a>
-            <div class="pdoc-code codehilite"><pre><span></span><span id="ClassDeserializer.deserialize-1022"><a href="#ClassDeserializer.deserialize-1022"><span class="linenos">1022</span></a>    <span class="k">def</span> <span class="nf">deserialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">cls</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
-</span><span id="ClassDeserializer.deserialize-1023"><a href="#ClassDeserializer.deserialize-1023"><span class="linenos">1023</span></a>        <span class="k">pass</span>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="ClassDeserializer.deserialize-1032"><a href="#ClassDeserializer.deserialize-1032"><span class="linenos">1032</span></a>    <span class="k">def</span> <span class="nf">deserialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">cls</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+</span><span id="ClassDeserializer.deserialize-1033"><a href="#ClassDeserializer.deserialize-1033"><span class="linenos">1033</span></a>        <span class="k">pass</span>
 </span></pre></div>
 
 
@@ -2077,11 +2077,11 @@ is specified at the class but you want to override a field with the default seri
 
     </div>
     <a class="headerlink" href="#add_serializer"></a>
-            <div class="pdoc-code codehilite"><pre><span></span><span id="add_serializer-1031"><a href="#add_serializer-1031"><span class="linenos">1031</span></a><span class="k">def</span> <span class="nf">add_serializer</span><span class="p">(</span><span class="n">serializer</span><span class="p">:</span> <span class="n">ClassSerializer</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-</span><span id="add_serializer-1032"><a href="#add_serializer-1032"><span class="linenos">1032</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-</span><span id="add_serializer-1033"><a href="#add_serializer-1033"><span class="linenos">1033</span></a><span class="sd">    Register custom global serializer.</span>
-</span><span id="add_serializer-1034"><a href="#add_serializer-1034"><span class="linenos">1034</span></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="add_serializer-1035"><a href="#add_serializer-1035"><span class="linenos">1035</span></a>    <span class="n">GLOBAL_CLASS_SERIALIZER</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">serializer</span><span class="p">)</span>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="add_serializer-1041"><a href="#add_serializer-1041"><span class="linenos">1041</span></a><span class="k">def</span> <span class="nf">add_serializer</span><span class="p">(</span><span class="n">serializer</span><span class="p">:</span> <span class="n">ClassSerializer</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="add_serializer-1042"><a href="#add_serializer-1042"><span class="linenos">1042</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+</span><span id="add_serializer-1043"><a href="#add_serializer-1043"><span class="linenos">1043</span></a><span class="sd">    Register custom global serializer.</span>
+</span><span id="add_serializer-1044"><a href="#add_serializer-1044"><span class="linenos">1044</span></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="add_serializer-1045"><a href="#add_serializer-1045"><span class="linenos">1045</span></a>    <span class="n">GLOBAL_CLASS_SERIALIZER</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">serializer</span><span class="p">)</span>
 </span></pre></div>
 
 
@@ -2101,11 +2101,11 @@ is specified at the class but you want to override a field with the default seri
 
     </div>
     <a class="headerlink" href="#add_deserializer"></a>
-            <div class="pdoc-code codehilite"><pre><span></span><span id="add_deserializer-1038"><a href="#add_deserializer-1038"><span class="linenos">1038</span></a><span class="k">def</span> <span class="nf">add_deserializer</span><span class="p">(</span><span class="n">deserializer</span><span class="p">:</span> <span class="n">ClassDeserializer</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-</span><span id="add_deserializer-1039"><a href="#add_deserializer-1039"><span class="linenos">1039</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-</span><span id="add_deserializer-1040"><a href="#add_deserializer-1040"><span class="linenos">1040</span></a><span class="sd">    Register custom global deserializer.</span>
-</span><span id="add_deserializer-1041"><a href="#add_deserializer-1041"><span class="linenos">1041</span></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="add_deserializer-1042"><a href="#add_deserializer-1042"><span class="linenos">1042</span></a>    <span class="n">GLOBAL_CLASS_DESERIALIZER</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">deserializer</span><span class="p">)</span>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="add_deserializer-1048"><a href="#add_deserializer-1048"><span class="linenos">1048</span></a><span class="k">def</span> <span class="nf">add_deserializer</span><span class="p">(</span><span class="n">deserializer</span><span class="p">:</span> <span class="n">ClassDeserializer</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="add_deserializer-1049"><a href="#add_deserializer-1049"><span class="linenos">1049</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+</span><span id="add_deserializer-1050"><a href="#add_deserializer-1050"><span class="linenos">1050</span></a><span class="sd">    Register custom global deserializer.</span>
+</span><span id="add_deserializer-1051"><a href="#add_deserializer-1051"><span class="linenos">1051</span></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="add_deserializer-1052"><a href="#add_deserializer-1052"><span class="linenos">1052</span></a>    <span class="n">GLOBAL_CLASS_DESERIALIZER</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">deserializer</span><span class="p">)</span>
 </span></pre></div>
 
 
