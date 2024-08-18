@@ -1126,3 +1126,12 @@ def test_frozen_dataclass() -> None:
 
     bar = Bar(a=10, b=20)
     assert bar == serde.from_dict(Bar, serde.to_dict(bar))
+
+
+def test_init_var_with_field_attribute() -> None:
+    @serde.serde
+    @dataclasses.dataclass
+    class Foo:
+        a: int = serde.field(skip=True)
+
+    assert serde.to_dict(Foo(10)) == {}
