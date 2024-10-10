@@ -18,6 +18,7 @@ classifiers=[
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
   "Programming Language :: Python :: Implementation :: CPython",
   "Programming Language :: Python :: Implementation :: PyPy",
 ]
@@ -37,6 +38,7 @@ numpy = [
   { version = ">1.22.0,<2.0.0", markers = "python_version ~= '3.10' and (extra == 'numpy' or extra == 'all')", optional = true },
   { version = ">1.22.0,<2.0.0", markers = "python_version ~= '3.11' and (extra == 'numpy' or extra == 'all')", optional = true },
   { version = ">1.22.0,<2.0.0", markers = "python_version ~= '3.12' and (extra == 'numpy' or extra == 'all')", optional = true },
+  { version = ">1.22.0,<2.0.0", markers = "python_version ~= '3.13' and (extra == 'numpy' or extra == 'all')", optional = true },
 ]
 jaxtyping = { version = "*", markers = "extra == 'jaxtyping' or extra == 'all'", optional = true }
 orjson = { version = "*", markers = "extra == 'orjson' or extra == 'all'", optional = true }
@@ -54,6 +56,7 @@ numpy = [
   { version = ">1.22.0,<2.0.0", markers = "python_version ~= '3.10'" },
   { version = ">1.22.0,<2.0.0", markers = "python_version ~= '3.11'" },
   { version = ">1.22.0,<2.0.0", markers = "python_version ~= '3.12'" },
+  { version = ">1.22.0,<2.0.0", markers = "python_version ~= '3.13'" },
 ]
 mypy = "==1.10.1"
 pytest = "*"
