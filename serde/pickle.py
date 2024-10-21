@@ -30,6 +30,7 @@ def to_pickle(
     se: type[Serializer[bytes]] = PickleSerializer,
     reuse_instances: bool = False,
     convert_sets: bool = True,
+    skip_none: bool = False,
     **opts: Any,
 ) -> bytes:
     return se.serialize(

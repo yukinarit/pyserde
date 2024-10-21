@@ -32,6 +32,7 @@ def to_yaml(
     se: type[Serializer[str]] = YamlSerializer,
     reuse_instances: bool = False,
     convert_sets: bool = True,
+    skip_none: bool = False,
     **opts: Any,
 ) -> str:
     """
@@ -39,6 +40,9 @@ def to_yaml(
 
     You can pass any serializable `obj`. If you supply keyword arguments other than `se`,
     they will be passed in `yaml.safe_dump` function.
+
+    * `skip_none`: When set to True, any field in the class with a None value is excluded from the
+    serialized output. Defaults to False.
 
     If you want to use the other yaml package, you can subclass `YamlSerializer` and implement
     your own logic.

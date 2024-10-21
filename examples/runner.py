@@ -132,5 +132,7 @@ def run(module: typing.Any) -> None:
 if __name__ == "__main__":
     try:
         run_all()
+        print("-----------------")
+        print("all tests passed successfully!")
     except Exception:
         sys.exit(1)

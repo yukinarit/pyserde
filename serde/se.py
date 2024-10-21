@@ -334,13 +334,17 @@ def to_obj(
     named: bool,
     reuse_instances: Optional[bool] = None,
     convert_sets: Optional[bool] = None,
+    skip_none: bool = False,
     c: Optional[Any] = None,
 ) -> Any:
     def serializable_to_obj(object: Any) -> Any:
         serde_scope: Scope = getattr(object, SERDE_SCOPE)
         func_name = TO_DICT if named else TO_ITER
         return serde_scope.funcs[func_name](
-            object, reuse_instances=reuse_instances, convert_sets=convert_sets
+            object,
+            reuse_instances=reuse_instances,
+            convert_sets=convert_sets,
+            skip_none=skip_none,
         )
 
     try:
@@ -349,6 +353,7 @@ def to_obj(
             named=named,
             reuse_instances=reuse_instances,
             convert_sets=convert_sets,
+            skip_none=skip_none,
         )
 
         # If a class in the argument is a non-dataclass class e.g. Union[Foo, Bar],
@@ -377,7 +382,11 @@ def to_obj(
             return {k: thisfunc(v) for k, v in o.items()}
         elif is_str_serializable_instance(o) or is_datetime_instance(o):
             return CACHE.serialize(
-                c or o.__class__, o, reuse_instances=reuse_instances, convert_sets=convert_sets
+                c or o.__class__,
+                o,
+                reuse_instances=reuse_instances,
+                convert_sets=convert_sets,
+                skip_none=skip_none,
             )
 
         return o
@@ -398,6 +407,7 @@ def to_tuple(
     c: Optional[type[Any]] = None,
     reuse_instances: Optional[bool] = None,
     convert_sets: Optional[bool] = None,
+    skip_none: bool = False,
 ) -> tuple[Any, ...]:
     """
     Serialize object into tuple.
@@ -419,7 +429,12 @@ def to_tuple(
     [(10, 'foo', 100.0, True), (20, 'foo', 100.0, True)]
     """
     return to_obj(  # type: ignore
-        o, named=False, c=c, reuse_instances=reuse_instances, convert_sets=convert_sets
+        o,
+        named=False,
+        c=c,
+        reuse_instances=reuse_instances,
+        convert_sets=convert_sets,
+        skip_none=skip_none,
     )
 
 
@@ -435,6 +450,7 @@ def to_dict(
     c: Optional[type[Any]] = None,
     reuse_instances: Optional[bool] = None,
     convert_sets: Optional[bool] = None,
+    skip_none: bool = False,
 ) -> dict[Any, Any]:
     """
     Serialize object into python dictionary. This function ensures that the dataclass's fields are
@@ -450,6 +466,8 @@ def to_dict(
     deserialization. When `convert_sets` is set to True, pyserde will convert sets to lists during
     serialization and back to sets during deserialization. This is useful for data formats that
     do not natively support sets.
+    * `skip_none`: When set to True, any field in the class with a None value is excluded from the
+    serialized output. Defaults to False.
 
     >>> from serde import serde
     >>> @serde
@@ -470,7 +488,12 @@ def to_dict(
     [{'i': 10, 's': 'foo', 'f': 100.0, 'b': True}, {'i': 20, 's': 'foo', 'f': 100.0, 'b': True}]
     """
     return to_obj(  # type: ignore
-        o, named=True, c=c, reuse_instances=reuse_instances, convert_sets=convert_sets
+        o,
+        named=True,
+        c=c,
+        reuse_instances=reuse_instances,
+        convert_sets=convert_sets,
+        skip_none=skip_none,
     )
 
 
@@ -524,7 +547,7 @@ jinja2_env = jinja2.Environment(
     loader=jinja2.DictLoader(
         {
             "dict": """
-def {{func}}(obj, reuse_instances = None, convert_sets = None):
+def {{func}}(obj, reuse_instances = None, convert_sets = None, skip_none = False):
   if reuse_instances is None:
     reuse_instances = {{serde_scope.reuse_instances_default}}
   if convert_sets is None:
@@ -534,13 +557,17 @@ def {{func}}(obj, reuse_instances = None, convert_sets = None):
 
   res = {}
   {% for f in fields -%}
+  subres = {{rvalue(f)}}
   {% if not f.skip -%}
     {% if f.skip_if -%}
-  subres = {{rvalue(f)}}
   if not {{f.skip_if.name}}(subres):
     {{lvalue(f)}} = subres
     {% else -%}
-  {{lvalue(f)}} = {{rvalue(f)}}
+  if skip_none:
+    if subres is not None:
+      {{lvalue(f)}} = subres
+  else:
+    {{lvalue(f)}} = subres
     {% endif -%}
   {% endif %}
 
@@ -548,7 +575,7 @@ def {{func}}(obj, reuse_instances = None, convert_sets = None):
   return res
 """,
             "iter": """
-def {{func}}(obj, reuse_instances=None, convert_sets=None):
+def {{func}}(obj, reuse_instances=None, convert_sets=None, skip_none=False):
   if reuse_instances is None:
     reuse_instances = {{serde_scope.reuse_instances_default}}
   if convert_sets is None:

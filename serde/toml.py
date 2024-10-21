@@ -40,6 +40,7 @@ def to_toml(
     se: type[Serializer[str]] = TomlSerializer,
     reuse_instances: bool = False,
     convert_sets: bool = True,
+    skip_none: bool = True,
     **opts: Any,
 ) -> str:
     """
@@ -48,11 +49,21 @@ def to_toml(
     You can pass any serializable `obj`. If you supply keyword arguments other than `se`,
     they will be passed in `toml_w.dumps` function.
 
+    * `skip_none`: When set to True, any field in the class with a None value is excluded from the
+    serialized output. Defaults to True.
+
     If you want to use the other toml package, you can subclass `TomlSerializer` and implement
     your own logic.
     """
     return se.serialize(
-        to_dict(obj, c=cls, reuse_instances=reuse_instances, convert_sets=convert_sets), **opts
+        to_dict(
+            obj,
+            c=cls,
+            reuse_instances=reuse_instances,
+            convert_sets=convert_sets,
+            skip_none=skip_none,
+        ),
+        **opts,
     )
 
 

@@ -56,6 +56,7 @@ def to_json(
     se: type[Serializer[str]] = JsonSerializer,
     reuse_instances: bool = False,
     convert_sets: bool = True,
+    skip_none: bool = False,
     **opts: Any,
 ) -> str:
     """
@@ -67,6 +68,9 @@ def to_json(
     By default, numpy objects are serialized, this behaviour can be customized with the `option`
     argument with [orjson](https://github.com/ijl/orjson#numpy), or the `default` argument with
     Python standard json library.
+
+    * `skip_none`: When set to True, any field in the class with a None value is excluded from the
+    serialized output. Defaults to False.
 
     If you want to use another json package, you can subclass `JsonSerializer` and implement
     your own logic.

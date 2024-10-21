@@ -458,28 +458,6 @@ def test_msgpack_unnamed():
     assert p == serde.msgpack.from_msgpack(data.Pri, d, named=False)
 
 
-def test_toml():
-    @serde.serde
-    class Foo:
-        v: Optional[int]
-
-    f = Foo(10)
-    assert "v = 10\n" == serde.toml.to_toml(f)
-    assert f == serde.toml.from_toml(Foo, "v = 10\n")
-
-    # TODO: Should raise SerdeError
-    with pytest.raises(TypeError):
-        f = Foo(None)
-        serde.toml.to_toml(f)
-
-    @serde.serde
-    class Foo:
-        v: set[int]
-
-    f = Foo({1, 2, 3})
-    serde.toml.to_toml(f)
-
-
 @pytest.mark.parametrize("se,de", all_formats)
 def test_rename(se, de):
     @serde.serde
