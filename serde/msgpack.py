@@ -56,9 +56,12 @@ def to_msgpack(
     as a `msgpack.ExtType` If you supply other keyword arguments, they will be passed in
     `msgpack.packb` function.
 
-    If `named` is True, field names are preserved, namely the object is encoded as `dict` then
-    serialized into MsgPack.  If `named` is False, the object is encoded as `tuple` then serialized
-    into MsgPack. `named=False` will produces compact binary.
+    * `named`: If `named` is True, field names are preserved, namely the object is encoded as `dict`
+    then serialized into MsgPack.  If `named` is False, the object is encoded as `tuple` then
+    serialized into MsgPack. `named=False` will produces compact binary.
+
+    * `skip_none`: When set to True, any field in the class with a None value is excluded from the
+    serialized output. Defaults to False.
 
     If you want to use the other msgpack package, you can subclass `MsgPackSerializer` and
     implement your own logic.
@@ -107,6 +110,7 @@ def from_msgpack(
     de: type[Deserializer[bytes]] = MsgPackDeserializer,
     named: bool = True,
     ext_dict: Optional[dict[int, type[Any]]] = None,
+    skip_none: bool = False,
     **opts: Any,
 ) -> Any:
     """
