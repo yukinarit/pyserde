@@ -35,6 +35,7 @@ def run_all() -> None:
     import pep681
     import plain_dataclass
     import plain_dataclass_class_attribute
+    import deny_unknown_fields
     import python_pickle
     import recursive
     import recursive_list
@@ -107,6 +108,7 @@ def run_all() -> None:
     run(class_var)
     run(plain_dataclass)
     run(plain_dataclass_class_attribute)
+    run(deny_unknown_fields)
     run(msg_pack)
     run(primitive_subclass)
     run(kw_only)
@@ -133,6 +135,6 @@ if __name__ == "__main__":
     try:
         run_all()
         print("-----------------")
-        print("all tests passed successfully!")
+        print("all examples completed successfully!")
     except Exception:
         sys.exit(1)

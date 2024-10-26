@@ -192,6 +192,7 @@ def deserialize(
     tagging: Tagging = DefaultTagging,
     type_check: TypeCheck = strict,
     class_deserializer: Optional[ClassDeserializer] = None,
+    deny_unknown_fields: bool = False,
     **kwargs: Any,
 ) -> type[T]:
     """
@@ -329,7 +330,12 @@ def deserialize(
             scope,
             FROM_DICT,
             render_from_dict(
-                cls, rename_all, deserializer, type_check, class_deserializer=class_deserializer
+                cls,
+                rename_all,
+                deserializer,
+                type_check,
+                class_deserializer=class_deserializer,
+                deny_unknown_fields=deny_unknown_fields,
             ),
             g,
         )
@@ -1041,6 +1047,13 @@ def {{func}}(cls=cls, maybe_generic=None, maybe_generic_type_vars=None, data=Non
   if reuse_instances is None:
     reuse_instances = {{serde_scope.reuse_instances_default}}
 
+  {% if deny_unknown_fields %}
+  known_fields = {{ known_fields }}
+  unknown_fields = set((data or {}).keys()) - known_fields
+  if unknown_fields:
+    raise SerdeError(f'unknown fields: {unknown_fields}, expected one of {known_fields}')
+  {% endif %}
+
   maybe_generic_type_vars = maybe_generic_type_vars or {{cls_type_vars}}
 
   {% for f in fields %}
@@ -1143,12 +1156,18 @@ def render_from_iter(
     return res
 
 
+def get_known_fields(f: DeField[Any], rename_all: Optional[str]) -> list[str]:
+    names: list[str] = [f.conv_name(rename_all)]
+    return names + f.alias
+
+
 def render_from_dict(
     cls: type[Any],
     rename_all: Optional[str] = None,
     legacy_class_deserializer: Optional[DeserializeFunc] = None,
     type_check: TypeCheck = strict,
     class_deserializer: Optional[ClassDeserializer] = None,
+    deny_unknown_fields: bool = False,
 ) -> str:
     renderer = Renderer(
         FROM_DICT,
@@ -1159,6 +1178,9 @@ def render_from_dict(
         class_name=typename(cls),
     )
     fields = list(filter(renderable, defields(cls)))
+    known_fields = set(
+        itertools.chain.from_iterable([get_known_fields(f, rename_all) for f in fields])
+    )
     res = jinja2_env.get_template("dict").render(
         func=FROM_DICT,
         serde_scope=getattr(cls, SERDE_SCOPE),
@@ -1167,6 +1189,8 @@ def render_from_dict(
         cls_type_vars=get_type_var_names(cls),
         rvalue=renderer.render,
         arg=functools.partial(to_arg, rename_all=rename_all),
+        deny_unknown_fields=deny_unknown_fields,
+        known_fields=known_fields,
     )
 
     if renderer.import_numpy:

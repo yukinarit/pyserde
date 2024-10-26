@@ -1,5 +1,8 @@
+import pytest
 from decimal import Decimal
 from typing import Union, Optional
+from serde import serde, SerdeError, field
+from serde.json import from_json
 from serde.de import deserialize, from_obj, Renderer, DeField
 
 
@@ -125,3 +128,61 @@ def test_render_opt() -> None:
     rendered_foo = f"Foo.__serde__.funcs['foo'](data=data[\"f\"], {kwargs})"
     rendered_opt = f'({rendered_foo}) if data.get("f") is not None else None'
     assert rendered == rendered_opt
+
+
+def test_deny_unknown_fields() -> None:
+    @serde(deny_unknown_fields=True)
+    class Foo:
+        a: int
+        b: str
+
+    with pytest.raises(SerdeError):
+        from_json(Foo, '{"a": 10, "b": "foo", "c": 100.0, "d": true}')
+
+    f = from_json(Foo, '{"a": 10, "b": "foo"}')
+    assert f.a == 10
+    assert f.b == "foo"
+
+
+def test_deny_renamed_unknown_fields() -> None:
+    @serde(deny_unknown_fields=True)
+    class Foo:
+        a: int
+        b: str = field(rename="B")
+
+    with pytest.raises(SerdeError):
+        from_json(Foo, '{"a": 10, "b": "foo"}')
+
+    f = from_json(Foo, '{"a": 10, "B": "foo"}')
+    assert f.a == 10
+    assert f.b == "foo"
+
+    @serde(rename_all="constcase", deny_unknown_fields=True)
+    class Bar:
+        a: int
+        b: str
+
+    with pytest.raises(SerdeError):
+        from_json(Bar, '{"a": 10, "b": "foo"}')
+
+    b = from_json(Bar, '{"A": 10, "B": "foo"}')
+    assert b.a == 10
+    assert b.b == "foo"
+
+
+def test_deny_aliased_unknown_fields() -> None:
+    @serde(deny_unknown_fields=True)
+    class Foo:
+        a: int
+        b: str = field(alias=["B"])  # type: ignore
+
+    with pytest.raises(SerdeError):
+        from_json(Foo, '{"a": 10, "b": "foo", "c": 100.0, "d": true}')
+
+    f = from_json(Foo, '{"a": 10, "b": "foo"}')
+    assert f.a == 10
+    assert f.b == "foo"
+
+    f = from_json(Foo, '{"a": 10, "B": "foo"}')
+    assert f.a == 10
+    assert f.b == "foo"

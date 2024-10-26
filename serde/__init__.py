@@ -124,6 +124,7 @@ def serde(
     serialize_class_var: bool = False,
     class_serializer: Optional[ClassSerializer] = None,
     class_deserializer: Optional[ClassDeserializer] = None,
+    deny_unknown_fields: bool = False,
 ) -> Type[T]: ...
 
 
@@ -140,6 +141,7 @@ def serde(
     serialize_class_var: bool = False,
     class_serializer: Optional[ClassSerializer] = None,
     class_deserializer: Optional[ClassDeserializer] = None,
+    deny_unknown_fields: bool = False,
 ) -> Callable[[type[T]], type[T]]: ...
 
 
@@ -156,6 +158,7 @@ def serde(
     serialize_class_var: bool = False,
     class_serializer: Optional[ClassSerializer] = None,
     class_deserializer: Optional[ClassDeserializer] = None,
+    deny_unknown_fields: bool = False,
 ) -> Any:
     """
     serde decorator. Keyword arguments are passed in `serialize` and `deserialize`.
@@ -187,6 +190,7 @@ def serde(
             type_check=type_check,
             serialize_class_var=serialize_class_var,
             class_deserializer=class_deserializer,
+            deny_unknown_fields=deny_unknown_fields,
         )
         return cls
 
