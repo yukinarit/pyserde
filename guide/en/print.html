@@ -776,6 +776,19 @@ class Foo:
 <div class="footnote-definition" id="1"><sup class="footnote-definition-label">1</sup>
 <p><a href="https://docs.python.org/3/library/dataclasses.html#dataclasses.fields">dataclasses.fields</a></p>
 </div>
+<h3 id="deny_unknown_fields"><a class="header" href="#deny_unknown_fields"><strong><code>deny_unknown_fields</code></strong></a></h3>
+<p>New in v0.22.0, the <code>deny_unknown_fields</code> option in the pyserde decorator allows you to enforce strict field validation during deserialization. When this option is enabled, any fields in the input data that are not defined in the target class will cause deserialization to fail with a <code>SerdeError</code>.</p>
+<p>Consider the following example:</p>
+<pre><code class="language-python">@serde(deny_unknown_fields=True)
+class Foo:
+    a: int
+    b: str
+</code></pre>
+<p>With <code>deny_unknown_fields=True</code>, attempting to deserialize data containing fields beyond those defined (a and b in this case) will raise an error. For instance:</p>
+<pre><code>from_json(Foo, '{"a": 10, "b": "foo", "c": 100.0, "d": true}')
+</code></pre>
+<p>This will raise a <code>SerdeError</code> since fields c and d are not recognized members of Foo.</p>
+<p>See <a href="https://github.com/yukinarit/pyserde/blob/main/examples/deny_unknown_fields.py">examples/deny_unknown_fields.py</a> for complete example.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="field-attributes"><a class="header" href="#field-attributes">Field Attributes</a></h1>
 <p>Field attributes are options to customize (de)serialization behaviour for a field of a dataclass.</p>
 <h2 id="attributes-offered-by-dataclasses-1"><a class="header" href="#attributes-offered-by-dataclasses-1">Attributes offered by dataclasses</a></h2>

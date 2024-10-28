@@ -820,10 +820,23 @@ class Foo:
 class Foo:
     a: ClassVar[int] = 10
 </code></pre>
-<p>完全な例については、<a href="https://github.com/yukinarit/pyserde/blob/main/examples/class_var.py">examples/class_var.py</a> を参照してください。</p>
+<p>完全な例については、<a href="https://github.com/yukinarit/pyserde/blob/main/examples/class_var.py">examples/class_var.py</a>を参照してください。</p>
 <div class="footnote-definition" id="1"><sup class="footnote-definition-label">1</sup>
 <p><a href="https://docs.python.org/3/library/dataclasses.html#dataclasses.fields">dataclasses.fields</a></p>
 </div>
+<h3 id="deny_unknown_fields"><a class="header" href="#deny_unknown_fields"><strong><code>deny_unknown_fields</code></strong></a></h3>
+<p>バージョン0.22.0で新規追加。 pyserdeデコレータの<code>deny_unknown_fields</code>オプションはデシリアライズ時のより厳格なフィールドチェックを制御できます。このオプションをTrueにするとデシリアライズ時に宣言されていないフィールドが見つかると<code>SerdeError</code>を投げることができます。</p>
+<p>以下の例を考えてください。</p>
+<pre><code class="language-python">@serde(deny_unknown_fields=True)
+class Foo:
+    a: int
+    b: str
+</code></pre>
+<p><code>deny_unknown_fields=True</code>が指定されていると、 宣言されているフィールド(この場合aとb)以外がインプットにあると例外を投げます。例えば、</p>
+<pre><code>from_json(Foo, '{"a": 10, "b": "foo", "c": 100.0, "d": true}')
+</code></pre>
+<p>上記のコードはフィールドcとdという宣言されていないフィールドがあるためエラーとなります。</p>
+<p>完全な例については、<a href="https://github.com/yukinarit/pyserde/blob/main/examples/deny_unknown_fields.py">examples/deny_unknown_fields.py</a>を参照してください。</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="field-attributes"><a class="header" href="#field-attributes">Field Attributes</a></h1>
 <p>フィールド属性は、データクラスのフィールドの（デ）シリアライズ動作をカスタマイズするためのオプションです。</p>
 <h2 id="dataclassesによって提供される属性"><a class="header" href="#dataclassesによって提供される属性">dataclassesによって提供される属性</a></h2>
