@@ -178,6 +178,26 @@ class Foo:
     a: ClassVar[int] = 10
 ```
 
-完全な例については、[examples/class_var.py](https://github.com/yukinarit/pyserde/blob/main/examples/class_var.py) を参照してください。
+完全な例については、[examples/class_var.py](https://github.com/yukinarit/pyserde/blob/main/examples/class_var.py)を参照してください。
 
 [^1]: [dataclasses.fields](https://docs.python.org/3/library/dataclasses.html#dataclasses.fields)
+
+### **`deny_unknown_fields`**
+
+バージョン0.22.0で新規追加。 pyserdeデコレータの`deny_unknown_fields`オプションはデシリアライズ時のより厳格なフィールドチェックを制御できます。このオプションをTrueにするとデシリアライズ時に宣言されていないフィールドが見つかると`SerdeError`を投げることができます。
+
+以下の例を考えてください。
+```python
+@serde(deny_unknown_fields=True)
+class Foo:
+    a: int
+    b: str
+```
+
+`deny_unknown_fields=True`が指定されていると、 宣言されているフィールド(この場合aとb)以外がインプットにあると例外を投げます。例えば、
+```
+from_json(Foo, '{"a": 10, "b": "foo", "c": 100.0, "d": true}')
+```
+上記のコードはフィールドcとdという宣言されていないフィールドがあるためエラーとなります。
+
+完全な例については、[examples/deny_unknown_fields.py](https://github.com/yukinarit/pyserde/blob/main/examples/deny_unknown_fields.py)を参照してください。

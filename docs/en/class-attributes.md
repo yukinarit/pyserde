@@ -163,3 +163,23 @@ class Foo:
 See [examples/class_var.py](https://github.com/yukinarit/pyserde/blob/main/examples/class_var.py) for complete example.
 
 [^1]: [dataclasses.fields](https://docs.python.org/3/library/dataclasses.html#dataclasses.fields)
+
+### **`deny_unknown_fields`**
+
+New in v0.22.0, the `deny_unknown_fields` option in the pyserde decorator allows you to enforce strict field validation during deserialization. When this option is enabled, any fields in the input data that are not defined in the target class will cause deserialization to fail with a `SerdeError`.
+
+Consider the following example:
+```python
+@serde(deny_unknown_fields=True)
+class Foo:
+    a: int
+    b: str
+```
+
+With `deny_unknown_fields=True`, attempting to deserialize data containing fields beyond those defined (a and b in this case) will raise an error. For instance:
+```
+from_json(Foo, '{"a": 10, "b": "foo", "c": 100.0, "d": true}')
+```
+This will raise a `SerdeError` since fields c and d are not recognized members of Foo.
+
+See [examples/deny_unknown_fields.py](https://github.com/yukinarit/pyserde/blob/main/examples/deny_unknown_fields.py) for complete example.
