@@ -310,9 +310,9 @@ def iter_types(cls: type[Any]) -> list[type[Any]]:
     The correct return type is `Iterator[Union[Type, typing._specialform]],
     but `typing._specialform` doesn't exist for python 3.6. Use `Any` instead.
     """
-    lst: set[type[Any]] = set()
+    lst: set[Union[type[Any], Any]] = set()
 
-    def recursive(cls: type[Any]) -> None:
+    def recursive(cls: Union[type[Any], Any]) -> None:
         if cls in lst:
             return
 
@@ -323,12 +323,12 @@ def iter_types(cls: type[Any]) -> list[type[Any]]:
         elif isinstance(cls, str):
             lst.add(cls)
         elif is_opt(cls):
-            lst.add(Optional)  # type: ignore
+            lst.add(Optional)
             args = type_args(cls)
             if args:
                 recursive(args[0])
         elif is_union(cls):
-            lst.add(Union)  # type: ignore
+            lst.add(Union)
             for arg in type_args(cls):
                 recursive(arg)
         elif is_list(cls):
@@ -403,9 +403,9 @@ def iter_literals(cls: type[Any]) -> list[TypeLike]:
     """
     Iterate over all literals that are used in the dataclass
     """
-    lst: set[type[Any]] = set()
+    lst: set[Union[type[Any], Any]] = set()
 
-    def recursive(cls: type[Any]) -> None:
+    def recursive(cls: Union[type[Any], Any]) -> None:
         if cls in lst:
             return
 
@@ -830,7 +830,7 @@ def is_any(typ: type[Any]) -> bool:
     """
     Test if the type is `typing.Any`.
     """
-    return typ is Any
+    return typ is Any  # type: ignore
 
 
 @cache

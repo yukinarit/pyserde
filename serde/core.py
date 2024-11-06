@@ -349,6 +349,8 @@ def is_instance(obj: Any, typ: Any) -> bool:
     deeply check object against declared type.
     """
     if dataclasses.is_dataclass(typ):
+        if not isinstance(typ, type):
+            raise SerdeError("expect dataclass class but dataclass instance received")
         return isinstance(obj, typ)
     elif is_opt(typ):
         return is_opt_instance(obj, typ)
@@ -627,7 +629,7 @@ class Field(Generic[T]):
         kw_only = bool(f.kw_only) if sys.version_info >= (3, 10) else False
 
         return cls(
-            f.type,
+            f.type,  # type: ignore
             f.name,
             default=f.default,
             default_factory=f.default_factory,
