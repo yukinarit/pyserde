@@ -720,8 +720,8 @@ class Renderer:
             GLOBAL_CLASS_DESERIALIZER, [self.class_deserializer] if self.class_deserializer else []
         )
         for n, class_deserializer in enumerate(class_deserializers):
-            for sig in class_deserializer.__class__.deserialize.methods:  # type: ignore
-                implemented_methods[get_args(sig.types[1])[0]] = n
+            for method in class_deserializer.__class__.deserialize.methods:  # type: ignore
+                implemented_methods[get_args(method.signature.types[1])[0]] = n
 
         custom_deserializer_available = arg.type in implemented_methods
         if custom_deserializer_available and not arg.deserializer:

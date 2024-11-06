@@ -751,8 +751,8 @@ class Renderer:
             GLOBAL_CLASS_SERIALIZER, [self.class_serializer] if self.class_serializer else []
         )
         for n, class_serializer in enumerate(class_serializers):
-            for sig in class_serializer.__class__.serialize.methods:  # type: ignore
-                implemented_methods[sig.types[1]] = n
+            for method in class_serializer.__class__.serialize.methods:  # type: ignore
+                implemented_methods[method.signature.types[1]] = n
 
         custom_serializer_available = arg.type in implemented_methods
         if custom_serializer_available and not arg.serializer:
