@@ -131,7 +131,7 @@ def test_type_args() -> None:
     assert (int,) == type_args(list[int])
     assert (int, str) == type_args(dict[int, str])
     assert (int, type(None)) == type_args(Optional[int])
-    assert (Optional[int],) == type_args(list[Optional[int]])
+    assert (Optional[int],) == type_args(list[Optional[int]])  # type: ignore
     assert (list[int], type(None)) == type_args(Optional[list[int]])
     assert (list[int], dict[str, int]) == type_args(Union[list[int], dict[str, int]])
     assert (int, type(None), str) == type_args(Union[Optional[int], str])
@@ -141,7 +141,7 @@ def test_type_args() -> None:
 def test_union_args() -> None:
     assert (int, str) == union_args(Union[int, str])
     assert (list[int], dict[int, str]) == union_args(Union[list[int], dict[int, str]])
-    assert (Optional[int], str) == union_args(Union[Optional[int], str])
+    assert (Optional[int], str) == union_args(Union[Optional[int], str])  # type: ignore
 
 
 def test_is_instance() -> None:
