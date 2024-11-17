@@ -16,7 +16,7 @@ from beartype import beartype, BeartypeConf
 from beartype.door import is_bearable
 from beartype.roar import BeartypeCallHintParamViolation
 from dataclasses import dataclass, is_dataclass
-from typing import overload, TypeVar, Generic, Any, Optional, Union, Literal
+from typing import overload, TypeVar, Generic, Any, Optional, Union, Literal, Iterator
 from typing_extensions import dataclass_transform
 
 from .compat import (
@@ -985,11 +985,31 @@ class Renderer:
         )
 
     def default(self, arg: DeField[Any], code: str) -> str:
-        if arg.alias:
-            aliases = (f'"{s}"' for s in [arg.name, *arg.alias])
-            exists = f'_exists_by_aliases({arg.datavar}, [{",".join(aliases)}])'
+        """
+        Renders supplying default value during deserialization.
+        """
+
+        def get_aliased_fields(arg: Field[Any]) -> Iterator[str]:
+            return (f'"{s}"' for s in [arg.name, *arg.alias])
+
+        if arg.flatten:
+            # When a field has the `flatten` attribute, iterate over its dataclass fields.
+            # This ensures that the code checks keys in the data while considering aliases.
+            flattened = []
+            for subarg in defields(arg.type):
+                if subarg.alias:
+                    aliases = get_aliased_fields(subarg)
+                    flattened.append(f'_exists_by_aliases({arg.datavar}, [{",".join(aliases)}])')
+                else:
+                    flattened.append(f'"{subarg.name}" in {arg.datavar}')
+            exists = " and ".join(flattened)
         else:
-            exists = f'"{arg.conv_name()}" in {arg.datavar}'
+            if arg.alias:
+                aliases = get_aliased_fields(arg)
+                exists = f'_exists_by_aliases({arg.datavar}, [{",".join(aliases)}])'
+            else:
+                exists = f'"{arg.conv_name()}" in {arg.datavar}'
+
         if has_default(arg):
             return f'({code}) if {exists} else serde_scope.defaults["{arg.name}"]'
         elif has_default_factory(arg):
