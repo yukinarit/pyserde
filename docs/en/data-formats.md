@@ -16,7 +16,7 @@ serde.yaml.to_yaml(foo, sort_key=True)
 >>> from serde import to_dict, from_dict
 
 >>> to_dict(Foo(i=10, s='foo', f=100.0, b=True))
-from_dict(Foo, {"i": 10, "s": "foo", "f": 100.0, "b": True})
+{"i": 10, "s": "foo", "f": 100.0, "b": True}
 
 >>> from_dict(Foo, {"i": 10, "s": "foo", "f": 100.0, "b": True})
 Foo(i=10, s='foo', f=100.0, b=True)
