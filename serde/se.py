@@ -381,8 +381,9 @@ def to_obj(
         elif is_bearable(o, dict):
             return {k: thisfunc(v) for k, v in o.items()}
         elif is_str_serializable_instance(o) or is_datetime_instance(o):
+            se_cls = o.__class__ if not c or c is Any else c
             return CACHE.serialize(
-                c or o.__class__,
+                se_cls,
                 o,
                 reuse_instances=reuse_instances,
                 convert_sets=convert_sets,
