@@ -184,3 +184,12 @@ def test_coerce() -> None:
     assert p3.s.s == "100"
     assert p3.f.f == 1000.0
     assert p3.b.b
+
+    @serde.serde(type_check=serde.coerce)
+    class InnerTuple:
+        # Note: `foo` needs to be longer than 1 char, to properly test
+        # quote escaping
+        foo: tuple[float, float]
+
+    f = InnerTuple(foo=(1, 2))
+    assert f.foo == (1.0, 2.0)

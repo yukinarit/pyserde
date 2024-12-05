@@ -60,8 +60,8 @@ def test_render_tuple() -> None:
         pass
 
     rendered = Renderer("foo").render(DeField(tuple[str, int, list[int], Foo], "d", datavar="data"))
-    rendered_str = 'coerce_object("None", "data["d"][0]", str, data["d"][0])'
-    rendered_int = 'coerce_object("None", "data["d"][1]", int, data["d"][1])'
+    rendered_str = 'coerce_object("None", "data[\\"d\\"][0]", str, data["d"][0])'
+    rendered_int = 'coerce_object("None", "data[\\"d\\"][1]", int, data["d"][1])'
     rendered_lst = '[coerce_object("None", "v", int, v) for v in data["d"][2]]'
     rendered_foo = f"Foo.__serde__.funcs['foo'](data=data[\"d\"][3], {kwargs})"
     assert rendered == f"({rendered_str}, {rendered_int}, {rendered_lst}, {rendered_foo},)"
