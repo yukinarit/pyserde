@@ -956,7 +956,9 @@ class Renderer:
         if self.suppress_coerce and suppress_coerce:
             return dat
         else:
-            return f'coerce_object("{self.class_name}", "{arg.name}", {typ}, {dat})'
+            assert arg.name
+            escaped_arg_name = arg.name.replace('"', '\\"')
+            return f'coerce_object("{self.class_name}", "{escaped_arg_name}", {typ}, {dat})'
 
     def c_tor(self, arg: DeField[Any]) -> str:
         return f"{typename(arg.type)}({arg.data})"
