@@ -662,7 +662,6 @@ def test_skip_if_default(se, de):
 
 @pytest.mark.parametrize("se,de", format_msgpack)
 def test_inheritance(se, de):
-
     @serde.serde
     class Base:
         a: int
@@ -1113,3 +1112,23 @@ def test_init_var_with_field_attribute() -> None:
         a: int = serde.field(skip=True)
 
     assert serde.to_dict(Foo(10)) == {}
+
+
+def test_dict_str_any() -> None:
+    @serde.serde
+    class Foo:
+        a: dict[str, Any]
+
+    # Because the dict values are typed as Any, all values will be serialized as strings
+    date = datetime.datetime(2024, 12, 3, 16, 55, 20, 220662)
+    date_str = date.isoformat()
+
+    uuid_val = uuid.UUID("efb71d76-4337-4b27-a612-5b6f95b01d42")
+    uuid_str = str(uuid_val)
+
+    foo = Foo(a={"a": uuid_val, "b": date})
+    foo_se = {"a": {"a": uuid_str, "b": date_str}}
+    foo_de = Foo(a={"a": uuid_str, "b": date_str})
+
+    assert serde.to_dict(foo) == foo_se
+    assert serde.from_dict(Foo, foo_se) == foo_de
