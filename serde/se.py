@@ -923,7 +923,9 @@ class Renderer:
         if self.suppress_coerce:
             return var
         else:
-            return f'coerce_object("{self.class_name}", "{arg.name}", {typ}, {var})'
+            assert arg.name
+            escaped_arg_name = arg.name.replace('"', '\\"')
+            return f'coerce_object("{self.class_name}", "{escaped_arg_name}", {typ}, {var})'
 
     def string(self, arg: SeField[Any]) -> str:
         return f"str({arg.varname})"
