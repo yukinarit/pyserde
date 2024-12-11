@@ -295,7 +295,7 @@ pyserdeは<a href="https://peps.python.org/pep-0681/">PEP681 dataclass_transform
 <pre><code class="language-python">&gt;&gt;&gt; from serde import to_dict, from_dict
 
 &gt;&gt;&gt; to_dict(Foo(i=10, s='foo', f=100.0, b=True))
-from_dict(Foo, {"i": 10, "s": "foo", "f": 100.0, "b": True})
+{"i": 10, "s": "foo", "f": 100.0, "b": True}
 
 &gt;&gt;&gt; from_dict(Foo, {"i": 10, "s": "foo", "f": 100.0, "b": True})
 Foo(i=10, s='foo', f=100.0, b=True)
