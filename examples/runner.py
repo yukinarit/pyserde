@@ -53,6 +53,7 @@ def run_all() -> None:
     import type_numpy
     import type_pathlib
     import type_uuid
+    import type_alias_pep695
     import union
     import union_tagging
     import union_directly
@@ -88,6 +89,7 @@ def run_all() -> None:
     run(union_tagging)
     run(union_directly)
     run(generics)
+    run(type_alias_pep695)
     run(generics_pep695)
     run(generics_nested)
     run(nested)
