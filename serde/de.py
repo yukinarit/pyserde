@@ -52,6 +52,7 @@ from .compat import (
     is_tuple,
     is_union,
     is_variable_tuple,
+    is_pep695_type_alias,
     iter_literals,
     iter_types,
     iter_unions,
@@ -772,6 +773,8 @@ class Renderer:
             res = "None"
         elif is_any(arg.type) or is_ellipsis(arg.type):
             res = arg.data
+        elif is_pep695_type_alias(arg.type):
+            res = self.render(DeField(name=arg.name, type=arg.type.__value__, datavar=arg.datavar))
         elif is_primitive(arg.type):
             # For subclasses for primitives e.g. class FooStr(str), coercing is always enabled
             res = self.primitive(arg, not is_primitive_subclass(arg.type))

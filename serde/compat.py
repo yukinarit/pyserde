@@ -20,7 +20,7 @@ from dataclasses import is_dataclass
 from typing import TypeVar, Generic, Any, ClassVar, Optional, NewType, Union, Hashable, Callable
 
 import typing_inspect
-from typing_extensions import TypeGuard, ParamSpec
+from typing_extensions import TypeGuard, ParamSpec, TypeAliasType
 
 from .sqlalchemy import is_sqlalchemy_inspectable
 
@@ -351,6 +351,8 @@ def iter_types(cls: type[Any]) -> list[type[Any]]:
             if args and len(args) >= 2:
                 recursive(args[0])
                 recursive(args[1])
+        elif is_pep695_type_alias(cls):
+            recursive(cls.__value__)
         else:
             lst.add(cls)
 
@@ -373,6 +375,8 @@ def iter_unions(cls: TypeLike) -> list[TypeLike]:
             lst.append(cls)
             for arg in type_args(cls):
                 recursive(arg)
+        elif is_pep695_type_alias(cls):
+            recursive(cls.__value__)
         if is_dataclass(cls):
             stack.append(cls)
             for f in dataclass_fields(cls):
@@ -862,6 +866,13 @@ def is_datetime_instance(obj: Any) -> bool:
 
 def is_ellipsis(typ: Any) -> bool:
     return typ is Ellipsis
+
+
+def is_pep695_type_alias(typ: Any) -> bool:
+    """
+    Test if the type is of PEP695 type alias.
+    """
+    return isinstance(typ, TypeAliasType)
 
 
 @cache
