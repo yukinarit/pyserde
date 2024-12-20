@@ -3,6 +3,5 @@ import sys
 
 collect_ignore = ["setup.py"]
 
-if sys.version_info[:2] == (3, 6):
-    # skip these tests for python 3.6 because it does not support PEP 563
-    collect_ignore.append("tests/test_lazy_type_evaluation.py")
+if sys.version_info[:2] < (3, 12):
+    collect_ignore.append("tests/test_type_alias.py")

@@ -46,6 +46,7 @@ from .compat import (
     is_tuple,
     is_union,
     is_variable_tuple,
+    is_pep695_type_alias,
     iter_types,
     iter_unions,
     type_args,
@@ -804,6 +805,12 @@ class Renderer:
         elif is_class_var(arg.type):
             arg.type = type_args(arg.type)[0]
             res = self.render(arg)
+        elif is_pep695_type_alias(arg.type):
+            res = self.render(
+                SeField(
+                    name=arg.name, type=arg.type.__value__, parent=SeField(None.__class__, "obj")
+                )
+            )
         else:
             res = f"raise_unsupported_type({arg.varname})"
 
