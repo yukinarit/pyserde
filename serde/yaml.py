@@ -67,7 +67,7 @@ def from_yaml(
 
 def from_yaml(c: Any, s: str, de: type[Deserializer[str]] = YamlDeserializer, **opts: Any) -> Any:
     """
-    `c` is a class obejct and `s` is YAML string. If you supply keyword arguments other than `de`,
+    `c` is a class object and `s` is YAML string. If you supply keyword arguments other than `de`,
     they will be passed in `yaml.safe_load` function.
 
     If you want to use the other yaml package, you can subclass `YamlDeserializer` and implement
