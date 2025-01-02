@@ -84,7 +84,7 @@ def from_toml(c: Any, s: str, de: type[Deserializer[str]] = TomlDeserializer, **
     """
     Deserialize from TOML into the object.
 
-    `c` is a class obejct and `s` is TOML string. If you supply keyword arguments other than `de`,
+    `c` is a class object and `s` is TOML string. If you supply keyword arguments other than `de`,
     they will be passed in `toml.loads` function.
 
     If you want to use the other toml package, you can subclass `TomlDeserializer` and implement

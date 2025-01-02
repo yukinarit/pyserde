@@ -116,7 +116,7 @@ def from_msgpack(
     """
     Deserialize from MsgPack into the object.
 
-    `c` is a class obejct and `s` is MsgPack binary. If `ext_dict` option is specified,
+    `c` is a class object and `s` is MsgPack binary. If `ext_dict` option is specified,
     `c` is ignored and type is inferred from `msgpack.ExtType` If you supply other keyword
     arguments, they will be passed in `msgpack.unpackb` function.
 
