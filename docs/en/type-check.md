@@ -58,7 +58,7 @@ serde.compat.SerdeError: Method __main__.Foo.__init__() parameter s=10 violates 
 Type coercing automatically converts a value into the declared type during (de)serialization. If the value is incompatible e.g. value is "foo" and type is int, pyserde raises an `SerdeError`.
 
 ```python
-@serde(type_check=Coerce)
+@serde(type_check=coerce)
 class Foo
     s: str
 
