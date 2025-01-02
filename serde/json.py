@@ -100,7 +100,7 @@ def from_json(
     Deserialize from JSON into the object. [orjson](https://github.com/ijl/orjson) will be used
     if installed.
 
-    `c` is a class obejct and `s` is JSON bytes or str. If you supply other keyword arguments,
+    `c` is a class object and `s` is JSON bytes or str. If you supply other keyword arguments,
     they will be passed in `loads` function.
 
     If you want to use another json package, you can subclass `JsonDeserializer` and implement
