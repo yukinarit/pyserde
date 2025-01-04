@@ -62,7 +62,7 @@ serde.compat.SerdeError: Method __main__.Foo.__init__() parameter s=10 violates 
 型強制 `coerce` は、（デ）シリアライズ中に値を宣言された型に自動的に変換します。
 
 ```python
-@serde(type_check=Coerce)
+@serde(type_check=coerce)
 class Foo:
     s: str
 
