@@ -58,7 +58,7 @@ numpy = [
   { version = ">1.22.0,<2.0.0", markers = "python_version ~= '3.12'" },
   { version = ">1.22.0,<2.0.0", markers = "python_version ~= '3.13'" },
 ]
-mypy = "==1.14.0"
+mypy = "==1.14.1"
 pytest = "*"
 pytest-cov = "*"
 pytest-watch = "*"
