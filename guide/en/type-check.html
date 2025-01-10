@@ -201,7 +201,7 @@ f.s = 100
 </blockquote>
 <h2 id="coerce"><a class="header" href="#coerce"><code>coerce</code></a></h2>
 <p>Type coercing automatically converts a value into the declared type during (de)serialization. If the value is incompatible e.g. value is "foo" and type is int, pyserde raises an <code>SerdeError</code>.</p>
-<pre><code class="language-python">@serde(type_check=Coerce)
+<pre><code class="language-python">@serde(type_check=coerce)
 class Foo
     s: str
 

@@ -204,7 +204,7 @@ f.s = 100
 </blockquote>
 <h2 id="coerce"><a class="header" href="#coerce"><code>coerce</code></a></h2>
 <p>型強制 <code>coerce</code> は、（デ）シリアライズ中に値を宣言された型に自動的に変換します。</p>
-<pre><code class="language-python">@serde(type_check=Coerce)
+<pre><code class="language-python">@serde(type_check=coerce)
 class Foo:
     s: str
 
