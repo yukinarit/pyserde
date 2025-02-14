@@ -42,7 +42,7 @@ def test_render_primitives() -> None:
     rendered = Renderer("foo").render(DeField(int, "int_field", datavar="data", case="camelcase"))
     assert rendered == 'coerce_object("None", "int_field", int, data["intField"])'
 
-    rendered = Renderer("foo").render(DeField(int, "i", datavar="data", index=1, iterbased=True))
+    rendered = Renderer("foo").render(DeField(int, "i", datavar="data", index=1, named=True))
     assert rendered == 'coerce_object("None", "i", int, data[1])'
 
 
@@ -66,7 +66,7 @@ def test_render_tuple() -> None:
     rendered_foo = f"Foo.__serde__.funcs['foo'](data=data[\"d\"][3], {kwargs})"
     assert rendered == f"({rendered_str}, {rendered_int}, {rendered_lst}, {rendered_foo},)"
 
-    field = DeField(tuple[str, int, list[int], Foo], "d", datavar="data", index=0, iterbased=True)
+    field = DeField(tuple[str, int, list[int], Foo], "d", datavar="data", index=0, named=True)
     rendered = Renderer("foo").render(field)
     rendered_str = 'coerce_object("None", "data[0][0]", str, data[0][0])'
     rendered_int = 'coerce_object("None", "data[0][1]", int, data[0][1])'

@@ -57,7 +57,7 @@ from .core import (
     CACHE,
     SERDE_SCOPE,
     TO_DICT,
-    TO_ITER,
+    TO_TUPLE,
     UNION_SE_PREFIX,
     DefaultTagging,
     Field,
@@ -270,7 +270,7 @@ def serialize(
 
         add_func(
             scope,
-            TO_ITER,
+            TO_TUPLE,
             render_to_tuple(cls, serializer, type_check, serialize_class_var, class_serializer),
             g,
         )
@@ -340,7 +340,7 @@ def to_obj(
 ) -> Any:
     def serializable_to_obj(object: Any) -> Any:
         serde_scope: Scope = getattr(object, SERDE_SCOPE)
-        func_name = TO_DICT if named else TO_ITER
+        func_name = TO_DICT if named else TO_TUPLE
         return serde_scope.funcs[func_name](
             object,
             reuse_instances=reuse_instances,
@@ -635,7 +635,7 @@ def render_to_tuple(
     class_serializer: Optional[ClassSerializer] = None,
 ) -> str:
     renderer = Renderer(
-        TO_ITER,
+        TO_TUPLE,
         legacy_class_serializer,
         suppress_coerce=(not type_check.is_coerce()),
         serialize_class_var=serialize_class_var,
@@ -643,7 +643,7 @@ def render_to_tuple(
         class_name=typename(cls),
     )
     return jinja2_env.get_template("iter").render(
-        func=TO_ITER,
+        func=TO_TUPLE,
         serde_scope=getattr(cls, SERDE_SCOPE),
         fields=sefields(cls, serialize_class_var),
         type_check=type_check,
