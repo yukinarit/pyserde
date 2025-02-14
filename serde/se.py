@@ -202,8 +202,6 @@ def serialize(
             serde_beartype = beartype(conf=BeartypeConf(violation_type=SerdeError))
             serde_beartype(cls)
 
-        g: dict[str, Any] = {}
-
         # Create a scope storage used by serde.
         # Each class should get own scope. Child classes can not share scope with parent class.
         # That's why we need the "scope.cls is not cls" check.
@@ -221,22 +219,24 @@ def serialize(
         )
 
         # Set some globals for all generated functions
-        g["cls"] = cls
-        g["copy"] = copy
-        g["serde_scope"] = scope
-        g["SerdeError"] = SerdeError
-        g["raise_unsupported_type"] = raise_unsupported_type
-        g["enum_value"] = enum_value
-        g["is_dataclass"] = is_dataclass
-        g["typename"] = typename  # used in union functions
-        g["is_instance"] = is_instance  # used in union functions
-        g["to_obj"] = to_obj
-        g["typing"] = typing
-        g["Literal"] = Literal
-        g["TypeCheck"] = TypeCheck
-        g["disabled"] = disabled
-        g["coerce_object"] = coerce_object
-        g["class_serializers"] = class_serializers
+        g: dict[str, Any] = {
+            "class_serializers": class_serializers,
+            "cls": cls,
+            "coerce_object": coerce_object,
+            "copy": copy,
+            "disabled": disabled,
+            "enum_value": enum_value,
+            "is_dataclass": is_dataclass,
+            "is_instance": is_instance,
+            "Literal": Literal,
+            "raise_unsupported_type": raise_unsupported_type,
+            "SerdeError": SerdeError,
+            "serde_scope": scope,
+            "to_obj": to_obj,
+            "typename": typename,
+            "typing": typing,
+            "TypeCheck": TypeCheck,
+        }
         if serializer:
             g["serde_legacy_custom_class_serializer"] = functools.partial(
                 serde_legacy_custom_class_serializer, custom=serializer

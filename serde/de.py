@@ -231,8 +231,6 @@ def deserialize(
             serde_beartype = beartype(conf=BeartypeConf(violation_type=SerdeError))
             serde_beartype(cls)
 
-        g: dict[str, Any] = {}
-
         # Create a scope storage used by serde.
         # Each class should get own scope. Child classes can not share scope with parent class.
         # That's why we need the "scope.cls is not cls" check.
@@ -248,27 +246,29 @@ def deserialize(
         )
 
         # Set some globals for all generated functions
-        g["cls"] = cls
-        g["serde_scope"] = scope
-        g["SerdeError"] = SerdeError
-        g["UserError"] = UserError
-        g["raise_unsupported_type"] = raise_unsupported_type
-        g["typename"] = typename
-        g["ensure"] = ensure
-        g["typing"] = typing
-        g["collections"] = collections
-        g["Literal"] = Literal
-        g["from_obj"] = from_obj
-        g["get_generic_arg"] = get_generic_arg
-        g["is_instance"] = is_instance
-        g["TypeCheck"] = TypeCheck
-        g["disabled"] = disabled
-        g["coerce_object"] = coerce_object
-        g["_exists_by_aliases"] = _exists_by_aliases
-        g["_get_by_aliases"] = _get_by_aliases
-        g["class_deserializers"] = class_deserializers
-        g["BeartypeCallHintParamViolation"] = BeartypeCallHintParamViolation
-        g["is_bearable"] = is_bearable
+        g: dict[str, Any] = {
+            "BeartypeCallHintParamViolation": BeartypeCallHintParamViolation,
+            "class_deserializers": class_deserializers,
+            "cls": cls,
+            "coerce_object": coerce_object,
+            "collections": collections,
+            "disabled": disabled,
+            "get_generic_arg": get_generic_arg,
+            "from_obj": from_obj,
+            "ensure": ensure,
+            "is_bearable": is_bearable,
+            "is_instance": is_instance,
+            "Literal": Literal,
+            "raise_unsupported_type": raise_unsupported_type,
+            "SerdeError": SerdeError,
+            "serde_scope": scope,
+            "TypeCheck": TypeCheck,
+            "typename": typename,
+            "typing": typing,
+            "UserError": UserError,
+            "_exists_by_aliases": _exists_by_aliases,
+            "_get_by_aliases": _get_by_aliases,
+        }
         if deserializer:
             g["serde_legacy_custom_class_deserializer"] = functools.partial(
                 serde_legacy_custom_class_deserializer, custom=deserializer
