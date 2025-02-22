@@ -63,7 +63,7 @@ from .core import (
     GLOBAL_CLASS_DESERIALIZER,
     ClassDeserializer,
     FROM_DICT,
-    FROM_TUPLE,
+    FROM_ITER,
     SERDE_SCOPE,
     CACHE,
     UNION_DE_PREFIX,
@@ -231,6 +231,8 @@ def deserialize(
             serde_beartype = beartype(conf=BeartypeConf(violation_type=SerdeError))
             serde_beartype(cls)
 
+        g: dict[str, Any] = {}
+
         # Create a scope storage used by serde.
         # Each class should get own scope. Child classes can not share scope with parent class.
         # That's why we need the "scope.cls is not cls" check.
@@ -246,29 +248,27 @@ def deserialize(
         )
 
         # Set some globals for all generated functions
-        g: dict[str, Any] = {
-            "BeartypeCallHintParamViolation": BeartypeCallHintParamViolation,
-            "class_deserializers": class_deserializers,
-            "cls": cls,
-            "coerce_object": coerce_object,
-            "collections": collections,
-            "disabled": disabled,
-            "get_generic_arg": get_generic_arg,
-            "from_obj": from_obj,
-            "ensure": ensure,
-            "is_bearable": is_bearable,
-            "is_instance": is_instance,
-            "Literal": Literal,
-            "raise_unsupported_type": raise_unsupported_type,
-            "SerdeError": SerdeError,
-            "serde_scope": scope,
-            "TypeCheck": TypeCheck,
-            "typename": typename,
-            "typing": typing,
-            "UserError": UserError,
-            "_exists_by_aliases": _exists_by_aliases,
-            "_get_by_aliases": _get_by_aliases,
-        }
+        g["cls"] = cls
+        g["serde_scope"] = scope
+        g["SerdeError"] = SerdeError
+        g["UserError"] = UserError
+        g["raise_unsupported_type"] = raise_unsupported_type
+        g["typename"] = typename
+        g["ensure"] = ensure
+        g["typing"] = typing
+        g["collections"] = collections
+        g["Literal"] = Literal
+        g["from_obj"] = from_obj
+        g["get_generic_arg"] = get_generic_arg
+        g["is_instance"] = is_instance
+        g["TypeCheck"] = TypeCheck
+        g["disabled"] = disabled
+        g["coerce_object"] = coerce_object
+        g["_exists_by_aliases"] = _exists_by_aliases
+        g["_get_by_aliases"] = _get_by_aliases
+        g["class_deserializers"] = class_deserializers
+        g["BeartypeCallHintParamViolation"] = BeartypeCallHintParamViolation
+        g["is_bearable"] = is_bearable
         if deserializer:
             g["serde_legacy_custom_class_deserializer"] = functools.partial(
                 serde_legacy_custom_class_deserializer, custom=deserializer
@@ -323,8 +323,8 @@ def deserialize(
 
         add_func(
             scope,
-            FROM_TUPLE,
-            render_from_tuple(cls, deserializer, type_check, class_deserializer=class_deserializer),
+            FROM_ITER,
+            render_from_iter(cls, deserializer, type_check, class_deserializer=class_deserializer),
             g,
         )
         add_func(
@@ -419,7 +419,7 @@ def from_obj(c: type[T], o: Any, named: bool, reuse_instances: Optional[bool]) -
 
     def deserializable_to_obj(cls: type[T]) -> T:
         serde_scope: Scope = getattr(cls, SERDE_SCOPE)
-        func_name = FROM_DICT if named else FROM_TUPLE
+        func_name = FROM_DICT if named else FROM_ITER
         res = serde_scope.funcs[func_name](
             cls, maybe_generic=maybe_generic, data=o, reuse_instances=reuse_instances
         )
@@ -583,8 +583,8 @@ class DeField(Field[T]):
     index: int = 0
     """ Field index """
 
-    named: bool = False
-    """ True: deserialize to dict, False: deserialize to tuple """
+    iterbased: bool = False
+    """ Iterater based deserializer or not """
 
     def __getitem__(self, n: int) -> Union[DeField[Any], InnerField[Any]]:
         """
@@ -619,7 +619,7 @@ class DeField(Field[T]):
                 self.name,
                 datavar=self.datavar,
                 index=self.index,
-                named=self.named,
+                iterbased=self.iterbased,
                 **opts,
             )
 
@@ -654,7 +654,7 @@ class DeField(Field[T]):
             * data property returns "data["field_name"]".
         """
 
-        if self.named:
+        if self.iterbased:
             return f"{self.datavar}[{self.index}]"
         elif is_union(self.type) and type(None) in get_args(self.type):
             return f'{self.datavar}.get("{self.conv_name()}")'
@@ -666,7 +666,7 @@ class DeField(Field[T]):
         self.datavar = d
 
     def data_or(self) -> str:
-        if self.named:
+        if self.iterbased:
             return self.data
         else:
             return f'{self.datavar}.get("{self.conv_name()}")'
@@ -784,7 +784,7 @@ class Renderer:
             index = find_generic_arg(self.cls, arg.type)
             res = (
                 f"from_obj(get_generic_arg(maybe_generic, maybe_generic_type_vars, "
-                f"variable_type_args, {index}), {arg.data}, named={not arg.named}, "
+                f"variable_type_args, {index}), {arg.data}, named={not arg.iterbased}, "
                 "reuse_instances=reuse_instances)"
             )
         elif is_literal(arg.type):
@@ -837,7 +837,7 @@ class Renderer:
             # Because the field is flattened
             # e.g. "data" will be used as variable name.
             assert arg.datavar
-            if arg.named:
+            if arg.iterbased:
                 var = f"{arg.datavar}[{arg.index}:]"
             else:
                 var = arg.datavar
@@ -861,7 +861,7 @@ class Renderer:
         Render rvalue for Optional.
         """
         inner = arg[0]
-        if arg.named:
+        if arg.iterbased:
             exists = f"{arg.data} is not None"
         elif arg.flatten:
             # Check nullabilities of all nested fields.
@@ -1032,7 +1032,7 @@ def to_arg(f: DeField[T], index: int, rename_all: Optional[str] = None) -> DeFie
 
 def to_iter_arg(f: DeField[T], *args: Any, **kwargs: Any) -> DeField[T]:
     f = to_arg(f, *args, **kwargs)
-    f.named = True
+    f.iterbased = True
     return f
 
 
@@ -1151,14 +1151,14 @@ def {{func}}(cls=cls, maybe_generic=None, maybe_generic_type_vars=None, data=Non
 )
 
 
-def render_from_tuple(
+def render_from_iter(
     cls: type[Any],
     legacy_class_deserializer: Optional[DeserializeFunc] = None,
     type_check: TypeCheck = strict,
     class_deserializer: Optional[ClassDeserializer] = None,
 ) -> str:
     renderer = Renderer(
-        FROM_TUPLE,
+        FROM_ITER,
         cls=cls,
         legacy_class_deserializer=legacy_class_deserializer,
         suppress_coerce=(not type_check.is_coerce()),
@@ -1167,7 +1167,7 @@ def render_from_tuple(
     )
     fields = list(filter(renderable, defields(cls)))
     res = jinja2_env.get_template("iter").render(
-        func=FROM_TUPLE,
+        func=FROM_ITER,
         serde_scope=getattr(cls, SERDE_SCOPE),
         fields=fields,
         cls_type_vars=get_type_var_names(cls),

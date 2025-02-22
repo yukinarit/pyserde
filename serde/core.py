@@ -70,9 +70,9 @@ logger = logging.getLogger("serde")
 SERDE_SCOPE = "__serde__"
 
 # main function keys
-FROM_TUPLE = "from_tuple"
+FROM_ITER = "from_iter"
 FROM_DICT = "from_dict"
-TO_TUPLE = "to_tuple"
+TO_ITER = "to_iter"
 TO_DICT = "to_dict"
 TYPE_CHECK = "typecheck"
 
@@ -687,7 +687,7 @@ class Field(Generic[T]):
         return conv(self, case or self.case)
 
     def supports_default(self) -> bool:
-        return not getattr(self, "named", False) and (
+        return not getattr(self, "iterbased", False) and (
             has_default(self) or has_default_factory(self)
         )
 
