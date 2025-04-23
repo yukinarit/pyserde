@@ -92,7 +92,6 @@ def test_numpy_simple(se, de, opt):
 
     @serde.serde(**opt)
     class NumpyJaxtyping:
-        float_: jaxtyping.Float[np.ndarray, "2 2"]  # noqa: F722
         float16: jaxtyping.Float16[np.ndarray, "2 2"]  # noqa: F722
         float32: jaxtyping.Float32[np.ndarray, "2 2"]  # noqa: F722
         float64: jaxtyping.Float64[np.ndarray, "2 2"]  # noqa: F722
@@ -111,8 +110,7 @@ def test_numpy_simple(se, de, opt):
 
         def __eq__(self, other):
             return (
-                (self.float_ == other.float_).all()
-                and (self.float16 == other.float16).all()
+                (self.float16 == other.float16).all()
                 and (self.float32 == other.float32).all()
                 and (self.float64 == other.float64).all()
                 and (self.inexact == other.inexact).all()
@@ -130,11 +128,10 @@ def test_numpy_simple(se, de, opt):
             )
 
     jaxtyping_test = NumpyJaxtyping(
-        float_=np.array([[1, 2], [3, 4]], dtype=np.float_),
         float16=np.array([[5, 6], [7, 8]], dtype=np.float16),
         float32=np.array([[9, 10], [11, 12]], dtype=np.float32),
         float64=np.array([[13, 14], [15, 16]], dtype=np.float64),
-        inexact=np.array([[17, 18], [19, 20]], dtype=np.float_),
+        inexact=np.array([[17, 18], [19, 20]], dtype=np.float64),
         int_=np.array([[21, 22], [23, 24]], dtype=np.int_),
         int8=np.array([[25, 26], [27, 28]], dtype=np.int8),
         int16=np.array([[29, 30], [31, 32]], dtype=np.int16),
