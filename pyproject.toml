@@ -26,7 +26,7 @@ classifiers=[
 [tool.poetry.dependencies]
 python = "^3.9.0"
 typing_inspect = ">=0.4.0"
-typing_extensions = { version = ">=4.1.0" }
+typing_extensions = { version = ">=4.1.0,<4.13.0" }
 casefy = "*"
 jinja2 = "*"
 msgpack = { version = "*", markers = "extra == 'msgpack' or extra == 'all'", optional = true }
@@ -40,7 +40,7 @@ numpy = [
   { version = ">1.22.0,<2.0.0", markers = "python_version ~= '3.12' and (extra == 'numpy' or extra == 'all')", optional = true },
   { version = ">1.22.0,<2.0.0", markers = "python_version ~= '3.13' and (extra == 'numpy' or extra == 'all')", optional = true },
 ]
-jaxtyping = { version = "*", markers = "extra == 'jaxtyping' or extra == 'all'", optional = true }
+jaxtyping = { version = "<0.3.0", markers = "extra == 'jaxtyping' or extra == 'all'", optional = true }
 orjson = { version = "*", markers = "extra == 'orjson' or extra == 'all'", optional = true }
 plum-dispatch = ">=2.3"
 beartype = ">=0.18.4"
@@ -72,7 +72,7 @@ types-PyYAML = "^6.0.9"
 msgpack-types = "^0.5"
 envclasses = "^0.3.1"
 jedi = "*"
-jaxtyping = "*"
+jaxtyping = "<0.3.0"
 
 [tool.poetry.extras]
 msgpack = ["msgpack"]
