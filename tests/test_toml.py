@@ -4,7 +4,7 @@ from typing import Optional
 import pytest
 
 
-def toml_basics() -> None:
+def test_toml_basics() -> None:
     @serde
     class Foo:
         v: Optional[int]
@@ -17,8 +17,16 @@ def toml_basics() -> None:
     class Bar:
         v: set[int]
 
+    toml_literal = """\
+v = [
+    1,
+    2,
+    3,
+]
+"""
     b = Bar({1, 2, 3})
-    to_toml(b)
+    assert toml_literal == to_toml(b)
+    assert b == from_toml(Bar, toml_literal)
 
 
 def test_skip_none() -> None:
