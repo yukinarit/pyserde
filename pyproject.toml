@@ -163,6 +163,7 @@ select = [
   "F", # pyflakes
   "C", # flake8-comprehensions
   "B", # flake8-bugbear
+  "NPY201", # numpy2-deprecation
 ]
 ignore = ["B904"]
 line-length = 100
