@@ -76,7 +76,14 @@ def to_json(
     your own logic.
     """
     return se.serialize(
-        to_dict(obj, c=cls, reuse_instances=reuse_instances, convert_sets=convert_sets), **opts
+        to_dict(
+            obj,
+            c=cls,
+            reuse_instances=reuse_instances,
+            convert_sets=convert_sets,
+            skip_none=skip_none,
+        ),
+        **opts,
     )
 
 
