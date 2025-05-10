@@ -11,7 +11,7 @@ class Foo:
     in_: numpy.int_
     inc: numpy.intc
     ui: numpy.uint
-    fl: numpy.float_
+    fl: numpy.float64
     st: numpy.str_
     nd: numpy.typing.NDArray[numpy.int_]
     ha: numpy.half
@@ -25,7 +25,7 @@ def main() -> None:
         in_=numpy.int_(42),
         inc=numpy.intc(42),
         ui=numpy.uint(42),
-        fl=numpy.float_(3.14),
+        fl=numpy.float64(3.14),
         st=numpy.str_("numpy str"),
         nd=numpy.array([1, 2, 3]),
         ha=numpy.half(3.14),
