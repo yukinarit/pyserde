@@ -25,17 +25,18 @@
         <link rel="stylesheet" href="fonts/fonts.css">
 
         <!-- Highlight.js Stylesheets -->
-        <link rel="stylesheet" href="highlight.css">
-        <link rel="stylesheet" href="tomorrow-night.css">
-        <link rel="stylesheet" href="ayu-highlight.css">
+        <link rel="stylesheet" id="highlight-css" href="highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="ayu-highlight.css">
 
         <!-- Custom theme stylesheets -->
 
 
-        <!-- Provide site root to javascript -->
+        <!-- Provide site root and default themes to javascript -->
         <script>
-            var path_to_root = "";
-            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+            const path_to_root = "";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc.js"></script>
@@ -45,8 +46,8 @@
         <!-- Work around some values being stored in localStorage wrapped in quotes -->
         <script>
             try {
-                var theme = localStorage.getItem('mdbook-theme');
-                var sidebar = localStorage.getItem('mdbook-sidebar');
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
 
                 if (theme.startsWith('"') && theme.endsWith('"')) {
                     localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
@@ -60,7 +61,8 @@
 
         <!-- Set the theme before any content is loaded, prevents flash -->
         <script>
-            var theme;
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
             try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
             if (theme === null || theme === undefined) { theme = default_theme; }
             const html = document.documentElement;
@@ -73,8 +75,8 @@
 
         <!-- Hide / unhide sidebar before it is displayed -->
         <script>
-            var sidebar = null;
-            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
             if (document.body.clientWidth >= 1080) {
                 try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
                 sidebar = sidebar || 'visible';
@@ -110,6 +112,7 @@
                             <i class="fa fa-paint-brush"></i>
                         </button>
                         <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
@@ -378,37 +381,37 @@ Foo(i=10, s='foo', f=100.0, b=True)
 <div style="break-before: page; page-break-before: always;"></div><h1 id="types"><a class="header" href="#types">Types</a></h1>
 <p>以下はサポートされている型のリストです。各型の簡単な例は脚注にあります。</p>
 <ul>
-<li>プリミティブ（<code>int</code>, <code>float</code>, <code>str</code>, <code>bool</code>）<sup class="footnote-reference"><a href="#1">1</a></sup></li>
+<li>プリミティブ（<code>int</code>, <code>float</code>, <code>str</code>, <code>bool</code>）<sup class="footnote-reference" id="fr-1-1"><a href="#footnote-1">1</a></sup></li>
 <li>コンテナ
 <ul>
-<li><code>list</code>, <code>set</code>, <code>tuple</code>, <code>dict</code> <sup class="footnote-reference"><a href="#2">2</a></sup></li>
-<li><a href="https://docs.python.org/3/library/stdtypes.html#frozenset"><code>frozenset</code></a> <sup class="footnote-reference"><a href="#3">3</a></sup></li>
-<li><a href="https://docs.python.org/3/library/collections.html#collections.defaultdict"><code>defaultdict</code></a> <sup class="footnote-reference"><a href="#4">4</a></sup></li>
+<li><code>list</code>, <code>set</code>, <code>tuple</code>, <code>dict</code> <sup class="footnote-reference" id="fr-2-1"><a href="#footnote-2">2</a></sup></li>
+<li><a href="https://docs.python.org/3/library/stdtypes.html#frozenset"><code>frozenset</code></a> <sup class="footnote-reference" id="fr-3-1"><a href="#footnote-3">3</a></sup></li>
+<li><a href="https://docs.python.org/3/library/collections.html#collections.defaultdict"><code>defaultdict</code></a> <sup class="footnote-reference" id="fr-4-1"><a href="#footnote-4">4</a></sup></li>
 </ul>
 </li>
-<li><a href="https://docs.python.org/3/library/typing.html#typing.Optional"><code>typing.Optional</code></a><sup class="footnote-reference"><a href="#5">5</a></sup></li>
-<li><a href="https://docs.python.org/3/library/typing.html#typing.Union"><code>typing.Union</code></a> <sup class="footnote-reference"><a href="#6">6</a></sup> <sup class="footnote-reference"><a href="#7">7</a></sup> <sup class="footnote-reference"><a href="#8">8</a></sup></li>
-<li><a href="https://docs.python.org/3/library/dataclasses.html"><code>@dataclass</code></a> を用いたユーザ定義クラス <sup class="footnote-reference"><a href="#9">9</a></sup> <sup class="footnote-reference"><a href="#10">10</a></sup></li>
-<li><a href="https://docs.python.org/3/library/typing.html#newtype"><code>typing.NewType</code></a> を用いたプリミティブ型 <sup class="footnote-reference"><a href="#11">11</a></sup></li>
-<li><a href="https://docs.python.org/3/library/typing.html#the-any-type"><code>typing.Any</code></a> <sup class="footnote-reference"><a href="#12">12</a></sup></li>
-<li><a href="https://docs.python.org/3/library/typing.html#typing.Literal"><code>typing.Literal</code></a> <sup class="footnote-reference"><a href="#13">13</a></sup></li>
-<li><a href="https://docs.python.org/3/library/typing.html#user-defined-generic-types"><code>typing.Generic</code></a> <sup class="footnote-reference"><a href="#14">14</a></sup></li>
-<li><a href="https://docs.python.org/3/library/typing.html#typing.ClassVar"><code>typing.ClassVar</code></a> <sup class="footnote-reference"><a href="#15">15</a></sup></li>
-<li><a href="https://docs.python.org/3/library/dataclasses.html#init-only-variables"><code>typing.InitVar</code></a> <sup class="footnote-reference"><a href="#16">16</a></sup></li>
-<li><a href="https://docs.python.org/3/library/enum.html#enum.Enum"><code>Enum</code></a> および <a href="https://docs.python.org/3/library/enum.html#enum.IntEnum"><code>IntEnum</code></a> <sup class="footnote-reference"><a href="#17">17</a></sup></li>
+<li><a href="https://docs.python.org/3/library/typing.html#typing.Optional"><code>typing.Optional</code></a><sup class="footnote-reference" id="fr-5-1"><a href="#footnote-5">5</a></sup></li>
+<li><a href="https://docs.python.org/3/library/typing.html#typing.Union"><code>typing.Union</code></a> <sup class="footnote-reference" id="fr-6-1"><a href="#footnote-6">6</a></sup> <sup class="footnote-reference" id="fr-7-1"><a href="#footnote-7">7</a></sup> <sup class="footnote-reference" id="fr-8-1"><a href="#footnote-8">8</a></sup></li>
+<li><a href="https://docs.python.org/3/library/dataclasses.html"><code>@dataclass</code></a> を用いたユーザ定義クラス <sup class="footnote-reference" id="fr-9-1"><a href="#footnote-9">9</a></sup> <sup class="footnote-reference" id="fr-10-1"><a href="#footnote-10">10</a></sup></li>
+<li><a href="https://docs.python.org/3/library/typing.html#newtype"><code>typing.NewType</code></a> を用いたプリミティブ型 <sup class="footnote-reference" id="fr-11-1"><a href="#footnote-11">11</a></sup></li>
+<li><a href="https://docs.python.org/3/library/typing.html#the-any-type"><code>typing.Any</code></a> <sup class="footnote-reference" id="fr-12-1"><a href="#footnote-12">12</a></sup></li>
+<li><a href="https://docs.python.org/3/library/typing.html#typing.Literal"><code>typing.Literal</code></a> <sup class="footnote-reference" id="fr-13-1"><a href="#footnote-13">13</a></sup></li>
+<li><a href="https://docs.python.org/3/library/typing.html#user-defined-generic-types"><code>typing.Generic</code></a> <sup class="footnote-reference" id="fr-14-1"><a href="#footnote-14">14</a></sup></li>
+<li><a href="https://docs.python.org/3/library/typing.html#typing.ClassVar"><code>typing.ClassVar</code></a> <sup class="footnote-reference" id="fr-15-1"><a href="#footnote-15">15</a></sup></li>
+<li><a href="https://docs.python.org/3/library/dataclasses.html#init-only-variables"><code>typing.InitVar</code></a> <sup class="footnote-reference" id="fr-16-1"><a href="#footnote-16">16</a></sup></li>
+<li><a href="https://docs.python.org/3/library/enum.html#enum.Enum"><code>Enum</code></a> および <a href="https://docs.python.org/3/library/enum.html#enum.IntEnum"><code>IntEnum</code></a> <sup class="footnote-reference" id="fr-17-1"><a href="#footnote-17">17</a></sup></li>
 <li>標準ライブラリ
 <ul>
-<li><a href="https://docs.python.org/3/library/pathlib.html"><code>pathlib.Path</code></a> <sup class="footnote-reference"><a href="#18">18</a></sup></li>
-<li><a href="https://docs.python.org/3/library/decimal.html"><code>decimal.Decimal</code></a> <sup class="footnote-reference"><a href="#19">19</a></sup></li>
-<li><a href="https://docs.python.org/3/library/uuid.html"><code>uuid.UUID</code></a> <sup class="footnote-reference"><a href="#20">20</a></sup></li>
-<li><a href="https://docs.python.org/3/library/datetime.html#date-objects"><code>datetime.date</code></a>、<a href="https://docs.python.org/3/library/datetime.html#time-objects"><code>datetime.time</code></a>、<a href="https://docs.python.org/3/library/datetime.html#datetime-objects"><code>datetime.datetime</code></a> <sup class="footnote-reference"><a href="#21">21</a></sup></li>
-<li><a href="https://docs.python.org/3/library/ipaddress.html"><code>ipaddress</code></a> <sup class="footnote-reference"><a href="#22">22</a></sup></li>
+<li><a href="https://docs.python.org/3/library/pathlib.html"><code>pathlib.Path</code></a> <sup class="footnote-reference" id="fr-18-1"><a href="#footnote-18">18</a></sup></li>
+<li><a href="https://docs.python.org/3/library/decimal.html"><code>decimal.Decimal</code></a> <sup class="footnote-reference" id="fr-19-1"><a href="#footnote-19">19</a></sup></li>
+<li><a href="https://docs.python.org/3/library/uuid.html"><code>uuid.UUID</code></a> <sup class="footnote-reference" id="fr-20-1"><a href="#footnote-20">20</a></sup></li>
+<li><a href="https://docs.python.org/3/library/datetime.html#date-objects"><code>datetime.date</code></a>、<a href="https://docs.python.org/3/library/datetime.html#time-objects"><code>datetime.time</code></a>、<a href="https://docs.python.org/3/library/datetime.html#datetime-objects"><code>datetime.datetime</code></a> <sup class="footnote-reference" id="fr-21-1"><a href="#footnote-21">21</a></sup></li>
+<li><a href="https://docs.python.org/3/library/ipaddress.html"><code>ipaddress</code></a> <sup class="footnote-reference" id="fr-22-1"><a href="#footnote-22">22</a></sup></li>
 </ul>
 </li>
 <li>PyPIライブラリ
 <ul>
-<li><a href="https://github.com/numpy/numpy"><code>numpy</code></a> データ型 <sup class="footnote-reference"><a href="#23">23</a></sup></li>
-<li>宣言的データクラスマッピングを用いた <a href="https://github.com/sqlalchemy/sqlalchemy"><code>SQLAlchemy</code></a>（実験的）<sup class="footnote-reference"><a href="#24">24</a></sup></li>
+<li><a href="https://github.com/numpy/numpy"><code>numpy</code></a> データ型 <sup class="footnote-reference" id="fr-23-1"><a href="#footnote-23">23</a></sup></li>
+<li>宣言的データクラスマッピングを用いた <a href="https://github.com/sqlalchemy/sqlalchemy"><code>SQLAlchemy</code></a>（実験的）<sup class="footnote-reference" id="fr-24-1"><a href="#footnote-24">24</a></sup></li>
 </ul>
 </li>
 </ul>
@@ -477,79 +480,80 @@ NPFoo(i=1, j=2, f=3.0, g=4.0, h=False, u=array([1, 2]), v=array([3, 4]), w=array
 <p>標準ライブラリに現在サポートされていない型を使用する必要がある場合は、Githubでissueを作成してリクエストしてください。<br />
 なお、サードパーティのPythonパッケージの型については、numpyのような人気のあるパッケージの型を除き、pyserdeをできるだけシンプルに保つためにサポートする予定はありません。<br />
 カスタムクラスやフィールドシリアライザの使用を推奨します。</p>
-<div class="footnote-definition" id="1"><sup class="footnote-definition-label">1</sup>
-<p><a href="https://github.com/yukinarit/pyserde/blob/main/examples/simple.py">examples/simple.py</a> を参照</p>
-</div>
-<div class="footnote-definition" id="2"><sup class="footnote-definition-label">2</sup>
-<p><a href="https://github.com/yukinarit/pyserde/blob/main/examples/collection.py">examples/collection.py</a> を参照</p>
-</div>
-<div class="footnote-definition" id="3"><sup class="footnote-definition-label">3</sup>
-<p><a href="https://github.com/yukinarit/pyserde/blob/main/examples/frozen_set.py">examples/frozen_set.py</a> を参照</p>
-</div>
-<div class="footnote-definition" id="4"><sup class="footnote-definition-label">4</sup>
-<p><a href="https://github.com/yukinarit/pyserde/blob/main/examples/default_dict.py">examples/default_dict.py</a> を参照</p>
-</div>
-<div class="footnote-definition" id="5"><sup class="footnote-definition-label">5</sup>
-<p><a href="https://github.com/yukinarit/pyserde/blob/main/examples/union.py">examples/union.py</a> を参照</p>
-</div>
-<div class="footnote-definition" id="6"><sup class="footnote-definition-label">6</sup>
-<p><a href="https://github.com/yukinarit/pyserde/blob/main/examples/union.py">examples/union.py</a> を参照</p>
-</div>
-<div class="footnote-definition" id="7"><sup class="footnote-definition-label">7</sup>
-<p><a href="https://github.com/yukinarit/pyserde/blob/main/examples/union_operator.py">examples/union_operator.py</a> を参照</p>
-</div>
-<div class="footnote-definition" id="8"><sup class="footnote-definition-label">8</sup>
-<p><a href="https://github.com/yukinarit/pyserde/blob/main/examples/union_tagging.py">examples/union_tagging.py</a> を参照</p>
-</div>
-<div class="footnote-definition" id="9"><sup class="footnote-definition-label">9</sup>
-<p><a href="https://github.com/yukinarit/pyserde/blob/main/examples/simple.py">examples/simple.py</a> を参照</p>
-</div>
-<div class="footnote-definition" id="10"><sup class="footnote-definition-label">10</sup>
-<p><a href="https://github.com/yukinarit/pyserde/blob/main/examples/nested.py">examples/nested.py</a> を参照</p>
-</div>
-<div class="footnote-definition" id="11"><sup class="footnote-definition-label">11</sup>
-<p><a href="https://github.com/yukinarit/pyserde/blob/main/examples/newtype.py">examples/newtype.py</a> を参照</p>
-</div>
-<div class="footnote-definition" id="12"><sup class="footnote-definition-label">12</sup>
-<p><a href="https://github.com/yukinarit/pyserde/blob/main/examples/any.py">examples/any.py</a> を参照</p>
-</div>
-<div class="footnote-definition" id="13"><sup class="footnote-definition-label">13</sup>
-<p><a href="https://github.com/yukinarit/pyserde/blob/main/examples/literal.py">examples/literal.py</a> を参照</p>
-</div>
-<div class="footnote-definition" id="14"><sup class="footnote-definition-label">14</sup>
-<p><a href="https://github.com/yukinarit/pyserde/blob/main/examples/generics.py">examples/generics.py</a> を参照</p>
-</div>
-<div class="footnote-definition" id="15"><sup class="footnote-definition-label">15</sup>
-<p><a href="https://github.com/yukinarit/pyserde/blob/main/examples/class_var.py">examples/class_var.py</a> を参照</p>
-</div>
-<div class="footnote-definition" id="16"><sup class="footnote-definition-label">16</sup>
-<p><a href="https://github.com/yukinarit/pyserde/blob/main/examples/init_var.py">examples/init_var.py</a> を参照</p>
-</div>
-<div class="footnote-definition" id="17"><sup class="footnote-definition-label">17</sup>
-<p><a href="https://github.com/yukinarit/pyserde/blob/main/examples/enum34.py">examples/enum34.py</a> を参照</p>
-</div>
-<div class="footnote-definition" id="18"><sup class="footnote-definition-label">18</sup>
-<p><a href="https://github.com/yukinarit/pyserde/blob/main/examples/type_pathlib.py">examples/type_pathlib.py</a> を参照</p>
-</div>
-<div class="footnote-definition" id="19"><sup class="footnote-definition-label">19</sup>
-<p><a href="https://github.com/yukinarit/pyserde/blob/main/examples/type_decimal.py">examples/type_decimal.py</a> を参照</p>
-</div>
-<div class="footnote-definition" id="20"><sup class="footnote-definition-label">20</sup>
-<p><a href="https://github.com/yukinarit/pyserde/blob/main/examples/type_uuid.py">examples/type_uuid.py</a> を参照</p>
-</div>
-<div class="footnote-definition" id="21"><sup class="footnote-definition-label">21</sup>
-<p><a href="https://github.com/yukinarit/pyserde/blob/main/examples/type_datetime.py">examples/type_datetime.py</a> を参照</p>
-</div>
-<div class="footnote-definition" id="22"><sup class="footnote-definition-label">22</sup>
-<p><a href="https://github.com/yukinarit/pyserde/blob/main/examples/type_ipaddress.py">examples/type_ipaddress.py</a> を参照</p>
-</div>
-<div class="footnote-definition" id="23"><sup class="footnote-definition-label">23</sup>
-<p><a href="https://github.com/yukinarit/pyserde/blob/main/examples/type_numpy.py">examples/type_numpy.py</a> を参照</p>
-</div>
-<div class="footnote-definition" id="24"><sup class="footnote-definition-label">24</sup>
-<p><a href="https://github.com/yukinarit/pyserde/blob/main/examples/type_sqlalchemy.py">examples/type_sqlalchemy.py</a> を参照</p>
-</div>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="decorators"><a class="header" href="#decorators">Decorators</a></h1>
+<hr>
+<ol class="footnote-definition"><li id="footnote-1">
+<p><a href="https://github.com/yukinarit/pyserde/blob/main/examples/simple.py">examples/simple.py</a> を参照 <a href="#fr-1-1">↩</a></p>
+</li>
+<li id="footnote-2">
+<p><a href="https://github.com/yukinarit/pyserde/blob/main/examples/collection.py">examples/collection.py</a> を参照 <a href="#fr-2-1">↩</a></p>
+</li>
+<li id="footnote-3">
+<p><a href="https://github.com/yukinarit/pyserde/blob/main/examples/frozen_set.py">examples/frozen_set.py</a> を参照 <a href="#fr-3-1">↩</a></p>
+</li>
+<li id="footnote-4">
+<p><a href="https://github.com/yukinarit/pyserde/blob/main/examples/default_dict.py">examples/default_dict.py</a> を参照 <a href="#fr-4-1">↩</a></p>
+</li>
+<li id="footnote-5">
+<p><a href="https://github.com/yukinarit/pyserde/blob/main/examples/union.py">examples/union.py</a> を参照 <a href="#fr-5-1">↩</a></p>
+</li>
+<li id="footnote-6">
+<p><a href="https://github.com/yukinarit/pyserde/blob/main/examples/union.py">examples/union.py</a> を参照 <a href="#fr-6-1">↩</a></p>
+</li>
+<li id="footnote-7">
+<p><a href="https://github.com/yukinarit/pyserde/blob/main/examples/union_operator.py">examples/union_operator.py</a> を参照 <a href="#fr-7-1">↩</a></p>
+</li>
+<li id="footnote-8">
+<p><a href="https://github.com/yukinarit/pyserde/blob/main/examples/union_tagging.py">examples/union_tagging.py</a> を参照 <a href="#fr-8-1">↩</a></p>
+</li>
+<li id="footnote-9">
+<p><a href="https://github.com/yukinarit/pyserde/blob/main/examples/simple.py">examples/simple.py</a> を参照 <a href="#fr-9-1">↩</a></p>
+</li>
+<li id="footnote-10">
+<p><a href="https://github.com/yukinarit/pyserde/blob/main/examples/nested.py">examples/nested.py</a> を参照 <a href="#fr-10-1">↩</a></p>
+</li>
+<li id="footnote-11">
+<p><a href="https://github.com/yukinarit/pyserde/blob/main/examples/newtype.py">examples/newtype.py</a> を参照 <a href="#fr-11-1">↩</a></p>
+</li>
+<li id="footnote-12">
+<p><a href="https://github.com/yukinarit/pyserde/blob/main/examples/any.py">examples/any.py</a> を参照 <a href="#fr-12-1">↩</a></p>
+</li>
+<li id="footnote-13">
+<p><a href="https://github.com/yukinarit/pyserde/blob/main/examples/literal.py">examples/literal.py</a> を参照 <a href="#fr-13-1">↩</a></p>
+</li>
+<li id="footnote-14">
+<p><a href="https://github.com/yukinarit/pyserde/blob/main/examples/generics.py">examples/generics.py</a> を参照 <a href="#fr-14-1">↩</a></p>
+</li>
+<li id="footnote-15">
+<p><a href="https://github.com/yukinarit/pyserde/blob/main/examples/class_var.py">examples/class_var.py</a> を参照 <a href="#fr-15-1">↩</a></p>
+</li>
+<li id="footnote-16">
+<p><a href="https://github.com/yukinarit/pyserde/blob/main/examples/init_var.py">examples/init_var.py</a> を参照 <a href="#fr-16-1">↩</a></p>
+</li>
+<li id="footnote-17">
+<p><a href="https://github.com/yukinarit/pyserde/blob/main/examples/enum34.py">examples/enum34.py</a> を参照 <a href="#fr-17-1">↩</a></p>
+</li>
+<li id="footnote-18">
+<p><a href="https://github.com/yukinarit/pyserde/blob/main/examples/type_pathlib.py">examples/type_pathlib.py</a> を参照 <a href="#fr-18-1">↩</a></p>
+</li>
+<li id="footnote-19">
+<p><a href="https://github.com/yukinarit/pyserde/blob/main/examples/type_decimal.py">examples/type_decimal.py</a> を参照 <a href="#fr-19-1">↩</a></p>
+</li>
+<li id="footnote-20">
+<p><a href="https://github.com/yukinarit/pyserde/blob/main/examples/type_uuid.py">examples/type_uuid.py</a> を参照 <a href="#fr-20-1">↩</a></p>
+</li>
+<li id="footnote-21">
+<p><a href="https://github.com/yukinarit/pyserde/blob/main/examples/type_datetime.py">examples/type_datetime.py</a> を参照 <a href="#fr-21-1">↩</a></p>
+</li>
+<li id="footnote-22">
+<p><a href="https://github.com/yukinarit/pyserde/blob/main/examples/type_ipaddress.py">examples/type_ipaddress.py</a> を参照 <a href="#fr-22-1">↩</a></p>
+</li>
+<li id="footnote-23">
+<p><a href="https://github.com/yukinarit/pyserde/blob/main/examples/type_numpy.py">examples/type_numpy.py</a> を参照 <a href="#fr-23-1">↩</a></p>
+</li>
+<li id="footnote-24">
+<p><a href="https://github.com/yukinarit/pyserde/blob/main/examples/type_sqlalchemy.py">examples/type_sqlalchemy.py</a> を参照 <a href="#fr-24-1">↩</a></p>
+</li>
+</ol><div style="break-before: page; page-break-before: always;"></div><h1 id="decorators"><a class="header" href="#decorators">Decorators</a></h1>
 <h2 id="serde"><a class="header" href="#serde"><code>@serde</code></a></h2>
 <p><code>@serde</code> は <code>@serialize</code> と <code>@deserialize</code> デコレータのラッパーです。</p>
 <p>以下のコードがあるとします。</p>
@@ -793,16 +797,13 @@ class Foo:
 <p>バージョン0.9.0で新規追加。詳細は <a href="type-check.html">Type Check</a> を参照してください。</p>
 <h3 id="serialize_class_var"><a class="header" href="#serialize_class_var"><strong><code>serialize_class_var</code></strong></a></h3>
 <p>バージョン0.9.8で新規追加。</p>
-<p><code>dataclasses.fields</code> はクラス変数を含まないため<sup class="footnote-reference"><a href="#1">1</a></sup>、pyserdeはデフォルトでクラス変数をシリアライズしません。<br />
+<p><code>dataclasses.fields</code> はクラス変数を含まないため<sup class="footnote-reference" id="fr-1-1"><a href="#footnote-1">1</a></sup>、pyserdeはデフォルトでクラス変数をシリアライズしません。<br />
 <code>serialize_class_var</code> を使用することで <code>typing.ClassVar</code> のフィールドをシリアライズすることができます。</p>
 <pre><code class="language-python">@serde(serialize_class_var=True)
 class Foo:
     a: ClassVar[int] = 10
 </code></pre>
 <p>完全な例については、<a href="https://github.com/yukinarit/pyserde/blob/main/examples/class_var.py">examples/class_var.py</a>を参照してください。</p>
-<div class="footnote-definition" id="1"><sup class="footnote-definition-label">1</sup>
-<p><a href="https://docs.python.org/3/library/dataclasses.html#dataclasses.fields">dataclasses.fields</a></p>
-</div>
 <h3 id="deny_unknown_fields"><a class="header" href="#deny_unknown_fields"><strong><code>deny_unknown_fields</code></strong></a></h3>
 <p>バージョン0.22.0で新規追加。 pyserdeデコレータの<code>deny_unknown_fields</code>オプションはデシリアライズ時のより厳格なフィールドチェックを制御できます。このオプションをTrueにするとデシリアライズ時に宣言されていないフィールドが見つかると<code>SerdeError</code>を投げることができます。</p>
 <p>以下の例を考えてください。</p>
@@ -816,7 +817,11 @@ class Foo:
 </code></pre>
 <p>上記のコードはフィールドcとdという宣言されていないフィールドがあるためエラーとなります。</p>
 <p>完全な例については、<a href="https://github.com/yukinarit/pyserde/blob/main/examples/deny_unknown_fields.py">examples/deny_unknown_fields.py</a>を参照してください。</p>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="field-attributes"><a class="header" href="#field-attributes">Field Attributes</a></h1>
+<hr>
+<ol class="footnote-definition"><li id="footnote-1">
+<p><a href="https://docs.python.org/3/library/dataclasses.html#dataclasses.fields">dataclasses.fields</a> <a href="#fr-1-1">↩</a></p>
+</li>
+</ol><div style="break-before: page; page-break-before: always;"></div><h1 id="field-attributes"><a class="header" href="#field-attributes">Field Attributes</a></h1>
 <p>フィールド属性は、データクラスのフィールドの（デ）シリアライズ動作をカスタマイズするためのオプションです。</p>
 <h2 id="dataclassesによって提供される属性"><a class="header" href="#dataclassesによって提供される属性">dataclassesによって提供される属性</a></h2>
 <h3 id="default-と-default_factory"><a class="header" href="#default-と-default_factory"><strong><code>default</code></strong> と <strong><code>default_factory</code></strong></a></h3>
