@@ -96,7 +96,7 @@ from __future__ import annotations # make sure to import annotations
 class Foo:
     i: int
     s: str
-    bar: Bar  # Bar can be specified although it's declared afterward.
+    bar: "Bar"  # Bar can be specified although it's declared afterward.
 
 @serde
 @dataclass
