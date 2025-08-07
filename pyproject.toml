@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pyserde"
-version = "0.0.0"  # using poetry-dynamic-versioning
+version = "0.23.0"  # for testing
 description = "Yet another serialization library on top of dataclasses"
 authors = ["yukinarit <yukinarit84@gmail.com>"]
 license = "MIT"
@@ -45,6 +45,7 @@ orjson = { version = "*", markers = "extra == 'orjson' or extra == 'all'", optio
 plum-dispatch = ">=2.3"
 beartype = ">=0.18.4"
 sqlalchemy = { version = ">2", markers = "extra == 'sqlalchemy' or extra == 'all'", optional = true }
+cbor2 = "^5.6.5"
 
 [tool.poetry.dev-dependencies]
 pyyaml = "*"
