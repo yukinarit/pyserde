@@ -190,7 +190,6 @@ def test_is_instance() -> None:
     # set of dataclass
     assert is_instance({Int(n) for n in range(1, 10)}, set[Int])
     assert not is_instance({Str("foo")}, set[Int])
-
     # tuple
     assert not is_instance((), tuple[int, str, float, bool])
     assert is_instance((10, "a"), tuple)
@@ -262,9 +261,9 @@ def test_get_generic_arg() -> None:
     class GenericFoo(Generic[T, U]):
         pass
 
-    assert get_generic_arg(GenericFoo[int, str], ["T", "U"], ["T", "U"], 0) == int
-    assert get_generic_arg(GenericFoo[int, str], ["T", "U"], ["T", "U"], 1) == str
-    assert get_generic_arg(GenericFoo[int, str], ["T", "U"], ["U"], 0) == str
+    assert get_generic_arg(GenericFoo[int, str], ["T", "U"], ["T", "U"], 0) is int
+    assert get_generic_arg(GenericFoo[int, str], ["T", "U"], ["T", "U"], 1) is str
+    assert get_generic_arg(GenericFoo[int, str], ["T", "U"], ["U"], 0) is str
     assert get_generic_arg(GenericFoo[int, str], ["T", "U"], ["V"], 0) == Any
 
     with pytest.raises(SerdeError):

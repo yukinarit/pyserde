@@ -1,6 +1,6 @@
 import logging
 from dataclasses import dataclass
-from typing import Literal
+from typing import Any, Literal
 
 import pytest
 
@@ -131,19 +131,19 @@ Tests
 
 @pytest.mark.parametrize("opt", opt_case, ids=opt_case_ids())
 @pytest.mark.parametrize("se,de", all_formats)
-def test_dict(se, de, opt):
+def test_dict(se: Any, de: Any, opt: Any) -> None:
     if se in (serde.json.to_json, serde.msgpack.to_msgpack, serde.toml.to_toml):
         # JSON, Msgpack, Toml don't allow non string key.
         p = LitStrDict({"1": 2}, {"foo": "bar"}, {"True": True}, {"foo": True})
         assert p == de(LitStrDict, se(p))
     else:
-        p = LitDict({1: 2}, {"foo": "bar"}, {True: True}, {2: False})
+        p = LitDict({1: 2}, {"foo": "bar"}, {True: True}, {2: False})  # type: ignore[assignment]
         assert p == de(LitDict, se(p))
 
 
 @pytest.mark.parametrize("opt", opt_case, ids=opt_case_ids())
 @pytest.mark.parametrize("se,de", all_formats)
-def test_tuple(se, de, opt):
+def test_tuple(se: Any, de: Any, opt: Any) -> None:
     if se is not serde.toml.to_toml:
         p = LitNestedPrituple(
             (LitInt(1), LitInt(2)),
@@ -157,7 +157,7 @@ def test_tuple(se, de, opt):
 @pytest.mark.parametrize(
     "se,de", (format_dict + format_tuple + format_json + format_msgpack + format_yaml)
 )
-def test_list_literals(se, de):
+def test_list_literals(se: Any, de: Any) -> None:
     p = [PRI, PRI]
     assert p == de(listLiterals, se(p))
 
@@ -168,7 +168,7 @@ def test_list_literals(se, de):
 @pytest.mark.parametrize(
     "se,de", (format_dict + format_tuple + format_json + format_msgpack + format_yaml)
 )
-def test_dict_literals(se, de):
+def test_dict_literals(se: Any, de: Any) -> None:
     p = {"1": PRI, "2": PRI}
     assert p == de(DictLiterals, se(p))
 
@@ -176,20 +176,20 @@ def test_dict_literals(se, de):
     assert p == de(DictLiterals, se(p))
 
 
-def test_json():
+def test_json() -> None:
     p = Literals(1, "foo", True, "bar")
     s = '{"i":1,"s":"foo","b":true,"m":"bar"}'
     assert s == serde.json.to_json(p)
 
 
-def test_msgpack():
+def test_msgpack() -> None:
     p = Literals(1, "foo", True, "bar")
     d = b"\x84\xa1i\x01\xa1s\xa3foo\xa1b\xc3\xa1m\xa3bar"
     assert d == serde.msgpack.to_msgpack(p)
     assert p == serde.msgpack.from_msgpack(Literals, d)
 
 
-def test_msgpack_unnamed():
+def test_msgpack_unnamed() -> None:
     p = Literals(1, "foo", True, "bar")
     d = b"\x94\x01\xa3foo\xc3\xa3bar"
     assert d == serde.msgpack.to_msgpack(p, named=False)

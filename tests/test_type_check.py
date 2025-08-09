@@ -85,7 +85,7 @@ default_unstable_test_cases: list[tuple[Any, Any, bool]] = [
 def test_type_check_strict(T: Any, data: Any, exc: bool) -> None:
     @serde.serde
     class C:
-        a: T
+        a: T  # pyright: ignore[reportInvalidTypeForm]
 
     if exc:
         with pytest.raises((serde.SerdeError, BeartypeCallHintViolation)):

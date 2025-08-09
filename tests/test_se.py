@@ -66,10 +66,10 @@ def test_se_func_iter() -> None:
     )
     assert ({("i",): (10,)}, {("i",): ("10",)}, {("i",): (10.0,)}, {("i",): (True,)}) == to_tuple(
         NestedPriDict(
-            {Str("i"): Int(10)},
-            {Str("i"): Str("10")},
-            {Str("i"): Float(10.0)},
-            {Str("i"): Bool(True)},
+            {Str("i"): Int(10)},  # pyright: ignore[reportUnhashable]
+            {Str("i"): Str("10")},  # pyright: ignore[reportUnhashable]
+            {Str("i"): Float(10.0)},  # pyright: ignore[reportUnhashable]
+            {Str("i"): Bool(True)},  # pyright: ignore[reportUnhashable]
         )
     )
 

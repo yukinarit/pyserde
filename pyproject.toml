@@ -121,17 +121,12 @@ include = [
 exclude = [
   "serde/numpy.py",
   "bench",
-  "tests/test_basics.py",
-  "tests/test_core.py",
-  "tests/test_legacy_custom.py",
-  "tests/test_literal.py",
-  "tests/test_numpy.py",
-  "tests/test_union.py",
-  "tests/test_sqlalchemy.py",
   "serde/__init__.py"
 ]
 pythonVersion = "3.12"
 reportMissingImports = false
+reportUnhashable = false
+reportAttributeAccessIssue = false
 
 [tool.mypy]
 strict = true
@@ -141,14 +136,6 @@ exclude = [
   "examples/alias.py",
   "examples/generics_pep695.py",
   "bench",
-  "tests/common.py",
-  "tests/test_basics.py",
-  "tests/test_core.py",
-  "tests/test_legacy_custom.py",
-  "tests/test_literal.py",
-  "tests/test_numpy.py",
-  "tests/test_union.py",
-  "tests/test_sqlalchemy.py",
 ]
 
 [[tool.mypy.overrides]]
@@ -157,6 +144,9 @@ module = "examples.type_numpy_jaxtyping"
 ignore_errors = true
 
 [tool.ruff]
+line-length = 100
+
+[tool.ruff.lint]
 select = [
   "E", # pycodestyle errors
   "W", # pycodestyle warnings
@@ -165,11 +155,10 @@ select = [
   "B", # flake8-bugbear
 ]
 ignore = ["B904"]
-line-length = 100
 
 [tool.ruff.lint.mccabe]
 max-complexity = 30
 
-[tool.ruff.per-file-ignores]
+[tool.ruff.lint.per-file-ignores]
 # https://docs.kidger.site/jaxtyping/faq/#flake8-or-ruff-are-throwing-an-error
 "examples/type_numpy_jaxtyping.py" = ["F722"]

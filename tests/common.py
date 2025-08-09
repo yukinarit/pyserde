@@ -98,7 +98,7 @@ def yaml_not_supported(se: Any, de: Any, opt: Any) -> bool:
     return se is to_yaml
 
 
-types: list[tuple[Any, Any, Optional[Filter]]] = [
+types: list[tuple[Any, Any, Any]] = [
     param(10, int),  # Primitive
     param("foo", str),
     param(100.0, float),
@@ -137,7 +137,7 @@ types: list[tuple[Any, Any, Optional[Filter]]] = [
     param(data.Init(1), data.Init),
     param(10, NewType("Int", int)),  # NewType
     param({"a": 1}, Any),  # Any
-    param(GenericClass[str, int]("foo", 10), GenericClass[str, int]),  # type: ignore
+    param(GenericClass[str, int]("foo", 10), GenericClass[str, int]),
     param(NestedGenericClass[str, int]("foo", Inner[int](10)), NestedGenericClass[str, int]),
     param(pathlib.Path("/tmp/foo"), pathlib.Path),  # Extended types
     param(pathlib.Path("/tmp/foo"), Optional[pathlib.Path]),

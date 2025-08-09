@@ -1,5 +1,8 @@
+# type: ignore
+
 import logging
 from dataclasses import fields
+from typing import Any
 
 import numpy as np
 import numpy.typing as npt
@@ -18,7 +21,7 @@ serde.init(True)
 
 @pytest.mark.parametrize("opt", opt_case, ids=opt_case_ids())
 @pytest.mark.parametrize("se,de", all_formats)
-def test_numpy_simple(se, de, opt):
+def test_numpy_simple(se: Any, de: Any, opt: Any) -> None:
     log.info(f"Running test with se={se.__name__} de={de.__name__} opts={opt}")
 
     @serde.serde(**opt)
@@ -28,15 +31,15 @@ def test_numpy_simple(se, de, opt):
         f: np.float32
         g: np.float64
         h: np.bool_
-        u: np.ndarray
-        v: npt.NDArray
+        u: np.ndarray  # type: ignore[type-arg]
+        v: npt.NDArray  # type: ignore[type-arg]
         w: npt.NDArray[np.int32]
         x: npt.NDArray[np.int64]
         y: npt.NDArray[np.float32]
         z: npt.NDArray[np.float64]
 
-        def __eq__(self, other):
-            return (
+        def __eq__(self, other: Any) -> bool:
+            return bool(
                 self.i == other.i
                 and self.j == other.j
                 and self.f == other.f
@@ -72,14 +75,14 @@ def test_numpy_simple(se, de, opt):
         value = getattr(npfoo, field.name)
         de_value = getattr(de_npfoo, field.name)
 
-        assert type(value) == type(de_value)
+        assert type(value) is type(de_value)
 
         typ = field.type
         orig_type = get_origin(typ)
         if orig_type is not None:
             typ = orig_type
 
-        assert type(de_value) == typ
+        assert type(de_value) is typ
         assert type(de_value).dtype == field.type.dtype
 
     @serde.serde(**opt)
@@ -239,7 +242,7 @@ def test_encode_numpy(se, de, opt):
         typ = type(value)
         de_value = de(typ, se(value))
         assert de_value == value
-        assert type(de_value) == typ
+        assert type(de_value) is typ
 
         # test bare numpy array deserialization
         arr = np.array([0, 1, 2], dtype=typ)

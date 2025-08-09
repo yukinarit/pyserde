@@ -3,7 +3,7 @@ Tests for custom serializer/deserializer.
 """
 
 from datetime import datetime
-from typing import Optional, Union
+from typing import Any, Optional, Union
 
 import pytest
 
@@ -20,14 +20,14 @@ from serde import (
 from serde.json import from_json, to_json
 
 
-def test_legacy_custom_class_serializer():
-    def serializer(cls, o):
+def test_legacy_custom_class_serializer() -> None:
+    def serializer(cls: Any, o: Any) -> Any:
         if cls is datetime:
             return o.strftime("%d/%m/%y")
         else:
             raise SerdeSkip()
 
-    def deserializer(cls, o):
+    def deserializer(cls: Any, o: Any) -> Any:
         if cls is datetime:
             return datetime.strptime(o, "%d/%m/%y")
         else:
@@ -55,32 +55,32 @@ def test_legacy_custom_class_serializer():
     assert to_tuple(f) == (10, "01/01/21", "01/01/21", None, 10, [1, 2, 3], {4, 5, 6})
     assert f == from_tuple(Foo, to_tuple(f))
 
-    def fallback(_, __):
+    def fallback(_: Any, __: Any) -> Any:
         raise SerdeSkip()
 
     @serde(serializer=fallback, deserializer=fallback)
-    class Foo:
+    class Foo2:
         a: Optional[str]
         b: str
 
-    f = Foo("foo", "bar")
-    assert to_json(f) == '{"a":"foo","b":"bar"}'
-    assert f == from_json(Foo, '{"a":"foo","b":"bar"}')
-    assert Foo(None, "bar") == from_json(Foo, '{"b":"bar"}')
+    f2 = Foo2("foo", "bar")
+    assert to_json(f2) == '{"a":"foo","b":"bar"}'
+    assert f2 == from_json(Foo2, '{"a":"foo","b":"bar"}')
+    assert Foo2(None, "bar") == from_json(Foo2, '{"b":"bar"}')
     with pytest.raises(SerdeError):
-        assert Foo(None, "bar") == from_json(Foo, "{}")
+        assert Foo2(None, "bar") == from_json(Foo2, "{}")
     with pytest.raises(SerdeError):
-        assert Foo("foo", "bar") == from_json(Foo, '{"a": "foo"}')
+        assert Foo2("foo", "bar") == from_json(Foo2, '{"a": "foo"}')
 
 
-def test_field_serialize_override_legacy_class_serializer():
-    def serializer(cls, o):
+def test_field_serialize_override_legacy_class_serializer() -> None:
+    def serializer(cls: Any, o: Any) -> Any:
         if cls is datetime:
             return o.strftime("%d/%m/%y")
         else:
             raise SerdeSkip()
 
-    def deserializer(cls, o):
+    def deserializer(cls: Any, o: Any) -> Any:
         if cls is datetime:
             return datetime.strptime(o, "%d/%m/%y")
         else:
@@ -105,14 +105,14 @@ def test_field_serialize_override_legacy_class_serializer():
     assert f == from_tuple(Foo, to_tuple(f))
 
 
-def test_override_by_default_serializer():
-    def serializer(cls, o):
+def test_override_by_default_serializer() -> None:
+    def serializer(cls: Any, o: Any) -> Any:
         if cls is datetime:
             return o.strftime("%d/%m/%y")
         else:
             raise SerdeSkip()
 
-    def deserializer(cls, o):
+    def deserializer(cls: Any, o: Any) -> Any:
         if cls is datetime:
             return datetime.strptime(o, "%d/%m/%y")
         else:
