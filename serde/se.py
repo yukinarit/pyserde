@@ -594,7 +594,7 @@ def {{func}}(obj, reuse_instances=None, convert_sets=None, skip_none=False):
   )
 """,
             "union": """
-def {{func}}(obj, reuse_instances, convert_sets):
+def {{func}}(obj, reuse_instances, convert_sets, skip_none=False):
   union_args = serde_scope.union_se_args['{{func}}']
 
   {% for t in union_args %}
@@ -794,7 +794,7 @@ class Renderer:
         elif is_none(arg.type):
             res = "None"
         elif is_any(arg.type) or is_bearable(arg.type, TypeVar):
-            res = f"to_obj({arg.varname}, True, False, False, c=typing.Any)"
+            res = f"to_obj({arg.varname}, True, False, False, skip_none, typing.Any)"
         elif is_generic(arg.type):
             origin = get_origin(arg.type)
             assert origin
@@ -844,8 +844,8 @@ class Renderer:
             return ", ".join(flattened)
         else:
             return (
-                f"{arg.varname}.{SERDE_SCOPE}.funcs['{self.func}']({arg.varname},"
-                " reuse_instances=reuse_instances, convert_sets=convert_sets)"
+                f"{arg.varname}.{SERDE_SCOPE}.funcs['{self.func}']({arg.varname}, "
+                "reuse_instances=reuse_instances, convert_sets=convert_sets, skip_none=skip_none)"
             )
 
     def opt(self, arg: SeField[Any]) -> str:
@@ -939,7 +939,10 @@ class Renderer:
 
     def union_func(self, arg: SeField[Any]) -> str:
         func_name = union_func_name(UNION_SE_PREFIX, list(type_args(arg.type)))
-        return f"serde_scope.funcs['{func_name}']({arg.varname}, reuse_instances, convert_sets)"
+        return (
+            f"serde_scope.funcs['{func_name}']({arg.varname}, "
+            "reuse_instances, convert_sets, skip_none)"
+        )
 
     def literal(self, arg: SeField[Any]) -> str:
         return f"{arg.varname}"
