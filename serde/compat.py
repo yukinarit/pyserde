@@ -318,8 +318,9 @@ def iter_types(cls: type[Any]) -> list[type[Any]]:
 
         if is_dataclass(cls):
             lst.add(cls)
-            for f in dataclass_fields(cls):
-                recursive(f.type)
+            if isinstance(cls, type):
+                for f in dataclass_fields(cls):
+                    recursive(f.type)
         elif isinstance(cls, str):
             lst.add(cls)
         elif is_opt(cls):
@@ -379,8 +380,9 @@ def iter_unions(cls: TypeLike) -> list[TypeLike]:
             recursive(cls.__value__)
         if is_dataclass(cls):
             stack.append(cls)
-            for f in dataclass_fields(cls):
-                recursive(f.type)
+            if isinstance(cls, type):
+                for f in dataclass_fields(cls):
+                    recursive(f.type)
             stack.pop()
         elif is_opt(cls):
             args = type_args(cls)
@@ -420,8 +422,9 @@ def iter_literals(cls: type[Any]) -> list[TypeLike]:
                 recursive(arg)
         if is_dataclass(cls):
             lst.add(cls)
-            for f in dataclass_fields(cls):
-                recursive(f.type)
+            if isinstance(cls, type):
+                for f in dataclass_fields(cls):
+                    recursive(f.type)
         elif is_opt(cls):
             args = type_args(cls)
             if args:
