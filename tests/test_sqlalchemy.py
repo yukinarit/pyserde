@@ -1,5 +1,6 @@
+# type: ignore  # SQLAlchemy types imported via pytest.importorskip
 import logging
-from typing import Optional
+from typing import Optional, Any
 
 import pytest
 
@@ -32,7 +33,7 @@ all_except_toml: FormatFuncs = (
 
 @pytest.mark.parametrize("opt", opt_case, ids=opt_case_ids())
 @pytest.mark.parametrize("se,de", all_except_toml)
-def test_sqlalchemy_simple(se, de, opt):
+def test_sqlalchemy_simple(se: Any, de: Any, opt: Any) -> None:
     log.info(f"Running test with se={se.__name__} de={de.__name__} opts={opt}")
 
     class Base(sa_orm.MappedAsDataclass, sa_orm.DeclarativeBase):
@@ -53,7 +54,7 @@ def test_sqlalchemy_simple(se, de, opt):
 
 @pytest.mark.parametrize("opt", opt_case, ids=opt_case_ids())
 @pytest.mark.parametrize("se,de", format_toml)
-def test_sqlalchemy_simple_toml(se, de, opt):
+def test_sqlalchemy_simple_toml(se: Any, de: Any, opt: Any) -> None:
     log.info(f"Running test with se={se.__name__} de={de.__name__} opts={opt}")
 
     class Base(sa_orm.MappedAsDataclass, sa_orm.DeclarativeBase):
@@ -73,7 +74,7 @@ def test_sqlalchemy_simple_toml(se, de, opt):
 
 @pytest.mark.parametrize("opt", opt_case, ids=opt_case_ids())
 @pytest.mark.parametrize("se,de", all_formats)
-def test_sqlalchemy_nested(se, de, opt):
+def test_sqlalchemy_nested(se: Any, de: Any, opt: Any) -> None:
     log.info(f"Running test with se={se.__name__} de={de.__name__} opts={opt}")
 
     class Base(sa_orm.MappedAsDataclass, sa_orm.DeclarativeBase):
