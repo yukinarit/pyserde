@@ -2,24 +2,24 @@ exclude: '.git|.tox'
 files: 'serde/|tests/|examples/|bench/bench.py'
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v3.4.0
+    rev: v5.0.0
     hooks:
       - id: trailing-whitespace
       - id: end-of-file-fixer
 
   - repo: https://github.com/psf/black
-    rev: 24.3.0
+    rev: 24.10.0
     hooks:
       - id: black
         args:
           - .
   - repo: https://github.com/RobertCraigie/pyright-python
-    rev: v1.1.356
+    rev: v1.1.389
     hooks:
     - id: pyright
       additional_dependencies: ['pyyaml', 'msgpack', 'msgpack-types']
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.3.4
+    rev: v0.8.4
     hooks:
     - id: ruff
       args:
