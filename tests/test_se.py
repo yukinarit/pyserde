@@ -137,7 +137,7 @@ class Foo:
     val: int
 
 
-kwargs = "reuse_instances=reuse_instances, convert_sets=convert_sets"
+kwargs = "reuse_instances=reuse_instances, convert_sets=convert_sets, skip_none=skip_none"
 
 
 def test_render_primitives() -> None:

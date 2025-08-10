@@ -1,6 +1,6 @@
 from serde import serde
 from serde.json import to_json, from_json
-from typing import Optional
+from typing import Optional, Union, List
 
 
 def test_json_basics() -> None:
@@ -32,3 +32,46 @@ def test_skip_none() -> None:
 
     f = Foo(10, None)
     assert to_json(f, skip_none=True) == '{"a":10}'
+
+
+def test_skip_none_nested() -> None:
+    """Test that skip_none propagates to nested objects."""
+
+    @serde
+    class Inner:
+        a: int
+        b: Optional[int]
+
+    @serde
+    class Outer:
+        i: Inner
+        j: int
+        k: Optional[int]
+
+    # Test nested dataclass with skip_none
+    o = Outer(i=Inner(a=1, b=None), j=3, k=None)
+    result = to_json(o, skip_none=True)
+    expected = '{"i":{"a":1},"j":3}'
+    assert result == expected
+
+    # Test union with nested dataclass and skip_none
+    @serde
+    class WithUnion:
+        u: Union[Inner, str]
+        value: Optional[str]
+
+    u = WithUnion(u=Inner(a=5, b=None), value=None)
+    result = to_json(u, skip_none=True)
+    expected = '{"u":{"Inner":{"a":5}}}'
+    assert result == expected
+
+    # Test list with nested objects and skip_none
+    @serde
+    class WithList:
+        items: List[Inner]
+        name: Optional[str]
+
+    w = WithList(items=[Inner(a=1, b=None), Inner(a=2, b=3)], name=None)
+    result = to_json(w, skip_none=True)
+    expected = '{"items":[{"a":1},{"a":2,"b":3}]}'
+    assert result == expected
