@@ -14,6 +14,7 @@ import jinja2
 from dataclasses import dataclass, is_dataclass
 from typing import TypeVar, Literal, Generic, Optional, Any, Union
 from collections.abc import Callable, Iterable, Iterator
+
 from beartype import beartype, BeartypeConf
 from beartype.door import is_bearable
 from typing_extensions import dataclass_transform
@@ -75,17 +76,35 @@ from .core import (
     union_func_name,
     GLOBAL_CLASS_SERIALIZER,
 )
-from .numpy import (
-    is_numpy_array,
-    is_numpy_jaxtyping,
-    is_numpy_datetime,
-    is_numpy_scalar,
-    serialize_numpy_array,
-    serialize_numpy_datetime,
-    serialize_numpy_scalar,
-)
+
+# Lazy numpy imports to improve startup time
 
 __all__ = ["serialize", "is_serializable", "to_dict", "to_tuple"]
+
+
+# Lazy numpy import wrappers to improve startup time
+def _is_numpy_array(typ: Any) -> bool:
+    from .numpy import is_numpy_array
+
+    return is_numpy_array(typ)
+
+
+def _is_numpy_scalar(typ: Any) -> bool:
+    from .numpy import is_numpy_scalar
+
+    return is_numpy_scalar(typ)
+
+
+def _is_numpy_jaxtyping(typ: Any) -> bool:
+    from .numpy import is_numpy_jaxtyping
+
+    return is_numpy_jaxtyping(typ)
+
+
+def _is_numpy_datetime(typ: Any) -> bool:
+    from .numpy import is_numpy_datetime
+
+    return is_numpy_datetime(typ)
 
 
 SerializeFunc = Callable[[type[Any], Any], Any]
@@ -775,13 +794,21 @@ class Renderer:
             res = self.tuple(arg)
         elif is_enum(arg.type):
             res = self.enum(arg)
-        elif is_numpy_datetime(arg.type):
+        elif _is_numpy_datetime(arg.type):
+            from .numpy import serialize_numpy_datetime
+
             res = serialize_numpy_datetime(arg)
-        elif is_numpy_scalar(arg.type):
+        elif _is_numpy_scalar(arg.type):
+            from .numpy import serialize_numpy_scalar
+
             res = serialize_numpy_scalar(arg)
-        elif is_numpy_array(arg.type):
+        elif _is_numpy_array(arg.type):
+            from .numpy import serialize_numpy_array
+
             res = serialize_numpy_array(arg)
-        elif is_numpy_jaxtyping(arg.type):
+        elif _is_numpy_jaxtyping(arg.type):
+            from .numpy import serialize_numpy_array
+
             res = serialize_numpy_array(arg)
         elif is_primitive(arg.type):
             res = self.primitive(arg)

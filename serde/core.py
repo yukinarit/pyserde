@@ -11,6 +11,7 @@ import sys
 import re
 import casefy
 from dataclasses import dataclass
+
 from beartype.door import is_bearable
 from collections.abc import Mapping, Sequence, Callable
 from typing import (
