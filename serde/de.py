@@ -12,6 +12,7 @@ import functools
 import typing
 import jinja2
 from collections.abc import Callable, Sequence, Iterable
+
 from beartype import beartype, BeartypeConf
 from beartype.door import is_bearable
 from beartype.roar import BeartypeCallHintParamViolation
@@ -86,17 +87,29 @@ from .core import (
     raise_unsupported_type,
     union_func_name,
 )
-from .numpy import (
-    deserialize_numpy_array,
-    deserialize_numpy_scalar,
-    deserialize_numpy_array_direct,
-    deserialize_numpy_jaxtyping_array,
-    is_numpy_array,
-    is_numpy_jaxtyping,
-    is_numpy_scalar,
-)
+
+# Lazy numpy imports to improve startup time
 
 __all__ = ["deserialize", "is_deserializable", "from_dict", "from_tuple"]
+
+
+# Lazy numpy import wrappers to improve startup time
+def _is_numpy_array(typ: Any) -> bool:
+    from .numpy import is_numpy_array
+
+    return is_numpy_array(typ)
+
+
+def _is_numpy_scalar(typ: Any) -> bool:
+    from .numpy import is_numpy_scalar
+
+    return is_numpy_scalar(typ)
+
+
+def _is_numpy_jaxtyping(typ: Any) -> bool:
+    from .numpy import is_numpy_jaxtyping
+
+    return is_numpy_jaxtyping(typ)
 
 
 DeserializeFunc = Callable[[type[Any], Any], Any]
@@ -490,7 +503,9 @@ def from_obj(c: type[T], o: Any, named: bool, reuse_instances: Optional[bool]) -
                 res = {
                     thisfunc(type_args(c)[0], k): thisfunc(type_args(c)[1], v) for k, v in o.items()
                 }
-        elif is_numpy_array(c):
+        elif _is_numpy_array(c):
+            from .numpy import deserialize_numpy_array_direct
+
             res = deserialize_numpy_array_direct(c, o)
         elif is_datetime(c):
             res = c.fromisoformat(o)
@@ -752,13 +767,19 @@ class Renderer:
             res = self.tuple(arg)
         elif is_enum(arg.type):
             res = self.enum(arg)
-        elif is_numpy_scalar(arg.type):
+        elif _is_numpy_scalar(arg.type):
+            from .numpy import deserialize_numpy_scalar
+
             self.import_numpy = True
             res = deserialize_numpy_scalar(arg)
-        elif is_numpy_array(arg.type):
+        elif _is_numpy_array(arg.type):
+            from .numpy import deserialize_numpy_array
+
             self.import_numpy = True
             res = deserialize_numpy_array(arg)
-        elif is_numpy_jaxtyping(arg.type):
+        elif _is_numpy_jaxtyping(arg.type):
+            from .numpy import deserialize_numpy_jaxtyping_array
+
             self.import_numpy = True
             res = deserialize_numpy_jaxtyping_array(arg)
         elif is_union(arg.type):

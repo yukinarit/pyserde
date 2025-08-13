@@ -7,7 +7,8 @@ from typing import Any, AnyStr, overload, Optional, Union
 from .compat import T
 from .de import Deserializer, from_dict
 from .se import Serializer, to_dict
-from .numpy import encode_numpy
+
+# Lazy numpy imports to improve startup time
 
 try:  # pragma: no cover
     import orjson
@@ -25,6 +26,8 @@ except ImportError:
 
     def json_dumps(obj: Any, **opts: Any) -> str:
         if "default" not in opts:
+            from .numpy import encode_numpy
+
             opts["default"] = encode_numpy
         # compact output
         ensure_ascii = opts.pop("ensure_ascii", False)
