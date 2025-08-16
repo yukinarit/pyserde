@@ -9,12 +9,14 @@ from dataclasses import dataclass, field
 from functools import partial
 from pathlib import Path
 from platform import python_implementation
-from typing import Any, Callable, Dict, List, Tuple, Union
+from collections.abc import Callable
+from typing import Any, Optional, Union
 
 import click
 import data
 import dataclasses_class as dc
 import pyserde_class as ps  # noqa: F401
+import pyserde_nt_class as pn  # noqa: F401
 import raw  # noqa: F401
 from runner import Size
 
@@ -25,9 +27,7 @@ try:
         import dacite_class as da  # noqa: F401
         import marshmallow_class as ms  # noqa: F401
         import mashumaro_class as mc  # noqa: F401
-        import matplotlib.pyplot as plt
-        import numpy as np
-        import seaborn as sns
+        import pydantic_class as pd  # noqa: F401
 except ImportError:
     pass
 
@@ -42,7 +42,7 @@ class Opt:
     chart: bool
     output: Path
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         if not self.output.exists():
             self.output.mkdir()
 
@@ -53,18 +53,26 @@ class Bencher:
     opt: Opt
     number: int = 10000
     repeat: int = 5
-    result: List[Tuple[str, float]] = field(default_factory=list)
+    result: list[tuple[str, float]] = field(default_factory=list)
 
-    def run(self, name, func, expected=None, **kwargs):
+    def run(
+        self,
+        name: str,
+        func: Optional[Callable[..., Any]],
+        expected: Optional[Union[Any, Callable[[Any], bool]]] = None,
+        **kwargs: Any,
+    ) -> None:
         """
         Run benchmark.
         """
+        if not func:
+            return
+
+        f: Callable[[], Any]
         if kwargs:
             f = partial(func, **kwargs)
         else:
             f = func
-        if not f:
-            return
 
         # Evaluate result only once.
         if expected:
@@ -76,36 +84,43 @@ class Bencher:
 
         times = timeit.repeat(f, number=self.number, repeat=self.repeat)
         self.result.append((name, sum(times) / len(times)))
-        times = ", ".join([f"{t:.6f}" for t in times])
-        click.echo(f"{name:40s}\t{times}")
+        times_str = ", ".join([f"{t:.6f}" for t in times])
+        click.echo(f"{name:40s}\t{times_str}")
         self.draw_chart()
 
-    def draw_chart(self):
+    def draw_chart(self) -> None:
         if self.opt.chart:
-            x = np.array([r[0] for r in self.result])
-            y = np.array([r[1] for r in self.result])
-            chart = sns.barplot(x=x, y=y, palette="rocket")
-            chart.set(ylabel=f"Elapsed time for {self.number} requests [sec]")
-            for p in chart.patches:
-                chart.annotate(
-                    format(p.get_height(), ".4f"),
-                    (p.get_x() + p.get_width() / 2.0, p.get_height()),
-                    ha="center",
-                    va="center",
-                    xytext=(0, 10),
-                    textcoords="offset points",
-                )
-            plt.xticks(rotation=20)
-            plt.savefig(str(self.opt.output / f"{self.name}.png"))
-            plt.close()
+            try:
+                import matplotlib.pyplot as plt
+                import numpy as np
+                import seaborn as sns
+
+                x = np.array([r[0] for r in self.result])
+                y = np.array([r[1] for r in self.result])
+                chart = sns.barplot(x=x, y=y, palette="rocket")
+                chart.set(ylabel=f"Elapsed time for {self.number} requests [sec]")
+                for p in chart.patches:
+                    chart.annotate(
+                        format(p.get_height(), ".4f"),
+                        (p.get_x() + p.get_width() / 2.0, p.get_height()),
+                        ha="center",
+                        va="center",
+                        xytext=(0, 10),
+                        textcoords="offset points",
+                    )
+                plt.xticks(rotation=20)
+                plt.savefig(str(self.opt.output / f"{self.name}.png"))
+                plt.close()
+            except ImportError:
+                pass
 
 
-runners_base = ("raw", "dc", "ps")
+runners_base = ("raw", "dc", "ps", "pn")
 
-runners_extra = ("da", "mc", "ms", "at", "ca")
+runners_extra = ("da", "mc", "ms", "at", "ca", "pd")
 
 
-def run(opt: Opt, name: str, tc: TestCase):
+def run(opt: Opt, name: str, tc: TestCase) -> None:
     """
     Run benchmark.
     """
@@ -124,21 +139,63 @@ class TestCase:
     number: int
 
     @classmethod
-    def make(cls, size: Size, expected=None, number=10000) -> Dict[Size, TestCase]:
+    def make(cls, size: Size, expected: Any = None, number: int = 10000) -> dict[Size, TestCase]:
         return {size: TestCase(size, expected, number)}
 
 
-def equals_small(x):
+def equals_small(x: Any) -> None:
     y = dc.SMALL
     assert x.i == y.i and x.s == y.s and x.f == y.f and x.b == y.b, f"Expected: {x}, Actual: {y}"
 
 
-def equals_medium(x):
+def equals_medium(x: Any) -> None:
     y = dc.MEDIUM
     for xs, ys in zip(x.inner, y.inner, strict=True):
         assert (
             xs.i == xs.i and xs.s == ys.s and xs.f == ys.f and xs.b == ys.b
         ), f"Expected: {x}, Actual: {y}"
+
+
+def equals_large(x: Any) -> None:
+    """Validate large deserialized data structure"""
+    # Use different reference based on the library type
+    if hasattr(type(x), "model_fields"):  # Pydantic model
+        try:
+            import pydantic_class as pd
+
+            y = pd.LARGE
+        except ImportError:
+            y = ps.LARGE
+    else:
+        y = ps.LARGE
+
+    assert (
+        x.customer_id == y.customer_id
+    ), f"Customer ID mismatch: {x.customer_id} != {y.customer_id}"
+    assert x.name == y.name, f"Name mismatch: {x.name} != {y.name}"
+    assert x.email == y.email, f"Email mismatch: {x.email} != {y.email}"
+    assert len(x.items_list) == len(
+        y.items_list
+    ), f"Items list length mismatch: {len(x.items_list)} != {len(y.items_list)}"
+    assert len(x.nested_data) == len(
+        y.nested_data
+    ), f"Nested data keys mismatch: {len(x.nested_data)} != {len(y.nested_data)}"
+    assert (
+        x.loyalty_points == y.loyalty_points
+    ), f"Loyalty points mismatch: {x.loyalty_points} != {y.loyalty_points}"
+    assert x.created_at == y.created_at, f"Created at mismatch: {x.created_at} != {y.created_at}"
+
+    # Validate preferences
+    assert x.preferences["theme"] == y.preferences["theme"], "Theme preference mismatch"
+    assert (
+        x.preferences["notifications"] == y.preferences["notifications"]
+    ), "Notifications preference mismatch"
+
+    # Validate nested data structure
+    assert "category_1" in x.nested_data, "category_1 not found in nested_data"
+    assert (
+        len(x.nested_data["category_1"]) == 50
+    ), f"category_1 length mismatch: {len(x.nested_data['category_1'])}"
 
 
 TESTCASES = {
@@ -147,18 +204,22 @@ TESTCASES = {
         **TestCase.make(
             Size.Medium, lambda x: json.loads(x) == json.loads(data.MEDIUM), number=500
         ),
+        **TestCase.make(Size.Large, lambda x: json.loads(x) == json.loads(data.LARGE), number=100),
     },
     "de": {
         **TestCase.make(Size.Small, equals_small),
         **TestCase.make(Size.Medium, equals_medium, number=500),
+        **TestCase.make(Size.Large, equals_large, number=100),
     },
     "astuple": {
         **TestCase.make(Size.Small, data.SMALL_TUPLE),
         **TestCase.make(Size.Medium, number=500),
+        **TestCase.make(Size.Large, number=100),
     },
     "asdict": {
         **TestCase.make(Size.Small, data.SMALL_DICT),
         **TestCase.make(Size.Medium, number=500),
+        **TestCase.make(Size.Large, number=100),
     },
 }
 
@@ -183,7 +244,7 @@ TESTCASES = {
     callback=lambda _, __, p: Path(p),
     help="Output directory for charts.",
 )
-def main(full: bool, test: str, chart: bool, output: Path):
+def main(full: bool, test: str, chart: bool, output: Path) -> None:
     """
     bench.py - Benchmarking pyserde and other libraries.
     """
@@ -199,4 +260,4 @@ def main(full: bool, test: str, chart: bool, output: Path):
 
 
 if __name__ == "__main__":
-    main()
+    main()  # pyright: ignore[reportCallIssue]
