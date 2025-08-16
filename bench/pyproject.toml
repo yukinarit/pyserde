@@ -5,16 +5,17 @@ description = "Benchmark package for pyserde"
 authors = ["yukinarit <yukinarit84@gmail.com>"]
 
 [tool.poetry.dependencies]
-python = "^3.7.0"
+python = "^3.9.0"
 click = "*"
 pyserde = {path = "../"}
+dacite = "*"
+mashumaro = "^3.13"
+marshmallow = "^4.0"
+attrs = "^24.3"
+cattrs = "^25.1"
+seaborn = "*"
+matplotlib = "*"
+numpy = "*"
+pydantic = "^2.11.7"
 
 [tool.poetry.dev-dependencies]
-# dacite = "*"
-# mashumaro = "^2.11.0"
-# marshmallow = "~=3.2"
-# attrs = "*"
-# cattrs = "*"
-# seaborn = "*"
-# matplotlib = "*"
-# numpy = "*"

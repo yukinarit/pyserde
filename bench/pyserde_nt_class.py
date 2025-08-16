@@ -1,13 +1,16 @@
-import json
+from dataclasses import dataclass, field
 from functools import partial
 from typing import Any, Union
 
-import attr
 import data
 from runner import Runner, Size
 
+import serde
+import serde.json
 
-@attr.s(auto_attribs=True)
+
+@serde.serde(type_check=serde.disabled)
+@dataclass(unsafe_hash=True)
 class Small:
     i: int
     s: str
@@ -15,19 +18,21 @@ class Small:
     b: bool
 
 
-@attr.s(auto_attribs=True)
+@serde.serde(type_check=serde.disabled)
+@dataclass
 class Medium:
-    inner: list[Small] = attr.Factory(list)
+    inner: list[Small] = field(default_factory=list)
 
 
-@attr.s(auto_attribs=True)
+@serde.serde(type_check=serde.disabled)
+@dataclass
 class Large:
     customer_id: int
     name: str
     email: str
-    preferences: dict[str, Union[str, bool, int]] = attr.Factory(dict)
-    items_list: list[str] = attr.Factory(list)
-    nested_data: dict[str, list[int]] = attr.Factory(dict)
+    preferences: dict[str, Union[str, bool, int]] = field(default_factory=dict)
+    items_list: list[str] = field(default_factory=list)
+    nested_data: dict[str, list[int]] = field(default_factory=dict)
     loyalty_points: int = 0
     created_at: str = ""
 
@@ -68,23 +73,40 @@ LARGE = create_large_instance()
 
 
 def new(size: Size) -> Runner:
-    name = "attrs"
+    name = "pyserde-nt"
     if size == Size.Small:
         unp = SMALL
+        pac = data.SMALL
+        cls = Small
     elif size == Size.Medium:
         unp = MEDIUM  # type: ignore[assignment]
+        pac = data.MEDIUM
+        cls = Medium  # type: ignore[assignment]
     elif size == Size.Large:
         unp = LARGE  # type: ignore[assignment]
-    return Runner(name, unp, partial(se, unp), None, partial(astuple, unp), partial(asdict, unp))
+        pac = data.LARGE
+        cls = Large  # type: ignore[assignment]
+    return Runner(
+        name,
+        unp,
+        partial(se, unp),
+        partial(de, cls, pac),
+        partial(astuple, unp),
+        partial(asdict, unp),
+    )
 
 
 def se(obj: Union[Small, Medium, Large]) -> str:
-    return json.dumps(attr.asdict(obj))
+    return serde.json.to_json(obj)
 
 
-def astuple(obj: Union[Small, Medium, Large]) -> tuple[Any, ...]:
-    return attr.astuple(obj)
+def de(cls: type, data: str) -> Union[Small, Medium, Large]:
+    return serde.json.from_json(cls, data)
 
 
-def asdict(obj: Union[Small, Medium, Large]) -> dict[str, Any]:
-    return attr.asdict(obj)
+def astuple(data: Union[Small, Medium, Large]) -> tuple[Any, ...]:
+    return serde.to_tuple(data)
+
+
+def asdict(data: Union[Small, Medium, Large]) -> dict[str, Any]:
+    return serde.to_dict(data)

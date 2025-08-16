@@ -1,43 +1,39 @@
-import json
 from functools import partial
 from typing import Any, Union
 
-import attr
 import data
+from pydantic import BaseModel
 from runner import Runner, Size
 
 
-@attr.s(auto_attribs=True)
-class Small:
+class Small(BaseModel):
     i: int
     s: str
     f: float
     b: bool
 
 
-@attr.s(auto_attribs=True)
-class Medium:
-    inner: list[Small] = attr.Factory(list)
+class Medium(BaseModel):
+    inner: list[Small] = []
 
 
-@attr.s(auto_attribs=True)
-class Large:
+class Large(BaseModel):
     customer_id: int
     name: str
     email: str
-    preferences: dict[str, Union[str, bool, int]] = attr.Factory(dict)
-    items_list: list[str] = attr.Factory(list)
-    nested_data: dict[str, list[int]] = attr.Factory(dict)
+    preferences: dict[str, Union[str, bool, int]] = {}
+    items_list: list[str] = []
+    nested_data: dict[str, list[int]] = {}
     loyalty_points: int = 0
     created_at: str = ""
 
 
 SMALL = Small(**data.args_sm)
 
-MEDIUM = Medium([Small(**d) for d in data.args_md])
+MEDIUM = Medium(inner=[Small(**d) for d in data.args_md])
 
 
-# Create Large instance
+# Create Large instance with simpler structure but complex data
 def create_large_instance() -> Large:
     return Large(
         customer_id=12345,
@@ -68,23 +64,31 @@ LARGE = create_large_instance()
 
 
 def new(size: Size) -> Runner:
-    name = "attrs"
+    name = "pydantic"
     if size == Size.Small:
         unp = SMALL
+        pac = data.SMALL
+        cls = Small
     elif size == Size.Medium:
         unp = MEDIUM  # type: ignore[assignment]
+        pac = data.MEDIUM
+        cls = Medium  # type: ignore[assignment]
     elif size == Size.Large:
         unp = LARGE  # type: ignore[assignment]
-    return Runner(name, unp, partial(se, unp), None, partial(astuple, unp), partial(asdict, unp))
+        pac = data.LARGE
+        cls = Large  # type: ignore[assignment]
+    return Runner(name, unp, partial(se, unp), partial(de, cls, pac), None, partial(asdict, unp))
 
 
 def se(obj: Union[Small, Medium, Large]) -> str:
-    return json.dumps(attr.asdict(obj))
+    return obj.model_dump_json()
 
 
-def astuple(obj: Union[Small, Medium, Large]) -> tuple[Any, ...]:
-    return attr.astuple(obj)
+def de(
+    cls: Union[type[Small], type[Medium], type[Large]], data: str
+) -> Union[Small, Medium, Large]:
+    return cls.model_validate_json(data)
 
 
 def asdict(obj: Union[Small, Medium, Large]) -> dict[str, Any]:
-    return attr.asdict(obj)
+    return obj.model_dump()

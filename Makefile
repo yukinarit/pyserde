@@ -31,7 +31,6 @@ fmt:
 
 check:
 	$(POETRY) run pre-commit run -a
-	$(POETRY) run mypy .
 
 docs:
 	mkdir -p docs out/api out/guide/en

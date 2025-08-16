@@ -1,19 +1,19 @@
 import json
 from functools import partial
-from typing import Type
+from typing import Union
 
 import dacite
 import data
-from dataclasses_class import MEDIUM, SMALL, Medium, Small
+from dataclasses_class import LARGE, MEDIUM, SMALL, Large, Medium, Small
 from runner import Runner, Size
 
 
-def de(cls: Type, data: str):
+def de(cls: type, data: str) -> Union[Small, Medium, Large]:
     return dacite.from_dict(data_class=cls, data=json.loads(data))
 
 
 def new(size: Size) -> Runner:
-    name = "attrs"
+    name = "dacite"
     if size == Size.Small:
         unp = SMALL
         pac = data.SMALL
@@ -22,4 +22,8 @@ def new(size: Size) -> Runner:
         unp = MEDIUM
         pac = data.MEDIUM
         cls = Medium
+    elif size == Size.Large:
+        unp = LARGE
+        pac = data.LARGE
+        cls = Large
     return Runner(name, unp, None, partial(de, cls, pac), None, None)

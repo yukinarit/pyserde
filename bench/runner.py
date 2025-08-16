@@ -1,6 +1,7 @@
 import enum
 from dataclasses import dataclass
-from typing import Any, Callable
+from collections.abc import Callable
+from typing import Any, Optional
 
 
 class Size(enum.Enum):
@@ -11,9 +12,9 @@ class Size(enum.Enum):
 
 @dataclass
 class Runner:
-    name: Size
+    name: str
     data: Any
-    se: Callable
-    de: Callable
-    astuple: Callable
-    asdict: Callable
+    se: Optional[Callable[..., Any]]
+    de: Optional[Callable[..., Any]]
+    astuple: Optional[Callable[..., Any]]
+    asdict: Optional[Callable[..., Any]]
