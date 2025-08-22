@@ -7,20 +7,28 @@ repos:
       - id: trailing-whitespace
       - id: end-of-file-fixer
 
-  - repo: https://github.com/psf/black
-    rev: 24.10.0
+  - repo: local
     hooks:
       - id: black
-        args:
-          - .
-  - repo: https://github.com/RobertCraigie/pyright-python
-    rev: v1.1.389
-    hooks:
-    - id: pyright
-      additional_dependencies: ['pyyaml', 'msgpack', 'msgpack-types']
-  - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.8.4
-    hooks:
-    - id: ruff
-      args:
-        - --fix
+        name: black
+        entry: poetry run black
+        language: system
+        types: [python]
+        args: [.]
+      - id: pyright
+        name: pyright
+        entry: poetry run pyright
+        language: system
+        types: [python]
+      - id: ruff
+        name: ruff
+        entry: poetry run ruff check --fix
+        language: system
+        types: [python]
+      - id: mypy
+        name: mypy
+        entry: poetry run mypy
+        language: system
+        types: [python]
+        pass_filenames: false
+        args: [serde]

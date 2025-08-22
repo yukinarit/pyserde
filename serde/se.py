@@ -392,13 +392,13 @@ def to_obj(
             return serializable_to_obj(o)
         elif is_serializable(o):
             return serializable_to_obj(o)
-        elif is_bearable(o, list):
+        elif is_bearable(o, list):  # pyright: ignore[reportArgumentType]
             return [thisfunc(e) for e in o]
-        elif is_bearable(o, tuple):
+        elif is_bearable(o, tuple):  # pyright: ignore[reportArgumentType]
             return tuple(thisfunc(e) for e in o)
-        elif is_bearable(o, set):
+        elif is_bearable(o, set):  # pyright: ignore[reportArgumentType]
             return [thisfunc(e) for e in o]
-        elif is_bearable(o, dict):
+        elif is_bearable(o, dict):  # pyright: ignore[reportArgumentType]
             return {k: thisfunc(v) for k, v in o.items()}
         elif is_str_serializable_instance(o) or is_datetime_instance(o):
             se_cls = o.__class__ if not c or c is Any else c
@@ -820,7 +820,7 @@ class Renderer:
             res = f"{arg.varname} if reuse_instances else {arg.varname}.isoformat()"
         elif is_none(arg.type):
             res = "None"
-        elif is_any(arg.type) or is_bearable(arg.type, TypeVar):
+        elif is_any(arg.type) or is_bearable(arg.type, TypeVar):  # pyright: ignore
             res = f"to_obj({arg.varname}, True, False, False, skip_none, typing.Any)"
         elif is_generic(arg.type):
             origin = get_origin(arg.type)
