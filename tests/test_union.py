@@ -859,17 +859,17 @@ def _test_union_with_custom_tags_arguments() -> list[tuple[Any, Any, str]]:
 
     return [
         (
-            ExternalTagging_(tags={Foo: "f", Bar: "b"})(Foo | Bar),
+            ExternalTagging_(tags={Foo: "f", Bar: "b"})(Union[Foo, Bar]),
             Foo(1),
             '{"f":{"v":1}}',
         ),
         (
-            InternalTagging("type", tags={Foo: "f", Bar: "b"})(Foo | Bar),
+            InternalTagging("type", tags={Foo: "f", Bar: "b"})(Union[Foo, Bar]),
             Foo(1),
             '{"v":1,"type":"f"}',
         ),
         (
-            AdjacentTagging("type", "content", tags={Foo: "f", Bar: "b"})(Foo | Bar),
+            AdjacentTagging("type", "content", tags={Foo: "f", Bar: "b"})(Union[Foo, Bar]),
             Foo(1),
             '{"content":{"v":1},"type":"f"}',
         ),
