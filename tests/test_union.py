@@ -880,4 +880,3 @@ def _test_union_with_custom_tags_arguments():
 def test_union_with_custom_tags(cls: type[T], deserialized: T, serialized: str) -> None:
     assert to_json(deserialized, cls=cls) == serialized
     assert from_json(cls, serialized) == deserialized
-

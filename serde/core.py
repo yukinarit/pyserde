@@ -779,7 +779,13 @@ class Tagging:
     kind: Kind = Kind.External
     tags: Optional[frozendict[type[Any], str]] = None
 
-    def __init__(self, tag: Optional[str] = None, content: Optional[str] = None, kind: Kind = Kind.External, tags: Optional[dict[type[Any], str]] = None) -> None:
+    def __init__(
+        self,
+        tag: Optional[str] = None,
+        content: Optional[str] = None,
+        kind: Kind = Kind.External,
+        tags: Optional[dict[type[Any], str]] = None,
+    ) -> None:
         self.tag = tag
         self.content = content
         self.kind = kind
@@ -842,10 +848,14 @@ def InternalTagging(tag: str, *, tags: Optional[dict[type[Any], str]] = None) ->
 
 
 @overload
-def InternalTagging(tag: str, cls: T, *, tags: Optional[dict[type[Any], str]] = None) -> _WithTagging[T]: ...
+def InternalTagging(
+    tag: str, cls: T, *, tags: Optional[dict[type[Any], str]] = None
+) -> _WithTagging[T]: ...
 
 
-def InternalTagging(tag: str, cls: Optional[T] = None, *, tags: Optional[dict[type[Any], str]] = None) -> Union[Tagging, _WithTagging[T]]:
+def InternalTagging(
+    tag: str, cls: Optional[T] = None, *, tags: Optional[dict[type[Any], str]] = None
+) -> Union[Tagging, _WithTagging[T]]:
     tagging = Tagging(tag, kind=Tagging.Kind.Internal, tags=tags)
     if cls:
         return tagging(cls)
@@ -854,11 +864,15 @@ def InternalTagging(tag: str, cls: Optional[T] = None, *, tags: Optional[dict[ty
 
 
 @overload
-def AdjacentTagging(tag: str, content: str, *, tags: Optional[dict[type[Any], str]] = None) -> Tagging: ...
+def AdjacentTagging(
+    tag: str, content: str, *, tags: Optional[dict[type[Any], str]] = None
+) -> Tagging: ...
 
 
 @overload
-def AdjacentTagging(tag: str, content: str, cls: T, *, tags: Optional[dict[type[Any], str]] = None) -> _WithTagging[T]: ...
+def AdjacentTagging(
+    tag: str, content: str, cls: T, *, tags: Optional[dict[type[Any], str]] = None
+) -> _WithTagging[T]: ...
 
 
 def AdjacentTagging(
@@ -879,7 +893,9 @@ def ExternalTagging_(*, tags: dict[type[Any], str]) -> Tagging: ...
 def ExternalTagging_(cls: T, *, tags: dict[type[Any], str]) -> _WithTagging[T]: ...
 
 
-def ExternalTagging_(cls: Optional[T] = None, *, tags: dict[type[Any], str]) -> Union[Tagging, _WithTagging[T]]:
+def ExternalTagging_(
+    cls: Optional[T] = None, *, tags: dict[type[Any], str]
+) -> Union[Tagging, _WithTagging[T]]:
     tagging = Tagging(kind=Tagging.Kind.External, tags=tags)
     if cls:
         return tagging(cls)
