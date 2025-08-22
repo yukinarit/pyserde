@@ -1159,7 +1159,7 @@ def {{func}}(cls=cls, maybe_generic=None, maybe_generic_type_vars=None, data=Non
   {% endfor %}
   raise SerdeError("Can not deserialize " + repr(data) + " of type " + \
           typename(type(data)) + " into {{union_name}}.\\nReasons:\\n" + "\\n".join(errors))
-""",
+""",  # noqa: E501
             "literal": """
 def {{func}}(cls=cls, maybe_generic=None, maybe_generic_type_vars=None, data=None,
              variable_type_args=None, reuse_instances = {{serde_scope.reuse_instances_default}}):

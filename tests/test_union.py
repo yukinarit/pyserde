@@ -848,7 +848,7 @@ def test_union_internal_tagging_for_non_dataclass() -> None:
 T = TypeVar("T")
 
 
-def _test_union_with_custom_tags_arguments():
+def _test_union_with_custom_tags_arguments() -> list[tuple[Any, Any, str]]:
     @dataclass
     class Foo:
         v: int
