@@ -27,6 +27,7 @@ from serde import (
     to_tuple,
     InternalTagging,
     AdjacentTagging,
+    ExternalTagging_,
     Untagged,
 )
 from serde.json import from_json, to_json
@@ -842,3 +843,41 @@ def test_union_internal_tagging_for_non_dataclass() -> None:
 
     f = Foo([10])
     assert f == from_json(Foo, to_json(f))
+
+
+T = TypeVar("T")
+
+
+def _test_union_with_custom_tags_arguments():
+    @dataclass
+    class Foo:
+        v: int
+
+    @dataclass
+    class Bar:
+        w: str
+
+    return [
+        (
+            ExternalTagging_(tags={Foo: "f", Bar: "b"})(Foo | Bar),
+            Foo(1),
+            '{"f":{"v":1}}',
+        ),
+        (
+            InternalTagging("type", tags={Foo: "f", Bar: "b"})(Foo | Bar),
+            Foo(1),
+            '{"v":1,"type":"f"}',
+        ),
+        (
+            AdjacentTagging("type", "content", tags={Foo: "f", Bar: "b"})(Foo | Bar),
+            Foo(1),
+            '{"content":{"v":1},"type":"f"}',
+        ),
+    ]
+
+
+@pytest.mark.parametrize("cls,deserialized,serialized", _test_union_with_custom_tags_arguments())
+def test_union_with_custom_tags(cls: type[T], deserialized: T, serialized: str) -> None:
+    assert to_json(deserialized, cls=cls) == serialized
+    assert from_json(cls, serialized) == deserialized
+

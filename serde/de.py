@@ -1129,18 +1129,18 @@ def {{func}}(cls=cls, maybe_generic=None, maybe_generic_type_vars=None, data=Non
   try:
     # create fake dict so we can reuse the normal render function
     {% if tagging.is_external() and is_taggable(t)  %}
-    ensure("{{typename(t)}}" in data , "'{{typename(t)}}' key is not present")
-    fake_dict = {"fake_key": data["{{typename(t)}}"]}
+    ensure("{{tagging.tag_for(t)}}" in data , "'{{tagging.tag_for(t)}}' key is not present")
+    fake_dict = {"fake_key": data["{{tagging.tag_for(t)}}"]}
 
     {% elif tagging.is_internal() and is_taggable(t) %}
     ensure("{{tagging.tag}}" in data , "'{{tagging.tag}}' key is not present")
-    ensure("{{typename(t)}}" == data["{{tagging.tag}}"], "tag '{{typename(t)}}' isn't found")
+    ensure("{{tagging.tag_for(t)}}" == data["{{tagging.tag}}"], "tag '{{tagging.tag_for(t)}}' isn't found")
     fake_dict = {"fake_key": data}
 
     {% elif tagging.is_adjacent() and is_taggable(t) %}
     ensure("{{tagging.tag}}" in data , "'{{tagging.tag}}' key is not present")
     ensure("{{tagging.content}}" in data , "'{{tagging.content}}' key is not present")
-    ensure("{{typename(t)}}" == data["{{tagging.tag}}"], "tag '{{typename(t)}}' isn't found")
+    ensure("{{tagging.tag_for(t)}}" == data["{{tagging.tag}}"], "tag '{{tagging.tag_for(t)}}' isn't found")
     fake_dict = {"fake_key": data["{{tagging.content}}"]}
 
     {% else %}

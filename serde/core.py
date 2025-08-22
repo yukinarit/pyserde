@@ -11,6 +11,7 @@ import sys
 import re
 import casefy
 from dataclasses import dataclass
+from frozendict import frozendict
 
 from beartype.door import is_bearable
 from collections.abc import Mapping, Sequence, Callable
@@ -776,6 +777,13 @@ class Tagging:
     tag: Optional[str] = None
     content: Optional[str] = None
     kind: Kind = Kind.External
+    tags: Optional[frozendict[type[Any], str]] = None
+
+    def __init__(self, tag: Optional[str] = None, content: Optional[str] = None, kind: Kind = Kind.External, tags: Optional[dict[type[Any], str]] = None) -> None:
+        self.tag = tag
+        self.content = content
+        self.kind = kind
+        self.tags = frozendict(tags) if tags else None
 
     def is_external(self) -> bool:
         return self.kind == self.Kind.External
@@ -792,6 +800,11 @@ class Tagging:
     @classmethod
     def is_taggable(cls, typ: type[Any]) -> bool:
         return dataclasses.is_dataclass(typ)
+
+    def tag_for(self, typ: type[Any]) -> str:
+        if self.tags and typ in self.tags:
+            return self.tags[typ]
+        return typename(typ)
 
     def check(self) -> None:
         if self.is_internal() and self.tag is None:
@@ -825,15 +838,15 @@ class Tagging:
 
 
 @overload
-def InternalTagging(tag: str) -> Tagging: ...
+def InternalTagging(tag: str, *, tags: Optional[dict[type[Any], str]] = None) -> Tagging: ...
 
 
 @overload
-def InternalTagging(tag: str, cls: T) -> _WithTagging[T]: ...
+def InternalTagging(tag: str, cls: T, *, tags: Optional[dict[type[Any], str]] = None) -> _WithTagging[T]: ...
 
 
-def InternalTagging(tag: str, cls: Optional[T] = None) -> Union[Tagging, _WithTagging[T]]:
-    tagging = Tagging(tag, kind=Tagging.Kind.Internal)
+def InternalTagging(tag: str, cls: Optional[T] = None, *, tags: Optional[dict[type[Any], str]] = None) -> Union[Tagging, _WithTagging[T]]:
+    tagging = Tagging(tag, kind=Tagging.Kind.Internal, tags=tags)
     if cls:
         return tagging(cls)
     else:
@@ -841,23 +854,42 @@ def InternalTagging(tag: str, cls: Optional[T] = None) -> Union[Tagging, _WithTa
 
 
 @overload
-def AdjacentTagging(tag: str, content: str) -> Tagging: ...
+def AdjacentTagging(tag: str, content: str, *, tags: Optional[dict[type[Any], str]] = None) -> Tagging: ...
 
 
 @overload
-def AdjacentTagging(tag: str, content: str, cls: T) -> _WithTagging[T]: ...
+def AdjacentTagging(tag: str, content: str, cls: T, *, tags: Optional[dict[type[Any], str]] = None) -> _WithTagging[T]: ...
 
 
 def AdjacentTagging(
-    tag: str, content: str, cls: Optional[T] = None
+    tag: str, content: str, cls: Optional[T] = None, *, tags: Optional[dict[type[Any], str]] = None
 ) -> Union[Tagging, _WithTagging[T]]:
-    tagging = Tagging(tag, content, kind=Tagging.Kind.Adjacent)
+    tagging = Tagging(tag, content, kind=Tagging.Kind.Adjacent, tags=tags)
     if cls:
         return tagging(cls)
     else:
         return tagging
 
 
+@overload
+def ExternalTagging_(*, tags: dict[type[Any], str]) -> Tagging: ...
+
+
+@overload
+def ExternalTagging_(cls: T, *, tags: dict[type[Any], str]) -> _WithTagging[T]: ...
+
+
+def ExternalTagging_(cls: Optional[T] = None, *, tags: dict[type[Any], str]) -> Union[Tagging, _WithTagging[T]]:
+    tagging = Tagging(kind=Tagging.Kind.External, tags=tags)
+    if cls:
+        return tagging(cls)
+    else:
+        return tagging
+
+
+# TODO: This is an instance rather than a function for backwards-compatibility
+# reasons. In the next major version increase this should be replaced with a
+# function.
 ExternalTagging = Tagging()
 
 Untagged = Tagging(kind=Tagging.Kind.Untagged)
