@@ -19,8 +19,6 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
           allow-prereleases: true
-          cache: poetry
-          cache-dependency-path: pyproject.toml
       - name: Install dependencies
         run: make setup
       - name: Run tests
@@ -80,8 +78,6 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-          cache: poetry
-          cache-dependency-path: pyproject.toml
       - name: Install dependencies
         run: poetry install --extras sqlalchemy
       - name: Check coverage
