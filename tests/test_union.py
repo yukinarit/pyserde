@@ -842,3 +842,25 @@ def test_union_internal_tagging_for_non_dataclass() -> None:
 
     f = Foo([10])
     assert f == from_json(Foo, to_json(f))
+
+
+def test_union_internal_tagging_cache_conflict_different_case() -> None:
+    @serde
+    class Foo:
+        v: int
+
+    @serde
+    class Bar:
+        v: int
+
+    union_upper = InternalTagging("TAG")(Union[Foo, Bar])
+    deserialized_upper = Foo(1)
+    serialized_upper = '{"v":1,"TAG":"Foo"}'
+    assert from_json(union_upper, serialized_upper) == deserialized_upper
+    assert to_json(deserialized_upper, union_upper) == serialized_upper
+
+    union_lower = InternalTagging("tag")(Union[Foo, Bar])
+    deserialized_lower = Foo(1)
+    serialized_lower = '{"v":1,"tag":"Foo"}'
+    assert from_json(union_lower, serialized_lower) == deserialized_lower
+    assert to_json(deserialized_lower, union_lower) == serialized_lower
