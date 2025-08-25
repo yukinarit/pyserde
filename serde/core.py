@@ -823,21 +823,29 @@ class Tagging:
         Produce a unique class name for this tagging. The name is used for generated
         wrapper dataclass and stored in `Cache`.
         """
-        if self.is_internal():
-            tag = casefy.pascalcase(self.tag)  # type: ignore
-            if not tag:
-                raise SerdeError('"tag" must be specified in InternalTagging')
-            return f"Internal{tag}"
-        elif self.is_adjacent():
-            tag = casefy.pascalcase(self.tag)  # type: ignore
-            content = casefy.pascalcase(self.content)  # type: ignore
-            if not tag:
-                raise SerdeError('"tag" must be specified in AdjacentTagging')
-            if not content:
-                raise SerdeError('"content" must be specified in AdjacentTagging')
-            return f"Adjacent{tag}{content}"
+        tag = casefy.pascalcase(self.tag) if self.tag is not None else None
+        content = casefy.pascalcase(self.content) if self.content is not None else None
+        if self.tags is not None:
+            pairs = sorted(self.tags.items(), key=lambda pair: typename(pair[0]))
+            parts = (f"{typename(typ)}_{tag}" for typ, tag in pairs)
+            tags = re.sub(r"[^A-Za-z0-9]", "_", "_".join(parts))
         else:
-            return self.kind.name
+            tags = ""
+
+        if self.is_internal():
+            if tag is None:
+                raise SerdeError('"tag" must be specified in InternalTagging')
+            base_name = f"Internal{tag}{tags}"
+        elif self.is_adjacent():
+            if tag is None:
+                raise SerdeError('"tag" must be specified in AdjacentTagging')
+            if content is None:
+                raise SerdeError('"content" must be specified in AdjacentTagging')
+            base_name = f"Adjacent{tag}{content}{tags}"
+        else:
+            base_name = f"{self.kind.name}{tags}"
+
+        return base_name
 
     def __call__(self, cls: T) -> _WithTagging[T]:
         return _WithTagging(cls, self)

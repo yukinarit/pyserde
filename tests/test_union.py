@@ -850,27 +850,27 @@ T = TypeVar("T")
 
 def _test_union_with_custom_tags_arguments() -> list[tuple[Any, Any, str]]:
     @dataclass
-    class FooX:
+    class Foo:
         v: int
 
     @dataclass
-    class BarX:
+    class Bar:
         w: str
 
     return [
         (
-            ExternalTagging_(tags={FooX: "f", BarX: "b"})(Union[FooX, BarX]),
-            FooX(1),
+            ExternalTagging_(tags={Foo: "f", Bar: "b"})(Union[Foo, Bar]),
+            Foo(1),
             '{"f":{"v":1}}',
         ),
         (
-            InternalTagging("type", tags={FooX: "f", BarX: "b"})(Union[FooX, BarX]),
-            FooX(1),
+            InternalTagging("type", tags={Foo: "f", Bar: "b"})(Union[Foo, Bar]),
+            Foo(1),
             '{"v":1,"type":"f"}',
         ),
         (
-            AdjacentTagging("type", "content", tags={FooX: "f", BarX: "b"})(Union[FooX, BarX]),
-            FooX(1),
+            AdjacentTagging("type", "content", tags={Foo: "f", Bar: "b"})(Union[Foo, Bar]),
+            Foo(1),
             '{"content":{"v":1},"type":"f"}',
         ),
     ]
