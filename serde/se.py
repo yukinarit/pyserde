@@ -619,16 +619,16 @@ def {{func}}(obj, reuse_instances, convert_sets, skip_none=False):
   {% for t in union_args %}
   if is_instance(obj, union_args[{{loop.index0}}]):
     {% if tagging.is_external() and is_taggable(t) %}
-    return {"{{typename(t)}}": {{rvalue(arg(t))}}}
+    return {"{{tagging.tag_for(t)}}": {{rvalue(arg(t))}}}
 
     {% elif tagging.is_internal() and is_taggable(t) %}
     res = {{rvalue(arg(t))}}
-    res["{{tagging.tag}}"] = "{{typename(t)}}"
+    res["{{tagging.tag}}"] = "{{tagging.tag_for(t)}}"
     return res
 
     {% elif tagging.is_adjacent() and is_taggable(t) %}
     res = {"{{tagging.content}}": {{rvalue(arg(t))}}}
-    res["{{tagging.tag}}"] = "{{typename(t)}}"
+    res["{{tagging.tag}}"] = "{{tagging.tag_for(t)}}"
     return res
 
     {% else %}
