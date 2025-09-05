@@ -13,7 +13,7 @@ import casefy
 from dataclasses import dataclass
 
 from beartype.door import is_bearable
-from collections.abc import Mapping, Sequence, Callable
+from collections.abc import Mapping, Sequence, Callable, Hashable
 from typing import (
     overload,
     TypeVar,
@@ -86,6 +86,12 @@ LITERAL_DE_PREFIX = "literal_de"
 SETTINGS = {"debug": False}
 
 
+@dataclass(frozen=True)
+class UnionCacheKey:
+    union: Hashable
+    tagging: Tagging
+
+
 def init(debug: bool = False) -> None:
     SETTINGS["debug"] = debug
 
@@ -115,15 +121,14 @@ class Cache:
     should be only once.
     """
 
-    classes: dict[str, type[Any]] = dataclasses.field(default_factory=dict)
+    classes: dict[Hashable, type[Any]] = dataclasses.field(default_factory=dict)
 
     def _get_class(self, cls: type[Any]) -> type[Any]:
         """
         Get a wrapper class from the the cache. If not found, it will generate
         the class and store it in the cache.
         """
-        class_name = f"Wrapper{typename(cls)}"
-        wrapper = self.classes.get(class_name)
+        wrapper = self.classes.get(cls)  # type: ignore[call-overload] # mypy doesn't recognize type[Any] as Hashable
         return wrapper or self._generate_class(cls)
 
     def _generate_class(self, cls: type[Any]) -> type[Any]:
@@ -139,7 +144,7 @@ class Cache:
         wrapper = dataclasses.make_dataclass(class_name, [("v", cls)])
 
         serde(wrapper)
-        self.classes[class_name] = wrapper
+        self.classes[cls] = wrapper  # type: ignore[index] # mypy doesn't recognize type[Any] as Hashable
 
         logger.debug(f"(de)serializing code for {class_name} was generated")
         return wrapper
@@ -170,10 +175,8 @@ class Cache:
         the class and store it in the cache.
         """
         union_cls, tagging = _extract_from_with_tagging(cls)
-        class_name = union_func_name(
-            f"{tagging.produce_unique_class_name()}Union", list(type_args(union_cls))
-        )
-        wrapper = self.classes.get(class_name)
+        cache_key = UnionCacheKey(union=union_cls, tagging=tagging)
+        wrapper = self.classes.get(cache_key)
         return wrapper or self._generate_union_class(cls)
 
     def _generate_union_class(self, cls: type[Any]) -> type[Any]:
@@ -184,12 +187,13 @@ class Cache:
         import serde
 
         union_cls, tagging = _extract_from_with_tagging(cls)
+        cache_key = UnionCacheKey(union=union_cls, tagging=tagging)
         class_name = union_func_name(
             f"{tagging.produce_unique_class_name()}Union", list(type_args(union_cls))
         )
         wrapper = dataclasses.make_dataclass(class_name, [("v", union_cls)])
         serde.serde(wrapper, tagging=tagging)
-        self.classes[class_name] = wrapper
+        self.classes[cache_key] = wrapper
         return wrapper
 
     def serialize_union(self, cls: type[Any], obj: Any) -> Any:
