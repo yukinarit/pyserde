@@ -214,17 +214,10 @@ class Cache:
 
 
 def _extract_from_with_tagging(maybe_with_tagging: Any) -> tuple[Any, Tagging]:
-    try:
-        if isinstance(maybe_with_tagging, _WithTagging):
-            union_cls = maybe_with_tagging.inner
-            tagging = maybe_with_tagging.tagging
-        else:
-            raise Exception()
-    except Exception:
-        union_cls = maybe_with_tagging
-        tagging = ExternalTagging
-
-    return (union_cls, tagging)
+    if isinstance(maybe_with_tagging, _WithTagging):
+        return maybe_with_tagging.inner, maybe_with_tagging.tagging
+    else:
+        return maybe_with_tagging, ExternalTagging
 
 
 CACHE = Cache()
