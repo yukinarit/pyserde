@@ -8,9 +8,9 @@ PyPIからpyserdeをインストールしてください。pyserdeにはPython>=
 pip install pyserde
 ```
 
-poetryを使用している場合は、以下のコマンドを実行してください。
+uvを使用している場合は、以下のコマンドを実行してください。
 ```
-poetry add pyserde
+uv add pyserde
 ```
 
 JSONとPickle以外のデータ形式を扱う場合は、追加の依存関係をインストールする必要があります。  
@@ -22,9 +22,9 @@ JSONとPickle以外のデータ形式を扱う場合は、追加の依存関係�
 pip install "pyserde[toml,yaml]"
 ```
 
-poetryを使用している場合
+uvを使用している場合
 ```
-poetry add pyserde -E toml -E yaml
+uv add pyserde --extra toml --extra yaml
 ```
 
 一度にすべてをインストールする場合
@@ -33,9 +33,9 @@ poetry add pyserde -E toml -E yaml
 pip install "pyserde[all]"
 ```
 
-poetryを使用している場合
+uvを使用している場合
 ```
-poetry add pyserde -E all
+uv add pyserde --extra all
 ```
 
 利用可能な追加パッケージ

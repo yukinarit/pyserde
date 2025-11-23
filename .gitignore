@@ -18,5 +18,4 @@ venv/
 .venv/
 .idea/
 out/
-poetry.lock
 **/book

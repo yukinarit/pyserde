@@ -4,8 +4,8 @@ yamlfile.py
 Read swagger echo example yaml.
 
 Usage:
-    $ poetry install
-    $ poetry run python yamlfile.py
+    $ uv sync
+    $ uv run python yamlfile.py
 """
 
 import pathlib

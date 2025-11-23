@@ -2,7 +2,7 @@
 Serialize and Deserialize in JSON format.
 """
 
-from typing import Any, AnyStr, overload, Optional, Union
+from typing import Any, AnyStr, overload, Optional, Union, cast
 
 from .compat import T
 from .de import Deserializer, from_dict
@@ -14,9 +14,11 @@ try:  # pragma: no cover
     import orjson
 
     def json_dumps(obj: Any, **opts: Any) -> str:
-        if "option" not in opts:
-            opts["option"] = orjson.OPT_SERIALIZE_NUMPY
-        return orjson.dumps(obj, **opts).decode()  # type: ignore
+        if "option" in opts:
+            opts["option"] |= orjson.OPT_NON_STR_KEYS
+        else:
+            opts["option"] = orjson.OPT_SERIALIZE_NUMPY | orjson.OPT_NON_STR_KEYS
+        return cast(str, orjson.dumps(obj, **opts).decode())
 
     def json_loads(s: Union[str, bytes], **opts: Any) -> Any:
         return orjson.loads(s, **opts)

@@ -8,9 +8,9 @@ Install pyserde from PyPI. pyserde requires Python>=3.9.
 pip install pyserde
 ```
 
-If you're using poetry, run this command.
+If you're using uv, run this command.
 ```
-poetry add pyserde
+uv add pyserde
 ```
 
 Additional data formats besides JSON and Pickle need additional dependencies installed. Install `msgpack`, `toml` or `yaml` extras to work with the appropriate data formats; you can skip formats that you don't plan to use. For example, if you want to use Toml and YAML:
@@ -19,9 +19,9 @@ Additional data formats besides JSON and Pickle need additional dependencies ins
 pip install "pyserde[toml,yaml]"
 ```
 
-With poetry
+With uv
 ```
-poetry add pyserde -E toml -E yaml
+uv add pyserde --extra toml --extra yaml
 ```
 
 Or all at once:
@@ -30,9 +30,9 @@ Or all at once:
 pip install "pyserde[all]"
 ```
 
-With poetry
+With uv
 ```
-poetry add pyserde -E all
+uv add pyserde --extra all
 ```
 
 Here are the available extras

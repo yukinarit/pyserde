@@ -4,8 +4,8 @@ jsonfile.py
 Deserialize JSON into an object.
 
 Usage:
-    $ poetry install
-    $ poetry run python jsonfile.py
+    $ uv sync
+    $ uv run python jsonfile.py
 """
 
 from serde import serde

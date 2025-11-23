@@ -4,8 +4,8 @@ tomlfile.py
 Read Pipenv Pipfile by pyserde.
 
 Usage:
-    $ poetry install
-    $ poetry run python tomlfile.py
+    $ uv sync
+    $ uv run python tomlfile.py
 """
 
 from pathlib import Path

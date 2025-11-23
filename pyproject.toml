@@ -1,16 +1,11 @@
-[tool.poetry]
+[project]
 name = "pyserde"
-version = "0.0.0"  # using poetry-dynamic-versioning
 description = "Yet another serialization library on top of dataclasses"
-authors = ["yukinarit <yukinarit84@gmail.com>"]
-license = "MIT"
+authors = [{ name = "yukinarit", email = "yukinarit84@gmail.com" }]
+license = { file = "LICENSE" }
 readme = "README.md"
-repository = "https://github.com/yukinarit/pyserde"
-homepage = "https://github.com/yukinarit/pyserde"
-packages = [
-    { include = "serde" },
-]
-classifiers=[
+requires-python = ">=3.9,<4.0"
+classifiers = [
   "Development Status :: 4 - Beta",
   "Intended Audience :: Developers",
   "License :: OSI Approved :: MIT License",
@@ -22,78 +17,83 @@ classifiers=[
   "Programming Language :: Python :: Implementation :: CPython",
   "Programming Language :: Python :: Implementation :: PyPy",
 ]
-
-[tool.poetry.dependencies]
-python = "^3.9.0"
-typing_inspect = ">=0.4.0"
-typing_extensions = { version = ">=4.1.0,<4.13.0" }
-casefy = "*"
-jinja2 = "*"
-msgpack = { version = "*", markers = "extra == 'msgpack' or extra == 'all'", optional = true }
-tomli = { version = "*", markers = "extra == 'toml' or extra == 'all'", optional = true }
-tomli-w = { version = "*", markers = "extra == 'toml' or extra == 'all'", optional = true }
-pyyaml = { version = "*", markers = "extra == 'yaml' or extra == 'all'", optional = true }
-numpy = [
-  { version = ">1.21.0,<3.0.0", markers = "python_version ~= '3.9.0' and (extra == 'numpy' or extra == 'all')", optional = true },
-  { version = ">1.22.0,<3.0.0", markers = "python_version ~= '3.10' and (extra == 'numpy' or extra == 'all')", optional = true },
-  { version = ">1.22.0,<3.0.0", markers = "python_version ~= '3.11' and (extra == 'numpy' or extra == 'all')", optional = true },
-  { version = ">1.22.0,<3.0.0", markers = "python_version ~= '3.12' and (extra == 'numpy' or extra == 'all')", optional = true },
-  { version = ">1.22.0,<3.0.0", markers = "python_version ~= '3.13' and (extra == 'numpy' or extra == 'all')", optional = true },
+dynamic = ["version"]
+dependencies = [
+  "typing-inspect>=0.4.0",
+  "typing_extensions>=4.1.0,<4.13.0",
+  "casefy",
+  "jinja2",
+  "plum-dispatch>=2.3",
+  "beartype>=0.18.4",
 ]
-jaxtyping = { version = "<0.3.0", markers = "extra == 'jaxtyping' or extra == 'all'", optional = true }
-orjson = { version = "*", markers = "extra == 'orjson' or extra == 'all'", optional = true }
-plum-dispatch = ">=2.3"
-beartype = ">=0.18.4"
-sqlalchemy = { version = ">2", markers = "extra == 'sqlalchemy' or extra == 'all'", optional = true }
 
-[tool.poetry.dev-dependencies]
-pyyaml = "*"
-tomli = { version = "*", markers = "python_version <= '3.11.0'" }
-tomli-w = "*"
-msgpack = "*"
-numpy = [
-  { version = ">1.21.0,<3.0.0", markers = "python_version ~= '3.9.0'" },
-  { version = ">1.22.0,<3.0.0", markers = "python_version ~= '3.10'" },
-  { version = ">1.22.0,<3.0.0", markers = "python_version ~= '3.11'" },
-  { version = ">1.22.0,<3.0.0", markers = "python_version ~= '3.12'" },
-  { version = ">1.22.0,<3.0.0", markers = "python_version ~= '3.13'" },
-]
-mypy = "==1.14.1"
-black = "==24.10.0"
-pyright = "==1.1.389"
-ruff = "==0.8.4"
-pytest = "*"
-pytest-cov = "*"
-pytest-watch = "*"
-pytest-flake8 = "*"
-coverage = "==7.6.8"
-pdoc = "^15"
-more-itertools = "~=10.5.0"
-pre-commit = "==v4.1.0"
-pytest-xdist = "^3.5.0"
-types-PyYAML = "^6.0.9"
-msgpack-types = "^0.5"
-envclasses = "^0.3.1"
-jedi = "*"
-jaxtyping = "<0.3.0"
-
-[tool.poetry.extras]
+[project.optional-dependencies]
 msgpack = ["msgpack"]
-numpy = ["numpy"]
-toml = ["tomli", "tomli-w"]
+toml = [
+  "tomli; python_version < '3.11'",
+  "tomli-w",
+]
 yaml = ["pyyaml"]
+numpy = [
+  "numpy>1.21.0,<3.0.0; python_version >= '3.9' and python_version < '3.10'",
+  "numpy>1.22.0,<3.0.0; python_version >= '3.10'",
+]
+jaxtyping = ["jaxtyping<0.3.0"]
 orjson = ["orjson"]
-sqlalchemy = ["sqlalchemy"]
-jaxtyping = ["jaxtyping"]
-all = ["msgpack", "tomli", "tomli-w", "pyyaml", "numpy", "orjson", "sqlalchemy", "jaxtyping"]
+sqlalchemy = ["sqlalchemy>2"]
+all = [
+  "msgpack",
+  "tomli; python_version < '3.11'",
+  "tomli-w",
+  "pyyaml",
+  "numpy>1.21.0,<3.0.0; python_version >= '3.9' and python_version < '3.10'",
+  "numpy>1.22.0,<3.0.0; python_version >= '3.10'",
+  "jaxtyping<0.3.0",
+  "orjson",
+  "sqlalchemy>2",
+]
+
+[project.urls]
+Repository = "https://github.com/yukinarit/pyserde"
+Homepage = "https://github.com/yukinarit/pyserde"
+
+[dependency-groups]
+dev = [
+  "pyyaml",
+  "tomli; python_version <= '3.11'",
+  "tomli-w",
+  "msgpack",
+  "numpy>1.21.0,<3.0.0; python_version >= '3.9' and python_version < '3.10'",
+  "numpy>1.22.0,<3.0.0; python_version >= '3.10'",
+  "mypy==1.14.1",
+  "black==24.10.0",
+  "pyright==1.1.389",
+  "ruff==0.8.4",
+  "pytest",
+  "pytest-cov",
+  "pytest-watch",
+  "pytest-flake8",
+  "coverage==7.6.8",
+  "pdoc>=15,<16",
+  "more-itertools>=10.5.0,<10.6",
+  "pre-commit==4.1.0",
+  "pytest-xdist>=3.5.0,<4.0",
+  "types-PyYAML>=6.0.9,<7.0",
+  "msgpack-types>=0.5,<0.6",
+  "envclasses>=0.3.1,<0.4",
+  "jedi",
+  "jaxtyping<0.3.0",
+]
 
 [build-system]
-requires = ["poetry-core>=1.0.0", "poetry-dynamic-versioning"]
-build-backend = "poetry_dynamic_versioning.backend"
+requires = ["hatchling>=1.26", "hatch-vcs"]
+build-backend = "hatchling.build"
 
-[tool.poetry-dynamic-versioning]
-enable = true
-style = "pep440"
+[tool.hatch.version]
+source = "vcs"
+
+[tool.hatch.build.targets.wheel]
+packages = ["serde"]
 
 [tool.black]
 target_version = ["py312"]

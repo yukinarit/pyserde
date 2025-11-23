@@ -32,15 +32,9 @@ Thank you for considering contributing to pyserde!
   git remote add upstream https://github.com/yukinarit/pyserde
   git fetch upstream
   ```
-- Install Poetry (used for dependency management and packaging):
-
-  For macOS / Linux / WSL
+- Install [uv](https://github.com/astral-sh/uv) (used for dependency management and packaging). You can follow the [official installation guide](https://docs.astral.sh/uv/getting-started/installation/) or run:
   ```bash
-  curl -sSL https://install.python-poetry.org/ | python -
-  ```
-  For Windows Powershell
-  ```bash
-  (Invoke-WebRequest -Uri https://raw.githubusercontent.com/python-poetry/poetry/main/get-poetry.py -UseBasicParsing).Content | python -
+  curl -LsSf https://astral.sh/uv/install.sh | sh
   ```
 - Run setup script:
   ```bash

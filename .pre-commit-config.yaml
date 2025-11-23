@@ -11,23 +11,23 @@ repos:
     hooks:
       - id: black
         name: black
-        entry: poetry run black
+        entry: uv run --frozen black
         language: system
         types: [python]
         args: [.]
       - id: pyright
         name: pyright
-        entry: poetry run pyright
+        entry: uv run --frozen pyright
         language: system
         types: [python]
       - id: ruff
         name: ruff
-        entry: poetry run ruff check --fix
+        entry: uv run --frozen ruff check --fix
         language: system
         types: [python]
       - id: mypy
         name: mypy
-        entry: poetry run mypy
+        entry: uv run --frozen mypy
         language: system
         types: [python]
         pass_filenames: false

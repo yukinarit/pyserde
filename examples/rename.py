@@ -3,8 +3,8 @@ rename.py
 
 
 Usage:
-    $ poetry install
-    $ poetry run python rename.py
+    $ uv sync
+    $ uv run python rename.py
 """
 
 from serde import field, serde
