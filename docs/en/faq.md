@@ -11,8 +11,8 @@ e.g. in pyserde project
 
 ```
 cd pyserde
-poetry shell
-python -m serde.inspect examples/simple.py Foo
+uv sync
+uv run python -m serde.inspect examples/simple.py Foo
 ```
 
 Output

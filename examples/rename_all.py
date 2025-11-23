@@ -3,8 +3,8 @@ rename_all.py
 
 
 Usage:
-    $ poetry install
-    $ poetry run python rename_all.py
+    $ uv sync
+    $ uv run python rename_all.py
 """
 
 from serde import serde

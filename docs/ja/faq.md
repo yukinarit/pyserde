@@ -11,8 +11,8 @@ python -m serde.inspect <PATH_TO_FILE> <CLASS>
 
 ```
 cd pyserde
-poetry shell
-python -m serde.inspect examples/simple.py Foo
+uv sync
+uv run python -m serde.inspect examples/simple.py Foo
 ```
 
 出力

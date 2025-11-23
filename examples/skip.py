@@ -4,8 +4,8 @@ skip.py
 Example usage of skip and skip_if attributes.
 
 Usage:
-    $ poetry install
-    $ poetry run python skip.py
+    $ uv sync
+    $ uv run python skip.py
 """
 
 from serde import field, serde
