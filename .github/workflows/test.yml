@@ -28,7 +28,7 @@ jobs:
       - name: Run examples
         run: |
           make examples
-        if: matrix.python-version == '3.12'
+        if: matrix.python-version == '3.13'
       - name: Run tests (orjson)
         run: |
           uv sync --extra orjson --frozen
@@ -36,7 +36,7 @@ jobs:
       - name: Run examples (orjson)
         run: |
           make examples
-        if: matrix.python-version == '3.12'
+        if: matrix.python-version == '3.13'
       - name: Run tests (sqlalchemy)
         run: |
           uv sync --extra sqlalchemy --frozen
@@ -44,7 +44,7 @@ jobs:
       - name: Run examples (sqlalchemy)
         run: |
           make examples
-        if: matrix.python-version == '3.12'
+        if: matrix.python-version == '3.13'
 
   check_formatting:
     name: Check formatting
@@ -53,10 +53,10 @@ jobs:
       - uses: actions/checkout@v4
       - name: Install uv
         uses: astral-sh/setup-uv@v5
-      - name: Set up Python 3.12
+      - name: Set up Python 3.13
         uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
+          python-version: "3.13"
       - name: Check formatting
         run: UV_FROZEN=1 make setup check
       - name: Comment PR
@@ -73,10 +73,10 @@ jobs:
       - uses: actions/checkout@v4
       - name: Install uv
         uses: astral-sh/setup-uv@v5
-      - name: Set up Python 3.12
+      - name: Set up Python 3.13
         uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
+          python-version: "3.13"
       - name: Install dependencies
         run: uv sync --extra sqlalchemy --frozen
       - name: Check coverage
