@@ -1,6 +1,10 @@
-from serde import serde
-from serde.json import to_json, from_json
 from typing import Optional, Union, List
+
+import pytest
+
+import serde as serde_pkg
+from serde import serde
+from serde.json import deserialize_json_numbers, from_json, to_json
 
 
 def test_json_basics() -> None:
@@ -75,3 +79,60 @@ def test_skip_none_nested() -> None:
     result = to_json(w, skip_none=True)
     expected = '{"items":[{"a":1},{"a":2,"b":3}]}'
     assert result == expected
+
+
+def test_deserialize_json_numbers() -> None:
+    @serde
+    class Foo:
+        value: float = serde_pkg.field(deserializer=deserialize_json_numbers)
+
+    assert from_json(Foo, '{"value": 0}').value == 0.0
+    assert from_json(Foo, '{"value": 0.5}').value == 0.5
+
+    with pytest.raises(serde_pkg.SerdeError):
+        from_json(Foo, '{"value": true}')
+
+
+def test_coerce_numbers_json() -> None:
+    @serde
+    class Foo:
+        value: float
+
+    foo = from_json(Foo, '{"value": 1}')
+    assert foo.value == 1.0
+
+    @serde
+    class Bar:
+        values: List[float]
+
+    bar = from_json(Bar, '{"values":[1,2]}')
+    assert bar.values == [1.0, 2.0]
+
+    with pytest.raises(serde_pkg.SerdeError):
+        from_json(Bar, '{"values":[1,"2"]}')
+
+    with pytest.raises(serde_pkg.SerdeError):
+        from_json(Foo, '{"value": 1}', coerce_numbers=False)
+
+    with pytest.raises(serde_pkg.SerdeError):
+        from_json(Foo, '{"value": true}')
+
+
+def test_json_numbers_with_union() -> None:
+    @serde
+    class Foo:
+        value: Union[float, int]
+
+    assert from_json(Foo, '{"value": 1}').value == 1.0
+
+    with pytest.raises(serde_pkg.SerdeError):
+        from_json(Foo, '{"value": "1"}')
+
+    @serde
+    class Bar:
+        value: Union[int, float]
+
+    assert from_json(Bar, '{"value": 1}').value == 1
+
+    with pytest.raises(serde_pkg.SerdeError):
+        from_json(Bar, '{"value": "1"}')

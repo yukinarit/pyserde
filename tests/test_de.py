@@ -3,7 +3,7 @@ from decimal import Decimal
 from typing import Union, Optional
 from serde import serde, SerdeError, field
 from serde.json import from_json
-from serde.de import deserialize, from_obj, Renderer, DeField
+from serde.de import deserialize, from_obj, from_dict, Renderer, DeField
 
 
 def test_from_obj() -> None:
@@ -30,8 +30,36 @@ def test_from_obj() -> None:
 
 kwargs = (
     "maybe_generic=maybe_generic, maybe_generic_type_vars=maybe_generic_type_vars, "
-    + "variable_type_args=None, reuse_instances=reuse_instances"
+    "variable_type_args=None, reuse_instances=reuse_instances, "
+    "deserialize_numbers=deserialize_numbers"
 )
+
+
+def test_deserialize_numbers_option() -> None:
+    def coerce_numbers(val: Union[str, int]) -> float:
+        if isinstance(val, bool):
+            raise SerdeError("bool not allowed")
+        return float(val)
+
+    @serde
+    class Foo:
+        value: float
+        values: list[float]
+
+    foo = from_dict(
+        Foo,
+        {"value": "1.0", "values": ["1", 2]},
+        deserialize_numbers=coerce_numbers,
+    )
+    assert foo.value == 1.0
+    assert foo.values == [1.0, 2.0]
+
+    with pytest.raises(SerdeError):
+        from_dict(
+            Foo,
+            {"value": True, "values": []},
+            deserialize_numbers=coerce_numbers,
+        )
 
 
 def test_render_primitives() -> None:

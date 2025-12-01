@@ -52,8 +52,9 @@ def test_types() -> None:
     assert is_tuple(tuple)
     assert is_dict(dict)
 
+    Int = NewType("Int", int)
     assert is_primitive(int)
-    assert is_primitive(NewType("Int", int))
+    assert is_primitive(Int)  # type: ignore[arg-type]
 
     if sys.version_info[:3] >= (3, 10, 0):
         assert is_union(str | int)
