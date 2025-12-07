@@ -23,6 +23,7 @@ from typing import (
     Protocol,
     get_type_hints,
     Union,
+    cast,
 )
 
 from .compat import (
@@ -206,7 +207,12 @@ class Cache:
         func_name = union_func_name(UNION_SE_PREFIX, list(type_args(union_cls)))
         return scope.funcs[func_name](obj, False, False)
 
-    def deserialize_union(self, cls: type[T], data: Any) -> T:
+    def deserialize_union(
+        self,
+        cls: type[T],
+        data: Any,
+        deserialize_numbers: Optional[Callable[[Union[str, int]], float]] = None,
+    ) -> T:
         """
         Deserialize from dict or tuple into the specified Union.
         """
@@ -214,7 +220,12 @@ class Cache:
         wrapper = self._get_union_class(cls)
         scope: Scope = getattr(wrapper, SERDE_SCOPE)
         func_name = union_func_name(UNION_DE_PREFIX, list(type_args(union_cls)))
-        return scope.funcs[func_name](cls=union_cls, data=data)  # type: ignore
+        return cast(
+            T,
+            scope.funcs[func_name](
+                cls=union_cls, data=data, deserialize_numbers=deserialize_numbers
+            ),
+        )
 
 
 def _extract_from_with_tagging(maybe_with_tagging: Any) -> tuple[Any, Tagging]:

@@ -93,7 +93,7 @@ class Bencher:
             try:
                 import matplotlib.pyplot as plt
                 import numpy as np
-                import seaborn as sns
+                import seaborn as sns  # type: ignore[import]
 
                 x = np.array([r[0] for r in self.result])
                 y = np.array([r[1] for r in self.result])

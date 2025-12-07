@@ -17,7 +17,7 @@ from beartype import beartype, BeartypeConf
 from beartype.door import is_bearable
 from beartype.roar import BeartypeCallHintParamViolation
 from dataclasses import dataclass, is_dataclass
-from typing import overload, TypeVar, Generic, Any, Optional, Union, Literal, Iterator
+from typing import overload, TypeVar, Generic, Any, Optional, Union, Literal, Iterator, cast
 from typing_extensions import dataclass_transform
 
 from .compat import (
@@ -417,10 +417,20 @@ class Deserializer(Generic[T], metaclass=abc.ABCMeta):
         raise NotImplementedError
 
 
-def from_obj(c: type[T], o: Any, named: bool, reuse_instances: Optional[bool]) -> T:
+def from_obj(
+    c: type[T],
+    o: Any,
+    named: bool,
+    reuse_instances: Optional[bool],
+    deserialize_numbers: Optional[Callable[[Union[str, int]], float]] = None,
+) -> T:
     """
     Deserialize from an object into an instance of the type specified as arg `c`.
     `c` can be either primitive type, `list`, `tuple`, `dict` or `deserialize` class.
+
+    * `deserialize_numbers`: Optional callable to coerce numeric input into float (and subclasses)
+      when a float target is encountered. Useful for callers that want to treat ints or strings as
+      floats.
     """
 
     res: Any
@@ -434,7 +444,11 @@ def from_obj(c: type[T], o: Any, named: bool, reuse_instances: Optional[bool]) -
         serde_scope: Scope = getattr(cls, SERDE_SCOPE)
         func_name = FROM_DICT if named else FROM_ITER
         res = serde_scope.funcs[func_name](
-            cls, maybe_generic=maybe_generic, data=o, reuse_instances=reuse_instances
+            cls,
+            maybe_generic=maybe_generic,
+            data=o,
+            reuse_instances=reuse_instances,
+            deserialize_numbers=deserialize_numbers,
         )
         return res  # type: ignore
 
@@ -442,7 +456,7 @@ def from_obj(c: type[T], o: Any, named: bool, reuse_instances: Optional[bool]) -
         # If a class in the argument is a non-dataclass class e.g. Union[Foo, Bar],
         # pyserde generates a wrapper (de)serializable dataclass on the fly,
         # and use it to deserialize into the object.
-        return CACHE.deserialize_union(c, o)
+        return CACHE.deserialize_union(c, o, deserialize_numbers=deserialize_numbers)
 
     if is_generic(c):
         # Store subscripted generic type such as Foo[Bar] in "maybe_generic",
@@ -454,7 +468,12 @@ def from_obj(c: type[T], o: Any, named: bool, reuse_instances: Optional[bool]) -
     else:
         maybe_generic = c
     try:
-        thisfunc = functools.partial(from_obj, named=named, reuse_instances=reuse_instances)
+        thisfunc = functools.partial(
+            from_obj,
+            named=named,
+            reuse_instances=reuse_instances,
+            deserialize_numbers=deserialize_numbers,
+        )
         if is_dataclass_without_de(c):
             # Do not automatically implement beartype if dataclass without serde decorator
             # is passed, because it is surprising for users
@@ -509,12 +528,14 @@ def from_obj(c: type[T], o: Any, named: bool, reuse_instances: Optional[bool]) -
             res = deserialize_numpy_array_direct(c, o)
         elif is_datetime(c):
             res = c.fromisoformat(o)
+        elif isinstance(c, type) and issubclass(c, float):
+            res = deserialize_numbers(o) if deserialize_numbers else c(o)
         elif is_any(c) or is_ellipsis(c):
             res = o
         else:
-            res = c(o)  # type: ignore
+            res = cast(Any, c)(o)
 
-        return res  # type: ignore
+        return cast(T, res)
 
     except UserError as e:
         raise e.inner from None
@@ -524,14 +545,29 @@ def from_obj(c: type[T], o: Any, named: bool, reuse_instances: Optional[bool]) -
 
 
 @overload
-def from_dict(cls: type[T], o: dict[str, Any], reuse_instances: Optional[bool] = None) -> T: ...
+def from_dict(
+    cls: type[T],
+    o: dict[str, Any],
+    reuse_instances: Optional[bool] = None,
+    deserialize_numbers: Optional[Callable[[Union[str, int]], float]] = None,
+) -> T: ...
 
 
 @overload
-def from_dict(cls: Any, o: dict[str, Any], reuse_instances: Optional[bool] = None) -> Any: ...
+def from_dict(
+    cls: Any,
+    o: dict[str, Any],
+    reuse_instances: Optional[bool] = None,
+    deserialize_numbers: Optional[Callable[[Union[str, int]], float]] = None,
+) -> Any: ...
 
 
-def from_dict(cls: Any, o: dict[str, Any], reuse_instances: Optional[bool] = None) -> Any:
+def from_dict(
+    cls: Any,
+    o: dict[str, Any],
+    reuse_instances: Optional[bool] = None,
+    deserialize_numbers: Optional[Callable[[Union[str, int]], float]] = None,
+) -> Any:
     """
     Deserialize dictionary into object.
 
@@ -547,23 +583,47 @@ def from_dict(cls: Any, o: dict[str, Any], reuse_instances: Optional[bool] = Non
 
     You can pass any type supported by pyserde. For example,
 
+    * `deserialize_numbers`: Optional callable to coerce numeric input to floats when the target
+      type is float (e.g. accept ints or numeric strings supplied by a parser).
+
     >>> lst = [{'i': 10, 's': 'foo', 'f': 100.0, 'b': True},
     ...        {'i': 20, 's': 'foo', 'f': 100.0, 'b': True}]
     >>> from_dict(list[Foo], lst)
     [Foo(i=10, s='foo', f=100.0, b=True), Foo(i=20, s='foo', f=100.0, b=True)]
     """
-    return from_obj(cls, o, named=True, reuse_instances=reuse_instances)
+    return from_obj(
+        cls,
+        o,
+        named=True,
+        reuse_instances=reuse_instances,
+        deserialize_numbers=deserialize_numbers,
+    )
 
 
 @overload
-def from_tuple(cls: type[T], o: Any, reuse_instances: Optional[bool] = None) -> T: ...
+def from_tuple(
+    cls: type[T],
+    o: Any,
+    reuse_instances: Optional[bool] = None,
+    deserialize_numbers: Optional[Callable[[Union[str, int]], float]] = None,
+) -> T: ...
 
 
 @overload
-def from_tuple(cls: Any, o: Any, reuse_instances: Optional[bool] = None) -> Any: ...
+def from_tuple(
+    cls: Any,
+    o: Any,
+    reuse_instances: Optional[bool] = None,
+    deserialize_numbers: Optional[Callable[[Union[str, int]], float]] = None,
+) -> Any: ...
 
 
-def from_tuple(cls: Any, o: Any, reuse_instances: Optional[bool] = None) -> Any:
+def from_tuple(
+    cls: Any,
+    o: Any,
+    reuse_instances: Optional[bool] = None,
+    deserialize_numbers: Optional[Callable[[Union[str, int]], float]] = None,
+) -> Any:
     """
     Deserialize tuple into object.
 
@@ -579,11 +639,20 @@ def from_tuple(cls: Any, o: Any, reuse_instances: Optional[bool] = None) -> Any:
 
     You can pass any type supported by pyserde. For example,
 
+    * `deserialize_numbers`: Optional callable to coerce numeric input to floats when the target
+      type is float (e.g. accept ints or numeric strings supplied by a parser).
+
     >>> lst = [(10, 'foo', 100.0, True), (20, 'foo', 100.0, True)]
     >>> from_tuple(list[Foo], lst)
     [Foo(i=10, s='foo', f=100.0, b=True), Foo(i=20, s='foo', f=100.0, b=True)]
     """
-    return from_obj(cls, o, named=False, reuse_instances=reuse_instances)
+    return from_obj(
+        cls,
+        o,
+        named=False,
+        reuse_instances=reuse_instances,
+        deserialize_numbers=deserialize_numbers,
+    )
 
 
 @dataclass
@@ -806,7 +875,7 @@ class Renderer:
             res = (
                 f"from_obj(get_generic_arg(maybe_generic, maybe_generic_type_vars, "
                 f"variable_type_args, {index}), {arg.data}, named={not arg.iterbased}, "
-                "reuse_instances=reuse_instances)"
+                "reuse_instances=reuse_instances, deserialize_numbers=deserialize_numbers)"
             )
         elif is_literal(arg.type):
             res = self.literal(arg)
@@ -867,7 +936,8 @@ class Renderer:
 
         opts = (
             "maybe_generic=maybe_generic, maybe_generic_type_vars=maybe_generic_type_vars, "
-            f"variable_type_args={type_args_str}, reuse_instances=reuse_instances"
+            f"variable_type_args={type_args_str}, reuse_instances=reuse_instances, "
+            "deserialize_numbers=deserialize_numbers"
         )
 
         if arg.is_self_referencing():
@@ -977,6 +1047,16 @@ class Renderer:
         if arg.alias:
             aliases = (f'"{s}"' for s in [arg.name, *arg.alias])
             dat = f"_get_by_aliases(data, [{','.join(aliases)}])"
+        if isinstance(arg.type, type) and issubclass(arg.type, float):
+            if self.suppress_coerce and suppress_coerce:
+                return f"deserialize_numbers({dat}) if deserialize_numbers else {dat}"
+            else:
+                assert arg.name
+                escaped_arg_name = arg.name.replace('"', '\\"')
+                return (
+                    f"deserialize_numbers({dat}) if deserialize_numbers else "
+                    f'coerce_object("{self.class_name}", "{escaped_arg_name}", {typ}, {dat})'
+                )
         if self.suppress_coerce and suppress_coerce:
             return dat
         else:
@@ -998,7 +1078,8 @@ class Renderer:
             f"serde_scope.funcs['{func_name}']("
             "cls=cls, "
             f"data={arg.data}, "
-            "reuse_instances=reuse_instances)"
+            "reuse_instances=reuse_instances, "
+            "deserialize_numbers=deserialize_numbers)"
         )
 
     def literal(self, arg: DeField[Any]) -> str:
@@ -1007,7 +1088,8 @@ class Renderer:
             f"serde_scope.funcs['{func_name}']("
             "cls=cls, "
             f"data={arg.data}, "
-            "reuse_instances=reuse_instances)"
+            "reuse_instances=reuse_instances, "
+            "deserialize_numbers=deserialize_numbers)"
         )
 
     def default(self, arg: DeField[Any], code: str) -> str:
@@ -1066,7 +1148,7 @@ jinja2_env = jinja2.Environment(
         {
             "iter": """
 def {{func}}(cls=cls, maybe_generic=None, maybe_generic_type_vars=None, data=None,
-             variable_type_args=None, reuse_instances=None):
+             variable_type_args=None, reuse_instances=None, deserialize_numbers=None):
   if reuse_instances is None:
     reuse_instances = {{serde_scope.reuse_instances_default}}
 
@@ -1089,7 +1171,7 @@ def {{func}}(cls=cls, maybe_generic=None, maybe_generic_type_vars=None, data=Non
 """,
             "dict": """
 def {{func}}(cls=cls, maybe_generic=None, maybe_generic_type_vars=None, data=None,
-             variable_type_args=None, reuse_instances=None):
+             variable_type_args=None, reuse_instances=None, deserialize_numbers=None):
   if reuse_instances is None:
     reuse_instances = {{serde_scope.reuse_instances_default}}
 
@@ -1123,7 +1205,8 @@ def {{func}}(cls=cls, maybe_generic=None, maybe_generic_type_vars=None, data=Non
 """,
             "union": """
 def {{func}}(cls=cls, maybe_generic=None, maybe_generic_type_vars=None, data=None,
-             variable_type_args=None, reuse_instances = {{serde_scope.reuse_instances_default}}):
+             variable_type_args=None, reuse_instances = {{serde_scope.reuse_instances_default}},
+             deserialize_numbers=None):
   errors = []
   {% for t in union_args %}
   try:
@@ -1162,7 +1245,8 @@ def {{func}}(cls=cls, maybe_generic=None, maybe_generic_type_vars=None, data=Non
 """,
             "literal": """
 def {{func}}(cls=cls, maybe_generic=None, maybe_generic_type_vars=None, data=None,
-             variable_type_args=None, reuse_instances = {{serde_scope.reuse_instances_default}}):
+             variable_type_args=None, reuse_instances = {{serde_scope.reuse_instances_default}},
+             deserialize_numbers=None):
   if data in ({%- for v in literal_args -%}{{repr(v)}},{%- endfor -%}):
     return data
   raise SerdeError("Can not deserialize " + repr(data) + " as {{literal_name}}.")
