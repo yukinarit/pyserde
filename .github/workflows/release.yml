@@ -19,9 +19,10 @@ jobs:
           python-version: "3.10"
       - name: Install dependencies
         run: uv sync --frozen
+      - name: Build artifacts
+        run: uv build
       - name: Publish to PyPI
-        run: |
-          uv publish --token ${{ secrets.PYPI_API_TOKEN }}
+        run: uv publish --token ${{ secrets.PYPI_API_TOKEN }}
   release-docs:
     runs-on: ubuntu-latest
     steps:
