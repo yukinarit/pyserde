@@ -1242,34 +1242,48 @@ the following example serializes list of pyserde objects into dict.</p>
 <div class="attr function">
             
         <span class="def">def</span>
-        <span class="name">from_dict</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="bp">cls</span><span class="p">:</span> <span class="n">Any</span>,</span><span class="param">	<span class="n">o</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">]</span>,</span><span class="param">	<span class="n">reuse_instances</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span></span><span class="return-annotation">) -> <span class="n">Any</span>:</span></span>
+        <span class="name">from_dict</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="bp">cls</span><span class="p">:</span> <span class="n">Any</span>,</span><span class="param">	<span class="n">o</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">]</span>,</span><span class="param">	<span class="n">reuse_instances</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>,</span><span class="param">	<span class="n">deserialize_numbers</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Callable</span><span class="p">[[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]],</span> <span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span></span><span class="return-annotation">) -> <span class="n">Any</span>:</span></span>
 
                 <label class="view-source-button" for="from_dict-view-source"><span>View Source</span></label>
 
     </div>
     <a class="headerlink" href="#from_dict"></a>
-            <div class="pdoc-code codehilite"><pre><span></span><span id="from_dict-535"><a href="#from_dict-535"><span class="linenos">535</span></a><span class="k">def</span><span class="w"> </span><span class="nf">from_dict</span><span class="p">(</span><span class="bp">cls</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">o</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="n">reuse_instances</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
-</span><span id="from_dict-536"><a href="#from_dict-536"><span class="linenos">536</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-</span><span id="from_dict-537"><a href="#from_dict-537"><span class="linenos">537</span></a><span class="sd">    Deserialize dictionary into object.</span>
-</span><span id="from_dict-538"><a href="#from_dict-538"><span class="linenos">538</span></a>
-</span><span id="from_dict-539"><a href="#from_dict-539"><span class="linenos">539</span></a><span class="sd">    &gt;&gt;&gt; @deserialize</span>
-</span><span id="from_dict-540"><a href="#from_dict-540"><span class="linenos">540</span></a><span class="sd">    ... class Foo:</span>
-</span><span id="from_dict-541"><a href="#from_dict-541"><span class="linenos">541</span></a><span class="sd">    ...     i: int</span>
-</span><span id="from_dict-542"><a href="#from_dict-542"><span class="linenos">542</span></a><span class="sd">    ...     s: str = &#39;foo&#39;</span>
-</span><span id="from_dict-543"><a href="#from_dict-543"><span class="linenos">543</span></a><span class="sd">    ...     f: float = 100.0</span>
-</span><span id="from_dict-544"><a href="#from_dict-544"><span class="linenos">544</span></a><span class="sd">    ...     b: bool = True</span>
-</span><span id="from_dict-545"><a href="#from_dict-545"><span class="linenos">545</span></a><span class="sd">    &gt;&gt;&gt;</span>
-</span><span id="from_dict-546"><a href="#from_dict-546"><span class="linenos">546</span></a><span class="sd">    &gt;&gt;&gt; from_dict(Foo, {&#39;i&#39;: 10, &#39;s&#39;: &#39;foo&#39;, &#39;f&#39;: 100.0, &#39;b&#39;: True})</span>
-</span><span id="from_dict-547"><a href="#from_dict-547"><span class="linenos">547</span></a><span class="sd">    Foo(i=10, s=&#39;foo&#39;, f=100.0, b=True)</span>
-</span><span id="from_dict-548"><a href="#from_dict-548"><span class="linenos">548</span></a>
-</span><span id="from_dict-549"><a href="#from_dict-549"><span class="linenos">549</span></a><span class="sd">    You can pass any type supported by pyserde. For example,</span>
-</span><span id="from_dict-550"><a href="#from_dict-550"><span class="linenos">550</span></a>
-</span><span id="from_dict-551"><a href="#from_dict-551"><span class="linenos">551</span></a><span class="sd">    &gt;&gt;&gt; lst = [{&#39;i&#39;: 10, &#39;s&#39;: &#39;foo&#39;, &#39;f&#39;: 100.0, &#39;b&#39;: True},</span>
-</span><span id="from_dict-552"><a href="#from_dict-552"><span class="linenos">552</span></a><span class="sd">    ...        {&#39;i&#39;: 20, &#39;s&#39;: &#39;foo&#39;, &#39;f&#39;: 100.0, &#39;b&#39;: True}]</span>
-</span><span id="from_dict-553"><a href="#from_dict-553"><span class="linenos">553</span></a><span class="sd">    &gt;&gt;&gt; from_dict(list[Foo], lst)</span>
-</span><span id="from_dict-554"><a href="#from_dict-554"><span class="linenos">554</span></a><span class="sd">    [Foo(i=10, s=&#39;foo&#39;, f=100.0, b=True), Foo(i=20, s=&#39;foo&#39;, f=100.0, b=True)]</span>
-</span><span id="from_dict-555"><a href="#from_dict-555"><span class="linenos">555</span></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="from_dict-556"><a href="#from_dict-556"><span class="linenos">556</span></a>    <span class="k">return</span> <span class="n">from_obj</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">o</span><span class="p">,</span> <span class="n">named</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">reuse_instances</span><span class="o">=</span><span class="n">reuse_instances</span><span class="p">)</span>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="from_dict-566"><a href="#from_dict-566"><span class="linenos">566</span></a><span class="k">def</span><span class="w"> </span><span class="nf">from_dict</span><span class="p">(</span>
+</span><span id="from_dict-567"><a href="#from_dict-567"><span class="linenos">567</span></a>    <span class="bp">cls</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+</span><span id="from_dict-568"><a href="#from_dict-568"><span class="linenos">568</span></a>    <span class="n">o</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
+</span><span id="from_dict-569"><a href="#from_dict-569"><span class="linenos">569</span></a>    <span class="n">reuse_instances</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="from_dict-570"><a href="#from_dict-570"><span class="linenos">570</span></a>    <span class="n">deserialize_numbers</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Callable</span><span class="p">[[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]],</span> <span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="from_dict-571"><a href="#from_dict-571"><span class="linenos">571</span></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+</span><span id="from_dict-572"><a href="#from_dict-572"><span class="linenos">572</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+</span><span id="from_dict-573"><a href="#from_dict-573"><span class="linenos">573</span></a><span class="sd">    Deserialize dictionary into object.</span>
+</span><span id="from_dict-574"><a href="#from_dict-574"><span class="linenos">574</span></a>
+</span><span id="from_dict-575"><a href="#from_dict-575"><span class="linenos">575</span></a><span class="sd">    &gt;&gt;&gt; @deserialize</span>
+</span><span id="from_dict-576"><a href="#from_dict-576"><span class="linenos">576</span></a><span class="sd">    ... class Foo:</span>
+</span><span id="from_dict-577"><a href="#from_dict-577"><span class="linenos">577</span></a><span class="sd">    ...     i: int</span>
+</span><span id="from_dict-578"><a href="#from_dict-578"><span class="linenos">578</span></a><span class="sd">    ...     s: str = &#39;foo&#39;</span>
+</span><span id="from_dict-579"><a href="#from_dict-579"><span class="linenos">579</span></a><span class="sd">    ...     f: float = 100.0</span>
+</span><span id="from_dict-580"><a href="#from_dict-580"><span class="linenos">580</span></a><span class="sd">    ...     b: bool = True</span>
+</span><span id="from_dict-581"><a href="#from_dict-581"><span class="linenos">581</span></a><span class="sd">    &gt;&gt;&gt;</span>
+</span><span id="from_dict-582"><a href="#from_dict-582"><span class="linenos">582</span></a><span class="sd">    &gt;&gt;&gt; from_dict(Foo, {&#39;i&#39;: 10, &#39;s&#39;: &#39;foo&#39;, &#39;f&#39;: 100.0, &#39;b&#39;: True})</span>
+</span><span id="from_dict-583"><a href="#from_dict-583"><span class="linenos">583</span></a><span class="sd">    Foo(i=10, s=&#39;foo&#39;, f=100.0, b=True)</span>
+</span><span id="from_dict-584"><a href="#from_dict-584"><span class="linenos">584</span></a>
+</span><span id="from_dict-585"><a href="#from_dict-585"><span class="linenos">585</span></a><span class="sd">    You can pass any type supported by pyserde. For example,</span>
+</span><span id="from_dict-586"><a href="#from_dict-586"><span class="linenos">586</span></a>
+</span><span id="from_dict-587"><a href="#from_dict-587"><span class="linenos">587</span></a><span class="sd">    * `deserialize_numbers`: Optional callable to coerce numeric input to floats when the target</span>
+</span><span id="from_dict-588"><a href="#from_dict-588"><span class="linenos">588</span></a><span class="sd">      type is float (e.g. accept ints or numeric strings supplied by a parser).</span>
+</span><span id="from_dict-589"><a href="#from_dict-589"><span class="linenos">589</span></a>
+</span><span id="from_dict-590"><a href="#from_dict-590"><span class="linenos">590</span></a><span class="sd">    &gt;&gt;&gt; lst = [{&#39;i&#39;: 10, &#39;s&#39;: &#39;foo&#39;, &#39;f&#39;: 100.0, &#39;b&#39;: True},</span>
+</span><span id="from_dict-591"><a href="#from_dict-591"><span class="linenos">591</span></a><span class="sd">    ...        {&#39;i&#39;: 20, &#39;s&#39;: &#39;foo&#39;, &#39;f&#39;: 100.0, &#39;b&#39;: True}]</span>
+</span><span id="from_dict-592"><a href="#from_dict-592"><span class="linenos">592</span></a><span class="sd">    &gt;&gt;&gt; from_dict(list[Foo], lst)</span>
+</span><span id="from_dict-593"><a href="#from_dict-593"><span class="linenos">593</span></a><span class="sd">    [Foo(i=10, s=&#39;foo&#39;, f=100.0, b=True), Foo(i=20, s=&#39;foo&#39;, f=100.0, b=True)]</span>
+</span><span id="from_dict-594"><a href="#from_dict-594"><span class="linenos">594</span></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="from_dict-595"><a href="#from_dict-595"><span class="linenos">595</span></a>    <span class="k">return</span> <span class="n">from_obj</span><span class="p">(</span>
+</span><span id="from_dict-596"><a href="#from_dict-596"><span class="linenos">596</span></a>        <span class="bp">cls</span><span class="p">,</span>
+</span><span id="from_dict-597"><a href="#from_dict-597"><span class="linenos">597</span></a>        <span class="n">o</span><span class="p">,</span>
+</span><span id="from_dict-598"><a href="#from_dict-598"><span class="linenos">598</span></a>        <span class="n">named</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+</span><span id="from_dict-599"><a href="#from_dict-599"><span class="linenos">599</span></a>        <span class="n">reuse_instances</span><span class="o">=</span><span class="n">reuse_instances</span><span class="p">,</span>
+</span><span id="from_dict-600"><a href="#from_dict-600"><span class="linenos">600</span></a>        <span class="n">deserialize_numbers</span><span class="o">=</span><span class="n">deserialize_numbers</span><span class="p">,</span>
+</span><span id="from_dict-601"><a href="#from_dict-601"><span class="linenos">601</span></a>    <span class="p">)</span>
 </span></pre></div>
 
 
@@ -1289,6 +1303,11 @@ the following example serializes list of pyserde objects into dict.</p>
 </div>
 
 <p>You can pass any type supported by pyserde. For example,</p>
+
+<ul>
+<li><code>deserialize_numbers</code>: Optional callable to coerce numeric input to floats when the target
+type is float (e.g. accept ints or numeric strings supplied by a parser).</li>
+</ul>
 
 <div class="pdoc-code codehilite">
 <pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">lst</span> <span class="o">=</span> <span class="p">[{</span><span class="s1">&#39;i&#39;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span> <span class="s1">&#39;s&#39;</span><span class="p">:</span> <span class="s1">&#39;foo&#39;</span><span class="p">,</span> <span class="s1">&#39;f&#39;</span><span class="p">:</span> <span class="mf">100.0</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">},</span>
@@ -1381,33 +1400,47 @@ the following example serializes list of pyserde objects into dict.</p>
 <div class="attr function">
             
         <span class="def">def</span>
-        <span class="name">from_tuple</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">cls</span><span class="p">:</span> <span class="n">Any</span>, </span><span class="param"><span class="n">o</span><span class="p">:</span> <span class="n">Any</span>, </span><span class="param"><span class="n">reuse_instances</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span></span><span class="return-annotation">) -> <span class="n">Any</span>:</span></span>
+        <span class="name">from_tuple</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="bp">cls</span><span class="p">:</span> <span class="n">Any</span>,</span><span class="param">	<span class="n">o</span><span class="p">:</span> <span class="n">Any</span>,</span><span class="param">	<span class="n">reuse_instances</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>,</span><span class="param">	<span class="n">deserialize_numbers</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Callable</span><span class="p">[[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]],</span> <span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span></span><span class="return-annotation">) -> <span class="n">Any</span>:</span></span>
 
                 <label class="view-source-button" for="from_tuple-view-source"><span>View Source</span></label>
 
     </div>
     <a class="headerlink" href="#from_tuple"></a>
-            <div class="pdoc-code codehilite"><pre><span></span><span id="from_tuple-567"><a href="#from_tuple-567"><span class="linenos">567</span></a><span class="k">def</span><span class="w"> </span><span class="nf">from_tuple</span><span class="p">(</span><span class="bp">cls</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">o</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">reuse_instances</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
-</span><span id="from_tuple-568"><a href="#from_tuple-568"><span class="linenos">568</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-</span><span id="from_tuple-569"><a href="#from_tuple-569"><span class="linenos">569</span></a><span class="sd">    Deserialize tuple into object.</span>
-</span><span id="from_tuple-570"><a href="#from_tuple-570"><span class="linenos">570</span></a>
-</span><span id="from_tuple-571"><a href="#from_tuple-571"><span class="linenos">571</span></a><span class="sd">    &gt;&gt;&gt; @deserialize</span>
-</span><span id="from_tuple-572"><a href="#from_tuple-572"><span class="linenos">572</span></a><span class="sd">    ... class Foo:</span>
-</span><span id="from_tuple-573"><a href="#from_tuple-573"><span class="linenos">573</span></a><span class="sd">    ...     i: int</span>
-</span><span id="from_tuple-574"><a href="#from_tuple-574"><span class="linenos">574</span></a><span class="sd">    ...     s: str = &#39;foo&#39;</span>
-</span><span id="from_tuple-575"><a href="#from_tuple-575"><span class="linenos">575</span></a><span class="sd">    ...     f: float = 100.0</span>
-</span><span id="from_tuple-576"><a href="#from_tuple-576"><span class="linenos">576</span></a><span class="sd">    ...     b: bool = True</span>
-</span><span id="from_tuple-577"><a href="#from_tuple-577"><span class="linenos">577</span></a><span class="sd">    &gt;&gt;&gt;</span>
-</span><span id="from_tuple-578"><a href="#from_tuple-578"><span class="linenos">578</span></a><span class="sd">    &gt;&gt;&gt; from_tuple(Foo, (10, &#39;foo&#39;, 100.0, True))</span>
-</span><span id="from_tuple-579"><a href="#from_tuple-579"><span class="linenos">579</span></a><span class="sd">    Foo(i=10, s=&#39;foo&#39;, f=100.0, b=True)</span>
-</span><span id="from_tuple-580"><a href="#from_tuple-580"><span class="linenos">580</span></a>
-</span><span id="from_tuple-581"><a href="#from_tuple-581"><span class="linenos">581</span></a><span class="sd">    You can pass any type supported by pyserde. For example,</span>
-</span><span id="from_tuple-582"><a href="#from_tuple-582"><span class="linenos">582</span></a>
-</span><span id="from_tuple-583"><a href="#from_tuple-583"><span class="linenos">583</span></a><span class="sd">    &gt;&gt;&gt; lst = [(10, &#39;foo&#39;, 100.0, True), (20, &#39;foo&#39;, 100.0, True)]</span>
-</span><span id="from_tuple-584"><a href="#from_tuple-584"><span class="linenos">584</span></a><span class="sd">    &gt;&gt;&gt; from_tuple(list[Foo], lst)</span>
-</span><span id="from_tuple-585"><a href="#from_tuple-585"><span class="linenos">585</span></a><span class="sd">    [Foo(i=10, s=&#39;foo&#39;, f=100.0, b=True), Foo(i=20, s=&#39;foo&#39;, f=100.0, b=True)]</span>
-</span><span id="from_tuple-586"><a href="#from_tuple-586"><span class="linenos">586</span></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="from_tuple-587"><a href="#from_tuple-587"><span class="linenos">587</span></a>    <span class="k">return</span> <span class="n">from_obj</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">o</span><span class="p">,</span> <span class="n">named</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">reuse_instances</span><span class="o">=</span><span class="n">reuse_instances</span><span class="p">)</span>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="from_tuple-622"><a href="#from_tuple-622"><span class="linenos">622</span></a><span class="k">def</span><span class="w"> </span><span class="nf">from_tuple</span><span class="p">(</span>
+</span><span id="from_tuple-623"><a href="#from_tuple-623"><span class="linenos">623</span></a>    <span class="bp">cls</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+</span><span id="from_tuple-624"><a href="#from_tuple-624"><span class="linenos">624</span></a>    <span class="n">o</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+</span><span id="from_tuple-625"><a href="#from_tuple-625"><span class="linenos">625</span></a>    <span class="n">reuse_instances</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="from_tuple-626"><a href="#from_tuple-626"><span class="linenos">626</span></a>    <span class="n">deserialize_numbers</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Callable</span><span class="p">[[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]],</span> <span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="from_tuple-627"><a href="#from_tuple-627"><span class="linenos">627</span></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+</span><span id="from_tuple-628"><a href="#from_tuple-628"><span class="linenos">628</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+</span><span id="from_tuple-629"><a href="#from_tuple-629"><span class="linenos">629</span></a><span class="sd">    Deserialize tuple into object.</span>
+</span><span id="from_tuple-630"><a href="#from_tuple-630"><span class="linenos">630</span></a>
+</span><span id="from_tuple-631"><a href="#from_tuple-631"><span class="linenos">631</span></a><span class="sd">    &gt;&gt;&gt; @deserialize</span>
+</span><span id="from_tuple-632"><a href="#from_tuple-632"><span class="linenos">632</span></a><span class="sd">    ... class Foo:</span>
+</span><span id="from_tuple-633"><a href="#from_tuple-633"><span class="linenos">633</span></a><span class="sd">    ...     i: int</span>
+</span><span id="from_tuple-634"><a href="#from_tuple-634"><span class="linenos">634</span></a><span class="sd">    ...     s: str = &#39;foo&#39;</span>
+</span><span id="from_tuple-635"><a href="#from_tuple-635"><span class="linenos">635</span></a><span class="sd">    ...     f: float = 100.0</span>
+</span><span id="from_tuple-636"><a href="#from_tuple-636"><span class="linenos">636</span></a><span class="sd">    ...     b: bool = True</span>
+</span><span id="from_tuple-637"><a href="#from_tuple-637"><span class="linenos">637</span></a><span class="sd">    &gt;&gt;&gt;</span>
+</span><span id="from_tuple-638"><a href="#from_tuple-638"><span class="linenos">638</span></a><span class="sd">    &gt;&gt;&gt; from_tuple(Foo, (10, &#39;foo&#39;, 100.0, True))</span>
+</span><span id="from_tuple-639"><a href="#from_tuple-639"><span class="linenos">639</span></a><span class="sd">    Foo(i=10, s=&#39;foo&#39;, f=100.0, b=True)</span>
+</span><span id="from_tuple-640"><a href="#from_tuple-640"><span class="linenos">640</span></a>
+</span><span id="from_tuple-641"><a href="#from_tuple-641"><span class="linenos">641</span></a><span class="sd">    You can pass any type supported by pyserde. For example,</span>
+</span><span id="from_tuple-642"><a href="#from_tuple-642"><span class="linenos">642</span></a>
+</span><span id="from_tuple-643"><a href="#from_tuple-643"><span class="linenos">643</span></a><span class="sd">    * `deserialize_numbers`: Optional callable to coerce numeric input to floats when the target</span>
+</span><span id="from_tuple-644"><a href="#from_tuple-644"><span class="linenos">644</span></a><span class="sd">      type is float (e.g. accept ints or numeric strings supplied by a parser).</span>
+</span><span id="from_tuple-645"><a href="#from_tuple-645"><span class="linenos">645</span></a>
+</span><span id="from_tuple-646"><a href="#from_tuple-646"><span class="linenos">646</span></a><span class="sd">    &gt;&gt;&gt; lst = [(10, &#39;foo&#39;, 100.0, True), (20, &#39;foo&#39;, 100.0, True)]</span>
+</span><span id="from_tuple-647"><a href="#from_tuple-647"><span class="linenos">647</span></a><span class="sd">    &gt;&gt;&gt; from_tuple(list[Foo], lst)</span>
+</span><span id="from_tuple-648"><a href="#from_tuple-648"><span class="linenos">648</span></a><span class="sd">    [Foo(i=10, s=&#39;foo&#39;, f=100.0, b=True), Foo(i=20, s=&#39;foo&#39;, f=100.0, b=True)]</span>
+</span><span id="from_tuple-649"><a href="#from_tuple-649"><span class="linenos">649</span></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="from_tuple-650"><a href="#from_tuple-650"><span class="linenos">650</span></a>    <span class="k">return</span> <span class="n">from_obj</span><span class="p">(</span>
+</span><span id="from_tuple-651"><a href="#from_tuple-651"><span class="linenos">651</span></a>        <span class="bp">cls</span><span class="p">,</span>
+</span><span id="from_tuple-652"><a href="#from_tuple-652"><span class="linenos">652</span></a>        <span class="n">o</span><span class="p">,</span>
+</span><span id="from_tuple-653"><a href="#from_tuple-653"><span class="linenos">653</span></a>        <span class="n">named</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+</span><span id="from_tuple-654"><a href="#from_tuple-654"><span class="linenos">654</span></a>        <span class="n">reuse_instances</span><span class="o">=</span><span class="n">reuse_instances</span><span class="p">,</span>
+</span><span id="from_tuple-655"><a href="#from_tuple-655"><span class="linenos">655</span></a>        <span class="n">deserialize_numbers</span><span class="o">=</span><span class="n">deserialize_numbers</span><span class="p">,</span>
+</span><span id="from_tuple-656"><a href="#from_tuple-656"><span class="linenos">656</span></a>    <span class="p">)</span>
 </span></pre></div>
 
 
@@ -1427,6 +1460,11 @@ the following example serializes list of pyserde objects into dict.</p>
 </div>
 
 <p>You can pass any type supported by pyserde. For example,</p>
+
+<ul>
+<li><code>deserialize_numbers</code>: Optional callable to coerce numeric input to floats when the target
+type is float (e.g. accept ints or numeric strings supplied by a parser).</li>
+</ul>
 
 <div class="pdoc-code codehilite">
 <pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">lst</span> <span class="o">=</span> <span class="p">[(</span><span class="mi">10</span><span class="p">,</span> <span class="s1">&#39;foo&#39;</span><span class="p">,</span> <span class="mf">100.0</span><span class="p">,</span> <span class="kc">True</span><span class="p">),</span> <span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="s1">&#39;foo&#39;</span><span class="p">,</span> <span class="mf">100.0</span><span class="p">,</span> <span class="kc">True</span><span class="p">)]</span>
@@ -1495,14 +1533,14 @@ the following example serializes list of pyserde objects into dict.</p>
 
     </div>
     <a class="headerlink" href="#AdjacentTagging"></a>
-            <div class="pdoc-code codehilite"><pre><span></span><span id="AdjacentTagging-849"><a href="#AdjacentTagging-849"><span class="linenos">849</span></a><span class="k">def</span><span class="w"> </span><span class="nf">AdjacentTagging</span><span class="p">(</span>
-</span><span id="AdjacentTagging-850"><a href="#AdjacentTagging-850"><span class="linenos">850</span></a>    <span class="n">tag</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">content</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="bp">cls</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">T</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-</span><span id="AdjacentTagging-851"><a href="#AdjacentTagging-851"><span class="linenos">851</span></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">Tagging</span><span class="p">,</span> <span class="n">_WithTagging</span><span class="p">[</span><span class="n">T</span><span class="p">]]:</span>
-</span><span id="AdjacentTagging-852"><a href="#AdjacentTagging-852"><span class="linenos">852</span></a>    <span class="n">tagging</span> <span class="o">=</span> <span class="n">Tagging</span><span class="p">(</span><span class="n">tag</span><span class="p">,</span> <span class="n">content</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="n">Tagging</span><span class="o">.</span><span class="n">Kind</span><span class="o">.</span><span class="n">Adjacent</span><span class="p">)</span>
-</span><span id="AdjacentTagging-853"><a href="#AdjacentTagging-853"><span class="linenos">853</span></a>    <span class="k">if</span> <span class="bp">cls</span><span class="p">:</span>
-</span><span id="AdjacentTagging-854"><a href="#AdjacentTagging-854"><span class="linenos">854</span></a>        <span class="k">return</span> <span class="n">tagging</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
-</span><span id="AdjacentTagging-855"><a href="#AdjacentTagging-855"><span class="linenos">855</span></a>    <span class="k">else</span><span class="p">:</span>
-</span><span id="AdjacentTagging-856"><a href="#AdjacentTagging-856"><span class="linenos">856</span></a>        <span class="k">return</span> <span class="n">tagging</span>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="AdjacentTagging-860"><a href="#AdjacentTagging-860"><span class="linenos">860</span></a><span class="k">def</span><span class="w"> </span><span class="nf">AdjacentTagging</span><span class="p">(</span>
+</span><span id="AdjacentTagging-861"><a href="#AdjacentTagging-861"><span class="linenos">861</span></a>    <span class="n">tag</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">content</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="bp">cls</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">T</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+</span><span id="AdjacentTagging-862"><a href="#AdjacentTagging-862"><span class="linenos">862</span></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">Tagging</span><span class="p">,</span> <span class="n">_WithTagging</span><span class="p">[</span><span class="n">T</span><span class="p">]]:</span>
+</span><span id="AdjacentTagging-863"><a href="#AdjacentTagging-863"><span class="linenos">863</span></a>    <span class="n">tagging</span> <span class="o">=</span> <span class="n">Tagging</span><span class="p">(</span><span class="n">tag</span><span class="p">,</span> <span class="n">content</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="n">Tagging</span><span class="o">.</span><span class="n">Kind</span><span class="o">.</span><span class="n">Adjacent</span><span class="p">)</span>
+</span><span id="AdjacentTagging-864"><a href="#AdjacentTagging-864"><span class="linenos">864</span></a>    <span class="k">if</span> <span class="bp">cls</span><span class="p">:</span>
+</span><span id="AdjacentTagging-865"><a href="#AdjacentTagging-865"><span class="linenos">865</span></a>        <span class="k">return</span> <span class="n">tagging</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
+</span><span id="AdjacentTagging-866"><a href="#AdjacentTagging-866"><span class="linenos">866</span></a>    <span class="k">else</span><span class="p">:</span>
+</span><span id="AdjacentTagging-867"><a href="#AdjacentTagging-867"><span class="linenos">867</span></a>        <span class="k">return</span> <span class="n">tagging</span>
 </span></pre></div>
 
 
@@ -1532,12 +1570,12 @@ the following example serializes list of pyserde objects into dict.</p>
 
     </div>
     <a class="headerlink" href="#InternalTagging"></a>
-            <div class="pdoc-code codehilite"><pre><span></span><span id="InternalTagging-833"><a href="#InternalTagging-833"><span class="linenos">833</span></a><span class="k">def</span><span class="w"> </span><span class="nf">InternalTagging</span><span class="p">(</span><span class="n">tag</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="bp">cls</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">T</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">Tagging</span><span class="p">,</span> <span class="n">_WithTagging</span><span class="p">[</span><span class="n">T</span><span class="p">]]:</span>
-</span><span id="InternalTagging-834"><a href="#InternalTagging-834"><span class="linenos">834</span></a>    <span class="n">tagging</span> <span class="o">=</span> <span class="n">Tagging</span><span class="p">(</span><span class="n">tag</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="n">Tagging</span><span class="o">.</span><span class="n">Kind</span><span class="o">.</span><span class="n">Internal</span><span class="p">)</span>
-</span><span id="InternalTagging-835"><a href="#InternalTagging-835"><span class="linenos">835</span></a>    <span class="k">if</span> <span class="bp">cls</span><span class="p">:</span>
-</span><span id="InternalTagging-836"><a href="#InternalTagging-836"><span class="linenos">836</span></a>        <span class="k">return</span> <span class="n">tagging</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
-</span><span id="InternalTagging-837"><a href="#InternalTagging-837"><span class="linenos">837</span></a>    <span class="k">else</span><span class="p">:</span>
-</span><span id="InternalTagging-838"><a href="#InternalTagging-838"><span class="linenos">838</span></a>        <span class="k">return</span> <span class="n">tagging</span>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="InternalTagging-844"><a href="#InternalTagging-844"><span class="linenos">844</span></a><span class="k">def</span><span class="w"> </span><span class="nf">InternalTagging</span><span class="p">(</span><span class="n">tag</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="bp">cls</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">T</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">Tagging</span><span class="p">,</span> <span class="n">_WithTagging</span><span class="p">[</span><span class="n">T</span><span class="p">]]:</span>
+</span><span id="InternalTagging-845"><a href="#InternalTagging-845"><span class="linenos">845</span></a>    <span class="n">tagging</span> <span class="o">=</span> <span class="n">Tagging</span><span class="p">(</span><span class="n">tag</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="n">Tagging</span><span class="o">.</span><span class="n">Kind</span><span class="o">.</span><span class="n">Internal</span><span class="p">)</span>
+</span><span id="InternalTagging-846"><a href="#InternalTagging-846"><span class="linenos">846</span></a>    <span class="k">if</span> <span class="bp">cls</span><span class="p">:</span>
+</span><span id="InternalTagging-847"><a href="#InternalTagging-847"><span class="linenos">847</span></a>        <span class="k">return</span> <span class="n">tagging</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
+</span><span id="InternalTagging-848"><a href="#InternalTagging-848"><span class="linenos">848</span></a>    <span class="k">else</span><span class="p">:</span>
+</span><span id="InternalTagging-849"><a href="#InternalTagging-849"><span class="linenos">849</span></a>        <span class="k">return</span> <span class="n">tagging</span>
 </span></pre></div>
 
 
@@ -1603,48 +1641,48 @@ the following example serializes list of pyserde objects into dict.</p>
 
     </div>
     <a class="headerlink" href="#field"></a>
-            <div class="pdoc-code codehilite"><pre><span></span><span id="field-513"><a href="#field-513"><span class="linenos">513</span></a><span class="k">def</span><span class="w"> </span><span class="nf">field</span><span class="p">(</span>
-</span><span id="field-514"><a href="#field-514"><span class="linenos">514</span></a>    <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
-</span><span id="field-515"><a href="#field-515"><span class="linenos">515</span></a>    <span class="n">rename</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-</span><span id="field-516"><a href="#field-516"><span class="linenos">516</span></a>    <span class="n">alias</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-</span><span id="field-517"><a href="#field-517"><span class="linenos">517</span></a>    <span class="n">skip</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-</span><span id="field-518"><a href="#field-518"><span class="linenos">518</span></a>    <span class="n">skip_if</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Callable</span><span class="p">[[</span><span class="n">Any</span><span class="p">],</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-</span><span id="field-519"><a href="#field-519"><span class="linenos">519</span></a>    <span class="n">skip_if_false</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-</span><span id="field-520"><a href="#field-520"><span class="linenos">520</span></a>    <span class="n">skip_if_default</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-</span><span id="field-521"><a href="#field-521"><span class="linenos">521</span></a>    <span class="n">serializer</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-</span><span id="field-522"><a href="#field-522"><span class="linenos">522</span></a>    <span class="n">deserializer</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-</span><span id="field-523"><a href="#field-523"><span class="linenos">523</span></a>    <span class="n">flatten</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">FlattenOpts</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-</span><span id="field-524"><a href="#field-524"><span class="linenos">524</span></a>    <span class="n">metadata</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-</span><span id="field-525"><a href="#field-525"><span class="linenos">525</span></a>    <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
-</span><span id="field-526"><a href="#field-526"><span class="linenos">526</span></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
-</span><span id="field-527"><a href="#field-527"><span class="linenos">527</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-</span><span id="field-528"><a href="#field-528"><span class="linenos">528</span></a><span class="sd">    Declare a field with parameters.</span>
-</span><span id="field-529"><a href="#field-529"><span class="linenos">529</span></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="field-530"><a href="#field-530"><span class="linenos">530</span></a>    <span class="k">if</span> <span class="ow">not</span> <span class="n">metadata</span><span class="p">:</span>
-</span><span id="field-531"><a href="#field-531"><span class="linenos">531</span></a>        <span class="n">metadata</span> <span class="o">=</span> <span class="p">{}</span>
-</span><span id="field-532"><a href="#field-532"><span class="linenos">532</span></a>
-</span><span id="field-533"><a href="#field-533"><span class="linenos">533</span></a>    <span class="k">if</span> <span class="n">rename</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-</span><span id="field-534"><a href="#field-534"><span class="linenos">534</span></a>        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;serde_rename&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">rename</span>
-</span><span id="field-535"><a href="#field-535"><span class="linenos">535</span></a>    <span class="k">if</span> <span class="n">alias</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-</span><span id="field-536"><a href="#field-536"><span class="linenos">536</span></a>        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;serde_alias&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">alias</span>
-</span><span id="field-537"><a href="#field-537"><span class="linenos">537</span></a>    <span class="k">if</span> <span class="n">skip</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-</span><span id="field-538"><a href="#field-538"><span class="linenos">538</span></a>        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;serde_skip&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">skip</span>
-</span><span id="field-539"><a href="#field-539"><span class="linenos">539</span></a>    <span class="k">if</span> <span class="n">skip_if</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-</span><span id="field-540"><a href="#field-540"><span class="linenos">540</span></a>        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;serde_skip_if&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">skip_if</span>
-</span><span id="field-541"><a href="#field-541"><span class="linenos">541</span></a>    <span class="k">if</span> <span class="n">skip_if_false</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-</span><span id="field-542"><a href="#field-542"><span class="linenos">542</span></a>        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;serde_skip_if_false&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">skip_if_false</span>
-</span><span id="field-543"><a href="#field-543"><span class="linenos">543</span></a>    <span class="k">if</span> <span class="n">skip_if_default</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-</span><span id="field-544"><a href="#field-544"><span class="linenos">544</span></a>        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;serde_skip_if_default&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">skip_if_default</span>
-</span><span id="field-545"><a href="#field-545"><span class="linenos">545</span></a>    <span class="k">if</span> <span class="n">serializer</span><span class="p">:</span>
-</span><span id="field-546"><a href="#field-546"><span class="linenos">546</span></a>        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;serde_serializer&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">serializer</span>
-</span><span id="field-547"><a href="#field-547"><span class="linenos">547</span></a>    <span class="k">if</span> <span class="n">deserializer</span><span class="p">:</span>
-</span><span id="field-548"><a href="#field-548"><span class="linenos">548</span></a>        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;serde_deserializer&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">deserializer</span>
-</span><span id="field-549"><a href="#field-549"><span class="linenos">549</span></a>    <span class="k">if</span> <span class="n">flatten</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
-</span><span id="field-550"><a href="#field-550"><span class="linenos">550</span></a>        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;serde_flatten&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">FlattenOpts</span><span class="p">()</span>
-</span><span id="field-551"><a href="#field-551"><span class="linenos">551</span></a>    <span class="k">elif</span> <span class="n">flatten</span><span class="p">:</span>
-</span><span id="field-552"><a href="#field-552"><span class="linenos">552</span></a>        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;serde_flatten&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">flatten</span>
-</span><span id="field-553"><a href="#field-553"><span class="linenos">553</span></a>
-</span><span id="field-554"><a href="#field-554"><span class="linenos">554</span></a>    <span class="k">return</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="n">metadata</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="field-524"><a href="#field-524"><span class="linenos">524</span></a><span class="k">def</span><span class="w"> </span><span class="nf">field</span><span class="p">(</span>
+</span><span id="field-525"><a href="#field-525"><span class="linenos">525</span></a>    <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+</span><span id="field-526"><a href="#field-526"><span class="linenos">526</span></a>    <span class="n">rename</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="field-527"><a href="#field-527"><span class="linenos">527</span></a>    <span class="n">alias</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="field-528"><a href="#field-528"><span class="linenos">528</span></a>    <span class="n">skip</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="field-529"><a href="#field-529"><span class="linenos">529</span></a>    <span class="n">skip_if</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Callable</span><span class="p">[[</span><span class="n">Any</span><span class="p">],</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="field-530"><a href="#field-530"><span class="linenos">530</span></a>    <span class="n">skip_if_false</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="field-531"><a href="#field-531"><span class="linenos">531</span></a>    <span class="n">skip_if_default</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="field-532"><a href="#field-532"><span class="linenos">532</span></a>    <span class="n">serializer</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="field-533"><a href="#field-533"><span class="linenos">533</span></a>    <span class="n">deserializer</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="field-534"><a href="#field-534"><span class="linenos">534</span></a>    <span class="n">flatten</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">FlattenOpts</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="field-535"><a href="#field-535"><span class="linenos">535</span></a>    <span class="n">metadata</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="field-536"><a href="#field-536"><span class="linenos">536</span></a>    <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+</span><span id="field-537"><a href="#field-537"><span class="linenos">537</span></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+</span><span id="field-538"><a href="#field-538"><span class="linenos">538</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+</span><span id="field-539"><a href="#field-539"><span class="linenos">539</span></a><span class="sd">    Declare a field with parameters.</span>
+</span><span id="field-540"><a href="#field-540"><span class="linenos">540</span></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="field-541"><a href="#field-541"><span class="linenos">541</span></a>    <span class="k">if</span> <span class="ow">not</span> <span class="n">metadata</span><span class="p">:</span>
+</span><span id="field-542"><a href="#field-542"><span class="linenos">542</span></a>        <span class="n">metadata</span> <span class="o">=</span> <span class="p">{}</span>
+</span><span id="field-543"><a href="#field-543"><span class="linenos">543</span></a>
+</span><span id="field-544"><a href="#field-544"><span class="linenos">544</span></a>    <span class="k">if</span> <span class="n">rename</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="field-545"><a href="#field-545"><span class="linenos">545</span></a>        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;serde_rename&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">rename</span>
+</span><span id="field-546"><a href="#field-546"><span class="linenos">546</span></a>    <span class="k">if</span> <span class="n">alias</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="field-547"><a href="#field-547"><span class="linenos">547</span></a>        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;serde_alias&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">alias</span>
+</span><span id="field-548"><a href="#field-548"><span class="linenos">548</span></a>    <span class="k">if</span> <span class="n">skip</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="field-549"><a href="#field-549"><span class="linenos">549</span></a>        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;serde_skip&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">skip</span>
+</span><span id="field-550"><a href="#field-550"><span class="linenos">550</span></a>    <span class="k">if</span> <span class="n">skip_if</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="field-551"><a href="#field-551"><span class="linenos">551</span></a>        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;serde_skip_if&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">skip_if</span>
+</span><span id="field-552"><a href="#field-552"><span class="linenos">552</span></a>    <span class="k">if</span> <span class="n">skip_if_false</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="field-553"><a href="#field-553"><span class="linenos">553</span></a>        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;serde_skip_if_false&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">skip_if_false</span>
+</span><span id="field-554"><a href="#field-554"><span class="linenos">554</span></a>    <span class="k">if</span> <span class="n">skip_if_default</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="field-555"><a href="#field-555"><span class="linenos">555</span></a>        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;serde_skip_if_default&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">skip_if_default</span>
+</span><span id="field-556"><a href="#field-556"><span class="linenos">556</span></a>    <span class="k">if</span> <span class="n">serializer</span><span class="p">:</span>
+</span><span id="field-557"><a href="#field-557"><span class="linenos">557</span></a>        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;serde_serializer&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">serializer</span>
+</span><span id="field-558"><a href="#field-558"><span class="linenos">558</span></a>    <span class="k">if</span> <span class="n">deserializer</span><span class="p">:</span>
+</span><span id="field-559"><a href="#field-559"><span class="linenos">559</span></a>        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;serde_deserializer&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">deserializer</span>
+</span><span id="field-560"><a href="#field-560"><span class="linenos">560</span></a>    <span class="k">if</span> <span class="n">flatten</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+</span><span id="field-561"><a href="#field-561"><span class="linenos">561</span></a>        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;serde_flatten&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">FlattenOpts</span><span class="p">()</span>
+</span><span id="field-562"><a href="#field-562"><span class="linenos">562</span></a>    <span class="k">elif</span> <span class="n">flatten</span><span class="p">:</span>
+</span><span id="field-563"><a href="#field-563"><span class="linenos">563</span></a>        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;serde_flatten&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">flatten</span>
+</span><span id="field-564"><a href="#field-564"><span class="linenos">564</span></a>
+</span><span id="field-565"><a href="#field-565"><span class="linenos">565</span></a>    <span class="k">return</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="n">metadata</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 </span></pre></div>
 
 
@@ -1764,8 +1802,8 @@ is specified at the class but you want to override a field with the default seri
 
     </div>
     <a class="headerlink" href="#init"></a>
-            <div class="pdoc-code codehilite"><pre><span></span><span id="init-96"><a href="#init-96"><span class="linenos">96</span></a><span class="k">def</span><span class="w"> </span><span class="nf">init</span><span class="p">(</span><span class="n">debug</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-</span><span id="init-97"><a href="#init-97"><span class="linenos">97</span></a>    <span class="n">SETTINGS</span><span class="p">[</span><span class="s2">&quot;debug&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">debug</span>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="init-97"><a href="#init-97"><span class="linenos">97</span></a><span class="k">def</span><span class="w"> </span><span class="nf">init</span><span class="p">(</span><span class="n">debug</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="init-98"><a href="#init-98"><span class="linenos">98</span></a>    <span class="n">SETTINGS</span><span class="p">[</span><span class="s2">&quot;debug&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">debug</span>
 </span></pre></div>
 
 
@@ -1795,23 +1833,23 @@ is specified at the class but you want to override a field with the default seri
 
     </div>
     <a class="headerlink" href="#ClassSerializer"></a>
-            <div class="pdoc-code codehilite"><pre><span></span><span id="ClassSerializer-998"><a href="#ClassSerializer-998"><span class="linenos"> 998</span></a><span class="k">class</span><span class="w"> </span><span class="nc">ClassSerializer</span><span class="p">(</span><span class="n">Protocol</span><span class="p">):</span>
-</span><span id="ClassSerializer-999"><a href="#ClassSerializer-999"><span class="linenos"> 999</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-</span><span id="ClassSerializer-1000"><a href="#ClassSerializer-1000"><span class="linenos">1000</span></a><span class="sd">    Interface for custom class serializer.</span>
-</span><span id="ClassSerializer-1001"><a href="#ClassSerializer-1001"><span class="linenos">1001</span></a>
-</span><span id="ClassSerializer-1002"><a href="#ClassSerializer-1002"><span class="linenos">1002</span></a><span class="sd">    This protocol is intended to be used for custom class serializer.</span>
-</span><span id="ClassSerializer-1003"><a href="#ClassSerializer-1003"><span class="linenos">1003</span></a>
-</span><span id="ClassSerializer-1004"><a href="#ClassSerializer-1004"><span class="linenos">1004</span></a><span class="sd">    &gt;&gt;&gt; from datetime import datetime</span>
-</span><span id="ClassSerializer-1005"><a href="#ClassSerializer-1005"><span class="linenos">1005</span></a><span class="sd">    &gt;&gt;&gt; from serde import serde</span>
-</span><span id="ClassSerializer-1006"><a href="#ClassSerializer-1006"><span class="linenos">1006</span></a><span class="sd">    &gt;&gt;&gt; from plum import dispatch</span>
-</span><span id="ClassSerializer-1007"><a href="#ClassSerializer-1007"><span class="linenos">1007</span></a><span class="sd">    &gt;&gt;&gt; class MySerializer(ClassSerializer):</span>
-</span><span id="ClassSerializer-1008"><a href="#ClassSerializer-1008"><span class="linenos">1008</span></a><span class="sd">    ...     @dispatch</span>
-</span><span id="ClassSerializer-1009"><a href="#ClassSerializer-1009"><span class="linenos">1009</span></a><span class="sd">    ...     def serialize(self, value: datetime) -&gt; str:</span>
-</span><span id="ClassSerializer-1010"><a href="#ClassSerializer-1010"><span class="linenos">1010</span></a><span class="sd">    ...         return value.strftime(&quot;%d/%m/%y&quot;)</span>
-</span><span id="ClassSerializer-1011"><a href="#ClassSerializer-1011"><span class="linenos">1011</span></a><span class="sd">    &quot;&quot;&quot;</span>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="ClassSerializer-1009"><a href="#ClassSerializer-1009"><span class="linenos">1009</span></a><span class="k">class</span><span class="w"> </span><span class="nc">ClassSerializer</span><span class="p">(</span><span class="n">Protocol</span><span class="p">):</span>
+</span><span id="ClassSerializer-1010"><a href="#ClassSerializer-1010"><span class="linenos">1010</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+</span><span id="ClassSerializer-1011"><a href="#ClassSerializer-1011"><span class="linenos">1011</span></a><span class="sd">    Interface for custom class serializer.</span>
 </span><span id="ClassSerializer-1012"><a href="#ClassSerializer-1012"><span class="linenos">1012</span></a>
-</span><span id="ClassSerializer-1013"><a href="#ClassSerializer-1013"><span class="linenos">1013</span></a>    <span class="k">def</span><span class="w"> </span><span class="nf">serialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
-</span><span id="ClassSerializer-1014"><a href="#ClassSerializer-1014"><span class="linenos">1014</span></a>        <span class="k">pass</span>
+</span><span id="ClassSerializer-1013"><a href="#ClassSerializer-1013"><span class="linenos">1013</span></a><span class="sd">    This protocol is intended to be used for custom class serializer.</span>
+</span><span id="ClassSerializer-1014"><a href="#ClassSerializer-1014"><span class="linenos">1014</span></a>
+</span><span id="ClassSerializer-1015"><a href="#ClassSerializer-1015"><span class="linenos">1015</span></a><span class="sd">    &gt;&gt;&gt; from datetime import datetime</span>
+</span><span id="ClassSerializer-1016"><a href="#ClassSerializer-1016"><span class="linenos">1016</span></a><span class="sd">    &gt;&gt;&gt; from serde import serde</span>
+</span><span id="ClassSerializer-1017"><a href="#ClassSerializer-1017"><span class="linenos">1017</span></a><span class="sd">    &gt;&gt;&gt; from plum import dispatch</span>
+</span><span id="ClassSerializer-1018"><a href="#ClassSerializer-1018"><span class="linenos">1018</span></a><span class="sd">    &gt;&gt;&gt; class MySerializer(ClassSerializer):</span>
+</span><span id="ClassSerializer-1019"><a href="#ClassSerializer-1019"><span class="linenos">1019</span></a><span class="sd">    ...     @dispatch</span>
+</span><span id="ClassSerializer-1020"><a href="#ClassSerializer-1020"><span class="linenos">1020</span></a><span class="sd">    ...     def serialize(self, value: datetime) -&gt; str:</span>
+</span><span id="ClassSerializer-1021"><a href="#ClassSerializer-1021"><span class="linenos">1021</span></a><span class="sd">    ...         return value.strftime(&quot;%d/%m/%y&quot;)</span>
+</span><span id="ClassSerializer-1022"><a href="#ClassSerializer-1022"><span class="linenos">1022</span></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="ClassSerializer-1023"><a href="#ClassSerializer-1023"><span class="linenos">1023</span></a>
+</span><span id="ClassSerializer-1024"><a href="#ClassSerializer-1024"><span class="linenos">1024</span></a>    <span class="k">def</span><span class="w"> </span><span class="nf">serialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+</span><span id="ClassSerializer-1025"><a href="#ClassSerializer-1025"><span class="linenos">1025</span></a>        <span class="k">pass</span>
 </span></pre></div>
 
 
@@ -1886,8 +1924,8 @@ is specified at the class but you want to override a field with the default seri
 
     </div>
     <a class="headerlink" href="#ClassSerializer.serialize"></a>
-            <div class="pdoc-code codehilite"><pre><span></span><span id="ClassSerializer.serialize-1013"><a href="#ClassSerializer.serialize-1013"><span class="linenos">1013</span></a>    <span class="k">def</span><span class="w"> </span><span class="nf">serialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
-</span><span id="ClassSerializer.serialize-1014"><a href="#ClassSerializer.serialize-1014"><span class="linenos">1014</span></a>        <span class="k">pass</span>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="ClassSerializer.serialize-1024"><a href="#ClassSerializer.serialize-1024"><span class="linenos">1024</span></a>    <span class="k">def</span><span class="w"> </span><span class="nf">serialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+</span><span id="ClassSerializer.serialize-1025"><a href="#ClassSerializer.serialize-1025"><span class="linenos">1025</span></a>        <span class="k">pass</span>
 </span></pre></div>
 
 
@@ -1906,23 +1944,23 @@ is specified at the class but you want to override a field with the default seri
 
     </div>
     <a class="headerlink" href="#ClassDeserializer"></a>
-            <div class="pdoc-code codehilite"><pre><span></span><span id="ClassDeserializer-1017"><a href="#ClassDeserializer-1017"><span class="linenos">1017</span></a><span class="k">class</span><span class="w"> </span><span class="nc">ClassDeserializer</span><span class="p">(</span><span class="n">Protocol</span><span class="p">):</span>
-</span><span id="ClassDeserializer-1018"><a href="#ClassDeserializer-1018"><span class="linenos">1018</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-</span><span id="ClassDeserializer-1019"><a href="#ClassDeserializer-1019"><span class="linenos">1019</span></a><span class="sd">    Interface for custom class deserializer.</span>
-</span><span id="ClassDeserializer-1020"><a href="#ClassDeserializer-1020"><span class="linenos">1020</span></a>
-</span><span id="ClassDeserializer-1021"><a href="#ClassDeserializer-1021"><span class="linenos">1021</span></a><span class="sd">    This protocol is intended to be used for custom class deserializer.</span>
-</span><span id="ClassDeserializer-1022"><a href="#ClassDeserializer-1022"><span class="linenos">1022</span></a>
-</span><span id="ClassDeserializer-1023"><a href="#ClassDeserializer-1023"><span class="linenos">1023</span></a><span class="sd">    &gt;&gt;&gt; from datetime import datetime</span>
-</span><span id="ClassDeserializer-1024"><a href="#ClassDeserializer-1024"><span class="linenos">1024</span></a><span class="sd">    &gt;&gt;&gt; from serde import serde</span>
-</span><span id="ClassDeserializer-1025"><a href="#ClassDeserializer-1025"><span class="linenos">1025</span></a><span class="sd">    &gt;&gt;&gt; from plum import dispatch</span>
-</span><span id="ClassDeserializer-1026"><a href="#ClassDeserializer-1026"><span class="linenos">1026</span></a><span class="sd">    &gt;&gt;&gt; class MyDeserializer(ClassDeserializer):</span>
-</span><span id="ClassDeserializer-1027"><a href="#ClassDeserializer-1027"><span class="linenos">1027</span></a><span class="sd">    ...     @dispatch</span>
-</span><span id="ClassDeserializer-1028"><a href="#ClassDeserializer-1028"><span class="linenos">1028</span></a><span class="sd">    ...     def deserialize(self, cls: type[datetime], value: Any) -&gt; datetime:</span>
-</span><span id="ClassDeserializer-1029"><a href="#ClassDeserializer-1029"><span class="linenos">1029</span></a><span class="sd">    ...         return datetime.strptime(value, &quot;%d/%m/%y&quot;)</span>
-</span><span id="ClassDeserializer-1030"><a href="#ClassDeserializer-1030"><span class="linenos">1030</span></a><span class="sd">    &quot;&quot;&quot;</span>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="ClassDeserializer-1028"><a href="#ClassDeserializer-1028"><span class="linenos">1028</span></a><span class="k">class</span><span class="w"> </span><span class="nc">ClassDeserializer</span><span class="p">(</span><span class="n">Protocol</span><span class="p">):</span>
+</span><span id="ClassDeserializer-1029"><a href="#ClassDeserializer-1029"><span class="linenos">1029</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+</span><span id="ClassDeserializer-1030"><a href="#ClassDeserializer-1030"><span class="linenos">1030</span></a><span class="sd">    Interface for custom class deserializer.</span>
 </span><span id="ClassDeserializer-1031"><a href="#ClassDeserializer-1031"><span class="linenos">1031</span></a>
-</span><span id="ClassDeserializer-1032"><a href="#ClassDeserializer-1032"><span class="linenos">1032</span></a>    <span class="k">def</span><span class="w"> </span><span class="nf">deserialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">cls</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
-</span><span id="ClassDeserializer-1033"><a href="#ClassDeserializer-1033"><span class="linenos">1033</span></a>        <span class="k">pass</span>
+</span><span id="ClassDeserializer-1032"><a href="#ClassDeserializer-1032"><span class="linenos">1032</span></a><span class="sd">    This protocol is intended to be used for custom class deserializer.</span>
+</span><span id="ClassDeserializer-1033"><a href="#ClassDeserializer-1033"><span class="linenos">1033</span></a>
+</span><span id="ClassDeserializer-1034"><a href="#ClassDeserializer-1034"><span class="linenos">1034</span></a><span class="sd">    &gt;&gt;&gt; from datetime import datetime</span>
+</span><span id="ClassDeserializer-1035"><a href="#ClassDeserializer-1035"><span class="linenos">1035</span></a><span class="sd">    &gt;&gt;&gt; from serde import serde</span>
+</span><span id="ClassDeserializer-1036"><a href="#ClassDeserializer-1036"><span class="linenos">1036</span></a><span class="sd">    &gt;&gt;&gt; from plum import dispatch</span>
+</span><span id="ClassDeserializer-1037"><a href="#ClassDeserializer-1037"><span class="linenos">1037</span></a><span class="sd">    &gt;&gt;&gt; class MyDeserializer(ClassDeserializer):</span>
+</span><span id="ClassDeserializer-1038"><a href="#ClassDeserializer-1038"><span class="linenos">1038</span></a><span class="sd">    ...     @dispatch</span>
+</span><span id="ClassDeserializer-1039"><a href="#ClassDeserializer-1039"><span class="linenos">1039</span></a><span class="sd">    ...     def deserialize(self, cls: type[datetime], value: Any) -&gt; datetime:</span>
+</span><span id="ClassDeserializer-1040"><a href="#ClassDeserializer-1040"><span class="linenos">1040</span></a><span class="sd">    ...         return datetime.strptime(value, &quot;%d/%m/%y&quot;)</span>
+</span><span id="ClassDeserializer-1041"><a href="#ClassDeserializer-1041"><span class="linenos">1041</span></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="ClassDeserializer-1042"><a href="#ClassDeserializer-1042"><span class="linenos">1042</span></a>
+</span><span id="ClassDeserializer-1043"><a href="#ClassDeserializer-1043"><span class="linenos">1043</span></a>    <span class="k">def</span><span class="w"> </span><span class="nf">deserialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">cls</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+</span><span id="ClassDeserializer-1044"><a href="#ClassDeserializer-1044"><span class="linenos">1044</span></a>        <span class="k">pass</span>
 </span></pre></div>
 
 
@@ -1997,8 +2035,8 @@ is specified at the class but you want to override a field with the default seri
 
     </div>
     <a class="headerlink" href="#ClassDeserializer.deserialize"></a>
-            <div class="pdoc-code codehilite"><pre><span></span><span id="ClassDeserializer.deserialize-1032"><a href="#ClassDeserializer.deserialize-1032"><span class="linenos">1032</span></a>    <span class="k">def</span><span class="w"> </span><span class="nf">deserialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">cls</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
-</span><span id="ClassDeserializer.deserialize-1033"><a href="#ClassDeserializer.deserialize-1033"><span class="linenos">1033</span></a>        <span class="k">pass</span>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="ClassDeserializer.deserialize-1043"><a href="#ClassDeserializer.deserialize-1043"><span class="linenos">1043</span></a>    <span class="k">def</span><span class="w"> </span><span class="nf">deserialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">cls</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+</span><span id="ClassDeserializer.deserialize-1044"><a href="#ClassDeserializer.deserialize-1044"><span class="linenos">1044</span></a>        <span class="k">pass</span>
 </span></pre></div>
 
 
@@ -2017,11 +2055,11 @@ is specified at the class but you want to override a field with the default seri
 
     </div>
     <a class="headerlink" href="#add_serializer"></a>
-            <div class="pdoc-code codehilite"><pre><span></span><span id="add_serializer-1041"><a href="#add_serializer-1041"><span class="linenos">1041</span></a><span class="k">def</span><span class="w"> </span><span class="nf">add_serializer</span><span class="p">(</span><span class="n">serializer</span><span class="p">:</span> <span class="n">ClassSerializer</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-</span><span id="add_serializer-1042"><a href="#add_serializer-1042"><span class="linenos">1042</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-</span><span id="add_serializer-1043"><a href="#add_serializer-1043"><span class="linenos">1043</span></a><span class="sd">    Register custom global serializer.</span>
-</span><span id="add_serializer-1044"><a href="#add_serializer-1044"><span class="linenos">1044</span></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="add_serializer-1045"><a href="#add_serializer-1045"><span class="linenos">1045</span></a>    <span class="n">GLOBAL_CLASS_SERIALIZER</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">serializer</span><span class="p">)</span>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="add_serializer-1052"><a href="#add_serializer-1052"><span class="linenos">1052</span></a><span class="k">def</span><span class="w"> </span><span class="nf">add_serializer</span><span class="p">(</span><span class="n">serializer</span><span class="p">:</span> <span class="n">ClassSerializer</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="add_serializer-1053"><a href="#add_serializer-1053"><span class="linenos">1053</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+</span><span id="add_serializer-1054"><a href="#add_serializer-1054"><span class="linenos">1054</span></a><span class="sd">    Register custom global serializer.</span>
+</span><span id="add_serializer-1055"><a href="#add_serializer-1055"><span class="linenos">1055</span></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="add_serializer-1056"><a href="#add_serializer-1056"><span class="linenos">1056</span></a>    <span class="n">GLOBAL_CLASS_SERIALIZER</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">serializer</span><span class="p">)</span>
 </span></pre></div>
 
 
@@ -2041,11 +2079,11 @@ is specified at the class but you want to override a field with the default seri
 
     </div>
     <a class="headerlink" href="#add_deserializer"></a>
-            <div class="pdoc-code codehilite"><pre><span></span><span id="add_deserializer-1048"><a href="#add_deserializer-1048"><span class="linenos">1048</span></a><span class="k">def</span><span class="w"> </span><span class="nf">add_deserializer</span><span class="p">(</span><span class="n">deserializer</span><span class="p">:</span> <span class="n">ClassDeserializer</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-</span><span id="add_deserializer-1049"><a href="#add_deserializer-1049"><span class="linenos">1049</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-</span><span id="add_deserializer-1050"><a href="#add_deserializer-1050"><span class="linenos">1050</span></a><span class="sd">    Register custom global deserializer.</span>
-</span><span id="add_deserializer-1051"><a href="#add_deserializer-1051"><span class="linenos">1051</span></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="add_deserializer-1052"><a href="#add_deserializer-1052"><span class="linenos">1052</span></a>    <span class="n">GLOBAL_CLASS_DESERIALIZER</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">deserializer</span><span class="p">)</span>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="add_deserializer-1059"><a href="#add_deserializer-1059"><span class="linenos">1059</span></a><span class="k">def</span><span class="w"> </span><span class="nf">add_deserializer</span><span class="p">(</span><span class="n">deserializer</span><span class="p">:</span> <span class="n">ClassDeserializer</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="add_deserializer-1060"><a href="#add_deserializer-1060"><span class="linenos">1060</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+</span><span id="add_deserializer-1061"><a href="#add_deserializer-1061"><span class="linenos">1061</span></a><span class="sd">    Register custom global deserializer.</span>
+</span><span id="add_deserializer-1062"><a href="#add_deserializer-1062"><span class="linenos">1062</span></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="add_deserializer-1063"><a href="#add_deserializer-1063"><span class="linenos">1063</span></a>    <span class="n">GLOBAL_CLASS_DESERIALIZER</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">deserializer</span><span class="p">)</span>
 </span></pre></div>
 
 
