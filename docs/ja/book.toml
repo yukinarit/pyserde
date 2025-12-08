@@ -1,7 +1,6 @@
 [book]
 authors = ["yukinarit"]
 language = "ja"
-multilingual = true
 src = "./"
 title = "pyserde documentation"
 
