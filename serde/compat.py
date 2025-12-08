@@ -14,13 +14,23 @@ import sys
 import types
 import uuid
 import typing
+import typing_extensions
 from collections import defaultdict
 from collections.abc import Iterator
 from dataclasses import is_dataclass
 from typing import TypeVar, Generic, Any, ClassVar, Optional, NewType, Union, Hashable, Callable
 
 import typing_inspect
-from typing_extensions import TypeGuard, ParamSpec, TypeAliasType
+from typing_extensions import TypeGuard, ParamSpec
+
+# `typing_extensions.TypeAliasType` isn't always an alias to `typing.TypeAliasType`
+# depending on certain versions of `typing_extensions` and python.
+_PEP695_TYPES: tuple[type, ...]
+if hasattr(typing, "TypeAliasType"):
+    _PEP695_TYPES = (typing_extensions.TypeAliasType, typing.TypeAliasType)
+else:
+    _PEP695_TYPES = (typing_extensions.TypeAliasType,)
+
 
 # Lazy SQLAlchemy imports to improve startup time
 
@@ -882,7 +892,7 @@ def is_pep695_type_alias(typ: Any) -> bool:
     """
     Test if the type is of PEP695 type alias.
     """
-    return isinstance(typ, TypeAliasType)
+    return isinstance(typ, _PEP695_TYPES)
 
 
 @cache
