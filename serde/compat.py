@@ -265,13 +265,15 @@ def type_args(typ: Any) -> tuple[type[Any], ...]:
     Wrapper to suppress type error for accessing private members.
     """
     try:
-        args: tuple[type[Any, ...]] = typ.__args__  # type: ignore
-        if args is None:
-            return ()
-        else:
-            return args
+        args: Optional[tuple[type[Any, ...]]] = typ.__args__  # type: ignore
     except AttributeError:
         return get_args(typ)
+
+    # Some typing objects expose __args__ as a member_descriptor (e.g. typing.Union),
+    # which isn't iterable. Fall back to typing.get_args in that case.
+    if isinstance(args, tuple):
+        return args
+    return get_args(typ)
 
 
 def union_args(typ: Any) -> tuple[type[Any], ...]:
