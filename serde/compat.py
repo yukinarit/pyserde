@@ -849,11 +849,11 @@ def is_literal(typ: type[Any]) -> bool:
 
 
 @cache
-def is_any(typ: type[Any]) -> bool:
+def is_any(typ: Any) -> bool:
     """
     Test if the type is `typing.Any`.
     """
-    return typ is Any  # type: ignore
+    return typ is Any
 
 
 @cache

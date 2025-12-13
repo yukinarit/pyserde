@@ -14,6 +14,10 @@ except ImportError:  # pragma: no cover
 
 _PEP695_REASON = "PEP 695 `type` statement requires Python 3.12+."
 
+# `typing.TypeAliasType` aliases must be defined at module or class scope.
+Bar = TypeAliasType("Bar", list[int])
+Baz = TypeAliasType("Baz", Bar)
+
 
 @pytest.mark.skipif(sys.version_info < (3, 12), reason=_PEP695_REASON)
 def test_pep695_type_alias() -> None:
@@ -28,10 +32,10 @@ class Bar:
 """,
         ns,
     )
-    Bar = typing.cast(type, ns["Bar"])
+    BarClass = typing.cast(type, ns["Bar"])
 
-    value = Bar("foo")
-    assert value == from_dict(Bar, to_dict(value))
+    value = BarClass("foo")
+    assert value == from_dict(BarClass, to_dict(value))
 
 
 @pytest.mark.skipif(sys.version_info < (3, 12), reason=_PEP695_REASON)
@@ -47,10 +51,10 @@ class Bar:
 """,
         ns,
     )
-    Bar = typing.cast(type, ns["Bar"])
+    BarClass = typing.cast(type, ns["Bar"])
 
-    value = Bar(10)
-    assert value == from_dict(Bar, to_dict(value))
+    value = BarClass(10)
+    assert value == from_dict(BarClass, to_dict(value))
 
 
 @pytest.mark.skipif(sys.version_info < (3, 12), reason=_PEP695_REASON)
@@ -68,15 +72,13 @@ class Baz:
 """,
         ns,
     )
-    Baz = typing.cast(type, ns["Baz"])
+    BazClass = typing.cast(type, ns["Baz"])
 
-    value = Baz("test", ((0.0, 0.0), (1.0, 1.73)))
-    assert value == from_dict(Baz, to_dict(value))
+    value = BazClass("test", ((0.0, 0.0), (1.0, 1.73)))
+    assert value == from_dict(BazClass, to_dict(value))
 
 
 def test_typealiastype_list() -> None:
-    Bar = TypeAliasType("Bar", list[int])
-
     @serde
     class Foo:
         nums: Bar
@@ -86,13 +88,10 @@ def test_typealiastype_list() -> None:
 
 
 def test_typealiastype_nested_alias() -> None:
-    Bar = TypeAliasType("Bar", tuple[tuple[float, float], ...])
-    Baz = TypeAliasType("Baz", Bar)
-
     @serde(rename_all="camelcase")
     class Foo:
         name: str
         baz: Baz
 
-    value = Foo("alias", ((0.0, 0.0), (1.0, 1.73)))
+    value = Foo("alias", [1, 2, 3])
     assert value == from_dict(Foo, to_dict(value))
