@@ -1,36 +1,98 @@
+import sys
+import typing
+
+import pytest
+
 from serde import serde, from_dict, to_dict
 
 
-type S = str
+try:
+    from typing import TypeAliasType
+except ImportError:  # pragma: no cover
+    from typing_extensions import TypeAliasType
 
 
+_PEP695_REASON = "PEP 695 `type` statement requires Python 3.12+."
+
+
+@pytest.mark.skipif(sys.version_info < (3, 12), reason=_PEP695_REASON)
 def test_pep695_type_alias() -> None:
-
-    @serde
-    class Foo:
-        s: S
-
-    f = Foo("foo")
-    assert f == from_dict(Foo, to_dict(f))
-
+    ns: dict[str, object] = {"serde": serde}
+    exec(
+        """
+type Foo = str
 
 @serde
 class Bar:
-    a: int
+    s: Foo
+""",
+        ns,
+    )
+    Bar = typing.cast(type, ns["Bar"])
 
+    value = Bar("foo")
+    assert value == from_dict(Bar, to_dict(value))
+
+
+@pytest.mark.skipif(sys.version_info < (3, 12), reason=_PEP695_REASON)
+def test_pep695_type_alias_union() -> None:
+    ns: dict[str, object] = {"serde": serde}
+    exec(
+        """
+type Foo = int | str
 
 @serde
+class Bar:
+    x: Foo
+""",
+        ns,
+    )
+    Bar = typing.cast(type, ns["Bar"])
+
+    value = Bar(10)
+    assert value == from_dict(Bar, to_dict(value))
+
+
+@pytest.mark.skipif(sys.version_info < (3, 12), reason=_PEP695_REASON)
+def test_pep695_type_alias_variable_tuple() -> None:
+    ns: dict[str, object] = {"serde": serde}
+    exec(
+        """
+type Foo = tuple[float, float]
+type Bar = tuple[Foo, ...]
+
+@serde(rename_all="camelcase")
 class Baz:
-    b: int
+    name: str
+    bar: Bar
+""",
+        ns,
+    )
+    Baz = typing.cast(type, ns["Baz"])
+
+    value = Baz("test", ((0.0, 0.0), (1.0, 1.73)))
+    assert value == from_dict(Baz, to_dict(value))
 
 
-type BarBaz = Bar | Baz
+def test_typealiastype_list() -> None:
+    Bar = TypeAliasType("Bar", list[int])
 
-
-def test_pep695_type_alias_union() -> None:
     @serde
     class Foo:
-        barbaz: BarBaz
+        nums: Bar
 
-    f = Foo(Baz(10))
-    assert f == from_dict(Foo, to_dict(f))
+    value = Foo([1, 2, 3])
+    assert value == from_dict(Foo, to_dict(value))
+
+
+def test_typealiastype_nested_alias() -> None:
+    Bar = TypeAliasType("Bar", tuple[tuple[float, float], ...])
+    Baz = TypeAliasType("Baz", Bar)
+
+    @serde(rename_all="camelcase")
+    class Foo:
+        name: str
+        baz: Baz
+
+    value = Foo("alias", ((0.0, 0.0), (1.0, 1.73)))
+    assert value == from_dict(Foo, to_dict(value))

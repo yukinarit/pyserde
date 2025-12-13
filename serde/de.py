@@ -864,7 +864,7 @@ class Renderer:
         elif is_any(arg.type) or is_ellipsis(arg.type):
             res = arg.data
         elif is_pep695_type_alias(arg.type):
-            res = self.render(DeField(name=arg.name, type=arg.type.__value__, datavar=arg.datavar))
+            res = self.render(dataclasses.replace(arg, type=arg.type.__value__))
         elif is_primitive(arg.type):
             # For subclasses for primitives e.g. class FooStr(str), coercing is always enabled
             res = self.primitive(arg, not is_primitive_subclass(arg.type))

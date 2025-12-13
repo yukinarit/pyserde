@@ -59,6 +59,7 @@ def run_all() -> None:
     import union_directly
     import user_exception
     import variable_length_tuple
+    import type_statement
     import yamlfile
     import enum34
     import kw_only
@@ -90,6 +91,7 @@ def run_all() -> None:
     run(union_directly)
     run(generics)
     run(type_alias_pep695)
+    run(type_statement)
     run(generics_pep695)
     run(generics_nested)
     run(nested)
