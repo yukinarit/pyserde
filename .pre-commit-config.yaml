@@ -22,7 +22,7 @@ repos:
         types: [python]
       - id: ruff
         name: ruff
-        entry: uv run --frozen ruff check --fix
+        entry: uv run --frozen ruff check --fix --force-exclude
         language: system
         types: [python]
       - id: mypy

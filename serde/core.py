@@ -656,16 +656,18 @@ class Field(Generic[T]):
         )
 
     def to_dataclass(self) -> dataclasses.Field[T]:
-        f = dataclasses.Field(
-            default=self.default,
-            default_factory=self.default_factory,
-            init=self.init,
-            repr=self.repr,
-            hash=self.hash,
-            compare=self.compare,
-            metadata=self.metadata,
-            kw_only=self.kw_only,
-        )
+        base_kwargs = {
+            "init": self.init,
+            "repr": self.repr,
+            "hash": self.hash,
+            "compare": self.compare,
+            "metadata": self.metadata,
+            "kw_only": self.kw_only,
+            "default": self.default,
+            "default_factory": self.default_factory,
+        }
+
+        f = cast(dataclasses.Field[T], dataclasses.field(**base_kwargs))
         assert self.name
         f.name = self.name
         f.type = self.type

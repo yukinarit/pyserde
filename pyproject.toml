@@ -62,10 +62,10 @@ dev = [
   "tomli-w",
   "msgpack",
   "numpy>1.22.0,<3.0.0",
-  "mypy==1.14.1",
-  "black==24.10.0",
-  "pyright==1.1.389",
-  "ruff==0.8.4",
+  "mypy==1.19.0",
+  "black==25.12.0",
+  "pyright==1.1.407",
+  "ruff==0.14.9",
   "pytest",
   "pytest-cov",
   "pytest-watch",
@@ -149,6 +149,11 @@ ignore_errors = true
 
 [tool.ruff]
 line-length = 100
+extend-exclude = [
+  "examples/generics_pep695.py",
+  "examples/type_alias_pep695.py",
+  "examples/type_statement.py",
+]
 
 [tool.ruff.lint]
 select = [
