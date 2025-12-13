@@ -1,6 +1,6 @@
 # type: ignore  # SQLAlchemy types imported via pytest.importorskip
 import logging
-from typing import Optional, Any
+from typing import Any
 
 import pytest
 
@@ -46,7 +46,7 @@ def test_sqlalchemy_simple(se: Any, de: Any, opt: Any) -> None:
         id: sa_orm.Mapped[int] = sa_orm.mapped_column(primary_key=True)
         name: sa_orm.Mapped[str]
         fullname: sa_orm.Mapped[str] = sa_orm.mapped_column(sa.String(30))
-        nickname: sa_orm.Mapped[Optional[str]] = sa_orm.mapped_column(init=False)
+        nickname: sa_orm.Mapped[str | None] = sa_orm.mapped_column(init=False)
 
     user = User(1, "john", "John Doe")
     assert user == de(User, se(user))

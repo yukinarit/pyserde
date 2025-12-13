@@ -1,5 +1,3 @@
-from typing import Optional, Union, List
-
 import pytest
 
 import serde as serde_pkg
@@ -10,7 +8,7 @@ from serde.json import deserialize_json_numbers, from_json, to_json
 def test_json_basics() -> None:
     @serde
     class Foo:
-        v: Optional[int]
+        v: int | None
 
     f = Foo(10)
     assert '{"v":10}' == to_json(f)
@@ -29,7 +27,7 @@ def test_skip_none() -> None:
     @serde
     class Foo:
         a: int
-        b: Optional[int]
+        b: int | None
 
     f = Foo(10, 100)
     assert to_json(f, skip_none=True) == '{"a":10,"b":100}'
@@ -44,13 +42,13 @@ def test_skip_none_nested() -> None:
     @serde
     class Inner:
         a: int
-        b: Optional[int]
+        b: int | None
 
     @serde
     class Outer:
         i: Inner
         j: int
-        k: Optional[int]
+        k: int | None
 
     # Test nested dataclass with skip_none
     o = Outer(i=Inner(a=1, b=None), j=3, k=None)
@@ -61,8 +59,8 @@ def test_skip_none_nested() -> None:
     # Test union with nested dataclass and skip_none
     @serde
     class WithUnion:
-        u: Union[Inner, str]
-        value: Optional[str]
+        u: Inner | str
+        value: str | None
 
     u = WithUnion(u=Inner(a=5, b=None), value=None)
     result = to_json(u, skip_none=True)
@@ -72,8 +70,8 @@ def test_skip_none_nested() -> None:
     # Test list with nested objects and skip_none
     @serde
     class WithList:
-        items: List[Inner]
-        name: Optional[str]
+        items: list[Inner]
+        name: str | None
 
     w = WithList(items=[Inner(a=1, b=None), Inner(a=2, b=3)], name=None)
     result = to_json(w, skip_none=True)
@@ -103,7 +101,7 @@ def test_coerce_numbers_json() -> None:
 
     @serde
     class Bar:
-        values: List[float]
+        values: list[float]
 
     bar = from_json(Bar, '{"values":[1,2]}')
     assert bar.values == [1.0, 2.0]
@@ -121,7 +119,7 @@ def test_coerce_numbers_json() -> None:
 def test_json_numbers_with_union() -> None:
     @serde
     class Foo:
-        value: Union[float, int]
+        value: float | int
 
     assert from_json(Foo, '{"value": 1}').value == 1.0
 
@@ -130,7 +128,7 @@ def test_json_numbers_with_union() -> None:
 
     @serde
     class Bar:
-        value: Union[int, float]
+        value: int | float
 
     assert from_json(Bar, '{"value": 1}').value == 1
 

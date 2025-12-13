@@ -12,7 +12,7 @@ import typing
 import itertools
 import jinja2
 from dataclasses import dataclass, is_dataclass
-from typing import TypeVar, Literal, Generic, Optional, Any, Union
+from typing import Any, Generic, Literal, TypeVar
 from collections.abc import Callable, Iterable, Iterator
 
 from beartype import beartype, BeartypeConf
@@ -142,16 +142,16 @@ class Serializer(Generic[T], metaclass=abc.ABCMeta):
 
 def _make_serialize(
     cls_name: str,
-    fields: Iterable[Union[str, tuple[str, type[Any]], tuple[str, type[Any], Any]]],
+    fields: Iterable[str | tuple[str, type[Any]] | tuple[str, type[Any], Any]],
     *args: Any,
-    rename_all: Optional[str] = None,
+    rename_all: str | None = None,
     reuse_instances_default: bool = False,
     convert_sets_default: bool = False,
-    serializer: Optional[SerializeFunc] = None,
+    serializer: SerializeFunc | None = None,
     tagging: Tagging = DefaultTagging,
     type_check: TypeCheck = disabled,
     serialize_class_var: bool = False,
-    class_serializer: Optional[ClassSerializer] = None,
+    class_serializer: ClassSerializer | None = None,
     **kwargs: Any,
 ) -> type[Any]:
     """
@@ -180,15 +180,15 @@ GENERATION_STACK = []
 
 @dataclass_transform()
 def serialize(
-    _cls: Optional[type[T]] = None,
-    rename_all: Optional[str] = None,
+    _cls: type[T] | None = None,
+    rename_all: str | None = None,
     reuse_instances_default: bool = False,
     convert_sets_default: bool = False,
-    serializer: Optional[SerializeFunc] = None,
+    serializer: SerializeFunc | None = None,
     tagging: Tagging = DefaultTagging,
     type_check: TypeCheck = strict,
     serialize_class_var: bool = False,
-    class_serializer: Optional[ClassSerializer] = None,
+    class_serializer: ClassSerializer | None = None,
     **kwargs: Any,
 ) -> type[T]:
     """
@@ -226,7 +226,7 @@ def serialize(
         # Create a scope storage used by serde.
         # Each class should get own scope. Child classes can not share scope with parent class.
         # That's why we need the "scope.cls is not cls" check.
-        scope: Optional[Scope] = getattr(cls, SERDE_SCOPE, None)
+        scope: Scope | None = getattr(cls, SERDE_SCOPE, None)
         if scope is None or scope.cls is not cls:
             scope = Scope(
                 cls,
@@ -343,7 +343,7 @@ def is_dataclass_without_se(cls: type[Any]) -> bool:
         return False
     if not hasattr(cls, SERDE_SCOPE):
         return True
-    scope: Optional[Scope] = getattr(cls, SERDE_SCOPE)
+    scope: Scope | None = getattr(cls, SERDE_SCOPE)
     if not scope:
         return True
     return TO_DICT not in scope.funcs
@@ -352,10 +352,10 @@ def is_dataclass_without_se(cls: type[Any]) -> bool:
 def to_obj(
     o: Any,
     named: bool,
-    reuse_instances: Optional[bool] = None,
-    convert_sets: Optional[bool] = None,
+    reuse_instances: bool | None = None,
+    convert_sets: bool | None = None,
     skip_none: bool = False,
-    c: Optional[Any] = None,
+    c: Any | None = None,
 ) -> Any:
     def serializable_to_obj(object: Any) -> Any:
         serde_scope: Scope = getattr(object, SERDE_SCOPE)
@@ -425,9 +425,9 @@ def astuple(v: Any) -> tuple[Any, ...]:
 
 def to_tuple(
     o: Any,
-    c: Optional[type[Any]] = None,
-    reuse_instances: Optional[bool] = None,
-    convert_sets: Optional[bool] = None,
+    c: type[Any] | None = None,
+    reuse_instances: bool | None = None,
+    convert_sets: bool | None = None,
     skip_none: bool = False,
 ) -> tuple[Any, ...]:
     """
@@ -468,9 +468,9 @@ def asdict(v: Any) -> dict[Any, Any]:
 
 def to_dict(
     o: Any,
-    c: Optional[type[Any]] = None,
-    reuse_instances: Optional[bool] = None,
-    convert_sets: Optional[bool] = None,
+    c: type[Any] | None = None,
+    reuse_instances: bool | None = None,
+    convert_sets: bool | None = None,
     skip_none: bool = False,
 ) -> dict[Any, Any]:
     """
@@ -648,10 +648,10 @@ def {{func}}(obj, reuse_instances, convert_sets, skip_none=False):
 
 def render_to_tuple(
     cls: type[Any],
-    legacy_class_serializer: Optional[SerializeFunc] = None,
+    legacy_class_serializer: SerializeFunc | None = None,
     type_check: TypeCheck = strict,
     serialize_class_var: bool = False,
-    class_serializer: Optional[ClassSerializer] = None,
+    class_serializer: ClassSerializer | None = None,
 ) -> str:
     renderer = Renderer(
         TO_ITER,
@@ -672,11 +672,11 @@ def render_to_tuple(
 
 def render_to_dict(
     cls: type[Any],
-    case: Optional[str] = None,
-    legacy_class_serializer: Optional[SerializeFunc] = None,
+    case: str | None = None,
+    legacy_class_serializer: SerializeFunc | None = None,
     type_check: TypeCheck = strict,
     serialize_class_var: bool = False,
-    class_serializer: Optional[ClassSerializer] = None,
+    class_serializer: ClassSerializer | None = None,
 ) -> str:
     renderer = Renderer(
         TO_DICT,
@@ -723,7 +723,7 @@ class LRenderer:
     Render lvalue for various types.
     """
 
-    case: Optional[str]
+    case: str | None
     serialize_class_var: bool = False
 
     def render(self, arg: SeField[Any]) -> str:
@@ -756,12 +756,12 @@ class Renderer:
     """
 
     func: str
-    legacy_class_serializer: Optional[SerializeFunc] = None
+    legacy_class_serializer: SerializeFunc | None = None
     suppress_coerce: bool = False
     """ Suppress type coercing because generated union serializer has its own type checking """
     serialize_class_var: bool = False
-    class_serializer: Optional[ClassSerializer] = None
-    class_name: Optional[str] = None
+    class_serializer: ClassSerializer | None = None
+    class_name: str | None = None
 
     def render(self, arg: SeField[Any]) -> str:
         """

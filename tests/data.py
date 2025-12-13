@@ -1,7 +1,7 @@
 from __future__ import annotations
 from dataclasses import dataclass
 import enum
-from typing import Optional, Any
+from typing import Any
 
 from serde import field, serde, disabled
 
@@ -91,10 +91,10 @@ class PriOpt:
     Optional Primitives.
     """
 
-    i: Optional[int]
-    s: Optional[str]
-    f: Optional[float]
-    b: Optional[bool]
+    i: int | None
+    s: str | None
+    f: float | None
+    b: bool | None
 
 
 @serde
@@ -161,10 +161,10 @@ class NestedPriOpt:
     Optional Primitives.
     """
 
-    i: Optional[Int]
-    s: Optional[Str]
-    f: Optional[Float]
-    b: Optional[Bool]
+    i: Int | None
+    s: Str | None
+    f: Float | None
+    b: Bool | None
 
 
 @serde
@@ -222,8 +222,8 @@ class OptDefault:
     Optionals.
     """
 
-    n: Optional[int] = None
-    i: Optional[int] = 10
+    n: int | None = None
+    i: int | None = 10
 
 
 class E(enum.Enum):
@@ -246,15 +246,15 @@ class EnumInClass:
     """
 
     e: IE = IE.V2
-    o: Optional[E] = E.S
+    o: E | None = E.S
     i: imported.IE = imported.IE.V1
 
 
 @dataclass(unsafe_hash=True)
 class Recur:
-    a: Optional[Recur]
-    b: Optional[list[Recur]]
-    c: Optional[dict[str, Recur]]
+    a: Recur | None
+    b: list[Recur] | None
+    c: dict[str, Recur] | None
 
 
 @dataclass(unsafe_hash=True)

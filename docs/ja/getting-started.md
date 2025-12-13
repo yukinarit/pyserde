@@ -2,7 +2,7 @@
 
 ## インストール
 
-PyPIからpyserdeをインストールしてください。pyserdeにはPython>=3.9が必要です。
+PyPIからpyserdeをインストールしてください。pyserdeにはPython>=3.10が必要です。
 
 ```
 pip install pyserde
@@ -87,7 +87,7 @@ class Foo:
 
 ## PEP585とPEP604
 
-python>=3.9用の[PEP585](https://www.python.org/dev/peps/pep-0585/)スタイルのアノテーションと、python>=3.10用の[PEP604](https://www.python.org/dev/peps/pep-0604/) Unionオペレータがサポートされています。  
+python>=3.10用の[PEP585](https://www.python.org/dev/peps/pep-0585/)スタイルのアノテーションと、[PEP604](https://www.python.org/dev/peps/pep-0604/) Unionオペレータがサポートされています。  
 PEP585とPEP604を使用すると、pyserdeクラスをきれいに書くことができます。
 ```python
 @serde

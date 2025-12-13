@@ -1,5 +1,5 @@
 from collections.abc import Callable
-from typing import Any, Optional
+from typing import Any
 
 from serde.compat import get_args, get_origin
 
@@ -23,7 +23,7 @@ try:
     import numpy as np
     import numpy.typing as npt
 
-    encode_numpy: Optional[Callable[[Any], Any]]
+    encode_numpy: Callable[[Any], Any] | None
 
     def encode_numpy(obj: Any):
         if isinstance(obj, np.ndarray):

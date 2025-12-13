@@ -7,7 +7,6 @@ import dataclasses
 import enum
 import functools
 import logging
-import sys
 import re
 import casefy
 from dataclasses import dataclass
@@ -18,11 +17,9 @@ from typing import (
     overload,
     TypeVar,
     Generic,
-    Optional,
     Any,
     Protocol,
     get_type_hints,
-    Union,
     cast,
 )
 
@@ -170,7 +167,7 @@ class Cache:
         scope: Scope = getattr(wrapper, SERDE_SCOPE)
         return scope.funcs[FROM_DICT](data={"v": obj}).v  # type: ignore
 
-    def _get_union_class(self, cls: type[Any]) -> Optional[type[Any]]:
+    def _get_union_class(self, cls: type[Any]) -> type[Any] | None:
         """
         Get a wrapper class from the the cache. If not found, it will generate
         the class and store it in the cache.
@@ -211,7 +208,7 @@ class Cache:
         self,
         cls: type[T],
         data: Any,
-        deserialize_numbers: Optional[Callable[[Union[str, int]], float]] = None,
+        deserialize_numbers: Callable[[str | int], float] | None = None,
     ) -> T:
         """
         Deserialize from dict or tuple into the specified Union.
@@ -252,7 +249,7 @@ class Scope:
     funcs: dict[str, Callable[..., Any]] = dataclasses.field(default_factory=dict)
     """ Generated serialize and deserialize functions """
 
-    defaults: dict[str, Union[Callable[..., Any], Any]] = dataclasses.field(default_factory=dict)
+    defaults: dict[str, Callable[..., Any] | Any] = dataclasses.field(default_factory=dict)
     """ Default values of the dataclass fields (factories & normal values) """
 
     code: dict[str, str] = dataclasses.field(default_factory=dict)
@@ -318,7 +315,7 @@ def raise_unsupported_type(obj: Any) -> None:
 
 
 def gen(
-    code: str, globals: Optional[dict[str, Any]] = None, locals: Optional[dict[str, Any]] = None
+    code: str, globals: dict[str, Any] | None = None, locals: dict[str, Any] | None = None
 ) -> str:
     """
     A wrapper of builtin `exec` function.
@@ -451,7 +448,7 @@ def is_tuple_instance(obj: Any, typ: type[Any]) -> bool:
 
     # All the other tuples e.g. tuple[int, str]
     if len(obj) == len(args):
-        for element, arg in zip(obj, args):
+        for element, arg in zip(obj, args, strict=False):
             if not is_instance(element, arg):
                 return False
     else:
@@ -509,7 +506,7 @@ def skip_if_false(v: Any) -> Any:
     return not bool(v)
 
 
-def skip_if_default(v: Any, default: Optional[Any] = None) -> Any:
+def skip_if_default(v: Any, default: Any | None = None) -> Any:
     return v == default  # Why return type is deduced to be Any?
 
 
@@ -522,16 +519,16 @@ class FlattenOpts:
 
 def field(
     *args: Any,
-    rename: Optional[str] = None,
-    alias: Optional[list[str]] = None,
-    skip: Optional[bool] = None,
-    skip_if: Optional[Callable[[Any], Any]] = None,
-    skip_if_false: Optional[bool] = None,
-    skip_if_default: Optional[bool] = None,
-    serializer: Optional[Callable[..., Any]] = None,
-    deserializer: Optional[Callable[..., Any]] = None,
-    flatten: Optional[Union[FlattenOpts, bool]] = None,
-    metadata: Optional[dict[str, Any]] = None,
+    rename: str | None = None,
+    alias: list[str] | None = None,
+    skip: bool | None = None,
+    skip_if: Callable[[Any], Any] | None = None,
+    skip_if_false: bool | None = None,
+    skip_if_default: bool | None = None,
+    serializer: Callable[..., Any] | None = None,
+    deserializer: Callable[..., Any] | None = None,
+    flatten: FlattenOpts | bool | None = None,
+    metadata: dict[str, Any] | None = None,
     **kwargs: Any,
 ) -> Any:
     """
@@ -574,7 +571,7 @@ class Field(Generic[T]):
 
     type: type[T]
     """ Type of Field """
-    name: Optional[str]
+    name: str | None
     """ Name of Field """
     default: Any = field(default_factory=dataclasses._MISSING_TYPE)
     """ Default value of Field """
@@ -586,45 +583,45 @@ class Field(Generic[T]):
     compare: Any = field(default_factory=dataclasses._MISSING_TYPE)
     metadata: Mapping[str, Any] = field(default_factory=dict)
     kw_only: bool = False
-    case: Optional[str] = None
+    case: str | None = None
     alias: list[str] = field(default_factory=list)
-    rename: Optional[str] = None
-    skip: Optional[bool] = None
-    skip_if: Optional[Func] = None
-    skip_if_false: Optional[bool] = None
-    skip_if_default: Optional[bool] = None
-    serializer: Optional[Func] = None  # Custom field serializer.
-    deserializer: Optional[Func] = None  # Custom field deserializer.
-    flatten: Optional[FlattenOpts] = None
-    parent: Optional[Any] = None
-    type_args: Optional[list[str]] = None
+    rename: str | None = None
+    skip: bool | None = None
+    skip_if: Func | None = None
+    skip_if_false: bool | None = None
+    skip_if_default: bool | None = None
+    serializer: Func | None = None  # Custom field serializer.
+    deserializer: Func | None = None  # Custom field deserializer.
+    flatten: FlattenOpts | None = None
+    parent: Any | None = None
+    type_args: list[str] | None = None
 
     @classmethod
-    def from_dataclass(cls, f: dataclasses.Field[T], parent: Optional[Any] = None) -> Field[T]:
+    def from_dataclass(cls, f: dataclasses.Field[T], parent: Any | None = None) -> Field[T]:
         """
         Create `Field` object from `dataclasses.Field`.
         """
-        skip_if_false_func: Optional[Func] = None
+        skip_if_false_func: Func | None = None
         if f.metadata.get("serde_skip_if_false"):
             skip_if_false_func = Func(skip_if_false, cls.mangle(f, "skip_if_false"))
 
-        skip_if_default_func: Optional[Func] = None
+        skip_if_default_func: Func | None = None
         if f.metadata.get("serde_skip_if_default"):
             skip_if_def = functools.partial(skip_if_default, default=f.default)
             skip_if_default_func = Func(skip_if_def, cls.mangle(f, "skip_if_default"))
 
-        skip_if: Optional[Func] = None
+        skip_if: Func | None = None
         if f.metadata.get("serde_skip_if"):
             func = f.metadata.get("serde_skip_if")
             if callable(func):
                 skip_if = Func(func, cls.mangle(f, "skip_if"))
 
-        serializer: Optional[Func] = None
+        serializer: Func | None = None
         func = f.metadata.get("serde_serializer")
         if func:
             serializer = Func(func, cls.mangle(f, "serializer"))
 
-        deserializer: Optional[Func] = None
+        deserializer: Func | None = None
         func = f.metadata.get("serde_deserializer")
         if func:
             deserializer = Func(func, cls.mangle(f, "deserializer"))
@@ -635,7 +632,7 @@ class Field(Generic[T]):
         if flatten and not (dataclasses.is_dataclass(f.type) or is_opt_dataclass(f.type)):
             raise SerdeError(f"pyserde does not support flatten attribute for {typename(f.type)}")
 
-        kw_only = bool(f.kw_only) if sys.version_info >= (3, 10) else False
+        kw_only = bool(f.kw_only)
 
         return cls(
             f.type,  # type: ignore
@@ -688,7 +685,7 @@ class Field(Generic[T]):
         """
         return f"{field.name}_{name}"
 
-    def conv_name(self, case: Optional[str] = None) -> str:
+    def conv_name(self, case: str | None = None) -> str:
         """
         Get an actual field name which `rename` and `rename_all` conversions
         are made. Use `name` property to get a field name before conversion.
@@ -718,7 +715,7 @@ def fields(field_cls: type[F], cls: type[Any], serialize_class_var: bool = False
     return fields  # type: ignore
 
 
-def conv(f: Field[Any], case: Optional[str] = None) -> str:
+def conv(f: Field[Any], case: str | None = None) -> str:
     """
     Convert field name.
     """
@@ -781,8 +778,8 @@ class Tagging:
         Adjacent = enum.auto()
         Untagged = enum.auto()
 
-    tag: Optional[str] = None
-    content: Optional[str] = None
+    tag: str | None = None
+    content: str | None = None
     kind: Kind = Kind.External
 
     def is_external(self) -> bool:
@@ -840,7 +837,7 @@ def InternalTagging(tag: str) -> Tagging: ...
 def InternalTagging(tag: str, cls: T) -> _WithTagging[T]: ...
 
 
-def InternalTagging(tag: str, cls: Optional[T] = None) -> Union[Tagging, _WithTagging[T]]:
+def InternalTagging(tag: str, cls: T | None = None) -> Tagging | _WithTagging[T]:
     tagging = Tagging(tag, kind=Tagging.Kind.Internal)
     if cls:
         return tagging(cls)
@@ -856,9 +853,7 @@ def AdjacentTagging(tag: str, content: str) -> Tagging: ...
 def AdjacentTagging(tag: str, content: str, cls: T) -> _WithTagging[T]: ...
 
 
-def AdjacentTagging(
-    tag: str, content: str, cls: Optional[T] = None
-) -> Union[Tagging, _WithTagging[T]]:
+def AdjacentTagging(tag: str, content: str, cls: T | None = None) -> Tagging | _WithTagging[T]:
     tagging = Tagging(tag, content, kind=Tagging.Kind.Adjacent)
     if cls:
         return tagging(cls)

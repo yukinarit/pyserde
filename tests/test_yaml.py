@@ -3,13 +3,12 @@ import pytest
 import serde as serde_pkg
 from serde import serde
 from serde.yaml import to_yaml, from_yaml
-from typing import Optional, Union
 
 
 def test_yaml_basics() -> None:
     @serde
     class Foo:
-        v: Optional[int]
+        v: int | None
 
     f = Foo(10)
     assert "v: 10\n" == to_yaml(f)
@@ -28,7 +27,7 @@ def test_skip_none() -> None:
     @serde
     class Foo:
         a: int
-        b: Optional[int]
+        b: int | None
 
     f = Foo(10, 100)
     assert (
@@ -73,7 +72,7 @@ def test_coerce_numbers_yaml() -> None:
 def test_yaml_numbers_with_union() -> None:
     @serde
     class Foo:
-        value: Union[float, int]
+        value: float | int
 
     assert from_yaml(Foo, "value: 1\n").value == 1.0
 
@@ -82,7 +81,7 @@ def test_yaml_numbers_with_union() -> None:
 
     @serde
     class Bar:
-        value: Union[int, float]
+        value: int | float
 
     assert from_yaml(Bar, "value: 1\n").value == 1
 

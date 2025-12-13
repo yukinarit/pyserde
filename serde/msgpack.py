@@ -3,7 +3,7 @@ Serialize and Deserialize in MsgPack format. This module depends on
 [msgpack](https://pypi.org/project/msgpack/) package.
 """
 
-from typing import Any, Optional, overload
+from typing import Any, overload
 
 import msgpack
 
@@ -20,7 +20,7 @@ __all__ = ["from_msgpack", "to_msgpack"]
 class MsgPackSerializer(Serializer[bytes]):
     @classmethod
     def serialize(
-        cls, obj: Any, use_bin_type: bool = True, ext_type_code: Optional[int] = None, **opts: Any
+        cls, obj: Any, use_bin_type: bool = True, ext_type_code: int | None = None, **opts: Any
     ) -> bytes:
         if "default" not in opts:
             from .numpy import encode_numpy
@@ -44,10 +44,10 @@ class MsgPackDeserializer(Deserializer[bytes]):
 
 def to_msgpack(
     obj: Any,
-    cls: Optional[Any] = None,
+    cls: Any | None = None,
     se: type[Serializer[bytes]] = MsgPackSerializer,
     named: bool = True,
-    ext_dict: Optional[dict[type[Any], int]] = None,
+    ext_dict: dict[type[Any], int] | None = None,
     reuse_instances: bool = False,
     convert_sets: bool = True,
     **opts: Any,
@@ -91,7 +91,7 @@ def from_msgpack(
     s: bytes,
     de: type[Deserializer[bytes]] = MsgPackDeserializer,
     named: bool = True,
-    ext_dict: Optional[dict[int, type[Any]]] = None,
+    ext_dict: dict[int, type[Any]] | None = None,
     **opts: Any,
 ) -> T: ...
 
@@ -102,7 +102,7 @@ def from_msgpack(
     s: bytes,
     de: type[Deserializer[bytes]] = MsgPackDeserializer,
     named: bool = True,
-    ext_dict: Optional[dict[int, type[Any]]] = None,
+    ext_dict: dict[int, type[Any]] | None = None,
     **opts: Any,
 ) -> Any: ...
 
@@ -112,7 +112,7 @@ def from_msgpack(
     s: bytes,
     de: type[Deserializer[bytes]] = MsgPackDeserializer,
     named: bool = True,
-    ext_dict: Optional[dict[int, type[Any]]] = None,
+    ext_dict: dict[int, type[Any]] | None = None,
     skip_none: bool = False,
     **opts: Any,
 ) -> Any:

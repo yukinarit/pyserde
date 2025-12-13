@@ -3,7 +3,7 @@ name = "pyserde_bench"
 version = "0.1.0"
 description = "Benchmark package for pyserde"
 authors = [{ name = "yukinarit", email = "yukinarit84@gmail.com" }]
-requires-python = ">=3.9,<4.0"
+requires-python = ">=3.10,<4.0"
 dependencies = [
   "click",
   "pyserde",

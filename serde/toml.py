@@ -1,11 +1,11 @@
 """
 Serialize and Deserialize in TOML format. This module depends on
-[tomli](https://github.com/hukkin/tomli) (for python<=3.10) and
+[tomli](https://github.com/hukkin/tomli) (for python==3.10) and
 [tomli-w](https://github.com/hukkin/tomli-w) packages.
 """
 
 import sys
-from typing import overload, Optional, Any
+from typing import Any, overload
 
 import tomli_w
 
@@ -36,7 +36,7 @@ class TomlDeserializer(Deserializer[str]):
 
 def to_toml(
     obj: Any,
-    cls: Optional[Any] = None,
+    cls: Any | None = None,
     se: type[Serializer[str]] = TomlSerializer,
     reuse_instances: bool = False,
     convert_sets: bool = True,
