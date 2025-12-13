@@ -15,7 +15,7 @@ import uuid
 import typing
 import typing_extensions
 from collections import defaultdict
-from collections.abc import Iterator
+from collections.abc import Iterator, Sequence, MutableSequence
 from dataclasses import is_dataclass
 from typing import TypeVar, Generic, Any, ClassVar, Optional, NewType, Union, Hashable, Callable
 
@@ -563,30 +563,50 @@ def is_opt_dataclass(typ: Any) -> bool:
 @cache
 def is_list(typ: type[Any]) -> bool:
     """
-    Test if the type is `list`.
+    Test if the type is `list`, `collections.abc.Sequence`, or `collections.abc.MutableSequence`.
 
     >>> is_list(list[int])
     True
     >>> is_list(list)
     True
+    >>> is_list(Sequence[int])
+    True
+    >>> is_list(Sequence)
+    True
+    >>> is_list(MutableSequence[int])
+    True
+    >>> is_list(MutableSequence)
+    True
     """
-    try:
-        return issubclass(get_origin(typ), list)  # type: ignore
-    except TypeError:
-        return typ is list
+    origin = get_origin(typ)
+    if origin is None:
+        return typ in (list, Sequence, MutableSequence)
+    return origin in (list, Sequence, MutableSequence)
 
 
 @cache
 def is_bare_list(typ: type[Any]) -> bool:
     """
-    Test if the type is `list` without type args.
+    Test if the type is `list`/`collections.abc.Sequence`/`collections.abc.MutableSequence`
+    without type args.
 
     >>> is_bare_list(list[int])
     False
     >>> is_bare_list(list)
     True
+    >>> is_bare_list(Sequence[int])
+    False
+    >>> is_bare_list(Sequence)
+    True
+    >>> is_bare_list(MutableSequence[int])
+    False
+    >>> is_bare_list(MutableSequence)
+    True
     """
-    return typ is list
+    origin = get_origin(typ)
+    if origin in (list, Sequence, MutableSequence):
+        return not type_args(typ)
+    return typ in (list, Sequence, MutableSequence)
 
 
 @cache

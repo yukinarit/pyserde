@@ -1,4 +1,5 @@
 import pytest
+from collections.abc import Sequence, MutableSequence
 
 import serde as serde_pkg
 from serde import serde
@@ -21,6 +22,22 @@ def test_json_basics() -> None:
     b = Bar({1, 2, 3})
     assert '{"v":[1,2,3]}' == to_json(b)
     assert b == from_json(Bar, '{"v":[1,2,3]}')
+
+    @serde
+    class Baz:
+        v: Sequence[int]
+
+    baz = Baz((1, 2, 3))
+    assert '{"v":[1,2,3]}' == to_json(baz)
+    assert from_json(Baz, '{"v":[1,2,3]}').v == [1, 2, 3]
+
+    @serde
+    class Qux:
+        v: MutableSequence[int]
+
+    qux = Qux([1, 2, 3])
+    assert '{"v":[1,2,3]}' == to_json(qux)
+    assert from_json(Qux, '{"v":[1,2,3]}').v == [1, 2, 3]
 
 
 def test_skip_none() -> None:

@@ -890,7 +890,8 @@ class Renderer:
         Render rvalue for list.
         """
         if is_bare_list(arg.type):
-            return arg.varname
+            origin = get_origin(arg.type) or arg.type
+            return arg.varname if origin is list else f"list({arg.varname})"
         else:
             earg = arg[0]
             earg.name = "v"

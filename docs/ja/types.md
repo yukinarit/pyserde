@@ -4,7 +4,7 @@
 
 * プリミティブ（`int`, `float`, `str`, `bool`）[^1]
 * コンテナ
-    * `list`, `set`, `tuple`, `dict` [^2]
+    * `list`, `collections.abc.Sequence`, `collections.abc.MutableSequence`, `set`, `tuple`, `dict` [^2]
     * [`frozenset`](https://docs.python.org/3/library/stdtypes.html#frozenset) [^3]
     * [`defaultdict`](https://docs.python.org/3/library/collections.html#collections.defaultdict) [^4]
 * [`typing.Optional`](https://docs.python.org/3/library/typing.html#typing.Optional)[^5]

@@ -12,7 +12,7 @@ import casefy
 from dataclasses import dataclass
 
 from beartype.door import is_bearable
-from collections.abc import Mapping, Sequence, Callable, Hashable
+from collections.abc import Mapping, Sequence, MutableSequence, Callable, Hashable
 from typing import (
     overload,
     TypeVar,
@@ -403,8 +403,20 @@ def is_union_instance(obj: Any, typ: type[Any]) -> bool:
 
 
 def is_list_instance(obj: Any, typ: type[Any]) -> bool:
-    if not isinstance(obj, list):
-        return False
+    origin = get_origin(typ) or typ
+    if origin is list:
+        if not isinstance(obj, list):
+            return False
+    elif origin is MutableSequence:
+        if isinstance(obj, (str, bytes, bytearray)):
+            return False
+        if not isinstance(obj, MutableSequence):
+            return False
+    else:
+        if isinstance(obj, (str, bytes, bytearray)):
+            return False
+        if not isinstance(obj, Sequence):
+            return False
     if len(obj) == 0 or is_bare_list(typ):
         return True
     list_arg = type_args(typ)[0]
