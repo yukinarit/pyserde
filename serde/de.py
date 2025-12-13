@@ -17,7 +17,7 @@ from beartype import beartype, BeartypeConf
 from beartype.door import is_bearable
 from beartype.roar import BeartypeCallHintParamViolation
 from dataclasses import dataclass, is_dataclass
-from typing import overload, TypeVar, Generic, Any, Optional, Union, Literal, Iterator, cast
+from typing import Any, Generic, Iterator, Literal, TypeVar, cast, overload
 from typing_extensions import dataclass_transform
 
 from .compat import (
@@ -143,9 +143,7 @@ def default_deserializer(_cls: type[Any], obj: Any) -> Any:
     """
 
 
-def _get_by_aliases(
-    d: dict[str, str], aliases: list[str], raise_error: bool = True
-) -> Optional[str]:
+def _get_by_aliases(d: dict[str, str], aliases: list[str], raise_error: bool = True) -> str | None:
     if not aliases:
         if raise_error:
             raise KeyError("Tried all aliases, but key not found")
@@ -168,12 +166,12 @@ def _make_deserialize(
     cls_name: str,
     fields: list[Any],
     *args: Any,
-    rename_all: Optional[str] = None,
+    rename_all: str | None = None,
     reuse_instances_default: bool = True,
     convert_sets_default: bool = False,
-    deserializer: Optional[DeserializeFunc] = None,
+    deserializer: DeserializeFunc | None = None,
     type_check: TypeCheck = strict,
-    class_deserializer: Optional[ClassDeserializer] = None,
+    class_deserializer: ClassDeserializer | None = None,
     **kwargs: Any,
 ) -> type[Any]:
     """
@@ -198,14 +196,14 @@ GENERATION_STACK = []
 
 @dataclass_transform()
 def deserialize(
-    _cls: Optional[type[T]] = None,
-    rename_all: Optional[str] = None,
+    _cls: type[T] | None = None,
+    rename_all: str | None = None,
     reuse_instances_default: bool = True,
     convert_sets_default: bool = False,
-    deserializer: Optional[DeserializeFunc] = None,
+    deserializer: DeserializeFunc | None = None,
     tagging: Tagging = DefaultTagging,
     type_check: TypeCheck = strict,
-    class_deserializer: Optional[ClassDeserializer] = None,
+    class_deserializer: ClassDeserializer | None = None,
     deny_unknown_fields: bool = False,
     **kwargs: Any,
 ) -> type[T]:
@@ -249,7 +247,7 @@ def deserialize(
         # Create a scope storage used by serde.
         # Each class should get own scope. Child classes can not share scope with parent class.
         # That's why we need the "scope.cls is not cls" check.
-        scope: Optional[Scope] = getattr(cls, SERDE_SCOPE, None)
+        scope: Scope | None = getattr(cls, SERDE_SCOPE, None)
         if scope is None or scope.cls is not cls:
             scope = Scope(cls, reuse_instances_default=reuse_instances_default)
             setattr(cls, SERDE_SCOPE, scope)
@@ -391,7 +389,7 @@ def is_dataclass_without_de(cls: type[Any]) -> bool:
         return False
     if not hasattr(cls, SERDE_SCOPE):
         return True
-    scope: Optional[Scope] = getattr(cls, SERDE_SCOPE)
+    scope: Scope | None = getattr(cls, SERDE_SCOPE)
     if not scope:
         return True
     return FROM_DICT not in scope.funcs
@@ -421,8 +419,8 @@ def from_obj(
     c: type[T],
     o: Any,
     named: bool,
-    reuse_instances: Optional[bool],
-    deserialize_numbers: Optional[Callable[[Union[str, int]], float]] = None,
+    reuse_instances: bool | None,
+    deserialize_numbers: Callable[[str | int], float] | None = None,
 ) -> T:
     """
     Deserialize from an object into an instance of the type specified as arg `c`.
@@ -548,8 +546,8 @@ def from_obj(
 def from_dict(
     cls: type[T],
     o: dict[str, Any],
-    reuse_instances: Optional[bool] = None,
-    deserialize_numbers: Optional[Callable[[Union[str, int]], float]] = None,
+    reuse_instances: bool | None = None,
+    deserialize_numbers: Callable[[str | int], float] | None = None,
 ) -> T: ...
 
 
@@ -557,16 +555,16 @@ def from_dict(
 def from_dict(
     cls: Any,
     o: dict[str, Any],
-    reuse_instances: Optional[bool] = None,
-    deserialize_numbers: Optional[Callable[[Union[str, int]], float]] = None,
+    reuse_instances: bool | None = None,
+    deserialize_numbers: Callable[[str | int], float] | None = None,
 ) -> Any: ...
 
 
 def from_dict(
     cls: Any,
     o: dict[str, Any],
-    reuse_instances: Optional[bool] = None,
-    deserialize_numbers: Optional[Callable[[Union[str, int]], float]] = None,
+    reuse_instances: bool | None = None,
+    deserialize_numbers: Callable[[str | int], float] | None = None,
 ) -> Any:
     """
     Deserialize dictionary into object.
@@ -604,8 +602,8 @@ def from_dict(
 def from_tuple(
     cls: type[T],
     o: Any,
-    reuse_instances: Optional[bool] = None,
-    deserialize_numbers: Optional[Callable[[Union[str, int]], float]] = None,
+    reuse_instances: bool | None = None,
+    deserialize_numbers: Callable[[str | int], float] | None = None,
 ) -> T: ...
 
 
@@ -613,16 +611,16 @@ def from_tuple(
 def from_tuple(
     cls: Any,
     o: Any,
-    reuse_instances: Optional[bool] = None,
-    deserialize_numbers: Optional[Callable[[Union[str, int]], float]] = None,
+    reuse_instances: bool | None = None,
+    deserialize_numbers: Callable[[str | int], float] | None = None,
 ) -> Any: ...
 
 
 def from_tuple(
     cls: Any,
     o: Any,
-    reuse_instances: Optional[bool] = None,
-    deserialize_numbers: Optional[Callable[[Union[str, int]], float]] = None,
+    reuse_instances: bool | None = None,
+    deserialize_numbers: Callable[[str | int], float] | None = None,
 ) -> Any:
     """
     Deserialize tuple into object.
@@ -661,7 +659,7 @@ class DeField(Field[T]):
     Represents a field of dataclass.
     """
 
-    datavar: Optional[str] = None
+    datavar: str | None = None
     """ Name of variable which is passed in the deserialize API """
 
     index: int = 0
@@ -670,7 +668,7 @@ class DeField(Field[T]):
     iterbased: bool = False
     """ Iterater based deserializer or not """
 
-    def __getitem__(self, n: int) -> Union[DeField[Any], InnerField[Any]]:
+    def __getitem__(self, n: int) -> DeField[Any] | InnerField[Any]:
         """
         Get inner `Field` from current `Field`.
 
@@ -788,13 +786,13 @@ class Renderer:
     """
 
     func: str
-    cls: Optional[type[Any]] = None
-    legacy_class_deserializer: Optional[DeserializeFunc] = None
+    cls: type[Any] | None = None
+    legacy_class_deserializer: DeserializeFunc | None = None
     import_numpy: bool = False
     suppress_coerce: bool = False
     """ Disable type coercing in codegen """
-    class_deserializer: Optional[ClassDeserializer] = None
-    class_name: Optional[str] = None
+    class_deserializer: ClassDeserializer | None = None
+    class_name: str | None = None
 
     def render(self, arg: DeField[Any]) -> str:
         """
@@ -1067,7 +1065,7 @@ class Renderer:
     def c_tor(self, arg: DeField[Any]) -> str:
         return f"{typename(arg.type)}({arg.data})"
 
-    def c_tor_with_check(self, arg: DeField[Any], ctor: Optional[str] = None) -> str:
+    def c_tor_with_check(self, arg: DeField[Any], ctor: str | None = None) -> str:
         if ctor is None:
             ctor = self.c_tor(arg)
         return f"{arg.data} if isinstance({arg.data}, {typename(arg.type)}) else {ctor}"
@@ -1126,7 +1124,7 @@ class Renderer:
             return code
 
 
-def to_arg(f: DeField[T], index: int, rename_all: Optional[str] = None) -> DeField[T]:
+def to_arg(f: DeField[T], index: int, rename_all: str | None = None) -> DeField[T]:
     f.index = index
     f.data = "data"
     f.case = f.case or rename_all
@@ -1258,9 +1256,9 @@ def {{func}}(cls=cls, maybe_generic=None, maybe_generic_type_vars=None, data=Non
 
 def render_from_iter(
     cls: type[Any],
-    legacy_class_deserializer: Optional[DeserializeFunc] = None,
+    legacy_class_deserializer: DeserializeFunc | None = None,
     type_check: TypeCheck = strict,
-    class_deserializer: Optional[ClassDeserializer] = None,
+    class_deserializer: ClassDeserializer | None = None,
 ) -> str:
     renderer = Renderer(
         FROM_ITER,
@@ -1286,17 +1284,17 @@ def render_from_iter(
     return res
 
 
-def get_known_fields(f: DeField[Any], rename_all: Optional[str]) -> list[str]:
+def get_known_fields(f: DeField[Any], rename_all: str | None) -> list[str]:
     names: list[str] = [f.conv_name(rename_all)]
     return names + f.alias
 
 
 def render_from_dict(
     cls: type[Any],
-    rename_all: Optional[str] = None,
-    legacy_class_deserializer: Optional[DeserializeFunc] = None,
+    rename_all: str | None = None,
+    legacy_class_deserializer: DeserializeFunc | None = None,
     type_check: TypeCheck = strict,
-    class_deserializer: Optional[ClassDeserializer] = None,
+    class_deserializer: ClassDeserializer | None = None,
     deny_unknown_fields: bool = False,
 ) -> str:
     renderer = Renderer(

@@ -3,7 +3,7 @@ Serialize and Deserialize in YAML format. This module depends on
 [pyyaml](https://pypi.org/project/PyYAML/) package.
 """
 
-from typing import overload, Optional, Any
+from typing import Any, overload
 
 import yaml
 
@@ -45,7 +45,7 @@ def deserialize_yaml_numbers(value: Any) -> float:
 
 def to_yaml(
     obj: Any,
-    cls: Optional[Any] = None,
+    cls: Any | None = None,
     se: type[Serializer[str]] = YamlSerializer,
     reuse_instances: bool = False,
     convert_sets: bool = True,

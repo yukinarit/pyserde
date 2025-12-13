@@ -1,5 +1,3 @@
-from typing import Optional
-
 from sqlalchemy import Text, JSON, ForeignKey
 from sqlalchemy.orm import DeclarativeBase, MappedAsDataclass, Mapped, mapped_column, relationship
 
@@ -26,8 +24,8 @@ class User(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(Text, nullable=False)
     fullname: Mapped[str] = mapped_column(Text, nullable=False)
-    nickname: Mapped[Optional[str]] = mapped_column(Text)
-    attributes: Mapped[Optional[dict[str, str]]] = mapped_column(JSON)
+    nickname: Mapped[str | None] = mapped_column(Text)
+    attributes: Mapped[dict[str, str] | None] = mapped_column(JSON)
     projects: Mapped[list[Project]] = relationship(backref="owner")
 
 

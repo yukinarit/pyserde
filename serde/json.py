@@ -2,7 +2,7 @@
 Serialize and Deserialize in JSON format.
 """
 
-from typing import Any, AnyStr, overload, Optional, Union, cast
+from typing import Any, AnyStr, overload, cast
 
 from .compat import SerdeError, T
 from .de import Deserializer, from_dict
@@ -20,7 +20,7 @@ try:  # pragma: no cover
             opts["option"] = orjson.OPT_SERIALIZE_NUMPY | orjson.OPT_NON_STR_KEYS
         return cast(str, orjson.dumps(obj, **opts).decode())
 
-    def json_loads(s: Union[str, bytes], **opts: Any) -> Any:
+    def json_loads(s: str | bytes, **opts: Any) -> Any:
         return orjson.loads(s, **opts)
 
 except ImportError:
@@ -36,7 +36,7 @@ except ImportError:
         separators = opts.pop("separators", (",", ":"))
         return json.dumps(obj, ensure_ascii=ensure_ascii, separators=separators, **opts)
 
-    def json_loads(s: Union[str, bytes], **opts: Any) -> Any:
+    def json_loads(s: str | bytes, **opts: Any) -> Any:
         return json.loads(s, **opts)
 
 
@@ -69,7 +69,7 @@ def deserialize_json_numbers(value: Any) -> float:
 
 def to_json(
     obj: Any,
-    cls: Optional[Any] = None,
+    cls: Any | None = None,
     se: type[Serializer[str]] = JsonSerializer,
     reuse_instances: bool = False,
     convert_sets: bool = True,

@@ -2,7 +2,7 @@
 
 ## Installation
 
-Install pyserde from PyPI. pyserde requires Python>=3.9.
+Install pyserde from PyPI. pyserde requires Python>=3.10.
 
 ```
 pip install pyserde
@@ -78,7 +78,7 @@ pyserde generates methods necessary for (de)serialization by `@serde` when a cla
 
 ## PEP585 and PEP604
 
-[PEP585](https://www.python.org/dev/peps/pep-0585/) style annotation is supported for python>=3.9. [PEP604](https://www.python.org/dev/peps/pep-0604/) Union operator is also supported for python>=3.10. With PEP585 and PEP604, you can write a pyserde class pretty neatly.
+[PEP585](https://www.python.org/dev/peps/pep-0585/) style annotations and the [PEP604](https://www.python.org/dev/peps/pep-0604/) union operator are supported for python>=3.10. With PEP585 and PEP604, you can write a pyserde class pretty neatly.
 ```python
 @serde
 class Foo:

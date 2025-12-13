@@ -4,12 +4,11 @@ description = "Yet another serialization library on top of dataclasses"
 authors = [{ name = "yukinarit", email = "yukinarit84@gmail.com" }]
 license = { file = "LICENSE" }
 readme = "README.md"
-requires-python = ">=3.9,<4.0"
+requires-python = ">=3.10,<4.0"
 classifiers = [
   "Development Status :: 4 - Beta",
   "Intended Audience :: Developers",
   "License :: OSI Approved :: MIT License",
-  "Programming Language :: Python :: 3.9",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
@@ -36,8 +35,7 @@ toml = [
 ]
 yaml = ["pyyaml"]
 numpy = [
-  "numpy>1.21.0,<3.0.0; python_version >= '3.9' and python_version < '3.10'",
-  "numpy>1.22.0,<3.0.0; python_version >= '3.10'",
+  "numpy>1.22.0,<3.0.0",
 ]
 jaxtyping = ["jaxtyping<0.3.0"]
 orjson = ["orjson"]
@@ -47,8 +45,7 @@ all = [
   "tomli; python_version < '3.11'",
   "tomli-w",
   "pyyaml",
-  "numpy>1.21.0,<3.0.0; python_version >= '3.9' and python_version < '3.10'",
-  "numpy>1.22.0,<3.0.0; python_version >= '3.10'",
+  "numpy>1.22.0,<3.0.0",
   "jaxtyping<0.3.0",
   "orjson",
   "sqlalchemy>2",
@@ -64,8 +61,7 @@ dev = [
   "tomli; python_version <= '3.11'",
   "tomli-w",
   "msgpack",
-  "numpy>1.21.0,<3.0.0; python_version >= '3.9' and python_version < '3.10'",
-  "numpy>1.22.0,<3.0.0; python_version >= '3.10'",
+  "numpy>1.22.0,<3.0.0",
   "mypy==1.14.1",
   "black==24.10.0",
   "pyright==1.1.389",

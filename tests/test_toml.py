@@ -1,13 +1,12 @@
 from serde import serde
 from serde.toml import to_toml, from_toml
-from typing import Optional
 import pytest
 
 
 def test_toml_basics() -> None:
     @serde
     class Foo:
-        v: Optional[int]
+        v: int | None
 
     f = Foo(10)
     assert "v = 10\n" == to_toml(f)
@@ -33,7 +32,7 @@ def test_skip_none() -> None:
     @serde
     class Foo:
         a: int
-        b: Optional[int]
+        b: int | None
 
     f = Foo(10, 100)
     assert (
@@ -57,7 +56,7 @@ def test_skip_none_container_not_supported_yet() -> None:
     @serde
     class Foo:
         a: int
-        b: list[Optional[int]]
+        b: list[int | None]
 
     f = Foo(10, [100, None])
     with pytest.raises(TypeError):

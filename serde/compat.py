@@ -10,7 +10,6 @@ import functools
 import ipaddress
 import itertools
 import pathlib
-import sys
 import types
 import uuid
 import typing
@@ -42,7 +41,7 @@ def _is_sqlalchemy_inspectable(subject: Any) -> bool:
     return is_sqlalchemy_inspectable(subject)
 
 
-def get_np_origin(tp: type[Any]) -> Optional[Any]:
+def get_np_origin(tp: type[Any]) -> Any | None:
     return None
 
 
@@ -136,7 +135,7 @@ def cache(f: Callable[P, T]) -> Callable[P, T]:
 
 
 @cache
-def get_origin(typ: Any) -> Optional[Any]:
+def get_origin(typ: Any) -> Any | None:
     """
     Provide `get_origin` that works in all python versions.
     """
@@ -242,7 +241,7 @@ def typename(typ: Any, with_typing_module: bool = False) -> str:
         if inner:
             return typename(inner)
 
-        name: Optional[str] = getattr(typ, "_name", None)
+        name: str | None = getattr(typ, "_name", None)
         if name:
             return name
         else:
@@ -265,7 +264,7 @@ def type_args(typ: Any) -> tuple[type[Any], ...]:
     Wrapper to suppress type error for accessing private members.
     """
     try:
-        args: Optional[tuple[type[Any, ...]]] = typ.__args__  # type: ignore
+        args: tuple[type[Any, ...]] | None = typ.__args__  # type: ignore
     except AttributeError:
         return get_args(typ)
 
@@ -481,13 +480,12 @@ def is_union(typ: Any) -> bool:
     except Exception:
         pass
 
-    # Python 3.10 Union operator e.g. str | int
-    if sys.version_info[:2] >= (3, 10):
-        try:
-            if isinstance(typ, types.UnionType):
-                return True
-        except Exception:
-            pass
+    # Python 3.10+ Union operator e.g. str | int
+    try:
+        if isinstance(typ, types.UnionType):
+            return True
+    except Exception:
+        pass
 
     # typing.Union
     return typing_inspect.is_union_type(typ)  # type: ignore
@@ -506,14 +504,13 @@ def is_opt(typ: Any) -> bool:
     False
     """
 
-    # Python 3.10 Union operator e.g. str | None
+    # Python 3.10+ Union operator e.g. str | None
     is_union_type = False
-    if sys.version_info[:2] >= (3, 10):
-        try:
-            if isinstance(typ, types.UnionType):
-                is_union_type = True
-        except Exception:
-            pass
+    try:
+        if isinstance(typ, types.UnionType):
+            is_union_type = True
+    except Exception:
+        pass
 
     # typing.Optional
     is_typing_union = typing_inspect.is_optional_type(typ)
@@ -770,7 +767,7 @@ def is_primitive_subclass(typ: type[Any]) -> bool:
 
 
 @cache
-def is_primitive(typ: Union[type[Any], NewType]) -> bool:
+def is_primitive(typ: type[Any] | NewType) -> bool:
     """
     Test if the type is primitive.
 
@@ -788,7 +785,7 @@ def is_primitive(typ: Union[type[Any], NewType]) -> bool:
 
 
 @cache
-def is_new_type_primitive(typ: Union[type[Any], NewType]) -> bool:
+def is_new_type_primitive(typ: type[Any] | NewType) -> bool:
     """
     Test if the type is a NewType of primitives.
     """
@@ -871,7 +868,7 @@ def is_str_serializable(typ: type[Any]) -> bool:
 
 def is_datetime(
     typ: type[Any],
-) -> TypeGuard[Union[datetime.date, datetime.time, datetime.datetime]]:
+) -> TypeGuard[datetime.date | datetime.time | datetime.datetime]:
     """
     Test if the type is any of the datetime types..
     """
@@ -898,7 +895,7 @@ def is_pep695_type_alias(typ: Any) -> bool:
 
 
 @cache
-def get_type_var_names(cls: type[Any]) -> Optional[list[str]]:
+def get_type_var_names(cls: type[Any]) -> list[str] | None:
     """
     Get type argument names of a generic class.
 
@@ -953,8 +950,8 @@ def find_generic_arg(cls: type[Any], field: TypeVar) -> int:
 
 def get_generic_arg(
     typ: Any,
-    maybe_generic_type_vars: Optional[list[str]],
-    variable_type_args: Optional[list[str]],
+    maybe_generic_type_vars: list[str] | None,
+    variable_type_args: list[str] | None,
     index: int,
 ) -> Any:
     """

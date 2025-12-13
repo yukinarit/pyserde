@@ -23,7 +23,7 @@ Other modules
 
 from dataclasses import dataclass
 from collections.abc import Callable
-from typing import Optional, overload, Any, Type
+from typing import Any, Type, overload
 
 from typing_extensions import dataclass_transform
 
@@ -114,16 +114,16 @@ __all__ = [
 @overload
 def serde(
     _cls: Type[T],
-    rename_all: Optional[str] = None,
+    rename_all: str | None = None,
     reuse_instances_default: bool = True,
     convert_sets_default: bool = False,
-    serializer: Optional[SerializeFunc] = None,
-    deserializer: Optional[DeserializeFunc] = None,
+    serializer: SerializeFunc | None = None,
+    deserializer: DeserializeFunc | None = None,
     tagging: Tagging = DefaultTagging,
     type_check: TypeCheck = strict,
     serialize_class_var: bool = False,
-    class_serializer: Optional[ClassSerializer] = None,
-    class_deserializer: Optional[ClassDeserializer] = None,
+    class_serializer: ClassSerializer | None = None,
+    class_deserializer: ClassDeserializer | None = None,
     deny_unknown_fields: bool = False,
 ) -> Type[T]: ...
 
@@ -131,16 +131,16 @@ def serde(
 @overload
 def serde(
     _cls: Any = None,
-    rename_all: Optional[str] = None,
+    rename_all: str | None = None,
     reuse_instances_default: bool = True,
     convert_sets_default: bool = False,
-    serializer: Optional[SerializeFunc] = None,
-    deserializer: Optional[DeserializeFunc] = None,
+    serializer: SerializeFunc | None = None,
+    deserializer: DeserializeFunc | None = None,
     tagging: Tagging = DefaultTagging,
     type_check: TypeCheck = strict,
     serialize_class_var: bool = False,
-    class_serializer: Optional[ClassSerializer] = None,
-    class_deserializer: Optional[ClassDeserializer] = None,
+    class_serializer: ClassSerializer | None = None,
+    class_deserializer: ClassDeserializer | None = None,
     deny_unknown_fields: bool = False,
 ) -> Callable[[type[T]], type[T]]: ...
 
@@ -148,16 +148,16 @@ def serde(
 @dataclass_transform(field_specifiers=(field,))
 def serde(
     _cls: Any = None,
-    rename_all: Optional[str] = None,
+    rename_all: str | None = None,
     reuse_instances_default: bool = True,
     convert_sets_default: bool = False,
-    serializer: Optional[SerializeFunc] = None,
-    deserializer: Optional[DeserializeFunc] = None,
+    serializer: SerializeFunc | None = None,
+    deserializer: DeserializeFunc | None = None,
     tagging: Tagging = DefaultTagging,
     type_check: TypeCheck = strict,
     serialize_class_var: bool = False,
-    class_serializer: Optional[ClassSerializer] = None,
-    class_deserializer: Optional[ClassDeserializer] = None,
+    class_serializer: ClassSerializer | None = None,
+    class_deserializer: ClassDeserializer | None = None,
     deny_unknown_fields: bool = False,
 ) -> Any:
     """
