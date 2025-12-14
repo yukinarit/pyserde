@@ -65,7 +65,9 @@ Happy coding with pyserde! 🚀
 - Supported types
     - Primitives (`int`, `float`, `str`, `bool`)
     - Containers
-        - `list`, `collections.abc.Sequence`, `collections.abc.MutableSequence`, `set`, `tuple`, `dict`
+        - `list`, `collections.abc.Sequence`, `collections.abc.MutableSequence`, `tuple`
+        - `set`, `collections.abc.Set`, `collections.abc.MutableSet`
+        - `dict`, `collections.abc.Mapping`, `collections.abc.MutableMapping`
         - [`frozenset`](https://docs.python.org/3/library/stdtypes.html#frozenset), [`defaultdict`](https://docs.python.org/3/library/collections.html#collections.defaultdict)
     - [`typing.Optional`](https://docs.python.org/3/library/typing.html#typing.Optional)
     - [`typing.Union`](https://docs.python.org/3/library/typing.html#typing.Union)
