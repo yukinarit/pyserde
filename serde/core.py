@@ -12,7 +12,7 @@ import casefy
 from dataclasses import dataclass
 
 from beartype.door import is_bearable
-from collections.abc import Mapping, Sequence, MutableSequence, Callable, Hashable
+from collections.abc import Mapping, Sequence, MutableSequence, Set, Callable, Hashable
 from typing import (
     overload,
     TypeVar,
@@ -425,7 +425,7 @@ def is_list_instance(obj: Any, typ: type[Any]) -> bool:
 
 
 def is_set_instance(obj: Any, typ: type[Any]) -> bool:
-    if not isinstance(obj, (set, frozenset)):
+    if not isinstance(obj, Set):
         return False
     if len(obj) == 0 or is_bare_set(typ):
         return True

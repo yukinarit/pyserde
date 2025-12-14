@@ -16,7 +16,7 @@ import typing
 import typing_extensions
 from collections import defaultdict
 from collections.abc import Iterator, Sequence, MutableSequence
-from collections.abc import Mapping, MutableMapping
+from collections.abc import Mapping, MutableMapping, Set, MutableSet
 from dataclasses import is_dataclass
 from typing import TypeVar, Generic, Any, ClassVar, Optional, NewType, Union, Hashable, Callable
 
@@ -654,7 +654,7 @@ def is_variable_tuple(typ: type[Any]) -> bool:
 @cache
 def is_set(typ: type[Any]) -> bool:
     """
-    Test if the type is `set` or `frozenset`.
+    Test if the type is set-like.
 
     >>> is_set(set[int])
     True
@@ -662,24 +662,41 @@ def is_set(typ: type[Any]) -> bool:
     True
     >>> is_set(frozenset[int])
     True
+    >>> from collections.abc import Set, MutableSet
+    >>> is_set(Set[int])
+    True
+    >>> is_set(Set)
+    True
+    >>> is_set(MutableSet[int])
+    True
+    >>> is_set(MutableSet)
+    True
     """
     try:
-        return issubclass(get_origin(typ), (set, frozenset))  # type: ignore
+        return issubclass(get_origin(typ), (set, frozenset, Set, MutableSet))  # type: ignore[arg-type]
     except TypeError:
-        return typ in (set, frozenset)
+        return typ in (set, frozenset, Set, MutableSet)
 
 
 @cache
 def is_bare_set(typ: type[Any]) -> bool:
     """
-    Test if the type is `set` without type args.
+    Test if the type is `set`/`frozenset`/`Set`/`MutableSet` without type args.
 
     >>> is_bare_set(set[int])
     False
     >>> is_bare_set(set)
     True
+    >>> from collections.abc import Set, MutableSet
+    >>> is_bare_set(Set)
+    True
+    >>> is_bare_set(MutableSet)
+    True
     """
-    return typ in (set, frozenset)
+    origin = get_origin(typ)
+    if origin in (set, frozenset, Set, MutableSet):
+        return not type_args(typ)
+    return typ in (set, frozenset, Set, MutableSet)
 
 
 @cache

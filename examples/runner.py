@@ -15,6 +15,7 @@ def run_all() -> None:
     import collection
     import mapping
     import sequence
+    import set_abc
     import custom_class_serializer
     import custom_legacy_class_serializer
     import custom_field_serializer
@@ -74,6 +75,7 @@ def run_all() -> None:
     run(collection)
     run(mapping)
     run(sequence)
+    run(set_abc)
     run(default)
     run(default_dict)
     run(env)

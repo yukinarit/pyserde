@@ -18,6 +18,7 @@ from collections.abc import (
     Iterable,
     Iterator,
     Mapping,
+    Set,
 )
 
 from beartype import beartype, BeartypeConf
@@ -401,10 +402,10 @@ def to_obj(
             return [thisfunc(e) for e in o]
         elif is_bearable(o, tuple):  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
             return tuple(thisfunc(e) for e in o)
-        elif is_bearable(o, set):  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
-            return [thisfunc(e) for e in o]
         elif isinstance(o, Mapping):
             return {k: thisfunc(v) for k, v in o.items()}
+        elif isinstance(o, Set):
+            return [thisfunc(e) for e in o]
         elif is_str_serializable_instance(o) or is_datetime_instance(o):
             se_cls = o.__class__ if not c or c is Any else c
             return CACHE.serialize(
