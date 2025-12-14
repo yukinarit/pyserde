@@ -470,7 +470,7 @@ def is_tuple_instance(obj: Any, typ: type[Any]) -> bool:
 
 
 def is_dict_instance(obj: Any, typ: type[Any]) -> bool:
-    if not isinstance(obj, dict):
+    if not isinstance(obj, Mapping):
         return False
     if len(obj) == 0 or is_bare_dict(typ):
         return True

@@ -13,6 +13,7 @@ def run_all() -> None:
     import class_var
     import primitive_subclass
     import collection
+    import mapping
     import sequence
     import custom_class_serializer
     import custom_legacy_class_serializer
@@ -71,6 +72,7 @@ def run_all() -> None:
     run(frozen_set)
     run(newtype)
     run(collection)
+    run(mapping)
     run(sequence)
     run(default)
     run(default_dict)

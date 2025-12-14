@@ -13,7 +13,12 @@ import itertools
 import jinja2
 from dataclasses import dataclass, is_dataclass
 from typing import Any, Generic, Literal, TypeVar
-from collections.abc import Callable, Iterable, Iterator
+from collections.abc import (
+    Callable,
+    Iterable,
+    Iterator,
+    Mapping,
+)
 
 from beartype import beartype, BeartypeConf
 from beartype.door import is_bearable
@@ -398,7 +403,7 @@ def to_obj(
             return tuple(thisfunc(e) for e in o)
         elif is_bearable(o, set):  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
             return [thisfunc(e) for e in o]
-        elif is_bearable(o, dict):  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
+        elif isinstance(o, Mapping):
             return {k: thisfunc(v) for k, v in o.items()}
         elif is_str_serializable_instance(o) or is_datetime_instance(o):
             se_cls = o.__class__ if not c or c is Any else c

@@ -16,6 +16,7 @@ import typing
 import typing_extensions
 from collections import defaultdict
 from collections.abc import Iterator, Sequence, MutableSequence
+from collections.abc import Mapping, MutableMapping
 from dataclasses import is_dataclass
 from typing import TypeVar, Generic, Any, ClassVar, Optional, NewType, Union, Hashable, Callable
 
@@ -700,7 +701,7 @@ def is_frozen_set(typ: type[Any]) -> bool:
 @cache
 def is_dict(typ: type[Any]) -> bool:
     """
-    Test if the type is dict.
+    Test if the type is dict-like.
 
     >>> is_dict(dict[int, int])
     True
@@ -708,24 +709,44 @@ def is_dict(typ: type[Any]) -> bool:
     True
     >>> is_dict(defaultdict[int, int])
     True
+    >>> from collections.abc import Mapping, MutableMapping
+    >>> is_dict(Mapping[str, int])
+    True
+    >>> is_dict(Mapping)
+    True
+    >>> is_dict(MutableMapping[str, int])
+    True
+    >>> is_dict(MutableMapping)
+    True
     """
     try:
-        return issubclass(get_origin(typ), (dict, defaultdict))  # type: ignore
+        return issubclass(
+            get_origin(typ), (dict, defaultdict, Mapping, MutableMapping)  # type: ignore[arg-type]
+        )
     except TypeError:
-        return typ in (dict, defaultdict)
+        return typ in (dict, defaultdict, Mapping, MutableMapping)
 
 
 @cache
+@cache
 def is_bare_dict(typ: type[Any]) -> bool:
     """
-    Test if the type is `dict` without type args.
+    Test if the type is `dict`/`Mapping`/`MutableMapping` without type args.
 
     >>> is_bare_dict(dict[int, str])
     False
     >>> is_bare_dict(dict)
     True
+    >>> from collections.abc import Mapping, MutableMapping
+    >>> is_bare_dict(Mapping)
+    True
+    >>> is_bare_dict(MutableMapping)
+    True
     """
-    return typ is dict
+    origin = get_origin(typ)
+    if origin in (dict, Mapping, MutableMapping):
+        return not type_args(typ)
+    return typ in (dict, Mapping, MutableMapping)
 
 
 @cache
