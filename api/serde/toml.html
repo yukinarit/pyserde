@@ -54,7 +54,7 @@
 <a href="./../serde.html">serde</a><wbr>.toml    </h1>
 
                         <div class="docstring"><p>Serialize and Deserialize in TOML format. This module depends on
-<a href="https://github.com/hukkin/tomli">tomli</a> (for python&lt;=3.10) and
+<a href="https://github.com/hukkin/tomli">tomli</a> (for python==3.10) and
 <a href="https://github.com/hukkin/tomli-w">tomli-w</a> packages.</p>
 </div>
 
@@ -64,12 +64,12 @@
 
                         <div class="pdoc-code codehilite"><pre><span></span><span id="L-1"><a href="#L-1"><span class="linenos"> 1</span></a><span class="sd">&quot;&quot;&quot;</span>
 </span><span id="L-2"><a href="#L-2"><span class="linenos"> 2</span></a><span class="sd">Serialize and Deserialize in TOML format. This module depends on</span>
-</span><span id="L-3"><a href="#L-3"><span class="linenos"> 3</span></a><span class="sd">[tomli](https://github.com/hukkin/tomli) (for python&lt;=3.10) and</span>
+</span><span id="L-3"><a href="#L-3"><span class="linenos"> 3</span></a><span class="sd">[tomli](https://github.com/hukkin/tomli) (for python==3.10) and</span>
 </span><span id="L-4"><a href="#L-4"><span class="linenos"> 4</span></a><span class="sd">[tomli-w](https://github.com/hukkin/tomli-w) packages.</span>
 </span><span id="L-5"><a href="#L-5"><span class="linenos"> 5</span></a><span class="sd">&quot;&quot;&quot;</span>
 </span><span id="L-6"><a href="#L-6"><span class="linenos"> 6</span></a>
 </span><span id="L-7"><a href="#L-7"><span class="linenos"> 7</span></a><span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
-</span><span id="L-8"><a href="#L-8"><span class="linenos"> 8</span></a><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">overload</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Any</span>
+</span><span id="L-8"><a href="#L-8"><span class="linenos"> 8</span></a><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">overload</span>
 </span><span id="L-9"><a href="#L-9"><span class="linenos"> 9</span></a>
 </span><span id="L-10"><a href="#L-10"><span class="linenos">10</span></a><span class="kn">import</span><span class="w"> </span><span class="nn">tomli_w</span>
 </span><span id="L-11"><a href="#L-11"><span class="linenos">11</span></a>
@@ -100,7 +100,7 @@
 </span><span id="L-36"><a href="#L-36"><span class="linenos">36</span></a>
 </span><span id="L-37"><a href="#L-37"><span class="linenos">37</span></a><span class="k">def</span><span class="w"> </span><span class="nf">to_toml</span><span class="p">(</span>
 </span><span id="L-38"><a href="#L-38"><span class="linenos">38</span></a>    <span class="n">obj</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
-</span><span id="L-39"><a href="#L-39"><span class="linenos">39</span></a>    <span class="bp">cls</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="L-39"><a href="#L-39"><span class="linenos">39</span></a>    <span class="bp">cls</span><span class="p">:</span> <span class="n">Any</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 </span><span id="L-40"><a href="#L-40"><span class="linenos">40</span></a>    <span class="n">se</span><span class="p">:</span> <span class="nb">type</span><span class="p">[</span><span class="n">Serializer</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="n">TomlSerializer</span><span class="p">,</span>
 </span><span id="L-41"><a href="#L-41"><span class="linenos">41</span></a>    <span class="n">reuse_instances</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 </span><span id="L-42"><a href="#L-42"><span class="linenos">42</span></a>    <span class="n">convert_sets</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
@@ -200,7 +200,7 @@ your own logic.</p>
 <div class="attr function">
             
         <span class="def">def</span>
-        <span class="name">to_toml</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="n">obj</span><span class="p">:</span> <span class="n">Any</span>,</span><span class="param">	<span class="bp">cls</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>,</span><span class="param">	se: type[serde.se.Serializer[str]] = &lt;class &#x27;serde.toml.TomlSerializer&#x27;&gt;,</span><span class="param">	<span class="n">reuse_instances</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>,</span><span class="param">	<span class="n">convert_sets</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>,</span><span class="param">	<span class="n">skip_none</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>,</span><span class="param">	<span class="o">**</span><span class="n">opts</span><span class="p">:</span> <span class="n">Any</span></span><span class="return-annotation">) -> <span class="nb">str</span>:</span></span>
+        <span class="name">to_toml</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="n">obj</span><span class="p">:</span> <span class="n">Any</span>,</span><span class="param">	<span class="bp">cls</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>,</span><span class="param">	se: type[serde.se.Serializer[str]] = &lt;class &#x27;serde.toml.TomlSerializer&#x27;&gt;,</span><span class="param">	<span class="n">reuse_instances</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>,</span><span class="param">	<span class="n">convert_sets</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>,</span><span class="param">	<span class="n">skip_none</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>,</span><span class="param">	<span class="o">**</span><span class="n">opts</span><span class="p">:</span> <span class="n">Any</span></span><span class="return-annotation">) -> <span class="nb">str</span>:</span></span>
 
                 <label class="view-source-button" for="to_toml-view-source"><span>View Source</span></label>
 
@@ -208,7 +208,7 @@ your own logic.</p>
     <a class="headerlink" href="#to_toml"></a>
             <div class="pdoc-code codehilite"><pre><span></span><span id="to_toml-38"><a href="#to_toml-38"><span class="linenos">38</span></a><span class="k">def</span><span class="w"> </span><span class="nf">to_toml</span><span class="p">(</span>
 </span><span id="to_toml-39"><a href="#to_toml-39"><span class="linenos">39</span></a>    <span class="n">obj</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
-</span><span id="to_toml-40"><a href="#to_toml-40"><span class="linenos">40</span></a>    <span class="bp">cls</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="to_toml-40"><a href="#to_toml-40"><span class="linenos">40</span></a>    <span class="bp">cls</span><span class="p">:</span> <span class="n">Any</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 </span><span id="to_toml-41"><a href="#to_toml-41"><span class="linenos">41</span></a>    <span class="n">se</span><span class="p">:</span> <span class="nb">type</span><span class="p">[</span><span class="n">Serializer</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="n">TomlSerializer</span><span class="p">,</span>
 </span><span id="to_toml-42"><a href="#to_toml-42"><span class="linenos">42</span></a>    <span class="n">reuse_instances</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 </span><span id="to_toml-43"><a href="#to_toml-43"><span class="linenos">43</span></a>    <span class="n">convert_sets</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>

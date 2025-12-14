@@ -35,7 +35,7 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-0016a113.js";
+            window.path_to_searchindex_js = "searchindex-7f627d69.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc-65ba6fac.js"></script>
@@ -186,7 +186,9 @@
 <li>Primitives (int, float, str, bool) <sup class="footnote-reference" id="fr-1-1"><a href="#footnote-1">1</a></sup></li>
 <li>Containers
 <ul>
-<li><code>list</code>, <code>set</code>, <code>tuple</code>, <code>dict</code> <sup class="footnote-reference" id="fr-2-1"><a href="#footnote-2">2</a></sup></li>
+<li><code>list</code>, <code>collections.abc.Sequence</code>, <code>collections.abc.MutableSequence</code>, <code>tuple</code> <sup class="footnote-reference" id="fr-2-1"><a href="#footnote-2">2</a></sup></li>
+<li><code>set</code>, <code>collections.abc.Set</code>, <code>collections.abc.MutableSet</code> <sup class="footnote-reference" id="fr-2-2"><a href="#footnote-2">2</a></sup></li>
+<li><code>dict</code>, <code>collections.abc.Mapping</code>, <code>collections.abc.MutableMapping</code> <sup class="footnote-reference" id="fr-2-3"><a href="#footnote-2">2</a></sup></li>
 <li><a href="https://docs.python.org/3/library/stdtypes.html#frozenset"><code>frozenset</code></a>, <sup class="footnote-reference" id="fr-3-1"><a href="#footnote-3">3</a></sup></li>
 <li><a href="https://docs.python.org/3/library/collections.html#collections.defaultdict"><code>defaultdict</code></a> <sup class="footnote-reference" id="fr-4-1"><a href="#footnote-4">4</a></sup></li>
 </ul>
@@ -283,7 +285,7 @@ NPFoo(i=1, j=2, f=3.0, g=4.0, h=False, u=array([1, 2]), v=array([3, 4]), w=array
 <p>See <a href="https://github.com/yukinarit/pyserde/blob/main/examples/simple.py">examples/simple.py</a> <a href="#fr-1-1">↩</a></p>
 </li>
 <li id="footnote-2">
-<p>See <a href="https://github.com/yukinarit/pyserde/blob/main/examples/collection.py">examples/collection.py</a> <a href="#fr-2-1">↩</a></p>
+<p>See <a href="https://github.com/yukinarit/pyserde/blob/main/examples/collection.py">examples/collection.py</a> <a href="#fr-2-1">↩</a> <a href="#fr-2-2">↩2</a> <a href="#fr-2-3">↩3</a></p>
 </li>
 <li id="footnote-3">
 <p>See <a href="https://github.com/yukinarit/pyserde/blob/main/examples/frozen_set.py">examples/frozen_set.py</a> <a href="#fr-3-1">↩</a></p>
