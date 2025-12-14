@@ -4,7 +4,9 @@ Here is the list of the supported types. See the simple example for each type in
 
 * Primitives (int, float, str, bool) [^1]
 * Containers
-    * `list`, `set`, `tuple`, `dict` [^2]
+    * `list`, `collections.abc.Sequence`, `collections.abc.MutableSequence`, `tuple` [^2]
+    * `set`, `collections.abc.Set`, `collections.abc.MutableSet` [^2]
+    * `dict`, `collections.abc.Mapping`, `collections.abc.MutableMapping` [^2]
     * [`frozenset`](https://docs.python.org/3/library/stdtypes.html#frozenset), [^3]
     * [`defaultdict`](https://docs.python.org/3/library/collections.html#collections.defaultdict) [^4]
 * [`typing.Optional`](https://docs.python.org/3/library/typing.html#typing.Optional) [^5]

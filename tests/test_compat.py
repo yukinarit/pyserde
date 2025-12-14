@@ -3,6 +3,7 @@ import pytest
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Any, Generic, NewType, Optional, TypeVar, Union, Literal
+from collections.abc import Sequence, MutableSequence
 
 from serde import serde, field, is_serializable, is_deserializable, SerdeError
 from serde.compat import (
@@ -32,6 +33,10 @@ U = TypeVar("U")
 def test_types() -> None:
     assert is_list(list[int])
     assert is_list(list)
+    assert is_list(Sequence[int])
+    assert is_list(Sequence)
+    assert is_list(MutableSequence[int])
+    assert is_list(MutableSequence)
     assert is_set(set[int])
     assert is_set(set)
     assert is_tuple(tuple[int, int, int])
@@ -177,10 +182,22 @@ def test_is_instance() -> None:
     assert is_instance([10], list)
     assert is_instance([10], list[int])
     assert not is_instance([10.0], list[int])
+    assert not is_instance((10, 20), list[int])
 
     # list of dataclass
     assert is_instance([Int(n) for n in range(1, 10)], list[Int])
     assert not is_instance([Str("foo")], list[Int])
+
+    # sequence
+    assert is_instance([10], Sequence[int])
+    assert is_instance((10, 20), Sequence[int])
+    assert not is_instance(("a", "b"), Sequence[int])
+    assert not is_instance("ab", Sequence[str])
+
+    # mutable sequence
+    assert is_instance([10], MutableSequence[int])
+    assert not is_instance((10, 20), MutableSequence[int])
+    assert not is_instance("ab", MutableSequence[str])
 
     # set
     assert is_instance(set(), set[int])

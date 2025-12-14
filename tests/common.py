@@ -5,6 +5,7 @@ import itertools
 import os
 import pathlib
 import uuid
+from collections.abc import MutableSequence, MutableSet, Sequence, Set
 from typing import (
     Any,
     Generic,
@@ -108,10 +109,18 @@ types: list[tuple[Any, Any, Any]] = [
     param([1, 2], list[int]),  # Container
     param([1, 2], list),
     param([], list[int]),
+    param([1, 2], Sequence[int]),
+    param([1, 2], Sequence),
+    param([1, 2], MutableSequence[int]),
+    param([1, 2], MutableSequence),
     param({1, 2}, set[int], toml_not_supported),
     param({1, 2}, set, toml_not_supported),
     param(set(), set[int], toml_not_supported),
     param(frozenset({1, 2}), frozenset[int], toml_not_supported),
+    param(frozenset({1, 2}), Set[int], toml_not_supported),
+    param({1, 2}, Set, toml_not_supported),
+    param({1, 2}, MutableSet[int], toml_not_supported),
+    param({1, 2}, MutableSet, toml_not_supported),
     param((1, 1), tuple[int, int]),
     param((1, 1), tuple),
     param((1, 2, 3), tuple[int, ...]),

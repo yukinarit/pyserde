@@ -1,3 +1,5 @@
+from collections.abc import Sequence, MutableSequence
+
 from serde import asdict, astuple, serialize, to_dict, to_tuple
 from serde.json import to_json
 from serde.msgpack import to_msgpack
@@ -152,6 +154,18 @@ def test_render_list() -> None:
 
     rendered = Renderer(TO_ITER).render(SeField(list[Foo], "foo"))
     assert rendered == f"[v.__serde__.funcs['to_iter'](v, {kwargs}) for v in foo]"
+
+    rendered = Renderer(TO_ITER).render(SeField(Sequence[int], "l"))
+    assert rendered == '[coerce_object("None", "v", int, v) for v in l]'
+
+    rendered = Renderer(TO_ITER).render(SeField(Sequence, "l"))
+    assert rendered == "list(l)"
+
+    rendered = Renderer(TO_ITER).render(SeField(MutableSequence[int], "l"))
+    assert rendered == '[coerce_object("None", "v", int, v) for v in l]'
+
+    rendered = Renderer(TO_ITER).render(SeField(MutableSequence, "l"))
+    assert rendered == "list(l)"
 
 
 def test_render_dict() -> None:

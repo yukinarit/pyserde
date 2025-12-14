@@ -15,7 +15,8 @@ import uuid
 import typing
 import typing_extensions
 from collections import defaultdict
-from collections.abc import Iterator
+from collections.abc import Iterator, Sequence, MutableSequence
+from collections.abc import Mapping, MutableMapping, Set, MutableSet
 from dataclasses import is_dataclass
 from typing import TypeVar, Generic, Any, ClassVar, Optional, NewType, Union, Hashable, Callable
 
@@ -563,30 +564,50 @@ def is_opt_dataclass(typ: Any) -> bool:
 @cache
 def is_list(typ: type[Any]) -> bool:
     """
-    Test if the type is `list`.
+    Test if the type is `list`, `collections.abc.Sequence`, or `collections.abc.MutableSequence`.
 
     >>> is_list(list[int])
     True
     >>> is_list(list)
     True
+    >>> is_list(Sequence[int])
+    True
+    >>> is_list(Sequence)
+    True
+    >>> is_list(MutableSequence[int])
+    True
+    >>> is_list(MutableSequence)
+    True
     """
-    try:
-        return issubclass(get_origin(typ), list)  # type: ignore
-    except TypeError:
-        return typ is list
+    origin = get_origin(typ)
+    if origin is None:
+        return typ in (list, Sequence, MutableSequence)
+    return origin in (list, Sequence, MutableSequence)
 
 
 @cache
 def is_bare_list(typ: type[Any]) -> bool:
     """
-    Test if the type is `list` without type args.
+    Test if the type is `list`/`collections.abc.Sequence`/`collections.abc.MutableSequence`
+    without type args.
 
     >>> is_bare_list(list[int])
     False
     >>> is_bare_list(list)
     True
+    >>> is_bare_list(Sequence[int])
+    False
+    >>> is_bare_list(Sequence)
+    True
+    >>> is_bare_list(MutableSequence[int])
+    False
+    >>> is_bare_list(MutableSequence)
+    True
     """
-    return typ is list
+    origin = get_origin(typ)
+    if origin in (list, Sequence, MutableSequence):
+        return not type_args(typ)
+    return typ in (list, Sequence, MutableSequence)
 
 
 @cache
@@ -633,7 +654,7 @@ def is_variable_tuple(typ: type[Any]) -> bool:
 @cache
 def is_set(typ: type[Any]) -> bool:
     """
-    Test if the type is `set` or `frozenset`.
+    Test if the type is set-like.
 
     >>> is_set(set[int])
     True
@@ -641,24 +662,41 @@ def is_set(typ: type[Any]) -> bool:
     True
     >>> is_set(frozenset[int])
     True
+    >>> from collections.abc import Set, MutableSet
+    >>> is_set(Set[int])
+    True
+    >>> is_set(Set)
+    True
+    >>> is_set(MutableSet[int])
+    True
+    >>> is_set(MutableSet)
+    True
     """
     try:
-        return issubclass(get_origin(typ), (set, frozenset))  # type: ignore
+        return issubclass(get_origin(typ), (set, frozenset, Set, MutableSet))  # type: ignore[arg-type]
     except TypeError:
-        return typ in (set, frozenset)
+        return typ in (set, frozenset, Set, MutableSet)
 
 
 @cache
 def is_bare_set(typ: type[Any]) -> bool:
     """
-    Test if the type is `set` without type args.
+    Test if the type is `set`/`frozenset`/`Set`/`MutableSet` without type args.
 
     >>> is_bare_set(set[int])
     False
     >>> is_bare_set(set)
     True
+    >>> from collections.abc import Set, MutableSet
+    >>> is_bare_set(Set)
+    True
+    >>> is_bare_set(MutableSet)
+    True
     """
-    return typ in (set, frozenset)
+    origin = get_origin(typ)
+    if origin in (set, frozenset, Set, MutableSet):
+        return not type_args(typ)
+    return typ in (set, frozenset, Set, MutableSet)
 
 
 @cache
@@ -680,7 +718,7 @@ def is_frozen_set(typ: type[Any]) -> bool:
 @cache
 def is_dict(typ: type[Any]) -> bool:
     """
-    Test if the type is dict.
+    Test if the type is dict-like.
 
     >>> is_dict(dict[int, int])
     True
@@ -688,24 +726,44 @@ def is_dict(typ: type[Any]) -> bool:
     True
     >>> is_dict(defaultdict[int, int])
     True
+    >>> from collections.abc import Mapping, MutableMapping
+    >>> is_dict(Mapping[str, int])
+    True
+    >>> is_dict(Mapping)
+    True
+    >>> is_dict(MutableMapping[str, int])
+    True
+    >>> is_dict(MutableMapping)
+    True
     """
     try:
-        return issubclass(get_origin(typ), (dict, defaultdict))  # type: ignore
+        return issubclass(
+            get_origin(typ), (dict, defaultdict, Mapping, MutableMapping)  # type: ignore[arg-type]
+        )
     except TypeError:
-        return typ in (dict, defaultdict)
+        return typ in (dict, defaultdict, Mapping, MutableMapping)
 
 
 @cache
+@cache
 def is_bare_dict(typ: type[Any]) -> bool:
     """
-    Test if the type is `dict` without type args.
+    Test if the type is `dict`/`Mapping`/`MutableMapping` without type args.
 
     >>> is_bare_dict(dict[int, str])
     False
     >>> is_bare_dict(dict)
     True
+    >>> from collections.abc import Mapping, MutableMapping
+    >>> is_bare_dict(Mapping)
+    True
+    >>> is_bare_dict(MutableMapping)
+    True
     """
-    return typ is dict
+    origin = get_origin(typ)
+    if origin in (dict, Mapping, MutableMapping):
+        return not type_args(typ)
+    return typ in (dict, Mapping, MutableMapping)
 
 
 @cache

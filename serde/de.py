@@ -690,7 +690,7 @@ class DeField(Field[T]):
             "flatten": self.flatten,
             "parent": self.parent,
         }
-        if is_list(self.type) or is_dict(self.type) or is_set(self.type):
+        if is_list(self.type) or is_set(self.type) or is_dict(self.type):
             return InnerField(typ, "v", datavar="v", **opts)
         elif is_tuple(self.type):
             return InnerField(typ, f"{self.data}[{n}]", datavar=f"{self.data}[{n}]", **opts)

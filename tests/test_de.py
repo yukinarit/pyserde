@@ -1,4 +1,5 @@
 import pytest
+from collections.abc import Sequence, MutableSequence
 from decimal import Decimal
 from typing import Union, Optional
 from serde import serde, SerdeError, field
@@ -80,6 +81,18 @@ def test_render_list() -> None:
 
     rendered = Renderer("foo").render(DeField(list[list[int]], "l", datavar="data"))
     assert rendered == '[[coerce_object("None", "v", int, v) for v in v] for v in data["l"]]'
+
+    rendered = Renderer("foo").render(DeField(Sequence[int], "l", datavar="data"))
+    assert rendered == '[coerce_object("None", "v", int, v) for v in data["l"]]'
+
+    rendered = Renderer("foo").render(DeField(Sequence, "l", datavar="data"))
+    assert rendered == 'list(data["l"])'
+
+    rendered = Renderer("foo").render(DeField(MutableSequence[int], "l", datavar="data"))
+    assert rendered == '[coerce_object("None", "v", int, v) for v in data["l"]]'
+
+    rendered = Renderer("foo").render(DeField(MutableSequence, "l", datavar="data"))
+    assert rendered == 'list(data["l"])'
 
 
 def test_render_tuple() -> None:
