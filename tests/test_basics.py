@@ -56,19 +56,45 @@ def test_simple(se: Any, de: Any, opt: Any, t: Any, T: Any, f: Any) -> None:
     c = C(10, t)
     assert c == de(C, se(c))
 
-    # @serde.serde(**opt)
-    # class Nested:
-    #    t: T
 
-    # @serde.serde(**opt)
-    # class C:
-    #    n: Nested
+@pytest.mark.parametrize("t,T,f", types, ids=type_ids())
+@pytest.mark.parametrize("opt", opt_case, ids=opt_case_ids())
+@pytest.mark.parametrize("se,de", all_formats)
+def test_nested(se: Any, de: Any, opt: Any, t: Any, T: Any, f: Any) -> None:
+    if f(se, de, opt):
+        return
 
-    # c = C(Nested(t))
-    # assert c == de(C, se(c))
+    @serde.serde(**opt)
+    class Nested:
+        t: T
 
-    # if se is not serde.toml.to_toml:
-    #    assert t == de(T, se(t))
+    @serde.serde(**opt)
+    class C:
+        n: Nested
+
+    c = C(Nested(t))
+    assert c == de(C, se(c))
+
+
+@pytest.mark.parametrize("t,T,f", types, ids=type_ids())
+@pytest.mark.parametrize("opt", opt_case, ids=opt_case_ids())
+@pytest.mark.parametrize(
+    "se,de",
+    (format_dict + format_json + format_yaml + format_msgpack + format_pickle + format_tuple),
+)
+def test_without_dataclass(se: Any, de: Any, opt: Any, t: Any, T: Any, f: Any) -> None:
+    assert t == de(T, se(t))
+
+
+# @pytest.mark.parametrize("opt", opt_case, ids=opt_case_ids())
+# @pytest.mark.parametrize("se,de", all_formats)
+# def test_primitive_subclass(se: Any, de: Any, opt: Any) -> None:
+#     @serde.serde(**opt)
+#     class PrimitiveSubclass:
+#         v: data.StrSubclass
+#
+#     obj = PrimitiveSubclass(data.StrSubclass("a"))
+#     assert obj == de(PrimitiveSubclass, se(obj))
 
 
 @pytest.mark.parametrize("t,T,f", types, ids=type_ids())
