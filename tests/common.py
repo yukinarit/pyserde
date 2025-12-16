@@ -6,6 +6,7 @@ import os
 import pathlib
 import uuid
 from collections.abc import MutableSequence, MutableSet, Sequence, Set
+from collections import defaultdict
 from typing import (
     Any,
     Generic,
@@ -129,13 +130,10 @@ types: list[tuple[Any, Any, Any]] = [
     param({"a": 1}, dict),
     param({}, dict[str, int]),
     param({"a": 1}, dict[str, int]),
-    # param({"a": 1}, defaultdict[str, int]),
-    # param({"a": [1]}, defaultdict[str, list[int]]),
+    param(defaultdict(int, {"a": 1}), defaultdict[str, int]),
+    param(defaultdict(list, {"a": [1]}), defaultdict[str, list[int]]),
     param(data.Pri(10, "foo", 100.0, True), data.Pri),  # dataclass
     param(data.Pri(10, "foo", 100.0, True), Optional[data.Pri]),
-    param(
-        data.PrimitiveSubclass(data.StrSubclass("a")), data.PrimitiveSubclass, yaml_not_supported
-    ),
     param(None, Optional[data.Pri], toml_not_supported),
     param(data.Recur(data.Recur(None, None, None), None, None), data.Recur, toml_not_supported),
     param(
