@@ -72,6 +72,23 @@ print(to_json(f))
 
 バージョン0.7.0で新規追加。詳細は [Union](union.md) を参照してください。
 
+### **`transparent`**
+
+`transparent=True` を指定すると、単一フィールドのラッパークラスはそのフィールドとして(デ)シリアライズされます（serde-rs の `#[serde(transparent)]` と同様）。
+
+```python
+@serde(transparent=True)
+class UserId:
+    value: int
+
+assert to_json(UserId(1)) == "1"
+assert from_json(UserId, "1") == UserId(1)
+```
+
+制約:
+* `init=True` かつ `skip=False` のフィールドがちょうど1つ必要です。
+* それ以外のフィールドは `init=False` かつ `skip=True` である必要があります（内部キャッシュ用途など）。
+
 ### **`class_serializer`** と **`class_deserializer`**
 
 バージョン0.13.0で新規追加。  
