@@ -77,6 +77,7 @@ from .core import (
     add_func,
     coerce_object,
     strict,
+    get_transparent_field,
     has_default,
     has_default_factory,
     ensure,
@@ -171,6 +172,7 @@ def _make_deserialize(
     convert_sets_default: bool = False,
     deserializer: DeserializeFunc | None = None,
     type_check: TypeCheck = strict,
+    transparent: bool = False,
     class_deserializer: ClassDeserializer | None = None,
     **kwargs: Any,
 ) -> type[Any]:
@@ -183,6 +185,7 @@ def _make_deserialize(
         rename_all=rename_all,
         reuse_instances_default=reuse_instances_default,
         convert_sets_default=convert_sets_default,
+        transparent=transparent,
         **kwargs,
     )
     return C
@@ -205,6 +208,7 @@ def deserialize(
     type_check: TypeCheck = strict,
     class_deserializer: ClassDeserializer | None = None,
     deny_unknown_fields: bool = False,
+    transparent: bool = False,
     **kwargs: Any,
 ) -> type[T]:
     """
@@ -238,6 +242,9 @@ def deserialize(
         if not is_dataclass(cls):
             dataclass(cls)
 
+        if transparent:
+            get_transparent_field(cls)
+
         if type_check.is_strict():
             serde_beartype = beartype(conf=BeartypeConf(violation_type=SerdeError))
             serde_beartype(cls)
@@ -249,8 +256,13 @@ def deserialize(
         # That's why we need the "scope.cls is not cls" check.
         scope: Scope | None = getattr(cls, SERDE_SCOPE, None)
         if scope is None or scope.cls is not cls:
-            scope = Scope(cls, reuse_instances_default=reuse_instances_default)
+            scope = Scope(
+                cls,
+                reuse_instances_default=reuse_instances_default,
+                convert_sets_default=convert_sets_default,
+            )
             setattr(cls, SERDE_SCOPE, scope)
+        scope.transparent = transparent
 
         class_deserializers: list[ClassDeserializer] = list(
             itertools.chain(
@@ -1167,6 +1179,30 @@ def {{func}}(cls=cls, maybe_generic=None, maybe_generic_type_vars=None, data=Non
   except Exception as e:
     raise UserError(e)
 """,
+            "transparent_iter": """
+def {{func}}(cls=cls, maybe_generic=None, maybe_generic_type_vars=None, data=None,
+             variable_type_args=None, reuse_instances=None, deserialize_numbers=None):
+  if reuse_instances is None:
+    reuse_instances = {{serde_scope.reuse_instances_default}}
+
+  maybe_generic_type_vars = maybe_generic_type_vars or {{cls_type_vars}}
+
+  fake_data = (data,)
+  __{{field.name}} = {{rvalue(field)}}
+
+  try:
+    return cls(
+      {% if field.kw_only %}
+      {{field.name}}=__{{field.name}},
+      {% else %}
+      __{{field.name}},
+      {% endif %}
+    )
+  except BeartypeCallHintParamViolation as e:
+    raise SerdeError(e)
+  except Exception as e:
+    raise UserError(e)
+""",
             "dict": """
 def {{func}}(cls=cls, maybe_generic=None, maybe_generic_type_vars=None, data=None,
              variable_type_args=None, reuse_instances=None, deserialize_numbers=None):
@@ -1195,6 +1231,30 @@ def {{func}}(cls=cls, maybe_generic=None, maybe_generic_type_vars=None, data=Non
     __{{f.name}},
     {% endif %}
     {% endfor %}
+    )
+  except BeartypeCallHintParamViolation as e:
+    raise SerdeError(e)
+  except Exception as e:
+    raise UserError(e)
+""",
+            "transparent_dict": """
+def {{func}}(cls=cls, maybe_generic=None, maybe_generic_type_vars=None, data=None,
+             variable_type_args=None, reuse_instances=None, deserialize_numbers=None):
+  if reuse_instances is None:
+    reuse_instances = {{serde_scope.reuse_instances_default}}
+
+  maybe_generic_type_vars = maybe_generic_type_vars or {{cls_type_vars}}
+
+  fake_dict = {"__serde_transparent__": data}
+  __{{field.name}} = {{rvalue(field)}}
+
+  try:
+    return cls(
+    {% if field.kw_only %}
+    {{field.name}}=__{{field.name}},
+    {% else %}
+    __{{field.name}},
+    {% endif %}
     )
   except BeartypeCallHintParamViolation as e:
     raise SerdeError(e)
@@ -1268,15 +1328,29 @@ def render_from_iter(
         class_deserializer=class_deserializer,
         class_name=typename(cls),
     )
+    serde_scope = getattr(cls, SERDE_SCOPE)
     fields = list(filter(renderable, defields(cls)))
-    res = jinja2_env.get_template("iter").render(
-        func=FROM_ITER,
-        serde_scope=getattr(cls, SERDE_SCOPE),
-        fields=fields,
-        cls_type_vars=get_type_var_names(cls),
-        rvalue=renderer.render,
-        arg=to_iter_arg,
-    )
+    if serde_scope.transparent:
+        field = dataclasses.replace(fields[0], alias=[], rename=None, case=None)
+        field.iterbased = True
+        field.index = 0
+        field.data = "fake_data"
+        res = jinja2_env.get_template("transparent_iter").render(
+            func=FROM_ITER,
+            serde_scope=serde_scope,
+            field=field,
+            cls_type_vars=get_type_var_names(cls),
+            rvalue=renderer.render,
+        )
+    else:
+        res = jinja2_env.get_template("iter").render(
+            func=FROM_ITER,
+            serde_scope=serde_scope,
+            fields=fields,
+            cls_type_vars=get_type_var_names(cls),
+            rvalue=renderer.render,
+            arg=to_iter_arg,
+        )
 
     if renderer.import_numpy:
         res = "import numpy\n" + res
@@ -1305,21 +1379,36 @@ def render_from_dict(
         class_deserializer=class_deserializer,
         class_name=typename(cls),
     )
+    serde_scope = getattr(cls, SERDE_SCOPE)
     fields = list(filter(renderable, defields(cls)))
-    known_fields = set(
-        itertools.chain.from_iterable([get_known_fields(f, rename_all) for f in fields])
-    )
-    res = jinja2_env.get_template("dict").render(
-        func=FROM_DICT,
-        serde_scope=getattr(cls, SERDE_SCOPE),
-        fields=fields,
-        type_check=type_check,
-        cls_type_vars=get_type_var_names(cls),
-        rvalue=renderer.render,
-        arg=functools.partial(to_arg, rename_all=rename_all),
-        deny_unknown_fields=deny_unknown_fields,
-        known_fields=known_fields,
-    )
+    if serde_scope.transparent:
+        field = dataclasses.replace(fields[0], alias=[], rename="__serde_transparent__", case=None)
+        field.iterbased = False
+        field.index = 0
+        field.data = "fake_dict"
+        res = jinja2_env.get_template("transparent_dict").render(
+            func=FROM_DICT,
+            serde_scope=serde_scope,
+            field=field,
+            type_check=type_check,
+            cls_type_vars=get_type_var_names(cls),
+            rvalue=renderer.render,
+        )
+    else:
+        known_fields = set(
+            itertools.chain.from_iterable([get_known_fields(f, rename_all) for f in fields])
+        )
+        res = jinja2_env.get_template("dict").render(
+            func=FROM_DICT,
+            serde_scope=serde_scope,
+            fields=fields,
+            type_check=type_check,
+            cls_type_vars=get_type_var_names(cls),
+            rvalue=renderer.render,
+            arg=functools.partial(to_arg, rename_all=rename_all),
+            deny_unknown_fields=deny_unknown_fields,
+            known_fields=known_fields,
+        )
 
     if renderer.import_numpy:
         res = "import numpy\n" + res

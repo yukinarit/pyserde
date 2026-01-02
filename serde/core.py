@@ -263,6 +263,9 @@ class Scope:
 
     convert_sets_default: bool = False
 
+    transparent: bool = False
+    """If True, serialize/deserialize as the single inner field (serde-rs `transparent`)."""
+
     def __repr__(self) -> str:
         res: list[str] = []
 
@@ -727,6 +730,40 @@ def fields(field_cls: type[F], cls: type[Any], serialize_class_var: bool = False
                 fields.append(field_cls(typ, name, default=getattr(cls, name)))
 
     return fields  # type: ignore
+
+
+def get_transparent_field(cls: type[Any]) -> Field[Any]:
+    """
+    Return the single "transparent" field for `cls`.
+
+    A transparent class must have exactly one init=True field that is not skipped.
+    Any other dataclass fields must be both init=False and skipped.
+    """
+    all_fields: list[Field[Any]] = fields(Field, cls)
+
+    candidates = [f for f in all_fields if f.init and not f.skip]
+    if len(candidates) != 1:
+        raise SerdeError(
+            f"{typename(cls)} with `transparent=True` must have exactly one init=True, "
+            "non-skipped field"
+        )
+
+    chosen = candidates[0]
+    for f in all_fields:
+        if f.name == chosen.name:
+            continue
+        if f.init:
+            raise SerdeError(
+                f"{typename(cls)} with `transparent=True` can not have additional init=True fields "
+                f"(found {f.name!r})"
+            )
+        if not f.skip:
+            raise SerdeError(
+                f"{typename(cls)} with `transparent=True` requires non-transparent fields to be "
+                f"skipped (set `serde.field(skip=True)`) (found {f.name!r})"
+            )
+
+    return chosen
 
 
 def conv(f: Field[Any], case: str | None = None) -> str:

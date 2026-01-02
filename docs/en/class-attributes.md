@@ -68,6 +68,23 @@ See [examples/rename_all.py](https://github.com/yukinarit/pyserde/blob/main/exam
 
 New in v0.7.0. See [Union](union.md).
 
+### **`transparent`**
+
+When `transparent=True`, a wrapper class with a single field is (de)serialized as that field, like serde-rs `#[serde(transparent)]`.
+
+```python
+@serde(transparent=True)
+class UserId:
+    value: int
+
+assert to_json(UserId(1)) == "1"
+assert from_json(UserId, "1") == UserId(1)
+```
+
+Constraints:
+* The class must have exactly one `init=True` field that is not skipped.
+* Any other dataclass fields must be both `init=False` and `skip=True` (e.g. internal cache fields).
+
 ### **`class_serializer`** / **`class_deserializer`**
 
 If you want to use a custom (de)serializer at class level, you can pass your (de)serializer object in `class_serializer` and `class_deserializer` class attributes. Class custom (de)serializer depends on a python library [plum](https://github.com/beartype/plum) which allows multiple method overloading like C++. With plum, you can write robust custom (de)serializer in a quite neat way.

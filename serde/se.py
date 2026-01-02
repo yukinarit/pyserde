@@ -74,6 +74,7 @@ from .core import (
     add_func,
     coerce_object,
     disabled,
+    get_transparent_field,
     strict,
     fields,
     is_instance,
@@ -157,6 +158,7 @@ def _make_serialize(
     tagging: Tagging = DefaultTagging,
     type_check: TypeCheck = disabled,
     serialize_class_var: bool = False,
+    transparent: bool = False,
     class_serializer: ClassSerializer | None = None,
     **kwargs: Any,
 ) -> type[Any]:
@@ -173,6 +175,7 @@ def _make_serialize(
         tagging=tagging,
         type_check=type_check,
         serialize_class_var=serialize_class_var,
+        transparent=transparent,
         **kwargs,
     )
     return C
@@ -194,6 +197,7 @@ def serialize(
     tagging: Tagging = DefaultTagging,
     type_check: TypeCheck = strict,
     serialize_class_var: bool = False,
+    transparent: bool = False,
     class_serializer: ClassSerializer | None = None,
     **kwargs: Any,
 ) -> type[T]:
@@ -223,6 +227,9 @@ def serialize(
         if not is_dataclass(cls):
             dataclass(cls)
 
+        if transparent:
+            get_transparent_field(cls)
+
         if type_check.is_strict():
             serde_beartype = beartype(conf=BeartypeConf(violation_type=SerdeError))
             serde_beartype(cls)
@@ -240,6 +247,7 @@ def serialize(
                 convert_sets_default=convert_sets_default,
             )
             setattr(cls, SERDE_SCOPE, scope)
+        scope.transparent = transparent
 
         class_serializers: list[ClassSerializer] = list(
             itertools.chain(GLOBAL_CLASS_SERIALIZER, [class_serializer] if class_serializer else [])
@@ -601,6 +609,20 @@ def {{func}}(obj, reuse_instances = None, convert_sets = None, skip_none = False
   {% endfor -%}
   return res
 """,
+            "transparent_dict": """
+def {{func}}(obj, reuse_instances = None, convert_sets = None, skip_none = False):
+  if reuse_instances is None:
+    reuse_instances = {{serde_scope.reuse_instances_default}}
+  if convert_sets is None:
+    convert_sets = {{serde_scope.convert_sets_default}}
+  if not is_dataclass(obj):
+    return copy.deepcopy(obj)
+
+  res = {{rvalue(field)}}
+  if skip_none and res is None:
+    return None
+  return res
+""",
             "iter": """
 def {{func}}(obj, reuse_instances=None, convert_sets=None, skip_none=False):
   if reuse_instances is None:
@@ -617,6 +639,20 @@ def {{func}}(obj, reuse_instances=None, convert_sets=None, skip_none=False):
   {% endif -%}
   {% endfor -%}
   )
+""",
+            "transparent_iter": """
+def {{func}}(obj, reuse_instances=None, convert_sets=None, skip_none=False):
+  if reuse_instances is None:
+    reuse_instances = {{serde_scope.reuse_instances_default}}
+  if convert_sets is None:
+    convert_sets = {{serde_scope.convert_sets_default}}
+  if not is_dataclass(obj):
+    return copy.deepcopy(obj)
+
+  res = {{rvalue(field)}}
+  if skip_none and res is None:
+    return None
+  return res
 """,
             "union": """
 def {{func}}(obj, reuse_instances, convert_sets, skip_none=False):
@@ -667,13 +703,24 @@ def render_to_tuple(
         class_serializer=class_serializer,
         class_name=typename(cls),
     )
-    return jinja2_env.get_template("iter").render(
-        func=TO_ITER,
-        serde_scope=getattr(cls, SERDE_SCOPE),
-        fields=sefields(cls, serialize_class_var),
-        type_check=type_check,
-        rvalue=renderer.render,
-    )
+    serde_scope = getattr(cls, SERDE_SCOPE)
+    if serde_scope.transparent:
+        transparent = [f for f in sefields(cls, serialize_class_var) if not f.skip]
+        return jinja2_env.get_template("transparent_iter").render(
+            func=TO_ITER,
+            serde_scope=serde_scope,
+            field=transparent[0],
+            type_check=type_check,
+            rvalue=renderer.render,
+        )
+    else:
+        return jinja2_env.get_template("iter").render(
+            func=TO_ITER,
+            serde_scope=serde_scope,
+            fields=sefields(cls, serialize_class_var),
+            type_check=type_check,
+            rvalue=renderer.render,
+        )
 
 
 def render_to_dict(
@@ -692,14 +739,26 @@ def render_to_dict(
         class_name=typename(cls),
     )
     lrenderer = LRenderer(case, serialize_class_var)
-    return jinja2_env.get_template("dict").render(
-        func=TO_DICT,
-        serde_scope=getattr(cls, SERDE_SCOPE),
-        fields=sefields(cls, serialize_class_var),
-        type_check=type_check,
-        lvalue=lrenderer.render,
-        rvalue=renderer.render,
-    )
+    serde_scope = getattr(cls, SERDE_SCOPE)
+    if serde_scope.transparent:
+        transparent = [f for f in sefields(cls, serialize_class_var) if not f.skip]
+        return jinja2_env.get_template("transparent_dict").render(
+            func=TO_DICT,
+            serde_scope=serde_scope,
+            field=transparent[0],
+            type_check=type_check,
+            lvalue=lrenderer.render,
+            rvalue=renderer.render,
+        )
+    else:
+        return jinja2_env.get_template("dict").render(
+            func=TO_DICT,
+            serde_scope=serde_scope,
+            fields=sefields(cls, serialize_class_var),
+            type_check=type_check,
+            lvalue=lrenderer.render,
+            rvalue=renderer.render,
+        )
 
 
 def render_union_func(

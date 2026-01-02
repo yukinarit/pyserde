@@ -48,6 +48,7 @@ def run_all() -> None:
     import simple
     import skip
     import tomlfile
+    import transparent
     import type_check_coerce
     import type_check_disabled
     import type_datetime
@@ -85,6 +86,7 @@ def run_all() -> None:
     run(rename_all)
     run(skip)
     run(tomlfile)
+    run(transparent)
     run(yamlfile)
     run(union)
     run(custom_class_serializer)
