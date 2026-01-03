@@ -429,9 +429,10 @@ def iter_literals(cls: type[Any]) -> list[TypeLike]:
     Iterate over all literals that are used in the dataclass
     """
     lst: set[Union[type[Any], Any]] = set()
+    stack: list[TypeLike] = []  # To prevent infinite recursion
 
     def recursive(cls: Union[type[Any], Any]) -> None:
-        if cls in lst:
+        if cls in stack:
             return
 
         if is_literal(cls):
@@ -440,10 +441,11 @@ def iter_literals(cls: type[Any]) -> list[TypeLike]:
             for arg in type_args(cls):
                 recursive(arg)
         if is_dataclass(cls):
-            lst.add(cls)
+            stack.append(cls)
             if isinstance(cls, type):
                 for f in dataclass_fields(cls):
                     recursive(f.type)
+            stack.pop()
         elif is_opt(cls):
             args = type_args(cls)
             if args:
