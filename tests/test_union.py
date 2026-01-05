@@ -864,3 +864,58 @@ def test_union_internal_tagging_cache_conflict_different_case() -> None:
     serialized_lower = '{"v":1,"tag":"Foo"}'
     assert from_json(union_lower, serialized_lower) == deserialized_lower
     assert to_json(deserialized_lower, union_lower) == serialized_lower
+
+
+def test_untagged_union_with_literal() -> None:
+    """
+    Regression test for https://github.com/yukinarit/pyserde/issues/687
+
+    Ensures Untagged unions containing Literal types work correctly:
+    1. Valid data deserializes to the correct union variant
+    2. Invalid/mismatched fields raise SerdeError (not silently match Literal)
+    """
+
+    @dataclass
+    class Number:
+        num: int
+
+        def __post_init__(self) -> None:
+            if self.num < 0:
+                raise ValueError("num must be non-negative")
+
+    @dataclass
+    class All:
+        all: Literal[True]
+
+    @serde(tagging=Untagged)
+    class Baz:
+        num: Union[Number, All]
+
+    # Valid case: positive number should deserialize to Number
+    valid_json = '{"num": {"num": 10}}'
+    result = from_json(Baz, valid_json)
+    assert isinstance(result.num, Number)
+    assert result.num.num == 10
+
+    # Valid case: Literal[True] should deserialize to All
+    all_json = '{"num": {"all": true}}'
+    result_all = from_json(Baz, all_json)
+    assert isinstance(result_all.num, All)
+    assert result_all.num.all is True
+
+    # Issue #687 case: mismatched field should raise SerdeError,
+    # NOT silently fall through to All(all=True)
+    bad_json = '{"num": {"bar": -1}}'
+    with pytest.raises(SerdeError):
+        from_json(Baz, bad_json)
+
+    # __post_init__ validation error should be reported in SerdeError
+    invalid_json = '{"num": {"num": -1}}'
+    with pytest.raises(SerdeError) as exc_info:
+        from_json(Baz, invalid_json)
+    assert "num must be non-negative" in str(exc_info.value)
+
+    # Literal[True] should not match when all is false
+    all_false_json = '{"num": {"all": false}}'
+    with pytest.raises(SerdeError):
+        from_json(Baz, all_false_json)
