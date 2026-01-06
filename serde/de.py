@@ -31,12 +31,14 @@ from .compat import (
     get_origin,
     get_type_var_names,
     is_any,
+    is_bare_deque,
     is_bare_dict,
     is_bare_list,
     is_bare_set,
     is_bare_tuple,
     is_datetime,
     is_default_dict,
+    is_deque,
     is_dict,
     is_ellipsis,
     is_enum,
@@ -509,6 +511,11 @@ def from_obj(
                 res = frozenset(thisfunc(type_args(c)[0], e) for e in o)
             else:
                 res = {thisfunc(type_args(c)[0], e) for e in o}
+        elif is_deque(c):
+            if is_bare_deque(c):
+                res = collections.deque(o)
+            else:
+                res = collections.deque(thisfunc(type_args(c)[0], e) for e in o)
         elif is_tuple(c):
             if is_bare_tuple(c) or is_variable_tuple(c):
                 res = tuple(e for e in o)
@@ -702,7 +709,7 @@ class DeField(Field[T]):
             "flatten": self.flatten,
             "parent": self.parent,
         }
-        if is_list(self.type) or is_set(self.type) or is_dict(self.type):
+        if is_list(self.type) or is_set(self.type) or is_dict(self.type) or is_deque(self.type):
             return InnerField(typ, "v", datavar="v", **opts)
         elif is_tuple(self.type):
             return InnerField(typ, f"{self.data}[{n}]", datavar=f"{self.data}[{n}]", **opts)
@@ -840,6 +847,8 @@ class Renderer:
             res = self.list(arg)
         elif is_set(arg.type):
             res = self.set(arg)
+        elif is_deque(arg.type):
+            res = self.deque(arg)
         elif is_dict(arg.type):
             res = self.dict(arg)
         elif is_tuple(arg.type):
@@ -1001,6 +1010,15 @@ class Renderer:
             return f"frozenset({self.render(arg[0])} for v in {arg.data})"
         else:
             return f"set({self.render(arg[0])} for v in {arg.data})"
+
+    def deque(self, arg: DeField[Any]) -> str:
+        """
+        Render rvalue for deque.
+        """
+        if is_bare_deque(arg.type):
+            return f"collections.deque({arg.data})"
+        else:
+            return f"collections.deque({self.render(arg[0])} for v in {arg.data})"
 
     def tuple(self, arg: DeField[Any]) -> str:
         """
