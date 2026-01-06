@@ -13,6 +13,7 @@ import itertools
 import jinja2
 from dataclasses import dataclass, is_dataclass
 from typing import Any, Generic, Literal, TypeVar
+from collections import deque
 from collections.abc import (
     Callable,
     Iterable,
@@ -31,6 +32,7 @@ from .compat import (
     T,
     get_origin,
     is_any,
+    is_bare_deque,
     is_bare_dict,
     is_bare_list,
     is_bare_opt,
@@ -39,6 +41,7 @@ from .compat import (
     is_class_var,
     is_datetime,
     is_datetime_instance,
+    is_deque,
     is_dict,
     is_enum,
     is_generic,
@@ -413,6 +416,8 @@ def to_obj(
         elif isinstance(o, Mapping):
             return {k: thisfunc(v) for k, v in o.items()}
         elif isinstance(o, Set):
+            return [thisfunc(e) for e in o]
+        elif isinstance(o, deque):
             return [thisfunc(e) for e in o]
         elif is_str_serializable_instance(o) or is_datetime_instance(o):
             se_cls = o.__class__ if not c or c is Any else c
@@ -853,6 +858,8 @@ class Renderer:
             res = self.list(arg)
         elif is_set(arg.type):
             res = self.set(arg)
+        elif is_deque(arg.type):
+            res = self.deque(arg)
         elif is_dict(arg.type):
             res = self.dict(arg)
         elif is_tuple(arg.type):
@@ -975,6 +982,17 @@ class Renderer:
                 f"[{self.render(earg)} for v in {arg.varname}] "
                 f"if convert_sets else set({self.render(earg)} for v in {arg.varname})"
             )
+
+    def deque(self, arg: SeField[Any]) -> str:
+        """
+        Render rvalue for deque.
+        """
+        if is_bare_deque(arg.type):
+            return f"list({arg.varname})"
+        else:
+            earg = arg[0]
+            earg.name = "v"
+            return f"[{self.render(earg)} for v in {arg.varname}]"
 
     def tuple(self, arg: SeField[Any]) -> str:
         """

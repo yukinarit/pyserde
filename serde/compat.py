@@ -14,7 +14,7 @@ import types
 import uuid
 import typing
 import typing_extensions
-from collections import defaultdict
+from collections import defaultdict, deque
 from collections.abc import Iterator, Sequence, MutableSequence
 from collections.abc import Mapping, MutableMapping, Set, MutableSet
 from dataclasses import is_dataclass
@@ -211,6 +211,13 @@ def typename(typ: Any, with_typing_module: bool = False) -> str:
             return f"{mod}dict[{kt}, {vt}]"
         else:
             return f"{mod}dict"
+    elif is_deque(typ):
+        args = type_args(typ)
+        if args:
+            et = thisfunc(args[0])
+            return f"deque[{et}]"
+        else:
+            return "deque"
     elif is_tuple(typ):
         args = type_args(typ)
         if args:
@@ -361,6 +368,11 @@ def iter_types(cls: type[Any]) -> list[type[Any]]:
             args = type_args(cls)
             if args:
                 recursive(args[0])
+        elif is_deque(cls):
+            lst.add(deque)
+            args = type_args(cls)
+            if args:
+                recursive(args[0])
         elif is_tuple(cls):
             lst.add(tuple)
             for arg in type_args(cls):
@@ -407,7 +419,7 @@ def iter_unions(cls: TypeLike) -> list[TypeLike]:
             args = type_args(cls)
             if args:
                 recursive(args[0])
-        elif is_list(cls) or is_set(cls):
+        elif is_list(cls) or is_set(cls) or is_deque(cls):
             args = type_args(cls)
             if args:
                 recursive(args[0])
@@ -450,7 +462,7 @@ def iter_literals(cls: type[Any]) -> list[TypeLike]:
             args = type_args(cls)
             if args:
                 recursive(args[0])
-        elif is_list(cls) or is_set(cls):
+        elif is_list(cls) or is_set(cls) or is_deque(cls):
             args = type_args(cls)
             if args:
                 recursive(args[0])
@@ -782,6 +794,40 @@ def is_default_dict(typ: type[Any]) -> bool:
         return issubclass(get_origin(typ), defaultdict)  # type: ignore
     except TypeError:
         return typ is defaultdict
+
+
+@cache
+def is_deque(typ: type[Any]) -> bool:
+    """
+    Test if the type is `collections.deque`.
+
+    >>> is_deque(deque[int])
+    True
+    >>> is_deque(deque)
+    True
+    >>> is_deque(list[int])
+    False
+    """
+    try:
+        return issubclass(get_origin(typ), deque)  # type: ignore
+    except TypeError:
+        return typ is deque
+
+
+@cache
+def is_bare_deque(typ: type[Any]) -> bool:
+    """
+    Test if the type is `collections.deque` without type args.
+
+    >>> is_bare_deque(deque[int])
+    False
+    >>> is_bare_deque(deque)
+    True
+    """
+    origin = get_origin(typ)
+    if origin is deque:
+        return not type_args(typ)
+    return typ is deque
 
 
 @cache

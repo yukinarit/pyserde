@@ -6,7 +6,7 @@ import os
 import pathlib
 import uuid
 from collections.abc import MutableSequence, MutableSet, Sequence, Set
-from collections import defaultdict
+from collections import defaultdict, deque
 from typing import (
     Any,
     Generic,
@@ -132,6 +132,10 @@ types: list[tuple[Any, Any, Any]] = [
     param({"a": 1}, dict[str, int]),
     param(defaultdict(int, {"a": 1}), defaultdict[str, int]),
     param(defaultdict(list, {"a": [1]}), defaultdict[str, list[int]]),
+    param(deque([1, 2, 3]), deque[int]),  # deque
+    param(deque(["a", "b"]), deque[str]),
+    param(deque(), deque[int]),
+    param(deque([1, "a", 3.0]), deque),
     param(data.Pri(10, "foo", 100.0, True), data.Pri),  # dataclass
     param(data.Pri(10, "foo", 100.0, True), Optional[data.Pri]),
     param(None, Optional[data.Pri], toml_not_supported),
