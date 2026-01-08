@@ -67,6 +67,7 @@ def run_all() -> None:
     import yamlfile
     import enum34
     import kw_only
+    import self_type
 
     run(any)
     run(simple)
@@ -128,6 +129,7 @@ def run_all() -> None:
     run(type_ipaddress)
     run(type_uuid)
     run(type_numpy)
+    run(self_type)
 
     try:
         import type_sqlalchemy
