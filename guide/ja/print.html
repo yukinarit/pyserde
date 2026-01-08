@@ -36,7 +36,7 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-3abe9bc7.js";
+            window.path_to_searchindex_js = "searchindex-7055e4da.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc-65ba6fac.js"></script>
@@ -393,31 +393,33 @@ Foo(i=10, s='foo', f=100.0, b=True)
 <li><code>dict</code>, <code>collections.abc.Mapping</code>, <code>collections.abc.MutableMapping</code> <sup class="footnote-reference" id="fr-2-3"><a href="#footnote-2">2</a></sup></li>
 <li><a href="https://docs.python.org/3/library/stdtypes.html#frozenset"><code>frozenset</code></a> <sup class="footnote-reference" id="fr-3-1"><a href="#footnote-3">3</a></sup></li>
 <li><a href="https://docs.python.org/3/library/collections.html#collections.defaultdict"><code>defaultdict</code></a> <sup class="footnote-reference" id="fr-4-1"><a href="#footnote-4">4</a></sup></li>
+<li><a href="https://docs.python.org/3/library/collections.html#collections.deque"><code>deque</code></a> <sup class="footnote-reference" id="fr-25-1"><a href="#footnote-25">5</a></sup></li>
+<li><a href="https://docs.python.org/3/library/collections.html#collections.Counter"><code>Counter</code></a> <sup class="footnote-reference" id="fr-26-1"><a href="#footnote-26">6</a></sup></li>
 </ul>
 </li>
-<li><a href="https://docs.python.org/3/library/typing.html#typing.Optional"><code>typing.Optional</code></a><sup class="footnote-reference" id="fr-5-1"><a href="#footnote-5">5</a></sup></li>
-<li><a href="https://docs.python.org/3/library/typing.html#typing.Union"><code>typing.Union</code></a> <sup class="footnote-reference" id="fr-6-1"><a href="#footnote-6">6</a></sup> <sup class="footnote-reference" id="fr-7-1"><a href="#footnote-7">7</a></sup> <sup class="footnote-reference" id="fr-8-1"><a href="#footnote-8">8</a></sup></li>
-<li><a href="https://docs.python.org/3/library/dataclasses.html"><code>@dataclass</code></a> を用いたユーザ定義クラス <sup class="footnote-reference" id="fr-9-1"><a href="#footnote-9">9</a></sup> <sup class="footnote-reference" id="fr-10-1"><a href="#footnote-10">10</a></sup></li>
-<li><a href="https://docs.python.org/3/library/typing.html#newtype"><code>typing.NewType</code></a> を用いたプリミティブ型 <sup class="footnote-reference" id="fr-11-1"><a href="#footnote-11">11</a></sup></li>
-<li><a href="https://docs.python.org/3/library/typing.html#the-any-type"><code>typing.Any</code></a> <sup class="footnote-reference" id="fr-12-1"><a href="#footnote-12">12</a></sup></li>
-<li><a href="https://docs.python.org/3/library/typing.html#typing.Literal"><code>typing.Literal</code></a> <sup class="footnote-reference" id="fr-13-1"><a href="#footnote-13">13</a></sup></li>
-<li><a href="https://docs.python.org/3/library/typing.html#user-defined-generic-types"><code>typing.Generic</code></a> <sup class="footnote-reference" id="fr-14-1"><a href="#footnote-14">14</a></sup></li>
-<li><a href="https://docs.python.org/3/library/typing.html#typing.ClassVar"><code>typing.ClassVar</code></a> <sup class="footnote-reference" id="fr-15-1"><a href="#footnote-15">15</a></sup></li>
-<li><a href="https://docs.python.org/3/library/dataclasses.html#init-only-variables"><code>typing.InitVar</code></a> <sup class="footnote-reference" id="fr-16-1"><a href="#footnote-16">16</a></sup></li>
-<li><a href="https://docs.python.org/3/library/enum.html#enum.Enum"><code>Enum</code></a> および <a href="https://docs.python.org/3/library/enum.html#enum.IntEnum"><code>IntEnum</code></a> <sup class="footnote-reference" id="fr-17-1"><a href="#footnote-17">17</a></sup></li>
+<li><a href="https://docs.python.org/3/library/typing.html#typing.Optional"><code>typing.Optional</code></a><sup class="footnote-reference" id="fr-5-1"><a href="#footnote-5">7</a></sup></li>
+<li><a href="https://docs.python.org/3/library/typing.html#typing.Union"><code>typing.Union</code></a> <sup class="footnote-reference" id="fr-6-1"><a href="#footnote-6">8</a></sup> <sup class="footnote-reference" id="fr-7-1"><a href="#footnote-7">9</a></sup> <sup class="footnote-reference" id="fr-8-1"><a href="#footnote-8">10</a></sup></li>
+<li><a href="https://docs.python.org/3/library/dataclasses.html"><code>@dataclass</code></a> を用いたユーザ定義クラス <sup class="footnote-reference" id="fr-9-1"><a href="#footnote-9">11</a></sup> <sup class="footnote-reference" id="fr-10-1"><a href="#footnote-10">12</a></sup></li>
+<li><a href="https://docs.python.org/3/library/typing.html#newtype"><code>typing.NewType</code></a> を用いたプリミティブ型 <sup class="footnote-reference" id="fr-11-1"><a href="#footnote-11">13</a></sup></li>
+<li><a href="https://docs.python.org/3/library/typing.html#the-any-type"><code>typing.Any</code></a> <sup class="footnote-reference" id="fr-12-1"><a href="#footnote-12">14</a></sup></li>
+<li><a href="https://docs.python.org/3/library/typing.html#typing.Literal"><code>typing.Literal</code></a> <sup class="footnote-reference" id="fr-13-1"><a href="#footnote-13">15</a></sup></li>
+<li><a href="https://docs.python.org/3/library/typing.html#user-defined-generic-types"><code>typing.Generic</code></a> <sup class="footnote-reference" id="fr-14-1"><a href="#footnote-14">16</a></sup></li>
+<li><a href="https://docs.python.org/3/library/typing.html#typing.ClassVar"><code>typing.ClassVar</code></a> <sup class="footnote-reference" id="fr-15-1"><a href="#footnote-15">17</a></sup></li>
+<li><a href="https://docs.python.org/3/library/dataclasses.html#init-only-variables"><code>typing.InitVar</code></a> <sup class="footnote-reference" id="fr-16-1"><a href="#footnote-16">18</a></sup></li>
+<li><a href="https://docs.python.org/3/library/enum.html#enum.Enum"><code>Enum</code></a> および <a href="https://docs.python.org/3/library/enum.html#enum.IntEnum"><code>IntEnum</code></a> <sup class="footnote-reference" id="fr-17-1"><a href="#footnote-17">19</a></sup></li>
 <li>標準ライブラリ
 <ul>
-<li><a href="https://docs.python.org/3/library/pathlib.html"><code>pathlib.Path</code></a> <sup class="footnote-reference" id="fr-18-1"><a href="#footnote-18">18</a></sup></li>
-<li><a href="https://docs.python.org/3/library/decimal.html"><code>decimal.Decimal</code></a> <sup class="footnote-reference" id="fr-19-1"><a href="#footnote-19">19</a></sup></li>
-<li><a href="https://docs.python.org/3/library/uuid.html"><code>uuid.UUID</code></a> <sup class="footnote-reference" id="fr-20-1"><a href="#footnote-20">20</a></sup></li>
-<li><a href="https://docs.python.org/3/library/datetime.html#date-objects"><code>datetime.date</code></a>、<a href="https://docs.python.org/3/library/datetime.html#time-objects"><code>datetime.time</code></a>、<a href="https://docs.python.org/3/library/datetime.html#datetime-objects"><code>datetime.datetime</code></a> <sup class="footnote-reference" id="fr-21-1"><a href="#footnote-21">21</a></sup></li>
-<li><a href="https://docs.python.org/3/library/ipaddress.html"><code>ipaddress</code></a> <sup class="footnote-reference" id="fr-22-1"><a href="#footnote-22">22</a></sup></li>
+<li><a href="https://docs.python.org/3/library/pathlib.html"><code>pathlib.Path</code></a> <sup class="footnote-reference" id="fr-18-1"><a href="#footnote-18">20</a></sup></li>
+<li><a href="https://docs.python.org/3/library/decimal.html"><code>decimal.Decimal</code></a> <sup class="footnote-reference" id="fr-19-1"><a href="#footnote-19">21</a></sup></li>
+<li><a href="https://docs.python.org/3/library/uuid.html"><code>uuid.UUID</code></a> <sup class="footnote-reference" id="fr-20-1"><a href="#footnote-20">22</a></sup></li>
+<li><a href="https://docs.python.org/3/library/datetime.html#date-objects"><code>datetime.date</code></a>、<a href="https://docs.python.org/3/library/datetime.html#time-objects"><code>datetime.time</code></a>、<a href="https://docs.python.org/3/library/datetime.html#datetime-objects"><code>datetime.datetime</code></a> <sup class="footnote-reference" id="fr-21-1"><a href="#footnote-21">23</a></sup></li>
+<li><a href="https://docs.python.org/3/library/ipaddress.html"><code>ipaddress</code></a> <sup class="footnote-reference" id="fr-22-1"><a href="#footnote-22">24</a></sup></li>
 </ul>
 </li>
 <li>PyPIライブラリ
 <ul>
-<li><a href="https://github.com/numpy/numpy"><code>numpy</code></a> データ型 <sup class="footnote-reference" id="fr-23-1"><a href="#footnote-23">23</a></sup></li>
-<li>宣言的データクラスマッピングを用いた <a href="https://github.com/sqlalchemy/sqlalchemy"><code>SQLAlchemy</code></a>（実験的）<sup class="footnote-reference" id="fr-24-1"><a href="#footnote-24">24</a></sup></li>
+<li><a href="https://github.com/numpy/numpy"><code>numpy</code></a> データ型 <sup class="footnote-reference" id="fr-23-1"><a href="#footnote-23">25</a></sup></li>
+<li>宣言的データクラスマッピングを用いた <a href="https://github.com/sqlalchemy/sqlalchemy"><code>SQLAlchemy</code></a>（実験的）<sup class="footnote-reference" id="fr-24-1"><a href="#footnote-24">26</a></sup></li>
 </ul>
 </li>
 </ul>
@@ -496,6 +498,12 @@ NPFoo(i=1, j=2, f=3.0, g=4.0, h=False, u=array([1, 2]), v=array([3, 4]), w=array
 </li>
 <li id="footnote-4">
 <p><a href="https://github.com/yukinarit/pyserde/blob/main/examples/default_dict.py">examples/default_dict.py</a> を参照 <a href="#fr-4-1">↩</a></p>
+</li>
+<li id="footnote-25">
+<p><a href="https://github.com/yukinarit/pyserde/blob/main/examples/deque.py">examples/deque.py</a> を参照 <a href="#fr-25-1">↩</a></p>
+</li>
+<li id="footnote-26">
+<p><a href="https://github.com/yukinarit/pyserde/blob/main/examples/counter.py">examples/counter.py</a> を参照 <a href="#fr-26-1">↩</a></p>
 </li>
 <li id="footnote-5">
 <p><a href="https://github.com/yukinarit/pyserde/blob/main/examples/union.py">examples/union.py</a> を参照 <a href="#fr-5-1">↩</a></p>
@@ -713,6 +721,20 @@ print(to_json(f))
 <p>完全な例については、<a href="https://github.com/yukinarit/pyserde/blob/main/examples/rename_all.py">examples/rename_all.py</a>を参照してください。</p>
 <h3 id="tagging"><a class="header" href="#tagging"><strong><code>tagging</code></strong></a></h3>
 <p>バージョン0.7.0で新規追加。詳細は <a href="#union-representation">Union</a> を参照してください。</p>
+<h3 id="transparent"><a class="header" href="#transparent"><strong><code>transparent</code></strong></a></h3>
+<p><code>transparent=True</code> を指定すると、単一フィールドのラッパークラスはそのフィールドとして(デ)シリアライズされます（serde-rs の <code>#[serde(transparent)]</code> と同様）。</p>
+<pre><code class="language-python">@serde(transparent=True)
+class UserId:
+    value: int
+
+assert to_json(UserId(1)) == "1"
+assert from_json(UserId, "1") == UserId(1)
+</code></pre>
+<p>制約:</p>
+<ul>
+<li><code>init=True</code> かつ <code>skip=False</code> のフィールドがちょうど1つ必要です。</li>
+<li>それ以外のフィールドは <code>init=False</code> かつ <code>skip=True</code> である必要があります（内部キャッシュ用途など）。</li>
+</ul>
 <h3 id="class_serializer-と-class_deserializer"><a class="header" href="#class_serializer-と-class_deserializer"><strong><code>class_serializer</code></strong> と <strong><code>class_deserializer</code></strong></a></h3>
 <p>バージョン0.13.0で新規追加。</p>
 <p>クラスレベルでカスタム(デ)シリアライザを使用したい場合、<code>class_serializer</code> および <code>class_deserializer</code> 属性に(デ)シリアライザオブジェクトを渡すことができます。<br>カスタム(デ)シリアライザは、C++のように複数のメソッドのオーバーロードを可能にするPythonライブラリ <a href="https://github.com/beartype/plum">plum</a> に依存しています。<br>plumを使用すると、堅牢なカスタム(デ)シリアライザを簡単に書くことができます。</p>

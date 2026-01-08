@@ -35,7 +35,7 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-3abe9bc7.js";
+            window.path_to_searchindex_js = "searchindex-7055e4da.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc-65ba6fac.js"></script>
@@ -228,6 +228,20 @@ print(to_json(f))
 <p>完全な例については、<a href="https://github.com/yukinarit/pyserde/blob/main/examples/rename_all.py">examples/rename_all.py</a>を参照してください。</p>
 <h3 id="tagging"><a class="header" href="#tagging"><strong><code>tagging</code></strong></a></h3>
 <p>バージョン0.7.0で新規追加。詳細は <a href="union.html">Union</a> を参照してください。</p>
+<h3 id="transparent"><a class="header" href="#transparent"><strong><code>transparent</code></strong></a></h3>
+<p><code>transparent=True</code> を指定すると、単一フィールドのラッパークラスはそのフィールドとして(デ)シリアライズされます（serde-rs の <code>#[serde(transparent)]</code> と同様）。</p>
+<pre><code class="language-python">@serde(transparent=True)
+class UserId:
+    value: int
+
+assert to_json(UserId(1)) == "1"
+assert from_json(UserId, "1") == UserId(1)
+</code></pre>
+<p>制約:</p>
+<ul>
+<li><code>init=True</code> かつ <code>skip=False</code> のフィールドがちょうど1つ必要です。</li>
+<li>それ以外のフィールドは <code>init=False</code> かつ <code>skip=True</code> である必要があります（内部キャッシュ用途など）。</li>
+</ul>
 <h3 id="class_serializer-と-class_deserializer"><a class="header" href="#class_serializer-と-class_deserializer"><strong><code>class_serializer</code></strong> と <strong><code>class_deserializer</code></strong></a></h3>
 <p>バージョン0.13.0で新規追加。</p>
 <p>クラスレベルでカスタム(デ)シリアライザを使用したい場合、<code>class_serializer</code> および <code>class_deserializer</code> 属性に(デ)シリアライザオブジェクトを渡すことができます。<br>カスタム(デ)シリアライザは、C++のように複数のメソッドのオーバーロードを可能にするPythonライブラリ <a href="https://github.com/beartype/plum">plum</a> に依存しています。<br>plumを使用すると、堅牢なカスタム(デ)シリアライザを簡単に書くことができます。</p>

@@ -35,7 +35,7 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-7f627d69.js";
+            window.path_to_searchindex_js = "searchindex-fe211702.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc-65ba6fac.js"></script>
@@ -227,6 +227,20 @@ print(to_json(f))
 <p>See <a href="https://github.com/yukinarit/pyserde/blob/main/examples/rename_all.py">examples/rename_all.py</a> for the complete example.</p>
 <h3 id="tagging"><a class="header" href="#tagging"><strong><code>tagging</code></strong></a></h3>
 <p>New in v0.7.0. See <a href="union.html">Union</a>.</p>
+<h3 id="transparent"><a class="header" href="#transparent"><strong><code>transparent</code></strong></a></h3>
+<p>When <code>transparent=True</code>, a wrapper class with a single field is (de)serialized as that field, like serde-rs <code>#[serde(transparent)]</code>.</p>
+<pre><code class="language-python">@serde(transparent=True)
+class UserId:
+    value: int
+
+assert to_json(UserId(1)) == "1"
+assert from_json(UserId, "1") == UserId(1)
+</code></pre>
+<p>Constraints:</p>
+<ul>
+<li>The class must have exactly one <code>init=True</code> field that is not skipped.</li>
+<li>Any other dataclass fields must be both <code>init=False</code> and <code>skip=True</code> (e.g. internal cache fields).</li>
+</ul>
 <h3 id="class_serializer--class_deserializer"><a class="header" href="#class_serializer--class_deserializer"><strong><code>class_serializer</code></strong> / <strong><code>class_deserializer</code></strong></a></h3>
 <p>If you want to use a custom (de)serializer at class level, you can pass your (de)serializer object in <code>class_serializer</code> and <code>class_deserializer</code> class attributes. Class custom (de)serializer depends on a python library <a href="https://github.com/beartype/plum">plum</a> which allows multiple method overloading like C++. With plum, you can write robust custom (de)serializer in a quite neat way.</p>
 <pre><code class="language-python">class MySerializer:
