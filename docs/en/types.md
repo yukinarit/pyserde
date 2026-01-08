@@ -10,6 +10,7 @@ Here is the list of the supported types. See the simple example for each type in
     * [`frozenset`](https://docs.python.org/3/library/stdtypes.html#frozenset), [^3]
     * [`defaultdict`](https://docs.python.org/3/library/collections.html#collections.defaultdict) [^4]
     * [`deque`](https://docs.python.org/3/library/collections.html#collections.deque) [^25]
+    * [`Counter`](https://docs.python.org/3/library/collections.html#collections.Counter) [^26]
 * [`typing.Optional`](https://docs.python.org/3/library/typing.html#typing.Optional) [^5]
 * [`typing.Union`](https://docs.python.org/3/library/typing.html#typing.Union) [^6] [^7] [^8]
 * User defined class with [`@dataclass`](https://docs.python.org/3/library/dataclasses.html) [^9] [^10]
@@ -151,3 +152,5 @@ If you need to use a type which is currently not supported in the standard libra
 [^24]: See [examples/type_sqlalchemy.py](https://github.com/yukinarit/pyserde/blob/main/examples/type_sqlalchemy.py)
 
 [^25]: See [examples/deque.py](https://github.com/yukinarit/pyserde/blob/main/examples/deque.py)
+
+[^26]: See [examples/counter.py](https://github.com/yukinarit/pyserde/blob/main/examples/counter.py)

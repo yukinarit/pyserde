@@ -14,7 +14,7 @@ import types
 import uuid
 import typing
 import typing_extensions
-from collections import defaultdict, deque
+from collections import defaultdict, deque, Counter
 from collections.abc import Iterator, Sequence, MutableSequence
 from collections.abc import Mapping, MutableMapping, Set, MutableSet
 from dataclasses import is_dataclass
@@ -218,6 +218,13 @@ def typename(typ: Any, with_typing_module: bool = False) -> str:
             return f"deque[{et}]"
         else:
             return "deque"
+    elif is_counter(typ):
+        args = type_args(typ)
+        if args:
+            et = thisfunc(args[0])
+            return f"Counter[{et}]"
+        else:
+            return "Counter"
     elif is_tuple(typ):
         args = type_args(typ)
         if args:
@@ -373,6 +380,11 @@ def iter_types(cls: type[Any]) -> list[type[Any]]:
             args = type_args(cls)
             if args:
                 recursive(args[0])
+        elif is_counter(cls):
+            lst.add(Counter)
+            args = type_args(cls)
+            if args:
+                recursive(args[0])
         elif is_tuple(cls):
             lst.add(tuple)
             for arg in type_args(cls):
@@ -419,7 +431,7 @@ def iter_unions(cls: TypeLike) -> list[TypeLike]:
             args = type_args(cls)
             if args:
                 recursive(args[0])
-        elif is_list(cls) or is_set(cls) or is_deque(cls):
+        elif is_list(cls) or is_set(cls) or is_deque(cls) or is_counter(cls):
             args = type_args(cls)
             if args:
                 recursive(args[0])
@@ -462,7 +474,7 @@ def iter_literals(cls: type[Any]) -> list[TypeLike]:
             args = type_args(cls)
             if args:
                 recursive(args[0])
-        elif is_list(cls) or is_set(cls) or is_deque(cls):
+        elif is_list(cls) or is_set(cls) or is_deque(cls) or is_counter(cls):
             args = type_args(cls)
             if args:
                 recursive(args[0])
@@ -828,6 +840,40 @@ def is_bare_deque(typ: type[Any]) -> bool:
     if origin is deque:
         return not type_args(typ)
     return typ is deque
+
+
+@cache
+def is_counter(typ: type[Any]) -> bool:
+    """
+    Test if the type is `collections.Counter`.
+
+    >>> is_counter(Counter[str])
+    True
+    >>> is_counter(Counter)
+    True
+    >>> is_counter(dict[str, int])
+    False
+    """
+    try:
+        return issubclass(get_origin(typ), Counter)  # type: ignore
+    except TypeError:
+        return typ is Counter
+
+
+@cache
+def is_bare_counter(typ: type[Any]) -> bool:
+    """
+    Test if the type is `collections.Counter` without type args.
+
+    >>> is_bare_counter(Counter[str])
+    False
+    >>> is_bare_counter(Counter)
+    True
+    """
+    origin = get_origin(typ)
+    if origin is Counter:
+        return not type_args(typ)
+    return typ is Counter
 
 
 @cache

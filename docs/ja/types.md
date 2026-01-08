@@ -10,6 +10,7 @@
     * [`frozenset`](https://docs.python.org/3/library/stdtypes.html#frozenset) [^3]
     * [`defaultdict`](https://docs.python.org/3/library/collections.html#collections.defaultdict) [^4]
     * [`deque`](https://docs.python.org/3/library/collections.html#collections.deque) [^25]
+    * [`Counter`](https://docs.python.org/3/library/collections.html#collections.Counter) [^26]
 * [`typing.Optional`](https://docs.python.org/3/library/typing.html#typing.Optional)[^5]
 * [`typing.Union`](https://docs.python.org/3/library/typing.html#typing.Union) [^6] [^7] [^8]
 * [`@dataclass`](https://docs.python.org/3/library/dataclasses.html) を用いたユーザ定義クラス [^9] [^10]
@@ -156,3 +157,5 @@ SQLAlchemy宣言的データクラスマッピング統合の実験的サポー�
 [^24]: [examples/type_sqlalchemy.py](https://github.com/yukinarit/pyserde/blob/main/examples/type_sqlalchemy.py) を参照
 
 [^25]: [examples/deque.py](https://github.com/yukinarit/pyserde/blob/main/examples/deque.py) を参照
+
+[^26]: [examples/counter.py](https://github.com/yukinarit/pyserde/blob/main/examples/counter.py) を参照
