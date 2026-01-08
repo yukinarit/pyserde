@@ -12,7 +12,7 @@ import casefy
 from dataclasses import dataclass
 
 from beartype.door import is_bearable
-from collections import deque
+from collections import deque, Counter
 from collections.abc import Mapping, Sequence, MutableSequence, Set, Callable, Hashable
 from typing import (
     overload,
@@ -29,12 +29,14 @@ from .compat import (
     SerdeError,
     dataclass_fields,
     get_origin,
+    is_bare_counter,
     is_bare_deque,
     is_bare_dict,
     is_bare_list,
     is_bare_set,
     is_bare_tuple,
     is_class_var,
+    is_counter,
     is_deque,
     is_dict,
     is_generic,
@@ -374,6 +376,9 @@ def is_instance(obj: Any, typ: Any) -> bool:
         return is_set_instance(obj, typ)
     elif is_tuple(typ):
         return is_tuple_instance(obj, typ)
+    elif is_counter(typ):
+        # Counter must be checked before dict since Counter is a subclass of dict
+        return is_counter_instance(obj, typ)
     elif is_dict(typ):
         return is_dict_instance(obj, typ)
     elif is_deque(typ):
@@ -498,6 +503,16 @@ def is_deque_instance(obj: Any, typ: type[Any]) -> bool:
     deque_arg = type_args(typ)[0]
     # for speed reasons we just check the type of the 1st element
     return is_instance(obj[0], deque_arg)
+
+
+def is_counter_instance(obj: Any, typ: type[Any]) -> bool:
+    if not isinstance(obj, Counter):
+        return False
+    if len(obj) == 0 or is_bare_counter(typ):
+        return True
+    counter_arg = type_args(typ)[0]
+    # for speed reasons we just check the type of the 1st key
+    return is_instance(next(iter(obj.keys())), counter_arg)
 
 
 def is_generic_instance(obj: Any, typ: type[Any]) -> bool:

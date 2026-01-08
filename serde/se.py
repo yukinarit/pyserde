@@ -13,7 +13,7 @@ import itertools
 import jinja2
 from dataclasses import dataclass, is_dataclass
 from typing import Any, Generic, Literal, TypeVar
-from collections import deque
+from collections import deque, Counter
 from collections.abc import (
     Callable,
     Iterable,
@@ -32,6 +32,7 @@ from .compat import (
     T,
     get_origin,
     is_any,
+    is_bare_counter,
     is_bare_deque,
     is_bare_dict,
     is_bare_list,
@@ -39,6 +40,7 @@ from .compat import (
     is_bare_set,
     is_bare_tuple,
     is_class_var,
+    is_counter,
     is_datetime,
     is_datetime_instance,
     is_deque,
@@ -419,6 +421,8 @@ def to_obj(
             return [thisfunc(e) for e in o]
         elif isinstance(o, deque):
             return [thisfunc(e) for e in o]
+        elif isinstance(o, Counter):
+            return dict(o)
         elif is_str_serializable_instance(o) or is_datetime_instance(o):
             se_cls = o.__class__ if not c or c is Any else c
             return CACHE.serialize(
@@ -860,6 +864,8 @@ class Renderer:
             res = self.set(arg)
         elif is_deque(arg.type):
             res = self.deque(arg)
+        elif is_counter(arg.type):
+            res = self.counter(arg)
         elif is_dict(arg.type):
             res = self.dict(arg)
         elif is_tuple(arg.type):
@@ -993,6 +999,17 @@ class Renderer:
             earg = arg[0]
             earg.name = "v"
             return f"[{self.render(earg)} for v in {arg.varname}]"
+
+    def counter(self, arg: SeField[Any]) -> str:
+        """
+        Render rvalue for Counter.
+        """
+        if is_bare_counter(arg.type):
+            return f"dict({arg.varname})"
+        else:
+            karg = arg[0]
+            karg.name = "k"
+            return f"{{{self.render(karg)}: v for k, v in {arg.varname}.items()}}"
 
     def tuple(self, arg: SeField[Any]) -> str:
         """
