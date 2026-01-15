@@ -84,7 +84,6 @@ from .core import (
     fields,
     is_instance,
     logger,
-    raise_unsupported_type,
     union_func_name,
     GLOBAL_CLASS_SERIALIZER,
 )
@@ -263,7 +262,6 @@ def serialize(
         g["copy"] = copy
         g["serde_scope"] = scope
         g["SerdeError"] = SerdeError
-        g["raise_unsupported_type"] = raise_unsupported_type
         g["enum_value"] = enum_value
         g["is_dataclass"] = is_dataclass
         g["typename"] = typename  # used in union functions
@@ -913,7 +911,7 @@ class Renderer:
         elif is_pep695_type_alias(arg.type):
             res = self.render(dataclasses.replace(arg, type=arg.type.__value__))
         else:
-            res = f"raise_unsupported_type({arg.varname})"
+            raise SerdeError(f"Unsupported type: {typename(arg.type)}")
 
         # Custom field serializer overrides custom class serializer.
         if self.legacy_class_serializer and not arg.serializer and not custom_serializer_available:

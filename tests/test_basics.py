@@ -764,21 +764,20 @@ def test_ext(se: Any, de: Any) -> None:
 
 
 def test_exception_on_not_supported_types() -> None:
+    """Test that unsupported types raise SerdeError at decoration time, not runtime."""
+
     class UnsupportedClass:
         def __init__(self) -> None:
             pass
 
-    @serde.serde
-    class Foo:
-        b: UnsupportedClass
+    # Error should be raised when the class is decorated, not at runtime
+    with pytest.raises(serde.SerdeError) as ex:
 
-    with pytest.raises(serde.SerdeError) as se_ex:
-        serde.to_dict(Foo(UnsupportedClass()))
-    assert str(se_ex.value).startswith("Unsupported type: UnsupportedClass")
+        @serde.serde
+        class Foo:
+            b: UnsupportedClass
 
-    with pytest.raises(serde.SerdeError) as de_ex:
-        serde.from_dict(Foo, {"b": UnsupportedClass()})
-    assert str(de_ex.value).startswith("Unsupported type: UnsupportedClass")
+    assert str(ex.value).startswith("Unsupported type: UnsupportedClass")
 
 
 def test_dataclass_inheritance() -> None:
