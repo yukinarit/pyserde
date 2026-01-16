@@ -89,7 +89,6 @@ from .core import (
     is_instance,
     literal_func_name,
     logger,
-    raise_unsupported_type,
     union_func_name,
 )
 
@@ -279,7 +278,6 @@ def deserialize(
         g["serde_scope"] = scope
         g["SerdeError"] = SerdeError
         g["UserError"] = UserError
-        g["raise_unsupported_type"] = raise_unsupported_type
         g["typename"] = typename
         g["ensure"] = ensure
         g["typing"] = typing
@@ -914,7 +912,7 @@ class Renderer:
         elif is_literal(arg.type):
             res = self.literal(arg)
         else:
-            return f"raise_unsupported_type({arg.data})"
+            raise SerdeError(f"Unsupported type: {typename(arg.type)}")
 
         if arg.supports_default():
             res = self.default(arg, res)
