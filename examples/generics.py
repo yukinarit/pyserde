@@ -1,8 +1,4 @@
-from typing import Generic, TypeVar
-
 from serde import from_dict, serde, to_dict
-
-T = TypeVar("T")
 
 
 @serde
@@ -11,12 +7,12 @@ class Bar:
 
 
 @serde
-class Foo(Generic[T]):
+class Foo[T]:
     inner: T
 
 
 @serde
-class Baz(Generic[T]):
+class Baz[T]:
     foo: Foo[T]
 
 

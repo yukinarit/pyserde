@@ -1,6 +1,6 @@
-from __future__ import annotations
-from serde import serde, to_dict, InternalTagging, from_dict
 from dataclasses import dataclass
+
+from serde import InternalTagging, from_dict, serde, to_dict
 
 
 @serde(tagging=InternalTagging("type"))

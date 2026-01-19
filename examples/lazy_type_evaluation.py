@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from serde import serde
 from serde.json import from_json, to_json
 
