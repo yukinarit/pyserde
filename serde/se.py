@@ -46,6 +46,7 @@ from .compat import (
     is_deque,
     is_dict,
     is_enum,
+    is_flatten_dict,
     is_generic,
     is_list,
     is_literal,
@@ -601,7 +602,13 @@ def {{func}}(obj, reuse_instances = None, convert_sets = None, skip_none = False
   {% for f in fields -%}
   subres = {{rvalue(f)}}
   {% if not f.skip -%}
-    {% if f.skip_if -%}
+    {% if lvalue(f) == '__FLATTEN_DICT__' -%}
+  # Merge flattened dict into result (declared fields take precedence)
+  if subres:
+    for __k, __v in subres.items():
+      if __k not in res:
+        res[__k] = __v
+    {% elif f.skip_if -%}
   if not {{f.skip_if.name}}(subres):
     {{lvalue(f)}} = subres
     {% else -%}
@@ -808,6 +815,9 @@ class LRenderer:
             inner = arg[0]
             if is_dataclass(inner.type):
                 return self.flatten(inner)
+        elif is_flatten_dict(arg.type) and arg.flatten:
+            # Special marker for flatten dict - handled by template
+            return "__FLATTEN_DICT__"
 
         return f'res["{arg.conv_name(self.case)}"]'
 

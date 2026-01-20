@@ -39,6 +39,7 @@ from .compat import (
     is_counter,
     is_deque,
     is_dict,
+    is_flatten_dict,
     is_generic,
     is_list,
     is_literal,
@@ -674,8 +675,17 @@ class Field(Generic[T]):
         flatten = f.metadata.get("serde_flatten")
         if flatten is True:
             flatten = FlattenOpts()
-        if flatten and not (dataclasses.is_dataclass(f.type) or is_opt_dataclass(f.type)):
-            raise SerdeError(f"pyserde does not support flatten attribute for {typename(f.type)}")
+        if flatten:
+            is_valid_flatten_type = (
+                dataclasses.is_dataclass(f.type)
+                or is_opt_dataclass(f.type)
+                or is_flatten_dict(f.type)
+            )
+            if not is_valid_flatten_type:
+                raise SerdeError(
+                    f"pyserde does not support flatten attribute for {typename(f.type)}. "
+                    "Supported types: dataclass, Optional[dataclass], dict[str, Any], dict"
+                )
 
         kw_only = bool(f.kw_only)
 

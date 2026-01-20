@@ -44,6 +44,7 @@ from .compat import (
     is_dict,
     is_ellipsis,
     is_enum,
+    is_flatten_dict,
     is_frozen_set,
     is_generic,
     is_list,
@@ -1252,7 +1253,7 @@ def {{func}}(cls=cls, maybe_generic=None, maybe_generic_type_vars=None, data=Non
   if reuse_instances is None:
     reuse_instances = {{serde_scope.reuse_instances_default}}
 
-  {% if deny_unknown_fields %}
+  {% if deny_unknown_fields and not has_flatten_dict %}
   known_fields = {{ known_fields }}
   unknown_fields = set((data or {}).keys()) - known_fields
   if unknown_fields:
@@ -1261,8 +1262,17 @@ def {{func}}(cls=cls, maybe_generic=None, maybe_generic_type_vars=None, data=Non
 
   maybe_generic_type_vars = maybe_generic_type_vars or {{cls_type_vars}}
 
+  {% if has_flatten_dict %}
+  __flatten_known_fields = {{ known_fields }}
+  __flatten_extra = {k: v for k, v in (data or {}).items() if k not in __flatten_known_fields}
+  {% endif %}
+
   {% for f in fields %}
+  {% if f.flatten and is_flatten_dict(f.type) %}
+  __{{f.name}} = __flatten_extra
+  {% else %}
   __{{f.name}} = {{rvalue(arg(f,loop.index-1))}}
+  {% endif %}
   {% endfor %}
 
   try:
@@ -1406,6 +1416,28 @@ def get_known_fields(f: DeField[Any], rename_all: str | None) -> list[str]:
     return names + f.alias
 
 
+def _collect_known_fields(
+    fields: list[DeField[Any]], rename_all: str | None, exclude_flatten_dict: bool = False
+) -> set[str]:
+    """
+    Collect all known field names including aliases.
+    When exclude_flatten_dict is True, skips flatten dict fields from the known fields set.
+    For flattened dataclass fields, includes their nested field names.
+    """
+    known: set[str] = set()
+    for f in fields:
+        # Skip flatten dict field itself - it captures "unknown" fields
+        if exclude_flatten_dict and f.flatten and is_flatten_dict(f.type):
+            continue
+        # For flattened dataclass, include nested field names
+        if f.flatten and is_dataclass(f.type):
+            for nested_f in defields(f.type):
+                known.update(get_known_fields(nested_f, rename_all))
+        else:
+            known.update(get_known_fields(f, rename_all))
+    return known
+
+
 def render_from_dict(
     cls: type[Any],
     rename_all: str | None = None,
@@ -1438,9 +1470,12 @@ def render_from_dict(
             rvalue=renderer.render,
         )
     else:
-        known_fields = set(
-            itertools.chain.from_iterable([get_known_fields(f, rename_all) for f in fields])
-        )
+        # Detect flatten dict field
+        has_flatten_dict = any(f.flatten and is_flatten_dict(f.type) for f in fields)
+
+        # Compute known fields - exclude flatten dict field itself since it captures unknown fields
+        known_fields = _collect_known_fields(fields, rename_all, exclude_flatten_dict=True)
+
         res = jinja2_env.get_template("dict").render(
             func=FROM_DICT,
             serde_scope=serde_scope,
@@ -1451,6 +1486,8 @@ def render_from_dict(
             arg=functools.partial(to_arg, rename_all=rename_all),
             deny_unknown_fields=deny_unknown_fields,
             known_fields=known_fields,
+            has_flatten_dict=has_flatten_dict,
+            is_flatten_dict=is_flatten_dict,
         )
 
     if renderer.import_numpy:
