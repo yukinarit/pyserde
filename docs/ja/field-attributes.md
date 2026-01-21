@@ -148,7 +148,11 @@ class Foo:
 
 ## **`flatten`**
 
-ネストされた構造のフィールドをフラットにできます。
+`flatten` 属性は2つの方法で使用できます。
+
+### ネストされたdataclassのフラット化
+
+ネストされたdataclass構造のフィールドをフラットにできます。
 
 ```python
 @serde
@@ -163,7 +167,35 @@ class Foo:
     bar: Bar = field(flatten=True)
 ```
 
-上記の例では、`Bar` の `c` および `d` フィールドが `Foo` で定義されているかのようにデシリアライズされます。  
+上記の例では、`Bar` の `c` および `d` フィールドが `Foo` で定義されているかのようにデシリアライズされます。
 `Foo` をJSON形式にシリアライズすると `{"a":10,"b":"foo","c":100.0,"d":true}` を取得します。
 
 完全な例については、[examples/flatten.py](https://github.com/yukinarit/pyserde/blob/main/examples/flatten.py)を参照してください。
+
+### dictで追加フィールドをキャプチャ
+
+`dict[str, Any]` または `dict` と `flatten=True` を使用して、デシリアライズ時にすべての未知/追加フィールドをキャプチャできます。Rust serdeの `HashMap<String, Value>` に対する `#[serde(flatten)]` と同様の機能です。
+
+```python
+@serde
+class User:
+    id: int
+    name: str
+    extra: dict[str, Any] = field(flatten=True, default_factory=dict)
+
+# デシリアライズ - 追加フィールドがキャプチャされる
+user = from_json(User, '{"id": 1, "name": "Alice", "role": "admin", "active": true}')
+# user.extra == {"role": "admin", "active": True}
+
+# シリアライズ - 追加フィールドがマージされる
+user2 = User(id=2, name="Bob", extra={"department": "Engineering"})
+to_json(user2)  # '{"id": 2, "name": "Bob", "department": "Engineering"}'
+```
+
+**主な機能:**
+- デシリアライズ時、宣言されたフィールドに一致しないフィールドがdictにキャプチャされます
+- シリアライズ時、dictの内容が出力にマージされます（宣言されたフィールドが優先されます）
+- すべてのデータ形式（JSON、YAML、TOML、MessagePackなど）で動作します
+- フラット化されたdataclassフィールドと組み合わせることができます
+
+完全な例については、[examples/flatten_dict.py](https://github.com/yukinarit/pyserde/blob/main/examples/flatten_dict.py)を参照してください。

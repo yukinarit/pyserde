@@ -132,7 +132,11 @@ See [examples/custom_field_serializer.py](https://github.com/yukinarit/pyserde/b
 
 ## **`flatten`**
 
-You can flatten the fields of the nested structure.
+The `flatten` attribute can be used in two ways:
+
+### Flatten nested dataclass
+
+You can flatten the fields of the nested dataclass structure.
 
 ```python
 @serde
@@ -150,3 +154,31 @@ class Foo:
 Bar's c, d fields are deserialized as if they are defined in Foo. So you will get `{"a":10,"b":"foo","c":100.0,"d":true}` if you serialize `Foo` into JSON.
 
 See [examples/flatten.py](https://github.com/yukinarit/pyserde/blob/main/examples/flatten.py) for complete example.
+
+### Capture additional fields with dict
+
+You can use `dict[str, Any]` or bare `dict` with `flatten=True` to capture all unknown/extra fields during deserialization, similar to Rust serde's `#[serde(flatten)]` on `HashMap<String, Value>`.
+
+```python
+@serde
+class User:
+    id: int
+    name: str
+    extra: dict[str, Any] = field(flatten=True, default_factory=dict)
+
+# Deserialization - extra fields captured
+user = from_json(User, '{"id": 1, "name": "Alice", "role": "admin", "active": true}')
+# user.extra == {"role": "admin", "active": True}
+
+# Serialization - extra fields merged back
+user2 = User(id=2, name="Bob", extra={"department": "Engineering"})
+to_json(user2)  # '{"id": 2, "name": "Bob", "department": "Engineering"}'
+```
+
+**Key features:**
+- During deserialization, any fields not matching declared fields are captured in the dict
+- During serialization, the dict contents are merged into the output (declared fields take precedence)
+- Works with all data formats (JSON, YAML, TOML, MessagePack, etc.)
+- Can be combined with flattened dataclass fields
+
+See [examples/flatten_dict.py](https://github.com/yukinarit/pyserde/blob/main/examples/flatten_dict.py) for complete example.

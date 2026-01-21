@@ -770,6 +770,33 @@ def is_dict(typ: type[Any]) -> bool:
         return typ in (dict, defaultdict, Mapping, MutableMapping)
 
 
+def is_flatten_dict(typ: Any) -> bool:
+    """
+    Test if the type is dict[str, Any] or bare dict suitable for flatten.
+
+    >>> is_flatten_dict(dict[str, Any])
+    True
+    >>> is_flatten_dict(dict)
+    True
+    >>> is_flatten_dict(dict[str, int])
+    False
+    >>> is_flatten_dict(dict[int, str])
+    False
+    >>> is_flatten_dict(list[str])
+    False
+    """
+    if not is_dict(typ):
+        return False
+    # Allow bare dict
+    if is_bare_dict(typ):
+        return True
+    args = type_args(typ)
+    if not args or len(args) != 2:
+        return False
+    # Key must be str, value must be Any
+    return args[0] is str and is_any(args[1])
+
+
 @cache
 @cache
 def is_bare_dict(typ: type[Any]) -> bool:

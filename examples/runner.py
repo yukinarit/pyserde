@@ -23,6 +23,7 @@ def run_all() -> None:
     import default_dict
     import env
     import flatten
+    import flatten_dict
     import forward_reference
     import frozen_set
     import generics
@@ -82,6 +83,7 @@ def run_all() -> None:
     run(default_dict)
     run(env)
     run(flatten)
+    run(flatten_dict)
     run(jsonfile)
     run(rename)
     run(rename_all)
