@@ -2,6 +2,8 @@
 
 pyserde offers three ways to extend pyserde to support non builtin types.
 
+Choose field-level serializers for one-off fields, class serializers for reusable types, and global serializers to apply extensions project-wide.
+
 ## Custom field (de)serializer
 
 See [custom field serializer](./field-attributes.md#serializerdeserializer).

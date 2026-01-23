@@ -2,6 +2,8 @@
 
 pyserde offers runtime type checking since v0.9. It was completely reworked at v0.14 using [beartype](https://github.com/beartype/beartype) and it became more sophisticated and reliable. It is highly recommended to enable type checking always as it helps writing type-safe and robust programs.
 
+If you need to accept untrusted input, prefer `strict` or `coerce` so invalid data fails early.
+
 ## `strict`
 
 Strict type checking is to check every field value against the declared type during (de)serialization and object construction. This is the default type check mode since v0.14. What will happen with this mode is if you declare a class with `@serde` decorator without any class attributes, `@serde(type_check=strict)` is assumed and strict type checking is enabled.
@@ -43,15 +45,14 @@ serde.compat.SerdeError: Method __main__.Foo.__init__() parameter s=10 violates 
 > The following code mutates the property "s" at the bottom. beartype can not detect this case.
 > ```python
 > @serde
-> class Foo
+> class Foo:
 >     s: str
 >
 > f = Foo("foo")
 > f.s = 100
 > ```
 >
-> 2. beartype can not validate every one of elements in containers. This is not a bug. This is desgin principle of beartype. See [Does beartype actually do anything?](https://beartype.readthedocs.io/en/latest/faq/#faq-o1].
-> ```
+> 2. beartype can not validate every one of elements in containers. This is not a bug. This is desgin principle of beartype. See [Does beartype actually do anything?](https://beartype.readthedocs.io/en/latest/faq/#faq-o1).
 
 ## `coerce`
 
@@ -59,7 +60,7 @@ Type coercing automatically converts a value into the declared type during (de)s
 
 ```python
 @serde(type_check=coerce)
-class Foo
+class Foo:
     s: str
 
 foo = Foo(10)
@@ -74,7 +75,7 @@ This is the default behavior until pyserde v0.8.3 and v0.9.x. No type coercion o
 
 ```python
 @serde
-class Foo
+class Foo:
     s: str
 
 foo = Foo(10)

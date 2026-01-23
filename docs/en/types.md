@@ -1,6 +1,8 @@
 # Types
 
-Here is the list of the supported types. See the simple example for each type in the footnotes
+Here is the list of the supported types. See the simple example for each type in the footnotes.
+
+Tip: Most standard-library containers and datetime types just work, but you can always add custom serializers for third-party types.
 
 * Primitives (int, float, str, bool) [^1]
 * Containers
@@ -34,7 +36,7 @@ Here is the list of the supported types. See the simple example for each type in
 You can write pretty complex class like this:
 ```python
 @serde
-class bar:
+class Bar:
     i: int
 
 @serde
@@ -101,7 +103,7 @@ It's recommended to exercise caution when relying on experimental features in pr
 
 ## Needs a new type support?
 
-If you need to use a type which is currently not supported in the standard library, please creat a Github issue to request. For types in third party python packages, unless it's polular like numpy, we don't plan to support it to keep pyserde as simple as possible. We recommend to use custom class or field serializer.
+If you need to use a type which is currently not supported in the standard library, please create a Github issue to request. For types in third party python packages, unless it's popular like numpy, we don't plan to support it to keep pyserde as simple as possible. We recommend to use custom class or field serializer.
 
 [^1]: See [examples/simple.py](https://github.com/yukinarit/pyserde/blob/main/examples/simple.py)
 

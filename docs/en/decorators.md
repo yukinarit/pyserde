@@ -27,6 +27,8 @@ class Foo:
 * You can pass both (de)serialize attributes to the decorator
     * `serializer` attribute is ignored in `@deserialize` and `deserializer` attribute is ignored in `@serialize`
 
+Use `@serde` for most classes unless you need separate serialization/deserialization configs.
+
 ```python
 @serde(serializer=serializer, deserializer=deserializer)
 @dataclass

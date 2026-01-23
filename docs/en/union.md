@@ -1,6 +1,8 @@
 # Union Representation
 
-`pyserde`>=0.7 offers attributes to control how Union is (de)serialized. This concept is the very same as the one in [serde-rs](https://serde.rs/enum-representations.html). Note these representations only apply to the dataclass, non dataclass objects are (de)serialized with `Untagged` always.
+`pyserde`>=0.7 offers attributes to control how Union is (de)serialized. This concept is the very same as the one in [serde-rs](https://serde.rs/enum-representations.html). Note these representations only apply to the dataclass; non dataclass objects are (de)serialized with `Untagged` always.
+
+Use tagged unions whenever your Union members can be ambiguous (same field names/types), otherwise deserialization may choose the wrong type.
 
 ## `Untagged`
 

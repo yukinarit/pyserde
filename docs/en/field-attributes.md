@@ -1,6 +1,6 @@
 # Field Attributes
 
-Field attributes are options to customize (de)serialization behaviour for a field of a dataclass.
+Field attributes are options to customize (de)serialization behaviour for a field of a dataclass. Use them when you want different wire formats, optional behavior, or custom logic for specific fields.
 
 ## Attributes offered by dataclasses
 
@@ -34,7 +34,7 @@ Here is an example specifying `rename` attribute in both `serde.field` and `data
 @serde.serde
 class Foo:
     a: str = serde.field(rename="A")
-    b: str = dataclasses.field(metadata={"serde_rename"="B"})
+    b: str = dataclasses.field(metadata={"serde_rename": "B"})
 ```
 
 ### **`rename`**
@@ -65,7 +65,7 @@ See [examples/skip.py](https://github.com/yukinarit/pyserde/blob/main/examples/s
 
 ### **`skip_if`**
 
-`skip` is used to skip (de)serialization of the field if the predicate function returns `True`.
+`skip_if` is used to skip (de)serialization of the field if the predicate function returns `True`.
 
 ```python
 @serde
@@ -74,6 +74,8 @@ class World:
 ```
 
 See [examples/skip.py](https://github.com/yukinarit/pyserde/blob/main/examples/skip.py) for the complete example.
+
+> **NOTE:** `skip`, `skip_if`, `skip_if_false`, and `skip_if_default` apply to both serialization and deserialization. Use them to keep wire formats compact or to ignore fields you only use locally.
 
 ### **`skip_if_false`**
 

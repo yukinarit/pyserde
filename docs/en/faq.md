@@ -7,6 +7,8 @@ pyserde provides `inspect` submodule that works as commandline:
 python -m serde.inspect <PATH_TO_FILE> <CLASS>
 ```
 
+This is useful when you want to understand generated code, debug custom serializers, or confirm how pyserde handles a specific type.
+
 e.g. in pyserde project
 
 ```

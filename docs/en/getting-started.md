@@ -4,6 +4,8 @@
 
 Install pyserde from PyPI. pyserde requires Python>=3.10.
 
+If you want faster JSON handling, you can also install `orjson` and use the `orjson` extra for optional acceleration.
+
 ```
 pip install pyserde
 ```
@@ -44,6 +46,8 @@ Here are the available extras
 * `numpy`: Install [numpy](https://github.com/numpy/numpy)
 * `orjson`: Install [orjson](https://github.com/ijl/orjson)
 * `sqlalchemy`: Install [sqlalchemy](https://github.com/sqlalchemy/sqlalchemy)
+
+> **NOTE:** Extras enable additional formats and types, but you can mix them as needed. For example, install only `toml` and `yaml` if you do not need MsgPack or numpy.
 
 ## Define your first pyserde class
 
@@ -98,7 +102,7 @@ from serde.json import from_json, to_json
 ```
 
 Use `to_json` to serialize the object into JSON.
-```
+```python
 f = Foo(i=10, s='foo', f=100.0, b=True)
 print(to_json(f))
 ```
@@ -109,7 +113,20 @@ s = '{"i": 10, "s": "foo", "f": 100.0, "b": true}'
 print(from_json(Foo, s))
 ```
 
+You can also serialize to a Python `dict` when you need to manipulate data before writing it to a file or sending it over the network.
+
+```python
+from serde import to_dict, from_dict
+
+payload = to_dict(f)
+# e.g. add a field before sending
+payload["source"] = "cli"
+print(from_dict(Foo, payload))
+```
+
 That's it! pyserde offers many more features. If you're interested, please read the rest of the documentation.
+
+> **NOTE:** If you plan to use YAML, TOML, or MsgPack, remember to install the matching extras listed above.
 
 > 💡 Tip: which type checker should I use?
 > pyserde depends on [PEP681 dataclass_transform](https://peps.python.org/pep-0681/). [mypy](https://github.com/python/mypy) does not fully support dataclass_transform as of Jan. 2024. My personal recommendation is [pyright](https://github.com/microsoft/pyright).

@@ -1,6 +1,6 @@
 # Field Attributes
 
-フィールド属性は、データクラスのフィールドの（デ）シリアライズ動作をカスタマイズするためのオプションです。
+フィールド属性は、データクラスのフィールドの（デ）シリアライズ動作をカスタマイズするためのオプションです。ワイヤ形式の調整や、特定のフィールドだけ特別扱いしたい場合に使います。
 
 ## dataclassesによって提供される属性
 
@@ -41,7 +41,7 @@ ClassVarフィールドをシリアライズする場合は、[serialize_class_v
 @serde.serde
 class Foo:
     a: str = serde.field(rename="A")
-    b: str = dataclasses.field(metadata={"serde_rename"="B"})
+    b: str = dataclasses.field(metadata={"serde_rename": "B"})
 ```
 
 ### **`rename`**
@@ -84,6 +84,8 @@ class World:
 ```
 
 完全な例については、[examples/skip.py](https://github.com/yukinarit/pyserde/blob/main/examples/skip.py)を参照してください。
+
+> **注記:** `skip`、`skip_if`、`skip_if_false`、`skip_if_default` はシリアライズ/デシリアライズの両方に適用されます。出力をコンパクトにしたい場合やローカル専用のフィールドを無視したい場合に便利です。
 
 ### **`skip_if_false`**
 

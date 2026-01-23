@@ -3,13 +3,15 @@
 pyserdeは、`dict`、`tuple`、`JSON`、`YAML`、`TOML`、`MsgPack`、`Pickle` などのさまざまなデータ形式をシリアライズおよびデシリアライズできます。  
 各APIは追加のキーワード引数を取ることができ、これらの引数はpyserdeで使用されるベースパッケージへと渡されます。
 
-例えば、YAMLでフィールドの順序を保持したい場合、`serde.yaml.to_yaml`に`sort_key=True`を渡すことができます。
+形式ごとの設定をしたい場合は、`serde.json` や `serde.yaml` などのモジュールを使ってください。例えば、YAMLでフィールドの順序を保持したい場合、`serde.yaml.to_yaml`に`sort_key=True`を渡すことができます。
 
 ```python
 serde.yaml.to_yaml(foo, sort_key=True)
 ```
 
 `sort_key=True`は[yaml.safedump](https://github.com/yukinarit/pyserde/blob/a9f44d52d109144a4c3bb93965f831e91d13960b/serde/yaml.py#L18)に渡されます。
+
+> **注記:** JSON/YAML/TOML/MsgPackは対応するエクストラのインストールが必要です。`dict`、`tuple`、Pickleは追加依存なしで利用できます。
 
 ## dict
 
@@ -51,6 +53,8 @@ Foo(i=10, s='foo', f=100.0, b=True)
 Foo(i=10, s='foo', f=100.0, b=True)
 ```
 
+`orjson` エクストラを有効にすると、pyserdeは内部的に高速なJSONエンコード/デコードを使用できます。
+
 詳細は[serde.json.to_json](https://yukinarit.github.io/pyserde/api/serde/json.html#to_json) / [serde.json.from_json](https://yukinarit.github.io/pyserde/api/serde/json.html#from_json)をご覧ください。
 
 ## Yaml
@@ -73,7 +77,7 @@ Foo(i=10, s='foo', f=100.0, b=True)
 ## Toml
 
 ```python
->>> from serde.toml from_toml, to_toml
+>>> from serde.toml import from_toml, to_toml
 
 >>> to_toml(Foo(i=10, s='foo', f=100.0, b=True))
 i = 10
@@ -81,9 +85,7 @@ s = "foo"
 f = 100.0
 b = true
 
->>> from_toml(Foo, 'i = 10\ns = "foo"\nf = 100.0\n
-
-b = true')
+>>> from_toml(Foo, 'i = 10\ns = "foo"\nf = 100.0\nb = true')
 Foo(i=10, s='foo', f=100.0, b=True)
 ```
 

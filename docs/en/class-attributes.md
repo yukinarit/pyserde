@@ -2,6 +2,8 @@
 
 Class attributes can be specified as arguments in the `serialize`/`deserialize` decorators in order to customize the (de)serialization behaviour of the class entirely. If you want to customize a field, please consider using [Field Attributes](field-attributes.md).
 
+Class attributes affect how every field is treated, so they are ideal for naming conventions, tagging, or behavior that must be consistent across the whole class.
+
 ## Attributes offered by dataclasses
 
 ### **`frozen`**
@@ -141,7 +143,7 @@ New in v0.13.0.
 
 > **NOTE:** Deprecated since v0.13.0. Consider using `class_serializer` and `class_deserializer`.
 
-If you want to use a custom (de)serializer at class level, you can pass your (de)serializer methods n `serializer` and `deserializer` class attributes.
+If you want to use a custom (de)serializer at class level, you can pass your (de)serializer methods in `serializer` and `deserializer` class attributes.
 
 ```python
 def serializer(cls, o):
