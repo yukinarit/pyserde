@@ -600,24 +600,24 @@ def {{func}}(obj, reuse_instances = None, convert_sets = None, skip_none = False
 
   res = {}
   {% for f in fields -%}
-  subres = {{rvalue(f)}}
   {% if not f.skip -%}
-    {% if lvalue(f) == '__FLATTEN_DICT__' -%}
+  subres = {{rvalue(f)}}
+  {% if lvalue(f) == '__FLATTEN_DICT__' -%}
   # Merge flattened dict into result (declared fields take precedence)
   if subres:
     for __k, __v in subres.items():
       if __k not in res:
         res[__k] = __v
-    {% elif f.skip_if -%}
+  {% elif f.skip_if -%}
   if not {{f.skip_if.name}}(subres):
     {{lvalue(f)}} = subres
-    {% else -%}
+  {% else -%}
   if skip_none:
     if subres is not None:
       {{lvalue(f)}} = subres
   else:
     {{lvalue(f)}} = subres
-    {% endif -%}
+  {% endif -%}
   {% endif %}
 
   {% endfor -%}
