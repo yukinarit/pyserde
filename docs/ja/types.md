@@ -2,6 +2,8 @@
 
 以下はサポートされている型のリストです。各型の簡単な例は脚注にあります。
 
+ヒント: 標準ライブラリのコンテナやdatetime系はそのまま使えます。サードパーティ型はカスタムシリアライザで拡張できます。
+
 * プリミティブ（`int`, `float`, `str`, `bool`）[^1]
 * コンテナ
     * `list`, `collections.abc.Sequence`, `collections.abc.MutableSequence`, `tuple` [^2]
@@ -34,7 +36,7 @@
 このように複雑なクラスを記述することができます。
 ```python
 @serde
-class bar:
+class Bar:
     i: int
 
 @serde

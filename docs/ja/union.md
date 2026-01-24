@@ -4,6 +4,8 @@
 
 これらの表現は dataclass にのみ適用され、dataclassではないオブジェクトは常に `Untagged` で（デ）シリアライズされます。
 
+Union内の型が曖昧になり得る場合（フィールドが似ている場合など）は、タグ付き表現を使うと安全です。
+
 ## `Untagged`
 
 以下は、 `pyserde<0.7` におけるデフォルトの Union 表現です。dataclass が与えられた場合を例に上げます。
@@ -146,7 +148,7 @@ print(from_json(Union[Foo, Bar], s))
 
 * AdjacentTagging
   ```python
-  from serde
+  from serde import AdjacentTagging
 
   s = to_json(bar, cls=AdjacentTagging("type", "content", Union[Foo, Bar]))
   print(s)

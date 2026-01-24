@@ -7,6 +7,8 @@ pyserdeはコマンドラインとして動作する `inspect` サブモジュ�
 python -m serde.inspect <PATH_TO_FILE> <CLASS>
 ```
 
+生成コードの確認、カスタムシリアライザのデバッグ、特定の型の扱いを把握したいときに便利です。
+
 例：pyserdeプロジェクト内で以下を実行します。
 
 ```

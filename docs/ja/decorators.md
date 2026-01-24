@@ -27,6 +27,8 @@ class Foo:
 * 両方の（デ）シリアライズ属性をデコレータに渡すことができます。
     * `serializer` 属性は `@deserialize` で無視され、`deserializer` 属性は `@serialize` で無視されます。
 
+通常は `@serde` を使い、必要に応じて `@serialize` / `@deserialize` を使い分けます。
+
 ```python
 @serde(serializer=serializer, deserializer=deserializer)
 @dataclass
