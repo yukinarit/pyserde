@@ -36,7 +36,7 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-fe211702.js";
+            window.path_to_searchindex_js = "searchindex-2876a135.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc-65ba6fac.js"></script>
@@ -180,6 +180,13 @@
                     <main>
                         <h1 id="introduction"><a class="header" href="#introduction">Introduction</a></h1>
 <p><code>pyserde</code> is a simple yet powerful serialization library on top of <a href="https://docs.python.org/3/library/dataclasses.html">dataclasses</a>. It allows you to convert Python objects to and from JSON, YAML, and other formats easily and efficiently.</p>
+<p>pyserde focuses on dataclass-first workflows and keeps runtime overhead low by generating serializers when classes are loaded.</p>
+<p>Highlights:</p>
+<ul>
+<li>Multiple formats (<code>dict</code>, <code>tuple</code>, JSON, YAML, TOML, MsgPack, Pickle)</li>
+<li>Rich type support (Optional, Union, Literals, enums, datetime, numpy, etc.)</li>
+<li>Runtime type checking and extensibility hooks</li>
+</ul>
 <p>Declare your class with <code>@serde</code> decorator and annotate fields using <a href="https://peps.python.org/pep-0484/">PEP484</a> as below.</p>
 <pre><code class="language-python">from serde import serde
 
@@ -200,6 +207,13 @@ class Foo:
 &gt;&gt;&gt; from_json(Foo, '{"i": 10, "s": "foo", "f": 100.0, "b": true}')
 Foo(i=10, s='foo', f=100.0, b=True)
 </code></pre>
+<p>pyserde also provides in-memory formats like <code>dict</code> and <code>tuple</code>, plus YAML, TOML, MsgPack, and Pickle when their extras are installed.</p>
+<pre><code class="language-python">&gt;&gt;&gt; from serde import to_dict, from_dict
+&gt;&gt;&gt; to_dict(Foo(i=10, s='foo', f=100.0, b=True))
+{"i": 10, "s": "foo", "f": 100.0, "b": True}
+&gt;&gt;&gt; from_dict(Foo, {"i": 10, "s": "foo", "f": 100.0, "b": True})
+Foo(i=10, s='foo', f=100.0, b=True)
+</code></pre>
 <h2 id="next-steps"><a class="header" href="#next-steps">Next Steps</a></h2>
 <ul>
 <li><a href="#getting-started">Getting started</a></li>
@@ -211,6 +225,7 @@ Foo(i=10, s='foo', f=100.0, b=True)
 <h1 id="getting-started"><a class="header" href="#getting-started">Getting started</a></h1>
 <h2 id="installation"><a class="header" href="#installation">Installation</a></h2>
 <p>Install pyserde from PyPI. pyserde requires Python&gt;=3.10.</p>
+<p>If you want faster JSON handling, you can also install <code>orjson</code> and use the <code>orjson</code> extra for optional acceleration.</p>
 <pre><code>pip install pyserde
 </code></pre>
 <p>If you’re using uv, run this command.</p>
@@ -242,6 +257,9 @@ Foo(i=10, s='foo', f=100.0, b=True)
 <li><code>orjson</code>: Install <a href="https://github.com/ijl/orjson">orjson</a></li>
 <li><code>sqlalchemy</code>: Install <a href="https://github.com/sqlalchemy/sqlalchemy">sqlalchemy</a></li>
 </ul>
+<blockquote>
+<p><strong>NOTE:</strong> Extras enable additional formats and types, but you can mix them as needed. For example, install only <code>toml</code> and <code>yaml</code> if you do not need MsgPack or numpy.</p>
+</blockquote>
 <h2 id="define-your-first-pyserde-class"><a class="header" href="#define-your-first-pyserde-class">Define your first pyserde class</a></h2>
 <p>Define your class with pyserde’s <code>@serde</code> decorators. Be careful that module name is <code>serde</code>, not <code>pyserde</code>. <code>pyserde</code> heavily depends on the standard library’s <code>dataclasses</code> module. If you are new to dataclass, I would recommend to read <a href="https://docs.python.org/3/library/dataclasses.html">dataclasses documentation</a> first.</p>
 <pre><code class="language-python">from serde import serde
@@ -282,14 +300,25 @@ class Foo:
 <pre><code class="language-python">from serde.json import from_json, to_json
 </code></pre>
 <p>Use <code>to_json</code> to serialize the object into JSON.</p>
-<pre><code>f = Foo(i=10, s='foo', f=100.0, b=True)
+<pre><code class="language-python">f = Foo(i=10, s='foo', f=100.0, b=True)
 print(to_json(f))
 </code></pre>
 <p>Pass <code>Foo</code> class and JSON string in <code>from_json</code> to deserialize JSON into the object.</p>
 <pre><code class="language-python">s = '{"i": 10, "s": "foo", "f": 100.0, "b": true}'
 print(from_json(Foo, s))
 </code></pre>
+<p>You can also serialize to a Python <code>dict</code> when you need to manipulate data before writing it to a file or sending it over the network.</p>
+<pre><code class="language-python">from serde import to_dict, from_dict
+
+payload = to_dict(f)
+# e.g. add a field before sending
+payload["source"] = "cli"
+print(from_dict(Foo, payload))
+</code></pre>
 <p>That’s it! pyserde offers many more features. If you’re interested, please read the rest of the documentation.</p>
+<blockquote>
+<p><strong>NOTE:</strong> If you plan to use YAML, TOML, or MsgPack, remember to install the matching extras listed above.</p>
+</blockquote>
 <blockquote>
 <p>💡 Tip: which type checker should I use?
 pyserde depends on <a href="https://peps.python.org/pep-0681/">PEP681 dataclass_transform</a>. <a href="https://github.com/python/mypy">mypy</a> does not fully support dataclass_transform as of Jan. 2024. My personal recommendation is <a href="https://github.com/microsoft/pyright">pyright</a>.</p>
@@ -297,10 +326,13 @@ pyserde depends on <a href="https://peps.python.org/pep-0681/">PEP681 dataclass_
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="data-formats"><a class="header" href="#data-formats">Data Formats</a></h1>
 <p>pyserde supports several data formats for serialization and deserialization, including <code>dict</code>, <code>tuple</code>, <code>JSON</code>, <code>YAML</code>, <code>TOML</code>, <code>MsgPack</code>, and <code>Pickle</code>. Each API can take additional keyword arguments, which are forwarded to the underlying packages used by pyserde.</p>
-<p>e.g. If you want to preserve the field order in YAML, you can pass <code>sort_key=True</code> in <code>serde.yaml.to_yaml</code></p>
+<p>Use the format-specific modules (e.g. <code>serde.json</code>, <code>serde.yaml</code>) when you want to control serialization options. For example, if you want to preserve the field order in YAML, you can pass <code>sort_key=True</code> in <code>serde.yaml.to_yaml</code>.</p>
 <pre><code class="language-python">serde.yaml.to_yaml(foo, sort_key=True)
 </code></pre>
 <p><code>sort_key=True</code> will be passed in the <a href="https://github.com/yukinarit/pyserde/blob/a9f44d52d109144a4c3bb93965f831e91d13960b/serde/yaml.py#L18">yaml.safedump</a></p>
+<blockquote>
+<p><strong>NOTE:</strong> JSON, YAML, TOML, and MsgPack formats require their matching extras. <code>dict</code>, <code>tuple</code>, and Pickle work without optional dependencies.</p>
+</blockquote>
 <h2 id="dict"><a class="header" href="#dict">dict</a></h2>
 <pre><code class="language-python">&gt;&gt;&gt; from serde import to_dict, from_dict
 
@@ -330,6 +362,7 @@ Foo(i=10, s='foo', f=100.0, b=True)
 &gt;&gt;&gt; from_json(Foo, '{"i": 10, "s": "foo", "f": 100.0, "b": true}')
 Foo(i=10, s='foo', f=100.0, b=True)
 </code></pre>
+<p>If you enable the <code>orjson</code> extra, pyserde can use it under the hood for faster JSON encoding/decoding.</p>
 <p>See <a href="https://yukinarit.github.io/pyserde/api/serde/json.html#to_json">serde.json.to_json</a> / <a href="https://yukinarit.github.io/pyserde/api/serde/json.html#from_json">serde.json.from_json</a> for more information.</p>
 <h2 id="yaml"><a class="header" href="#yaml">Yaml</a></h2>
 <pre><code class="language-python">&gt;&gt;&gt; from serde.yaml import from_yaml, to_yaml
@@ -380,10 +413,11 @@ Foo(i=10, s='foo', f=100.0, b=True)
 </code></pre>
 <p>See <a href="https://yukinarit.github.io/pyserde/api/serde/pickle.html#to_pickle">serde.pickle.to_pickle</a> / <a href="https://yukinarit.github.io/pyserde/api/serde/pickle.html#from_pickle">serde.pickle.from_pickle</a> for more information.</p>
 <h2 id="needs-a-new-data-format-support"><a class="header" href="#needs-a-new-data-format-support">Needs a new data format support?</a></h2>
-<p>We don’t plan to supprot a data format such as XML to keep pyserde as simple as possible. If you need a new data format support, we recommend to create a separate python package. If the data format is interchangable to dict or tuple, implementing the serialize/desrialize API is not that difficult. See <a href="https://github.com/yukinarit/pyserde/blob/main/serde/yaml.py">YAML’s implementation</a> to know how to implement.</p>
+<p>We don’t plan to support a data format such as XML to keep pyserde as simple as possible. If you need a new data format support, we recommend to create a separate python package. If the data format is interchangable to dict or tuple, implementing the serialize/deserialize API is not that difficult. See <a href="https://github.com/yukinarit/pyserde/blob/main/serde/yaml.py">YAML’s implementation</a> to know how to implement.</p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="types"><a class="header" href="#types">Types</a></h1>
-<p>Here is the list of the supported types. See the simple example for each type in the footnotes</p>
+<p>Here is the list of the supported types. See the simple example for each type in the footnotes.</p>
+<p>Tip: Most standard-library containers and datetime types just work, but you can always add custom serializers for third-party types.</p>
 <ul>
 <li>Primitives (int, float, str, bool) <sup class="footnote-reference" id="fr-1-1"><a href="#footnote-1">1</a></sup></li>
 <li>Containers
@@ -425,7 +459,7 @@ Foo(i=10, s='foo', f=100.0, b=True)
 </ul>
 <p>You can write pretty complex class like this:</p>
 <pre><code class="language-python">@serde
-class bar:
+class Bar:
     i: int
 
 @serde
@@ -482,7 +516,7 @@ NPFoo(i=1, j=2, f=3.0, g=4.0, h=False, u=array([1, 2]), v=array([3, 4]), w=array
 <p>While experimental support for SQLAlchemy Declarative Dataclass Mapping integration has been added, certain features such as <code>@serde(type_check=strict)</code> and <code>serde.field()</code> are not currently supported.</p>
 <p>It’s recommended to exercise caution when relying on experimental features in production environments. It’s also advisable to thoroughly test your code and be aware of potential limitations or unexpected behavior.</p>
 <h2 id="needs-a-new-type-support"><a class="header" href="#needs-a-new-type-support">Needs a new type support?</a></h2>
-<p>If you need to use a type which is currently not supported in the standard library, please creat a Github issue to request. For types in third party python packages, unless it’s polular like numpy, we don’t plan to support it to keep pyserde as simple as possible. We recommend to use custom class or field serializer.</p>
+<p>If you need to use a type which is currently not supported in the standard library, please create a Github issue to request. For types in third party python packages, unless it’s popular like numpy, we don’t plan to support it to keep pyserde as simple as possible. We recommend to use custom class or field serializer.</p>
 <hr>
 <ol class="footnote-definition">
 <li id="footnote-1">
@@ -590,6 +624,7 @@ class Foo:
 </ul>
 </li>
 </ul>
+<p>Use <code>@serde</code> for most classes unless you need separate serialization/deserialization configs.</p>
 <pre><code class="language-python">@serde(serializer=serializer, deserializer=deserializer)
 @dataclass
 class Foo:
@@ -671,6 +706,7 @@ class Foo:
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="class-attributes"><a class="header" href="#class-attributes">Class Attributes</a></h1>
 <p>Class attributes can be specified as arguments in the <code>serialize</code>/<code>deserialize</code> decorators in order to customize the (de)serialization behaviour of the class entirely. If you want to customize a field, please consider using <a href="#field-attributes">Field Attributes</a>.</p>
+<p>Class attributes affect how every field is treated, so they are ideal for naming conventions, tagging, or behavior that must be consistent across the whole class.</p>
 <h2 id="attributes-offered-by-dataclasses"><a class="header" href="#attributes-offered-by-dataclasses">Attributes offered by dataclasses</a></h2>
 <h3 id="frozen"><a class="header" href="#frozen"><strong><code>frozen</code></strong></a></h3>
 <p>dataclass <code>frozen</code> class attribute works as expected.</p>
@@ -779,7 +815,7 @@ class Serializer:
 <blockquote>
 <p><strong>NOTE:</strong> Deprecated since v0.13.0. Consider using <code>class_serializer</code> and <code>class_deserializer</code>.</p>
 </blockquote>
-<p>If you want to use a custom (de)serializer at class level, you can pass your (de)serializer methods n <code>serializer</code> and <code>deserializer</code> class attributes.</p>
+<p>If you want to use a custom (de)serializer at class level, you can pass your (de)serializer methods in <code>serializer</code> and <code>deserializer</code> class attributes.</p>
 <pre><code class="language-python">def serializer(cls, o):
     if cls is datetime:
         return o.strftime('%d/%m/%y')
@@ -827,7 +863,7 @@ class Foo:
 </ol>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="field-attributes"><a class="header" href="#field-attributes">Field Attributes</a></h1>
-<p>Field attributes are options to customize (de)serialization behaviour for a field of a dataclass.</p>
+<p>Field attributes are options to customize (de)serialization behaviour for a field of a dataclass. Use them when you want different wire formats, optional behavior, or custom logic for specific fields.</p>
 <h2 id="attributes-offered-by-dataclasses-1"><a class="header" href="#attributes-offered-by-dataclasses-1">Attributes offered by dataclasses</a></h2>
 <h3 id="default--default_factory"><a class="header" href="#default--default_factory"><strong><code>default</code></strong> / <strong><code>default_factory</code></strong></a></h3>
 <p><code>default</code> and <code>default_factory</code> work as expected. If a field has <code>default</code> or <code>default_factory</code> attribute, it behaves like an optional field. If the field is found in the data, the value is fetched from the data and set in the deserialized object. If the field is not found in the data, the specified default value is set in the deserialized object.</p>
@@ -848,7 +884,7 @@ Here is an example specifying <code>rename</code> attribute in both <code>serde.
 <pre><code class="language-python">@serde.serde
 class Foo:
     a: str = serde.field(rename="A")
-    b: str = dataclasses.field(metadata={"serde_rename"="B"})
+    b: str = dataclasses.field(metadata={"serde_rename": "B"})
 </code></pre>
 <h3 id="rename"><a class="header" href="#rename"><strong><code>rename</code></strong></a></h3>
 <p><code>rename</code> is used to rename field name during (de)serialization. This attribute is convenient when you want to use a python keyword in field name. For example, this code renames field name <code>id</code> to <code>ID</code>.</p>
@@ -867,12 +903,15 @@ class Resource:
 </code></pre>
 <p>See <a href="https://github.com/yukinarit/pyserde/blob/main/examples/skip.py">examples/skip.py</a> for the complete example.</p>
 <h3 id="skip_if"><a class="header" href="#skip_if"><strong><code>skip_if</code></strong></a></h3>
-<p><code>skip</code> is used to skip (de)serialization of the field if the predicate function returns <code>True</code>.</p>
+<p><code>skip_if</code> is used to skip (de)serialization of the field if the predicate function returns <code>True</code>.</p>
 <pre><code class="language-python">@serde
 class World:
     buddy: str = field(default='', skip_if=lambda v: v == 'Pikachu')
 </code></pre>
 <p>See <a href="https://github.com/yukinarit/pyserde/blob/main/examples/skip.py">examples/skip.py</a> for the complete example.</p>
+<blockquote>
+<p><strong>NOTE:</strong> <code>skip</code>, <code>skip_if</code>, <code>skip_if_false</code>, and <code>skip_if_default</code> apply to both serialization and deserialization. Use them to keep wire formats compact or to ignore fields you only use locally.</p>
+</blockquote>
 <h3 id="skip_if_false"><a class="header" href="#skip_if_false"><strong><code>skip_if_false</code></strong></a></h3>
 <p><code>skip</code> is used to skip (de)serialization of the field if the field evaluates to <code>False</code>. For example, this code skip (de)serializing if <code>enemies</code> is empty.</p>
 <pre><code class="language-python">@serde
@@ -909,7 +948,9 @@ class Foo:
 </code></pre>
 <p>See <a href="https://github.com/yukinarit/pyserde/blob/main/examples/custom_field_serializer.py">examples/custom_field_serializer.py</a> for the complete example.</p>
 <h2 id="flatten"><a class="header" href="#flatten"><strong><code>flatten</code></strong></a></h2>
-<p>You can flatten the fields of the nested structure.</p>
+<p>The <code>flatten</code> attribute can be used in two ways:</p>
+<h3 id="flatten-nested-dataclass"><a class="header" href="#flatten-nested-dataclass">Flatten nested dataclass</a></h3>
+<p>You can flatten the fields of the nested dataclass structure.</p>
 <pre><code class="language-python">@serde
 class Bar:
     c: float
@@ -923,9 +964,34 @@ class Foo:
 </code></pre>
 <p>Bar’s c, d fields are deserialized as if they are defined in Foo. So you will get <code>{"a":10,"b":"foo","c":100.0,"d":true}</code> if you serialize <code>Foo</code> into JSON.</p>
 <p>See <a href="https://github.com/yukinarit/pyserde/blob/main/examples/flatten.py">examples/flatten.py</a> for complete example.</p>
+<h3 id="capture-additional-fields-with-dict"><a class="header" href="#capture-additional-fields-with-dict">Capture additional fields with dict</a></h3>
+<p>You can use <code>dict[str, Any]</code> or bare <code>dict</code> with <code>flatten=True</code> to capture all unknown/extra fields during deserialization, similar to Rust serde’s <code>#[serde(flatten)]</code> on <code>HashMap&lt;String, Value&gt;</code>.</p>
+<pre><code class="language-python">@serde
+class User:
+    id: int
+    name: str
+    extra: dict[str, Any] = field(flatten=True, default_factory=dict)
+
+# Deserialization - extra fields captured
+user = from_json(User, '{"id": 1, "name": "Alice", "role": "admin", "active": true}')
+# user.extra == {"role": "admin", "active": True}
+
+# Serialization - extra fields merged back
+user2 = User(id=2, name="Bob", extra={"department": "Engineering"})
+to_json(user2)  # '{"id": 2, "name": "Bob", "department": "Engineering"}'
+</code></pre>
+<p><strong>Key features:</strong></p>
+<ul>
+<li>During deserialization, any fields not matching declared fields are captured in the dict</li>
+<li>During serialization, the dict contents are merged into the output (declared fields take precedence)</li>
+<li>Works with all data formats (JSON, YAML, TOML, MessagePack, etc.)</li>
+<li>Can be combined with flattened dataclass fields</li>
+</ul>
+<p>See <a href="https://github.com/yukinarit/pyserde/blob/main/examples/flatten_dict.py">examples/flatten_dict.py</a> for complete example.</p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="union-representation"><a class="header" href="#union-representation">Union Representation</a></h1>
-<p><code>pyserde</code>&gt;=0.7 offers attributes to control how Union is (de)serialized. This concept is the very same as the one in <a href="https://serde.rs/enum-representations.html">serde-rs</a>. Note these representations only apply to the dataclass, non dataclass objects are (de)serialized with <code>Untagged</code> always.</p>
+<p><code>pyserde</code>&gt;=0.7 offers attributes to control how Union is (de)serialized. This concept is the very same as the one in <a href="https://serde.rs/enum-representations.html">serde-rs</a>. Note these representations only apply to the dataclass; non dataclass objects are (de)serialized with <code>Untagged</code> always.</p>
+<p>Use tagged unions whenever your Union members can be ambiguous (same field names/types), otherwise deserialization may choose the wrong type.</p>
 <h2 id="untagged"><a class="header" href="#untagged"><code>Untagged</code></a></h2>
 <p>This is the default Union representation for pyserde&lt;0.7. Given these dataclasses,</p>
 <pre><code class="language-python">@serde
@@ -1037,6 +1103,7 @@ print(from_json(Untagged(Union[Foo, Bar]), s))
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="type-checking"><a class="header" href="#type-checking">Type Checking</a></h1>
 <p>pyserde offers runtime type checking since v0.9. It was completely reworked at v0.14 using <a href="https://github.com/beartype/beartype">beartype</a> and it became more sophisticated and reliable. It is highly recommended to enable type checking always as it helps writing type-safe and robust programs.</p>
+<p>If you need to accept untrusted input, prefer <code>strict</code> or <code>coerce</code> so invalid data fails early.</p>
 <h2 id="strict"><a class="header" href="#strict"><code>strict</code></a></h2>
 <p>Strict type checking is to check every field value against the declared type during (de)serialization and object construction. This is the default type check mode since v0.14. What will happen with this mode is if you declare a class with <code>@serde</code> decorator without any class attributes, <code>@serde(type_check=strict)</code> is assumed and strict type checking is enabled.</p>
 <pre><code class="language-python">@serde
@@ -1065,21 +1132,20 @@ class Foo:
 </ol>
 <p>The following code mutates the property “s” at the bottom. beartype can not detect this case.</p>
 <pre><code class="language-python">@serde
-class Foo
+class Foo:
     s: str
 
 f = Foo("foo")
 f.s = 100
 </code></pre>
 <ol start="2">
-<li>beartype can not validate every one of elements in containers. This is not a bug. This is desgin principle of beartype. See [Does beartype actually do anything?](https://beartype.readthedocs.io/en/latest/faq/#faq-o1].</li>
+<li>beartype can not validate every one of elements in containers. This is not a bug. This is desgin principle of beartype. See <a href="https://beartype.readthedocs.io/en/latest/faq/#faq-o1">Does beartype actually do anything?</a>.</li>
 </ol>
-<pre><code></code></pre>
 </blockquote>
 <h2 id="coerce"><a class="header" href="#coerce"><code>coerce</code></a></h2>
 <p>Type coercing automatically converts a value into the declared type during (de)serialization. If the value is incompatible e.g. value is “foo” and type is int, pyserde raises an <code>SerdeError</code>.</p>
 <pre><code class="language-python">@serde(type_check=coerce)
-class Foo
+class Foo:
     s: str
 
 foo = Foo(10)
@@ -1090,7 +1156,7 @@ print(to_json(foo))
 <h2 id="disabled"><a class="header" href="#disabled"><code>disabled</code></a></h2>
 <p>This is the default behavior until pyserde v0.8.3 and v0.9.x. No type coercion or checks are run. Even if a user puts a wrong value, pyserde doesn’t complain anything.</p>
 <pre><code class="language-python">@serde
-class Foo
+class Foo:
     s: str
 
 foo = Foo(10)
@@ -1100,6 +1166,7 @@ print(to_json(foo))
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="extending-pyserde"><a class="header" href="#extending-pyserde">Extending pyserde</a></h1>
 <p>pyserde offers three ways to extend pyserde to support non builtin types.</p>
+<p>Choose field-level serializers for one-off fields, class serializers for reusable types, and global serializers to apply extensions project-wide.</p>
 <h2 id="custom-field-deserializer"><a class="header" href="#custom-field-deserializer">Custom field (de)serializer</a></h2>
 <p>See <a href="#serializerdeserializer">custom field serializer</a>.</p>
 <blockquote>
@@ -1178,6 +1245,7 @@ Registered (de)serializers are stacked in the memory. A (de)serializer can be ov
 <p>pyserde provides <code>inspect</code> submodule that works as commandline:</p>
 <pre><code>python -m serde.inspect &lt;PATH_TO_FILE&gt; &lt;CLASS&gt;
 </code></pre>
+<p>This is useful when you want to understand generated code, debug custom serializers, or confirm how pyserde handles a specific type.</p>
 <p>e.g. in pyserde project</p>
 <pre><code>cd pyserde
 uv sync

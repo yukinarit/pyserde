@@ -35,7 +35,7 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-fe211702.js";
+            window.path_to_searchindex_js = "searchindex-2876a135.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc-65ba6fac.js"></script>
@@ -182,10 +182,13 @@
                     <main>
                         <h1 id="data-formats"><a class="header" href="#data-formats">Data Formats</a></h1>
 <p>pyserde supports several data formats for serialization and deserialization, including <code>dict</code>, <code>tuple</code>, <code>JSON</code>, <code>YAML</code>, <code>TOML</code>, <code>MsgPack</code>, and <code>Pickle</code>. Each API can take additional keyword arguments, which are forwarded to the underlying packages used by pyserde.</p>
-<p>e.g. If you want to preserve the field order in YAML, you can pass <code>sort_key=True</code> in <code>serde.yaml.to_yaml</code></p>
+<p>Use the format-specific modules (e.g. <code>serde.json</code>, <code>serde.yaml</code>) when you want to control serialization options. For example, if you want to preserve the field order in YAML, you can pass <code>sort_key=True</code> in <code>serde.yaml.to_yaml</code>.</p>
 <pre><code class="language-python">serde.yaml.to_yaml(foo, sort_key=True)
 </code></pre>
 <p><code>sort_key=True</code> will be passed in the <a href="https://github.com/yukinarit/pyserde/blob/a9f44d52d109144a4c3bb93965f831e91d13960b/serde/yaml.py#L18">yaml.safedump</a></p>
+<blockquote>
+<p><strong>NOTE:</strong> JSON, YAML, TOML, and MsgPack formats require their matching extras. <code>dict</code>, <code>tuple</code>, and Pickle work without optional dependencies.</p>
+</blockquote>
 <h2 id="dict"><a class="header" href="#dict">dict</a></h2>
 <pre><code class="language-python">&gt;&gt;&gt; from serde import to_dict, from_dict
 
@@ -215,6 +218,7 @@ Foo(i=10, s='foo', f=100.0, b=True)
 &gt;&gt;&gt; from_json(Foo, '{"i": 10, "s": "foo", "f": 100.0, "b": true}')
 Foo(i=10, s='foo', f=100.0, b=True)
 </code></pre>
+<p>If you enable the <code>orjson</code> extra, pyserde can use it under the hood for faster JSON encoding/decoding.</p>
 <p>See <a href="https://yukinarit.github.io/pyserde/api/serde/json.html#to_json">serde.json.to_json</a> / <a href="https://yukinarit.github.io/pyserde/api/serde/json.html#from_json">serde.json.from_json</a> for more information.</p>
 <h2 id="yaml"><a class="header" href="#yaml">Yaml</a></h2>
 <pre><code class="language-python">&gt;&gt;&gt; from serde.yaml import from_yaml, to_yaml
@@ -265,7 +269,7 @@ Foo(i=10, s='foo', f=100.0, b=True)
 </code></pre>
 <p>See <a href="https://yukinarit.github.io/pyserde/api/serde/pickle.html#to_pickle">serde.pickle.to_pickle</a> / <a href="https://yukinarit.github.io/pyserde/api/serde/pickle.html#from_pickle">serde.pickle.from_pickle</a> for more information.</p>
 <h2 id="needs-a-new-data-format-support"><a class="header" href="#needs-a-new-data-format-support">Needs a new data format support?</a></h2>
-<p>We don’t plan to supprot a data format such as XML to keep pyserde as simple as possible. If you need a new data format support, we recommend to create a separate python package. If the data format is interchangable to dict or tuple, implementing the serialize/desrialize API is not that difficult. See <a href="https://github.com/yukinarit/pyserde/blob/main/serde/yaml.py">YAML’s implementation</a> to know how to implement.</p>
+<p>We don’t plan to support a data format such as XML to keep pyserde as simple as possible. If you need a new data format support, we recommend to create a separate python package. If the data format is interchangable to dict or tuple, implementing the serialize/deserialize API is not that difficult. See <a href="https://github.com/yukinarit/pyserde/blob/main/serde/yaml.py">YAML’s implementation</a> to know how to implement.</p>
 
                     </main>
 

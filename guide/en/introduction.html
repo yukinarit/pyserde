@@ -35,7 +35,7 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-fe211702.js";
+            window.path_to_searchindex_js = "searchindex-2876a135.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc-65ba6fac.js"></script>
@@ -182,6 +182,13 @@
                     <main>
                         <h1 id="introduction"><a class="header" href="#introduction">Introduction</a></h1>
 <p><code>pyserde</code> is a simple yet powerful serialization library on top of <a href="https://docs.python.org/3/library/dataclasses.html">dataclasses</a>. It allows you to convert Python objects to and from JSON, YAML, and other formats easily and efficiently.</p>
+<p>pyserde focuses on dataclass-first workflows and keeps runtime overhead low by generating serializers when classes are loaded.</p>
+<p>Highlights:</p>
+<ul>
+<li>Multiple formats (<code>dict</code>, <code>tuple</code>, JSON, YAML, TOML, MsgPack, Pickle)</li>
+<li>Rich type support (Optional, Union, Literals, enums, datetime, numpy, etc.)</li>
+<li>Runtime type checking and extensibility hooks</li>
+</ul>
 <p>Declare your class with <code>@serde</code> decorator and annotate fields using <a href="https://peps.python.org/pep-0484/">PEP484</a> as below.</p>
 <pre><code class="language-python">from serde import serde
 
@@ -200,6 +207,13 @@ class Foo:
 <p>You can deserialize JSON into <code>Foo</code> object.</p>
 <pre><code class="language-python">&gt;&gt;&gt; from serde.json import from_json
 &gt;&gt;&gt; from_json(Foo, '{"i": 10, "s": "foo", "f": 100.0, "b": true}')
+Foo(i=10, s='foo', f=100.0, b=True)
+</code></pre>
+<p>pyserde also provides in-memory formats like <code>dict</code> and <code>tuple</code>, plus YAML, TOML, MsgPack, and Pickle when their extras are installed.</p>
+<pre><code class="language-python">&gt;&gt;&gt; from serde import to_dict, from_dict
+&gt;&gt;&gt; to_dict(Foo(i=10, s='foo', f=100.0, b=True))
+{"i": 10, "s": "foo", "f": 100.0, "b": True}
+&gt;&gt;&gt; from_dict(Foo, {"i": 10, "s": "foo", "f": 100.0, "b": True})
 Foo(i=10, s='foo', f=100.0, b=True)
 </code></pre>
 <h2 id="next-steps"><a class="header" href="#next-steps">Next Steps</a></h2>

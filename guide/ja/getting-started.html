@@ -35,7 +35,7 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-7055e4da.js";
+            window.path_to_searchindex_js = "searchindex-e476e3ca.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc-65ba6fac.js"></script>
@@ -183,6 +183,7 @@
                         <h1 id="getting-started"><a class="header" href="#getting-started">Getting Started</a></h1>
 <h2 id="インストール"><a class="header" href="#インストール">インストール</a></h2>
 <p>PyPIからpyserdeをインストールしてください。pyserdeにはPython&gt;=3.10が必要です。</p>
+<p>より高速なJSON処理が必要な場合は、<code>orjson</code> をインストールして <code>orjson</code> エクストラを利用できます。</p>
 <pre><code>pip install pyserde
 </code></pre>
 <p>uvを使用している場合は、以下のコマンドを実行してください。</p>
@@ -214,6 +215,9 @@
 <li><code>orjson</code>：<a href="https://github.com/ijl/orjson">orjson</a> をインストール</li>
 <li><code>sqlalchemy</code>：<a href="https://github.com/sqlalchemy/sqlalchemy">sqlalchemy</a> をインストール</li>
 </ul>
+<blockquote>
+<p><strong>注記:</strong> エクストラは追加フォーマットや追加型のサポートを有効にします。必要なものだけを組み合わせてインストールできます。</p>
+</blockquote>
 <h2 id="最初のpyserdeクラスを定義"><a class="header" href="#最初のpyserdeクラスを定義">最初のpyserdeクラスを定義</a></h2>
 <p>pyserdeの<code>@serde</code>デコレータを使用してクラスを定義します。<br>モジュール名が <code>pyserde</code> ではなく <code>serde</code> であることに注意してください。<br><code>pyserde</code>は標準ライブラリの<code>dataclasses</code>モジュールに大きく依存しています。<br>そのため、dataclassに慣れていない場合はまず<a href="https://docs.python.org/3/library/dataclasses.html">dataclassesのドキュメント</a>を読むことをおすすめします。</p>
 <pre><code class="language-python">from serde import serde
@@ -261,7 +265,18 @@ print(to_json(f))
 <pre><code class="language-python">s = '{"i": 10, "s": "foo", "f": 100.0, "b": true}'
 print(from_json(Foo, s))
 </code></pre>
+<p>ファイルやネットワーク送信前にデータを加工したい場合、Pythonの<code>dict</code>としてシリアライズすることもできます。</p>
+<pre><code class="language-python">from serde import to_dict, from_dict
+
+payload = to_dict(f)
+# 例: 送信前にフィールドを追加する
+payload["source"] = "cli"
+print(from_dict(Foo, payload))
+</code></pre>
 <p>以上です！<br>pyserdeには他にも多くの機能があります。興味があれば、残りのドキュメントをお読みください。</p>
+<blockquote>
+<p><strong>注記:</strong> YAML/TOML/MsgPackを使う場合は、上記の該当エクストラをインストールしてください。</p>
+</blockquote>
 <blockquote>
 <p>💡 ヒント：どのタイプチェッカーを使用すべきか？<br>pyserdeは<a href="https://peps.python.org/pep-0681/">PEP681 dataclass_transform</a>に依存しています。<br>2024年1月現在、<a href="https://github.com/python/mypy">mypy</a>はdataclass_transformを完全にはサポートしていません。<br>私の個人的なおすすめは<a href="https://github.com/microsoft/pyright">pyright</a>です。</p>
 </blockquote>

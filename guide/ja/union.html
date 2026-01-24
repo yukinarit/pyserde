@@ -35,7 +35,7 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-7055e4da.js";
+            window.path_to_searchindex_js = "searchindex-e476e3ca.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc-65ba6fac.js"></script>
@@ -183,6 +183,7 @@
                         <h1 id="union-representation"><a class="header" href="#union-representation">Union Representation</a></h1>
 <p><code>pyserde&gt;=0.7</code> では、Union が（デ）シリアライズされる方法を制御するための属性が提供されています。この概念は <a href="https://serde.rs/enum-representations.html">serde-rs</a> にあるものと同じです。</p>
 <p>これらの表現は dataclass にのみ適用され、dataclassではないオブジェクトは常に <code>Untagged</code> で（デ）シリアライズされます。</p>
+<p>Union内の型が曖昧になり得る場合（フィールドが似ている場合など）は、タグ付き表現を使うと安全です。</p>
 <h2 id="untagged"><a class="header" href="#untagged"><code>Untagged</code></a></h2>
 <p>以下は、 <code>pyserde&lt;0.7</code> におけるデフォルトの Union 表現です。dataclass が与えられた場合を例に上げます。</p>
 <pre><code class="language-python">@serde
@@ -282,7 +283,7 @@ print(from_json(InternalTagging("type", Union[Foo, Bar]), s))
 </li>
 <li>
 <p>AdjacentTagging</p>
-<pre><code class="language-python">from serde
+<pre><code class="language-python">from serde import AdjacentTagging
 
 s = to_json(bar, cls=AdjacentTagging("type", "content", Union[Foo, Bar]))
 print(s)

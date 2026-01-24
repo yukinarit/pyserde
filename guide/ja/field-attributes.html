@@ -35,7 +35,7 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-7055e4da.js";
+            window.path_to_searchindex_js = "searchindex-e476e3ca.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc-65ba6fac.js"></script>
@@ -181,7 +181,7 @@
                 <div id="mdbook-content" class="content">
                     <main>
                         <h1 id="field-attributes"><a class="header" href="#field-attributes">Field Attributes</a></h1>
-<p>フィールド属性は、データクラスのフィールドの（デ）シリアライズ動作をカスタマイズするためのオプションです。</p>
+<p>フィールド属性は、データクラスのフィールドの（デ）シリアライズ動作をカスタマイズするためのオプションです。ワイヤ形式の調整や、特定のフィールドだけ特別扱いしたい場合に使います。</p>
 <h2 id="dataclassesによって提供される属性"><a class="header" href="#dataclassesによって提供される属性">dataclassesによって提供される属性</a></h2>
 <h3 id="default-と-default_factory"><a class="header" href="#default-と-default_factory"><strong><code>default</code></strong> と <strong><code>default_factory</code></strong></a></h3>
 <p>dataclassesの <code>default</code> と <code>default_factory</code> は期待通りに動作します。<br>フィールドが <code>default</code> または <code>default_factory</code> 属性を持つ場合、そのフィールドはオプショナルフィールドのように振る舞います。<br>フィールドがデータ内に存在する場合、当該フィールドの値がデシリアライズされたオブジェクトに設定されます。<br>フィールドがデータ内に存在しない場合、指定されたデフォルト値がデシリアライズされたオブジェクトに設定されます。</p>
@@ -202,7 +202,7 @@ print(from_dict(Foo, {}))  # Foo(a=10, b=10, c={}) を出力
 <pre><code class="language-python">@serde.serde
 class Foo:
     a: str = serde.field(rename="A")
-    b: str = dataclasses.field(metadata={"serde_rename"="B"})
+    b: str = dataclasses.field(metadata={"serde_rename": "B"})
 </code></pre>
 <h3 id="rename"><a class="header" href="#rename"><strong><code>rename</code></strong></a></h3>
 <p><code>rename</code> は（デ）シリアライズ中にフィールド名を変更するために使用されます。<br>この属性は、フィールド名にPythonのキーワード（予約語）を使用したい場合に便利です。</p>
@@ -228,6 +228,9 @@ class World:
     buddy: str = field(default='', skip_if=lambda v: v == 'Pikachu')
 </code></pre>
 <p>完全な例については、<a href="https://github.com/yukinarit/pyserde/blob/main/examples/skip.py">examples/skip.py</a>を参照してください。</p>
+<blockquote>
+<p><strong>注記:</strong> <code>skip</code>、<code>skip_if</code>、<code>skip_if_false</code>、<code>skip_if_default</code> はシリアライズ/デシリアライズの両方に適用されます。出力をコンパクトにしたい場合やローカル専用のフィールドを無視したい場合に便利です。</p>
+</blockquote>
 <h3 id="skip_if_false"><a class="header" href="#skip_if_false"><strong><code>skip_if_false</code></strong></a></h3>
 <p><code>skip_if_false</code> はフィールドが <code>False</code> と評価される場合にフィールドの（デ）シリアライズをスキップします。</p>
 <p>例えば、以下のコードは <code>enemies</code> が空であれば（デ）シリアライズをスキップします。</p>
@@ -267,7 +270,9 @@ class Foo:
 </code></pre>
 <p>完全な例については、<a href="https://github.com/yukinarit/pyserde/blob/main/examples/custom_field_serializer.py">examples/custom_field_serializer.py</a>を参照してください。</p>
 <h2 id="flatten"><a class="header" href="#flatten"><strong><code>flatten</code></strong></a></h2>
-<p>ネストされた構造のフィールドをフラットにできます。</p>
+<p><code>flatten</code> 属性は2つの方法で使用できます。</p>
+<h3 id="ネストされたdataclassのフラット化"><a class="header" href="#ネストされたdataclassのフラット化">ネストされたdataclassのフラット化</a></h3>
+<p>ネストされたdataclass構造のフィールドをフラットにできます。</p>
 <pre><code class="language-python">@serde
 class Bar:
     c: float
@@ -279,8 +284,33 @@ class Foo:
     b: str
     bar: Bar = field(flatten=True)
 </code></pre>
-<p>上記の例では、<code>Bar</code> の <code>c</code> および <code>d</code> フィールドが <code>Foo</code> で定義されているかのようにデシリアライズされます。<br><code>Foo</code> をJSON形式にシリアライズすると <code>{"a":10,"b":"foo","c":100.0,"d":true}</code> を取得します。</p>
+<p>上記の例では、<code>Bar</code> の <code>c</code> および <code>d</code> フィールドが <code>Foo</code> で定義されているかのようにデシリアライズされます。
+<code>Foo</code> をJSON形式にシリアライズすると <code>{"a":10,"b":"foo","c":100.0,"d":true}</code> を取得します。</p>
 <p>完全な例については、<a href="https://github.com/yukinarit/pyserde/blob/main/examples/flatten.py">examples/flatten.py</a>を参照してください。</p>
+<h3 id="dictで追加フィールドをキャプチャ"><a class="header" href="#dictで追加フィールドをキャプチャ">dictで追加フィールドをキャプチャ</a></h3>
+<p><code>dict[str, Any]</code> または <code>dict</code> と <code>flatten=True</code> を使用して、デシリアライズ時にすべての未知/追加フィールドをキャプチャできます。Rust serdeの <code>HashMap&lt;String, Value&gt;</code> に対する <code>#[serde(flatten)]</code> と同様の機能です。</p>
+<pre><code class="language-python">@serde
+class User:
+    id: int
+    name: str
+    extra: dict[str, Any] = field(flatten=True, default_factory=dict)
+
+# デシリアライズ - 追加フィールドがキャプチャされる
+user = from_json(User, '{"id": 1, "name": "Alice", "role": "admin", "active": true}')
+# user.extra == {"role": "admin", "active": True}
+
+# シリアライズ - 追加フィールドがマージされる
+user2 = User(id=2, name="Bob", extra={"department": "Engineering"})
+to_json(user2)  # '{"id": 2, "name": "Bob", "department": "Engineering"}'
+</code></pre>
+<p><strong>主な機能:</strong></p>
+<ul>
+<li>デシリアライズ時、宣言されたフィールドに一致しないフィールドがdictにキャプチャされます</li>
+<li>シリアライズ時、dictの内容が出力にマージされます（宣言されたフィールドが優先されます）</li>
+<li>すべてのデータ形式（JSON、YAML、TOML、MessagePackなど）で動作します</li>
+<li>フラット化されたdataclassフィールドと組み合わせることができます</li>
+</ul>
+<p>完全な例については、<a href="https://github.com/yukinarit/pyserde/blob/main/examples/flatten_dict.py">examples/flatten_dict.py</a>を参照してください。</p>
 
                     </main>
 

@@ -35,7 +35,7 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-7055e4da.js";
+            window.path_to_searchindex_js = "searchindex-e476e3ca.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc-65ba6fac.js"></script>
@@ -182,10 +182,13 @@
                     <main>
                         <h1 id="data-formats"><a class="header" href="#data-formats">Data Formats</a></h1>
 <p>pyserdeは、<code>dict</code>、<code>tuple</code>、<code>JSON</code>、<code>YAML</code>、<code>TOML</code>、<code>MsgPack</code>、<code>Pickle</code> などのさまざまなデータ形式をシリアライズおよびデシリアライズできます。<br>各APIは追加のキーワード引数を取ることができ、これらの引数はpyserdeで使用されるベースパッケージへと渡されます。</p>
-<p>例えば、YAMLでフィールドの順序を保持したい場合、<code>serde.yaml.to_yaml</code>に<code>sort_key=True</code>を渡すことができます。</p>
+<p>形式ごとの設定をしたい場合は、<code>serde.json</code> や <code>serde.yaml</code> などのモジュールを使ってください。例えば、YAMLでフィールドの順序を保持したい場合、<code>serde.yaml.to_yaml</code>に<code>sort_key=True</code>を渡すことができます。</p>
 <pre><code class="language-python">serde.yaml.to_yaml(foo, sort_key=True)
 </code></pre>
 <p><code>sort_key=True</code>は<a href="https://github.com/yukinarit/pyserde/blob/a9f44d52d109144a4c3bb93965f831e91d13960b/serde/yaml.py#L18">yaml.safedump</a>に渡されます。</p>
+<blockquote>
+<p><strong>注記:</strong> JSON/YAML/TOML/MsgPackは対応するエクストラのインストールが必要です。<code>dict</code>、<code>tuple</code>、Pickleは追加依存なしで利用できます。</p>
+</blockquote>
 <h2 id="dict"><a class="header" href="#dict">dict</a></h2>
 <pre><code class="language-python">&gt;&gt;&gt; from serde import to_dict, from_dict
 
@@ -215,6 +218,7 @@ Foo(i=10, s='foo', f=100.0, b=True)
 &gt;&gt;&gt; from_json(Foo, '{"i": 10, "s": "foo", "f": 100.0, "b": true}')
 Foo(i=10, s='foo', f=100.0, b=True)
 </code></pre>
+<p><code>orjson</code> エクストラを有効にすると、pyserdeは内部的に高速なJSONエンコード/デコードを使用できます。</p>
 <p>詳細は<a href="https://yukinarit.github.io/pyserde/api/serde/json.html#to_json">serde.json.to_json</a> / <a href="https://yukinarit.github.io/pyserde/api/serde/json.html#from_json">serde.json.from_json</a>をご覧ください。</p>
 <h2 id="yaml"><a class="header" href="#yaml">Yaml</a></h2>
 <pre><code class="language-python">&gt;&gt;&gt; from serde.yaml import from_yaml, to_yaml
@@ -230,7 +234,7 @@ Foo(i=10, s='foo', f=100.0, b=True)
 </code></pre>
 <p>詳細は<a href="https://yukinarit.github.io/pyserde/api/serde/yaml.html#to_yaml">serde.yaml.to_yaml</a> / <a href="https://yukinarit.github.io/pyserde/api/serde/yaml.html#from_yaml">serde.yaml.from_yaml</a>をご覧ください。</p>
 <h2 id="toml"><a class="header" href="#toml">Toml</a></h2>
-<pre><code class="language-python">&gt;&gt;&gt; from serde.toml from_toml, to_toml
+<pre><code class="language-python">&gt;&gt;&gt; from serde.toml import from_toml, to_toml
 
 &gt;&gt;&gt; to_toml(Foo(i=10, s='foo', f=100.0, b=True))
 i = 10
@@ -238,9 +242,7 @@ s = "foo"
 f = 100.0
 b = true
 
-&gt;&gt;&gt; from_toml(Foo, 'i = 10\ns = "foo"\nf = 100.0\n
-
-b = true')
+&gt;&gt;&gt; from_toml(Foo, 'i = 10\ns = "foo"\nf = 100.0\nb = true')
 Foo(i=10, s='foo', f=100.0, b=True)
 </code></pre>
 <p>詳細は<a href="https://yukinarit.github.io/pyserde/api/serde/toml.html#to_toml">serde.toml.to_toml</a> / <a href="https://yukinarit.github.io/pyserde/api/serde/toml.html#from_toml">serde.toml.from_toml</a>をご覧ください。</p>

@@ -35,7 +35,7 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-fe211702.js";
+            window.path_to_searchindex_js = "searchindex-2876a135.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc-65ba6fac.js"></script>
@@ -182,6 +182,7 @@
                     <main>
                         <h1 id="type-checking"><a class="header" href="#type-checking">Type Checking</a></h1>
 <p>pyserde offers runtime type checking since v0.9. It was completely reworked at v0.14 using <a href="https://github.com/beartype/beartype">beartype</a> and it became more sophisticated and reliable. It is highly recommended to enable type checking always as it helps writing type-safe and robust programs.</p>
+<p>If you need to accept untrusted input, prefer <code>strict</code> or <code>coerce</code> so invalid data fails early.</p>
 <h2 id="strict"><a class="header" href="#strict"><code>strict</code></a></h2>
 <p>Strict type checking is to check every field value against the declared type during (de)serialization and object construction. This is the default type check mode since v0.14. What will happen with this mode is if you declare a class with <code>@serde</code> decorator without any class attributes, <code>@serde(type_check=strict)</code> is assumed and strict type checking is enabled.</p>
 <pre><code class="language-python">@serde
@@ -210,21 +211,20 @@ class Foo:
 </ol>
 <p>The following code mutates the property “s” at the bottom. beartype can not detect this case.</p>
 <pre><code class="language-python">@serde
-class Foo
+class Foo:
     s: str
 
 f = Foo("foo")
 f.s = 100
 </code></pre>
 <ol start="2">
-<li>beartype can not validate every one of elements in containers. This is not a bug. This is desgin principle of beartype. See [Does beartype actually do anything?](https://beartype.readthedocs.io/en/latest/faq/#faq-o1].</li>
+<li>beartype can not validate every one of elements in containers. This is not a bug. This is desgin principle of beartype. See <a href="https://beartype.readthedocs.io/en/latest/faq/#faq-o1">Does beartype actually do anything?</a>.</li>
 </ol>
-<pre><code></code></pre>
 </blockquote>
 <h2 id="coerce"><a class="header" href="#coerce"><code>coerce</code></a></h2>
 <p>Type coercing automatically converts a value into the declared type during (de)serialization. If the value is incompatible e.g. value is “foo” and type is int, pyserde raises an <code>SerdeError</code>.</p>
 <pre><code class="language-python">@serde(type_check=coerce)
-class Foo
+class Foo:
     s: str
 
 foo = Foo(10)
@@ -235,7 +235,7 @@ print(to_json(foo))
 <h2 id="disabled"><a class="header" href="#disabled"><code>disabled</code></a></h2>
 <p>This is the default behavior until pyserde v0.8.3 and v0.9.x. No type coercion or checks are run. Even if a user puts a wrong value, pyserde doesn’t complain anything.</p>
 <pre><code class="language-python">@serde
-class Foo
+class Foo:
     s: str
 
 foo = Foo(10)
