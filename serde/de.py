@@ -1194,7 +1194,7 @@ def to_iter_arg(f: DeField[T], *args: Any, **kwargs: Any) -> DeField[T]:
 
 
 def renderable(f: DeField[Any]) -> bool:
-    return f.init
+    return f.init and not f.skip
 
 
 jinja2_env = jinja2.Environment(
