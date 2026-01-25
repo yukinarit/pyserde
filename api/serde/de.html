@@ -1263,7 +1263,7 @@ and functions associated with deserialization.</p>
 </span><span id="L-1194"><a href="#L-1194"><span class="linenos">1194</span></a>
 </span><span id="L-1195"><a href="#L-1195"><span class="linenos">1195</span></a>
 </span><span id="L-1196"><a href="#L-1196"><span class="linenos">1196</span></a><span class="k">def</span><span class="w"> </span><span class="nf">renderable</span><span class="p">(</span><span class="n">f</span><span class="p">:</span> <span class="n">DeField</span><span class="p">[</span><span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-</span><span id="L-1197"><a href="#L-1197"><span class="linenos">1197</span></a>    <span class="k">return</span> <span class="n">f</span><span class="o">.</span><span class="n">init</span>
+</span><span id="L-1197"><a href="#L-1197"><span class="linenos">1197</span></a>    <span class="k">return</span> <span class="n">f</span><span class="o">.</span><span class="n">init</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">f</span><span class="o">.</span><span class="n">skip</span>
 </span><span id="L-1198"><a href="#L-1198"><span class="linenos">1198</span></a>
 </span><span id="L-1199"><a href="#L-1199"><span class="linenos">1199</span></a>
 </span><span id="L-1200"><a href="#L-1200"><span class="linenos">1200</span></a><span class="n">jinja2_env</span> <span class="o">=</span> <span class="n">jinja2</span><span class="o">.</span><span class="n">Environment</span><span class="p">(</span>

@@ -669,24 +669,24 @@ and functions associated with serialization.</p>
 </span><span id="L-600"><a href="#L-600"><span class="linenos"> 600</span></a>
 </span><span id="L-601"><a href="#L-601"><span class="linenos"> 601</span></a><span class="s2">  res = </span><span class="si">{}</span>
 </span><span id="L-602"><a href="#L-602"><span class="linenos"> 602</span></a><span class="s2">  {</span><span class="si">% f</span><span class="s2">or f in fields -%}</span>
-</span><span id="L-603"><a href="#L-603"><span class="linenos"> 603</span></a><span class="s2">  subres = {{rvalue(f)}}</span>
-</span><span id="L-604"><a href="#L-604"><span class="linenos"> 604</span></a><span class="s2">  {</span><span class="si">% i</span><span class="s2">f not f.skip -%}</span>
-</span><span id="L-605"><a href="#L-605"><span class="linenos"> 605</span></a><span class="s2">    {</span><span class="si">% i</span><span class="s2">f lvalue(f) == &#39;__FLATTEN_DICT__&#39; -%}</span>
+</span><span id="L-603"><a href="#L-603"><span class="linenos"> 603</span></a><span class="s2">  {</span><span class="si">% i</span><span class="s2">f not f.skip -%}</span>
+</span><span id="L-604"><a href="#L-604"><span class="linenos"> 604</span></a><span class="s2">  subres = {{rvalue(f)}}</span>
+</span><span id="L-605"><a href="#L-605"><span class="linenos"> 605</span></a><span class="s2">  {</span><span class="si">% i</span><span class="s2">f lvalue(f) == &#39;__FLATTEN_DICT__&#39; -%}</span>
 </span><span id="L-606"><a href="#L-606"><span class="linenos"> 606</span></a><span class="s2">  # Merge flattened dict into result (declared fields take precedence)</span>
 </span><span id="L-607"><a href="#L-607"><span class="linenos"> 607</span></a><span class="s2">  if subres:</span>
 </span><span id="L-608"><a href="#L-608"><span class="linenos"> 608</span></a><span class="s2">    for __k, __v in subres.items():</span>
 </span><span id="L-609"><a href="#L-609"><span class="linenos"> 609</span></a><span class="s2">      if __k not in res:</span>
 </span><span id="L-610"><a href="#L-610"><span class="linenos"> 610</span></a><span class="s2">        res[__k] = __v</span>
-</span><span id="L-611"><a href="#L-611"><span class="linenos"> 611</span></a><span class="s2">    {</span><span class="si">% e</span><span class="s2">lif f.skip_if -%}</span>
+</span><span id="L-611"><a href="#L-611"><span class="linenos"> 611</span></a><span class="s2">  {</span><span class="si">% e</span><span class="s2">lif f.skip_if -%}</span>
 </span><span id="L-612"><a href="#L-612"><span class="linenos"> 612</span></a><span class="s2">  if not {{f.skip_if.name}}(subres):</span>
 </span><span id="L-613"><a href="#L-613"><span class="linenos"> 613</span></a><span class="s2">    {{lvalue(f)}} = subres</span>
-</span><span id="L-614"><a href="#L-614"><span class="linenos"> 614</span></a><span class="s2">    {</span><span class="si">% e</span><span class="s2">lse -%}</span>
+</span><span id="L-614"><a href="#L-614"><span class="linenos"> 614</span></a><span class="s2">  {</span><span class="si">% e</span><span class="s2">lse -%}</span>
 </span><span id="L-615"><a href="#L-615"><span class="linenos"> 615</span></a><span class="s2">  if skip_none:</span>
 </span><span id="L-616"><a href="#L-616"><span class="linenos"> 616</span></a><span class="s2">    if subres is not None:</span>
 </span><span id="L-617"><a href="#L-617"><span class="linenos"> 617</span></a><span class="s2">      {{lvalue(f)}} = subres</span>
 </span><span id="L-618"><a href="#L-618"><span class="linenos"> 618</span></a><span class="s2">  else:</span>
 </span><span id="L-619"><a href="#L-619"><span class="linenos"> 619</span></a><span class="s2">    {{lvalue(f)}} = subres</span>
-</span><span id="L-620"><a href="#L-620"><span class="linenos"> 620</span></a><span class="s2">    {</span><span class="si">% e</span><span class="s2">ndif -%}</span>
+</span><span id="L-620"><a href="#L-620"><span class="linenos"> 620</span></a><span class="s2">  {</span><span class="si">% e</span><span class="s2">ndif -%}</span>
 </span><span id="L-621"><a href="#L-621"><span class="linenos"> 621</span></a><span class="s2">  {</span><span class="si">% e</span><span class="s2">ndif %}</span>
 </span><span id="L-622"><a href="#L-622"><span class="linenos"> 622</span></a>
 </span><span id="L-623"><a href="#L-623"><span class="linenos"> 623</span></a><span class="s2">  {</span><span class="si">% e</span><span class="s2">ndfor -%}</span>
