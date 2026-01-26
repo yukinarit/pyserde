@@ -37,7 +37,7 @@ yaml = ["pyyaml"]
 numpy = [
   "numpy>1.22.0,<3.0.0",
 ]
-jaxtyping = ["jaxtyping<0.3.0"]
+jaxtyping = ["jaxtyping<0.4.0"]
 orjson = ["orjson"]
 sqlalchemy = ["sqlalchemy>2"]
 all = [
@@ -46,7 +46,7 @@ all = [
   "tomli-w",
   "pyyaml",
   "numpy>1.22.0,<3.0.0",
-  "jaxtyping<0.3.0",
+  "jaxtyping<0.4.0",
   "orjson",
   "sqlalchemy>2",
 ]
@@ -79,7 +79,7 @@ dev = [
   "msgpack-types>=0.5,<0.6",
   "envclasses>=0.3.1,<0.4",
   "jedi",
-  "jaxtyping<0.3.0",
+  "jaxtyping<0.4.0",
 ]
 
 [build-system]
