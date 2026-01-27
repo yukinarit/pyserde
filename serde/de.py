@@ -707,6 +707,8 @@ class DeField(Field[T]):
             "alias": self.alias,
             "rename": self.rename,
             "skip": self.skip,
+            "skip_serializing": self.skip_serializing,
+            "skip_deserializing": self.skip_deserializing,
             "skip_if": self.skip_if,
             "skip_if_false": self.skip_if_false,
             "skip_if_default": self.skip_if_default,
@@ -1061,7 +1063,7 @@ class Renderer:
             for i, _typ in enumerate(type_args(arg.type)):
                 inner = arg[i]
                 values.append(self.render(inner))
-            return f'({", ".join(values)},)'  # trailing , is required for single element tuples
+            return f"({', '.join(values)},)"  # trailing , is required for single element tuples
 
     def dict(self, arg: DeField[Any]) -> str:
         """
@@ -1161,14 +1163,14 @@ class Renderer:
             for subarg in defields(arg.type):
                 if subarg.alias:
                     aliases = get_aliased_fields(subarg)
-                    flattened.append(f'_exists_by_aliases({arg.datavar}, [{",".join(aliases)}])')
+                    flattened.append(f"_exists_by_aliases({arg.datavar}, [{','.join(aliases)}])")
                 else:
                     flattened.append(f'"{subarg.name}" in {arg.datavar}')
             exists = " and ".join(flattened)
         else:
             if arg.alias:
                 aliases = get_aliased_fields(arg)
-                exists = f'_exists_by_aliases({arg.datavar}, [{",".join(aliases)}])'
+                exists = f"_exists_by_aliases({arg.datavar}, [{','.join(aliases)}])"
             else:
                 exists = f'"{arg.conv_name()}" in {arg.datavar}'
 
@@ -1194,7 +1196,7 @@ def to_iter_arg(f: DeField[T], *args: Any, **kwargs: Any) -> DeField[T]:
 
 
 def renderable(f: DeField[Any]) -> bool:
-    return f.init and not f.skip
+    return f.init and not (f.skip or f.skip_deserializing)
 
 
 jinja2_env = jinja2.Environment(
@@ -1455,7 +1457,8 @@ def render_from_dict(
         class_name=typename(cls),
     )
     serde_scope = getattr(cls, SERDE_SCOPE)
-    fields = list(filter(renderable, defields(cls)))
+    all_fields = defields(cls)
+    fields = list(filter(renderable, all_fields))
     if serde_scope.transparent:
         field = dataclasses.replace(fields[0], alias=[], rename="__serde_transparent__", case=None)
         field.iterbased = False
@@ -1474,7 +1477,7 @@ def render_from_dict(
         has_flatten_dict = any(f.flatten and is_flatten_dict(f.type) for f in fields)
 
         # Compute known fields - exclude flatten dict field itself since it captures unknown fields
-        known_fields = _collect_known_fields(fields, rename_all, exclude_flatten_dict=True)
+        known_fields = _collect_known_fields(all_fields, rename_all, exclude_flatten_dict=True)
 
         res = jinja2_env.get_template("dict").render(
             func=FROM_DICT,

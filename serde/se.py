@@ -567,6 +567,8 @@ class SeField(Field[T]):
             "alias": self.alias,
             "rename": self.rename,
             "skip": self.skip,
+            "skip_serializing": self.skip_serializing,
+            "skip_deserializing": self.skip_deserializing,
             "skip_if": self.skip_if,
             "skip_if_false": self.skip_if_false,
             "skip_if_default": self.skip_if_default,
@@ -600,7 +602,7 @@ def {{func}}(obj, reuse_instances = None, convert_sets = None, skip_none = False
 
   res = {}
   {% for f in fields -%}
-  {% if not f.skip -%}
+  {% if not (f.skip or f.skip_serializing) -%}
   subres = {{rvalue(f)}}
   {% if lvalue(f) == '__FLATTEN_DICT__' -%}
   # Merge flattened dict into result (declared fields take precedence)
@@ -648,7 +650,7 @@ def {{func}}(obj, reuse_instances=None, convert_sets=None, skip_none=False):
 
   return (
   {% for f in fields -%}
-  {% if not f.skip|default(False) %}
+  {% if not (f.skip|default(False) or f.skip_serializing|default(False)) %}
   {{rvalue(f)}},
   {% endif -%}
   {% endfor -%}
@@ -719,7 +721,9 @@ def render_to_tuple(
     )
     serde_scope = getattr(cls, SERDE_SCOPE)
     if serde_scope.transparent:
-        transparent = [f for f in sefields(cls, serialize_class_var) if not f.skip]
+        transparent = [
+            f for f in sefields(cls, serialize_class_var) if not (f.skip or f.skip_serializing)
+        ]
         return jinja2_env.get_template("transparent_iter").render(
             func=TO_ITER,
             serde_scope=serde_scope,
@@ -755,7 +759,9 @@ def render_to_dict(
     lrenderer = LRenderer(case, serialize_class_var)
     serde_scope = getattr(cls, SERDE_SCOPE)
     if serde_scope.transparent:
-        transparent = [f for f in sefields(cls, serialize_class_var) if not f.skip]
+        transparent = [
+            f for f in sefields(cls, serialize_class_var) if not (f.skip or f.skip_serializing)
+        ]
         return jinja2_env.get_template("transparent_dict").render(
             func=TO_DICT,
             serde_scope=serde_scope,
