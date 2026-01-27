@@ -63,6 +63,32 @@ class Resource:
 
 See [examples/skip.py](https://github.com/yukinarit/pyserde/blob/main/examples/skip.py) for the complete example.
 
+### **`skip_serializing`**
+
+`skip_serializing` omits the field only when serializing. The field is still accepted on input.
+
+```python
+@serde
+class Credentials:
+    user: str
+    token: str = field(skip_serializing=True)
+```
+
+See [examples/skip_serializing_deserializing.py](https://github.com/yukinarit/pyserde/blob/main/examples/skip_serializing_deserializing.py) for the complete example.
+
+### **`skip_deserializing`**
+
+`skip_deserializing` ignores incoming data for the field and keeps its default/default_factory value. A default is required when the field participates in `__init__`.
+
+```python
+@serde
+class Profile:
+    username: str
+    session_id: str = field(default="generated", skip_deserializing=True)
+```
+
+See [examples/skip_serializing_deserializing.py](https://github.com/yukinarit/pyserde/blob/main/examples/skip_serializing_deserializing.py) for the complete example.
+
 ### **`skip_if`**
 
 `skip_if` is used to skip (de)serialization of the field if the predicate function returns `True`.
@@ -75,7 +101,7 @@ class World:
 
 See [examples/skip.py](https://github.com/yukinarit/pyserde/blob/main/examples/skip.py) for the complete example.
 
-> **NOTE:** `skip`, `skip_if`, `skip_if_false`, and `skip_if_default` apply to both serialization and deserialization. Use them to keep wire formats compact or to ignore fields you only use locally.
+> **NOTE:** `skip`, `skip_if`, `skip_if_false`, and `skip_if_default` apply to both serialization and deserialization. Use `skip_serializing` / `skip_deserializing` to make direction-specific choices.
 
 ### **`skip_if_false`**
 

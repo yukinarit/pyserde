@@ -48,6 +48,7 @@ def run_all() -> None:
     import rename_all
     import simple
     import skip
+    import skip_serializing_deserializing
     import tomlfile
     import transparent
     import type_check_coerce
@@ -88,6 +89,7 @@ def run_all() -> None:
     run(rename)
     run(rename_all)
     run(skip)
+    run(skip_serializing_deserializing)
     run(tomlfile)
     run(transparent)
     run(yamlfile)

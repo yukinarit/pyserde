@@ -568,6 +568,8 @@ def field(
     rename: str | None = None,
     alias: list[str] | None = None,
     skip: bool | None = None,
+    skip_serializing: bool | None = None,
+    skip_deserializing: bool | None = None,
     skip_if: Callable[[Any], Any] | None = None,
     skip_if_false: bool | None = None,
     skip_if_default: bool | None = None,
@@ -589,6 +591,10 @@ def field(
         metadata["serde_alias"] = alias
     if skip is not None:
         metadata["serde_skip"] = skip
+    if skip_serializing is not None:
+        metadata["serde_skip_serializing"] = skip_serializing
+    if skip_deserializing is not None:
+        metadata["serde_skip_deserializing"] = skip_deserializing
     if skip_if is not None:
         metadata["serde_skip_if"] = skip_if
     if skip_if_false is not None:
@@ -633,6 +639,8 @@ class Field(Generic[T]):
     alias: list[str] = field(default_factory=list)
     rename: str | None = None
     skip: bool | None = None
+    skip_serializing: bool | None = None
+    skip_deserializing: bool | None = None
     skip_if: Func | None = None
     skip_if_false: bool | None = None
     skip_if_default: bool | None = None
@@ -689,6 +697,17 @@ class Field(Generic[T]):
 
         kw_only = bool(f.kw_only)
 
+        skip_deserializing = f.metadata.get("serde_skip_deserializing")
+        if skip_deserializing and f.init:
+            has_def = not isinstance(f.default, dataclasses._MISSING_TYPE)
+            has_def_factory = not isinstance(f.default_factory, dataclasses._MISSING_TYPE)
+            if not (has_def or has_def_factory or f.metadata.get("serde_skip")):
+                raise SerdeError(
+                    f"Field {f.name!r} sets skip_deserializing=True but lacks default or "
+                    "default_factory. Add a default or default_factory so deserialization can "
+                    "construct the object."
+                )
+
         return cls(
             f.type,  # type: ignore
             f.name,
@@ -702,6 +721,8 @@ class Field(Generic[T]):
             rename=f.metadata.get("serde_rename"),
             alias=f.metadata.get("serde_alias", []),
             skip=f.metadata.get("serde_skip"),
+            skip_serializing=f.metadata.get("serde_skip_serializing"),
+            skip_deserializing=skip_deserializing,
             skip_if=skip_if or skip_if_false_func or skip_if_default_func,
             serializer=serializer,
             deserializer=deserializer,
@@ -781,7 +802,10 @@ def get_transparent_field(cls: type[Any]) -> Field[Any]:
     """
     all_fields: list[Field[Any]] = fields(Field, cls)
 
-    candidates = [f for f in all_fields if f.init and not f.skip]
+    def fully_skipped(f: Field[Any]) -> bool:
+        return bool(f.skip or (f.skip_serializing and f.skip_deserializing))
+
+    candidates = [f for f in all_fields if f.init and not fully_skipped(f)]
     if len(candidates) != 1:
         raise SerdeError(
             f"{typename(cls)} with `transparent=True` must have exactly one init=True, "
@@ -797,7 +821,7 @@ def get_transparent_field(cls: type[Any]) -> Field[Any]:
                 f"{typename(cls)} with `transparent=True` can not have additional init=True fields "
                 f"(found {f.name!r})"
             )
-        if not f.skip:
+        if not fully_skipped(f):
             raise SerdeError(
                 f"{typename(cls)} with `transparent=True` requires non-transparent fields to be "
                 f"skipped (set `serde.field(skip=True)`) (found {f.name!r})"

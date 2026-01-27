@@ -73,6 +73,32 @@ class Resource:
 
 完全な例については、[examples/skip.py](https://github.com/yukinarit/pyserde/blob/main/examples/skip.py)を参照してください。
 
+### **`skip_serializing`**
+
+`skip_serializing` はシリアライズ時のみフィールドを省きます。入力では通常通り受け取ります。
+
+```python
+@serde
+class Credentials:
+    user: str
+    token: str = field(skip_serializing=True)
+```
+
+完全な例については、[examples/skip_serializing_deserializing.py](https://github.com/yukinarit/pyserde/blob/main/examples/skip_serializing_deserializing.py)を参照してください。
+
+### **`skip_deserializing`**
+
+`skip_deserializing` はデシリアライズ時に入力値を無視し、デフォルト（または default_factory）の値を保持します。`__init__` に含まれるフィールドではデフォルトが必須です。
+
+```python
+@serde
+class Profile:
+    username: str
+    session_id: str = field(default="generated", skip_deserializing=True)
+```
+
+完全な例については、[examples/skip_serializing_deserializing.py](https://github.com/yukinarit/pyserde/blob/main/examples/skip_serializing_deserializing.py)を参照してください。
+
 ### **`skip_if`**
 
 `skip_if` は条件関数が `True` を返す場合にフィールドの（デ）シリアライズをスキップします。
@@ -85,7 +111,7 @@ class World:
 
 完全な例については、[examples/skip.py](https://github.com/yukinarit/pyserde/blob/main/examples/skip.py)を参照してください。
 
-> **注記:** `skip`、`skip_if`、`skip_if_false`、`skip_if_default` はシリアライズ/デシリアライズの両方に適用されます。出力をコンパクトにしたい場合やローカル専用のフィールドを無視したい場合に便利です。
+> **注記:** `skip`、`skip_if`、`skip_if_false`、`skip_if_default` はシリアライズ/デシリアライズの両方に適用されます。方向ごとに制御したい場合は `skip_serializing` / `skip_deserializing` を使用してください。
 
 ### **`skip_if_false`**
 
