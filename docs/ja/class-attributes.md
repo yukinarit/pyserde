@@ -203,7 +203,7 @@ class Foo:
 
 ### **`skip_if_default`**
 
-バージョン0.23.0で新規追加。クラスデコレータに `skip_if_default=True` を指定すると、そのクラス内の全フィールドについて値がデフォルト（または `default_factory` の結果）と等しい場合に（デ）シリアライズをスキップします。フィールド側で `skip_if_default` を指定すればそちらが優先され、特定のフィールドだけ残す/外すことができます。
+バージョン0.30.0で新規追加。クラスデコレータに `skip_if_default=True` を指定すると、そのクラス内の全フィールドについて値がデフォルト（または `default_factory` の結果）と等しい場合に（デ）シリアライズをスキップします。フィールド側で `skip_if_default` を指定すればそちらが優先され、特定のフィールドだけ残す/外すことができます。
 
 ```python
 @serde(skip_if_default=True)
@@ -215,6 +215,19 @@ class Settings:
 ```
 
 ネストしたdataclassや `default_factory` を使ったデフォルトも対象になります。動作例は [examples/skip_if_default_class.py](https://github.com/yukinarit/pyserde/blob/main/examples/skip_if_default_class.py) を参照してください。
+
+### **`skip_if_none`**
+
+バージョン0.30.0で新規追加。クラスデコレータに `skip_if_none=True` を指定すると、そのクラス内のフィールドが `None` の場合に（デ）シリアライズをスキップします。フィールド側で `skip_if_none` を指定すればそちらが優先されるため、特定のフィールドだけ残す/外すこともできます。
+
+```python
+@serde(skip_if_none=True)
+class Profile:
+    nickname: str | None = None
+    bio: str | None = field(default=None, skip_if_none=False)  # None でも残す
+```
+
+`None` を大量に含むペイロードをコンパクトにしたい場合に便利です。
 
 ### **`deny_unknown_fields`**
 

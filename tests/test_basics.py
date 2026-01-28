@@ -690,6 +690,18 @@ def test_skip_if_default(se: Any, de: Any) -> None:
 
 
 @pytest.mark.parametrize("se,de", all_formats)
+def test_skip_if_none(se: Any, de: Any) -> None:
+    @serde.serde
+    class Foo:
+        a: str | None = serde.field(default=None, skip_if_none=True)
+
+    assert serde.to_dict(Foo()) == {}
+    assert serde.to_dict(Foo("x")) == {"a": "x"}
+    assert serde.from_dict(Foo, {}) == Foo()
+    assert serde.from_dict(Foo, {"a": "x"}) == Foo("x")
+
+
+@pytest.mark.parametrize("se,de", all_formats)
 def test_class_skip_if_default(se: Any, de: Any) -> None:
     @serde.serde(skip_if_default=True)
     class Foo:
@@ -727,6 +739,29 @@ def test_class_skip_if_default(se: Any, de: Any) -> None:
 
     assert serde.to_dict(Baz()) == {}
     assert serde.to_dict(Baz({"k": 1})) == {"mapping": {"k": 1}}
+
+
+@pytest.mark.parametrize("se,de", all_formats)
+def test_class_skip_if_none(se: Any, de: Any) -> None:
+    @serde.serde(skip_if_none=True)
+    class Foo:
+        a: str | None = None
+        b: int | None = None
+        c: str | None = serde.field(default=None, skip_if_none=False)
+
+    assert serde.to_dict(Foo()) == {"c": None}
+    assert serde.to_dict(Foo("x")) == {"a": "x", "c": None}
+    assert de(Foo, se(Foo())) == Foo()
+    assert serde.from_dict(Foo, {}) == Foo()
+
+    @serde.serde(skip_if_none=True)
+    class Bar:
+        inner: Foo | None = None
+        tags: list[str] | None = None
+
+    assert serde.to_dict(Bar()) == {}
+    assert serde.to_dict(Bar(Foo("x"))) == {"inner": {"a": "x", "c": None}}
+    assert de(Bar, se(Bar())) == Bar()
 
 
 @pytest.mark.parametrize("se,de", format_msgpack)

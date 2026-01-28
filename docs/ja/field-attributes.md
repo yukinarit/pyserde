@@ -111,7 +111,7 @@ class World:
 
 完全な例については、[examples/skip.py](https://github.com/yukinarit/pyserde/blob/main/examples/skip.py)を参照してください。
 
-> **注記:** `skip`、`skip_if`、`skip_if_false`、`skip_if_default` はシリアライズ/デシリアライズの両方に適用されます。方向ごとに制御したい場合は `skip_serializing` / `skip_deserializing` を使用してください。
+> **注記:** `skip`、`skip_if`、`skip_if_false`、`skip_if_none`、`skip_if_default` はシリアライズ/デシリアライズの両方に適用されます。方向ごとに制御したい場合は `skip_serializing` / `skip_deserializing` を使用してください。
 
 ### **`skip_if_false`**
 
@@ -126,6 +126,19 @@ class World:
 ```
 
 完全な例については、[examples/skip.py](https://github.com/yukinarit/pyserde/blob/main/examples/skip.py)を参照してください。
+
+### **`skip_if_none`**
+
+`skip_if_none` は値が `None` のときにそのフィールドの（デ）シリアライズをスキップします。
+
+```python
+@serde
+class Profile:
+    nickname: str | None = field(default=None, skip_if_none=True)
+```
+
+クラス全体に適用する方法は [クラス属性: skip_if_none](class-attributes.md#skip_if_none) を参照してください。
+実行例は [examples/skip_if_none.py](https://github.com/yukinarit/pyserde/blob/main/examples/skip_if_none.py) を参照してください。
 
 ### **`skip_if_default`**
 

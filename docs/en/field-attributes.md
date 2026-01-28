@@ -101,7 +101,7 @@ class World:
 
 See [Class Attributes: skip_if_default](class-attributes.md#skip_if_default) for the class-level toggle, and [examples/skip.py](https://github.com/yukinarit/pyserde/blob/main/examples/skip.py) plus [examples/skip_if_default_class.py](https://github.com/yukinarit/pyserde/blob/main/examples/skip_if_default_class.py) for the complete examples.
 
-> **NOTE:** `skip`, `skip_if`, `skip_if_false`, and `skip_if_default` apply to both serialization and deserialization. Use `skip_serializing` / `skip_deserializing` to make direction-specific choices.
+> **NOTE:** `skip`, `skip_if`, `skip_if_false`, `skip_if_none`, and `skip_if_default` apply to both serialization and deserialization. Use `skip_serializing` / `skip_deserializing` to make direction-specific choices.
 
 ### **`skip_if_false`**
 
@@ -114,6 +114,19 @@ class World:
 ```
 
 See [examples/skip.py](https://github.com/yukinarit/pyserde/blob/main/examples/skip.py) for the complete example.
+
+### **`skip_if_none`**
+
+`skip_if_none` skips (de)serialization of the field when its value is `None`.
+
+```python
+@serde
+class Profile:
+    nickname: str | None = field(default=None, skip_if_none=True)
+```
+
+You can also enable this for all fields in a class; see [Class Attributes: skip_if_none](class-attributes.md#skip_if_none).
+See [examples/skip_if_none.py](https://github.com/yukinarit/pyserde/blob/main/examples/skip_if_none.py) for a runnable example.
 
 ### **`skip_if_default`**
 

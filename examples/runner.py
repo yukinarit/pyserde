@@ -48,6 +48,7 @@ def run_all() -> None:
     import rename_all
     import simple
     import skip
+    import skip_if_none
     import skip_if_default_class
     import skip_serializing_deserializing
     import tomlfile
@@ -90,6 +91,7 @@ def run_all() -> None:
     run(rename)
     run(rename_all)
     run(skip)
+    run(skip_if_none)
     run(skip_if_default_class)
     run(skip_serializing_deserializing)
     run(tomlfile)
