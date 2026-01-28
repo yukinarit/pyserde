@@ -185,7 +185,7 @@ See [examples/class_var.py](https://github.com/yukinarit/pyserde/blob/main/examp
 
 ### **`skip_if_default`**
 
-New in v0.23.0. When `skip_if_default=True` is set on the class decorator, every field is skipped during (de)serialization if its value equals its default (or the result of its `default_factory`). Field-level `skip_if_default` still wins, so you can turn it off for specific fields by setting `skip_if_default=False` on that field.
+New in v0.30.0. When `skip_if_default=True` is set on the class decorator, every field is skipped during (de)serialization if its value equals its default (or the result of its `default_factory`). Field-level `skip_if_default` still wins, so you can turn it off for specific fields by setting `skip_if_default=False` on that field.
 
 ```python
 @serde(skip_if_default=True)
@@ -198,6 +198,19 @@ class Settings:
 ```
 
 Nested dataclasses respect the class-level setting, and defaults created via `default_factory` are handled as well. See [examples/skip_if_default_class.py](https://github.com/yukinarit/pyserde/blob/main/examples/skip_if_default_class.py) for a runnable demo.
+
+### **`skip_if_none`**
+
+New in v0.30.0. When `skip_if_none=True` is set on the class decorator, all fields whose value is `None` are skipped during (de)serialization. Field-level `skip_if_none` overrides the class setting (`False` keeps the field even when it is `None`).
+
+```python
+@serde(skip_if_none=True)
+class Profile:
+    nickname: str | None = None
+    bio: str | None = field(default=None, skip_if_none=False)  # keep even when None
+```
+
+Use this when you want compact payloads but need to keep specific `None` fields.
 
 ### **`deny_unknown_fields`**
 

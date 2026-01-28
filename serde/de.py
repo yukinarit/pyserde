@@ -175,6 +175,7 @@ def _make_deserialize(
     reuse_instances_default: bool = True,
     convert_sets_default: bool = False,
     skip_if_default: bool = False,
+    skip_if_none: bool = False,
     deserializer: DeserializeFunc | None = None,
     type_check: TypeCheck = strict,
     transparent: bool = False,
@@ -191,6 +192,7 @@ def _make_deserialize(
         reuse_instances_default=reuse_instances_default,
         convert_sets_default=convert_sets_default,
         skip_if_default=skip_if_default,
+        skip_if_none=skip_if_none,
         transparent=transparent,
         **kwargs,
     )
@@ -210,6 +212,7 @@ def deserialize(
     reuse_instances_default: bool = True,
     convert_sets_default: bool = False,
     skip_if_default: bool = False,
+    skip_if_none: bool = False,
     deserializer: DeserializeFunc | None = None,
     tagging: Tagging = DefaultTagging,
     type_check: TypeCheck = strict,
@@ -268,6 +271,7 @@ def deserialize(
                 reuse_instances_default=reuse_instances_default,
                 convert_sets_default=convert_sets_default,
                 skip_if_default_default=skip_if_default,
+                skip_if_none_default=skip_if_none,
             )
             setattr(cls, SERDE_SCOPE, scope)
         scope.transparent = transparent
@@ -818,6 +822,7 @@ def defields(cls: type[Any]) -> list[DeField[Any]]:
         DeField,
         cls,
         skip_if_default_default=serde_scope.skip_if_default_default,
+        skip_if_none_default=serde_scope.skip_if_none_default,
     )
 
 
