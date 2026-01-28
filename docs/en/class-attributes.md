@@ -183,6 +183,22 @@ See [examples/class_var.py](https://github.com/yukinarit/pyserde/blob/main/examp
 
 [^1]: [dataclasses.fields](https://docs.python.org/3/library/dataclasses.html#dataclasses.fields)
 
+### **`skip_if_default`**
+
+New in v0.23.0. When `skip_if_default=True` is set on the class decorator, every field is skipped during (de)serialization if its value equals its default (or the result of its `default_factory`). Field-level `skip_if_default` still wins, so you can turn it off for specific fields by setting `skip_if_default=False` on that field.
+
+```python
+@serde(skip_if_default=True)
+class Settings:
+    theme: str = "light"
+    retries: int = 3
+    api_key: str | None = None
+    # this one is kept even though class-level skipping is on
+    note: str = field(default="keep me", skip_if_default=False)
+```
+
+Nested dataclasses respect the class-level setting, and defaults created via `default_factory` are handled as well. See [examples/skip_if_default_class.py](https://github.com/yukinarit/pyserde/blob/main/examples/skip_if_default_class.py) for a runnable demo.
+
 ### **`deny_unknown_fields`**
 
 New in v0.22.0, the `deny_unknown_fields` option in the pyserde decorator allows you to enforce strict field validation during deserialization. When this option is enabled, any fields in the input data that are not defined in the target class will cause deserialization to fail with a `SerdeError`.

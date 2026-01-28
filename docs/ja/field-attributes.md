@@ -139,7 +139,18 @@ class World:
     town: str = field(default='Masara Town', skip_if_default=True)
 ```
 
-完全な例については、[examples/skip.py](https://github.com/yukinarit/pyserde/blob/main/examples/skip.py)を参照してください。
+クラス全体に一括で適用することもできます。
+
+```python
+@serde(skip_if_default=True)
+class Settings:
+    theme: str = \"light\"
+    retries: int = 3
+```
+
+クラスで有効にしても、フィールド側で `skip_if_default=False` と設定すればそのフィールドは保持されます。
+
+クラス全体に適用する設定については [クラス属性: skip_if_default](class-attributes.md#skip_if_default) を参照してください。完全な例は [examples/skip.py](https://github.com/yukinarit/pyserde/blob/main/examples/skip.py) と [examples/skip_if_default_class.py](https://github.com/yukinarit/pyserde/blob/main/examples/skip_if_default_class.py) にあります。
 
 ### **`alias`**
 

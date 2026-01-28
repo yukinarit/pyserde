@@ -61,7 +61,7 @@ class Resource:
     metadata: dict[str, str] = field(default_factory=dict, skip=True)
 ```
 
-See [examples/skip.py](https://github.com/yukinarit/pyserde/blob/main/examples/skip.py) for the complete example.
+See [examples/skip.py](https://github.com/yukinarit/pyserde/blob/main/examples/skip.py) and [examples/skip_if_default_class.py](https://github.com/yukinarit/pyserde/blob/main/examples/skip_if_default_class.py) for complete examples.
 
 ### **`skip_serializing`**
 
@@ -99,7 +99,7 @@ class World:
     buddy: str = field(default='', skip_if=lambda v: v == 'Pikachu')
 ```
 
-See [examples/skip.py](https://github.com/yukinarit/pyserde/blob/main/examples/skip.py) for the complete example.
+See [Class Attributes: skip_if_default](class-attributes.md#skip_if_default) for the class-level toggle, and [examples/skip.py](https://github.com/yukinarit/pyserde/blob/main/examples/skip.py) plus [examples/skip_if_default_class.py](https://github.com/yukinarit/pyserde/blob/main/examples/skip_if_default_class.py) for the complete examples.
 
 > **NOTE:** `skip`, `skip_if`, `skip_if_false`, and `skip_if_default` apply to both serialization and deserialization. Use `skip_serializing` / `skip_deserializing` to make direction-specific choices.
 
@@ -117,13 +117,24 @@ See [examples/skip.py](https://github.com/yukinarit/pyserde/blob/main/examples/s
 
 ### **`skip_if_default`**
 
-`skip` is used to skip (de)serialization of the field if the field is equivalent to its default value. For example, this code skip (de)serializing if `town` is `Masara Town`.
+`skip_if_default` skips (de)serialization of the field when its value equals the default.
 
 ```python
 @serde
 class World:
     town: str = field(default='Masara Town', skip_if_default=True)
 ```
+
+You can also enable it for every field in a class at once:
+
+```python
+@serde(skip_if_default=True)
+class Settings:
+    theme: str = "light"
+    retries: int = 3
+```
+
+Field-level values still override the class setting; set `skip_if_default=False` on a field to keep it even when class-level skipping is enabled.
 
 See [examples/skip.py](https://github.com/yukinarit/pyserde/blob/main/examples/skip.py) for the complete example.
 
