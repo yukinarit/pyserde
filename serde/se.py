@@ -159,6 +159,7 @@ def _make_serialize(
     rename_all: str | None = None,
     reuse_instances_default: bool = False,
     convert_sets_default: bool = False,
+    skip_if_default: bool = False,
     serializer: SerializeFunc | None = None,
     tagging: Tagging = DefaultTagging,
     type_check: TypeCheck = disabled,
@@ -176,6 +177,7 @@ def _make_serialize(
         rename_all=rename_all,
         reuse_instances_default=reuse_instances_default,
         convert_sets_default=convert_sets_default,
+        skip_if_default=skip_if_default,
         serializer=serializer,
         tagging=tagging,
         type_check=type_check,
@@ -198,6 +200,7 @@ def serialize(
     rename_all: str | None = None,
     reuse_instances_default: bool = False,
     convert_sets_default: bool = False,
+    skip_if_default: bool = False,
     serializer: SerializeFunc | None = None,
     tagging: Tagging = DefaultTagging,
     type_check: TypeCheck = strict,
@@ -250,6 +253,7 @@ def serialize(
                 cls,
                 reuse_instances_default=reuse_instances_default,
                 convert_sets_default=convert_sets_default,
+                skip_if_default_default=skip_if_default,
             )
             setattr(cls, SERDE_SCOPE, scope)
         scope.transparent = transparent
@@ -583,7 +587,13 @@ def sefields(cls: type[Any], serialize_class_var: bool = False) -> Iterator[SeFi
     """
     Iterate fields for serialization.
     """
-    for f in fields(SeField, cls, serialize_class_var=serialize_class_var):
+    serde_scope: Scope = getattr(cls, SERDE_SCOPE)
+    for f in fields(
+        SeField,
+        cls,
+        serialize_class_var=serialize_class_var,
+        skip_if_default_default=serde_scope.skip_if_default_default,
+    ):
         f.parent = SeField(None, "obj")  # type: ignore
         yield f
 

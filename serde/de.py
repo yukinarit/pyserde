@@ -174,6 +174,7 @@ def _make_deserialize(
     rename_all: str | None = None,
     reuse_instances_default: bool = True,
     convert_sets_default: bool = False,
+    skip_if_default: bool = False,
     deserializer: DeserializeFunc | None = None,
     type_check: TypeCheck = strict,
     transparent: bool = False,
@@ -189,6 +190,7 @@ def _make_deserialize(
         rename_all=rename_all,
         reuse_instances_default=reuse_instances_default,
         convert_sets_default=convert_sets_default,
+        skip_if_default=skip_if_default,
         transparent=transparent,
         **kwargs,
     )
@@ -207,6 +209,7 @@ def deserialize(
     rename_all: str | None = None,
     reuse_instances_default: bool = True,
     convert_sets_default: bool = False,
+    skip_if_default: bool = False,
     deserializer: DeserializeFunc | None = None,
     tagging: Tagging = DefaultTagging,
     type_check: TypeCheck = strict,
@@ -264,6 +267,7 @@ def deserialize(
                 cls,
                 reuse_instances_default=reuse_instances_default,
                 convert_sets_default=convert_sets_default,
+                skip_if_default_default=skip_if_default,
             )
             setattr(cls, SERDE_SCOPE, scope)
         scope.transparent = transparent
@@ -809,7 +813,12 @@ class InnerField(DeField[T]):
 
 
 def defields(cls: type[Any]) -> list[DeField[Any]]:
-    return fields(DeField, cls)
+    serde_scope: Scope = getattr(cls, SERDE_SCOPE)
+    return fields(
+        DeField,
+        cls,
+        skip_if_default_default=serde_scope.skip_if_default_default,
+    )
 
 
 @dataclass

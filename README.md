@@ -102,7 +102,7 @@ Happy coding with pyserde! 🚀
 - [Case Conversion](https://github.com/yukinarit/pyserde/blob/main/docs/en/class-attributes.md#rename_all)
 - [Rename](https://github.com/yukinarit/pyserde/blob/main/docs/en/field-attributes.md#rename)
 - [Alias](https://github.com/yukinarit/pyserde/blob/main/docs/en/field-attributes.md#alias)
-- Skip (de)serialization ([skip](https://github.com/yukinarit/pyserde/blob/main/docs/en/field-attributes.md#skip), [skip_if](https://github.com/yukinarit/pyserde/blob/main/docs/en/field-attributes.md#skip_if), [skip_if_false](https://github.com/yukinarit/pyserde/blob/main/docs/en/field-attributes.md#skip_if_false), [skip_if_default](https://github.com/yukinarit/pyserde/blob/main/docs/en/field-attributes.md#skip_if_default))
+- Skip (de)serialization ([skip](https://github.com/yukinarit/pyserde/blob/main/docs/en/field-attributes.md#skip), [skip_if](https://github.com/yukinarit/pyserde/blob/main/docs/en/field-attributes.md#skip_if), [skip_if_false](https://github.com/yukinarit/pyserde/blob/main/docs/en/field-attributes.md#skip_if_false), [skip_if_default](https://github.com/yukinarit/pyserde/blob/main/docs/en/field-attributes.md#skip_if_default) at field or class level)
 - [Custom field (de)serializer](https://github.com/yukinarit/pyserde/blob/main/docs/en/field-attributes.md#serializerdeserializer)
 - [Custom class (de)serializer](https://github.com/yukinarit/pyserde/blob/main/docs/en/class-attributes.md#class_serializer--class_deserializer)
 - [Custom global (de)serializer](https://github.com/yukinarit/pyserde/blob/main/docs/en/extension.md#custom-global-deserializer)

@@ -269,6 +269,9 @@ class Scope:
 
     convert_sets_default: bool = False
 
+    # Skip fields whose value equals the default when set at the class level.
+    skip_if_default_default: bool = False
+
     transparent: bool = False
     """If True, serialize/deserialize as the single inner field (serde-rs `transparent`)."""
 
@@ -553,7 +556,22 @@ def skip_if_false(v: Any) -> Any:
 
 
 def skip_if_default(v: Any, default: Any | None = None) -> Any:
-    return v == default  # Why return type is deduced to be Any?
+    if isinstance(default, dataclasses._MISSING_TYPE):
+        return False
+
+    serialized_default = default
+
+    # Align the comparison with how serde serializes defaults so nested dataclasses
+    # with class-level skip_if_default are handled correctly.
+    if dataclasses.is_dataclass(default) and not isinstance(default, type):
+        try:
+            from .se import to_dict as serde_to_dict
+
+            serialized_default = serde_to_dict(default)
+        except Exception:
+            serialized_default = dataclasses.asdict(default)
+
+    return v == serialized_default  # Why return type is deduced to be Any?
 
 
 @dataclass
@@ -651,7 +669,12 @@ class Field(Generic[T]):
     type_args: list[str] | None = None
 
     @classmethod
-    def from_dataclass(cls, f: dataclasses.Field[T], parent: Any | None = None) -> Field[T]:
+    def from_dataclass(
+        cls,
+        f: dataclasses.Field[T],
+        parent: Any | None = None,
+        skip_if_default_default: bool = False,
+    ) -> Field[T]:
         """
         Create `Field` object from `dataclasses.Field`.
         """
@@ -660,8 +683,20 @@ class Field(Generic[T]):
             skip_if_false_func = Func(skip_if_false, cls.mangle(f, "skip_if_false"))
 
         skip_if_default_func: Func | None = None
-        if f.metadata.get("serde_skip_if_default"):
-            skip_if_def = functools.partial(skip_if_default, default=f.default)
+        skip_if_default_flag = f.metadata.get("serde_skip_if_default")
+        if skip_if_default_flag is None:
+            skip_if_default_flag = skip_if_default_default
+
+        if skip_if_default_flag:
+            default_value: Any
+            if not isinstance(f.default, dataclasses._MISSING_TYPE):
+                default_value = f.default
+            elif not isinstance(f.default_factory, dataclasses._MISSING_TYPE):
+                default_value = f.default_factory()
+            else:
+                default_value = dataclasses._MISSING_TYPE
+
+            skip_if_def = functools.partial(skip_if_default, default=default_value)
             skip_if_default_func = Func(skip_if_def, cls.mangle(f, "skip_if_default"))
 
         skip_if: Func | None = None
@@ -723,6 +758,7 @@ class Field(Generic[T]):
             skip=f.metadata.get("serde_skip"),
             skip_serializing=f.metadata.get("serde_skip_serializing"),
             skip_deserializing=skip_deserializing,
+            skip_if_default=skip_if_default_flag,
             skip_if=skip_if or skip_if_false_func or skip_if_default_func,
             serializer=serializer,
             deserializer=deserializer,
@@ -779,11 +815,19 @@ class Field(Generic[T]):
 F = TypeVar("F", bound=Field[Any])
 
 
-def fields(field_cls: type[F], cls: type[Any], serialize_class_var: bool = False) -> list[F]:
+def fields(
+    field_cls: type[F],
+    cls: type[Any],
+    serialize_class_var: bool = False,
+    skip_if_default_default: bool = False,
+) -> list[F]:
     """
     Iterate fields of the dataclass and returns `serde.core.Field`.
     """
-    fields = [field_cls.from_dataclass(f, parent=cls) for f in dataclass_fields(cls)]
+    fields = [
+        field_cls.from_dataclass(f, parent=cls, skip_if_default_default=skip_if_default_default)
+        for f in dataclass_fields(cls)
+    ]
 
     if serialize_class_var:
         for name, typ in get_type_hints(cls).items():

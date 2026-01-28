@@ -201,6 +201,21 @@ class Foo:
 
 [^1]: [dataclasses.fields](https://docs.python.org/3/library/dataclasses.html#dataclasses.fields)
 
+### **`skip_if_default`**
+
+バージョン0.23.0で新規追加。クラスデコレータに `skip_if_default=True` を指定すると、そのクラス内の全フィールドについて値がデフォルト（または `default_factory` の結果）と等しい場合に（デ）シリアライズをスキップします。フィールド側で `skip_if_default` を指定すればそちらが優先され、特定のフィールドだけ残す/外すことができます。
+
+```python
+@serde(skip_if_default=True)
+class Settings:
+    theme: str = "light"
+    retries: int = 3
+    api_key: str | None = None
+    note: str = field(default="keep", skip_if_default=False)  # このフィールドは保持する
+```
+
+ネストしたdataclassや `default_factory` を使ったデフォルトも対象になります。動作例は [examples/skip_if_default_class.py](https://github.com/yukinarit/pyserde/blob/main/examples/skip_if_default_class.py) を参照してください。
+
 ### **`deny_unknown_fields`**
 
 バージョン0.22.0で新規追加。 pyserdeデコレータの`deny_unknown_fields`オプションはデシリアライズ時のより厳格なフィールドチェックを制御できます。このオプションをTrueにするとデシリアライズ時に宣言されていないフィールドが見つかると`SerdeError`を投げることができます。
