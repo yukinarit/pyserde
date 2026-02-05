@@ -111,7 +111,8 @@ class World:
 
 完全な例については、[examples/skip.py](https://github.com/yukinarit/pyserde/blob/main/examples/skip.py)を参照してください。
 
-> **注記:** `skip`、`skip_if`、`skip_if_false`、`skip_if_none`、`skip_if_default` はシリアライズ/デシリアライズの両方に適用されます。方向ごとに制御したい場合は `skip_serializing` / `skip_deserializing` を使用してください。
+!!! note
+    `skip`、`skip_if`、`skip_if_false`、`skip_if_none`、`skip_if_default` はシリアライズ/デシリアライズの両方に適用されます。方向ごとに制御したい場合は `skip_serializing` / `skip_deserializing` を使用してください。
 
 ### **`skip_if_false`**
 

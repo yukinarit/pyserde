@@ -2,7 +2,8 @@
 
 Here is the list of the supported types. See the simple example for each type in the footnotes.
 
-Tip: Most standard-library containers and datetime types just work, but you can always add custom serializers for third-party types.
+!!! tip
+    Most standard-library containers and datetime types just work, but you can always add custom serializers for third-party types.
 
 * Primitives (int, float, str, bool) [^1]
 * Containers

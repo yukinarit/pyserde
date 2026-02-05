@@ -29,7 +29,8 @@ foo = Foo(10)
 beartype.roar.BeartypeCallHintParamViolation: Method __main__.Foo.__init__() parameter s=10 violates type hint <class 'str'>, as int 10 not instance of str.
 ```
 
-> **注記:** 2024年2月時点でbeartypeは検証フックを提供していないため、コンストラクターからはSerdeErrorではなくbeartypeの例外が発生します。
+!!! note
+    2024年2月時点でbeartypeは検証フックを提供していないため、コンストラクターからはSerdeErrorではなくbeartypeの例外が発生します。
 
 同様に、間違った型のオブジェクトで（デ）シリアライズAPIを呼び出すと、
 
@@ -43,21 +44,20 @@ print(to_json(foo))
 serde.compat.SerdeError: Method __main__.Foo.__init__() parameter s=10 violates type hint <class 'str'>, as int 10 not instance of str.
 ```
 
-> **注記:** beartypeによる型チェックにはいくつかの注意点があります。
->
-> 1. beartypeは変更されたプロパティを検証できません。
->
->   以下のコードでは、プロパティ `s` が最後に変更されていますが、beartypeはこのケースを検出できません。
->   ```python
->   @serde
->   class Foo:
->       s: str
->
->   f = Foo("foo")
->   f.s = 100
->   ```
->
-> 2. beartypeはコンテナ内の各要素を検証することはできません。これはバグではなく、beartypeの設計原則です。[Does beartype actually do anything?](https://beartype.readthedocs.io/en/latest/faq/#faq-o1)を参照してください。
+!!! note "beartypeによる型チェックの注意点"
+    1. beartypeは変更されたプロパティを検証できません。
+
+        以下のコードでは、プロパティ `s` が最後に変更されていますが、beartypeはこのケースを検出できません。
+        ```python
+        @serde
+        class Foo:
+            s: str
+
+        f = Foo("foo")
+        f.s = 100
+        ```
+
+    2. beartypeはコンテナ内の各要素を検証することはできません。これはバグではなく、beartypeの設計原則です。[Does beartype actually do anything?](https://beartype.readthedocs.io/en/latest/faq/#faq-o1)を参照してください。
 
 ## `coerce`
 

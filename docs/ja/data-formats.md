@@ -11,7 +11,8 @@ serde.yaml.to_yaml(foo, sort_key=True)
 
 `sort_key=True`は[yaml.safedump](https://github.com/yukinarit/pyserde/blob/a9f44d52d109144a4c3bb93965f831e91d13960b/serde/yaml.py#L18)に渡されます。
 
-> **注記:** JSON/YAML/TOML/MsgPackは対応するエクストラのインストールが必要です。`dict`、`tuple`、Pickleは追加依存なしで利用できます。
+!!! note
+    JSON/YAML/TOML/MsgPackは対応するエクストラのインストールが必要です。`dict`、`tuple`、Pickleは追加依存なしで利用できます。
 
 ## dict
 

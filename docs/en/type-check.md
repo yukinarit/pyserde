@@ -24,7 +24,8 @@ you get an error
 beartype.roar.BeartypeCallHintParamViolation: Method __main__.Foo.__init__() parameter s=10 violates type hint <class 'str'>, as int 10 not instance of str.
 ```
 
-> **NOTE:** beartype exception instead of SerdeError is raised from constructor because beartype does not provide post validation hook as of Feb. 2024.
+!!! note
+    beartype exception instead of SerdeError is raised from constructor because beartype does not provide post validation hook as of Feb. 2024.
 
 similarly, if you call (de)serialize APIs with wrong type of object,
 
@@ -38,21 +39,20 @@ again you get an error
 serde.compat.SerdeError: Method __main__.Foo.__init__() parameter s=10 violates type hint <class 'str'>, as int 10 not instance of str.
 ```
 
-> **NOTE:** There are several caveats regarding type checks by beartype.
->
-> 1. beartype can not validate on mutated properties
->
-> The following code mutates the property "s" at the bottom. beartype can not detect this case.
-> ```python
-> @serde
-> class Foo:
->     s: str
->
-> f = Foo("foo")
-> f.s = 100
-> ```
->
-> 2. beartype can not validate every one of elements in containers. This is not a bug. This is desgin principle of beartype. See [Does beartype actually do anything?](https://beartype.readthedocs.io/en/latest/faq/#faq-o1).
+!!! note "Caveats regarding type checks by beartype"
+    1. beartype can not validate on mutated properties
+
+        The following code mutates the property "s" at the bottom. beartype can not detect this case.
+        ```python
+        @serde
+        class Foo:
+            s: str
+
+        f = Foo("foo")
+        f.s = 100
+        ```
+
+    2. beartype can not validate every one of elements in containers. This is not a bug. This is desgin principle of beartype. See [Does beartype actually do anything?](https://beartype.readthedocs.io/en/latest/faq/#faq-o1).
 
 ## `coerce`
 

@@ -33,14 +33,13 @@ check:
 	$(UV) run pre-commit run -a
 
 docs:
-	mkdir -p docs out/api out/guide/en
-	mkdir -p docs out/api out/guide/ja
-	$(UV) run pdoc -e serde=https://github.com/yukinarit/pyserde/tree/main/serde/ serde -o out/api
-	mdbook build -d ./out/guide/en ./docs/en
-	mdbook build -d ./out/guide/ja ./docs/ja
+	$(UV) run mkdocs build
 
-open-docs:
-	$(UV) run pdoc -e serde=https://github.com/yukinarit/pyserde/tree/main/serde serde
+docs-serve:
+	$(UV) run mkdocs serve
+
+docs-deploy:
+	$(UV) run mike deploy --push --update-aliases $(VERSION) latest
 
 bench:
 	pushd bench && $(UV) run $(PYTHON) bench.py && popd

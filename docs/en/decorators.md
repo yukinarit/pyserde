@@ -36,15 +36,16 @@ class Foo:
     ...
 ```
 
-> **NOTE:** `@serde` actually works without @dataclass decorator, because it detects and add @dataclass to the declared class automatically. However, mypy will produce `Too many arguments` or `Unexpected keyword argument` error. This is due to [the mypy limitation](https://mypy.readthedocs.io/en/stable/additional_features.html#caveats-known-issues).
->
-> ```python
-> @serde
-> class Foo:
->     ...
-> ```
->
-> But if you use a PEP681 compliant type checker (e.g. pyright), you don't get the type error because pyserde supports [PEP681 dataclass_transform](https://peps.python.org/pep-0681/)
+!!! note
+    `@serde` actually works without @dataclass decorator, because it detects and add @dataclass to the declared class automatically. However, mypy will produce `Too many arguments` or `Unexpected keyword argument` error. This is due to [the mypy limitation](https://mypy.readthedocs.io/en/stable/additional_features.html#caveats-known-issues).
+
+    ```python
+    @serde
+    class Foo:
+        ...
+    ```
+
+    But if you use a PEP681 compliant type checker (e.g. pyright), you don't get the type error because pyserde supports [PEP681 dataclass_transform](https://peps.python.org/pep-0681/)
 
 
 ## `@serialize`/`@deserialize`

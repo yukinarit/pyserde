@@ -43,16 +43,17 @@ class Foo:
 ```
 `Foo(Baz(10))` を辞書にシリアライズすると、 `{"a": {"Baz": {"b": 10}}}` が得られ、デシリアライズすると `Foo(Baz(10))` になります。
 
-> **注意:** dataclass でないオブジェクトは、`tagging` 属性に関わらず常に `Untagged` で（デ）シリアライズされます。  
-> これはタグに使用できる情報がないためです。`Untagged` の欠点は、特定のタイプを正しく非シリアライズできないことです。
->
-> 例えば、以下のクラスの `Foo({1, 2, 3})` は `{"a": [1, 2, 3]}` にシリアライズされますが、デシリアライズすると `Foo([1, 2, 3])` になります。
->
-> ```python
-> @serde(tagging=ExternalTagging)
-> class Foo:
->    a: Union[list[int], set[int]]
-> ```
+!!! note
+    dataclass でないオブジェクトは、`tagging` 属性に関わらず常に `Untagged` で（デ）シリアライズされます。
+    これはタグに使用できる情報がないためです。`Untagged` の欠点は、特定のタイプを正しく非シリアライズできないことです。
+
+    例えば、以下のクラスの `Foo({1, 2, 3})` は `{"a": [1, 2, 3]}` にシリアライズされますが、デシリアライズすると `Foo([1, 2, 3])` になります。
+
+    ```python
+    @serde(tagging=ExternalTagging)
+    class Foo:
+       a: Union[list[int], set[int]]
+    ```
 
 ## `InternalTagging`
 

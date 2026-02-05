@@ -52,21 +52,22 @@ print(to_json(f))
 {"intField": 10, "strField": "foo"}
 ```
 
-> **注記:** `rename_all` クラス属性と `rename` フィールド属性が同時に使用される場合、`rename` が優先されます。
->
-> ```python
-> @serde(rename_all = 'camelcase')
-> class Foo:
->     int_field: int
->     str_field: str = field(rename='str-field')
->
-> f = Foo(int_field=10, str_field='foo')
-> print(to_json(f))
-> ```
-> 上記のコードは以下を出力します。
-> ```
-> {"intField": 10, "str-field": "foo"}
-> ```
+!!! note
+    `rename_all` クラス属性と `rename` フィールド属性が同時に使用される場合、`rename` が優先されます。
+
+    ```python
+    @serde(rename_all = 'camelcase')
+    class Foo:
+        int_field: int
+        str_field: str = field(rename='str-field')
+
+    f = Foo(int_field=10, str_field='foo')
+    print(to_json(f))
+    ```
+    上記のコードは以下を出力します。
+    ```
+    {"intField": 10, "str-field": "foo"}
+    ```
 
 完全な例については、[examples/rename_all.py](https://github.com/yukinarit/pyserde/blob/main/examples/rename_all.py)を参照してください。
 
@@ -126,37 +127,39 @@ class Foo:
 * フィールドシリアライザとクラスシリアライザの両方が指定されている場合、フィールドシリアライザが優先されます。
 * 旧と新のクラスシリアライザの両方が指定されている場合、新しいクラスシリアライザが優先されます。
 
-> 💡 ヒント：複数の `serialize` メソッドを実装する場合、型チェッカーから、`Redefinition of unused serialize`という警告が出ることがあります。  
-> その場合は、`plum.overload` と `plum.dispatch` を使用して回避してください。  
-> 詳細は [plumのドキュメント](https://beartype.github.io/plum/integration.html) を参照してください。
->
-> ```python
-> from plum import dispatch, overload
-> 
-> class Serializer:
->    # @overload を使用
->    @overload
->    def serialize(self, value: int) -> Any:
->        return str(value)
->
->    # @overload を使用
->    @overload
->    def serialize(self, value: float) -> Any:
->        return int(value)
->
->    # メソッド追加時は必ず @dispatch を追加してください。Plumが型チェッカーからの警告を消してくれます
->    @dispatch
->    def serialize(self, value: Any) -> Any:
->        ...
-> ```
+!!! tip
+    複数の `serialize` メソッドを実装する場合、型チェッカーから、`Redefinition of unused serialize`という警告が出ることがあります。
+    その場合は、`plum.overload` と `plum.dispatch` を使用して回避してください。
+    詳細は [plumのドキュメント](https://beartype.github.io/plum/integration.html) を参照してください。
+
+    ```python
+    from plum import dispatch, overload
+
+    class Serializer:
+       # @overload を使用
+       @overload
+       def serialize(self, value: int) -> Any:
+           return str(value)
+
+       # @overload を使用
+       @overload
+       def serialize(self, value: float) -> Any:
+           return int(value)
+
+       # メソッド追加時は必ず @dispatch を追加してください。Plumが型チェッカーからの警告を消してくれます
+       @dispatch
+       def serialize(self, value: Any) -> Any:
+           ...
+    ```
 
 完全な例については、[examples/custom_class_serializer.py](https://github.com/yukinarit/pyserde/blob/main/examples/custom_class_serializer.py)を参照してください。
 
 
 ### **`serializer`** と **`deserializer`**
 
-> **注記:** `serializer`** と **`deserializer`は、バージョン0.13.0以降、非推奨となりました。  
-> `class_serializer` および `class_deserializer` の使用を検討してください。
+!!! warning "非推奨"
+    `serializer` と `deserializer` は、バージョン0.13.0以降、非推奨となりました。
+    `class_serializer` および `class_deserializer` の使用を検討してください。
 
 クラスレベルでカスタムの(デ)シリアライザを使用したい場合、`serializer` および `deserializer` 属性に(デ)シリアライザメソッドを渡すことができます。
 
