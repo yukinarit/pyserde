@@ -36,17 +36,18 @@ class Foo:
     ...
 ```
 
-> **注記:** `@serde` は `@dataclass` デコレータなしで動作します。  
-> これはserdeが `@dataclass` を自動的に検出し、宣言されたクラスに追加するからです。  
-> しかし `@dataclass` を定義しない場合、mypy では `Too many arguments` または `Unexpected keyword argument` というエラーが発生します。これは [mypy の制限](https://mypy.readthedocs.io/en/stable/additional_features.html#caveats-known-issues)によるものです。
->
-> ```python
-> @serde
-> class Foo:
->     ...
-> ```
->
-> しかし、PEP681に準拠した型チェッカー（例：pyright）を使用すると、pyserdeが [PEP681 dataclass_transform](https://peps.python.org/pep-0681/) をサポートしているため、型エラーは発生しません。
+!!! note
+    `@serde` は `@dataclass` デコレータなしで動作します。
+    これはserdeが `@dataclass` を自動的に検出し、宣言されたクラスに追加するからです。
+    しかし `@dataclass` を定義しない場合、mypy では `Too many arguments` または `Unexpected keyword argument` というエラーが発生します。これは [mypy の制限](https://mypy.readthedocs.io/en/stable/additional_features.html#caveats-known-issues)によるものです。
+
+    ```python
+    @serde
+    class Foo:
+        ...
+    ```
+
+    しかし、PEP681に準拠した型チェッカー（例：pyright）を使用すると、pyserdeが [PEP681 dataclass_transform](https://peps.python.org/pep-0681/) をサポートしているため、型エラーは発生しません。
 
 ## `@serialize` と `@deserialize`
 

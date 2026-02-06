@@ -48,21 +48,22 @@ print(to_json(f))
 {"intField": 10, "strField": "foo"}
 ```
 
-> **NOTE:** If `rename_all` class attribute and `rename` field attribute are used at the same time, `rename` will be prioritized.
->
-> ```python
-> @serde(rename_all = 'camelcase')
-> class Foo:
->     int_field: int
->     str_field: str = field(rename='str-field')
->
-> f = Foo(int_field=10, str_field='foo')
-> print(to_json(f))
-> ```
-> The above code prints
-> ```
-> {"intField": 10, "str-field": "foo"}
-> ```
+!!! note
+    If `rename_all` class attribute and `rename` field attribute are used at the same time, `rename` will be prioritized.
+
+    ```python
+    @serde(rename_all = 'camelcase')
+    class Foo:
+        int_field: int
+        str_field: str = field(rename='str-field')
+
+    f = Foo(int_field=10, str_field='foo')
+    print(to_json(f))
+    ```
+    The above code prints
+    ```
+    {"intField": 10, "str-field": "foo"}
+    ```
 
 See [examples/rename_all.py](https://github.com/yukinarit/pyserde/blob/main/examples/rename_all.py) for the complete example.
 
@@ -113,27 +114,28 @@ Also,
 * If both field and class serializer specified, field serializer is prioritized
 * If both legacy and new class serializer specified, new class serializer is prioritized
 
-> 💡 Tip: If you implements multiple `serialize` methods, you will receive "Redefinition of unused `serialize`" warning from type checker. In such case, try using `plum.overload` and `plum.dispatch` to workaround it. See [plum's documentation](https://beartype.github.io/plum/integration.html) for more information.
->
-> ```python
-> from plum import dispatch, overload
-> 
-> class Serializer:
->    # use @overload
->    @overload
->    def serialize(self, value: int) -> Any:
->        return str(value)
->
->    # use @overload
->    @overload
->    def serialize(self, value: float) -> Any:
->        return int(value)
->
->    # Add method time and make sure to add @dispatch. Plum will do all the magic to erase warnings from type checker.
->    @dispatch
->    def serialize(self, value: Any) -> Any:
->        ...
-> ```
+!!! tip
+    If you implements multiple `serialize` methods, you will receive "Redefinition of unused `serialize`" warning from type checker. In such case, try using `plum.overload` and `plum.dispatch` to workaround it. See [plum's documentation](https://beartype.github.io/plum/integration.html) for more information.
+
+    ```python
+    from plum import dispatch, overload
+
+    class Serializer:
+       # use @overload
+       @overload
+       def serialize(self, value: int) -> Any:
+           return str(value)
+
+       # use @overload
+       @overload
+       def serialize(self, value: float) -> Any:
+           return int(value)
+
+       # Add method time and make sure to add @dispatch. Plum will do all the magic to erase warnings from type checker.
+       @dispatch
+       def serialize(self, value: Any) -> Any:
+           ...
+    ```
 
 See [examples/custom_class_serializer.py](https://github.com/yukinarit/pyserde/blob/main/examples/custom_class_serializer.py) for complete example.
 
@@ -141,7 +143,8 @@ New in v0.13.0.
 
 ### **`serializer`** / **`deserializer`**
 
-> **NOTE:** Deprecated since v0.13.0. Consider using `class_serializer` and `class_deserializer`.
+!!! warning "Deprecated"
+    Deprecated since v0.13.0. Consider using `class_serializer` and `class_deserializer`.
 
 If you want to use a custom (de)serializer at class level, you can pass your (de)serializer methods in `serializer` and `deserializer` class attributes.
 

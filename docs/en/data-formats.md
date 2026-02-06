@@ -11,7 +11,8 @@ serde.yaml.to_yaml(foo, sort_key=True)
 
 `sort_key=True` will be passed in the [yaml.safedump](https://github.com/yukinarit/pyserde/blob/a9f44d52d109144a4c3bb93965f831e91d13960b/serde/yaml.py#L18)
 
-> **NOTE:** JSON, YAML, TOML, and MsgPack formats require their matching extras. `dict`, `tuple`, and Pickle work without optional dependencies.
+!!! note
+    JSON, YAML, TOML, and MsgPack formats require their matching extras. `dict`, `tuple`, and Pickle work without optional dependencies.
 
 ## dict
 

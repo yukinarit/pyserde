@@ -28,7 +28,8 @@ jobs:
     steps:
       - uses: actions/checkout@v6
         with:
-          persist-credentials: false
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
       - name: Install uv
         uses: astral-sh/setup-uv@v7
       - name: Set up Python 3.12
@@ -36,33 +37,18 @@ jobs:
         with:
           python-version: "3.12"
       - name: Install dependencies
+        run: uv sync
+      - name: Get version from tag
+        id: get_version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+      - name: Configure git for mike
         run: |
-          uv sync
-          curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain stable
-          source $HOME/.cargo/env
-          cargo install mdbook
-      - name: Get PR number
-        uses: jwalton/gh-find-current-pr@v1
-        id: findPr
-        with:
-          state: all
-      - name: Set commit message
+          git config --global user.name github-actions
+          git config --global user.email github-actions@github.com
+      - name: Deploy docs with mike
         run: |
-          if [ -z "$PR" ]
-          then
-            echo "COMMIT_MESSAGE=:octocat: Update docs" >> $GITHUB_ENV
-          else
-            echo "COMMIT_MESSAGE=:octocat: Update docs for #$PR" >> $GITHUB_ENV
-          fi
+          git fetch origin gh-pages --depth=1
+          uv run mike deploy --push --update-aliases ${{ steps.get_version.outputs.VERSION }} latest
+          uv run mike set-default --push latest
         env:
-          PR: ${{ steps.findPr.outputs.pr }}
-      - name: Build docs
-        run: make docs
-      - name: Deploy on gh-pages
-        uses: JamesIves/github-pages-deploy-action@v4
-        with:
-          folder: out
-          commit-message: ${{ env.COMMIT_MESSAGE }}
-          clean: true
-          git-config-name: github-actions
-          git-config-email: github-actions@github.com
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

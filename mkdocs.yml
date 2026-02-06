@@ -1,0 +1,155 @@
+site_name: pyserde
+site_description: Yet another serialization library on top of dataclasses
+site_url: https://yukinarit.github.io/pyserde/
+repo_name: yukinarit/pyserde
+repo_url: https://github.com/yukinarit/pyserde
+edit_uri: edit/main/docs/
+copyright: Copyright &copy; 2025 yukinarit
+
+theme:
+  name: material
+  palette:
+    # Palette toggle for dark mode (default)
+    - scheme: slate
+      primary: deep purple
+      accent: deep purple
+      toggle:
+        icon: material/brightness-7
+        name: Switch to light mode
+    # Palette toggle for light mode
+    - scheme: default
+      primary: deep purple
+      accent: deep purple
+      toggle:
+        icon: material/brightness-4
+        name: Switch to dark mode
+  features:
+    - navigation.instant
+    - navigation.tracking
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - navigation.tabs
+    - navigation.footer
+    - content.code.copy
+    - content.code.annotate
+    - content.action.edit
+    - toc.integrate
+    - toc.follow
+    - navigation.path
+    - search.highlight
+    - search.suggest
+  icon:
+    repo: fontawesome/brands/github
+
+plugins:
+  - search:
+      separator: '[\s\-,:!=\[\]()"`/]+|\.(?!\d)|&[lg]t;|(?!\b)(?=[A-Z][a-z])'
+  - mike
+  - i18n:
+      docs_structure: folder
+      fallback_to_default: true
+      reconfigure_material: true
+      reconfigure_search: true
+      languages:
+        - locale: en
+          default: true
+          name: English
+          build: true
+        - locale: ja
+          name: 日本語
+          build: true
+          nav_translations:
+            Home: ホーム
+            User Guide: ユーザーガイド
+            Introduction: はじめに
+            Getting Started: スタートガイド
+            Data Formats: データフォーマット
+            Types: 型
+            Decorators: デコレータ
+            Class Attributes: クラス属性
+            Field Attributes: フィールド属性
+            Union: ユニオン
+            Type Checking: 型チェック
+            Extension: 拡張
+            FAQ: よくある質問
+            API Reference: APIリファレンス
+  - mkdocstrings:
+      handlers:
+        python:
+          options:
+            show_source: true
+            show_root_heading: true
+            show_root_full_path: false
+            docstring_style: google
+            members_order: source
+            show_signature_annotations: true
+            separate_signature: true
+
+nav:
+  - Introduction: index.md
+  - Getting Started: getting-started.md
+  - Data Formats: data-formats.md
+  - Types: types.md
+  - Decorators: decorators.md
+  - Class Attributes: class-attributes.md
+  - Field Attributes: field-attributes.md
+  - Union: union.md
+  - Type Checking: type-check.md
+  - Extension: extension.md
+  - FAQ: faq.md
+  - API Reference: api/index.md
+
+markdown_extensions:
+  # Python Markdown
+  - abbr
+  - admonition
+  - attr_list
+  - def_list
+  - footnotes
+  - md_in_html
+  - toc:
+      permalink: true
+      title: On this page
+
+  # Python Markdown Extensions
+  - pymdownx.arithmatex:
+      generic: true
+  - pymdownx.betterem:
+      smart_enable: all
+  - pymdownx.caret
+  - pymdownx.details
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.keys
+  - pymdownx.mark
+  - pymdownx.smartsymbols
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+      combine_header_slug: true
+      slugify: !!python/object/apply:pymdownx.slugs.slugify
+        kwds:
+          case: lower
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.tilde
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/yukinarit/pyserde
+    - icon: fontawesome/brands/python
+      link: https://pypi.org/project/pyserde/
+  version:
+    provider: mike

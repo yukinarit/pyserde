@@ -1,26 +1,3 @@
-"""
-.. include:: ../README.md
-
-## Modules
-
-The following modules provide the core functionalities of `pyserde`.
-* `serde.se`: All about serialization.
-* `serde.de`: All about deserialization.
-* `serde.core`: Core module used by `serde.se` and `serde.de` modules.
-* `serde.compat`: Compatibility layer which handles mostly differences of `typing` module between
-python versions.
-
-The following modules provide pyserde's (de)serialize APIs.
-* `serde.json`: Serialize and Deserialize in JSON.
-* `serde.msgpack`: Serialize and Deserialize in MsgPack.
-* `serde.yaml`: Serialize and Deserialize in YAML.
-* `serde.toml`: Serialize and Deserialize in TOML.
-* `serde.pickle`: Serialize and Deserialize in Pickle.
-
-Other modules
-* `serde.inspect`: Prints generated code by pyserde.
-"""
-
 from dataclasses import dataclass
 from collections.abc import Callable
 from typing import Any, Type, overload
@@ -87,27 +64,24 @@ __all__ = [
     "strict",
     "coerce",
     "field",
-    "default_deserializer",
     "asdict",
     "astuple",
-    "default_serializer",
     "compat",
-    "core",
-    "de",
+    "init",
+    "logger",
     "inspect",
     "json",
     "msgpack",
     "numpy",
-    "se",
     "toml",
     "pickle",
     "yaml",
-    "init",
-    "logger",
     "ClassSerializer",
     "ClassDeserializer",
     "add_serializer",
     "add_deserializer",
+    "default_serializer",
+    "default_deserializer",
 ]
 
 

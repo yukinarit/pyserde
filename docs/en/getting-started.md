@@ -37,17 +37,21 @@ With uv
 uv add pyserde --extra all
 ```
 
-Here are the available extras
+Here are the available extras:
+
 * `all`: Install `msgpack`, `toml`, `yaml`, `numpy`, `orjson`, and `sqlalchemy` extras
 * `msgpack`: Install [msgpack](https://github.com/msgpack/msgpack-python)
 * `toml`: Install [tomli](https://github.com/hukkin/tomli) and [tomli-w](https://github.com/hukkin/tomli-w)
-	* NOTE: [tomllib](https://docs.python.org/3/library/tomllib.html) is used for python 3.11 onwards
 * `yaml`: Install [pyyaml](https://github.com/yaml/pyyaml)
 * `numpy`: Install [numpy](https://github.com/numpy/numpy)
 * `orjson`: Install [orjson](https://github.com/ijl/orjson)
 * `sqlalchemy`: Install [sqlalchemy](https://github.com/sqlalchemy/sqlalchemy)
 
-> **NOTE:** Extras enable additional formats and types, but you can mix them as needed. For example, install only `toml` and `yaml` if you do not need MsgPack or numpy.
+!!! note
+    [tomllib](https://docs.python.org/3/library/tomllib.html) is used for python 3.11 onwards
+
+!!! note
+    Extras enable additional formats and types, but you can mix them as needed. For example, install only `toml` and `yaml` if you do not need MsgPack or numpy.
 
 ## Define your first pyserde class
 
@@ -66,19 +70,20 @@ class Foo:
 
 pyserde generates methods necessary for (de)serialization by `@serde` when a class is loaded into python interpreter. The code generation occurs only once and there is no overhead when you use the class. Now your class is serializable and deserializable in all the data formats supported by pyserde.
 
-> **NOTE:** If you need only either serialization or deserialization functionality, you can use `@serialize` or `@deserialize` instead of `@serde` decorator.
->
-> e.g. If you do only serialization, you can use `@serialize` decorator. But calling deserialize API e.g. `from_json` for `Foo` will raise an error.
-> ```python
-> from serde import serialize
->
-> @serialize
-> class Foo:
->     i: int
->     s: str
->     f: float
->     b: bool
-> ```
+!!! note
+    If you need only either serialization or deserialization functionality, you can use `@serialize` or `@deserialize` instead of `@serde` decorator.
+
+    e.g. If you do only serialization, you can use `@serialize` decorator. But calling deserialize API e.g. `from_json` for `Foo` will raise an error.
+    ```python
+    from serde import serialize
+
+    @serialize
+    class Foo:
+        i: int
+        s: str
+        f: float
+        b: bool
+    ```
 
 ## PEP585 and PEP604
 
@@ -126,7 +131,8 @@ print(from_dict(Foo, payload))
 
 That's it! pyserde offers many more features. If you're interested, please read the rest of the documentation.
 
-> **NOTE:** If you plan to use YAML, TOML, or MsgPack, remember to install the matching extras listed above.
+!!! note
+    If you plan to use YAML, TOML, or MsgPack, remember to install the matching extras listed above.
 
-> 💡 Tip: which type checker should I use?
-> pyserde depends on [PEP681 dataclass_transform](https://peps.python.org/pep-0681/). [mypy](https://github.com/python/mypy) does not fully support dataclass_transform as of Jan. 2024. My personal recommendation is [pyright](https://github.com/microsoft/pyright).
+!!! tip "Which type checker should I use?"
+    pyserde depends on [PEP681 dataclass_transform](https://peps.python.org/pep-0681/). [mypy](https://github.com/python/mypy) does not fully support dataclass_transform as of Jan. 2024. My personal recommendation is [pyright](https://github.com/microsoft/pyright).

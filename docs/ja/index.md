@@ -4,10 +4,10 @@
 
 pyserdeはdataclass中心のワークフローを想定し、クラス読み込み時にシリアライザを生成することで実行時オーバーヘッドを抑えます。
 
-主な特徴:
-- 複数フォーマット対応（`dict`、`tuple`、JSON、YAML、TOML、MsgPack、Pickle）
-- リッチな型サポート（Optional、Union、Literal、enum、datetime、numpy など）
-- ランタイム型チェックと拡張フック
+!!! info "主な特徴"
+    - 複数フォーマット対応（`dict`、`tuple`、JSON、YAML、TOML、MsgPack、Pickle）
+    - リッチな型サポート（Optional、Union、Literal、enum、datetime、numpy など）
+    - ランタイム型チェックと拡張フック
 
 クラスに`@serde`デコレータを付け、[PEP484](https://peps.python.org/pep-0484/)形式でフィールドに型アノテーションを付けます。
 
@@ -46,10 +46,3 @@ pyserdeはメモリ内フォーマットの`dict`や`tuple`に加えて、追加
 >>> from_dict(Foo, {"i": 10, "s": "foo", "f": 100.0, "b": True})
 Foo(i=10, s='foo', f=100.0, b=True)
 ```
-
-## Next Steps
-
-* [Getting started](getting-started.md)
-* [API Reference](https://yukinarit.github.io/pyserde/api/serde.html)
-* [Examples](https://github.com/yukinarit/pyserde/tree/main/examples)
-* [FAQ](faq.md)

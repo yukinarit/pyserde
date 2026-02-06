@@ -8,18 +8,19 @@ Choose field-level serializers for one-off fields, class serializers for reusabl
 
 See [custom field serializer](./field-attributes.md#serializerdeserializer).
 
-> 💡 Tip: wrapping `serde.field` with your own field function makes 
->
-> ```python
-> import serde
->
-> def field(*args, **kwargs):
->     serde.field(*args, **kwargs, serializer=str)
->
-> @serde
-> class Foo:
->     a: int = field(default=0)  # Configuring field serializer
-> ```
+!!! tip
+    Wrapping `serde.field` with your own field function makes it easy to configure field serializers:
+
+    ```python
+    import serde
+
+    def field(*args, **kwargs):
+        serde.field(*args, **kwargs, serializer=str)
+
+    @serde
+    class Foo:
+        a: int = field(default=0)  # Configuring field serializer
+    ```
 
 ## Custom class (de)serializer
 
@@ -80,12 +81,14 @@ and you get `datetime.timedelta` to be serialized in ISO 8601 duration format!
 Foo(a=datetime.timedelta(seconds=36000))
 ```
 
-> 💡 Tip: You can register as many class (de)serializer as you want. This means you can use as many pyserde extensions as you want.
->  Registered (de)serializers are stacked in the memory. A (de)serializer can be overridden by another (de)serializer.
->
-> e.g. If you register 3 custom serializers in this order, the first serializer will completely overridden by the 3rd one. 2nd one works because it is implemented for a different type.
-> 1. Register Serializer for `int`
-> 2. Register Serializer for `float`
-> 3. Register Serializer for `int`
+!!! tip
+    You can register as many class (de)serializer as you want. This means you can use as many pyserde extensions as you want.
+    Registered (de)serializers are stacked in the memory. A (de)serializer can be overridden by another (de)serializer.
+
+    e.g. If you register 3 custom serializers in this order, the first serializer will completely overridden by the 3rd one. 2nd one works because it is implemented for a different type.
+
+    1. Register Serializer for `int`
+    2. Register Serializer for `float`
+    3. Register Serializer for `int`
 
 New in v0.13.0.

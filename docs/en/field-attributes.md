@@ -101,7 +101,8 @@ class World:
 
 See [Class Attributes: skip_if_default](class-attributes.md#skip_if_default) for the class-level toggle, and [examples/skip.py](https://github.com/yukinarit/pyserde/blob/main/examples/skip.py) plus [examples/skip_if_default_class.py](https://github.com/yukinarit/pyserde/blob/main/examples/skip_if_default_class.py) for the complete examples.
 
-> **NOTE:** `skip`, `skip_if`, `skip_if_false`, `skip_if_none`, and `skip_if_default` apply to both serialization and deserialization. Use `skip_serializing` / `skip_deserializing` to make direction-specific choices.
+!!! note
+    `skip`, `skip_if`, `skip_if_false`, `skip_if_none`, and `skip_if_default` apply to both serialization and deserialization. Use `skip_serializing` / `skip_deserializing` to make direction-specific choices.
 
 ### **`skip_if_false`**
 
