@@ -1,5 +1,3 @@
-from typing import Generic, TypeVar
-
 from serde import from_dict, serde, to_dict
 
 
@@ -15,17 +13,15 @@ class A(EventData):
 
 # Additional subclasses of EventData exist
 
-Data = TypeVar("Data", bound=EventData)
-
 
 @serde
-class Payload(Generic[Data]):
+class Payload[Data: EventData]:
     id: int
     data: Data
 
 
 @serde
-class Event(Generic[Data]):
+class Event[Data: EventData]:
     name: str
     payload: Payload[Data]
 
