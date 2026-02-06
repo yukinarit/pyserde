@@ -76,7 +76,7 @@ dev = [
   "mkdocstrings[python]>=0.24",
   "mkdocs-static-i18n>=1.2",
   "mike>=2.0",
-  "more-itertools>=10.5.0,<10.6",
+  "more-itertools>=10.5.0,<10.9",
   "pre-commit==4.5.1",
   "pytest-xdist>=3.5.0,<4.0",
   "types-PyYAML>=6.0.9,<7.0",
