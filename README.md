@@ -15,7 +15,7 @@
   </a>
 </p>
 <p align="center">
-  <a href="https://yukinarit.github.io/pyserde">Guide🇬🇧</a> | <a href="https://yukinarit.github.io/pyserde">ガイド🇯🇵</a> | <a href="https://yukinarit.github.io/pyserde/api/serde.html">API Reference</a> | <a href="https://github.com/yukinarit/pyserde/tree/main/examples">Examples</a>
+  <a href="https://yukinarit.github.io/pyserde">Guide🇬🇧</a> | <a href="https://yukinarit.github.io/pyserde/latest/ja">ガイド🇯🇵</a> | <a href="https://yukinarit.github.io/pyserde/api/serde.html">API Reference</a> | <a href="https://github.com/yukinarit/pyserde/tree/main/examples">Examples</a>
 </p>
 
 ## Overview
