@@ -125,7 +125,12 @@ include = [
 exclude = [
   "serde/numpy.py",
   "serde/__init__.py",
-  "examples/type_numpy_jaxtyping.py"
+  "examples/type_numpy_jaxtyping.py",
+  "examples/forward_reference.py",
+  "examples/recursive.py",
+  "examples/recursive_list.py",
+  "examples/recursive_union.py",
+  "examples/lazy_type_evaluation.py",
 ]
 pythonVersion = "3.12"
 reportMissingImports = false
@@ -138,7 +143,8 @@ ignore_missing_imports = true
 exclude = [
   "serde/numpy.py",
   "examples/alias.py",
-  "examples/generics_pep695.py",
+  "examples/generics.py",
+  "examples/generics_nested.py",
   "examples/custom_class_serializer.py",
   "examples/global_custom_class_serializer.py",
   "tests/.*",
@@ -154,9 +160,15 @@ ignore_errors = true
 [tool.ruff]
 line-length = 100
 extend-exclude = [
-  "examples/generics_pep695.py",
+  "examples/generics.py",
+  "examples/generics_nested.py",
   "examples/type_alias_pep695.py",
   "examples/type_statement.py",
+  "examples/forward_reference.py",
+  "examples/recursive.py",
+  "examples/recursive_list.py",
+  "examples/recursive_union.py",
+  "examples/lazy_type_evaluation.py",
 ]
 
 [tool.ruff.lint]
