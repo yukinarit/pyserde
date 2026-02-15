@@ -1,7 +1,6 @@
 import sys
 import typing
 
-
 if sys.version_info[:3] < (3, 12, 0):
     print("examples require at least Python 3.12")
     sys.exit(1)
@@ -72,6 +71,7 @@ def run_all() -> None:
     import enum34
     import kw_only
     import self_type
+    import typeddict
 
     run(any)
     run(simple)
@@ -138,6 +138,7 @@ def run_all() -> None:
     run(type_uuid)
     run(type_numpy)
     run(self_type)
+    run(typeddict)
 
     try:
         import type_sqlalchemy

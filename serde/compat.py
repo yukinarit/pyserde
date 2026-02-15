@@ -389,6 +389,10 @@ def iter_types(cls: type[Any]) -> list[type[Any]]:
             lst.add(tuple)
             for arg in type_args(cls):
                 recursive(arg)
+        elif is_typeddict(cls):
+            lst.add(cls)
+            for _name, (field_type, _is_req) in typeddict_fields(cls).items():
+                recursive(field_type)
         elif is_dict(cls):
             lst.add(dict)
             args = type_args(cls)
@@ -1071,6 +1075,57 @@ def is_pep695_type_alias(typ: Any) -> bool:
     Test if the type is of PEP695 type alias.
     """
     return isinstance(typ, _PEP695_TYPES)
+
+
+def is_typeddict(typ: Any) -> bool:
+    """
+    Test if the type is a TypedDict.
+
+    >>> from typing import TypedDict
+    >>> class Movie(TypedDict):
+    ...     title: str
+    ...     year: int
+    >>> is_typeddict(Movie)
+    True
+    >>> is_typeddict(dict)
+    False
+    """
+    return typing_extensions.is_typeddict(typ)
+
+
+def typeddict_fields(typ: type[Any]) -> dict[str, tuple[type[Any], bool]]:
+    """
+    Get fields from a TypedDict with their types and required status.
+
+    Returns a dict mapping field name to (unwrapped_type, is_required).
+
+    >>> from typing import TypedDict, NotRequired
+    >>> class Movie(TypedDict):
+    ...     title: str
+    ...     year: NotRequired[int]
+    >>> fields = typeddict_fields(Movie)
+    >>> fields['title']
+    (<class 'str'>, True)
+    >>> fields['year']
+    (<class 'int'>, False)
+    """
+    hints = typing.get_type_hints(typ, include_extras=True)
+    required_keys = frozenset(getattr(typ, "__required_keys__", hints.keys()))
+
+    result: dict[str, tuple[type[Any], bool]] = {}
+    for name, field_type in hints.items():
+        origin = get_origin(field_type)
+        # Unwrap NotRequired[T] or Required[T] wrappers
+        if origin is typing_extensions.NotRequired:
+            inner = type_args(field_type)[0]
+            result[name] = (inner, False)
+        elif origin is typing_extensions.Required:
+            inner = type_args(field_type)[0]
+            result[name] = (inner, True)
+        else:
+            result[name] = (field_type, name in required_keys)
+
+    return result
 
 
 @cache
