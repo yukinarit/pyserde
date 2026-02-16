@@ -867,6 +867,7 @@ def test_skip_with_unsupported_types() -> None:
     class Foo:
         name: str
         internal: UnsupportedClass = serde.field(default_factory=UnsupportedClass, skip=True)
+        internal_union: UnsupportedClass | None = serde.field(default=None, skip=True)
 
     # Serialization should work
     f = Foo(name="test")
@@ -876,6 +877,7 @@ def test_skip_with_unsupported_types() -> None:
     restored = serde.from_dict(Foo, {"name": "test"})
     assert restored.name == "test"
     assert isinstance(restored.internal, UnsupportedClass)
+    assert restored.internal_union is None
 
     # Also test with List of unsupported types
     @serde.serde
