@@ -70,7 +70,7 @@ dev = [
   "pytest-cov",
   "pytest-watch",
   "pytest-flake8",
-  "coverage==7.13.3",
+  "coverage==7.13.4",
   "mkdocs>=1.6",
   "mkdocs-material>=9.5",
   "mkdocstrings[python]>=0.24",
