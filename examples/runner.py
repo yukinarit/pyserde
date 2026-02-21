@@ -1,7 +1,6 @@
 import sys
 import typing
 
-
 if sys.version_info[:3] < (3, 12, 0):
     print("examples require at least Python 3.12")
     sys.exit(1)
