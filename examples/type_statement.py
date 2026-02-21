@@ -2,7 +2,6 @@ from dataclasses import dataclass
 
 from serde import serde
 
-
 type Baz = tuple[float, float]
 type Bar = tuple[Baz, ...]
 
