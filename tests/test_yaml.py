@@ -30,21 +30,15 @@ def test_skip_none() -> None:
         b: int | None
 
     f = Foo(10, 100)
-    assert (
-        to_yaml(f, skip_none=True)
-        == """\
+    assert to_yaml(f, skip_none=True) == """\
 a: 10
 b: 100
 """
-    )
 
     f = Foo(10, None)
-    assert (
-        to_yaml(f, skip_none=True)
-        == """\
+    assert to_yaml(f, skip_none=True) == """\
 a: 10
 """
-    )
 
 
 def test_coerce_numbers_yaml() -> None:

@@ -5,7 +5,6 @@ import pytest
 
 from serde import serde, from_dict, to_dict
 
-
 try:
     from typing import TypeAliasType
 except ImportError:  # pragma: no cover

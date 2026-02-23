@@ -35,21 +35,15 @@ def test_skip_none() -> None:
         b: int | None
 
     f = Foo(10, 100)
-    assert (
-        to_toml(f)
-        == """\
+    assert to_toml(f) == """\
 a = 10
 b = 100
 """
-    )
 
     f = Foo(10, None)
-    assert (
-        to_toml(f)
-        == """\
+    assert to_toml(f) == """\
 a = 10
 """
-    )
 
 
 def test_skip_none_container_not_supported_yet() -> None:
