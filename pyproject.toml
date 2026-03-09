@@ -63,7 +63,7 @@ dev = [
   "msgpack",
   "numpy>1.22.0,<3.0.0",
   "mypy==1.19.1",
-  "black==26.1.0",
+  "black==26.3.0",
   "pyright==1.1.408",
   "ruff==0.15.4",
   "pytest",
