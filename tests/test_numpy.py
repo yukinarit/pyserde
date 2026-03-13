@@ -19,6 +19,11 @@ log = logging.getLogger("test")
 serde.init(True)
 
 
+def test_numpy_jaxtyping_detection() -> None:
+    assert serde.numpy.is_numpy_jaxtyping(jaxtyping.Float[np.ndarray, "2 2"])  # noqa: F722
+    assert not serde.numpy.is_numpy_jaxtyping(np.ndarray)
+
+
 @pytest.mark.parametrize("opt", opt_case, ids=opt_case_ids())
 @pytest.mark.parametrize("se,de", all_formats)
 def test_numpy_simple(se: Any, de: Any, opt: Any) -> None:
