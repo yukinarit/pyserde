@@ -75,11 +75,13 @@ try:
 
     def is_numpy_jaxtyping(typ) -> bool:
         try:
-            origin = get_origin(typ)
-            if origin is not None:
-                typ = origin
-            return typ is not np.ndarray and issubclass(typ, np.ndarray)
-        except TypeError:
+            import jaxtyping
+
+            typ = get_origin(typ) or typ
+            return issubclass(typ, jaxtyping.AbstractArray) and (
+                getattr(typ, "array_type", None) is np.ndarray
+            )
+        except (ImportError, TypeError):
             return False
 
     def serialize_numpy_array(arg) -> str:
