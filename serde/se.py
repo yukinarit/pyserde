@@ -57,12 +57,14 @@ from .compat import (
     is_str_serializable,
     is_str_serializable_instance,
     is_tuple,
+    is_typeddict,
     is_union,
     is_variable_tuple,
     is_pep695_type_alias,
     iter_types,
     iter_unions,
     type_args,
+    typeddict_fields,
     typename,
 )
 from .core import (
@@ -422,6 +424,11 @@ def to_obj(
             return [thisfunc(e) for e in o]
         elif is_bearable(o, tuple):  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
             return tuple(thisfunc(e) for e in o)
+        elif is_typeddict(type(o)):
+            td_fields = typeddict_fields(type(o))
+            return {
+                name: thisfunc(o[name]) for name, (_ft, _is_req) in td_fields.items() if name in o
+            }
         elif isinstance(o, Mapping):
             return {k: thisfunc(v) for k, v in o.items()}
         elif isinstance(o, Set):
@@ -895,6 +902,8 @@ class Renderer:
             res = self.deque(arg)
         elif is_counter(arg.type):
             res = self.counter(arg)
+        elif is_typeddict(arg.type):
+            res = self.typeddict(arg)
         elif is_dict(arg.type):
             res = self.dict(arg)
         elif is_tuple(arg.type):
@@ -1070,6 +1079,23 @@ class Renderer:
             varg = arg[1]
             varg.name = "v"
             return f"{{{self.render(karg)}: {self.render(varg)} for k, v in {arg.varname}.items()}}"
+
+    def typeddict(self, arg: SeField[Any]) -> str:
+        """
+        Render rvalue for TypedDict serialization.
+        """
+        td_fields = typeddict_fields(arg.type)
+        parts = []
+        for name, (field_type, is_required) in td_fields.items():
+            inner = SeField(field_type, name=f'{arg.varname}["{name}"]')
+            rendered_value = self.render(inner)
+            if is_required:
+                parts.append(f'"{name}": {rendered_value}')
+            else:
+                parts.append(
+                    f'**({{"{name}": {rendered_value}}} if "{name}" in {arg.varname} else {{}})'
+                )
+        return "{" + ", ".join(parts) + "}"
 
     def enum(self, arg: SeField[Any]) -> str:
         return f"enum_value({typename(arg.type)}, {arg.varname})"
