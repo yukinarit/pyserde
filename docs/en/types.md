@@ -14,6 +14,7 @@ Here is the list of the supported types. See the simple example for each type in
     * [`defaultdict`](https://docs.python.org/3/library/collections.html#collections.defaultdict) [^4]
     * [`deque`](https://docs.python.org/3/library/collections.html#collections.deque) [^25]
     * [`Counter`](https://docs.python.org/3/library/collections.html#collections.Counter) [^26]
+* [`typing.TypedDict`](https://docs.python.org/3/library/typing.html#typing.TypedDict) [^27]
 * [`typing.Optional`](https://docs.python.org/3/library/typing.html#typing.Optional) [^5]
 * [`typing.Union`](https://docs.python.org/3/library/typing.html#typing.Union) [^6] [^7] [^8]
 * User defined class with [`@dataclass`](https://docs.python.org/3/library/dataclasses.html) [^9] [^10]
@@ -48,6 +49,49 @@ class Foo:
     d: dict[str, list[tuple[str, int]]]
     e: str | None
     f: Bar
+```
+
+## TypedDict
+
+[`typing.TypedDict`](https://docs.python.org/3/library/typing.html#typing.TypedDict) can be used as a field type in a `@serde` dataclass, or deserialized directly via `from_dict` / `from_json`.
+
+```python
+from typing import NotRequired, TypedDict
+from serde import serde
+from serde.json import to_json, from_json
+
+class Movie(TypedDict):
+    title: str
+    year: int
+    director: str
+
+class Person(TypedDict):
+    name: str
+    age: int
+    email: NotRequired[str]  # optional field
+
+@serde
+class Cinema:
+    location: str
+    featured: Movie
+```
+
+```python
+>>> movie: Movie = {"title": "Inception", "year": 2010, "director": "Christopher Nolan"}
+>>> cinema = Cinema(location="Downtown", featured=movie)
+
+>>> to_json(cinema)
+'{"location":"Downtown","featured":{"title":"Inception","year":2010,"director":"Christopher Nolan"}}'
+
+>>> from_json(Cinema, to_json(cinema))
+Cinema(location='Downtown', featured={'title': 'Inception', 'year': 2010, 'director': 'Christopher Nolan'})
+```
+
+`NotRequired` fields are omitted from the output when absent, and optional on input:
+
+```python
+>>> person_with_email: Person = {"name": "Alice", "age": 30, "email": "alice@example.com"}
+>>> person_no_email: Person = {"name": "Bob", "age": 25}
 ```
 
 ## Numpy
@@ -157,3 +201,5 @@ If you need to use a type which is currently not supported in the standard libra
 [^25]: See [examples/deque.py](https://github.com/yukinarit/pyserde/blob/main/examples/deque.py)
 
 [^26]: See [examples/counter.py](https://github.com/yukinarit/pyserde/blob/main/examples/counter.py)
+
+[^27]: See [examples/typeddict.py](https://github.com/yukinarit/pyserde/blob/main/examples/typeddict.py)

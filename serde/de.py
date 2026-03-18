@@ -56,6 +56,7 @@ from .compat import (
     is_set,
     is_str_serializable,
     is_tuple,
+    is_typeddict,
     is_union,
     is_variable_tuple,
     is_pep695_type_alias,
@@ -63,6 +64,7 @@ from .compat import (
     iter_types,
     iter_unions,
     type_args,
+    typeddict_fields,
     typename,
 )
 from .core import (
@@ -535,6 +537,15 @@ def from_obj(
                 res = tuple(e for e in o)
             else:
                 res = tuple(thisfunc(type_args(c)[i], e) for i, e in enumerate(o))
+        elif is_typeddict(c):
+            td_fields = typeddict_fields(c)
+            result: dict[str, Any] = {}
+            for name, (field_type, is_required) in td_fields.items():
+                if name in o:
+                    result[name] = thisfunc(field_type, o[name])
+                elif is_required:
+                    raise SerdeError(f"Missing required key '{name}' for TypedDict {typename(c)}")
+            res = result
         elif is_dict(c):
             if is_bare_dict(c):
                 res = o
@@ -879,6 +890,8 @@ class Renderer:
             res = self.deque(arg)
         elif is_counter(arg.type):
             res = self.counter(arg)
+        elif is_typeddict(arg.type):
+            res = self.typeddict(arg)
         elif is_dict(arg.type):
             res = self.dict(arg)
         elif is_tuple(arg.type):
@@ -1102,6 +1115,23 @@ class Renderer:
             k = arg.key_field()
             v = arg.value_field()
             return f"{{{self.render(k)}: {self.render(v)} for k, v in {arg.data}.items()}}"
+
+    def typeddict(self, arg: DeField[Any]) -> str:
+        """
+        Render rvalue for TypedDict deserialization.
+        """
+        td_fields = typeddict_fields(arg.type)
+        parts = []
+        for name, (field_type, is_required) in td_fields.items():
+            inner = DeField(field_type, name, datavar=arg.data)
+            rendered_value = self.render(inner)
+            if is_required:
+                parts.append(f'"{name}": {rendered_value}')
+            else:
+                parts.append(
+                    f'**({{"{name}": {rendered_value}}} if "{name}" in {arg.data} else {{}})'
+                )
+        return "{" + ", ".join(parts) + "}"
 
     def enum(self, arg: DeField[Any]) -> str:
         return f"{typename(arg.type)}({self.primitive(arg)})"

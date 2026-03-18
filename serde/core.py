@@ -49,9 +49,11 @@ from .compat import (
     is_opt_dataclass,
     is_set,
     is_tuple,
+    is_typeddict,
     is_union,
     is_variable_tuple,
     type_args,
+    typeddict_fields,
     typename,
     _WithTagging,
 )
@@ -368,7 +370,9 @@ def is_instance(obj: Any, typ: Any) -> bool:
     pyserde's own `isinstance` helper. It accepts subscripted generics e.g. `list[int]` and
     deeply check object against declared type.
     """
-    if dataclasses.is_dataclass(typ):
+    if is_typeddict(typ):
+        return is_typeddict_instance(obj, typ)
+    elif dataclasses.is_dataclass(typ):
         if not isinstance(typ, type):
             raise SerdeError("expect dataclass class but dataclass instance received")
         return isinstance(obj, typ)
@@ -419,6 +423,18 @@ def is_union_instance(obj: Any, typ: type[Any]) -> bool:
         if is_instance(obj, arg):
             return True
     return False
+
+
+def is_typeddict_instance(obj: Any, typ: type[Any]) -> bool:
+    if not isinstance(obj, dict):
+        return False
+    td_fields = typeddict_fields(typ)
+    for name, (field_type, is_required) in td_fields.items():
+        if is_required and name not in obj:
+            return False
+        if name in obj and not is_instance(obj[name], field_type):
+            return False
+    return True
 
 
 def is_list_instance(obj: Any, typ: type[Any]) -> bool:
