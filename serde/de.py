@@ -737,7 +737,11 @@ class DeField(Field[T]):
             return InnerField(typ, f"{self.data}[{n}]", datavar=f"{self.data}[{n}]", **opts)
         else:
             # For Optional etc.
-            return DeField(
+            # Preserve InnerField when unwrapping Optional inside a collection,
+            # so that data access uses the loop variable directly (e.g. "v")
+            # instead of indexing into it (e.g. v["v"]).
+            field_cls = type(self)
+            return field_cls(
                 typ,
                 self.name,
                 datavar=self.datavar,
@@ -1001,7 +1005,7 @@ class Renderer:
         Render rvalue for Optional.
         """
         inner = arg[0]
-        if arg.iterbased:
+        if arg.iterbased or isinstance(arg, InnerField):
             exists = f"{arg.data} is not None"
         elif arg.flatten:
             # Check nullabilities of all nested fields.

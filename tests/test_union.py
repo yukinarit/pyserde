@@ -919,3 +919,20 @@ def test_untagged_union_with_literal() -> None:
     all_false_json = '{"num": {"all": false}}'
     with pytest.raises(SerdeError):
         from_json(Baz, all_false_json)
+
+
+def test_optional_value_in_list():
+    """Test that Optional/Union with None in list values deserializes correctly."""
+
+    @serde
+    @dataclass
+    class Inner:
+        value: int = 10
+
+    @serde
+    @dataclass
+    class Outer:
+        items: list[Optional[Inner]]
+
+    instance = Outer(items=[Inner(value=1), None, Inner(value=3)])
+    assert from_dict(Outer, to_dict(instance)) == instance
