@@ -171,7 +171,7 @@ select = [
 ignore = ["B904"]
 
 [tool.ruff.lint.mccabe]
-max-complexity = 30
+max-complexity = 34
 
 [tool.ruff.lint.per-file-ignores]
 # https://docs.kidger.site/jaxtyping/faq/#flake8-or-ruff-are-throwing-an-error

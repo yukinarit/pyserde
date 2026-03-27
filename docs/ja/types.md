@@ -14,6 +14,7 @@
     * [`defaultdict`](https://docs.python.org/3/library/collections.html#collections.defaultdict) [^4]
     * [`deque`](https://docs.python.org/3/library/collections.html#collections.deque) [^25]
     * [`Counter`](https://docs.python.org/3/library/collections.html#collections.Counter) [^26]
+* [`typing.TypedDict`](https://docs.python.org/3/library/typing.html#typing.TypedDict) [^27]
 * [`typing.Optional`](https://docs.python.org/3/library/typing.html#typing.Optional)[^5]
 * [`typing.Union`](https://docs.python.org/3/library/typing.html#typing.Union) [^6] [^7] [^8]
 * [`@dataclass`](https://docs.python.org/3/library/dataclasses.html) を用いたユーザ定義クラス [^9] [^10]
@@ -48,6 +49,49 @@ class Foo:
     d: dict[str, list[tuple[str, int]]]
     e: str | None
     f: Bar
+```
+
+## TypedDict
+
+[`typing.TypedDict`](https://docs.python.org/3/library/typing.html#typing.TypedDict) は `@serde` デコレータを付けたデータクラスのフィールド型として使用できます。また、`from_dict` / `from_json` で直接デシリアライズすることも可能です。
+
+```python
+from typing import NotRequired, TypedDict
+from serde import serde
+from serde.json import to_json, from_json
+
+class Movie(TypedDict):
+    title: str
+    year: int
+    director: str
+
+class Person(TypedDict):
+    name: str
+    age: int
+    email: NotRequired[str]  # 省略可能なフィールド
+
+@serde
+class Cinema:
+    location: str
+    featured: Movie
+```
+
+```python
+>>> movie: Movie = {"title": "Inception", "year": 2010, "director": "Christopher Nolan"}
+>>> cinema = Cinema(location="Downtown", featured=movie)
+
+>>> to_json(cinema)
+'{"location":"Downtown","featured":{"title":"Inception","year":2010,"director":"Christopher Nolan"}}'
+
+>>> from_json(Cinema, to_json(cinema))
+Cinema(location='Downtown', featured={'title': 'Inception', 'year': 2010, 'director': 'Christopher Nolan'})
+```
+
+`NotRequired` フィールドは値が存在しない場合に出力から省略され、入力でも省略できます。
+
+```python
+>>> person_with_email: Person = {"name": "Alice", "age": 30, "email": "alice@example.com"}
+>>> person_no_email: Person = {"name": "Bob", "age": 25}
 ```
 
 ## Numpy
@@ -162,3 +206,5 @@ SQLAlchemy宣言的データクラスマッピング統合の実験的サポー�
 [^25]: [examples/deque.py](https://github.com/yukinarit/pyserde/blob/main/examples/deque.py) を参照
 
 [^26]: [examples/counter.py](https://github.com/yukinarit/pyserde/blob/main/examples/counter.py) を参照
+
+[^27]: [examples/typeddict.py](https://github.com/yukinarit/pyserde/blob/main/examples/typeddict.py) を参照
