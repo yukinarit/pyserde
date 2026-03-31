@@ -1,3 +1,4 @@
+import enum
 import logging
 from dataclasses import dataclass
 from typing import Any, Literal
@@ -194,3 +195,17 @@ def test_msgpack_unnamed() -> None:
     d = b"\x94\x01\xa3foo\xc3\xa3bar"
     assert d == serde.msgpack.to_msgpack(p, named=False)
     assert p == serde.msgpack.from_msgpack(Literals, d, named=False)
+
+
+def test_skip_literal_enum_field() -> None:
+    class Choice(enum.Enum):
+        X = "x"
+
+    @serde.serde
+    class Foo:
+        name: str
+        ignored: Literal[Choice.X] = serde.field(default=Choice.X, skip=True)
+
+    value = Foo("test")
+    assert {"name": "test"} == serde.to_dict(value)
+    assert value == serde.from_dict(Foo, {"name": "test"})
