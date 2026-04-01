@@ -3,7 +3,7 @@ import typing
 
 import pytest
 
-from serde import serde, from_dict, to_dict
+from serde import serde, field, from_dict, to_dict
 
 try:
     from typing import TypeAliasType
@@ -94,3 +94,29 @@ def test_typealiastype_nested_alias() -> None:
 
     value = Foo("alias", [1, 2, 3])
     assert value == from_dict(Foo, to_dict(value))
+
+
+@pytest.mark.skipif(sys.version_info < (3, 12), reason=_PEP695_REASON)
+def test_pep695_recursive_type_alias_skipped_field() -> None:
+    ns: dict[str, object] = {
+        "field": field,
+        "from_dict": from_dict,
+        "serde": serde,
+        "to_dict": to_dict,
+    }
+    exec(
+        """
+type NestedDict = dict[str, NestedDict | int]
+
+@serde
+class Config:
+    name: str
+    internal: NestedDict | None = field(default=None, skip=True)
+""",
+        ns,
+    )
+    Config = typing.cast(type, ns["Config"])
+
+    value = Config(name="test")
+    assert {"name": "test"} == to_dict(value)
+    assert value == from_dict(Config, {"name": "test"})
