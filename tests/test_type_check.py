@@ -119,6 +119,9 @@ def test_uncoercible() -> None:
     with pytest.raises(serde.SerdeError):
         serde.from_dict(Foo, {"i": "foo"})
 
+    with pytest.raises(serde.SerdeError):
+        serde.from_dict(Foo, {"i": None})
+
 
 def test_coerce() -> None:
     @serde.serde(type_check=serde.coerce)
