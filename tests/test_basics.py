@@ -994,8 +994,10 @@ def test_exception_to_from_obj() -> None:
     class Bar:
         pass
 
-    with pytest.raises(serde.SerdeError):
+    with pytest.raises(serde.SerdeError) as exc_info:
         serde.from_dict(Foo, {})
+
+    assert str(exc_info.value) == "missing required field 'a' while deserializing Foo"
 
 
 def test_user_error() -> None:

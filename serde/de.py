@@ -1288,10 +1288,18 @@ def {{func}}(cls=cls, maybe_generic=None, maybe_generic_type_vars=None, data=Non
   {% endif %}
 
   {% for f in fields %}
+  {% set field_arg = arg(f,loop.index-1) %}
   {% if f.flatten and is_flatten_dict(f.type) %}
   __{{f.name}} = __flatten_extra
+  {% elif field_arg.supports_default() %}
+  __{{f.name}} = {{rvalue(field_arg)}}
   {% else %}
-  __{{f.name}} = {{rvalue(arg(f,loop.index-1))}}
+  try:
+    __{{f.name}} = {{rvalue(field_arg)}}
+  except KeyError:
+    raise SerdeError(
+      "missing required field '{{field_arg.conv_name()}}' while deserializing {{class_name}}"
+    )
   {% endif %}
   {% endfor %}
 
@@ -1503,6 +1511,7 @@ def render_from_dict(
             fields=fields,
             type_check=type_check,
             cls_type_vars=get_type_var_names(cls),
+            class_name=typename(cls),
             rvalue=renderer.render,
             arg=functools.partial(to_arg, rename_all=rename_all),
             deny_unknown_fields=deny_unknown_fields,
