@@ -625,6 +625,24 @@ def test_default_rename_and_alias() -> None:
     assert ff.a == 2
 
 
+def test_skip() -> None:
+    # Note that skipped field is not the last one
+    @serde.serde
+    class Foo:
+        comments: list[str] = serde.field(default_factory=list, skip=True)
+        name: str = ""
+
+    f = Foo(["foo"], "bar")
+
+    # Serialization should work
+    assert serde.to_dict(f) == {"name": "bar"}
+
+    # Deserialization should work, using default for skipped field
+    restored = serde.from_dict(Foo, {"name": "bar"})
+    assert restored.name == "bar"
+    assert restored.comments == []
+
+
 @pytest.mark.parametrize(
     "se,de",
     (format_dict + format_json + format_msgpack + format_yaml + format_toml + format_pickle),
