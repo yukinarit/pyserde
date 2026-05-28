@@ -1484,6 +1484,12 @@ def render_from_dict(
     )
     serde_scope = getattr(cls, SERDE_SCOPE)
     all_fields = defields(cls)
+    force_kw = False
+    for field in all_fields:
+        if not renderable(field):
+            force_kw = True
+        if force_kw:
+            field.kw_only = True
     fields = list(filter(renderable, all_fields))
     if serde_scope.transparent:
         field = dataclasses.replace(fields[0], alias=[], rename="__serde_transparent__", case=None)
