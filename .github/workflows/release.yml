@@ -48,6 +48,7 @@ jobs:
       - name: Deploy docs with mike
         run: |
           git fetch origin gh-pages --depth=1
+          uv run mike delete --push latest || true
           uv run mike deploy --push --update-aliases ${{ steps.get_version.outputs.VERSION }} latest
           uv run mike set-default --push latest
         env:
