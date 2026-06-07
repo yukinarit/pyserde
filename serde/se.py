@@ -307,11 +307,7 @@ def serialize(
             add_func(scope, union_key, render_union_func(cls, union_args, tagging), g)
             scope.union_se_args[union_key] = union_args
 
-        for f in sefields(cls, serialize_class_var):
-            if f.skip_if:
-                g[f.skip_if.name] = f.skip_if
-            if f.serializer:
-                g[f.serializer.name] = f.serializer
+        add_field_serializers_to_scope(sefields(cls, serialize_class_var), g, serialize_class_var)
 
         add_func(
             scope,
@@ -601,6 +597,29 @@ def sefields(cls: type[Any], serialize_class_var: bool = False) -> Iterator[SeFi
     ):
         f.parent = SeField(None, "obj")  # type: ignore
         yield f
+
+
+def add_field_serializers_to_scope(
+    sfields: Iterator[SeField[Any]], g: dict[str, Any], serialize_class_var: bool = False
+) -> None:
+    """
+    Register custom field serializers and skip_if predicates in the generated globals.
+
+    A flattened dataclass field is rendered inline in the enclosing class's serialize
+    function, so the custom serializers and skip_if predicates of its inner fields must
+    be available in this scope too, not only those of the top-level fields (#453).
+    """
+    for f in sfields:
+        if f.skip_if:
+            g[f.skip_if.name] = f.skip_if
+        if f.serializer:
+            g[f.serializer.name] = f.serializer
+        if f.flatten:
+            inner = f[0] if is_opt(f.type) else f
+            if is_dataclass(inner.type):
+                add_field_serializers_to_scope(
+                    sefields(inner.type, serialize_class_var), g, serialize_class_var
+                )
 
 
 jinja2_env = jinja2.Environment(
