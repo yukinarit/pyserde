@@ -167,6 +167,31 @@ def _exists_by_aliases(d: dict[str, str], aliases: list[str]) -> bool:
     return False
 
 
+def _project_flattened_data(
+    data: dict[str, Any] | None,
+    child_known_fields: set[str],
+    parent_known_fields: set[str],
+    child_has_flatten_dict: bool,
+    parent_has_flatten_dict: bool,
+) -> dict[str, Any]:
+    """
+    Select the portion of a flattened input map that should be visible to a child dataclass.
+
+    Parent fields must not be reported as unknown fields by a flattened child. Unknown fields
+    still need to pass through when no parent flatten dict captures them, or when the child has
+    its own flatten dict somewhere below it.
+    """
+    if not data:
+        return {}
+
+    keep_unknowns = child_has_flatten_dict or not parent_has_flatten_dict
+    if keep_unknowns:
+        return {
+            k: v for k, v in data.items() if k in child_known_fields or k not in parent_known_fields
+        }
+    return {k: v for k, v in data.items() if k in child_known_fields}
+
+
 def _make_deserialize(
     cls_name: str,
     fields: list[Any],
@@ -300,6 +325,7 @@ def deserialize(
         g["coerce_object"] = coerce_object
         g["_exists_by_aliases"] = _exists_by_aliases
         g["_get_by_aliases"] = _get_by_aliases
+        g["_project_flattened_data"] = _project_flattened_data
         g["class_deserializers"] = class_deserializers
         g["BeartypeCallHintParamViolation"] = BeartypeCallHintParamViolation
         g["is_bearable"] = is_bearable
@@ -1200,9 +1226,14 @@ class Renderer:
             return code
 
 
-def to_arg(f: DeField[T], index: int, rename_all: str | None = None) -> DeField[T]:
+def to_arg(
+    f: DeField[T],
+    index: int,
+    rename_all: str | None = None,
+    datavar: str = "data",
+) -> DeField[T]:
     f.index = index
-    f.data = "data"
+    f.data = datavar
     f.case = f.case or rename_all
     return f
 
@@ -1288,10 +1319,23 @@ def {{func}}(cls=cls, maybe_generic=None, maybe_generic_type_vars=None, data=Non
   {% endif %}
 
   {% for f in fields %}
-  {% set field_arg = arg(f,loop.index-1) %}
   {% if f.flatten and is_flatten_dict(f.type) %}
   __{{f.name}} = __flatten_extra
-  {% elif field_arg.supports_default() %}
+  {% else %}
+  {% set child_scope = flattened_dataclass_child_scopes.get(f.name) %}
+  {% if child_scope %}
+  __{{f.name}}_flatten_data = _project_flattened_data(
+    data,
+    {{ child_scope.de_known_fields }},
+    {{ known_fields }},
+    {{ child_scope.de_has_flatten_dict }},
+    {{ has_flatten_dict }},
+  )
+  {% set field_arg = arg(f,loop.index-1, datavar="__" ~ f.name ~ "_flatten_data") %}
+  {% else %}
+  {% set field_arg = arg(f,loop.index-1) %}
+  {% endif %}
+  {% if field_arg.supports_default() %}
   __{{f.name}} = {{rvalue(field_arg)}}
   {% else %}
   try:
@@ -1300,6 +1344,7 @@ def {{func}}(cls=cls, maybe_generic=None, maybe_generic_type_vars=None, data=Non
     raise SerdeError(
       "missing required field '{{field_arg.conv_name()}}' while deserializing {{class_name}}"
     )
+  {% endif %}
   {% endif %}
   {% endfor %}
 
@@ -1444,6 +1489,30 @@ def get_known_fields(f: DeField[Any], rename_all: str | None) -> list[str]:
     return names + f.alias
 
 
+def _collect_flattened_dataclass_child_scopes(fields: list[DeField[Any]]) -> dict[str, Scope]:
+    flattened_children: dict[str, Scope] = {}
+    for f in fields:
+        if not f.flatten or is_flatten_dict(f.type) or f.name is None:
+            continue
+
+        child_cls: type[Any] | None = None
+        if isinstance(f.type, type) and is_dataclass(f.type):
+            child_cls = cast(type[Any], f.type)
+        elif is_opt(f.type):
+            child_cls = next(
+                (
+                    cast(type[Any], arg)
+                    for arg in get_args(f.type)
+                    if isinstance(arg, type) and is_dataclass(arg)
+                ),
+                None,
+            )
+
+        if child_cls is not None:
+            flattened_children[f.name] = cast(Scope, getattr(child_cls, SERDE_SCOPE))
+    return flattened_children
+
+
 def _collect_known_fields(
     fields: list[DeField[Any]], rename_all: str | None, exclude_flatten_dict: bool = False
 ) -> set[str]:
@@ -1452,15 +1521,16 @@ def _collect_known_fields(
     When exclude_flatten_dict is True, skips flatten dict fields from the known fields set.
     For flattened dataclass fields, includes their nested field names.
     """
+    flattened_children = _collect_flattened_dataclass_child_scopes(fields)
     known: set[str] = set()
     for f in fields:
         # Skip flatten dict field itself - it captures "unknown" fields
         if exclude_flatten_dict and f.flatten and is_flatten_dict(f.type):
             continue
         # For flattened dataclass, include nested field names
-        if f.flatten and is_dataclass(f.type):
-            for nested_f in defields(f.type):
-                known.update(get_known_fields(nested_f, rename_all))
+        child_scope = flattened_children.get(f.name) if f.name is not None else None
+        if child_scope is not None:
+            known.update(child_scope.de_known_fields)
         else:
             known.update(get_known_fields(f, rename_all))
     return known
@@ -1496,6 +1566,8 @@ def render_from_dict(
         field.iterbased = False
         field.index = 0
         field.data = "fake_dict"
+        serde_scope.de_known_fields = {field.conv_name()}
+        serde_scope.de_has_flatten_dict = False
         res = jinja2_env.get_template("transparent_dict").render(
             func=FROM_DICT,
             serde_scope=serde_scope,
@@ -1507,9 +1579,16 @@ def render_from_dict(
     else:
         # Detect flatten dict field
         has_flatten_dict = any(f.flatten and is_flatten_dict(f.type) for f in fields)
+        flattened_dataclass_child_scopes = _collect_flattened_dataclass_child_scopes(fields)
+        has_flatten_dict_transitively = has_flatten_dict or any(
+            child_scope.de_has_flatten_dict
+            for child_scope in flattened_dataclass_child_scopes.values()
+        )
 
         # Compute known fields - exclude flatten dict field itself since it captures unknown fields
         known_fields = _collect_known_fields(all_fields, rename_all, exclude_flatten_dict=True)
+        serde_scope.de_known_fields = known_fields
+        serde_scope.de_has_flatten_dict = has_flatten_dict_transitively
 
         res = jinja2_env.get_template("dict").render(
             func=FROM_DICT,
@@ -1524,6 +1603,7 @@ def render_from_dict(
             known_fields=known_fields,
             has_flatten_dict=has_flatten_dict,
             is_flatten_dict=is_flatten_dict,
+            flattened_dataclass_child_scopes=flattened_dataclass_child_scopes,
         )
 
     if renderer.import_numpy:

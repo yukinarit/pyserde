@@ -258,6 +258,12 @@ class Scope:
     defaults: dict[str, Callable[..., Any] | Any] = dataclasses.field(default_factory=dict)
     """ Default values of the dataclass fields (factories & normal values) """
 
+    de_known_fields: set[str] = dataclasses.field(default_factory=set)
+    """ Field names accepted by the generated from_dict function """
+
+    de_has_flatten_dict: bool = False
+    """ True when generated from_dict or a flattened child captures unknown fields """
+
     code: dict[str, str] = dataclasses.field(default_factory=dict)
     """ Generated source code (only filled when debug is True) """
 

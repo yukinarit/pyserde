@@ -6,7 +6,7 @@ from typing import Any, Optional
 
 import pytest
 
-from serde import field, serde, SerdeError
+from serde import field, from_dict, serde, SerdeError
 from serde.json import from_json, to_json
 
 from .common import all_formats
@@ -99,6 +99,19 @@ def test_flatten_default() -> None:
     assert from_json(Foo, to_json(f)) == f
 
     assert from_json(Foo, '{"a": 20}') == Foo(20, "foo", Bar())
+
+
+def test_flatten_default_with_empty_input() -> None:
+    @serde
+    class Bar:
+        c: float = field(default=0.0)
+        d: bool = field(default=False)
+
+    @serde
+    class Foo:
+        bar: Bar = field(flatten=True, default_factory=Bar)
+
+    assert from_dict(Foo, {}) == Foo(bar=Bar())
 
 
 def test_flatten_default_alias() -> None:
@@ -272,3 +285,92 @@ def test_flatten_bare_dict() -> None:
     assert '"a":20' in s2
     assert '"x":1' in s2
     assert '"y":"z"' in s2
+
+
+def test_flatten_deny_unknown_fields_excludes_parent_fields() -> None:
+    @serde(deny_unknown_fields=True)
+    class Inner:
+        a: int
+
+    @serde
+    class Outer:
+        b: int
+        inner: Inner = field(flatten=True)
+
+    assert from_dict(Outer, {"a": 1, "b": 2}) == Outer(b=2, inner=Inner(a=1))
+
+    with pytest.raises(SerdeError):
+        from_dict(Outer, {"a": 1, "b": 2, "unknown": 3})
+
+
+def test_flatten_deny_unknown_child_with_parent_extra() -> None:
+    @serde(deny_unknown_fields=True)
+    class Inner:
+        a: int
+
+    @serde
+    class Outer:
+        b: int
+        inner: Inner = field(flatten=True)
+        extra: dict[str, Any] = field(flatten=True, default_factory=dict)
+
+    assert from_dict(Outer, {"a": 1, "b": 2, "unknown": 3}) == Outer(
+        b=2, inner=Inner(a=1), extra={"unknown": 3}
+    )
+
+
+def test_flatten_parent_and_child_extra_both_capture_unknowns() -> None:
+    @serde
+    class Inner:
+        a: int
+        child_extra: dict[str, Any] = field(flatten=True, default_factory=dict)
+
+    @serde
+    class Outer:
+        b: int
+        inner: Inner = field(flatten=True)
+        parent_extra: dict[str, Any] = field(flatten=True, default_factory=dict)
+
+    assert from_dict(Outer, {"a": 1, "b": 2, "unknown": 3}) == Outer(
+        b=2,
+        inner=Inner(a=1, child_extra={"unknown": 3}),
+        parent_extra={"unknown": 3},
+    )
+
+
+def test_flatten_parent_and_grandchild_extra_both_capture_unknowns() -> None:
+    @serde
+    class Grand:
+        a: int
+        grand_extra: dict[str, Any] = field(flatten=True, default_factory=dict)
+
+    @serde
+    class Inner:
+        grand: Grand = field(flatten=True)
+
+    @serde
+    class Outer:
+        inner: Inner = field(flatten=True)
+        parent_extra: dict[str, Any] = field(flatten=True, default_factory=dict)
+
+    assert from_dict(Outer, {"a": 1, "unknown": 2}) == Outer(
+        inner=Inner(grand=Grand(a=1, grand_extra={"unknown": 2})),
+        parent_extra={"unknown": 2},
+    )
+
+
+def test_flatten_sibling_fields_do_not_leak_between_children() -> None:
+    @serde(deny_unknown_fields=True)
+    class Left:
+        a: int
+
+    @serde(deny_unknown_fields=True)
+    class Right:
+        b: int
+
+    @serde
+    class Outer:
+        left: Left = field(flatten=True)
+        right: Right = field(flatten=True)
+
+    assert from_dict(Outer, {"a": 1, "b": 2}) == Outer(left=Left(a=1), right=Right(b=2))
