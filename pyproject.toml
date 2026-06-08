@@ -64,7 +64,7 @@ dev = [
   "numpy>1.22.0,<3.0.0",
   "mypy==1.19.1",
   "black==26.3.1",
-  "pyright==1.1.408",
+  "pyright==1.1.410",
   "ruff==0.15.9",
   "pytest",
   "pytest-cov",
