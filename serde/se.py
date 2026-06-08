@@ -375,6 +375,22 @@ def is_dataclass_without_se(cls: type[Any]) -> bool:
     return TO_DICT not in scope.funcs
 
 
+def find_global_class_serializer(typ: type[Any]) -> ClassSerializer | None:
+    """Return a globally registered class serializer that handles ``typ``, if any.
+
+    This mirrors the lookup used when rendering dataclass fields, so a serializer
+    registered with ``serde.add_serializer`` also applies when an instance of
+    ``typ`` is passed directly to ``to_dict``/``to_tuple`` instead of nested in a
+    dataclass (https://github.com/yukinarit/pyserde/issues/514).
+    """
+    for class_serializer in GLOBAL_CLASS_SERIALIZER:
+        for method in class_serializer.__class__.serialize.methods:  # type: ignore[attr-defined]
+            # signature.types[1] is the value type; index 0 is ``self``.
+            if method.signature.types[1] is typ:
+                return class_serializer
+    return None
+
+
 def to_obj(
     o: Any,
     named: bool,
@@ -410,6 +426,9 @@ def to_obj(
 
         if o is None:
             return None
+        class_serializer = find_global_class_serializer(type(o))
+        if class_serializer is not None:
+            return class_serializer.serialize(o)
         if is_dataclass_without_se(o):
             # Do not automatically implement beartype if dataclass without serde decorator
             # is passed, because it is surprising for users
