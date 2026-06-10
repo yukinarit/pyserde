@@ -187,6 +187,44 @@ def test_global_class_serializer_top_level() -> None:
         GLOBAL_CLASS_DESERIALIZER[:] = de_snapshot
 
 
+def test_global_class_serializer_top_level_no_match() -> None:
+    # When a global serializer is registered but does not handle the top-level
+    # type, the lookup must fall through to the normal dataclass path rather
+    # than hijacking it. https://github.com/yukinarit/pyserde/issues/514
+    class Point:
+        def __init__(self, x: int, y: int) -> None:
+            self.x = x
+            self.y = y
+
+    class PointSerializer(ClassSerializer):
+        @dispatch
+        def serialize(self, value: Point) -> dict[str, Any]:
+            return {"x": value.x, "y": value.y}
+
+    class PointDeserializer(ClassDeserializer):
+        @dispatch
+        def deserialize(self, cls: type[Point], value: dict[str, Any]) -> Point:
+            return Point(value["x"], value["y"])
+
+    ser_snapshot = list(GLOBAL_CLASS_SERIALIZER)
+    de_snapshot = list(GLOBAL_CLASS_DESERIALIZER)
+    add_serializer(PointSerializer())
+    add_deserializer(PointDeserializer())
+    try:
+
+        @serde
+        class Other:
+            a: int
+
+        # The registry is non-empty, but no entry matches ``Other``; the value
+        # must be handled by the regular dataclass (de)serialization.
+        assert to_dict(Other(1)) == {"a": 1}
+        assert from_dict(Other, {"a": 1}) == Other(1)
+    finally:
+        GLOBAL_CLASS_SERIALIZER[:] = ser_snapshot
+        GLOBAL_CLASS_DESERIALIZER[:] = de_snapshot
+
+
 def test_custom_serializer_with_field_attributes() -> None:
     class MySerializer(ClassSerializer):
         @dispatch
