@@ -1144,6 +1144,28 @@ coerce = TypeCheck(kind=TypeCheck.Kind.Coerce)
 strict = TypeCheck(kind=TypeCheck.Kind.Strict)
 
 
+def deserialize_enum(typ: type[enum.Enum], value: Any) -> enum.Enum:
+    """
+    Construct an enum member from a deserialized value.
+
+    Formats such as JSON force object keys to ``str``, so an ``IntEnum``/
+    ``IntFlag`` used as a dict key arrives as e.g. ``"1"`` instead of ``1``.
+    A plain ``typ(value)`` lookup then fails even though the value is valid.
+    When the direct lookup fails for a ``str`` value, retry after coercing it
+    to the type of the enum's member values (e.g. ``int``).
+    """
+    try:
+        return typ(value)
+    except (ValueError, KeyError):
+        if isinstance(value, str):
+            members = list(typ.__members__.values())
+            if members:
+                member_value_type = type(members[0].value)
+                if member_value_type is not str:
+                    return typ(member_value_type(value))
+        raise
+
+
 def coerce_object(cls: str, field: str, typ: type[Any], obj: Any) -> Any:
     if obj is None:
         raise SerdeError(
