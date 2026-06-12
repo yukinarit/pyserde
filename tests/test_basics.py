@@ -286,6 +286,23 @@ def test_deserialize_enum_helper() -> None:
         deserialize_enum(SE, "z")  # str-valued enum, invalid
 
 
+@pytest.mark.parametrize("se,de", (format_dict + format_json + format_yaml))
+def test_aliased_enum_field(se: Any, de: Any) -> None:
+    class IE(enum.IntEnum):
+        V0 = 0
+        V1 = 1
+
+    @serde.serde
+    class Foo:
+        a: IE = serde.field(alias=["b", "c"])  # type: ignore[literal-required]
+
+    f = Foo(a=IE.V1)
+    assert f == de(Foo, se(f))
+    # Deserializing via an alias name must also resolve the enum member.
+    assert serde.from_dict(Foo, {"b": 1}) == f
+    assert serde.from_dict(Foo, {"c": 1}) == f
+
+
 @pytest.mark.parametrize("opt", opt_case, ids=opt_case_ids())
 @pytest.mark.parametrize("se,de", all_formats)
 def test_enum(se: Any, de: Any, opt: Any) -> None:

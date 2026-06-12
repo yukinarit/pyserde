@@ -1157,12 +1157,13 @@ def deserialize_enum(typ: type[enum.Enum], value: Any) -> enum.Enum:
     try:
         return typ(value)
     except (ValueError, KeyError):
+        # A ValueError/KeyError here means ``typ`` has at least one member (an
+        # empty enum would raise TypeError instead), so ``__members__`` is never
+        # empty in this branch.
         if isinstance(value, str):
-            members = list(typ.__members__.values())
-            if members:
-                member_value_type = type(members[0].value)
-                if member_value_type is not str:
-                    return typ(member_value_type(value))
+            member_value_type = type(next(iter(typ.__members__.values())).value)
+            if member_value_type is not str:
+                return typ(member_value_type(value))
         raise
 
 
