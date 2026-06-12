@@ -262,6 +262,30 @@ def test_dict_with_int_enum_keys(se: Any, de: Any, opt: Any) -> None:
         assert p == de(Foo, se(p))
 
 
+def test_deserialize_enum_helper() -> None:
+    from serde.core import deserialize_enum
+
+    class IE(enum.IntEnum):
+        V0 = 0
+        V1 = 1
+
+    class SE(enum.Enum):
+        A = "a"
+
+    # Direct lookup and the str->int coercion both yield the member.
+    assert deserialize_enum(IE, 1) is IE.V1
+    assert deserialize_enum(IE, "1") is IE.V1
+    # A str-valued enum is resolved by the normal lookup (no coercion).
+    assert deserialize_enum(SE, "a") is SE.A
+    # Invalid values re-raise rather than returning None, for every branch:
+    with pytest.raises((ValueError, KeyError)):
+        deserialize_enum(IE, 99)  # non-str, not a member
+    with pytest.raises((ValueError, KeyError)):
+        deserialize_enum(IE, "99")  # stringified non-member
+    with pytest.raises((ValueError, KeyError)):
+        deserialize_enum(SE, "z")  # str-valued enum, invalid
+
+
 @pytest.mark.parametrize("opt", opt_case, ids=opt_case_ids())
 @pytest.mark.parametrize("se,de", all_formats)
 def test_enum(se: Any, de: Any, opt: Any) -> None:
