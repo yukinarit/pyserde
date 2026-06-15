@@ -57,6 +57,38 @@ class Bar:
 
 
 @pytest.mark.skipif(sys.version_info < (3, 12), reason=_PEP695_REASON)
+def test_pep695_type_alias_as_top_level_union() -> None:
+    # A `type T = Foo | Bar` alias passed as the top-level `cls` must be treated
+    # as the union it aliases, not silently serialized without tagging. See #753.
+    ns: dict[str, object] = {"serde": serde}
+    exec(
+        """
+@serde
+class Foo:
+    a: int = 123
+
+@serde
+class Dummy:
+    b: int = 456
+
+type T = Foo | Dummy
+""",
+        ns,
+    )
+    Foo = typing.cast(type, ns["Foo"])
+    Dummy = typing.cast(type, ns["Dummy"])
+    T = ns["T"]
+
+    value = Foo()
+    expected = to_dict(value, c=typing.cast(type, Foo | Dummy))
+    assert expected == {"Foo": {"a": 123}}
+    # the alias must produce the same tagged output as the real union ...
+    assert to_dict(value, c=typing.cast(type, T)) == expected
+    # ... and round-trip back through the alias.
+    assert value == from_dict(typing.cast(type, T), to_dict(value, c=typing.cast(type, T)))
+
+
+@pytest.mark.skipif(sys.version_info < (3, 12), reason=_PEP695_REASON)
 def test_pep695_type_alias_variable_tuple() -> None:
     ns: dict[str, object] = {"serde": serde}
     exec(

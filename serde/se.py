@@ -414,6 +414,11 @@ def to_obj(
             skip_none=skip_none,
         )
 
+        # A PEP 695 type alias (``type T = Foo | Bar``) is a TypeAliasType, not
+        # the aliased type itself, so unwrap it to recognize e.g. a union.
+        if c is not None and is_pep695_type_alias(c):
+            c = c.__value__
+
         # If a class in the argument is a non-dataclass class e.g. Union[Foo, Bar],
         # pyserde generates a wrapper (de)serializable dataclass on the fly,
         # and use it to serialize the object.

@@ -500,6 +500,11 @@ def from_obj(
 
     res: Any
 
+    # A PEP 695 type alias (``type T = Foo | Bar``) is a TypeAliasType, not the
+    # aliased type itself, so unwrap it to recognize e.g. a union.
+    if is_pep695_type_alias(c):
+        c = c.__value__  # type: ignore[attr-defined]
+
     # It is possible that the parser already generates the correct data type requested
     # by the caller. Hence, it should be checked early to avoid doing anymore work.
     if type(o) is c:
