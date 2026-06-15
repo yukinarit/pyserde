@@ -10,13 +10,18 @@ import pytest
 
 from serde import (
     SerdeError,
+    add_deserializer,
+    add_serializer,
     field,
+    from_dict,
     from_tuple,
     serde,
+    to_dict,
     to_tuple,
     ClassSerializer,
     ClassDeserializer,
 )
+from serde.core import GLOBAL_CLASS_DESERIALIZER, GLOBAL_CLASS_SERIALIZER
 from serde.json import from_json, to_json
 
 
@@ -134,6 +139,90 @@ def test_custom_class_serializer_dataclass() -> None:
     s = '{"bar":"10"}'
     assert s == to_json(f)
     assert f == from_json(Foo, s)
+
+
+def test_global_class_serializer_top_level() -> None:
+    # A serializer/deserializer registered globally via add_serializer/add_deserializer
+    # must also apply when the custom type is passed directly to to_dict/from_dict, not
+    # only when nested inside a dataclass. https://github.com/yukinarit/pyserde/issues/514
+    class Point:
+        def __init__(self, x: int, y: int) -> None:
+            self.x = x
+            self.y = y
+
+        def __eq__(self, other: object) -> bool:
+            return isinstance(other, Point) and self.x == other.x and self.y == other.y
+
+    class PointSerializer(ClassSerializer):
+        @dispatch
+        def serialize(self, value: Point) -> dict[str, Any]:
+            return {"x": value.x, "y": value.y}
+
+    class PointDeserializer(ClassDeserializer):
+        @dispatch
+        def deserialize(self, cls: type[Point], value: dict[str, Any]) -> Point:
+            return Point(value["x"], value["y"])
+
+    ser_snapshot = list(GLOBAL_CLASS_SERIALIZER)
+    de_snapshot = list(GLOBAL_CLASS_DESERIALIZER)
+    add_serializer(PointSerializer())
+    add_deserializer(PointDeserializer())
+    try:
+
+        @serde
+        class Wrapper:
+            p: Point
+
+        # Nested has always worked; keep it as the reference behaviour.
+        assert to_dict(Wrapper(Point(1, 2))) == {"p": {"x": 1, "y": 2}}
+
+        # Top-level used to skip the global serializer and return the raw object.
+        assert to_dict(Point(1, 2)) == {"x": 1, "y": 2}
+        assert to_tuple(Point(1, 2)) == {"x": 1, "y": 2}
+
+        # Deserialization is symmetric and must round-trip from the top level.
+        assert from_dict(Point, {"x": 1, "y": 2}) == Point(1, 2)
+    finally:
+        GLOBAL_CLASS_SERIALIZER[:] = ser_snapshot
+        GLOBAL_CLASS_DESERIALIZER[:] = de_snapshot
+
+
+def test_global_class_serializer_top_level_no_match() -> None:
+    # When a global serializer is registered but does not handle the top-level
+    # type, the lookup must fall through to the normal dataclass path rather
+    # than hijacking it. https://github.com/yukinarit/pyserde/issues/514
+    class Point:
+        def __init__(self, x: int, y: int) -> None:
+            self.x = x
+            self.y = y
+
+    class PointSerializer(ClassSerializer):
+        @dispatch
+        def serialize(self, value: Point) -> dict[str, Any]:
+            return {"x": value.x, "y": value.y}
+
+    class PointDeserializer(ClassDeserializer):
+        @dispatch
+        def deserialize(self, cls: type[Point], value: dict[str, Any]) -> Point:
+            return Point(value["x"], value["y"])
+
+    ser_snapshot = list(GLOBAL_CLASS_SERIALIZER)
+    de_snapshot = list(GLOBAL_CLASS_DESERIALIZER)
+    add_serializer(PointSerializer())
+    add_deserializer(PointDeserializer())
+    try:
+
+        @serde
+        class Other:
+            a: int
+
+        # The registry is non-empty, but no entry matches ``Other``; the value
+        # must be handled by the regular dataclass (de)serialization.
+        assert to_dict(Other(1)) == {"a": 1}
+        assert from_dict(Other, {"a": 1}) == Other(1)
+    finally:
+        GLOBAL_CLASS_SERIALIZER[:] = ser_snapshot
+        GLOBAL_CLASS_DESERIALIZER[:] = de_snapshot
 
 
 def test_custom_serializer_with_field_attributes() -> None:

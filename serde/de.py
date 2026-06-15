@@ -464,6 +464,22 @@ class Deserializer(Generic[T], metaclass=abc.ABCMeta):
         raise NotImplementedError
 
 
+def find_global_class_deserializer(typ: type[Any]) -> ClassDeserializer | None:
+    """Return a globally registered class deserializer that handles ``typ``, if any.
+
+    This mirrors the lookup used when rendering dataclass fields, so a deserializer
+    registered with ``serde.add_deserializer`` also applies when ``typ`` is passed
+    directly to ``from_dict``/``from_tuple`` instead of nested in a dataclass
+    (https://github.com/yukinarit/pyserde/issues/514).
+    """
+    for class_deserializer in GLOBAL_CLASS_DESERIALIZER:
+        for method in class_deserializer.__class__.deserialize.methods:  # type: ignore[attr-defined]
+            # signature.types[1] is ``type[X]``; unwrap it to the value type ``X``.
+            if get_args(method.signature.types[1])[0] is typ:
+                return class_deserializer
+    return None
+
+
 def from_obj(
     c: type[T],
     o: Any,
@@ -521,7 +537,10 @@ def from_obj(
             reuse_instances=reuse_instances,
             deserialize_numbers=deserialize_numbers,
         )
-        if is_dataclass_without_de(c):
+        class_deserializer = find_global_class_deserializer(c)
+        if class_deserializer is not None:
+            res = class_deserializer.deserialize(c, o)
+        elif is_dataclass_without_de(c):
             # Do not automatically implement beartype if dataclass without serde decorator
             # is passed, because it is surprising for users
             # See https://github.com/yukinarit/pyserde/issues/480
