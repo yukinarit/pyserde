@@ -237,6 +237,74 @@ def test_dict_with_non_str_keys(se: Any, de: Any, opt: Any) -> None:
 
 @pytest.mark.parametrize("opt", opt_case, ids=opt_case_ids())
 @pytest.mark.parametrize("se,de", all_formats)
+def test_dict_with_int_enum_keys(se: Any, de: Any, opt: Any) -> None:
+    class IE(enum.IntEnum):
+        V0 = 0
+        V1 = 1
+        V2 = 2
+
+    class IF(enum.IntFlag):
+        R = 1
+        W = 2
+        X = 4
+
+    @serde.serde(**opt)
+    class Foo:
+        i: dict[IE, str]
+        f: dict[IF, str]
+
+    # Msgpack and Toml can not represent non string keys.
+    if se not in (serde.msgpack.to_msgpack, serde.toml.to_toml):
+        # Formats such as JSON stringify object keys, so an IntEnum/IntFlag key
+        # arrives as e.g. "1" on deserialization. It must still round-trip back
+        # to the enum member (including combined IntFlag values).
+        p = Foo({IE.V1: "a", IE.V2: "b"}, {IF.R: "x", IF.R | IF.X: "y"})
+        assert p == de(Foo, se(p))
+
+
+def test_deserialize_enum_helper() -> None:
+    from serde.core import deserialize_enum
+
+    class IE(enum.IntEnum):
+        V0 = 0
+        V1 = 1
+
+    class SE(enum.Enum):
+        A = "a"
+
+    # Direct lookup and the str->int coercion both yield the member.
+    assert deserialize_enum(IE, 1) is IE.V1
+    assert deserialize_enum(IE, "1") is IE.V1
+    # A str-valued enum is resolved by the normal lookup (no coercion).
+    assert deserialize_enum(SE, "a") is SE.A
+    # Invalid values re-raise rather than returning None, for every branch:
+    with pytest.raises((ValueError, KeyError)):
+        deserialize_enum(IE, 99)  # non-str, not a member
+    with pytest.raises((ValueError, KeyError)):
+        deserialize_enum(IE, "99")  # stringified non-member
+    with pytest.raises((ValueError, KeyError)):
+        deserialize_enum(SE, "z")  # str-valued enum, invalid
+
+
+@pytest.mark.parametrize("se,de", (format_dict + format_json + format_yaml))
+def test_aliased_enum_field(se: Any, de: Any) -> None:
+    class IE(enum.IntEnum):
+        V0 = 0
+        V1 = 1
+
+    @serde.serde
+    class Foo:
+        a: IE = serde.field(alias=["b", "c"])  # type: ignore[literal-required]
+
+    f = Foo(a=IE.V1)
+    assert f == de(Foo, se(f))
+    # Deserializing via an alias name must also resolve the enum member.
+    assert serde.from_dict(Foo, {"b": 1}) == f
+    assert serde.from_dict(Foo, {"c": 1}) == f
+
+
+@pytest.mark.parametrize("opt", opt_case, ids=opt_case_ids())
+@pytest.mark.parametrize("se,de", all_formats)
 def test_enum(se: Any, de: Any, opt: Any) -> None:
     from serde.compat import is_enum
 
