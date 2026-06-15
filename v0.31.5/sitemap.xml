@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
+    <url>
+        <loc>https://yukinarit.github.io/pyserde/v0.31.5/api/</loc>
+        <lastmod>2026-06-15</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://yukinarit.github.io/pyserde/v0.31.5/api/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://yukinarit.github.io/pyserde/v0.31.5ja/api/"/>
+    </url>
+    <url>
+        <loc>https://yukinarit.github.io/pyserde/v0.31.5/</loc>
+        <lastmod>2026-06-15</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://yukinarit.github.io/pyserde/v0.31.5/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://yukinarit.github.io/pyserde/v0.31.5ja/"/>
+    </url>
+    <url>
+        <loc>https://yukinarit.github.io/pyserde/v0.31.5/class-attributes/</loc>
+        <lastmod>2026-06-15</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://yukinarit.github.io/pyserde/v0.31.5/class-attributes/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://yukinarit.github.io/pyserde/v0.31.5ja/class-attributes/"/>
+    </url>
+    <url>
+        <loc>https://yukinarit.github.io/pyserde/v0.31.5/data-formats/</loc>
+        <lastmod>2026-06-15</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://yukinarit.github.io/pyserde/v0.31.5/data-formats/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://yukinarit.github.io/pyserde/v0.31.5ja/data-formats/"/>
+    </url>
+    <url>
+        <loc>https://yukinarit.github.io/pyserde/v0.31.5/decorators/</loc>
+        <lastmod>2026-06-15</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://yukinarit.github.io/pyserde/v0.31.5/decorators/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://yukinarit.github.io/pyserde/v0.31.5ja/decorators/"/>
+    </url>
+    <url>
+        <loc>https://yukinarit.github.io/pyserde/v0.31.5/extension/</loc>
+        <lastmod>2026-06-15</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://yukinarit.github.io/pyserde/v0.31.5/extension/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://yukinarit.github.io/pyserde/v0.31.5ja/extension/"/>
+    </url>
+    <url>
+        <loc>https://yukinarit.github.io/pyserde/v0.31.5/faq/</loc>
+        <lastmod>2026-06-15</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://yukinarit.github.io/pyserde/v0.31.5/faq/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://yukinarit.github.io/pyserde/v0.31.5ja/faq/"/>
+    </url>
+    <url>
+        <loc>https://yukinarit.github.io/pyserde/v0.31.5/field-attributes/</loc>
+        <lastmod>2026-06-15</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://yukinarit.github.io/pyserde/v0.31.5/field-attributes/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://yukinarit.github.io/pyserde/v0.31.5ja/field-attributes/"/>
+    </url>
+    <url>
+        <loc>https://yukinarit.github.io/pyserde/v0.31.5/getting-started/</loc>
+        <lastmod>2026-06-15</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://yukinarit.github.io/pyserde/v0.31.5/getting-started/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://yukinarit.github.io/pyserde/v0.31.5ja/getting-started/"/>
+    </url>
+    <url>
+        <loc>https://yukinarit.github.io/pyserde/v0.31.5/type-check/</loc>
+        <lastmod>2026-06-15</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://yukinarit.github.io/pyserde/v0.31.5/type-check/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://yukinarit.github.io/pyserde/v0.31.5ja/type-check/"/>
+    </url>
+    <url>
+        <loc>https://yukinarit.github.io/pyserde/v0.31.5/types/</loc>
+        <lastmod>2026-06-15</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://yukinarit.github.io/pyserde/v0.31.5/types/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://yukinarit.github.io/pyserde/v0.31.5ja/types/"/>
+    </url>
+    <url>
+        <loc>https://yukinarit.github.io/pyserde/v0.31.5/union/</loc>
+        <lastmod>2026-06-15</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://yukinarit.github.io/pyserde/v0.31.5/union/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://yukinarit.github.io/pyserde/v0.31.5ja/union/"/>
+    </url>
+    <url>
+        <loc>https://yukinarit.github.io/pyserde/v0.31.5/ja/api/</loc>
+        <lastmod>2026-06-15</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://yukinarit.github.io/pyserde/v0.31.5/ja/api/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://yukinarit.github.io/pyserde/v0.31.5api/"/>
+    </url>
+    <url>
+        <loc>https://yukinarit.github.io/pyserde/v0.31.5/ja/</loc>
+        <lastmod>2026-06-15</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://yukinarit.github.io/pyserde/v0.31.5/ja/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://yukinarit.github.io/pyserde/v0.31.5"/>
+    </url>
+    <url>
+        <loc>https://yukinarit.github.io/pyserde/v0.31.5/ja/class-attributes/</loc>
+        <lastmod>2026-06-15</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://yukinarit.github.io/pyserde/v0.31.5/ja/class-attributes/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://yukinarit.github.io/pyserde/v0.31.5class-attributes/"/>
+    </url>
+    <url>
+        <loc>https://yukinarit.github.io/pyserde/v0.31.5/ja/data-formats/</loc>
+        <lastmod>2026-06-15</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://yukinarit.github.io/pyserde/v0.31.5/ja/data-formats/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://yukinarit.github.io/pyserde/v0.31.5data-formats/"/>
+    </url>
+    <url>
+        <loc>https://yukinarit.github.io/pyserde/v0.31.5/ja/decorators/</loc>
+        <lastmod>2026-06-15</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://yukinarit.github.io/pyserde/v0.31.5/ja/decorators/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://yukinarit.github.io/pyserde/v0.31.5decorators/"/>
+    </url>
+    <url>
+        <loc>https://yukinarit.github.io/pyserde/v0.31.5/ja/extension/</loc>
+        <lastmod>2026-06-15</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://yukinarit.github.io/pyserde/v0.31.5/ja/extension/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://yukinarit.github.io/pyserde/v0.31.5extension/"/>
+    </url>
+    <url>
+        <loc>https://yukinarit.github.io/pyserde/v0.31.5/ja/faq/</loc>
+        <lastmod>2026-06-15</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://yukinarit.github.io/pyserde/v0.31.5/ja/faq/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://yukinarit.github.io/pyserde/v0.31.5faq/"/>
+    </url>
+    <url>
+        <loc>https://yukinarit.github.io/pyserde/v0.31.5/ja/field-attributes/</loc>
+        <lastmod>2026-06-15</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://yukinarit.github.io/pyserde/v0.31.5/ja/field-attributes/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://yukinarit.github.io/pyserde/v0.31.5field-attributes/"/>
+    </url>
+    <url>
+        <loc>https://yukinarit.github.io/pyserde/v0.31.5/ja/getting-started/</loc>
+        <lastmod>2026-06-15</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://yukinarit.github.io/pyserde/v0.31.5/ja/getting-started/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://yukinarit.github.io/pyserde/v0.31.5getting-started/"/>
+    </url>
+    <url>
+        <loc>https://yukinarit.github.io/pyserde/v0.31.5/ja/type-check/</loc>
+        <lastmod>2026-06-15</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://yukinarit.github.io/pyserde/v0.31.5/ja/type-check/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://yukinarit.github.io/pyserde/v0.31.5type-check/"/>
+    </url>
+    <url>
+        <loc>https://yukinarit.github.io/pyserde/v0.31.5/ja/types/</loc>
+        <lastmod>2026-06-15</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://yukinarit.github.io/pyserde/v0.31.5/ja/types/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://yukinarit.github.io/pyserde/v0.31.5types/"/>
+    </url>
+    <url>
+        <loc>https://yukinarit.github.io/pyserde/v0.31.5/ja/union/</loc>
+        <lastmod>2026-06-15</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://yukinarit.github.io/pyserde/v0.31.5/ja/union/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://yukinarit.github.io/pyserde/v0.31.5union/"/>
+    </url>
+</urlset>
