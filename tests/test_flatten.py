@@ -30,6 +30,27 @@ def test_flatten_simple() -> None:
     assert from_json(Foo, s) == f
 
 
+def test_flatten_custom_field_serializer() -> None:
+    # A custom field serializer on a flattened dataclass's field must be in
+    # scope of the enclosing class's generated serializer (#453).
+    @serde
+    class Child:
+        value: int = field(serializer=str)
+
+    @serde
+    class Parent:
+        child: Child = field(flatten=True)
+
+    assert to_json(Parent(child=Child(value=3))) == '{"value":"3"}'
+
+    # also works through a nested flatten
+    @serde
+    class GrandParent:
+        parent: Parent = field(flatten=True)
+
+    assert to_json(GrandParent(parent=Parent(child=Child(value=7)))) == '{"value":"7"}'
+
+
 @pytest.mark.parametrize("se,de", all_formats)
 def test_flatten(se: Any, de: Any) -> None:
     @serde
