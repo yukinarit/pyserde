@@ -936,3 +936,28 @@ def test_optional_value_in_list():
 
     instance = Outer(items=[Inner(value=1), None, Inner(value=3)])
     assert from_dict(Outer, to_dict(instance)) == instance
+
+
+def test_union_none_first_argument_order():
+    """``Union[None, int]`` is the same type as ``Optional[int]`` but lists its
+    arguments in the opposite order. Decorating an ``Optional`` field first used
+    to poison a cache shared by both orderings, after which ``Union[None, int]``
+    was mistaken for an optional and every value was serialized as ``null``."""
+
+    @serde
+    @dataclass
+    class HasOptional:
+        v: Optional[int]
+
+    @serde
+    @dataclass
+    class NoneFirst:
+        v: Union[None, int]
+
+    assert to_dict(NoneFirst(7)) == {"v": 7}
+    assert to_json(NoneFirst(7)) == '{"v":7}'
+    assert from_dict(NoneFirst, {"v": 7}) == NoneFirst(7)
+    assert from_json(NoneFirst, '{"v":7}') == NoneFirst(7)
+    # None still round-trips, and the Optional class is unaffected.
+    assert to_dict(NoneFirst(None)) == {"v": None}
+    assert to_dict(HasOptional(7)) == {"v": 7}
