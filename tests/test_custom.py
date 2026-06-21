@@ -155,12 +155,12 @@ def test_global_class_serializer_top_level() -> None:
 
     class PointSerializer(ClassSerializer):
         @dispatch
-        def serialize(self, value: Point) -> dict[str, Any]:
+        def serialize(self, value: Point) -> dict:
             return {"x": value.x, "y": value.y}
 
     class PointDeserializer(ClassDeserializer):
         @dispatch
-        def deserialize(self, cls: type[Point], value: dict[str, Any]) -> Point:
+        def deserialize(self, cls: type[Point], value: dict) -> Point:
             return Point(value["x"], value["y"])
 
     ser_snapshot = list(GLOBAL_CLASS_SERIALIZER)
@@ -198,12 +198,12 @@ def test_global_class_serializer_top_level_no_match() -> None:
 
     class PointSerializer(ClassSerializer):
         @dispatch
-        def serialize(self, value: Point) -> dict[str, Any]:
+        def serialize(self, value: Point) -> dict:
             return {"x": value.x, "y": value.y}
 
     class PointDeserializer(ClassDeserializer):
         @dispatch
-        def deserialize(self, cls: type[Point], value: dict[str, Any]) -> Point:
+        def deserialize(self, cls: type[Point], value: dict) -> Point:
             return Point(value["x"], value["y"])
 
     ser_snapshot = list(GLOBAL_CLASS_SERIALIZER)
