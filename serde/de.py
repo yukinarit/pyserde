@@ -482,6 +482,51 @@ def find_global_class_deserializer(typ: type[Any]) -> ClassDeserializer | None:
     return None
 
 
+_UNHANDLED = object()
+
+
+def _from_obj_collection(
+    c: Any,
+    o: Any,
+    thisfunc: Callable[[Any, Any], Any],
+) -> Any:
+    if is_list(c):
+        if is_bare_list(c):
+            return list(o)
+        return [thisfunc(type_args(c)[0], e) for e in o]
+    if is_set(c):
+        if is_bare_set(c):
+            return set(o)
+        if is_frozen_set(c):
+            return frozenset(thisfunc(type_args(c)[0], e) for e in o)
+        return {thisfunc(type_args(c)[0], e) for e in o}
+    if is_deque(c):
+        if is_bare_deque(c):
+            return collections.deque(o)
+        return collections.deque(thisfunc(type_args(c)[0], e) for e in o)
+    if is_counter(c):
+        if is_bare_counter(c):
+            return collections.Counter(o)
+        return collections.Counter({thisfunc(type_args(c)[0], k): v for k, v in o.items()})
+    if is_tuple(c):
+        if is_bare_tuple(c) or is_variable_tuple(c):
+            return tuple(e for e in o)
+        return tuple(thisfunc(type_args(c)[i], e) for i, e in enumerate(o))
+    if is_dict(c):
+        if is_bare_dict(c):
+            return o
+        if is_default_dict(c):
+            f = DeField(c, "")
+            v = f.value_field()
+            origin = get_origin(v.type)
+            return collections.defaultdict(
+                origin if origin else v.type,
+                {thisfunc(type_args(c)[0], k): thisfunc(type_args(c)[1], v) for k, v in o.items()},
+            )
+        return {thisfunc(type_args(c)[0], k): thisfunc(type_args(c)[1], v) for k, v in o.items()}
+    return _UNHANDLED
+
+
 def from_obj(
     c: type[T],
     o: Any,
@@ -560,51 +605,8 @@ def from_obj(
                 res = None
             else:
                 res = thisfunc(type_args(c)[0], o)
-        elif is_list(c):
-            if is_bare_list(c):
-                res = list(o)
-            else:
-                res = [thisfunc(type_args(c)[0], e) for e in o]
-        elif is_set(c):
-            if is_bare_set(c):
-                res = set(o)
-            elif is_frozen_set(c):
-                res = frozenset(thisfunc(type_args(c)[0], e) for e in o)
-            else:
-                res = {thisfunc(type_args(c)[0], e) for e in o}
-        elif is_deque(c):
-            if is_bare_deque(c):
-                res = collections.deque(o)
-            else:
-                res = collections.deque(thisfunc(type_args(c)[0], e) for e in o)
-        elif is_counter(c):
-            if is_bare_counter(c):
-                res = collections.Counter(o)
-            else:
-                res = collections.Counter({thisfunc(type_args(c)[0], k): v for k, v in o.items()})
-        elif is_tuple(c):
-            if is_bare_tuple(c) or is_variable_tuple(c):
-                res = tuple(e for e in o)
-            else:
-                res = tuple(thisfunc(type_args(c)[i], e) for i, e in enumerate(o))
-        elif is_dict(c):
-            if is_bare_dict(c):
-                res = o
-            elif is_default_dict(c):
-                f = DeField(c, "")
-                v = f.value_field()
-                origin = get_origin(v.type)
-                res = collections.defaultdict(
-                    origin if origin else v.type,
-                    {
-                        thisfunc(type_args(c)[0], k): thisfunc(type_args(c)[1], v)
-                        for k, v in o.items()
-                    },
-                )
-            else:
-                res = {
-                    thisfunc(type_args(c)[0], k): thisfunc(type_args(c)[1], v) for k, v in o.items()
-                }
+        elif (collection_res := _from_obj_collection(c, o, thisfunc)) is not _UNHANDLED:
+            res = collection_res
         elif _is_numpy_array(c):
             from .numpy import deserialize_numpy_array_direct
 
