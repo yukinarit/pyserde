@@ -574,7 +574,8 @@ def is_bare_opt(typ: Any) -> bool:
     return not type_args(typ) and typ is Optional
 
 
-@cache
+# Not memoized: like ``is_opt``, the result depends on the order of union
+# arguments even though ``Optional[T]`` and ``Union[None, T]`` compare equal.
 def is_opt_dataclass(typ: Any) -> bool:
     """
     Test if the type is optional dataclass.
@@ -587,7 +588,7 @@ def is_opt_dataclass(typ: Any) -> bool:
     >>> is_opt_dataclass(Foo)
     False
     >>> is_opt_dataclass(Optional[Foo])
-    False
+    True
     """
     args = get_args(typ)
     return is_opt(typ) and len(args) > 0 and is_dataclass(args[0])
