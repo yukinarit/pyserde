@@ -521,7 +521,10 @@ def is_union(typ: Any) -> bool:
     return typing_inspect.is_union_type(typ)  # type: ignore
 
 
-@cache
+# Not memoized: the result depends on the order of the union arguments
+# (``args[0]`` must be non-None and ``args[1]`` must be None), but ``Union``
+# hashes and compares equal regardless of that order, so a cache would return
+# the first-seen answer for both ``Optional[int]`` and ``Union[None, int]``.
 def is_opt(typ: Any) -> bool:
     """
     Test if the type is `typing.Optional`.
@@ -571,7 +574,8 @@ def is_bare_opt(typ: Any) -> bool:
     return not type_args(typ) and typ is Optional
 
 
-@cache
+# Not memoized: like ``is_opt``, the result depends on the order of union
+# arguments even though ``Optional[T]`` and ``Union[None, T]`` compare equal.
 def is_opt_dataclass(typ: Any) -> bool:
     """
     Test if the type is optional dataclass.
@@ -584,7 +588,7 @@ def is_opt_dataclass(typ: Any) -> bool:
     >>> is_opt_dataclass(Foo)
     False
     >>> is_opt_dataclass(Optional[Foo])
-    False
+    True
     """
     args = get_args(typ)
     return is_opt(typ) and len(args) > 0 and is_dataclass(args[0])

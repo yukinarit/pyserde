@@ -482,6 +482,16 @@ def find_global_class_deserializer(typ: type[Any]) -> ClassDeserializer | None:
     return None
 
 
+def _deserialize_optional(
+    c: type[Any],
+    o: Any,
+    deserializer: Callable[[type[Any], Any], Any],
+) -> Any:
+    if o is None:
+        return None
+    return deserializer(type_args(c)[0], o)
+
+
 def from_obj(
     c: type[T],
     o: Any,
@@ -556,10 +566,7 @@ def from_obj(
         elif is_deserializable(c):
             res = deserializable_to_obj(c)
         elif is_opt(c):
-            if o is None:
-                res = None
-            else:
-                res = thisfunc(type_args(c)[0], o)
+            res = _deserialize_optional(c, o, thisfunc)
         elif is_list(c):
             if is_bare_list(c):
                 res = list(o)
