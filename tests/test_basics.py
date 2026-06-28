@@ -272,11 +272,16 @@ def test_deserialize_enum_helper() -> None:
     class SE(enum.Enum):
         A = "a"
 
+    class TE(enum.Enum):
+        X = ("one", "info one")
+
     # Direct lookup and the str->int coercion both yield the member.
     assert deserialize_enum(IE, 1) is IE.V1
     assert deserialize_enum(IE, "1") is IE.V1
     # A str-valued enum is resolved by the normal lookup (no coercion).
     assert deserialize_enum(SE, "a") is SE.A
+    # A tuple value is serialized as a list
+    assert deserialize_enum(TE, ["one", "info one"]) is TE.X
     # Invalid values re-raise rather than returning None, for every branch:
     with pytest.raises((ValueError, KeyError)):
         deserialize_enum(IE, 99)  # non-str, not a member
@@ -284,6 +289,37 @@ def test_deserialize_enum_helper() -> None:
         deserialize_enum(IE, "99")  # stringified non-member
     with pytest.raises((ValueError, KeyError)):
         deserialize_enum(SE, "z")  # str-valued enum, invalid
+    with pytest.raises((ValueError, KeyError)):
+        deserialize_enum(TE, ["two", "info two"])  # tuple enum, not a member
+
+
+@pytest.mark.parametrize("se,de", (format_dict + format_json + format_yaml))
+def test_enum_with_tuple_value(se: Any, de: Any) -> None:
+    class TE(enum.Enum):
+        X = ("one", "info one")
+        Y = ("two", "info two")
+
+    @serde.serde
+    class C:
+        m: TE
+
+    @serde.serde
+    class CDict:
+        m: dict[str, TE]
+
+    @serde.serde
+    class CList:
+        m: list[TE]
+
+    @serde.serde
+    class COpt:
+        m: TE | None
+
+    assert de(C, se(C(TE.X))) == C(TE.X)
+    assert de(CDict, se(CDict({"a": TE.X}))) == CDict({"a": TE.X})
+    assert de(CList, se(CList([TE.X, TE.Y]))) == CList([TE.X, TE.Y])
+    assert de(COpt, se(COpt(TE.X))) == COpt(TE.X)
+    assert de(COpt, se(COpt(None))) == COpt(None)
 
 
 @pytest.mark.parametrize("se,de", (format_dict + format_json + format_yaml))
