@@ -1160,11 +1160,31 @@ class Renderer:
                 # When the callable type is non generic type e.g int, Foo.
                 callable = v.type.__name__
             return f"collections.defaultdict({callable}, \
-                    {{{self.render(k)}: {self.render(v)} for k, v in {arg.data}.items()}})"
+                    {{{self.dict_key(k)}: {self.render(v)} for k, v in {arg.data}.items()}})"
         else:
             k = arg.key_field()
             v = arg.value_field()
-            return f"{{{self.render(k)}: {self.render(v)} for k, v in {arg.data}.items()}}"
+            return f"{{{self.dict_key(k)}: {self.render(v)} for k, v in {arg.data}.items()}}"
+
+    def dict_key(self, arg: DeField[Any]) -> str:
+        """
+        Render rvalue for a dict key.
+
+        Formats such as JSON/YAML stringify object keys, so an ``int``/``float`` key
+        arrives as e.g. ``"1"``/``"1.5"`` on deserialization. Coerce such keys back to
+        their declared numeric type even when coercion is otherwise suppressed (i.e.
+        ``strict``), mirroring how stringified ``IntEnum``/``IntFlag`` keys are handled.
+        ``bool`` is intentionally excluded because ``bool("false")`` is ``True``.
+        """
+        typ = arg.type
+        if (
+            isinstance(typ, type)
+            and issubclass(typ, (int, float))
+            and not issubclass(typ, bool)
+            and not is_enum(typ)
+        ):
+            return f'coerce_object("{self.class_name}", "k", {typename(typ)}, {arg.data})'
+        return self.render(arg)
 
     def enum(self, arg: DeField[Any]) -> str:
         # Pass the raw data to ``deserialize_enum``, which constructs the enum

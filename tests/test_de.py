@@ -29,6 +29,25 @@ def test_from_obj() -> None:
     assert isinstance(dec[1], Decimal) and dec[1] == Decimal(0.1)
 
 
+def test_from_obj_dict() -> None:
+    import collections
+    from typing import Dict, DefaultDict
+
+    # Bare dict is returned as-is. Use ``typing.Dict`` so ``from_obj`` does not
+    # short-circuit on the ``type(o) is c`` early return and actually reaches the
+    # dict handling.
+    assert {"a": 1, "b": 2} == from_obj(Dict, {"a": 1, "b": 2}, False, False)
+
+    # Regular dict coerces both keys and values to the declared types.
+    assert {1: "a", 2: "b"} == from_obj(dict[int, str], {"1": "a", "2": "b"}, False, False)
+    assert {"a": 1} == from_obj(dict[str, int], {"a": "1"}, False, False)
+
+    # DefaultDict yields a collections.defaultdict with coerced keys/values.
+    dd = from_obj(DefaultDict[int, str], {"1": "a"}, False, False)
+    assert isinstance(dd, collections.defaultdict)
+    assert dd == {1: "a"}
+
+
 kwargs = (
     "maybe_generic=maybe_generic, maybe_generic_type_vars=maybe_generic_type_vars, "
     "variable_type_args=None, reuse_instances=reuse_instances, "
