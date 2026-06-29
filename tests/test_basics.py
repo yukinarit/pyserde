@@ -262,6 +262,23 @@ def test_dict_with_int_enum_keys(se: Any, de: Any, opt: Any) -> None:
         assert p == de(Foo, se(p))
 
 
+@pytest.mark.parametrize("opt", opt_case, ids=opt_case_ids())
+@pytest.mark.parametrize("se,de", all_formats)
+def test_dict_with_numeric_keys(se: Any, de: Any, opt: Any) -> None:
+    @serde.serde(**opt)
+    class Foo:
+        i: dict[int, str]
+        f: dict[float, str]
+
+    # Msgpack and Toml can not represent non string keys.
+    if se not in (serde.msgpack.to_msgpack, serde.toml.to_toml):
+        # Formats such as JSON stringify object keys, so an int/float key arrives
+        # as e.g. "1"/"1.5" on deserialization. It must still round-trip back to
+        # the numeric key.
+        p = Foo({1: "a", 2: "b"}, {1.5: "x", 2.0: "y"})
+        assert p == de(Foo, se(p))
+
+
 def test_deserialize_enum_helper() -> None:
     from serde.core import deserialize_enum
 
