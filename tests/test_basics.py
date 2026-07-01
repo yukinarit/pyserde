@@ -746,6 +746,79 @@ def test_default_rename_and_alias() -> None:
     assert ff.a == 2
 
 
+def test_alias_with_list() -> None:
+    @serde.serde
+    class Foo:
+        a: list[int] = serde.field(alias=["b"])  # type: ignore[literal-required]
+
+    assert Foo([1, 2]) == serde.json.from_json(Foo, '{"a":[1,2]}')
+    assert Foo([1, 2]) == serde.json.from_json(Foo, '{"b":[1,2]}')
+
+
+def test_alias_with_optional_list_default() -> None:
+    @serde.serde
+    class Foo:
+        a: Optional[list[int]] = serde.field(alias=["b"], default=None)  # type: ignore[literal-required]
+
+    assert Foo([1]) == serde.json.from_json(Foo, '{"b":[1]}')
+    assert Foo(None) == serde.json.from_json(Foo, "{}")
+
+
+def test_alias_with_list_default_factory() -> None:
+    @serde.serde
+    class Foo:
+        a: list[int] = serde.field(alias=["b"], default_factory=list)  # type: ignore[literal-required]
+
+    assert Foo([1]) == serde.json.from_json(Foo, '{"b":[1]}')
+    assert Foo([]) == serde.json.from_json(Foo, "{}")
+
+
+def test_alias_with_dict() -> None:
+    @serde.serde
+    class Foo:
+        a: dict[str, int] = serde.field(alias=["b"])  # type: ignore[literal-required]
+
+    assert Foo({"x": 1}) == serde.json.from_json(Foo, '{"b":{"x":1}}')
+
+
+def test_alias_with_set() -> None:
+    @serde.serde
+    class Foo:
+        a: set[int] = serde.field(alias=["b"])  # type: ignore[literal-required]
+
+    assert Foo({1, 2}) == serde.json.from_json(Foo, '{"b":[1,2]}')
+
+
+def test_alias_with_tuple() -> None:
+    @serde.serde
+    class Foo:
+        a: tuple[int, str] = serde.field(alias=["b"])  # type: ignore[literal-required]
+
+    assert Foo((1, "x")) == serde.json.from_json(Foo, '{"b":[1,"x"]}')
+
+
+def test_alias_with_datetime() -> None:
+    @serde.serde
+    class Foo:
+        a: datetime.datetime = serde.field(alias=["b"])  # type: ignore[literal-required]
+
+    dt = datetime.datetime(2021, 1, 1, 0, 0, 0)
+    assert Foo(dt) == serde.json.from_json(Foo, '{"b":"2021-01-01T00:00:00"}')
+
+
+def test_alias_with_nested_dataclass() -> None:
+    @serde.serde
+    class Bar:
+        e: int
+        f: str
+
+    @serde.serde
+    class Foo:
+        a: Bar = serde.field(alias=["b"])  # type: ignore[literal-required]
+
+    assert Foo(Bar(1, "x")) == serde.json.from_json(Foo, '{"b":{"e":1,"f":"x"}}')
+
+
 def test_skip() -> None:
     # Note that skipped field is not the last one
     @serde.serde
