@@ -835,6 +835,9 @@ class DeField(Field[T]):
         e.g. Optional
             * datavar property returns "data"
             * data property returns "data.get("field_name")".
+        e.g. a field with an alias
+            * datavar property returns "data"
+            * data property returns "_get_by_aliases(data, ["field_name", ...])".
         For other types
             * datavar property returns "data"
             * data property returns "data["field_name"]".
@@ -842,7 +845,17 @@ class DeField(Field[T]):
 
         if self.iterbased:
             return f"{self.datavar}[{self.index}]"
-        elif is_union(self.type) and type(None) in get_args(self.type):
+        optional = is_union(self.type) and type(None) in get_args(self.type)
+        if self.alias:
+            # A field may be populated from any of its aliases (or its own name),
+            # so read it through ``_get_by_aliases`` regardless of the field type.
+            # This keeps ``alias`` working for containers, datetimes, nested
+            # dataclasses etc. - not just the leaf renderers (primitive/enum/
+            # Optional) that used to special-case it.
+            names = ", ".join(f'"{name}"' for name in [self.name, *self.alias])
+            raise_error = "False" if optional else "True"
+            return f"_get_by_aliases({self.datavar}, [{names}], raise_error={raise_error})"
+        elif optional:
             return f'{self.datavar}.get("{self.conv_name()}")'
         else:
             return f'{self.datavar}["{self.conv_name()}"]'
@@ -1191,11 +1204,7 @@ class Renderer:
         # member itself. Coercing the value beforehand (e.g. via ``coerce_object``)
         # would eagerly call ``EnumType(value)`` and fail for stringified keys of
         # ``IntEnum``/``IntFlag`` produced by JSON (e.g. ``"1"``).
-        dat = arg.data
-        if arg.alias:
-            aliases = (f'"{s}"' for s in [arg.name, *arg.alias])
-            dat = f"_get_by_aliases(data, [{','.join(aliases)}])"
-        return f"deserialize_enum({typename(arg.type)}, {dat})"
+        return f"deserialize_enum({typename(arg.type)}, {arg.data})"
 
     def primitive(self, arg: DeField[Any], suppress_coerce: bool = False) -> str:
         """
@@ -1205,9 +1214,6 @@ class Renderer:
         """
         typ = typename(arg.type)
         dat = arg.data
-        if arg.alias:
-            aliases = (f'"{s}"' for s in [arg.name, *arg.alias])
-            dat = f"_get_by_aliases(data, [{','.join(aliases)}])"
         if isinstance(arg.type, type) and issubclass(arg.type, float):
             if self.suppress_coerce and suppress_coerce:
                 return f"deserialize_numbers({dat}) if deserialize_numbers else {dat}"
