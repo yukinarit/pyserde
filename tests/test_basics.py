@@ -339,6 +339,65 @@ def test_enum_with_tuple_value(se: Any, de: Any) -> None:
     assert de(COpt, se(COpt(None))) == COpt(None)
 
 
+def test_deserialize_enum_helper_heterogeneous() -> None:
+    from serde.core import deserialize_enum
+
+    # An enum may mix value types. The conversion must be derived from the
+    # incoming value, not from the first member's value type.
+    class Mixed(enum.Enum):
+        NUM = 1  # first member: value type is int
+        TXT = "b"
+        PAIR = ("x", "y")  # tuple-valued member, not first
+
+    # list->tuple must fire even though the first member is not a tuple.
+    assert deserialize_enum(Mixed, ["x", "y"]) is Mixed.PAIR
+    # str->numeric must fire even though the first member's value is not numeric.
+    class Mixed2(enum.Enum):
+        NAME = "alice"  # first member: value type is str
+        AGE = 30  # numeric member, not first
+
+    assert deserialize_enum(Mixed2, "30") is Mixed2.AGE
+    # Invalid values still re-raise for every branch.
+    with pytest.raises((ValueError, KeyError)):
+        deserialize_enum(Mixed, ["p", "q"])
+    with pytest.raises((ValueError, KeyError)):
+        deserialize_enum(Mixed2, "99")
+
+
+@pytest.mark.parametrize("se,de", (format_dict + format_json + format_yaml))
+def test_enum_heterogeneous_tuple_member(se: Any, de: Any) -> None:
+    # Regression: a tuple-valued member that is not the first member serializes
+    # to a list and previously failed to deserialize (the member value type was
+    # sampled from the first member only).
+    class Mixed(enum.Enum):
+        NUM = 1
+        TXT = "b"
+        PAIR = ("x", "y")
+
+    @serde.serde
+    class C:
+        m: Mixed
+
+    for member in Mixed:
+        assert de(C, se(C(member))) == C(member)
+
+
+@pytest.mark.parametrize("se,de", (format_dict + format_json + format_yaml))
+def test_enum_heterogeneous_numeric_key(se: Any, de: Any) -> None:
+    # Regression: a numeric member that is not the first member arrives as a
+    # stringified dict key and previously failed to coerce back (the member
+    # value type was sampled from the first member only).
+    class Mixed(enum.Enum):
+        NAME = "alice"
+        AGE = 30
+
+    @serde.serde
+    class C:
+        d: dict[Mixed, int]
+
+    assert de(C, se(C({Mixed.AGE: 1}))) == C({Mixed.AGE: 1})
+
+
 @pytest.mark.parametrize("se,de", (format_dict + format_json + format_yaml))
 def test_aliased_enum_field(se: Any, de: Any) -> None:
     class IE(enum.IntEnum):

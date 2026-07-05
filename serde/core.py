@@ -1157,14 +1157,25 @@ def deserialize_enum(typ: type[enum.Enum], value: Any) -> enum.Enum:
     try:
         return typ(value)
     except (ValueError, KeyError):
-        # A ValueError/KeyError here means ``typ`` has at least one member (an
-        # empty enum would raise TypeError instead), so ``__members__`` is never
-        # empty in this branch.
-        member_value_type = type(next(iter(typ.__members__.values())).value)
-        if isinstance(value, list) and member_value_type is tuple:
-            return typ(tuple(value))
-        if isinstance(value, str) and member_value_type is not str:
-            return typ(member_value_type(value))
+        # JSON/YAML coerce enum values used as object keys to ``str`` and turn
+        # tuple values into ``list``. Retry after undoing that coercion. The enum
+        # may be heterogeneous, so derive the conversion from ``value`` itself
+        # rather than assuming every member shares the first member's value type.
+        if isinstance(value, list):
+            # A ``list`` can only originate from a tuple-valued member: list
+            # values are unhashable and are never valid enum values.
+            try:
+                return typ(tuple(value))
+            except (ValueError, KeyError):
+                pass
+        elif isinstance(value, str):
+            for member_value_type in {type(member.value) for member in typ}:
+                if member_value_type is str:
+                    continue
+                try:
+                    return typ(member_value_type(value))
+                except (ValueError, KeyError, TypeError):
+                    continue
         raise
 
 
