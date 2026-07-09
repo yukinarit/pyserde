@@ -8,7 +8,9 @@ import datetime
 from beartype.roar import BeartypeCallHintViolation
 from typing import (
     ClassVar,
+    Generic,
     Optional,
+    TypeVar,
     Any,
 )
 from collections import defaultdict
@@ -1549,3 +1551,33 @@ def test_dict_str_any() -> None:
 
     assert serde.to_dict(foo) == foo_se
     assert serde.from_dict(Foo, foo_se) == foo_de
+
+
+def test_generic_with_generic_dataclass_arg() -> None:
+    # https://github.com/yukinarit/pyserde/issues/464
+    # Deserializing into a generic whose type argument is itself a generic
+    # dataclass (e.g. ``Foo[Bar[int]]``) used to leave the inner dataclass as a
+    # raw dict instead of reconstructing it.
+    T = TypeVar("T")
+
+    @serde.serde
+    class Bar(Generic[T]):
+        inner: T
+
+    @serde.serde
+    class Foo(Generic[T]):
+        inner: T
+
+    # A plain type argument keeps working.
+    f1 = Foo(10)
+    assert f1 == serde.json.from_json(Foo[int], serde.json.to_json(f1))
+
+    # A generic dataclass as the type argument is now reconstructed.
+    f2 = Foo(Bar(10))
+    json = serde.json.to_json(f2)
+    assert json == '{"inner":{"inner":10}}'
+    assert f2 == serde.json.from_json(Foo[Bar[int]], json)
+
+    # Nested more than one level deep also works.
+    f3 = Foo(Bar(Bar(10)))
+    assert f3 == serde.json.from_json(Foo[Bar[Bar[int]]], serde.json.to_json(f3))
