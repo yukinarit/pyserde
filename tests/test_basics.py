@@ -351,6 +351,7 @@ def test_deserialize_enum_helper_heterogeneous() -> None:
 
     # list->tuple must fire even though the first member is not a tuple.
     assert deserialize_enum(Mixed, ["x", "y"]) is Mixed.PAIR
+
     # str->numeric must fire even though the first member's value is not numeric.
     class Mixed2(enum.Enum):
         NAME = "alice"  # first member: value type is str
