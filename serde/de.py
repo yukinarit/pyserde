@@ -1270,8 +1270,10 @@ class Renderer:
         if arg.flatten:
             # When a field has the `flatten` attribute, iterate over its dataclass fields.
             # This ensures that the code checks keys in the data while considering aliases.
+            # An optional flattened field holds the dataclass in its type argument.
+            inner = arg[0] if is_opt(arg.type) else arg
             flattened = []
-            for subarg in defields(arg.type):
+            for subarg in defields(inner.type):
                 if subarg.alias:
                     aliases = get_aliased_fields(subarg)
                     flattened.append(f"_exists_by_aliases({arg.datavar}, [{','.join(aliases)}])")
