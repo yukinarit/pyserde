@@ -430,6 +430,8 @@ def to_obj(
         class_serializer = find_global_class_serializer(type(o))
         if class_serializer is not None:
             return class_serializer.serialize(o)
+        if is_enum(type(o)):
+            return enum_value(type(o), o)
         if is_dataclass_without_se(o):
             # Do not automatically implement beartype if dataclass without serde decorator
             # is passed, because it is surprising for users
@@ -443,7 +445,7 @@ def to_obj(
         elif is_bearable(o, tuple):  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
             return tuple(thisfunc(e) for e in o)
         elif isinstance(o, Mapping):
-            return {k: thisfunc(v) for k, v in o.items()}
+            return {thisfunc(k): thisfunc(v) for k, v in o.items()}
         elif isinstance(o, Set):
             return [thisfunc(e) for e in o]
         elif isinstance(o, deque):
