@@ -76,6 +76,47 @@ print(to_json(foo))
 
 しかし、値が宣言された型に変換できない場合（例えば、値が `foo` で型が `int` の場合）、pyserde は`SerdeError` を発生させます。
 
+### 変換ルールをカスタマイズする
+
+`coerce` は通常、`int(value)` のように宣言された型を呼び出してプリミティブ値を変換します。入力値を検証したり、別の方法で変換したりするには、`coerce(coercer=...)` に coercer 関数を渡します。この関数は次の引数を受け取ります。
+
+- `owner`: `"Config"` のようなデコレートされたクラス名。クラス名を取得できない場合は `None`
+- `field`: `"count"` のようなフィールド名
+- `target`: 宣言されたプリミティブ型
+- `value`: 変換する値
+
+関数は変換後の値を返す必要があります。関数から例外が送出されると、pyserde はその例外を `SerdeError` でラップします。
+
+次の関数は、`int` フィールドでは整数値だけを受け入れます。エラーメッセージにはフィールドの場所を含め、その他のプリミティブ型は通常どおり変換します。
+
+```python
+from typing import Any
+from serde import coerce, from_dict, serde
+
+
+def integer_only(
+    owner: str | None, field: str, target: type[Any], value: Any
+) -> Any:
+    if target is int:
+        if isinstance(value, bool) or not isinstance(value, int):
+            location = f"{owner}.{field}" if owner else field
+            raise TypeError(f"{location} は整数である必要があります")
+    return target(value)
+
+
+@serde(type_check=coerce(coercer=integer_only))
+class Config:
+    count: int
+
+
+from_dict(Config, {"count": 1})       # Config(count=1)
+from_dict(Config, {"count": 1.5})     # Config.count を含む SerdeError を送出
+```
+
+pyserde は、シリアライズとデシリアライズのどちらでも、プリミティブ型のフィールドにこの関数を使用します。コンテナや `Optional` 内のプリミティブ値も対象です。列挙型や `Literal` の値がこの関数に渡されることはなく、`Union` の分岐選択にも使われません。フィールドシリアライザまたはフィールドデシリアライザを指定すると、対応する処理ではこの関数は呼び出されません。リストの要素とマッピングの値では `field` に `"v"`、マッピングのキーでは `"k"` が渡されます。
+
+この関数はクラスごとに設定されます。そのため、ネストしたデータクラスのフィールドには、そのデータクラス自身の `type_check` 設定が適用されます。
+
 ## `disabled`
 
 これはpyserde v0.8.3およびv0.9.xまでのデフォルトの挙動です。  

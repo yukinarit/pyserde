@@ -323,7 +323,11 @@ def deserialize(
         g["is_instance"] = is_instance
         g["TypeCheck"] = TypeCheck
         g["disabled"] = disabled
-        g["coerce_object"] = coerce_object
+        g["coerce_object"] = (
+            functools.partial(coerce_object, coercer=type_check.coercer)
+            if type_check.coercer
+            else coerce_object
+        )
         g["deserialize_enum"] = deserialize_enum
         g["_exists_by_aliases"] = _exists_by_aliases
         g["_get_by_aliases"] = _get_by_aliases
