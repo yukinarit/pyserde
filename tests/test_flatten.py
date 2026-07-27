@@ -92,6 +92,25 @@ def test_flatten_optional(se: Any, de: Any) -> None:
 
 
 @pytest.mark.parametrize("se,de", all_formats)
+def test_flatten_optional_with_default(se: Any, de: Any) -> None:
+    @serde
+    class Bar:
+        c: float
+        d: bool
+
+    @serde
+    class Foo:
+        a: int
+        b: str
+        bar: Optional[Bar] = field(default=None, flatten=True)
+
+    f = Foo(a=10, b="foo", bar=Bar(c=100.0, d=True))
+    assert de(Foo, se(f)) == f
+
+    assert from_dict(Foo, {"a": 10, "b": "foo"}) == Foo(a=10, b="foo", bar=None)
+
+
+@pytest.mark.parametrize("se,de", all_formats)
 def test_flatten_not_supported(se: Any, de: Any) -> None:
     @serde
     class Bar:
