@@ -1153,9 +1153,18 @@ def get_generic_arg(
     'str'
     >>> get_generic_arg(GenericFoo[int, str], ['T', 'U'], ['U'], 0).__name__
     'str'
+    >>> get_generic_arg(GenericFoo[int, str], ['T', 'U'], None, 0).__name__
+    'int'
     """
-    if not is_generic(typ) or maybe_generic_type_vars is None or variable_type_args is None:
+    if not is_generic(typ) or maybe_generic_type_vars is None:
         return typing.Any
+
+    if variable_type_args is None:
+        # No remapping was supplied by the caller (e.g. when deserializing directly
+        # into a subscripted generic such as ``Foo[Bar[int]]``). In that case the
+        # field's type var maps straight onto the class's own type vars, so fall back
+        # to the identity mapping instead of losing the argument. See issue #464.
+        variable_type_args = maybe_generic_type_vars
 
     args = get_args(typ)
 
