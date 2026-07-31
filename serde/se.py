@@ -280,7 +280,11 @@ def serialize(
         g["Literal"] = Literal
         g["TypeCheck"] = TypeCheck
         g["disabled"] = disabled
-        g["coerce_object"] = coerce_object
+        g["coerce_object"] = (
+            functools.partial(coerce_object, coercer=type_check.coercer)
+            if type_check.coercer
+            else coerce_object
+        )
         g["class_serializers"] = class_serializers
         if serializer:
             g["serde_legacy_custom_class_serializer"] = functools.partial(
