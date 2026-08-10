@@ -1109,6 +1109,10 @@ def should_impl_dataclass(cls: type[Any]) -> bool:
     return False
 
 
+Coercer = Callable[[str | None, str, type[Any], Any], Any]
+"""Convert a field value into its declared primitive type."""
+
+
 @dataclass
 class TypeCheck:
     """
@@ -1125,6 +1129,7 @@ class TypeCheck:
         """ Value are strictly checked against the declared type """
 
     kind: Kind
+    coercer: Coercer | None = None
 
     def is_strict(self) -> bool:
         return self.kind == self.Kind.Strict
@@ -1132,9 +1137,20 @@ class TypeCheck:
     def is_coerce(self) -> bool:
         return self.kind == self.Kind.Coerce
 
-    def __call__(self, **kwargs: Any) -> TypeCheck:
-        # TODO
-        return self
+    def __call__(self, *, coercer: Coercer | None = None) -> TypeCheck:
+        """
+        Return a type-check configuration with an optional custom coercer.
+
+        Only ``coerce`` accepts a custom coercer. Calling ``coerce()`` without
+        one preserves the shared default configuration.
+        """
+        if coercer is None:
+            return self
+        if not self.is_coerce():
+            raise TypeError("A custom coercer is only supported by serde.coerce.")
+        if not callable(coercer):
+            raise TypeError("coercer must be callable.")
+        return dataclasses.replace(self, coercer=coercer)
 
 
 disabled = TypeCheck(kind=TypeCheck.Kind.Disabled)
@@ -1144,14 +1160,51 @@ coerce = TypeCheck(kind=TypeCheck.Kind.Coerce)
 strict = TypeCheck(kind=TypeCheck.Kind.Strict)
 
 
-def coerce_object(cls: str, field: str, typ: type[Any], obj: Any) -> Any:
+def deserialize_enum(typ: type[enum.Enum], value: Any) -> enum.Enum:
+    """
+    Construct an enum member from a deserialized value.
+
+    Formats such as JSON force object keys to ``str``, so an ``IntEnum``/
+    ``IntFlag`` used as a dict key arrives as e.g. ``"1"`` instead of ``1``.
+    A plain ``typ(value)`` lookup then fails even though the value is valid.
+    When the direct lookup fails for a ``str`` value, retry after coercing it
+    to the type of the enum's member values (e.g. ``int``).
+    """
+    try:
+        return typ(value)
+    except (ValueError, KeyError):
+        # JSON/YAML coerce enum values used as object keys to ``str`` and turn
+        # tuple values into ``list``. Retry after undoing that coercion. The enum
+        # may be heterogeneous, so derive the conversion from ``value`` itself
+        # rather than assuming every member shares the first member's value type.
+        if isinstance(value, list):
+            # A ``list`` can only originate from a tuple-valued member: list
+            # values are unhashable and are never valid enum values.
+            try:
+                return typ(tuple(value))
+            except (ValueError, KeyError):
+                pass
+        elif isinstance(value, str):
+            for member_value_type in {type(member.value) for member in typ}:
+                if member_value_type is str:
+                    continue
+                try:
+                    return typ(member_value_type(value))
+                except (ValueError, KeyError, TypeError):
+                    continue
+        raise
+
+
+def coerce_object(
+    cls: str | None, field: str, typ: type[Any], obj: Any, *, coercer: Coercer | None = None
+) -> Any:
     if obj is None:
         raise SerdeError(
             f"failed to coerce the field {cls}.{field} value {obj} into {typename(typ)}: "
             "None is not allowed for non-optional fields"
         )
     try:
-        return typ(obj)
+        return coercer(cls, field, typ, obj) if coercer else typ(obj)
     except Exception as e:
         raise SerdeError(
             f"failed to coerce the field {cls}.{field} value {obj} into {typename(typ)}: {e}"

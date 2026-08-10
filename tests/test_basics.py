@@ -8,7 +8,9 @@ import datetime
 from beartype.roar import BeartypeCallHintViolation
 from typing import (
     ClassVar,
+    Generic,
     Optional,
+    TypeVar,
     Any,
 )
 from collections import defaultdict
@@ -233,6 +235,187 @@ def test_dict_with_non_str_keys(se: Any, de: Any, opt: Any) -> None:
     if se not in (serde.json.to_json, serde.msgpack.to_msgpack, serde.toml.to_toml):
         p = Foo({10: 10}, {"foo": "bar"}, {100.0: 100.0}, {True: False})
         assert p == de(Foo, se(p))
+
+
+@pytest.mark.parametrize("opt", opt_case, ids=opt_case_ids())
+@pytest.mark.parametrize("se,de", all_formats)
+def test_dict_with_int_enum_keys(se: Any, de: Any, opt: Any) -> None:
+    class IE(enum.IntEnum):
+        V0 = 0
+        V1 = 1
+        V2 = 2
+
+    class IF(enum.IntFlag):
+        R = 1
+        W = 2
+        X = 4
+
+    @serde.serde(**opt)
+    class Foo:
+        i: dict[IE, str]
+        f: dict[IF, str]
+
+    # Msgpack and Toml can not represent non string keys.
+    if se not in (serde.msgpack.to_msgpack, serde.toml.to_toml):
+        # Formats such as JSON stringify object keys, so an IntEnum/IntFlag key
+        # arrives as e.g. "1" on deserialization. It must still round-trip back
+        # to the enum member (including combined IntFlag values).
+        p = Foo({IE.V1: "a", IE.V2: "b"}, {IF.R: "x", IF.R | IF.X: "y"})
+        assert p == de(Foo, se(p))
+
+
+@pytest.mark.parametrize("opt", opt_case, ids=opt_case_ids())
+@pytest.mark.parametrize("se,de", all_formats)
+def test_dict_with_numeric_keys(se: Any, de: Any, opt: Any) -> None:
+    @serde.serde(**opt)
+    class Foo:
+        i: dict[int, str]
+        f: dict[float, str]
+
+    # Msgpack and Toml can not represent non string keys.
+    if se not in (serde.msgpack.to_msgpack, serde.toml.to_toml):
+        # Formats such as JSON stringify object keys, so an int/float key arrives
+        # as e.g. "1"/"1.5" on deserialization. It must still round-trip back to
+        # the numeric key.
+        p = Foo({1: "a", 2: "b"}, {1.5: "x", 2.0: "y"})
+        assert p == de(Foo, se(p))
+
+
+def test_deserialize_enum_helper() -> None:
+    from serde.core import deserialize_enum
+
+    class IE(enum.IntEnum):
+        V0 = 0
+        V1 = 1
+
+    class SE(enum.Enum):
+        A = "a"
+
+    class TE(enum.Enum):
+        X = ("one", "info one")
+
+    # Direct lookup and the str->int coercion both yield the member.
+    assert deserialize_enum(IE, 1) is IE.V1
+    assert deserialize_enum(IE, "1") is IE.V1
+    # A str-valued enum is resolved by the normal lookup (no coercion).
+    assert deserialize_enum(SE, "a") is SE.A
+    # A tuple value is serialized as a list
+    assert deserialize_enum(TE, ["one", "info one"]) is TE.X
+    # Invalid values re-raise rather than returning None, for every branch:
+    with pytest.raises((ValueError, KeyError)):
+        deserialize_enum(IE, 99)  # non-str, not a member
+    with pytest.raises((ValueError, KeyError)):
+        deserialize_enum(IE, "99")  # stringified non-member
+    with pytest.raises((ValueError, KeyError)):
+        deserialize_enum(SE, "z")  # str-valued enum, invalid
+    with pytest.raises((ValueError, KeyError)):
+        deserialize_enum(TE, ["two", "info two"])  # tuple enum, not a member
+
+
+@pytest.mark.parametrize("se,de", (format_dict + format_json + format_yaml))
+def test_enum_with_tuple_value(se: Any, de: Any) -> None:
+    class TE(enum.Enum):
+        X = ("one", "info one")
+        Y = ("two", "info two")
+
+    @serde.serde
+    class C:
+        m: TE
+
+    @serde.serde
+    class CDict:
+        m: dict[str, TE]
+
+    @serde.serde
+    class CList:
+        m: list[TE]
+
+    @serde.serde
+    class COpt:
+        m: TE | None
+
+    assert de(C, se(C(TE.X))) == C(TE.X)
+    assert de(CDict, se(CDict({"a": TE.X}))) == CDict({"a": TE.X})
+    assert de(CList, se(CList([TE.X, TE.Y]))) == CList([TE.X, TE.Y])
+    assert de(COpt, se(COpt(TE.X))) == COpt(TE.X)
+    assert de(COpt, se(COpt(None))) == COpt(None)
+
+
+def test_deserialize_enum_helper_heterogeneous() -> None:
+    from serde.core import deserialize_enum
+
+    # An enum may mix value types. The conversion must be derived from the
+    # incoming value, not from the first member's value type.
+    class Mixed(enum.Enum):
+        NUM = 1  # first member: value type is int
+        TXT = "b"
+        PAIR = ("x", "y")  # tuple-valued member, not first
+
+    # list->tuple must fire even though the first member is not a tuple.
+    assert deserialize_enum(Mixed, ["x", "y"]) is Mixed.PAIR
+
+    # str->numeric must fire even though the first member's value is not numeric.
+    class Mixed2(enum.Enum):
+        NAME = "alice"  # first member: value type is str
+        AGE = 30  # numeric member, not first
+
+    assert deserialize_enum(Mixed2, "30") is Mixed2.AGE
+    # Invalid values still re-raise for every branch.
+    with pytest.raises((ValueError, KeyError)):
+        deserialize_enum(Mixed, ["p", "q"])
+    with pytest.raises((ValueError, KeyError)):
+        deserialize_enum(Mixed2, "99")
+
+
+@pytest.mark.parametrize("se,de", (format_dict + format_json + format_yaml))
+def test_enum_heterogeneous_tuple_member(se: Any, de: Any) -> None:
+    # Regression: a tuple-valued member that is not the first member serializes
+    # to a list and previously failed to deserialize (the member value type was
+    # sampled from the first member only).
+    class Mixed(enum.Enum):
+        NUM = 1
+        TXT = "b"
+        PAIR = ("x", "y")
+
+    @serde.serde
+    class C:
+        m: Mixed
+
+    for member in Mixed:
+        assert de(C, se(C(member))) == C(member)
+
+
+@pytest.mark.parametrize("se,de", (format_dict + format_json + format_yaml))
+def test_enum_heterogeneous_numeric_key(se: Any, de: Any) -> None:
+    # Regression: a numeric member that is not the first member arrives as a
+    # stringified dict key and previously failed to coerce back (the member
+    # value type was sampled from the first member only).
+    class Mixed(enum.Enum):
+        NAME = "alice"
+        AGE = 30
+
+    @serde.serde
+    class C:
+        d: dict[Mixed, int]
+
+    assert de(C, se(C({Mixed.AGE: 1}))) == C({Mixed.AGE: 1})
+
+
+@pytest.mark.parametrize("se,de", (format_dict + format_json + format_yaml))
+def test_aliased_enum_field(se: Any, de: Any) -> None:
+    class IE(enum.IntEnum):
+        V0 = 0
+        V1 = 1
+
+    @serde.serde
+    class Foo:
+        a: IE = serde.field(alias=["b", "c"])  # type: ignore[literal-required]
+
+    f = Foo(a=IE.V1)
+    assert f == de(Foo, se(f))
+    # Deserializing via an alias name must also resolve the enum member.
+    assert serde.from_dict(Foo, {"b": 1}) == f
+    assert serde.from_dict(Foo, {"c": 1}) == f
 
 
 @pytest.mark.parametrize("opt", opt_case, ids=opt_case_ids())
@@ -623,6 +806,79 @@ def test_default_rename_and_alias() -> None:
     assert ff.a == 10
     ff = serde.json.from_json(Foo, '{"e":10}')
     assert ff.a == 2
+
+
+def test_alias_with_list() -> None:
+    @serde.serde
+    class Foo:
+        a: list[int] = serde.field(alias=["b"])  # type: ignore[literal-required]
+
+    assert Foo([1, 2]) == serde.json.from_json(Foo, '{"a":[1,2]}')
+    assert Foo([1, 2]) == serde.json.from_json(Foo, '{"b":[1,2]}')
+
+
+def test_alias_with_optional_list_default() -> None:
+    @serde.serde
+    class Foo:
+        a: Optional[list[int]] = serde.field(alias=["b"], default=None)  # type: ignore[literal-required]
+
+    assert Foo([1]) == serde.json.from_json(Foo, '{"b":[1]}')
+    assert Foo(None) == serde.json.from_json(Foo, "{}")
+
+
+def test_alias_with_list_default_factory() -> None:
+    @serde.serde
+    class Foo:
+        a: list[int] = serde.field(alias=["b"], default_factory=list)  # type: ignore[literal-required]
+
+    assert Foo([1]) == serde.json.from_json(Foo, '{"b":[1]}')
+    assert Foo([]) == serde.json.from_json(Foo, "{}")
+
+
+def test_alias_with_dict() -> None:
+    @serde.serde
+    class Foo:
+        a: dict[str, int] = serde.field(alias=["b"])  # type: ignore[literal-required]
+
+    assert Foo({"x": 1}) == serde.json.from_json(Foo, '{"b":{"x":1}}')
+
+
+def test_alias_with_set() -> None:
+    @serde.serde
+    class Foo:
+        a: set[int] = serde.field(alias=["b"])  # type: ignore[literal-required]
+
+    assert Foo({1, 2}) == serde.json.from_json(Foo, '{"b":[1,2]}')
+
+
+def test_alias_with_tuple() -> None:
+    @serde.serde
+    class Foo:
+        a: tuple[int, str] = serde.field(alias=["b"])  # type: ignore[literal-required]
+
+    assert Foo((1, "x")) == serde.json.from_json(Foo, '{"b":[1,"x"]}')
+
+
+def test_alias_with_datetime() -> None:
+    @serde.serde
+    class Foo:
+        a: datetime.datetime = serde.field(alias=["b"])  # type: ignore[literal-required]
+
+    dt = datetime.datetime(2021, 1, 1, 0, 0, 0)
+    assert Foo(dt) == serde.json.from_json(Foo, '{"b":"2021-01-01T00:00:00"}')
+
+
+def test_alias_with_nested_dataclass() -> None:
+    @serde.serde
+    class Bar:
+        e: int
+        f: str
+
+    @serde.serde
+    class Foo:
+        a: Bar = serde.field(alias=["b"])  # type: ignore[literal-required]
+
+    assert Foo(Bar(1, "x")) == serde.json.from_json(Foo, '{"b":{"e":1,"f":"x"}}')
 
 
 def test_skip() -> None:
@@ -1296,3 +1552,33 @@ def test_dict_str_any() -> None:
 
     assert serde.to_dict(foo) == foo_se
     assert serde.from_dict(Foo, foo_se) == foo_de
+
+
+def test_generic_with_generic_dataclass_arg() -> None:
+    # https://github.com/yukinarit/pyserde/issues/464
+    # Deserializing into a generic whose type argument is itself a generic
+    # dataclass (e.g. ``Foo[Bar[int]]``) used to leave the inner dataclass as a
+    # raw dict instead of reconstructing it.
+    T = TypeVar("T")
+
+    @serde.serde
+    class Bar(Generic[T]):
+        inner: T
+
+    @serde.serde
+    class Foo(Generic[T]):
+        inner: T
+
+    # A plain type argument keeps working.
+    f1 = Foo(10)
+    assert f1 == serde.json.from_json(Foo[int], serde.json.to_json(f1))
+
+    # A generic dataclass as the type argument is now reconstructed.
+    f2 = Foo(Bar(10))
+    json = serde.json.to_json(f2)
+    assert json == '{"inner":{"inner":10}}'
+    assert f2 == serde.json.from_json(Foo[Bar[int]], json)
+
+    # Nested more than one level deep also works.
+    f3 = Foo(Bar(Bar(10)))
+    assert f3 == serde.json.from_json(Foo[Bar[Bar[int]]], serde.json.to_json(f3))

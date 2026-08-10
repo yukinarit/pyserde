@@ -69,6 +69,56 @@ foo = Foo(10)
 print(to_json(foo))
 ```
 
+### Custom coercion rules
+
+By default, `coerce` converts a primitive value by calling its declared type, as in `int(value)`.
+To validate values or use a different conversion, pass a coercer function to
+`coerce(coercer=...)`. The function receives:
+
+- `owner`: the decorated class name, such as `"Config"`, or `None` when unavailable
+- `field`: the field name, such as `"count"`
+- `target`: the declared primitive type
+- `value`: the value to convert
+
+The function must return the converted value. If it raises an exception, pyserde wraps that
+exception in `SerdeError`.
+
+The following function accepts only integer values for `int` fields. It includes the field location
+in the error message and converts all other primitive types normally:
+
+```python
+from typing import Any
+from serde import coerce, from_dict, serde
+
+
+def integer_only(
+    owner: str | None, field: str, target: type[Any], value: Any
+) -> Any:
+    if target is int:
+        if isinstance(value, bool) or not isinstance(value, int):
+            location = f"{owner}.{field}" if owner else field
+            raise TypeError(f"{location} must be an integer")
+    return target(value)
+
+
+@serde(type_check=coerce(coercer=integer_only))
+class Config:
+    count: int
+
+
+from_dict(Config, {"count": 1})       # Config(count=1)
+from_dict(Config, {"count": 1.5})     # raises SerdeError mentioning Config.count
+```
+
+pyserde calls the function for primitive fields during both serialization and deserialization,
+including primitive values inside containers and `Optional` fields. Enums and `Literal` values are
+not passed to the function, nor is the function used to select a `Union` branch. Field serializers
+and deserializers handle their corresponding direction without invoking it. The `field` argument is
+`"v"` for list items and mapping values, and `"k"` for mapping keys.
+
+The function is configured per class. Fields in a nested dataclass are therefore handled according
+to that dataclass's own `type_check` setting.
+
 ## `disabled`
 
 This is the default behavior until pyserde v0.8.3 and v0.9.x. No type coercion or checks are run. Even if a user puts a wrong value, pyserde doesn't complain anything.

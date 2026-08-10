@@ -81,6 +81,7 @@ from .core import (
     TypeCheck,
     add_func,
     coerce_object,
+    deserialize_enum,
     strict,
     get_transparent_field,
     has_default,
@@ -322,7 +323,12 @@ def deserialize(
         g["is_instance"] = is_instance
         g["TypeCheck"] = TypeCheck
         g["disabled"] = disabled
-        g["coerce_object"] = coerce_object
+        g["coerce_object"] = (
+            functools.partial(coerce_object, coercer=type_check.coercer)
+            if type_check.coercer
+            else coerce_object
+        )
+        g["deserialize_enum"] = deserialize_enum
         g["_exists_by_aliases"] = _exists_by_aliases
         g["_get_by_aliases"] = _get_by_aliases
         g["_project_flattened_data"] = _project_flattened_data
@@ -464,6 +470,77 @@ class Deserializer(Generic[T], metaclass=abc.ABCMeta):
         raise NotImplementedError
 
 
+def find_global_class_deserializer(typ: type[Any]) -> ClassDeserializer | None:
+    """Return a globally registered class deserializer that handles ``typ``, if any.
+
+    This mirrors the lookup used when rendering dataclass fields, so a deserializer
+    registered with ``serde.add_deserializer`` also applies when ``typ`` is passed
+    directly to ``from_dict``/``from_tuple`` instead of nested in a dataclass
+    (https://github.com/yukinarit/pyserde/issues/514).
+    """
+    for class_deserializer in GLOBAL_CLASS_DESERIALIZER:
+        for method in class_deserializer.__class__.deserialize.methods:  # type: ignore[attr-defined]
+            # signature.types[1] is ``type[X]``; unwrap it to the value type ``X``.
+            if get_args(method.signature.types[1])[0] is typ:
+                return class_deserializer
+    return None
+
+
+def _deserialize_optional(
+    c: type[Any],
+    o: Any,
+    deserializer: Callable[[type[Any], Any], Any],
+) -> Any:
+    if o is None:
+        return None
+    return deserializer(type_args(c)[0], o)
+
+
+_UNHANDLED = object()
+
+
+def _from_obj_collection(
+    c: Any,
+    o: Any,
+    thisfunc: Callable[[Any, Any], Any],
+) -> Any:
+    if is_list(c):
+        if is_bare_list(c):
+            return list(o)
+        return [thisfunc(type_args(c)[0], e) for e in o]
+    if is_set(c):
+        if is_bare_set(c):
+            return set(o)
+        if is_frozen_set(c):
+            return frozenset(thisfunc(type_args(c)[0], e) for e in o)
+        return {thisfunc(type_args(c)[0], e) for e in o}
+    if is_deque(c):
+        if is_bare_deque(c):
+            return collections.deque(o)
+        return collections.deque(thisfunc(type_args(c)[0], e) for e in o)
+    if is_counter(c):
+        if is_bare_counter(c):
+            return collections.Counter(o)
+        return collections.Counter({thisfunc(type_args(c)[0], k): v for k, v in o.items()})
+    if is_tuple(c):
+        if is_bare_tuple(c) or is_variable_tuple(c):
+            return tuple(e for e in o)
+        return tuple(thisfunc(type_args(c)[i], e) for i, e in enumerate(o))
+    if is_dict(c):
+        if is_bare_dict(c):
+            return o
+        if is_default_dict(c):
+            f = DeField(c, "")
+            v = f.value_field()
+            origin = get_origin(v.type)
+            return collections.defaultdict(
+                origin if origin else v.type,
+                {thisfunc(type_args(c)[0], k): thisfunc(type_args(c)[1], v) for k, v in o.items()},
+            )
+        return {thisfunc(type_args(c)[0], k): thisfunc(type_args(c)[1], v) for k, v in o.items()}
+    return _UNHANDLED
+
+
 def from_obj(
     c: type[T],
     o: Any,
@@ -481,6 +558,11 @@ def from_obj(
     """
 
     res: Any
+
+    # A PEP 695 type alias (``type T = Foo | Bar``) is a TypeAliasType, not the
+    # aliased type itself, so unwrap it to recognize e.g. a union.
+    if is_pep695_type_alias(c):
+        c = c.__value__  # type: ignore[attr-defined]
 
     # It is possible that the parser already generates the correct data type requested
     # by the caller. Hence, it should be checked early to avoid doing anymore work.
@@ -521,7 +603,10 @@ def from_obj(
             reuse_instances=reuse_instances,
             deserialize_numbers=deserialize_numbers,
         )
-        if is_dataclass_without_de(c):
+        class_deserializer = find_global_class_deserializer(c)
+        if class_deserializer is not None:
+            res = class_deserializer.deserialize(c, o)
+        elif is_dataclass_without_de(c):
             # Do not automatically implement beartype if dataclass without serde decorator
             # is passed, because it is surprising for users
             # See https://github.com/yukinarit/pyserde/issues/480
@@ -530,55 +615,9 @@ def from_obj(
         elif is_deserializable(c):
             res = deserializable_to_obj(c)
         elif is_opt(c):
-            if o is None:
-                res = None
-            else:
-                res = thisfunc(type_args(c)[0], o)
-        elif is_list(c):
-            if is_bare_list(c):
-                res = list(o)
-            else:
-                res = [thisfunc(type_args(c)[0], e) for e in o]
-        elif is_set(c):
-            if is_bare_set(c):
-                res = set(o)
-            elif is_frozen_set(c):
-                res = frozenset(thisfunc(type_args(c)[0], e) for e in o)
-            else:
-                res = {thisfunc(type_args(c)[0], e) for e in o}
-        elif is_deque(c):
-            if is_bare_deque(c):
-                res = collections.deque(o)
-            else:
-                res = collections.deque(thisfunc(type_args(c)[0], e) for e in o)
-        elif is_counter(c):
-            if is_bare_counter(c):
-                res = collections.Counter(o)
-            else:
-                res = collections.Counter({thisfunc(type_args(c)[0], k): v for k, v in o.items()})
-        elif is_tuple(c):
-            if is_bare_tuple(c) or is_variable_tuple(c):
-                res = tuple(e for e in o)
-            else:
-                res = tuple(thisfunc(type_args(c)[i], e) for i, e in enumerate(o))
-        elif is_dict(c):
-            if is_bare_dict(c):
-                res = o
-            elif is_default_dict(c):
-                f = DeField(c, "")
-                v = f.value_field()
-                origin = get_origin(v.type)
-                res = collections.defaultdict(
-                    origin if origin else v.type,
-                    {
-                        thisfunc(type_args(c)[0], k): thisfunc(type_args(c)[1], v)
-                        for k, v in o.items()
-                    },
-                )
-            else:
-                res = {
-                    thisfunc(type_args(c)[0], k): thisfunc(type_args(c)[1], v) for k, v in o.items()
-                }
+            res = _deserialize_optional(c, o, thisfunc)
+        elif (collection_res := _from_obj_collection(c, o, thisfunc)) is not _UNHANDLED:
+            res = collection_res
         elif _is_numpy_array(c):
             from .numpy import deserialize_numpy_array_direct
 
@@ -802,6 +841,9 @@ class DeField(Field[T]):
         e.g. Optional
             * datavar property returns "data"
             * data property returns "data.get("field_name")".
+        e.g. a field with an alias
+            * datavar property returns "data"
+            * data property returns "_get_by_aliases(data, ["field_name", ...])".
         For other types
             * datavar property returns "data"
             * data property returns "data["field_name"]".
@@ -809,7 +851,17 @@ class DeField(Field[T]):
 
         if self.iterbased:
             return f"{self.datavar}[{self.index}]"
-        elif is_union(self.type) and type(None) in get_args(self.type):
+        optional = is_union(self.type) and type(None) in get_args(self.type)
+        if self.alias:
+            # A field may be populated from any of its aliases (or its own name),
+            # so read it through ``_get_by_aliases`` regardless of the field type.
+            # This keeps ``alias`` working for containers, datetimes, nested
+            # dataclasses etc. - not just the leaf renderers (primitive/enum/
+            # Optional) that used to special-case it.
+            names = ", ".join(f'"{name}"' for name in [self.name, *self.alias])
+            raise_error = "False" if optional else "True"
+            return f"_get_by_aliases({self.datavar}, [{names}], raise_error={raise_error})"
+        elif optional:
             return f'{self.datavar}.get("{self.conv_name()}")'
         else:
             return f'{self.datavar}["{self.conv_name()}"]'
@@ -1127,14 +1179,38 @@ class Renderer:
                 # When the callable type is non generic type e.g int, Foo.
                 callable = v.type.__name__
             return f"collections.defaultdict({callable}, \
-                    {{{self.render(k)}: {self.render(v)} for k, v in {arg.data}.items()}})"
+                    {{{self.dict_key(k)}: {self.render(v)} for k, v in {arg.data}.items()}})"
         else:
             k = arg.key_field()
             v = arg.value_field()
-            return f"{{{self.render(k)}: {self.render(v)} for k, v in {arg.data}.items()}}"
+            return f"{{{self.dict_key(k)}: {self.render(v)} for k, v in {arg.data}.items()}}"
+
+    def dict_key(self, arg: DeField[Any]) -> str:
+        """
+        Render rvalue for a dict key.
+
+        Formats such as JSON/YAML stringify object keys, so an ``int``/``float`` key
+        arrives as e.g. ``"1"``/``"1.5"`` on deserialization. Coerce such keys back to
+        their declared numeric type even when coercion is otherwise suppressed (i.e.
+        ``strict``), mirroring how stringified ``IntEnum``/``IntFlag`` keys are handled.
+        ``bool`` is intentionally excluded because ``bool("false")`` is ``True``.
+        """
+        typ = arg.type
+        if (
+            isinstance(typ, type)
+            and issubclass(typ, (int, float))
+            and not issubclass(typ, bool)
+            and not is_enum(typ)
+        ):
+            return f'coerce_object("{self.class_name}", "k", {typename(typ)}, {arg.data})'
+        return self.render(arg)
 
     def enum(self, arg: DeField[Any]) -> str:
-        return f"{typename(arg.type)}({self.primitive(arg)})"
+        # Pass the raw data to ``deserialize_enum``, which constructs the enum
+        # member itself. Coercing the value beforehand (e.g. via ``coerce_object``)
+        # would eagerly call ``EnumType(value)`` and fail for stringified keys of
+        # ``IntEnum``/``IntFlag`` produced by JSON (e.g. ``"1"``).
+        return f"deserialize_enum({typename(arg.type)}, {arg.data})"
 
     def primitive(self, arg: DeField[Any], suppress_coerce: bool = False) -> str:
         """
@@ -1144,9 +1220,6 @@ class Renderer:
         """
         typ = typename(arg.type)
         dat = arg.data
-        if arg.alias:
-            aliases = (f'"{s}"' for s in [arg.name, *arg.alias])
-            dat = f"_get_by_aliases(data, [{','.join(aliases)}])"
         if isinstance(arg.type, type) and issubclass(arg.type, float):
             if self.suppress_coerce and suppress_coerce:
                 return f"deserialize_numbers({dat}) if deserialize_numbers else {dat}"
@@ -1203,8 +1276,10 @@ class Renderer:
         if arg.flatten:
             # When a field has the `flatten` attribute, iterate over its dataclass fields.
             # This ensures that the code checks keys in the data while considering aliases.
+            # An optional flattened field holds the dataclass in its type argument.
+            inner = arg[0] if is_opt(arg.type) else arg
             flattened = []
-            for subarg in defields(arg.type):
+            for subarg in defields(inner.type):
                 if subarg.alias:
                     aliases = get_aliased_fields(subarg)
                     flattened.append(f"_exists_by_aliases({arg.datavar}, [{','.join(aliases)}])")

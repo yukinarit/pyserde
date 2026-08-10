@@ -280,7 +280,11 @@ def serialize(
         g["Literal"] = Literal
         g["TypeCheck"] = TypeCheck
         g["disabled"] = disabled
-        g["coerce_object"] = coerce_object
+        g["coerce_object"] = (
+            functools.partial(coerce_object, coercer=type_check.coercer)
+            if type_check.coercer
+            else coerce_object
+        )
         g["class_serializers"] = class_serializers
         if serializer:
             g["serde_legacy_custom_class_serializer"] = functools.partial(
@@ -307,11 +311,7 @@ def serialize(
             add_func(scope, union_key, render_union_func(cls, union_args, tagging), g)
             scope.union_se_args[union_key] = union_args
 
-        for f in sefields(cls, serialize_class_var):
-            if f.skip_if:
-                g[f.skip_if.name] = f.skip_if
-            if f.serializer:
-                g[f.serializer.name] = f.serializer
+        add_field_serializers_to_scope(sefields(cls, serialize_class_var), g, serialize_class_var)
 
         add_func(
             scope,
@@ -375,6 +375,22 @@ def is_dataclass_without_se(cls: type[Any]) -> bool:
     return TO_DICT not in scope.funcs
 
 
+def find_global_class_serializer(typ: type[Any]) -> ClassSerializer | None:
+    """Return a globally registered class serializer that handles ``typ``, if any.
+
+    This mirrors the lookup used when rendering dataclass fields, so a serializer
+    registered with ``serde.add_serializer`` also applies when an instance of
+    ``typ`` is passed directly to ``to_dict``/``to_tuple`` instead of nested in a
+    dataclass (https://github.com/yukinarit/pyserde/issues/514).
+    """
+    for class_serializer in GLOBAL_CLASS_SERIALIZER:
+        for method in class_serializer.__class__.serialize.methods:  # type: ignore[attr-defined]
+            # signature.types[1] is the value type; index 0 is ``self``.
+            if method.signature.types[1] is typ:
+                return class_serializer
+    return None
+
+
 def to_obj(
     o: Any,
     named: bool,
@@ -402,6 +418,11 @@ def to_obj(
             skip_none=skip_none,
         )
 
+        # A PEP 695 type alias (``type T = Foo | Bar``) is a TypeAliasType, not
+        # the aliased type itself, so unwrap it to recognize e.g. a union.
+        if c is not None and is_pep695_type_alias(c):
+            c = c.__value__
+
         # If a class in the argument is a non-dataclass class e.g. Union[Foo, Bar],
         # pyserde generates a wrapper (de)serializable dataclass on the fly,
         # and use it to serialize the object.
@@ -410,6 +431,11 @@ def to_obj(
 
         if o is None:
             return None
+        class_serializer = find_global_class_serializer(type(o))
+        if class_serializer is not None:
+            return class_serializer.serialize(o)
+        if is_enum(type(o)):
+            return enum_value(type(o), o)
         if is_dataclass_without_se(o):
             # Do not automatically implement beartype if dataclass without serde decorator
             # is passed, because it is surprising for users
@@ -423,7 +449,7 @@ def to_obj(
         elif is_bearable(o, tuple):  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
             return tuple(thisfunc(e) for e in o)
         elif isinstance(o, Mapping):
-            return {k: thisfunc(v) for k, v in o.items()}
+            return {thisfunc(k): thisfunc(v) for k, v in o.items()}
         elif isinstance(o, Set):
             return [thisfunc(e) for e in o]
         elif isinstance(o, deque):
@@ -601,6 +627,29 @@ def sefields(cls: type[Any], serialize_class_var: bool = False) -> Iterator[SeFi
     ):
         f.parent = SeField(None, "obj")  # type: ignore
         yield f
+
+
+def add_field_serializers_to_scope(
+    sfields: Iterator[SeField[Any]], g: dict[str, Any], serialize_class_var: bool = False
+) -> None:
+    """
+    Register custom field serializers and skip_if predicates in the generated globals.
+
+    A flattened dataclass field is rendered inline in the enclosing class's serialize
+    function, so the custom serializers and skip_if predicates of its inner fields must
+    be available in this scope too, not only those of the top-level fields (#453).
+    """
+    for f in sfields:
+        if f.skip_if:
+            g[f.skip_if.name] = f.skip_if
+        if f.serializer:
+            g[f.serializer.name] = f.serializer
+        if f.flatten:
+            inner = f[0] if is_opt(f.type) else f
+            if is_dataclass(inner.type):
+                add_field_serializers_to_scope(
+                    sefields(inner.type, serialize_class_var), g, serialize_class_var
+                )
 
 
 jinja2_env = jinja2.Environment(

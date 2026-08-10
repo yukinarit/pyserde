@@ -12,6 +12,7 @@ from serde.compat import (
     is_generic,
     is_list,
     is_opt,
+    is_opt_dataclass,
     is_primitive,
     is_set,
     is_tuple,
@@ -65,6 +66,17 @@ def test_types() -> None:
         assert is_union(str | int)
         assert is_union(str | None)
         assert is_opt(str | None)
+
+
+def test_is_opt_dataclass_preserves_union_arg_order() -> None:
+    @dataclass
+    class Foo:
+        pass
+
+    assert is_opt_dataclass(Optional[Foo])
+    assert not is_opt_dataclass(Union[None, Foo])
+    assert not is_opt_dataclass(Union[None, Foo])
+    assert is_opt_dataclass(Optional[Foo])
 
 
 def test_typename() -> None:

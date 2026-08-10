@@ -1,3 +1,4 @@
+from collections import Counter
 from dataclasses import dataclass
 import datetime
 import pathlib
@@ -196,3 +197,227 @@ def test_coerce() -> None:
 
     f = InnerTuple(foo=(1, 2))
     assert f.foo == (1.0, 2.0)
+
+
+def _integer_only_coercer(
+    _owner: str | None, _field_name: str, target: type[Any], value: Any
+) -> Any:
+    if target is int and (isinstance(value, bool) or not isinstance(value, int)):
+        raise TypeError("expected an integer")
+    return target(value)
+
+
+def test_custom_coercer_configuration_is_isolated() -> None:
+    calls: list[tuple[str | None, str, type[Any], Any]] = []
+
+    def record_context(owner: str | None, field_name: str, target: type[Any], value: Any) -> Any:
+        calls.append((owner, field_name, target, value))
+        return target(value)
+
+    default_coerce = serde.coerce()
+    assert default_coerce is serde.coerce
+
+    @serde.serde(type_check=serde.coerce(coercer=record_context))
+    class CustomConfig:
+        value: int
+
+    @serde.serde(type_check=default_coerce)
+    class DefaultConfig:
+        value: int
+
+    assert serde.from_dict(CustomConfig, {"value": "1"}) == CustomConfig(1)
+    assert calls == [("CustomConfig", "value", int, "1")]
+
+    calls.clear()
+    assert serde.from_dict(DefaultConfig, {"value": "2"}) == DefaultConfig(2)
+    assert calls == []
+
+
+def test_custom_coercer_configuration_validation() -> None:
+    def coercer(_owner: str | None, _field_name: str, target: type[Any], value: Any) -> Any:
+        return target(value)
+
+    with pytest.raises(TypeError, match="only supported"):
+        serde.strict(coercer=coercer)
+    with pytest.raises(TypeError, match="must be callable"):
+        serde.coerce(coercer=42)  # type: ignore[arg-type]
+
+
+def test_custom_coercer_receives_field_context() -> None:
+    calls: list[tuple[str | None, str, type[Any], Any]] = []
+
+    def record_context(owner: str | None, field_name: str, target: type[Any], value: Any) -> Any:
+        calls.append((owner, field_name, target, value))
+        return target(value)
+
+    @serde.serde(type_check=serde.coerce(coercer=record_context))
+    class Config:
+        count: int
+
+    assert serde.from_dict(Config, {"count": "1"}) == Config(1)
+    assert calls == [("Config", "count", int, "1")]
+
+    calls.clear()
+    assert serde.to_dict(Config("2")) == {"count": 2}  # type: ignore[arg-type]
+    assert calls == [("Config", "count", int, "2")]
+
+
+def test_custom_coercer_receives_composite_value_context() -> None:
+    calls: list[tuple[str | None, str, type[Any], Any]] = []
+
+    def record_context(owner: str | None, field_name: str, target: type[Any], value: Any) -> Any:
+        calls.append((owner, field_name, target, value))
+        return target(value)
+
+    @serde.serde(type_check=serde.coerce(coercer=record_context))
+    class Payload:
+        values: list[float]
+        mapping: dict[int, str]
+
+    payload = serde.from_dict(
+        Payload,
+        {"values": [2, 3.5], "mapping": {"5": 6}},
+    )
+    assert payload == Payload([2.0, 3.5], {5: "6"})
+    assert Counter(calls) == Counter(
+        [
+            ("Payload", "v", float, 2),
+            ("Payload", "v", float, 3.5),
+            ("Payload", "k", int, "5"),
+            ("Payload", "v", str, 6),
+        ]
+    )
+
+    calls.clear()
+    serialized = serde.to_dict(Payload([2, 3.5], {5: 6}))  # type: ignore[dict-item]
+    assert serialized == {"values": [2.0, 3.5], "mapping": {5: "6"}}
+    assert Counter(calls) == Counter(
+        [
+            ("Payload", "v", float, 2),
+            ("Payload", "v", float, 3.5),
+            ("Payload", "k", int, 5),
+            ("Payload", "v", str, 6),
+        ]
+    )
+
+
+def test_custom_coercer_applies_to_optional_values() -> None:
+    @serde.serde(type_check=serde.coerce(coercer=_integer_only_coercer))
+    class Config:
+        scale: float | None
+
+    assert serde.from_dict(Config, {"scale": 4}) == Config(4.0)
+    assert serde.to_dict(Config(4)) == {"scale": 4.0}
+    assert serde.from_dict(Config, {"scale": None}) == Config(None)
+    assert serde.to_dict(Config(None)) == {"scale": None}
+
+
+def test_custom_field_converters_take_precedence_over_custom_coercer() -> None:
+    calls: list[tuple[str, Any]] = []
+
+    def record_call(_owner: str | None, field_name: str, target: type[Any], value: Any) -> Any:
+        calls.append((field_name, value))
+        return target(value)
+
+    @serde.serde(type_check=serde.coerce(coercer=record_call))
+    class Config:
+        serializer_only: int = serde.field(serializer=lambda value: f"serialized:{value}")
+        deserializer_only: int = serde.field(deserializer=lambda _value: 7)
+        plain: int
+
+    config = serde.from_dict(
+        Config,
+        {
+            "serializer_only": "1",
+            "deserializer_only": "ignored",
+            "plain": "3",
+        },
+    )
+    assert config == Config(1, 7, 3)
+    assert Counter(calls) == Counter(
+        [
+            ("serializer_only", "1"),
+            ("plain", "3"),
+        ]
+    )
+
+    calls.clear()
+    assert serde.to_dict(Config("4", "5", "6")) == {  # type: ignore[arg-type]
+        "serializer_only": "serialized:4",
+        "deserializer_only": 5,
+        "plain": 6,
+    }
+    assert Counter(calls) == Counter(
+        [
+            ("deserializer_only", "5"),
+            ("plain", "6"),
+        ]
+    )
+
+
+def test_custom_coercer_does_not_handle_unions() -> None:
+    def fail_if_called(
+        _owner: str | None, _field_name: str, _target: type[Any], _value: Any
+    ) -> Any:
+        raise AssertionError("custom coercer must not be called")
+
+    @serde.serde(type_check=serde.coerce(coercer=fail_if_called))
+    class Choice:
+        value: Union[int, str]
+
+    assert serde.from_dict(Choice, {"value": "1"}) == Choice("1")
+    assert serde.to_dict(Choice("1")) == {"value": "1"}
+
+
+def test_nested_dataclass_uses_its_own_custom_coercer() -> None:
+    outer_calls: list[tuple[str | None, str, type[Any], Any]] = []
+    inner_calls: list[tuple[str | None, str, type[Any], Any]] = []
+
+    def outer_coercer(owner: str | None, field_name: str, target: type[Any], value: Any) -> Any:
+        outer_calls.append((owner, field_name, target, value))
+        return target(value)
+
+    def inner_coercer(owner: str | None, field_name: str, target: type[Any], value: Any) -> Any:
+        inner_calls.append((owner, field_name, target, value))
+        return target(value)
+
+    @serde.serde(type_check=serde.coerce(coercer=inner_coercer))
+    class Inner:
+        value: int
+
+    @serde.serde(type_check=serde.coerce(coercer=outer_coercer))
+    class Outer:
+        inner: Inner
+
+    assert serde.from_dict(Outer, {"inner": {"value": "1"}}) == Outer(Inner(1))
+    assert outer_calls == []
+    assert inner_calls == [("Inner", "value", int, "1")]
+
+    inner_calls.clear()
+    assert serde.to_dict(Outer(Inner("2"))) == {"inner": {"value": 2}}  # type: ignore[arg-type]
+    assert outer_calls == []
+    assert inner_calls == [("Inner", "value", int, "2")]
+
+
+def test_custom_coercer_wraps_deserialization_rejection() -> None:
+    @serde.serde(type_check=serde.coerce(coercer=_integer_only_coercer))
+    class Config:
+        count: int
+
+    with pytest.raises(
+        serde.SerdeError,
+        match=r"failed to coerce the field Config\.count.*expected an integer",
+    ):
+        serde.from_dict(Config, {"count": 3.9999})
+
+
+def test_custom_coercer_wraps_serialization_rejection() -> None:
+    @serde.serde(type_check=serde.coerce(coercer=_integer_only_coercer))
+    class Config:
+        count: int
+
+    with pytest.raises(
+        serde.SerdeError,
+        match=r"failed to coerce the field Config\.count.*expected an integer",
+    ):
+        serde.to_dict(Config(3.9999))  # type: ignore[arg-type]

@@ -1,3 +1,4 @@
+import enum
 from collections.abc import Sequence, MutableSequence
 
 from serde import asdict, astuple, serialize, to_dict, to_tuple
@@ -192,3 +193,12 @@ def test_render_dataclass() -> None:
     rendered = Renderer(TO_ITER).render(SeField(Foo, "foo"))
     rendered_foo = f"foo.__serde__.funcs['to_iter'](foo, {kwargs})"
     assert rendered_foo == rendered
+
+
+def test_to_json_bare_enum_and_enum_dict_key() -> None:
+    class E(enum.Enum):
+        FOO = "foo"
+
+    assert to_json(E.FOO) == '"foo"'
+    assert to_json([E.FOO]) == '["foo"]'
+    assert to_json({E.FOO: "x"}) == '{"foo":"x"}'
