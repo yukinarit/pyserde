@@ -109,6 +109,26 @@ class Baz:
     assert value == from_dict(BazClass, to_dict(value))
 
 
+@pytest.mark.skipif(sys.version_info < (3, 12), reason=_PEP695_REASON)
+def test_pep695_type_alias_literal() -> None:
+    ns: dict[str, object] = {"serde": serde, "Literal": typing.Literal}
+    exec(
+        """
+type Mode = Literal["trailing", "mean-reversion"]
+
+@serde
+class Foo:
+    value: Mode
+""",
+        ns,
+    )
+    FooClass = typing.cast(type, ns["Foo"])
+
+    value = FooClass("trailing")
+    assert {"value": "trailing"} == to_dict(value)
+    assert value == from_dict(FooClass, {"value": "trailing"})
+
+
 def test_typealiastype_list() -> None:
     @serde
     class Foo:

@@ -466,6 +466,8 @@ def iter_literals(cls: type[Any]) -> list[TypeLike]:
         if is_union(cls):
             for arg in type_args(cls):
                 recursive(arg)
+        elif is_pep695_type_alias(cls):
+            recursive(cls.__value__)
         if is_dataclass(cls):
             stack.append(cls)
             if isinstance(cls, type):
