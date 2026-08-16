@@ -1090,14 +1090,16 @@ def should_impl_dataclass(cls: type[Any]) -> bool:
     # Checking is_dataclass is not enough in such a case that the class is inherited
     # from another dataclass. To do it correctly, check if all fields in __annotations__
     # are present as dataclass fields.
-    annotations = getattr(cls, "__annotations__", {})
-    if not annotations:
+    raw_annotations = getattr(cls, "__annotations__", {})
+    if not raw_annotations:
         return False
 
+    resolved_annotations = get_type_hints(cls)
     field_names = [field.name for field in dataclass_fields(cls)]
-    for field_name, annotation in annotations.items():
-        # Omit InitVar field because it doesn't appear in dataclass fields.
-        if is_instance(annotation, dataclasses.InitVar):
+    for field_name, raw_annotation in raw_annotations.items():
+        annotation = resolved_annotations.get(field_name, raw_annotation)
+        # Omit InitVar and ClassVar fields because they don't appear in dataclass fields.
+        if is_instance(annotation, dataclasses.InitVar) or is_class_var(annotation):
             continue
         # This field in __annotations__ is not a part of dataclass fields.
         # This means this class does not implement dataclass directly.
