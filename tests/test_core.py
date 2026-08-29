@@ -1,4 +1,5 @@
-from dataclasses import dataclass, is_dataclass
+from dataclasses import dataclass, field, is_dataclass
+from typing import ClassVar
 
 from serde.core import should_impl_dataclass
 
@@ -79,3 +80,12 @@ def test_should_impl_dataclass() -> None:
     assert not should_impl_dataclass(Base1)
     assert not should_impl_dataclass(Base6)
     assert should_impl_dataclass(Derived6)
+
+
+def test_should_impl_dataclass_with_class_var() -> None:
+    @dataclass
+    class Base:
+        values: list[int] = field(default_factory=lambda: [1])
+        namespace: ClassVar[str | None] = None
+
+    assert not should_impl_dataclass(Base)

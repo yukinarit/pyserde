@@ -2,6 +2,7 @@ from __future__ import annotations  # this is the line this test file is all abo
 
 import dataclasses
 from enum import Enum
+from typing import ClassVar
 
 import pytest
 
@@ -41,6 +42,21 @@ def test_serde_with_lazy_type_annotations() -> None:
 
     assert b == from_dict(B, b_dict)
     assert b_dict == to_dict(b)
+
+
+def test_serde_with_class_var() -> None:
+    @serde
+    @dataclasses.dataclass
+    class Base:
+        values: list[int] = dataclasses.field(default_factory=lambda: [1])
+        namespace: ClassVar[str | None] = None
+
+    @serde
+    @dataclasses.dataclass
+    class Child(Base):
+        child: int = 2
+
+    assert from_dict(Child, {}) == Child(values=[1], child=2)
 
 
 # test_forward_reference_works currently only works with global visible classes
