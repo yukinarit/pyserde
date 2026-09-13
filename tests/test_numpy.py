@@ -240,7 +240,7 @@ def test_encode_numpy(se, de, opt):
     np_datetime = np.datetime64("2022-04-27")
     assert de(np.datetime64, se(np_datetime)) == np_datetime
 
-    for value in [np.int32(1), np.int64(1), np.bool_(False), np.bool_(True), int(1), False, True]:
+    for value in [np.int32(1), np.int64(1), np.bool_(False), np.bool_(True), 1, False, True]:
         typ = type(value)
         de_value = de(typ, se(value))
         assert de_value == value

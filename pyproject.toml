@@ -4,12 +4,11 @@ description = "Yet another serialization library on top of dataclasses"
 authors = [{ name = "yukinarit", email = "yukinarit84@gmail.com" }]
 license = { file = "LICENSE" }
 readme = "README.md"
-requires-python = ">=3.10,<4.0"
+requires-python = ">=3.11,<4.0"
 classifiers = [
   "Development Status :: 5 - Production/Stable",
   "Intended Audience :: Developers",
   "License :: OSI Approved :: MIT License",
-  "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: 3.13",
@@ -29,7 +28,6 @@ dependencies = [
 [project.optional-dependencies]
 msgpack = ["msgpack"]
 toml = [
-  "tomli; python_version < '3.11'",
   "tomli-w",
 ]
 yaml = ["pyyaml"]
@@ -41,7 +39,6 @@ orjson = ["orjson"]
 sqlalchemy = ["sqlalchemy>2"]
 all = [
   "msgpack",
-  "tomli; python_version < '3.11'",
   "tomli-w",
   "pyyaml",
   "numpy>1.22.0,<3.0.0",
@@ -57,7 +54,6 @@ Homepage = "https://github.com/yukinarit/pyserde"
 [dependency-groups]
 dev = [
   "pyyaml",
-  "tomli; python_version <= '3.11'",
   "tomli-w",
   "msgpack",
   "numpy>1.22.0,<3.0.0",
@@ -96,7 +92,7 @@ source = "vcs"
 packages = ["serde"]
 
 [tool.black]
-target-version = ["py312"]
+target-version = ["py311"]
 line-length = 100
 
 [tool.pyright]
@@ -152,6 +148,7 @@ ignore_errors = true
 
 [tool.ruff]
 line-length = 100
+target-version = "py311"
 extend-exclude = [
   "examples/generics_pep695.py",
   "examples/type_alias_pep695.py",
@@ -166,6 +163,7 @@ select = [
   "C", # flake8-comprehensions
   "B", # flake8-bugbear
   "NPY201", # numpy2-deprecation
+  "UP", # pyupgrade
 ]
 ignore = ["B904"]
 
@@ -175,3 +173,5 @@ max-complexity = 30
 [tool.ruff.lint.per-file-ignores]
 # https://docs.kidger.site/jaxtyping/faq/#flake8-or-ruff-are-throwing-an-error
 "examples/type_numpy_jaxtyping.py" = ["F722"]
+# tests intentionally exercise legacy typing generics (Dict, Set, Union, Optional, ...)
+"tests/**" = ["UP006", "UP007", "UP035", "UP045"]

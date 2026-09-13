@@ -2,7 +2,7 @@
 
 ## Installation
 
-Install pyserde from PyPI. pyserde requires Python>=3.10.
+Install pyserde from PyPI. pyserde requires Python>=3.11.
 
 If you want faster JSON handling, you can also install `orjson` and use the `orjson` extra for optional acceleration.
 
@@ -41,14 +41,14 @@ Here are the available extras:
 
 * `all`: Install `msgpack`, `toml`, `yaml`, `numpy`, `orjson`, and `sqlalchemy` extras
 * `msgpack`: Install [msgpack](https://github.com/msgpack/msgpack-python)
-* `toml`: Install [tomli](https://github.com/hukkin/tomli) and [tomli-w](https://github.com/hukkin/tomli-w)
+* `toml`: Install [tomli-w](https://github.com/hukkin/tomli-w)
 * `yaml`: Install [pyyaml](https://github.com/yaml/pyyaml)
 * `numpy`: Install [numpy](https://github.com/numpy/numpy)
 * `orjson`: Install [orjson](https://github.com/ijl/orjson)
 * `sqlalchemy`: Install [sqlalchemy](https://github.com/sqlalchemy/sqlalchemy)
 
 !!! note
-    [tomllib](https://docs.python.org/3/library/tomllib.html) is used for python 3.11 onwards
+    TOML parsing uses the standard library [tomllib](https://docs.python.org/3/library/tomllib.html)
 
 !!! note
     Extras enable additional formats and types, but you can mix them as needed. For example, install only `toml` and `yaml` if you do not need MsgPack or numpy.
@@ -87,7 +87,7 @@ pyserde generates methods necessary for (de)serialization by `@serde` when a cla
 
 ## PEP585 and PEP604
 
-[PEP585](https://www.python.org/dev/peps/pep-0585/) style annotations and the [PEP604](https://www.python.org/dev/peps/pep-0604/) union operator are supported for python>=3.10. With PEP585 and PEP604, you can write a pyserde class pretty neatly.
+[PEP585](https://www.python.org/dev/peps/pep-0585/) style annotations and the [PEP604](https://www.python.org/dev/peps/pep-0604/) union operator are supported. With PEP585 and PEP604, you can write a pyserde class pretty neatly.
 ```python
 @serde
 class Foo:

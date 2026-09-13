@@ -16,7 +16,7 @@ from typing import (
     Union,
     Callable,
 )
-from typing_extensions import TypeAlias
+from typing import TypeAlias
 
 import more_itertools
 

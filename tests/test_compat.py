@@ -1,4 +1,3 @@
-import sys
 import pytest
 from dataclasses import dataclass
 from datetime import datetime
@@ -62,10 +61,9 @@ def test_types() -> None:
     assert is_primitive(int)
     assert is_primitive(Int)  # type: ignore[arg-type]
 
-    if sys.version_info[:3] >= (3, 10, 0):
-        assert is_union(str | int)
-        assert is_union(str | None)
-        assert is_opt(str | None)
+    assert is_union(str | int)
+    assert is_union(str | None)
+    assert is_opt(str | None)
 
 
 def test_is_opt_dataclass_preserves_union_arg_order() -> None:

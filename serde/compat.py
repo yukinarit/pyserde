@@ -15,12 +15,10 @@ import uuid
 import typing
 import typing_extensions
 from collections import defaultdict, deque, Counter
-from collections.abc import Iterator, Sequence, MutableSequence
+from collections.abc import Callable, Hashable, Iterator, Sequence, MutableSequence
 from collections.abc import Mapping, MutableMapping, Set, MutableSet
 from dataclasses import is_dataclass
-from typing import TypeVar, Generic, Any, ClassVar, Optional, NewType, Union, Hashable, Callable
-
-from typing_extensions import TypeGuard, ParamSpec
+from typing import TypeVar, Generic, Any, ClassVar, Optional, NewType, Union, TypeGuard, ParamSpec
 
 # `typing_extensions.TypeAliasType` isn't always an alias to `typing.TypeAliasType`
 # depending on certain versions of `typing_extensions` and python.
@@ -301,7 +299,7 @@ def union_args(typ: Any) -> tuple[type[Any], ...]:
         if not i2:
             types.append(i1)
         elif is_none(i2):
-            types.append(Optional[i1])
+            types.append(Optional[i1])  # noqa: UP045
         else:
             types.extend((i1, i2))
     return tuple(types)
@@ -332,19 +330,16 @@ def dataclass_fields(cls: type[Any]) -> Iterator[dataclasses.Field]:  # type: ig
     return iter(raw_fields)
 
 
-TypeLike = Union[type[Any], typing.Any]
+TypeLike = type[Any] | typing.Any
 
 
 def iter_types(cls: type[Any]) -> list[type[Any]]:
     """
     Iterate field types recursively.
-
-    The correct return type is `Iterator[Union[Type, typing._specialform]],
-    but `typing._specialform` doesn't exist for python 3.6. Use `Any` instead.
     """
-    lst: set[Union[type[Any], Any]] = set()
+    lst: set[type[Any] | Any] = set()
 
-    def recursive(cls: Union[type[Any], Any]) -> None:
+    def recursive(cls: type[Any] | Any) -> None:
         if cls in lst:
             return
 
@@ -453,10 +448,10 @@ def iter_literals(cls: type[Any]) -> list[TypeLike]:
     """
     Iterate over all literals that are used in the dataclass
     """
-    lst: set[Union[type[Any], Any]] = set()
+    lst: set[type[Any] | Any] = set()
     stack: list[TypeLike] = []  # To prevent infinite recursion
 
-    def recursive(cls: Union[type[Any], Any]) -> None:
+    def recursive(cls: type[Any] | Any) -> None:
         if cls in stack:
             return
 

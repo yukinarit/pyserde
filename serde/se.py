@@ -24,7 +24,7 @@ from collections.abc import (
 
 from beartype import beartype, BeartypeConf
 from beartype.door import is_bearable
-from typing_extensions import dataclass_transform
+from typing import dataclass_transform
 
 from .compat import (
     SerdeError,

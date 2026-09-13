@@ -2,7 +2,7 @@
 
 ## インストール
 
-PyPIからpyserdeをインストールしてください。pyserdeにはPython>=3.10が必要です。
+PyPIからpyserdeをインストールしてください。pyserdeにはPython>=3.11が必要です。
 
 より高速なJSON処理が必要な場合は、`orjson` をインストールして `orjson` エクストラを利用できます。
 
@@ -44,14 +44,14 @@ uv add pyserde --extra all
 
 * `all`：`msgpack`、`toml`、`yaml`、`numpy`、`orjson`、`sqlalchemy` をインストール
 * `msgpack`：[msgpack](https://github.com/msgpack/msgpack-python) をインストール
-* `toml`：[tomli](https://github.com/hukkin/tomli) と [tomli-w](https://github.com/hukkin/tomli-w) をインストール
+* `toml`：[tomli-w](https://github.com/hukkin/tomli-w) をインストール
 * `yaml`：[pyyaml](https://github.com/yaml/pyyaml) をインストール
 * `numpy`：[numpy](https://github.com/numpy/numpy) をインストール
 * `orjson`：[orjson](https://github.com/ijl/orjson) をインストール
 * `sqlalchemy`：[sqlalchemy](https://github.com/sqlalchemy/sqlalchemy) をインストール
 
 !!! note
-    python 3.11以降は [tomllib](https://docs.python.org/3/library/tomllib.html) を使用
+    TOMLのパースには標準ライブラリの [tomllib](https://docs.python.org/3/library/tomllib.html) を使用
 
 !!! note
     エクストラは追加フォーマットや追加型のサポートを有効にします。必要なものだけを組み合わせてインストールできます。
@@ -96,7 +96,7 @@ class Foo:
 
 ## PEP585とPEP604
 
-python>=3.10用の[PEP585](https://www.python.org/dev/peps/pep-0585/)スタイルのアノテーションと、[PEP604](https://www.python.org/dev/peps/pep-0604/) Unionオペレータがサポートされています。  
+[PEP585](https://www.python.org/dev/peps/pep-0585/)スタイルのアノテーションと、[PEP604](https://www.python.org/dev/peps/pep-0604/) Unionオペレータがサポートされています。  
 PEP585とPEP604を使用すると、pyserdeクラスをきれいに書くことができます。
 ```python
 @serde
