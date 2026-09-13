@@ -1,11 +1,11 @@
 from datetime import datetime
-from typing import Type, Any
+from typing import Any
 
 from serde import SerdeSkip, default_deserializer, default_serializer, field, serde
 from serde.json import from_json, to_json
 
 
-def serializer(cls: Type[Any], o: Any) -> str:
+def serializer(cls: type[Any], o: Any) -> str:
     """
     Custom class level serializer.
     """
@@ -19,7 +19,7 @@ def serializer(cls: Type[Any], o: Any) -> str:
         raise SerdeSkip()
 
 
-def deserializer(cls: Type[Any], o: Any) -> datetime:
+def deserializer(cls: type[Any], o: Any) -> datetime:
     """
     Custom class level deserializer.
     """

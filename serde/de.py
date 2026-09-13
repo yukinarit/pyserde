@@ -17,8 +17,8 @@ from beartype import beartype, BeartypeConf
 from beartype.door import is_bearable
 from beartype.roar import BeartypeCallHintParamViolation
 from dataclasses import dataclass, is_dataclass
-from typing import Any, Generic, Iterator, Literal, TypeVar, cast, overload
-from typing_extensions import dataclass_transform
+from collections.abc import Iterator
+from typing import Any, Generic, Literal, TypeVar, cast, dataclass_transform, overload
 
 from .compat import (
     SerdeError,

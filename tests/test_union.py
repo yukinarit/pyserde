@@ -1,5 +1,4 @@
 import logging
-import sys
 import uuid
 from dataclasses import dataclass
 from ipaddress import IPv4Address
@@ -37,27 +36,14 @@ logger.setLevel(logging.DEBUG)
 serde_init(True)
 
 
-if sys.version_info[:3] >= (3, 10, 0):
+@serde
+@dataclass(unsafe_hash=True)
+class PriUnion:
+    """
+    Union Primitives.
+    """
 
-    @serde
-    @dataclass(unsafe_hash=True)
-    class PriUnion:  # pyright: ignore[reportRedeclaration] # Version-specific redefinition
-        """
-        Union Primitives.
-        """
-
-        v: int | str | float | bool
-
-else:
-
-    @serde
-    @dataclass(unsafe_hash=True)
-    class PriUnion:  # type: ignore[no-redef] # pyright: ignore[reportRedeclaration] # Version-specific redefinition
-        """
-        Union Primitives.
-        """
-
-        v: Union[int, str, float, bool]
+    v: int | str | float | bool
 
 
 @serde

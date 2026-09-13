@@ -1,10 +1,10 @@
 """
 Serialize and Deserialize in TOML format. This module depends on
-[tomli](https://github.com/hukkin/tomli) (for python==3.10) and
-[tomli-w](https://github.com/hukkin/tomli-w) packages.
+the standard library [tomllib](https://docs.python.org/3/library/tomllib.html) and
+[tomli-w](https://github.com/hukkin/tomli-w) package.
 """
 
-import sys
+import tomllib
 from typing import Any, overload
 
 import tomli_w
@@ -14,12 +14,6 @@ from .de import Deserializer, from_dict
 from .se import Serializer, to_dict
 
 __all__ = ["from_toml", "to_toml"]
-
-
-if sys.version_info[:2] >= (3, 11):
-    import tomllib
-else:
-    import tomli as tomllib
 
 
 class TomlSerializer(Serializer[str]):

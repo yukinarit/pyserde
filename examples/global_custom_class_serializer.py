@@ -2,7 +2,7 @@ from plum import dispatch
 from datetime import datetime
 from serde import serde, add_serializer, add_deserializer
 from serde.json import from_json, to_json
-from typing import Type, Any
+from typing import Any
 
 
 class MySerializer:
@@ -13,7 +13,7 @@ class MySerializer:
 
 class MyDeserializer:
     @dispatch
-    def deserialize(self, cls: Type[datetime], value: Any) -> datetime:
+    def deserialize(self, cls: type[datetime], value: Any) -> datetime:
         return datetime.strptime(value, "%d/%m/%y")
 
 
@@ -25,7 +25,7 @@ class MySerializer2:
 
 class MyDeserializer2:
     @dispatch
-    def deserialize(self, cls: Type[int], value: Any) -> int:
+    def deserialize(self, cls: type[int], value: Any) -> int:
         return int(value)
 
 
@@ -37,7 +37,7 @@ class MySerializer3:
 
 class MyDeserializer3:
     @dispatch
-    def deserialize(self, cls: Type[float], value: Any) -> float:
+    def deserialize(self, cls: type[float], value: Any) -> float:
         return float(value)
 
 

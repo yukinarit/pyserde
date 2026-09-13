@@ -5,7 +5,7 @@ from serde import (
     field,
 )
 from serde.json import from_json, to_json
-from typing import Type, Any
+from typing import Any
 
 
 class MySerializer:
@@ -16,7 +16,7 @@ class MySerializer:
 
 class MyDeserializer:
     @dispatch
-    def deserialize(self, cls: Type[datetime], value: Any) -> datetime:
+    def deserialize(self, cls: type[datetime], value: Any) -> datetime:
         return datetime.strptime(value, "%d/%m/%y")
 
 

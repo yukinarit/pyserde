@@ -1,8 +1,6 @@
 from dataclasses import dataclass
 from collections.abc import Callable
-from typing import Any, Type, overload
-
-from typing_extensions import dataclass_transform
+from typing import Any, dataclass_transform, overload
 
 from .compat import SerdeError, SerdeSkip, T
 from .core import (
@@ -87,7 +85,7 @@ __all__ = [
 
 @overload
 def serde(
-    _cls: Type[T],
+    _cls: type[T],
     rename_all: str | None = None,
     reuse_instances_default: bool = True,
     convert_sets_default: bool = False,
@@ -102,7 +100,7 @@ def serde(
     class_serializer: ClassSerializer | None = None,
     class_deserializer: ClassDeserializer | None = None,
     deny_unknown_fields: bool = False,
-) -> Type[T]: ...
+) -> type[T]: ...
 
 
 @overload

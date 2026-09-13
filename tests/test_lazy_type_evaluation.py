@@ -115,7 +115,7 @@ def test_string_forward_reference_throws() -> None:
         @serde
         class UnresolvedStringForwardFoo:
             # string forward references are not compatible with PEP 563 and will throw
-            bar: "UnresolvedStringForwardBar"
+            bar: "UnresolvedStringForwardBar"  # noqa: UP037
 
         @serde
         class UnresolvedStringForwardBar:

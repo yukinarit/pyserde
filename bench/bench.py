@@ -10,7 +10,7 @@ from functools import partial
 from pathlib import Path
 from platform import python_implementation
 from collections.abc import Callable
-from typing import Any, Optional, Union
+from typing import Any
 
 import click
 import data
@@ -58,8 +58,8 @@ class Bencher:
     def run(
         self,
         name: str,
-        func: Optional[Callable[..., Any]],
-        expected: Optional[Union[Any, Callable[[Any], bool]]] = None,
+        func: Callable[..., Any] | None,
+        expected: Any | Callable[[Any], bool] | None = None,
         **kwargs: Any,
     ) -> None:
         """
@@ -135,7 +135,7 @@ def run(opt: Opt, name: str, tc: TestCase) -> None:
 @dataclass
 class TestCase:
     size: Size
-    expected: Union[Any, Callable[[Any], bool]]
+    expected: Any | Callable[[Any], bool]
     number: int
 
     @classmethod
