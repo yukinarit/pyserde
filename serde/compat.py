@@ -20,7 +20,6 @@ from collections.abc import Mapping, MutableMapping, Set, MutableSet
 from dataclasses import is_dataclass
 from typing import TypeVar, Generic, Any, ClassVar, Optional, NewType, Union, Hashable, Callable
 
-import typing_inspect
 from typing_extensions import TypeGuard, ParamSpec
 
 # `typing_extensions.TypeAliasType` isn't always an alias to `typing.TypeAliasType`
@@ -512,15 +511,14 @@ def is_union(typ: Any) -> bool:
     except Exception:
         pass
 
-    # Python 3.10+ Union operator e.g. str | int
-    try:
-        if isinstance(typ, types.UnionType):
-            return True
-    except Exception:
-        pass
+    return _is_union_type(typ)
 
-    # typing.Union
-    return typing_inspect.is_union_type(typ)  # type: ignore
+
+def _is_union_type(typ: Any) -> bool:
+    """
+    Test if the type is `typing.Union` (bare or subscripted) or a PEP 604 union e.g. `str | int`.
+    """
+    return typ is Union or typing.get_origin(typ) is Union or isinstance(typ, types.UnionType)
 
 
 # Not memoized: the result depends on the order of the union arguments
@@ -539,25 +537,9 @@ def is_opt(typ: Any) -> bool:
     False
     """
 
-    # Python 3.10+ Union operator e.g. str | None
-    is_union_type = False
-    try:
-        if isinstance(typ, types.UnionType):
-            is_union_type = True
-    except Exception:
-        pass
-
-    # typing.Optional
-    is_typing_union = typing_inspect.is_optional_type(typ)
-
     args = type_args(typ)
     if args:
-        return (
-            (is_union_type or is_typing_union)
-            and len(args) == 2
-            and not is_none(args[0])
-            and is_none(args[1])
-        )
+        return _is_union_type(typ) and len(args) == 2 and not is_none(args[0]) and is_none(args[1])
     else:
         return typ is Optional
 
