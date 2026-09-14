@@ -10,9 +10,6 @@
   <a href="https://github.com/yukinarit/pyserde/actions/workflows/test.yml">
     <img alt="GithubActions" src="https://github.com/yukinarit/pyserde/actions/workflows/test.yml/badge.svg">
   </a>
-  <a href="https://codecov.io/gh/yukinarit/pyserde">
-    <img alt="CodeCov" src="https://codecov.io/gh/yukinarit/pyserde/branch/main/graph/badge.svg">
-  </a>
 </p>
 <p align="center">
   <a href="https://yukinarit.github.io/pyserde">Guide🇬🇧</a> | <a href="https://yukinarit.github.io/pyserde/latest/ja">ガイド🇯🇵</a> | <a href="https://yukinarit.github.io/pyserde/api/serde.html">API Reference</a> | <a href="https://github.com/yukinarit/pyserde/tree/main/examples">Examples</a>
