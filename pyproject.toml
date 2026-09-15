@@ -155,6 +155,10 @@ extend-exclude = [
   "examples/type_statement.py",
 ]
 
+[tool.ruff.per-file-target-version]
+# relies on PEP 649 deferred evaluation of annotations
+"tests/test_pep649.py" = "py314"
+
 [tool.ruff.lint]
 select = [
   "E", # pycodestyle errors
