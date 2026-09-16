@@ -18,7 +18,7 @@ classifiers = [
 ]
 dynamic = ["version"]
 dependencies = [
-  "typing_extensions>=4.1.0,<4.17.0",
+  "typing_extensions>=4.13.0,<4.17.0",
   "casefy",
   "jinja2",
   "plum-dispatch>=2.3",
@@ -115,6 +115,7 @@ include = [
   "tests/test_flatten.py",
   "tests/test_lazy_type_evaluation.py",
   "tests/test_type_check.py",
+  "tests/test_typing.py",
   "tests/data.py",
 ]
 exclude = [
@@ -123,6 +124,8 @@ exclude = [
   "examples/type_numpy_jaxtyping.py"
 ]
 pythonVersion = "3.12"
+# PEP 747 TypeForm. Required for pyright to resolve union type expressions.
+enableExperimentalFeatures = true
 reportMissingImports = false
 reportUnhashable = false
 reportAttributeAccessIssue = false
@@ -130,6 +133,8 @@ reportAttributeAccessIssue = false
 [tool.mypy]
 strict = true
 ignore_missing_imports = true
+# PEP 747 TypeForm. Can be dropped once mypy enables it by default.
+enable_incomplete_feature = ["TypeForm"]
 exclude = [
   "serde/numpy.py",
   "examples/alias.py",

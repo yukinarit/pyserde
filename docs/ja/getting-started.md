@@ -150,3 +150,9 @@ pyserdeには他にも多くの機能があります。興味があれば、残�
 > pyserdeは[PEP681 dataclass_transform](https://peps.python.org/pep-0681/)に依存しています。  
 > 2024年1月現在、[mypy](https://github.com/python/mypy)はdataclass_transformを完全にはサポートしていません。  
 > 私の個人的なおすすめは[pyright](https://github.com/microsoft/pyright)です。
+>
+> pyserdeは[PEP747 TypeForm](https://peps.python.org/pep-0747/)も使用しており、デシリアライズAPIに
+> 型式を渡した際に正確な戻り値の型が推論されます。例えば`from_json(list[Foo], s)`は`Any`ではなく
+> `list[Foo]`と推論されます。mypyでは設定は不要です。  
+> pyrightで`from_json(Foo | Bar, s)`のようなUnion型式を解決するには、`[tool.pyright]`に
+> `enableExperimentalFeatures = true`が必要です。設定しない場合、`Any`にフォールバックします。

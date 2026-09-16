@@ -6,6 +6,7 @@ Serialize and Deserialize in MsgPack format. This module depends on
 from typing import Any, overload
 
 import msgpack
+from typing_extensions import TypeForm
 
 from .compat import T
 from .compat import SerdeError
@@ -92,10 +93,25 @@ def from_msgpack(
     de: type[Deserializer[bytes]] = MsgPackDeserializer,
     named: bool = True,
     ext_dict: dict[int, type[Any]] | None = None,
+    skip_none: bool = False,
     **opts: Any,
 ) -> T: ...
 
 
+# For Union, Optional, list[Foo] and other type expressions (PEP 747).
+@overload
+def from_msgpack(
+    c: TypeForm[T],
+    s: bytes,
+    de: type[Deserializer[bytes]] = MsgPackDeserializer,
+    named: bool = True,
+    ext_dict: dict[int, type[Any]] | None = None,
+    skip_none: bool = False,
+    **opts: Any,
+) -> T: ...
+
+
+# For tagging instances such as Untagged, InternalTagging and AdjacentTagging.
 @overload
 def from_msgpack(
     c: Any,
@@ -103,6 +119,7 @@ def from_msgpack(
     de: type[Deserializer[bytes]] = MsgPackDeserializer,
     named: bool = True,
     ext_dict: dict[int, type[Any]] | None = None,
+    skip_none: bool = False,
     **opts: Any,
 ) -> Any: ...
 

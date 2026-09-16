@@ -136,3 +136,9 @@ That's it! pyserde offers many more features. If you're interested, please read 
 
 !!! tip "Which type checker should I use?"
     pyserde depends on [PEP681 dataclass_transform](https://peps.python.org/pep-0681/). [mypy](https://github.com/python/mypy) does not fully support dataclass_transform as of Jan. 2024. My personal recommendation is [pyright](https://github.com/microsoft/pyright).
+
+    pyserde also uses [PEP747 TypeForm](https://peps.python.org/pep-0747/) so that deserialization
+    APIs infer a precise return type when you pass a type expression, e.g. `from_json(list[Foo], s)`
+    is inferred as `list[Foo]` rather than `Any`. mypy needs no configuration for this. pyright
+    needs `enableExperimentalFeatures = true` under `[tool.pyright]` to resolve *union* type
+    expressions such as `from_json(Foo | Bar, s)`; without it those fall back to `Any`.
