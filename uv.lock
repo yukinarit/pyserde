@@ -1369,7 +1369,7 @@ requires-dist = [
     { name = "sqlalchemy", marker = "extra == 'sqlalchemy'", specifier = ">2" },
     { name = "tomli-w", marker = "extra == 'all'" },
     { name = "tomli-w", marker = "extra == 'toml'" },
-    { name = "typing-extensions", specifier = ">=4.1.0,<4.17.0" },
+    { name = "typing-extensions", specifier = ">=4.13.0,<4.17.0" },
 ]
 provides-extras = ["all", "jaxtyping", "msgpack", "numpy", "orjson", "sqlalchemy", "toml", "yaml"]
 

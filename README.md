@@ -99,6 +99,7 @@ Happy coding with pyserde! 🚀
 - [PEP604 Allow writing union types as X | Y](https://github.com/yukinarit/pyserde/blob/main/docs/en/getting-started.md#pep585-and-pep604)
 - [PEP681 Data Class Transform](https://github.com/yukinarit/pyserde/blob/main/docs/en/decorators.md#serde)
 - [PEP695 Type Parameter Syntax](https://peps.python.org/pep-0695/)
+- [PEP747 Annotating Type Forms](https://peps.python.org/pep-0747/)
 - [Case Conversion](https://github.com/yukinarit/pyserde/blob/main/docs/en/class-attributes.md#rename_all)
 - [Rename](https://github.com/yukinarit/pyserde/blob/main/docs/en/field-attributes.md#rename)
 - [Alias](https://github.com/yukinarit/pyserde/blob/main/docs/en/field-attributes.md#alias)

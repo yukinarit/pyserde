@@ -20,6 +20,8 @@ from dataclasses import dataclass, is_dataclass
 from collections.abc import Iterator
 from typing import Any, Generic, Literal, TypeVar, cast, dataclass_transform, overload
 
+from typing_extensions import TypeForm
+
 from .compat import (
     SerdeError,
     SerdeSkip,
@@ -649,10 +651,22 @@ def from_dict(
 ) -> T: ...
 
 
+# For Union, Optional, list[Foo] and other type expressions (PEP 747).
+@overload
+def from_dict(
+    cls: TypeForm[T],
+    # Not necessarily a dict: e.g. `from_dict(list[Foo], [...])` takes a list.
+    o: Any,
+    reuse_instances: bool | None = None,
+    deserialize_numbers: Callable[[str | int], float] | None = None,
+) -> T: ...
+
+
+# For tagging instances such as Untagged, InternalTagging and AdjacentTagging.
 @overload
 def from_dict(
     cls: Any,
-    o: dict[str, Any],
+    o: Any,
     reuse_instances: bool | None = None,
     deserialize_numbers: Callable[[str | int], float] | None = None,
 ) -> Any: ...
@@ -660,7 +674,7 @@ def from_dict(
 
 def from_dict(
     cls: Any,
-    o: dict[str, Any],
+    o: Any,
     reuse_instances: bool | None = None,
     deserialize_numbers: Callable[[str | int], float] | None = None,
 ) -> Any:
@@ -705,6 +719,17 @@ def from_tuple(
 ) -> T: ...
 
 
+# For Union, Optional, list[Foo] and other type expressions (PEP 747).
+@overload
+def from_tuple(
+    cls: TypeForm[T],
+    o: Any,
+    reuse_instances: bool | None = None,
+    deserialize_numbers: Callable[[str | int], float] | None = None,
+) -> T: ...
+
+
+# For tagging instances such as Untagged, InternalTagging and AdjacentTagging.
 @overload
 def from_tuple(
     cls: Any,

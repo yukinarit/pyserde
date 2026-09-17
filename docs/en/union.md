@@ -105,6 +105,17 @@ print(from_json(Union[Foo, Bar], s))
 # prints Bar(10)
 ```
 
+!!! tip "Type checking"
+
+    Thanks to [PEP747 TypeForm](https://peps.python.org/pep-0747/), type checkers infer the precise
+    return type of these calls: `from_json(Union[Foo, Bar], s)` is inferred as `Foo | Bar`, not
+    `Any`. This works for any type expression, e.g. `from_json(list[Foo], s)` gives `list[Foo]`.
+
+    mypy users need no configuration. pyright users need
+    `enableExperimentalFeatures = true` under `[tool.pyright]` for *union* type expressions
+    specifically; without it unions fall back to `Any` (other forms such as `list[Foo]` work
+    either way).
+
 Also you can change the tagging using `serde.InternalTagging`, `serde.AdjacentTagging` and `serde.Untagged`.
 
 Now try to change the tagging for the above example. You need to pass a new argument `cls` in `to_json`. Also union class must be wrapped in either `InternalTagging`, `AdjacentTaging` or `Untagged` with required parameters.

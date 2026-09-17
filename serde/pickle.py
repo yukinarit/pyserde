@@ -5,6 +5,8 @@ Serialize and Deserialize in Pickle format.
 import pickle
 from typing import Any, overload
 
+from typing_extensions import TypeForm
+
 from .compat import T
 from .de import Deserializer, from_dict
 from .se import Serializer, to_dict
@@ -44,13 +46,20 @@ def from_pickle(
 ) -> T: ...
 
 
+# For Union, Optional, list[Foo] and other type expressions (PEP 747).
+@overload
+def from_pickle(
+    c: TypeForm[T], data: bytes, de: type[Deserializer[bytes]] = PickleDeserializer, **opts: Any
+) -> T: ...
+
+
+# For tagging instances such as Untagged, InternalTagging and AdjacentTagging.
 @overload
 def from_pickle(
     c: Any, data: bytes, de: type[Deserializer[bytes]] = PickleDeserializer, **opts: Any
 ) -> Any: ...
 
 
-# For Union, Optional etc.
 def from_pickle(
     c: Any, data: bytes, de: type[Deserializer[bytes]] = PickleDeserializer, **opts: Any
 ) -> Any:

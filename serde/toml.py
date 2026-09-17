@@ -8,6 +8,7 @@ import tomllib
 from typing import Any, overload
 
 import tomli_w
+from typing_extensions import TypeForm
 
 from .compat import T
 from .de import Deserializer, from_dict
@@ -67,7 +68,14 @@ def from_toml(
 ) -> T: ...
 
 
-# For Union, Optional etc.
+# For Union, Optional, list[Foo] and other type expressions (PEP 747).
+@overload
+def from_toml(
+    c: TypeForm[T], s: str, de: type[Deserializer[str]] = TomlDeserializer, **opts: Any
+) -> T: ...
+
+
+# For tagging instances such as Untagged, InternalTagging and AdjacentTagging.
 @overload
 def from_toml(
     c: Any, s: str, de: type[Deserializer[str]] = TomlDeserializer, **opts: Any

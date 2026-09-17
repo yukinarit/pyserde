@@ -4,6 +4,8 @@ Serialize and Deserialize in JSON format.
 
 from typing import Any, AnyStr, overload, cast
 
+from typing_extensions import TypeForm
+
 from .compat import SerdeError, T
 from .de import Deserializer, from_dict
 from .se import Serializer, to_dict
@@ -114,7 +116,18 @@ def from_json(
 ) -> T: ...
 
 
-# For Union, Optional etc.
+# For Union, Optional, list[Foo] and other type expressions (PEP 747).
+@overload
+def from_json(
+    c: TypeForm[T],
+    s: AnyStr,
+    de: type[Deserializer[AnyStr]] = JsonDeserializer,
+    coerce_numbers: bool = True,
+    **opts: Any,
+) -> T: ...
+
+
+# For tagging instances such as Untagged, InternalTagging and AdjacentTagging.
 @overload
 def from_json(
     c: Any,

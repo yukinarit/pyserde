@@ -129,6 +129,16 @@ print(from_json(Union[Foo, Bar], s))
 # Bar(10) を出力
 ```
 
+!!! tip "型チェック"
+
+    [PEP747 TypeForm](https://peps.python.org/pep-0747/) により、型チェッカーはこれらの呼び出しの
+    戻り値の型を正確に推論します。`from_json(Union[Foo, Bar], s)` は `Any` ではなく `Foo | Bar` と
+    推論されます。これは任意の型式で機能し、例えば `from_json(list[Foo], s)` は `list[Foo]` になります。
+
+    mypy では設定は不要です。pyright では *Union* 型式に限り `[tool.pyright]` の
+    `enableExperimentalFeatures = true` が必要です。設定しない場合、Union は `Any` に
+    フォールバックします（`list[Foo]` などの他の型式はどちらでも機能します）。
+
 また、`serde.InternalTagging`、`serde.AdjacentTagging`、および `serde.Untagged` を使用してタグ付けを変更できます。
 
 それでは、上記の例を用いてタグ付けを変更してみましょう。
