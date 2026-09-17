@@ -12,7 +12,7 @@ from .se import Serializer, to_dict
 
 # Lazy numpy imports to improve startup time
 
-try:  # pragma: no cover
+try:
     import orjson
 
     def json_dumps(obj: Any, **opts: Any) -> str:

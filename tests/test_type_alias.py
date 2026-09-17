@@ -7,7 +7,7 @@ from serde import serde, field, from_dict, to_dict
 
 try:
     from typing import TypeAliasType
-except ImportError:  # pragma: no cover
+except ImportError:
     from typing_extensions import TypeAliasType
 
 

@@ -7,10 +7,7 @@ __pycache__
 .eggs
 *.egg-info
 *.pyc
-htmlcov
 Pipfile.lock
-coverage.xml
-.coverage
 html/
 pip-wheel-metadata
 .DS_Store
