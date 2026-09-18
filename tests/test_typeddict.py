@@ -313,8 +313,10 @@ def test_extra_items_is_not_inherited() -> None:
     class Base(te.TypedDict, extra_items=int):
         a: str
 
+    # PEP 728 extra items are implicitly non-required, so a subclass may only add
+    # non-required items of a compatible type.
     class Child(Base):
-        b: int
+        b: NotRequired[int]
 
     assert typeddict_extra_items(Base) is int
     assert typeddict_extra_items(Child) is None
