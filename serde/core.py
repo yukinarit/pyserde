@@ -49,9 +49,12 @@ from .compat import (
     is_opt_dataclass,
     is_set,
     is_tuple,
+    is_typeddict,
     is_union,
     is_variable_tuple,
     type_args,
+    typeddict_extra_items,
+    typeddict_items,
     typename,
     _WithTagging,
 )
@@ -391,6 +394,11 @@ def is_instance(obj: Any, typ: Any) -> bool:
     elif is_counter(typ):
         # Counter must be checked before dict since Counter is a subclass of dict
         return is_counter_instance(obj, typ)
+    elif is_typeddict(typ):
+        # TypedDict must be checked before dict since a TypedDict is a subclass of dict.
+        # It must also be checked before the is_bearable fallback below, which reduces
+        # every TypedDict to Mapping[str, object] and so accepts any dict at all.
+        return is_typeddict_instance(obj, typ)
     elif is_dict(typ):
         return is_dict_instance(obj, typ)
     elif is_deque(typ):
@@ -425,6 +433,28 @@ def is_union_instance(obj: Any, typ: type[Any]) -> bool:
         if is_instance(obj, arg):
             return True
     return False
+
+
+def is_typeddict_instance(obj: Any, typ: type[Any]) -> bool:
+    if not isinstance(obj, dict):
+        return False
+
+    items = typeddict_items(typ)
+    for name, item in items.items():
+        if name not in obj:
+            if item.required:
+                return False
+            continue
+        if not is_instance(obj[name], item.type):
+            return False
+
+    extra_items = typeddict_extra_items(typ)
+    for name in obj.keys() - items.keys():
+        if extra_items is None:
+            return False
+        if not is_instance(obj[name], extra_items):
+            return False
+    return True
 
 
 def is_list_instance(obj: Any, typ: type[Any]) -> bool:
@@ -1063,6 +1093,23 @@ DefaultTagging = ExternalTagging
 def ensure(expr: Any, description: str) -> None:
     if not expr:
         raise Exception(description)
+
+
+def raise_if_typeddict(cls: type[Any]) -> None:
+    """
+    Reject a TypedDict passed to @serde/@serialize/@deserialize.
+
+    A TypedDict is not a dataclass and cannot be made into one, and it needs no decorator:
+    pyserde reads its items directly wherever the type is used. Without this guard,
+    `should_impl_dataclass` reports True for a TypedDict and the decorators would try to
+    `@dataclass` it.
+    """
+    if is_typeddict(cls):
+        raise SerdeError(
+            f"{typename(cls)} is a TypedDict, which does not need a pyserde decorator. "
+            "Use it as a field type in a @serde class, or pass it directly to "
+            "from_dict/to_dict."
+        )
 
 
 def should_impl_dataclass(cls: type[Any]) -> bool:
