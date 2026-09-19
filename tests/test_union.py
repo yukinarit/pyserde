@@ -592,6 +592,26 @@ def test_internal_tagging() -> None:
             pass
 
 
+def test_internal_tagging_with_deny_unknown_fields() -> None:
+    @serde(deny_unknown_fields=True)
+    class Bar:
+        v: int
+
+    @serde(deny_unknown_fields=True)
+    class Baz:
+        v: int
+
+    @serde(tagging=InternalTagging("type"))
+    class Outer:
+        a: Union[Bar, Baz]
+
+    obj = Outer(Bar(10))
+    data = {"a": {"v": 10, "type": "Bar"}}
+
+    assert to_dict(obj) == data
+    assert from_dict(Outer, data) == obj
+
+
 def test_adjacent_tagging() -> None:
     from serde import AdjacentTagging
 
