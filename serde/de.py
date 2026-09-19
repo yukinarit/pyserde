@@ -1502,7 +1502,9 @@ def {{func}}(cls=cls, maybe_generic=None, maybe_generic_type_vars=None, data=Non
     {% elif tagging.is_internal() and is_taggable(t) %}
     ensure("{{tagging.tag}}" in data , "'{{tagging.tag}}' key is not present")
     ensure("{{typename(t)}}" == data["{{tagging.tag}}"], "tag '{{typename(t)}}' isn't found")
-    fake_dict = {"fake_key": data}
+    # Drop the injected tag key so member classes with deny_unknown_fields
+    # do not treat it as an unknown field.
+    fake_dict = {"fake_key": {k: v for k, v in data.items() if k != "{{tagging.tag}}"}}
 
     {% elif tagging.is_adjacent() and is_taggable(t) %}
     ensure("{{tagging.tag}}" in data , "'{{tagging.tag}}' key is not present")
