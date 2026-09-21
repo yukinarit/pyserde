@@ -59,7 +59,7 @@ dev = [
   "numpy>1.22.0,<3.0.0",
   "mypy==2.3.1",
   "black==26.5.1",
-  "pyright==1.1.410",
+  "pyright==1.1.414",
   "ruff==0.16.8",
   "pytest",
   "pytest-watch",
