@@ -57,12 +57,15 @@ from .compat import (
     is_str_serializable,
     is_str_serializable_instance,
     is_tuple,
+    is_typeddict,
     is_union,
     is_variable_tuple,
     is_pep695_type_alias,
     iter_types,
     iter_unions,
     type_args,
+    typeddict_extra_items,
+    typeddict_items,
     typename,
 )
 from .core import (
@@ -85,6 +88,7 @@ from .core import (
     fields,
     is_instance,
     logger,
+    raise_if_typeddict,
     union_func_name,
     GLOBAL_CLASS_SERIALIZER,
 )
@@ -232,6 +236,8 @@ def serialize(
     """
 
     def wrap(cls: type[T]) -> type[T]:
+        raise_if_typeddict(cls)
+
         tagging.check()
 
         # If no `dataclass` found in the class, dataclassify it automatically.
@@ -428,6 +434,17 @@ def to_obj(
         # and use it to serialize the object.
         if c and is_union(c) and not is_opt(c):
             return CACHE.serialize_union(c, o)
+
+        # A TypedDict instance is a plain dict at runtime, so the declared type can only
+        # come from `c`. Without it, the Mapping branch below handles the value untyped.
+        if c is not None and is_typeddict(c):
+            return CACHE.serialize(
+                c,
+                o,
+                reuse_instances=reuse_instances,
+                convert_sets=convert_sets,
+                skip_none=skip_none,
+            )
 
         if o is None:
             return None
@@ -914,6 +931,8 @@ class Renderer:
     serialize_class_var: bool = False
     class_serializer: ClassSerializer | None = None
     class_name: str | None = None
+    typeddict_stack: list[Any] = dataclasses.field(default_factory=list)
+    """ TypedDicts currently being rendered, used to detect recursive ones """
 
     def render(self, arg: SeField[Any]) -> str:
         """
@@ -944,6 +963,9 @@ class Renderer:
             res = self.deque(arg)
         elif is_counter(arg.type):
             res = self.counter(arg)
+        elif is_typeddict(arg.type):
+            # Must precede is_dict, since a TypedDict is a subclass of dict.
+            res = self.typeddict(arg)
         elif is_dict(arg.type):
             res = self.dict(arg)
         elif is_tuple(arg.type):
@@ -1119,6 +1141,52 @@ class Renderer:
             varg = arg[1]
             varg.name = "v"
             return f"{{{self.render(karg)}: {self.render(varg)} for k, v in {arg.varname}.items()}}"
+
+    def typeddict(self, arg: SeField[Any]) -> str:
+        """
+        Render rvalue for TypedDict.
+
+        The rendering is inlined as a dict literal rather than delegated to a scope function
+        the way `dataclass` does, because a TypedDict instance is a plain `dict` at runtime
+        and so carries no `__serde__` attribute to dispatch on.
+
+        A key that is not required is emitted through a `**{...} if ... else {}` merge, so
+        that an absent key stays absent instead of materializing as None.
+        """
+        if arg.type in self.typeddict_stack:
+            raise SerdeError(
+                f"Recursive TypedDict is not supported yet: {typename(arg.type)}. "
+                "Use a dataclass instead, which pyserde renders through its own scope "
+                "function and so can recurse."
+            )
+        self.typeddict_stack.append(arg.type)
+        try:
+            items = typeddict_items(arg.type)
+            parts = []
+            for name, item in items.items():
+                # Keys are the wire contract of the TypedDict itself, so they are never
+                # subject to the enclosing dataclass's rename_all. Pass no `case`.
+                inner = SeField(item.type, name=f'{arg.varname}["{name}"]')
+                rendered = self.render(inner)
+                if item.required:
+                    parts.append(f'"{name}": {rendered}')
+                else:
+                    parts.append(
+                        f'**({{"{name}": {rendered}}} if "{name}" in {arg.varname} else {{}})'
+                    )
+
+            extra_items = typeddict_extra_items(arg.type)
+            if extra_items is not None:
+                extra = SeField(extra_items, name="v")
+                known = "{" + ", ".join(f'"{name}"' for name in items) + "}" if items else "set()"
+                parts.append(
+                    f"**{{k: {self.render(extra)} for k, v in {arg.varname}.items() "
+                    f"if k not in {known}}}"
+                )
+            # Undeclared keys are otherwise dropped: the type says they should not exist.
+            return "{" + ", ".join(parts) + "}"
+        finally:
+            self.typeddict_stack.pop()
 
     def enum(self, arg: SeField[Any]) -> str:
         return f"enum_value({typename(arg.type)}, {arg.varname})"
