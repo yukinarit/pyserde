@@ -19,6 +19,7 @@ from .core import (
     field,
     init,
     logger,
+    raise_if_typeddict,
     should_impl_dataclass,
     add_serializer,
     add_deserializer,
@@ -146,6 +147,7 @@ def serde(
     """
 
     def wrap(cls: Any) -> Any:
+        raise_if_typeddict(cls)
         if should_impl_dataclass(cls):
             dataclass(cls)
         serialize(

@@ -58,6 +58,7 @@ from .compat import (
     is_set,
     is_str_serializable,
     is_tuple,
+    is_typeddict,
     is_union,
     is_variable_tuple,
     is_pep695_type_alias,
@@ -65,6 +66,8 @@ from .compat import (
     iter_types,
     iter_unions,
     type_args,
+    typeddict_extra_items,
+    typeddict_items,
     typename,
 )
 from .core import (
@@ -93,6 +96,7 @@ from .core import (
     is_instance,
     literal_func_name,
     logger,
+    raise_if_typeddict,
     union_func_name,
 )
 
@@ -168,6 +172,51 @@ def _exists_by_aliases(d: dict[str, str], aliases: list[str]) -> bool:
         if alias in d:
             return True
     return False
+
+
+def _typeddict_check_keys(
+    data: dict[str, Any],
+    required_fields: frozenset[str],
+    known_fields: frozenset[str] | None,
+    class_name: str,
+) -> dict[str, Any]:
+    """
+    Check which keys a TypedDict payload carries, before any value is deserialized.
+
+    Every required key must be present (PEP 655), and a TypedDict declares the full set of
+    its keys (PEP 589), so undeclared keys are an error unless the type opts in with PEP 728
+    `extra_items=`/`closed=False` - signalled here by `known_fields` being None.
+
+    Returns an empty dict so that the call can be merged into the rendered dict literal,
+    which has to be a single expression. It is merged first, so that it reports a missing
+    key rather than letting a bare KeyError escape from a value expression.
+    """
+    missing_fields = required_fields - data.keys()
+    if missing_fields:
+        raise SerdeError(
+            f"missing required fields: {sorted(missing_fields)} while deserializing {class_name}"
+        )
+    if known_fields is not None:
+        unknown_fields = data.keys() - known_fields
+        if unknown_fields:
+            raise SerdeError(
+                f"unknown fields: {sorted(unknown_fields)}, "
+                f"expected one of {sorted(known_fields)} while deserializing {class_name}"
+            )
+    return {}
+
+
+def _typeddict_check_types(value: dict[str, Any], typ: type[Any], class_name: str) -> Any:
+    """
+    Deep-check a deserialized TypedDict value under `type_check=strict`.
+
+    A TypedDict has no constructor to hang beartype off the way a dataclass does, and
+    beartype reduces a TypedDict to Mapping[str, object] anyway, so strict mode has to
+    check the value explicitly.
+    """
+    if not is_instance(value, typ):
+        raise SerdeError(f"{value} is not an instance of {class_name}")
+    return value
 
 
 def _project_flattened_data(
@@ -274,6 +323,8 @@ def deserialize(
             return cls
         stack.append(cls)
 
+        raise_if_typeddict(cls)
+
         tagging.check()
 
         # If no `dataclass` found in the class, dataclassify it automatically.
@@ -334,6 +385,8 @@ def deserialize(
         g["_exists_by_aliases"] = _exists_by_aliases
         g["_get_by_aliases"] = _get_by_aliases
         g["_project_flattened_data"] = _project_flattened_data
+        g["_typeddict_check_keys"] = _typeddict_check_keys
+        g["_typeddict_check_types"] = _typeddict_check_types
         g["class_deserializers"] = class_deserializers
         g["BeartypeCallHintParamViolation"] = BeartypeCallHintParamViolation
         g["is_bearable"] = is_bearable
@@ -618,6 +671,11 @@ def from_obj(
             res = deserializable_to_obj(c)
         elif is_opt(c):
             res = _deserialize_optional(c, o, thisfunc)
+        elif is_typeddict(c):
+            # Reuse the codegen path via a wrapper dataclass, the same way a bare Union
+            # is handled. Must precede the collection walker, which would treat the
+            # TypedDict as a plain dict.
+            res = CACHE.deserialize(c, o)
         elif (collection_res := _from_obj_collection(c, o, thisfunc)) is not _UNHANDLED:
             res = collection_res
         elif _is_numpy_array(c):
@@ -945,8 +1003,12 @@ class Renderer:
     import_numpy: bool = False
     suppress_coerce: bool = False
     """ Disable type coercing in codegen """
+    strict: bool = False
+    """ Emit a deep type check for values that beartype cannot check, i.e. TypedDict """
     class_deserializer: ClassDeserializer | None = None
     class_name: str | None = None
+    typeddict_stack: list[Any] = dataclasses.field(default_factory=list)
+    """ TypedDicts currently being rendered, used to detect recursive ones """
 
     def render(self, arg: DeField[Any]) -> str:
         """
@@ -986,27 +1048,17 @@ class Renderer:
             res = self.deque(arg)
         elif is_counter(arg.type):
             res = self.counter(arg)
+        elif is_typeddict(arg.type):
+            # Must precede is_dict, since a TypedDict is a subclass of dict.
+            res = self.typeddict(arg)
         elif is_dict(arg.type):
             res = self.dict(arg)
         elif is_tuple(arg.type):
             res = self.tuple(arg)
         elif is_enum(arg.type):
             res = self.enum(arg)
-        elif _is_numpy_scalar(arg.type):
-            from .numpy import deserialize_numpy_scalar
-
-            self.import_numpy = True
-            res = deserialize_numpy_scalar(arg)
-        elif _is_numpy_array(arg.type):
-            from .numpy import deserialize_numpy_array
-
-            self.import_numpy = True
-            res = deserialize_numpy_array(arg)
-        elif _is_numpy_jaxtyping(arg.type):
-            from .numpy import deserialize_numpy_jaxtyping_array
-
-            self.import_numpy = True
-            res = deserialize_numpy_jaxtyping_array(arg)
+        elif (numpy_res := self.numpy(arg)) is not None:
+            res = numpy_res
         elif is_union(arg.type):
             res = self.union_func(arg)
         elif is_str_serializable(arg.type):
@@ -1074,6 +1126,29 @@ class Renderer:
             f"{arg.data_or()}, "
             f"default=lambda: {code})"
         )
+
+    def numpy(self, arg: DeField[Any]) -> str | None:
+        """
+        Render rvalue for the numpy types, or None if the type is not one of them.
+
+        Grouped into one method so that `render` stays within the complexity budget.
+        """
+        if _is_numpy_scalar(arg.type):
+            from .numpy import deserialize_numpy_scalar
+
+            self.import_numpy = True
+            return deserialize_numpy_scalar(arg)
+        elif _is_numpy_array(arg.type):
+            from .numpy import deserialize_numpy_array
+
+            self.import_numpy = True
+            return deserialize_numpy_array(arg)
+        elif _is_numpy_jaxtyping(arg.type):
+            from .numpy import deserialize_numpy_jaxtyping_array
+
+            self.import_numpy = True
+            return deserialize_numpy_jaxtyping_array(arg)
+        return None
 
     def dataclass(self, arg: DeField[Any]) -> str:
         if not arg.flatten:
@@ -1209,6 +1284,65 @@ class Renderer:
             k = arg.key_field()
             v = arg.value_field()
             return f"{{{self.dict_key(k)}: {self.render(v)} for k, v in {arg.data}.items()}}"
+
+    def typeddict(self, arg: DeField[Any]) -> str:
+        """
+        Render rvalue for TypedDict.
+
+        Rendered inline as a dict literal, mirroring `Renderer.typeddict` in se.py. A key
+        that is not required is emitted through a `**{...} if ... else {}` merge, so that
+        an absent key stays absent instead of materializing as None.
+        """
+        if arg.type in self.typeddict_stack:
+            raise SerdeError(
+                f"Recursive TypedDict is not supported yet: {typename(arg.type)}. "
+                "Use a dataclass instead, which pyserde renders through its own scope "
+                "function and so can recurse."
+            )
+        self.typeddict_stack.append(arg.type)
+        try:
+            items = typeddict_items(arg.type)
+            class_name = typename(arg.type)
+            extra_items = typeddict_extra_items(arg.type)
+
+            required = self._frozenset_literal(
+                name for name, item in items.items() if item.required
+            )
+            known = None if extra_items is not None else self._frozenset_literal(items)
+            # Merged first, so that a missing key is reported properly rather than escaping
+            # as a bare KeyError from one of the value expressions below.
+            parts = [f'**_typeddict_check_keys({arg.data}, {required}, {known}, "{class_name}")']
+
+            for name, item in items.items():
+                # Keys are the wire contract of the TypedDict itself, so they are never
+                # subject to the enclosing dataclass's rename_all. Pass no `case`.
+                inner = DeField(item.type, name, datavar=arg.data)
+                rendered = self.render(inner)
+                if item.required:
+                    parts.append(f'"{name}": {rendered}')
+                else:
+                    parts.append(
+                        f'**({{"{name}": {rendered}}} if "{name}" in {arg.data} else {{}})'
+                    )
+
+            if extra_items is not None:
+                extra = InnerField(extra_items, "v", datavar="v")
+                known_literal = self._frozenset_literal(items)
+                parts.append(
+                    f"**{{k: {self.render(extra)} for k, v in {arg.data}.items() "
+                    f"if k not in {known_literal}}}"
+                )
+        finally:
+            self.typeddict_stack.pop()
+
+        rendered_dict = "{" + ", ".join(parts) + "}"
+        if not self.strict:
+            return rendered_dict
+        return f'_typeddict_check_types({rendered_dict}, {class_name}, "{class_name}")'
+
+    @staticmethod
+    def _frozenset_literal(names: Iterable[str]) -> str:
+        return "frozenset((" + "".join(f'"{name}", ' for name in names) + "))"
 
     def dict_key(self, arg: DeField[Any]) -> str:
         """
@@ -1521,7 +1655,11 @@ def {{func}}(cls=cls, maybe_generic=None, maybe_generic_type_vars=None, data=Non
         raise Exception("Not a type of {{typename(t)}}")
     {% endif %}
     res = {{rvalue(arg(t))}}
+    {% if is_typeddict(t) %}
+    ensure(is_instance(res, {{typename(t)}}), "object is not of type '{{typename(t)}}'")
+    {% else %}
     ensure(is_bearable(res, {{typename(t)}}), "object is not of type '{{typename(t)}}'")
+    {% endif %}
     return res
   except Exception as e:
     errors.append(f" Failed to deserialize into {{typename(t)}}: {e}")
@@ -1553,6 +1691,7 @@ def render_from_iter(
         cls=cls,
         legacy_class_deserializer=legacy_class_deserializer,
         suppress_coerce=(not type_check.is_coerce()),
+        strict=type_check.is_strict(),
         class_deserializer=class_deserializer,
         class_name=typename(cls),
     )
@@ -1651,6 +1790,7 @@ def render_from_dict(
         cls=cls,
         legacy_class_deserializer=legacy_class_deserializer,
         suppress_coerce=(not type_check.is_coerce()),
+        strict=type_check.is_strict(),
         class_deserializer=class_deserializer,
         class_name=typename(cls),
     )
@@ -1731,6 +1871,10 @@ def render_union_func(
         rvalue=renderer.render,
         is_primitive=is_primitive,
         is_none=is_none,
+        # beartype reduces a TypedDict to Mapping[str, object], so it would accept any
+        # dict at all and the first TypedDict arm would always win. Use pyserde's own
+        # deep check for those arms instead.
+        is_typeddict=is_typeddict,
         typename=typename,
     )
 

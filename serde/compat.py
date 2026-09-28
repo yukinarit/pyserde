@@ -29,6 +29,32 @@ else:
     _PEP695_TYPES = (typing_extensions.TypeAliasType,)
 
 
+def _typeddict_qualifiers(*names: str) -> tuple[Any, ...]:
+    """
+    Collect the named TypedDict item qualifiers from both `typing` and `typing_extensions`.
+
+    As with the PEP695 types above, the two spellings aren't always the same object, and
+    `typing.ReadOnly` only exists from python 3.13.
+    """
+    return tuple(
+        {
+            qualifier
+            for module in (typing, typing_extensions)
+            for name in names
+            if (qualifier := getattr(module, name, None)) is not None
+        }
+    )
+
+
+# PEP 655 `Required`/`NotRequired` and PEP 705 `ReadOnly` qualifiers for TypedDict items.
+_TYPEDDICT_QUALIFIERS: tuple[Any, ...] = _typeddict_qualifiers(
+    "Required", "NotRequired", "ReadOnly"
+)
+_READONLY_QUALIFIERS: tuple[Any, ...] = _typeddict_qualifiers("ReadOnly")
+_REQUIRED_QUALIFIERS: tuple[Any, ...] = _typeddict_qualifiers("Required")
+_NOTREQUIRED_QUALIFIERS: tuple[Any, ...] = _typeddict_qualifiers("NotRequired")
+
+
 # Lazy SQLAlchemy imports to improve startup time
 
 
@@ -384,6 +410,11 @@ def iter_types(cls: type[Any]) -> list[type[Any]]:
             lst.add(tuple)
             for arg in type_args(cls):
                 recursive(arg)
+        elif is_typeddict(cls):
+            # Must precede is_dict, since a TypedDict is a subclass of dict.
+            lst.add(cls)
+            for value_type in typeddict_value_types(cls):
+                recursive(value_type)
         elif is_dict(cls):
             lst.add(dict)
             args = type_args(cls)
@@ -434,6 +465,12 @@ def iter_unions(cls: TypeLike) -> list[TypeLike]:
         elif is_tuple(cls):
             for arg in type_args(cls):
                 recursive(arg)
+        elif is_typeddict(cls):
+            # Must precede is_dict, since a TypedDict is a subclass of dict.
+            stack.append(cls)
+            for value_type in typeddict_value_types(cls):
+                recursive(value_type)
+            stack.pop()
         elif is_dict(cls):
             args = type_args(cls)
             if args and len(args) >= 2:
@@ -480,6 +517,12 @@ def iter_literals(cls: type[Any]) -> list[TypeLike]:
         elif is_tuple(cls):
             for arg in type_args(cls):
                 recursive(arg)
+        elif is_typeddict(cls):
+            # Must precede is_dict, since a TypedDict is a subclass of dict.
+            stack.append(cls)
+            for value_type in typeddict_value_types(cls):
+                recursive(value_type)
+            stack.pop()
         elif is_dict(cls):
             args = type_args(cls)
             if args and len(args) >= 2:
@@ -1057,6 +1100,203 @@ def is_pep695_type_alias(typ: Any) -> bool:
     Test if the type is of PEP695 type alias.
     """
     return isinstance(typ, _PEP695_TYPES)
+
+
+def is_typeddict(typ: Any) -> bool:
+    """
+    Test if the type is a TypedDict.
+
+    >>> from typing import TypedDict
+    >>> class Movie(TypedDict):
+    ...     title: str
+    ...     year: int
+    >>> is_typeddict(Movie)
+    True
+    >>> is_typeddict(dict)
+    False
+
+    `typing_extensions.is_typeddict` is used rather than `typing.is_typeddict`, because the
+    latter returns False for a `typing_extensions.TypedDict`, which PEP 728 requires.
+
+    >>> import typing_extensions
+    >>> class Closed(typing_extensions.TypedDict, closed=True):
+    ...     a: int
+    >>> is_typeddict(Closed)
+    True
+    """
+    return typing_extensions.is_typeddict(typ)
+
+
+@dataclasses.dataclass(frozen=True)
+class TypedDictItem:
+    """
+    An item (key) of a TypedDict, with its PEP 655 / PEP 705 qualifiers resolved.
+    """
+
+    type: Any
+    """ Declared type with Required/NotRequired/ReadOnly qualifiers stripped """
+
+    required: bool
+    """ Whether the key must be present. See PEP 655 """
+
+    readonly: bool
+    """ Whether the key is declared ReadOnly. See PEP 705. Informational only """
+
+
+def strip_typeddict_qualifiers(typ: Any) -> Any:
+    """
+    Strip PEP 655 `Required`/`NotRequired` and PEP 705 `ReadOnly` qualifiers from a
+    TypedDict item annotation. The qualifiers nest in either order, so unwrap repeatedly.
+
+    >>> from typing import NotRequired
+    >>> from typing_extensions import ReadOnly
+    >>> strip_typeddict_qualifiers(NotRequired[int])
+    <class 'int'>
+    >>> strip_typeddict_qualifiers(ReadOnly[NotRequired[str]])
+    <class 'str'>
+    >>> strip_typeddict_qualifiers(int)
+    <class 'int'>
+    """
+    return _strip_typeddict_qualifiers(typ)[0]
+
+
+def _strip_typeddict_qualifiers(typ: Any) -> tuple[Any, bool, bool | None]:
+    """
+    As `strip_typeddict_qualifiers`, but also report what the qualifiers said: whether the
+    item is ReadOnly, and whether Required/NotRequired stated its requiredness explicitly
+    (None when neither appears, so that `total=` decides).
+
+    The dunders are unreliable on older pythons. A stdlib TypedDict does not populate
+    `__readonly_keys__` before python 3.13, and before then its `__required_keys__` does
+    not see through a `typing_extensions.ReadOnly[NotRequired[T]]` wrapper either, so
+    both are read off the annotation here.
+    """
+    readonly = False
+    required: bool | None = None
+    while (origin := get_origin(typ)) in _TYPEDDICT_QUALIFIERS:
+        readonly = readonly or origin in _READONLY_QUALIFIERS
+        if required is None:
+            if origin in _REQUIRED_QUALIFIERS:
+                required = True
+            elif origin in _NOTREQUIRED_QUALIFIERS:
+                required = False
+        typ = type_args(typ)[0]
+    return typ, readonly, required
+
+
+def _contains_type_var(typ: Any) -> bool:
+    if isinstance(typ, TypeVar):
+        return True
+    return any(_contains_type_var(arg) for arg in type_args(typ))
+
+
+def typeddict_items(typ: type[Any]) -> dict[str, TypedDictItem]:
+    """
+    Get the items of a TypedDict, keyed by name.
+
+    >>> from typing import TypedDict, NotRequired
+    >>> class Movie(TypedDict):
+    ...     title: str
+    ...     year: NotRequired[int]
+    >>> typeddict_items(Movie)['title']
+    TypedDictItem(type=<class 'str'>, required=True, readonly=False)
+    >>> typeddict_items(Movie)['year']
+    TypedDictItem(type=<class 'int'>, required=False, readonly=False)
+
+    `total=False` and `ReadOnly` are reflected as well.
+
+    >>> from typing_extensions import ReadOnly
+    >>> class Config(TypedDict, total=False):
+    ...     debug: ReadOnly[bool]
+    >>> typeddict_items(Config)['debug']
+    TypedDictItem(type=<class 'bool'>, required=False, readonly=True)
+    """
+    try:
+        hints = typing_extensions.get_type_hints(typ, include_extras=True)
+    except Exception as e:
+        raise SerdeError(
+            f"Failed to resolve type hints for {typename(typ)}:\n"
+            f"{e.__class__.__name__}: {e}\n\n"
+            f"If you are using forward references make sure you are calling deserialize & "
+            "serialize after all classes are globally visible."
+        ) from e
+    # __required_keys__/__optional_keys__ are authoritative: they already account for
+    # `total=`, inheritance and ReadOnly[NotRequired[X]] nesting in either order.
+    required_keys: frozenset[str] = getattr(typ, "__required_keys__", frozenset(hints))
+    # __readonly_keys__ is absent on a stdlib TypedDict before Python 3.13.
+    readonly_keys: frozenset[str] = getattr(typ, "__readonly_keys__", frozenset())
+
+    items: dict[str, TypedDictItem] = {}
+    for name, hint in hints.items():
+        item_type, readonly, required = _strip_typeddict_qualifiers(hint)
+        if _contains_type_var(item_type):
+            raise SerdeError(
+                f"Generic TypedDict is not supported yet: {typename(typ)} has a type "
+                f"variable in item '{name}'"
+            )
+        items[name] = TypedDictItem(
+            type=item_type,
+            # An explicit Required/NotRequired wins; otherwise `total=` and inheritance
+            # decide, which is what the dunder correctly reports.
+            required=required if required is not None else name in required_keys,
+            readonly=readonly or name in readonly_keys,
+        )
+    return items
+
+
+def typeddict_extra_items(typ: type[Any]) -> Any | None:
+    """
+    Resolve PEP 728 `closed=`/`extra_items=` into the type that undeclared keys carry,
+    or None if undeclared keys are rejected.
+
+    Note that a plain `typing_extensions.TypedDict` also reports
+    `__extra_items__ is NoExtraItems`, so `__closed__` is the real discriminator.
+    pyserde rejects undeclared keys unless the TypedDict opts in, so an unspecified
+    `__closed__` is treated the same as `closed=True`.
+
+    >>> import typing_extensions
+    >>> from typing import TypedDict
+    >>> class Plain(TypedDict):
+    ...     a: int
+    >>> typeddict_extra_items(Plain) is None
+    True
+    >>> class Extra(typing_extensions.TypedDict, extra_items=int):
+    ...     a: str
+    >>> typeddict_extra_items(Extra)
+    <class 'int'>
+
+    `closed=False` opts into undeclared keys without typing them, which is reported as
+    `Any` so that undeclared values pass through untouched. `extra_items=object` means the
+    same thing and is normalized to `Any` too.
+
+    >>> class Open(typing_extensions.TypedDict, closed=False):
+    ...     a: int
+    >>> typeddict_extra_items(Open)
+    typing.Any
+    """
+    extra_items = getattr(typ, "__extra_items__", typing_extensions.NoExtraItems)
+    if extra_items is not typing_extensions.NoExtraItems:
+        extra_items = strip_typeddict_qualifiers(extra_items)
+        # `extra_items=Never` is the spelling PEP 728 gives for "same as closed=True".
+        if extra_items is typing_extensions.Never:
+            return None
+        return Any if extra_items is object else extra_items
+    # No extra_items declared. Only an explicit closed=False opens the TypedDict up.
+    if getattr(typ, "__closed__", None) is False:
+        return Any
+    return None
+
+
+def typeddict_value_types(typ: type[Any]) -> Iterator[Any]:
+    """
+    Iterate the item types of a TypedDict, plus its PEP 728 extra items type if it has one.
+    Used by the `iter_*` walkers to reach types nested inside a TypedDict.
+    """
+    for item in typeddict_items(typ).values():
+        yield item.type
+    extra_items = typeddict_extra_items(typ)
+    if extra_items is not None:
+        yield extra_items
 
 
 @cache

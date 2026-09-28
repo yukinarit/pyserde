@@ -14,6 +14,7 @@ Here is the list of the supported types. See the simple example for each type in
     * [`defaultdict`](https://docs.python.org/3/library/collections.html#collections.defaultdict) [^4]
     * [`deque`](https://docs.python.org/3/library/collections.html#collections.deque) [^25]
     * [`Counter`](https://docs.python.org/3/library/collections.html#collections.Counter) [^26]
+* [`typing.TypedDict`](https://docs.python.org/3/library/typing.html#typing.TypedDict) [^27]
 * [`typing.Optional`](https://docs.python.org/3/library/typing.html#typing.Optional) [^5]
 * [`typing.Union`](https://docs.python.org/3/library/typing.html#typing.Union) [^6] [^7] [^8]
 * User defined class with [`@dataclass`](https://docs.python.org/3/library/dataclasses.html) [^9] [^10]
@@ -49,6 +50,98 @@ class Foo:
     e: str | None
     f: Bar
 ```
+
+## TypedDict
+
+[`typing.TypedDict`](https://docs.python.org/3/library/typing.html#typing.TypedDict) can be used as a field type in a `@serde` class, or passed directly to `from_dict`/`from_json`.
+
+```python
+from typing import NotRequired, TypedDict
+from serde import serde
+from serde.json import from_json, to_json
+
+class Movie(TypedDict):
+    title: str
+    year: int
+
+@serde
+class Cinema:
+    location: str
+    featured: Movie
+```
+
+```python
+>>> cinema = Cinema(location="Downtown", featured={"title": "Inception", "year": 2010})
+>>> to_json(cinema)
+'{"location":"Downtown","featured":{"title":"Inception","year":2010}}'
+>>> from_json(Cinema, to_json(cinema))
+Cinema(location='Downtown', featured={'title': 'Inception', 'year': 2010})
+```
+
+A TypedDict can also be (de)serialized on its own. Serialization needs the type passed as `c`, because a TypedDict value is an ordinary `dict` at runtime and so carries no type information:
+
+```python
+>>> from serde import from_dict, to_dict
+>>> from_dict(Movie, {"title": "Arrival", "year": 2016})
+{'title': 'Arrival', 'year': 2016}
+>>> to_dict({"title": "Arrival", "year": 2016}, c=Movie)
+{'title': 'Arrival', 'year': 2016}
+```
+
+Keys are never renamed by a `rename_all` on the enclosing class: a TypedDict carries no pyserde decorator of its own, so its keys are the wire contract.
+
+### Required and NotRequired (PEP 655)
+
+A key declared [`NotRequired`](https://peps.python.org/pep-0655/) (or any key under `total=False`) may be omitted. An omitted key stays omitted on both sides; it does not become `None`.
+
+```python
+class Person(TypedDict):
+    name: str
+    email: NotRequired[str]
+```
+
+```python
+>>> to_dict({"name": "Alice"}, c=Person)
+{'name': 'Alice'}
+```
+
+A missing *required* key raises `SerdeError`.
+
+### ReadOnly (PEP 705)
+
+[`ReadOnly`](https://peps.python.org/pep-0705/) marks a key as read-only for type checkers. pyserde accepts it in either nesting order (`ReadOnly[NotRequired[T]]` and `NotRequired[ReadOnly[T]]`) and it has no effect on the serialized form.
+
+### Unknown keys, closed and extra_items (PEP 728)
+
+A TypedDict declares the full set of its keys, so by default pyserde **rejects** a payload carrying an undeclared key:
+
+```python
+>>> from_dict(Movie, {"title": "Arrival", "year": 2016, "director": "Villeneuve"})
+Traceback (most recent call last):
+    ...
+serde.compat.SerdeError: unknown fields: ['director'], expected one of ['title', 'year'] while deserializing Movie
+```
+
+To allow undeclared keys, opt in with [PEP 728](https://peps.python.org/pep-0728/). These spellings require `typing_extensions.TypedDict`, since `closed=`/`extra_items=` are not in the standard library:
+
+```python
+import typing_extensions as te
+
+class Config(te.TypedDict, extra_items=int):  # undeclared keys allowed, and must be ints
+    name: str
+
+class Loose(te.TypedDict, closed=False):      # undeclared keys allowed, untyped
+    name: str
+
+class Strict(te.TypedDict, closed=True):      # the default behaviour, stated explicitly
+    name: str
+```
+
+On serialization a `closed` TypedDict is lenient: a stray runtime key is dropped rather than raising.
+
+### Limitations
+
+Generic TypedDicts (`class Box(TypedDict, Generic[T])`) and recursive TypedDicts are not supported yet; both raise a `SerdeError` explaining the limitation. Use a `@serde` dataclass for those. The `flatten` field attribute does not apply to TypedDict fields either.
 
 ## Numpy
 
@@ -157,3 +250,5 @@ If you need to use a type which is currently not supported in the standard libra
 [^25]: See [examples/deque.py](https://github.com/yukinarit/pyserde/blob/main/examples/deque.py)
 
 [^26]: See [examples/counter.py](https://github.com/yukinarit/pyserde/blob/main/examples/counter.py)
+
+[^27]: See [examples/typeddict.py](https://github.com/yukinarit/pyserde/blob/main/examples/typeddict.py)
