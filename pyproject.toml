@@ -60,7 +60,7 @@ dev = [
   "mypy==2.3.1",
   "black==26.5.1",
   "pyright==1.1.410",
-  "ruff==0.16.8",
+  "ruff==0.16.9",
   "pytest",
   "pytest-watch",
   "pytest-flake8",
