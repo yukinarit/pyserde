@@ -1,14 +1,10 @@
 import json
+import sys
 from collections.abc import MutableSequence, Sequence
 from typing import Any, Generic, TypeVar
 
 import pytest
 from plum import dispatch
-
-try:
-    from typing import TypeAliasType
-except ImportError:
-    from typing_extensions import TypeAliasType
 
 import serde
 from serde.json import from_json
@@ -25,7 +21,12 @@ SEQUENCE_TYPES = [
     tuple[str, str],
 ]
 BAD_INPUTS = [{"first": "discarded", "second": "discarded"}, "ab", {}, ""]
-Strings = TypeAliasType("Strings", list[str])
+if sys.version_info >= (3, 12):
+    from typing import TypeAliasType
+
+    Strings = TypeAliasType("Strings", list[str])
+else:
+    Strings = list[str]
 T = TypeVar("T")
 
 
