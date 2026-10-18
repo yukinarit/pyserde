@@ -1,7 +1,6 @@
 import sys
 from dataclasses import dataclass, make_dataclass
 import typing
-from typing_extensions import TypeAliasType as BackportTypeAliasType
 
 import pytest
 
@@ -210,9 +209,12 @@ class User:
         from_dict(User, {"id": -1, "name": "John Doe"})
 
 
-@pytest.mark.parametrize("alias_type", [TypeAliasType, BackportTypeAliasType])
+# Use the native alias for strict end-to-end tests. Backport code generation is
+# covered in test_se/test_de and discovery in test_compat, without requiring
+# Beartype to support a distinct typing_extensions.TypeAliasType implementation.
 @pytest.mark.parametrize("value", [1, "text"])
-def test_annotated_type_alias_union(alias_type: typing.Any, value: int | str) -> None:
+def test_annotated_type_alias_union(value: int | str) -> None:
+    alias_type: typing.Any = TypeAliasType
     alias = alias_type("Choice", typing.Annotated[int | str, "metadata"])
     Item = serde(make_dataclass("Item", [("value", alias)]))
 
@@ -222,8 +224,8 @@ def test_annotated_type_alias_union(alias_type: typing.Any, value: int | str) ->
     assert from_tuple(Item, to_tuple(item)) == item
 
 
-@pytest.mark.parametrize("alias_type", [TypeAliasType, BackportTypeAliasType])
-def test_annotated_type_alias_literal(alias_type: typing.Any) -> None:
+def test_annotated_type_alias_literal() -> None:
+    alias_type: typing.Any = TypeAliasType
     alias = alias_type("Mode", typing.Annotated[typing.Literal["a", "b"], "metadata"])
     Item = serde(make_dataclass("Item", [("value", alias)]))
 
@@ -235,8 +237,9 @@ def test_annotated_type_alias_literal(alias_type: typing.Any) -> None:
         from_dict(Item, {"value": "c"})
 
 
-@pytest.mark.parametrize("alias_type", [TypeAliasType, BackportTypeAliasType])
-def test_annotated_type_alias_nested_dataclass(alias_type: typing.Any) -> None:
+def test_annotated_type_alias_nested_dataclass() -> None:
+    alias_type: typing.Any = TypeAliasType
+
     @dataclass
     class Child:
         value: int
@@ -253,8 +256,8 @@ def test_annotated_type_alias_nested_dataclass(alias_type: typing.Any) -> None:
     assert from_tuple(Item, to_tuple(item)) == item
 
 
-@pytest.mark.parametrize("alias_type", [TypeAliasType, BackportTypeAliasType])
-def test_annotated_type_alias_field_options(alias_type: typing.Any) -> None:
+def test_annotated_type_alias_field_options() -> None:
+    alias_type: typing.Any = TypeAliasType
     alias = alias_type("Number", typing.Annotated[int, "metadata"])
     numbers = alias_type("Numbers", list[alias])
 

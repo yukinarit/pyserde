@@ -1,7 +1,8 @@
 import pytest
 from collections.abc import Sequence, MutableSequence
 from decimal import Decimal
-from typing import Union, Optional
+from typing import Annotated, Any, Union, Optional
+from typing_extensions import TypeAliasType
 from serde import serde, SerdeError, field
 from serde.json import from_json
 from serde.de import deserialize, from_obj, from_dict, Renderer, DeField
@@ -92,6 +93,23 @@ def test_render_primitives() -> None:
 
     rendered = Renderer("foo").render(DeField(int, "i", datavar="data", index=1, iterbased=True))
     assert rendered == 'coerce_object("None", "i", int, data[1])'
+
+
+@pytest.mark.parametrize("typ", [int, list[int], dict[str, int]])
+@pytest.mark.parametrize("metadata", ["metadata", {"description": "value"}])
+def test_render_annotated_backport_alias(typ: Any, metadata: Any) -> None:
+    # Test code generation directly: Beartype 0.22 cannot validate the distinct
+    # typing_extensions.TypeAliasType implementation on Python 3.12 and 3.13.
+    alias_type: Any = TypeAliasType
+    annotated_type: Any = Annotated
+    annotated = alias_type("AnnotatedValue", annotated_type[typ, metadata])
+    alias = alias_type("Alias", annotated)
+    field = DeField(alias, "value", datavar="data")
+    renderer = Renderer("foo")
+
+    assert renderer.render(field) == renderer.render(DeField(typ, "value", datavar="data"))
+    assert field.type is alias
+    assert annotated.__value__.__metadata__[0] is metadata
 
 
 def test_render_list() -> None:
