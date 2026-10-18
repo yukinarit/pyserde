@@ -1,9 +1,15 @@
 import sys
+from dataclasses import dataclass, make_dataclass
 import typing
+from typing_extensions import TypeAliasType as BackportTypeAliasType
 
 import pytest
 
-from serde import serde, field, from_dict, to_dict
+from serde import SerdeError, serde, field, from_dict, to_dict, from_tuple, to_tuple
+from serde.core import disabled
+from serde.se import serialize
+from serde.de import deserialize
+from serde.json import from_json, to_json
 
 try:
     from typing import TypeAliasType
@@ -16,6 +22,7 @@ _PEP695_REASON = "PEP 695 `type` statement requires Python 3.12+."
 # `typing.TypeAliasType` aliases must be defined at module or class scope.
 Bar = TypeAliasType("Bar", list[int])
 Baz = TypeAliasType("Baz", Bar)
+Number = TypeAliasType("Number", typing.Annotated[int, "metadata"])
 
 
 @pytest.mark.skipif(sys.version_info < (3, 12), reason=_PEP695_REASON)
@@ -172,3 +179,142 @@ class Config:
     value = Config(name="test")
     assert {"name": "test"} == to_dict(value)
     assert value == from_dict(Config, {"name": "test"})
+
+
+@pytest.mark.skipif(sys.version_info < (3, 12), reason=_PEP695_REASON)
+def test_pep695_annotated_type_alias() -> None:
+    ns: dict[str, object] = {"serde": serde}
+    exec(
+        """
+from typing import Annotated
+from beartype.vale import Is
+
+type Natural = Annotated[int, Is[lambda x: 0 <= x]]
+
+@serde
+class User:
+    id: Natural
+    name: str
+""",
+        ns,
+    )
+    User = typing.cast(type, ns["User"])
+    value = User(0, "John Doe")
+    assert to_dict(value) == {"id": 0, "name": "John Doe"}
+    assert from_dict(User, to_dict(value)) == value
+    assert from_json(User, to_json(value)) == value
+    assert from_tuple(User, to_tuple(value)) == value
+    # Code generation must not erase the original validator annotation.
+    assert typing.get_type_hints(User)["id"] is ns["Natural"]
+    with pytest.raises(SerdeError):
+        from_dict(User, {"id": -1, "name": "John Doe"})
+
+
+@pytest.mark.parametrize("alias_type", [TypeAliasType, BackportTypeAliasType])
+@pytest.mark.parametrize("value", [1, "text"])
+def test_annotated_type_alias_union(alias_type: typing.Any, value: int | str) -> None:
+    alias = alias_type("Choice", typing.Annotated[int | str, "metadata"])
+    Item = serde(make_dataclass("Item", [("value", alias)]))
+
+    item = Item(value)
+    assert from_dict(Item, to_dict(item)) == item
+    assert from_json(Item, to_json(item)) == item
+    assert from_tuple(Item, to_tuple(item)) == item
+
+
+@pytest.mark.parametrize("alias_type", [TypeAliasType, BackportTypeAliasType])
+def test_annotated_type_alias_literal(alias_type: typing.Any) -> None:
+    alias = alias_type("Mode", typing.Annotated[typing.Literal["a", "b"], "metadata"])
+    Item = serde(make_dataclass("Item", [("value", alias)]))
+
+    item = Item("a")
+    assert from_dict(Item, to_dict(item)) == item
+    assert from_json(Item, to_json(item)) == item
+    assert from_tuple(Item, to_tuple(item)) == item
+    with pytest.raises(SerdeError):
+        from_dict(Item, {"value": "c"})
+
+
+@pytest.mark.parametrize("alias_type", [TypeAliasType, BackportTypeAliasType])
+def test_annotated_type_alias_nested_dataclass(alias_type: typing.Any) -> None:
+    @dataclass
+    class Child:
+        value: int
+
+    child = alias_type("AnnotatedChild", typing.Annotated[Child, "metadata"])
+    children = alias_type("Children", typing.Annotated[list[child], "metadata"])
+    alias = alias_type("Alias", children)
+    Item = serde(make_dataclass("Item", [("values", alias)]))
+
+    item = Item([Child(1), Child(2)])
+    assert to_dict(item) == {"values": [{"value": 1}, {"value": 2}]}
+    assert from_dict(Item, to_dict(item)) == item
+    assert from_json(Item, to_json(item)) == item
+    assert from_tuple(Item, to_tuple(item)) == item
+
+
+@pytest.mark.parametrize("alias_type", [TypeAliasType, BackportTypeAliasType])
+def test_annotated_type_alias_field_options(alias_type: typing.Any) -> None:
+    alias = alias_type("Number", typing.Annotated[int, "metadata"])
+    numbers = alias_type("Numbers", list[alias])
+
+    Item = serde(
+        make_dataclass(
+            "Item",
+            [
+                ("value", alias, field(default=1, rename="renamed")),
+                ("values", numbers, field(default_factory=list)),
+                (
+                    "custom",
+                    alias,
+                    field(
+                        default=2,
+                        serializer=lambda value: str(value),
+                        deserializer=lambda value: int(value),
+                    ),
+                ),
+                ("ignored", alias, field(default=3, skip=True)),
+            ],
+        )
+    )
+
+    item = Item()
+    assert to_dict(item) == {"renamed": 1, "values": [], "custom": "2"}
+    assert from_dict(Item, {}) == item
+    assert from_dict(Item, to_dict(item)) == item
+    assert from_json(Item, to_json(item)) == item
+    assert from_tuple(Item, to_tuple(item)) == item
+    assert Item.__dataclass_fields__["value"].metadata["serde_rename"] == "renamed"
+    assert typing.get_type_hints(Item)["value"] is alias
+
+
+@pytest.mark.parametrize("decorator", [serialize, deserialize])
+def test_annotated_type_alias_standalone(decorator: typing.Any) -> None:
+    @decorator
+    class Item:
+        value: Number
+
+    item = Item(1)
+    if decorator is serialize:
+        assert to_dict(item) == {"value": 1}
+        assert to_tuple(item) == (1,)
+    else:
+        assert from_dict(Item, {"value": 1}) == item
+        assert from_tuple(Item, (1,)) == item
+
+
+@pytest.mark.parametrize("metadata", [{"description": "value"}, ["metadata"]])
+def test_annotated_type_alias_unhashable_metadata(metadata: typing.Any) -> None:
+    class Aliases:
+        Number = TypeAliasType("Number", typing.Annotated[int, metadata])
+
+    # Beartype cannot validate aliases containing unhashable metadata.
+    @serde(type_check=disabled)
+    class Item:
+        value: Aliases.Number
+
+    item = Item(1)
+    assert from_dict(Item, to_dict(item)) == item
+    assert from_json(Item, to_json(item)) == item
+    assert from_tuple(Item, to_tuple(item)) == item
+    assert typing.get_args(Aliases.Number.__value__)[1] is metadata
