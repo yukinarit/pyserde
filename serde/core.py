@@ -568,7 +568,7 @@ def skip_if_none(v: Any) -> Any:
 
 
 def skip_if_default(v: Any, default: Any | None = None) -> Any:
-    if isinstance(default, dataclasses._MISSING_TYPE):
+    if default is dataclasses.MISSING:
         return False
 
     serialized_default = default
@@ -658,14 +658,14 @@ class Field(Generic[T]):
     """ Type of Field """
     name: str | None
     """ Name of Field """
-    default: Any = field(default_factory=dataclasses._MISSING_TYPE)
+    default: Any = field(default_factory=lambda: dataclasses.MISSING)
     """ Default value of Field """
-    default_factory: Any = field(default_factory=dataclasses._MISSING_TYPE)
+    default_factory: Any = field(default_factory=lambda: dataclasses.MISSING)
     """ Default factory method of Field """
-    init: bool = field(default_factory=dataclasses._MISSING_TYPE)
-    repr: Any = field(default_factory=dataclasses._MISSING_TYPE)
-    hash: Any = field(default_factory=dataclasses._MISSING_TYPE)
-    compare: Any = field(default_factory=dataclasses._MISSING_TYPE)
+    init: bool = field(default_factory=lambda: dataclasses.MISSING)
+    repr: Any = field(default_factory=lambda: dataclasses.MISSING)
+    hash: Any = field(default_factory=lambda: dataclasses.MISSING)
+    compare: Any = field(default_factory=lambda: dataclasses.MISSING)
     metadata: Mapping[str, Any] = field(default_factory=dict)
     kw_only: bool = False
     case: str | None = None
@@ -714,12 +714,12 @@ class Field(Generic[T]):
 
         if skip_if_default_flag:
             default_value: Any
-            if not isinstance(f.default, dataclasses._MISSING_TYPE):
+            if f.default is not dataclasses.MISSING:
                 default_value = f.default
-            elif not isinstance(f.default_factory, dataclasses._MISSING_TYPE):
+            elif f.default_factory is not dataclasses.MISSING:
                 default_value = f.default_factory()
             else:
-                default_value = dataclasses._MISSING_TYPE
+                default_value = dataclasses.MISSING
 
             skip_if_def = functools.partial(skip_if_default, default=default_value)
             skip_if_default_func = Func(skip_if_def, cls.mangle(f, "skip_if_default"))
@@ -759,8 +759,8 @@ class Field(Generic[T]):
 
         skip_deserializing = f.metadata.get("serde_skip_deserializing")
         if skip_deserializing and f.init:
-            has_def = not isinstance(f.default, dataclasses._MISSING_TYPE)
-            has_def_factory = not isinstance(f.default_factory, dataclasses._MISSING_TYPE)
+            has_def = f.default is not dataclasses.MISSING
+            has_def_factory = f.default_factory is not dataclasses.MISSING
             if not (has_def or has_def_factory or f.metadata.get("serde_skip")):
                 raise SerdeError(
                     f"Field {f.name!r} sets skip_deserializing=True but lacks default or "
@@ -1226,7 +1226,7 @@ def has_default(field: Field[Any]) -> bool:
     >>> has_default(dataclasses.fields(C)[1])
     True
     """
-    return not isinstance(field.default, dataclasses._MISSING_TYPE)
+    return field.default is not dataclasses.MISSING
 
 
 def has_default_factory(field: Field[Any]) -> bool:
@@ -1242,7 +1242,7 @@ def has_default_factory(field: Field[Any]) -> bool:
     >>> has_default_factory(dataclasses.fields(C)[1])
     True
     """
-    return not isinstance(field.default_factory, dataclasses._MISSING_TYPE)
+    return field.default_factory is not dataclasses.MISSING
 
 
 class ClassSerializer(Protocol):
