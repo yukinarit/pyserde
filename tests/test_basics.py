@@ -13,7 +13,8 @@ from typing import (
     TypeVar,
     Any,
 )
-from collections import defaultdict
+from collections import OrderedDict, defaultdict
+from types import MappingProxyType
 
 import pytest
 
@@ -1272,6 +1273,28 @@ def test_exception_to_from_obj() -> None:
         serde.from_dict(Foo, {})
 
     assert str(exc_info.value) == "missing required field 'a' while deserializing Foo"
+
+
+def test_from_dict_rejects_non_mapping() -> None:
+    @serde.serde
+    class Foo:
+        a: str = "none"
+
+    @serde.serde
+    class Bar:
+        foo: Foo
+
+    for value in ([], ["a"], "", "a", ()):
+        with pytest.raises(serde.SerdeError, match="expected a mapping"):
+            serde.from_dict(Foo, value)
+        with pytest.raises(serde.SerdeError, match="expected a mapping"):
+            serde.from_dict(Bar, {"foo": value})
+
+    assert serde.from_dict(Foo, {}) == Foo()
+    assert serde.from_dict(Foo, {"a": "b"}) == Foo("b")
+    assert serde.from_dict(Bar, {"foo": {}}) == Bar(Foo())
+    assert serde.from_dict(Foo, OrderedDict(a="b")) == Foo("b")
+    assert serde.from_dict(Foo, MappingProxyType({"a": "b"})) == Foo("b")
 
 
 def test_user_error() -> None:
