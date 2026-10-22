@@ -919,6 +919,9 @@ class Renderer:
         """
         Render rvalue
         """
+        if typing.get_origin(arg.type) is typing.Annotated:
+            return self.render(dataclasses.replace(arg, type=typing.get_args(arg.type)[0]))
+
         implemented_methods: dict[type[Any], int] = {}
         class_serializers: Iterable[ClassSerializer] = itertools.chain(
             GLOBAL_CLASS_SERIALIZER, [self.class_serializer] if self.class_serializer else []
