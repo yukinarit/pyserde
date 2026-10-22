@@ -11,7 +11,7 @@ import dataclasses
 import functools
 import typing
 import jinja2
-from collections.abc import Callable, Sequence, Iterable
+from collections.abc import Callable, Sequence, Iterable, Mapping
 
 from beartype import beartype, BeartypeConf
 from beartype.door import is_bearable
@@ -337,6 +337,7 @@ def deserialize(
         g["class_deserializers"] = class_deserializers
         g["BeartypeCallHintParamViolation"] = BeartypeCallHintParamViolation
         g["is_bearable"] = is_bearable
+        g["_Mapping"] = Mapping
         if deserializer:
             g["serde_legacy_custom_class_deserializer"] = functools.partial(
                 serde_legacy_custom_class_deserializer, custom=deserializer
@@ -1403,6 +1404,11 @@ def {{func}}(cls=cls, maybe_generic=None, maybe_generic_type_vars=None, data=Non
              variable_type_args=None, reuse_instances=None, deserialize_numbers=None):
   if reuse_instances is None:
     reuse_instances = {{serde_scope.reuse_instances_default}}
+
+  if data.__class__ is not dict and not isinstance(data, _Mapping):
+    raise SerdeError(
+      "Can not deserialize " + typename(type(data)) + " into {{class_name}}, expected a mapping"
+    )
 
   {% if deny_unknown_fields and not has_flatten_dict %}
   known_fields = {{ known_fields }}
