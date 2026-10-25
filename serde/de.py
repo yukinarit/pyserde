@@ -61,6 +61,7 @@ from .compat import (
     is_union,
     is_variable_tuple,
     is_pep695_type_alias,
+    get_pep695_type_alias_value,
     iter_literals,
     iter_types,
     iter_unions,
@@ -565,7 +566,7 @@ def from_obj(
     # A PEP 695 type alias (``type T = Foo | Bar``) is a TypeAliasType, not the
     # aliased type itself, so unwrap it to recognize e.g. a union.
     if is_pep695_type_alias(c):
-        c = c.__value__  # type: ignore[attr-defined]
+        c = get_pep695_type_alias_value(c)
 
     # It is possible that the parser already generates the correct data type requested
     # by the caller. Hence, it should be checked early to avoid doing anymore work.
@@ -1021,7 +1022,7 @@ class Renderer:
         elif is_any(arg.type) or is_ellipsis(arg.type):
             res = arg.data
         elif is_pep695_type_alias(arg.type):
-            res = self.render(dataclasses.replace(arg, type=arg.type.__value__))
+            res = self.render(dataclasses.replace(arg, type=get_pep695_type_alias_value(arg.type)))
         elif is_primitive(arg.type):
             # For subclasses for primitives e.g. class FooStr(str), coercing is always enabled
             res = self.primitive(arg, not is_primitive_subclass(arg.type))

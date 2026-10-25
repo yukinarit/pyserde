@@ -110,6 +110,27 @@ class Baz:
 
 
 @pytest.mark.skipif(sys.version_info < (3, 12), reason=_PEP695_REASON)
+def test_pep695_generic_type_alias() -> None:
+    ns: dict[str, object] = {"serde": serde}
+    exec(
+        """
+type Point[T] = tuple[T, T]
+type Polygon[T] = tuple[Point[T], ...]
+
+@serde
+class Figure:
+    name: str
+    polygon: Polygon[float]
+""",
+        ns,
+    )
+    FigureClass = typing.cast(type, ns["Figure"])
+
+    value = FigureClass("test", ((0.0, 0.0), (1.0, 1.73), (-1.0, 1.73)))
+    assert value == from_dict(FigureClass, to_dict(value))
+
+
+@pytest.mark.skipif(sys.version_info < (3, 12), reason=_PEP695_REASON)
 def test_pep695_type_alias_literal() -> None:
     ns: dict[str, object] = {"serde": serde, "Literal": typing.Literal}
     exec(
