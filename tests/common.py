@@ -11,7 +11,9 @@ from typing import (
     Any,
     Generic,
     NewType,
+    NotRequired,
     Optional,
+    TypedDict,
     TypeVar,
     Union,
     Callable,
@@ -100,6 +102,16 @@ def yaml_not_supported(se: Any, de: Any, opt: Any) -> bool:
     return se is to_yaml
 
 
+class CommonMovie(TypedDict):
+    title: str
+    year: int
+
+
+class CommonPerson(TypedDict):
+    name: str
+    email: NotRequired[str]
+
+
 types: list[tuple[Any, Any, Any]] = [
     param(10, int),  # Primitive
     param("foo", str),
@@ -174,6 +186,9 @@ types: list[tuple[Any, Any, Any]] = [
     param(
         datetime.datetime.strptime("Jan 1 2021 1:55PM", "%b %d %Y %I:%M%p").time(), datetime.time
     ),
+    param({"title": "Inception", "year": 2010}, CommonMovie),  # TypedDict
+    param({"name": "Alice"}, CommonPerson),  # TypedDict with a NotRequired key omitted
+    param({"name": "Bob", "email": "bob@example.com"}, CommonPerson),
 ]
 
 # these types can only be instantiated on their corresponding system
