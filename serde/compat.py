@@ -391,7 +391,7 @@ def iter_types(cls: type[Any]) -> list[type[Any]]:
                 recursive(args[0])
                 recursive(args[1])
         elif is_pep695_type_alias(cls):
-            recursive(cls.__value__)
+            recursive(get_pep695_type_alias_value(cls))
         else:
             lst.add(cls)
 
@@ -415,7 +415,7 @@ def iter_unions(cls: TypeLike) -> list[TypeLike]:
             for arg in type_args(cls):
                 recursive(arg)
         elif is_pep695_type_alias(cls):
-            recursive(cls.__value__)
+            recursive(get_pep695_type_alias_value(cls))
         if is_dataclass(cls):
             stack.append(cls)
             if isinstance(cls, type):
@@ -461,7 +461,7 @@ def iter_literals(cls: type[Any]) -> list[TypeLike]:
             for arg in type_args(cls):
                 recursive(arg)
         elif is_pep695_type_alias(cls):
-            recursive(cls.__value__)
+            recursive(get_pep695_type_alias_value(cls))
         if is_dataclass(cls):
             stack.append(cls)
             if isinstance(cls, type):
@@ -1056,7 +1056,22 @@ def is_pep695_type_alias(typ: Any) -> bool:
     """
     Test if the type is of PEP695 type alias.
     """
-    return isinstance(typ, _PEP695_TYPES)
+    return isinstance(typ, _PEP695_TYPES) or isinstance(get_origin(typ), _PEP695_TYPES)
+
+
+def get_pep695_type_alias_value(typ: Any) -> Any:
+    """
+    Get the aliased type of PEP695 type alias, with type arguments applied for a generic alias.
+    """
+    origin = get_origin(typ)
+    if origin is None:
+        return typ.__value__
+    value = origin.__value__
+    params = getattr(value, "__parameters__", ())
+    if not params:
+        return value
+    args = dict(zip(origin.__type_params__, get_args(typ), strict=True))
+    return value[tuple(args[p] for p in params)]
 
 
 @cache
