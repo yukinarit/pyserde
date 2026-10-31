@@ -194,7 +194,7 @@ def _make_serialize(
 # The `serialize` function can call itself recursively when it needs to generate code for
 # unmarked dataclasses. To avoid infinite recursion, this array remembers types for which code is
 # currently being generated.
-GENERATION_STACK = []
+GENERATION_STACK: list[type[Any]] = []
 
 
 @dataclass_transform()
