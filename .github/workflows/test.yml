@@ -57,11 +57,45 @@ jobs:
         uses: actions/setup-python@v7
         with:
           python-version: "3.14"
+      - name: Install dependencies
+        run: UV_FROZEN=1 make setup
       - name: Check formatting
-        run: UV_FROZEN=1 make setup check
+        run: make check-format
       - name: Comment PR
         if: ${{ failure() && github.event_name == 'pull_request' }}
         uses: thollander/actions-comment-pull-request@v3.0.1
         with:
           message: 'Please consider formatting your code according to the standards described here: https://github.com/yukinarit/pyserde/blob/main/CONTRIBUTING.md'
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+      - name: Set up Python 3.14
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.14"
+      - name: Install dependencies
+        run: UV_FROZEN=1 make setup
+      - name: Run ruff
+        run: make lint
+
+  typecheck:
+    name: Type check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+      - name: Set up Python 3.14
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.14"
+      - name: Install dependencies
+        run: UV_FROZEN=1 make setup
+      - name: Run pyright and mypy
+        run: make typecheck
