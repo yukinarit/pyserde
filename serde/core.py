@@ -217,6 +217,7 @@ class Cache:
         cls: type[T],
         data: Any,
         deserialize_numbers: Callable[[str | int], float] | None = None,
+        strict_containers: bool | None = None,
     ) -> T:
         """
         Deserialize from dict or tuple into the specified Union.
@@ -228,7 +229,10 @@ class Cache:
         return cast(
             T,
             scope.funcs[func_name](
-                cls=union_cls, data=data, deserialize_numbers=deserialize_numbers
+                cls=union_cls,
+                data=data,
+                deserialize_numbers=deserialize_numbers,
+                strict_containers=strict_containers,
             ),
         )
 
