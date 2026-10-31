@@ -299,3 +299,27 @@ def test_get_generic_arg() -> None:
 
     with pytest.raises(SerdeError):
         get_generic_arg(GenericFoo[int, str], ["T"], ["U"], 0)
+
+
+def test_annotated_alias_walkers() -> None:
+    from typing import Annotated
+    from typing_extensions import TypeAliasType
+    from serde.compat import iter_literals
+
+    @dataclass
+    class Child:
+        value: int
+
+    class Aliases:
+        Alias = TypeAliasType("Alias", Annotated[Union[Child, Literal["a", "b"]], "metadata"])
+
+    @dataclass
+    class Item:
+        value: Aliases.Alias
+
+    literal = Literal["a", "b"]
+    union = Union[Child, literal]
+
+    assert set(iter_types(Item)) == {Item, Union, Child, int, literal}
+    assert iter_unions(Item) == [union]
+    assert iter_literals(Item) == [literal]
