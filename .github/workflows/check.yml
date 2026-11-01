@@ -1,11 +1,11 @@
-name: Tests
+name: Check
 
 on: [pull_request, workflow_dispatch]
 
 jobs:
 
   test:
-    name: Python ${{ matrix.python-version }}
+    name: Check Python ${{ matrix.python-version }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
