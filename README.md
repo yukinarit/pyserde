@@ -7,8 +7,8 @@
   <a href="https://pypi.org/project/pyserde/">
     <img alt="pypi" src="https://img.shields.io/pypi/pyversions/pyserde.svg">
   </a>
-  <a href="https://github.com/yukinarit/pyserde/actions/workflows/test.yml">
-    <img alt="GithubActions" src="https://github.com/yukinarit/pyserde/actions/workflows/test.yml/badge.svg">
+  <a href="https://github.com/yukinarit/pyserde/actions/workflows/check.yml">
+    <img alt="GithubActions" src="https://github.com/yukinarit/pyserde/actions/workflows/check.yml/badge.svg">
   </a>
 </p>
 <p align="center">

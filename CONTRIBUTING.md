@@ -62,9 +62,17 @@ pyserde uses the following tools. mypy and pyright are enabled for `/examples` d
 
 If pre-commit is configured, `black`, `pyright` and `ruff` are automatically triggered when making a git commit. If you want to run mypy, run
 ```
-make check  # this also runs black, pyright and ruff
+make typecheck  # runs pyright and mypy
 ```
 or
 ```
 mypy .
 ```
+
+CI runs these as separate jobs, which you can reproduce locally:
+```
+make check-format  # whitespace fixers and black
+make lint          # ruff
+make typecheck     # pyright and mypy
+```
+`make check` runs all of them at once.
