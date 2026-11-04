@@ -171,6 +171,13 @@ def _exists_by_aliases(d: dict[str, str], aliases: list[str]) -> bool:
     return False
 
 
+def _check_sequence_input(value: Any, strict_containers: bool = True) -> Any:
+    """Reject object keys and text characters as sequence items in strict mode."""
+    if strict_containers and isinstance(value, (Mapping, str, bytes, bytearray)):
+        raise SerdeError(f"Expected a sequence, got {typename(type(value))}")
+    return value
+
+
 def _project_flattened_data(
     data: dict[str, Any] | None,
     child_known_fields: set[str],
@@ -334,6 +341,7 @@ def deserialize(
         g["deserialize_enum"] = deserialize_enum
         g["_exists_by_aliases"] = _exists_by_aliases
         g["_get_by_aliases"] = _get_by_aliases
+        g["_check_sequence_input"] = _check_sequence_input
         g["_project_flattened_data"] = _project_flattened_data
         g["class_deserializers"] = class_deserializers
         g["BeartypeCallHintParamViolation"] = BeartypeCallHintParamViolation
@@ -370,7 +378,7 @@ def deserialize(
             add_func(
                 scope,
                 union_func_name(UNION_DE_PREFIX, union_args),
-                render_union_func(cls, union_args, tagging),
+                render_union_func(cls, union_args, tagging, type_check),
                 g,
             )
 
@@ -551,6 +559,7 @@ def from_obj(
     named: bool,
     reuse_instances: bool | None,
     deserialize_numbers: Callable[[str | int], float] | None = None,
+    strict_containers: bool | None = None,
 ) -> T:
     """
     Deserialize from an object into an instance of the type specified as arg `c`.
@@ -589,7 +598,9 @@ def from_obj(
         # If a class in the argument is a non-dataclass class e.g. Union[Foo, Bar],
         # pyserde generates a wrapper (de)serializable dataclass on the fly,
         # and use it to deserialize into the object.
-        return CACHE.deserialize_union(c, o, deserialize_numbers=deserialize_numbers)
+        return CACHE.deserialize_union(
+            c, o, deserialize_numbers=deserialize_numbers, strict_containers=strict_containers
+        )
 
     if is_generic(c):
         # Store subscripted generic type such as Foo[Bar] in "maybe_generic",
@@ -606,6 +617,7 @@ def from_obj(
             named=named,
             reuse_instances=reuse_instances,
             deserialize_numbers=deserialize_numbers,
+            strict_containers=strict_containers,
         )
         class_deserializer = find_global_class_deserializer(c)
         if class_deserializer is not None:
@@ -620,6 +632,8 @@ def from_obj(
             res = deserializable_to_obj(c)
         elif is_opt(c):
             res = _deserialize_optional(c, o, thisfunc)
+        elif strict_containers and (is_list(c) or is_tuple(c)):
+            res = _from_obj_collection(c, _check_sequence_input(o), thisfunc)
         elif (collection_res := _from_obj_collection(c, o, thisfunc)) is not _UNHANDLED:
             res = collection_res
         elif _is_numpy_array(c):
@@ -949,6 +963,8 @@ class Renderer:
     """ Disable type coercing in codegen """
     class_deserializer: ClassDeserializer | None = None
     class_name: str | None = None
+    strict_containers: bool | str = False
+    """Whether to check sequence input shapes, or its generated runtime variable."""
 
     def render(self, arg: DeField[Any]) -> str:
         """
@@ -1033,7 +1049,8 @@ class Renderer:
             res = (
                 f"from_obj(get_generic_arg(maybe_generic, maybe_generic_type_vars, "
                 f"variable_type_args, {index}), {arg.data}, named={not arg.iterbased}, "
-                "reuse_instances=reuse_instances, deserialize_numbers=deserialize_numbers)"
+                "reuse_instances=reuse_instances, deserialize_numbers=deserialize_numbers, "
+                f"strict_containers={self.strict_containers})"
             )
         elif is_literal(arg.type):
             res = self.literal(arg)
@@ -1050,7 +1067,11 @@ class Renderer:
         ):
             # Rerender the code for default deserializer.
             default = Renderer(
-                self.func, self.cls, None, suppress_coerce=self.suppress_coerce
+                self.func,
+                self.cls,
+                None,
+                suppress_coerce=self.suppress_coerce,
+                strict_containers=self.strict_containers,
             ).render(arg)
             return self.custom_class_deserializer(arg, default)
         else:
@@ -1134,10 +1155,16 @@ class Renderer:
         """
         Render rvalue for list.
         """
+        data = self.sequence_data(arg)
         if is_bare_list(arg.type):
-            return f"list({arg.data})"
+            return f"list({data})"
         else:
-            return f"[{self.render(arg[0])} for v in {arg.data}]"
+            return f"[{self.render(arg[0])} for v in {data}]"
+
+    def sequence_data(self, arg: DeField[Any]) -> str:
+        if self.strict_containers:
+            return f"_check_sequence_input({arg.data}, {self.strict_containers})"
+        return arg.data
 
     def set(self, arg: DeField[Any]) -> str:
         """
@@ -1175,16 +1202,18 @@ class Renderer:
         """
         Render rvalue for tuple.
         """
+        data = self.sequence_data(arg)
         if is_bare_tuple(arg.type):
-            return f"tuple({arg.data})"
+            return f"tuple({data})"
         elif is_variable_tuple(arg.type):
             earg = arg[0]
             earg.datavar = "v"
-            return f"tuple({self.render(earg)} for v in {arg.data})"
+            return f"tuple({self.render(earg)} for v in {data})"
         else:
             values = []
             for i, _typ in enumerate(type_args(arg.type)):
                 inner = arg[i]
+                inner.data = f"{data}[{i}]"
                 values.append(self.render(inner))
             return f"({', '.join(values)},)"  # trailing , is required for single element tuples
 
@@ -1279,7 +1308,8 @@ class Renderer:
             "cls=cls, "
             f"data={arg.data}, "
             "reuse_instances=reuse_instances, "
-            "deserialize_numbers=deserialize_numbers)"
+            "deserialize_numbers=deserialize_numbers, "
+            f"strict_containers={self.strict_containers})"
         )
 
     def literal(self, arg: DeField[Any]) -> str:
@@ -1497,7 +1527,9 @@ def {{func}}(cls=cls, maybe_generic=None, maybe_generic_type_vars=None, data=Non
             "union": """
 def {{func}}(cls=cls, maybe_generic=None, maybe_generic_type_vars=None, data=None,
              variable_type_args=None, reuse_instances = {{serde_scope.reuse_instances_default}},
-             deserialize_numbers=None):
+             deserialize_numbers=None, strict_containers=None):
+  if strict_containers is None:
+    strict_containers = {{strict_containers}}
   errors = []
   {% for t in union_args %}
   try:
@@ -1562,6 +1594,7 @@ def render_from_iter(
         suppress_coerce=(not type_check.is_coerce()),
         class_deserializer=class_deserializer,
         class_name=typename(cls),
+        strict_containers=type_check.is_strict(),
     )
     serde_scope = getattr(cls, SERDE_SCOPE)
     fields = list(filter(renderable, defields(cls)))
@@ -1660,6 +1693,7 @@ def render_from_dict(
         suppress_coerce=(not type_check.is_coerce()),
         class_deserializer=class_deserializer,
         class_name=typename(cls),
+        strict_containers=type_check.is_strict(),
     )
     serde_scope = getattr(cls, SERDE_SCOPE)
     all_fields = defields(cls)
@@ -1722,11 +1756,16 @@ def render_from_dict(
 
 
 def render_union_func(
-    cls: type[Any], union_args: Sequence[type[Any]], tagging: Tagging = DefaultTagging
+    cls: type[Any],
+    union_args: Sequence[type[Any]],
+    tagging: Tagging = DefaultTagging,
+    type_check: TypeCheck = strict,
 ) -> str:
     union_name = f"Union[{', '.join([typename(a) for a in union_args])}]"
 
-    renderer = Renderer(FROM_DICT, cls=cls, suppress_coerce=True)
+    renderer = Renderer(
+        FROM_DICT, cls=cls, suppress_coerce=True, strict_containers="strict_containers"
+    )
     return jinja2_env.get_template("union").render(
         func=union_func_name(UNION_DE_PREFIX, union_args),
         serde_scope=getattr(cls, SERDE_SCOPE),
@@ -1739,6 +1778,7 @@ def render_union_func(
         is_primitive=is_primitive,
         is_none=is_none,
         typename=typename,
+        strict_containers=type_check.is_strict(),
     )
 
 
