@@ -333,6 +333,31 @@ def dataclass_fields(cls: type[Any]) -> Iterator[dataclasses.Field]:  # type: ig
 TypeLike = type[Any] | typing.Any
 
 
+def _is_field_type_unused(f: dataclasses.Field[Any]) -> bool:
+    """
+    Return True when generated code never references the field type.
+
+    This holds for `serde_skip` fields and for fields with both a custom serializer
+    and deserializer. The `default_*` markers opt back into codegen, and flattened
+    fields still need their child dataclass scope.
+    """
+    if f.metadata.get("serde_skip"):
+        return True
+    if f.metadata.get("serde_flatten"):
+        return False
+
+    serializer = f.metadata.get("serde_serializer")
+    deserializer = f.metadata.get("serde_deserializer")
+    if serializer is None or deserializer is None:
+        return False
+
+    # Imported lazily because `se` and `de` import this module at load time.
+    from .de import default_deserializer
+    from .se import default_serializer
+
+    return serializer is not default_serializer and deserializer is not default_deserializer
+
+
 def iter_types(cls: type[Any]) -> list[type[Any]]:
     """
     Iterate field types recursively.
@@ -347,7 +372,7 @@ def iter_types(cls: type[Any]) -> list[type[Any]]:
             lst.add(cls)
             if isinstance(cls, type):
                 for f in dataclass_fields(cls):
-                    if not f.metadata.get("serde_skip"):
+                    if not _is_field_type_unused(f):
                         recursive(f.type)
         elif isinstance(cls, str):
             lst.add(cls)
@@ -420,7 +445,7 @@ def iter_unions(cls: TypeLike) -> list[TypeLike]:
             stack.append(cls)
             if isinstance(cls, type):
                 for f in dataclass_fields(cls):
-                    if not f.metadata.get("serde_skip"):
+                    if not _is_field_type_unused(f):
                         recursive(f.type)
             stack.pop()
         elif is_opt(cls):
@@ -466,7 +491,7 @@ def iter_literals(cls: type[Any]) -> list[TypeLike]:
             stack.append(cls)
             if isinstance(cls, type):
                 for f in dataclass_fields(cls):
-                    if not f.metadata.get("serde_skip"):
+                    if not _is_field_type_unused(f):
                         recursive(f.type)
             stack.pop()
         elif is_opt(cls):

@@ -4,7 +4,15 @@ from datetime import datetime
 from typing import Any, Generic, NewType, Optional, TypeVar, Union, Literal
 from collections.abc import Sequence, MutableSequence
 
-from serde import serde, field, is_serializable, is_deserializable, SerdeError
+from serde import (
+    serde,
+    field,
+    is_serializable,
+    is_deserializable,
+    SerdeError,
+    default_deserializer,
+    default_serializer,
+)
 from serde.compat import (
     get_generic_arg,
     is_dict,
@@ -16,6 +24,7 @@ from serde.compat import (
     is_set,
     is_tuple,
     is_union,
+    iter_literals,
     iter_types,
     iter_unions,
     type_args,
@@ -124,6 +133,36 @@ def test_iter_types() -> None:
     assert {Foo, datetime, Optional, str, Union, list, set, int} == set(iter_types(Foo))
 
 
+def test_iter_types_custom_field_serde() -> None:
+    @dataclass
+    class Inner:
+        x: int
+
+    @dataclass
+    class FullyCustom:
+        i: Inner = field(serializer=str, deserializer=lambda v: Inner(0))
+
+    # Both directions are custom, so the field type is never rendered.
+    assert Inner not in iter_types(FullyCustom)
+
+    @dataclass
+    class SerializerOnly:
+        i: Inner = field(serializer=str)
+
+    # One direction still uses generated code, so the type must be walked.
+    assert Inner in iter_types(SerializerOnly)
+
+    @dataclass
+    class DefaultMarkers:
+        i: Inner = field(
+            serializer=default_serializer,
+            deserializer=default_deserializer,
+        )
+
+    # The default markers opt the field back into generated code.
+    assert Inner in iter_types(DefaultMarkers)
+
+
 def test_iter_unions() -> None:
     assert [Union[str, int]] == list(iter_unions(Union[str, int]))
     assert [Union[str, int]] == list(iter_unions(dict[str, Union[str, int]]))
@@ -141,6 +180,26 @@ def test_iter_unions() -> None:
     assert {Union[int, str], Union[float, int], Union[bool, str], Union[float, int]} == set(
         iter_unions(A)
     )
+
+    @dataclass
+    class B:
+        u: Union[int, str] = field(serializer=str, deserializer=lambda v: 1)
+
+    assert [] == iter_unions(B)
+
+
+def test_iter_literals() -> None:
+    @dataclass
+    class A:
+        v: Literal[1, 2]
+
+    assert {Literal[1, 2]} == set(iter_literals(A))
+
+    @dataclass
+    class B:
+        v: Literal[1, 2] = field(serializer=str, deserializer=lambda v: 1)
+
+    assert [] == iter_literals(B)
 
 
 def test_type_args() -> None:

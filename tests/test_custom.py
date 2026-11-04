@@ -2,6 +2,7 @@
 Tests for custom serializer/deserializer.
 """
 
+from dataclasses import dataclass
 from datetime import datetime
 from typing import Optional, Any, Union
 from plum import dispatch
@@ -75,6 +76,24 @@ def test_wrong_signature() -> None:
 
     with pytest.raises(SerdeError):
         from_json(Foo, '{"i": 10}')
+
+
+def test_custom_field_serializer_skips_type_walk() -> None:
+    @dataclass
+    class Inner:
+        x: complex  # Unsupported by serde codegen.
+
+    @serde
+    class Outer:
+        i: Inner = field(
+            serializer=lambda v: {"value": str(v.x)},
+            deserializer=lambda v: Inner(complex(v["value"])),
+        )
+
+    o = Outer(Inner(1 + 2j))
+    s = '{"i":{"value":"(1+2j)"}}'
+    assert to_json(o) == s
+    assert from_json(Outer, s) == o
 
 
 def test_custom_class_serializer() -> None:
