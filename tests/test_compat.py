@@ -1,13 +1,15 @@
 import pytest
+import typing_extensions as te
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Any, Generic, NewType, Optional, TypeVar, Union, Literal
+from typing import Any, Generic, NewType, Optional, TypedDict, TypeVar, Union, Literal
 from collections.abc import Sequence, MutableSequence
 
 from serde import serde, field, is_serializable, is_deserializable, SerdeError
 from serde.compat import (
     get_generic_arg,
     is_dict,
+    is_typeddict,
     is_generic,
     is_list,
     is_opt,
@@ -16,6 +18,7 @@ from serde.compat import (
     is_set,
     is_tuple,
     is_union,
+    iter_literals,
     iter_types,
     iter_unions,
     type_args,
@@ -141,6 +144,48 @@ def test_iter_unions() -> None:
     assert {Union[int, str], Union[float, int], Union[bool, str], Union[float, int]} == set(
         iter_unions(A)
     )
+
+
+def test_is_typeddict() -> None:
+    class Movie(TypedDict):
+        title: str
+
+    assert is_typeddict(Movie)
+    assert is_typeddict(te.TypedDict("TeMovie", {"title": str}))
+    # A TypedDict is a subclass of dict, so the two predicates must not overlap.
+    assert not is_dict(Movie)
+    assert not is_typeddict(dict)
+    assert not is_typeddict(dict[str, int])
+
+
+def test_iter_types_typeddict() -> None:
+    class Inner(TypedDict):
+        a: int
+
+    class Outer(TypedDict):
+        inner: Inner
+        lst: list[str]
+
+    assert {Outer, Inner, int, list, str} == set(iter_types(Outer))
+
+
+def test_iter_unions_typeddict() -> None:
+    """A Union nested in a TypedDict still needs its union function generated."""
+
+    class Outer(TypedDict):
+        u: Union[str, int]
+
+    assert [Union[str, int]] == list(iter_unions(Outer))
+    assert [Union[str, int]] == list(iter_unions(list[Outer]))
+
+
+def test_iter_literals_typeddict() -> None:
+    """A Literal nested in a TypedDict still needs its literal function generated."""
+
+    class Outer(TypedDict):
+        lit: Literal["a", "b"]
+
+    assert [Literal["a", "b"]] == list(iter_literals(Outer))
 
 
 def test_type_args() -> None:
