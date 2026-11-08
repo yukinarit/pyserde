@@ -60,6 +60,7 @@ from .compat import (
     is_union,
     is_variable_tuple,
     is_pep695_type_alias,
+    get_pep695_type_alias_value,
     iter_types,
     iter_unions,
     type_args,
@@ -193,7 +194,7 @@ def _make_serialize(
 # The `serialize` function can call itself recursively when it needs to generate code for
 # unmarked dataclasses. To avoid infinite recursion, this array remembers types for which code is
 # currently being generated.
-GENERATION_STACK = []
+GENERATION_STACK: list[type[Any]] = []
 
 
 @dataclass_transform()
@@ -305,7 +306,7 @@ def serialize(
             g[typename(typ)] = typ
 
         # render all union functions
-        for union in iter_unions(cls):
+        for union in iter_unions(cls, skip_metadata_key="serde_serializer"):
             union_args = list(type_args(union))
             union_key = union_func_name(UNION_SE_PREFIX, union_args)
             add_func(scope, union_key, render_union_func(cls, union_args, tagging), g)
@@ -421,7 +422,7 @@ def to_obj(
         # A PEP 695 type alias (``type T = Foo | Bar``) is a TypeAliasType, not
         # the aliased type itself, so unwrap it to recognize e.g. a union.
         if c is not None and is_pep695_type_alias(c):
-            c = c.__value__
+            c = get_pep695_type_alias_value(c)
 
         # If a class in the argument is a non-dataclass class e.g. Union[Foo, Bar],
         # pyserde generates a wrapper (de)serializable dataclass on the fly,
@@ -989,7 +990,7 @@ class Renderer:
             arg.type = type_args(arg.type)[0]
             res = self.render(arg)
         elif is_pep695_type_alias(arg.type):
-            res = self.render(dataclasses.replace(arg, type=arg.type.__value__))
+            res = self.render(dataclasses.replace(arg, type=get_pep695_type_alias_value(arg.type)))
         else:
             raise SerdeError(f"Unsupported type: {typename(arg.type)}")
 

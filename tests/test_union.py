@@ -1,3 +1,4 @@
+import dataclasses
 import logging
 import uuid
 from dataclasses import dataclass
@@ -832,6 +833,31 @@ def test_union_with_different_ordering() -> None:
     s = '{"a":"1","b":{"Expr":{"expr":"2"}},"c":"3"}'
     assert s == to_json(f)
     assert f == from_json(Foo, s)
+
+
+def test_union_directly_with_different_ordering() -> None:
+    @dataclass
+    class Foo:
+        v: int
+
+    @dataclass
+    class Bar:
+        w: str
+
+    bar = Bar("bar")
+    for union in (Union[Foo, Bar], Union[Bar, Foo]):
+        assert to_json(bar, cls=union) == '{"Bar":{"w":"bar"}}'
+        assert from_json(union, '{"Bar":{"w":"bar"}}') == bar
+
+    for typ in (list[Union[Foo, Bar]], list[Union[Bar, Foo]]):
+        assert from_json(typ, '[{"Bar":{"w":"bar"}}]') == [bar]
+
+
+def test_union_directly_with_same_named_classes() -> None:
+    IntFoo = dataclasses.make_dataclass("Foo", [("v", int)])
+    StrFoo = dataclasses.make_dataclass("Foo", [("v", str)])
+    assert from_json(Union[IntFoo, int], '{"Foo":{"v":1}}') == IntFoo(1)
+    assert type(from_json(Union[StrFoo, int], '{"Foo":{"v":"a"}}')) is StrFoo
 
 
 def test_union_internal_tagging_for_non_dataclass() -> None:

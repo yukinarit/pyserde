@@ -27,7 +27,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-msgpack = ["msgpack"]
+msgpack = ["msgpack>=1.2.3"]
 toml = [
   "tomli-w",
 ]
@@ -39,7 +39,7 @@ jaxtyping = ["jaxtyping"]
 orjson = ["orjson"]
 sqlalchemy = ["sqlalchemy>2"]
 all = [
-  "msgpack",
+  "msgpack>=1.2.3",
   "tomli-w",
   "pyyaml",
   "numpy>1.22.0,<3.0.0",
@@ -56,12 +56,12 @@ Homepage = "https://github.com/yukinarit/pyserde"
 dev = [
   "pyyaml",
   "tomli-w",
-  "msgpack",
+  "msgpack>=1.2.3",
   "numpy>1.22.0,<3.0.0",
-  "mypy==2.3.1",
-  "black==26.5.1",
+  "mypy==2.4.1",
+  "black==26.10.1",
   "pyright==1.1.414",
-  "ruff==0.16.9",
+  "ruff==0.17.3",
   "pytest",
   "pytest-watch",
   "pytest-flake8",
@@ -70,8 +70,8 @@ dev = [
   "mkdocstrings[python]>=0.24",
   "mkdocs-static-i18n>=1.2",
   "mike>=2.0",
-  "more-itertools>=10.5.0,<10.9",
-  "pre-commit==4.6.2",
+  "more-itertools>=10.5.0,<11.3",
+  "pre-commit==4.7.0",
   "pytest-xdist>=3.5.0,<4.0",
   "types-PyYAML>=6.0.9,<7.0",
   "msgpack-types>=0.5,<0.9",

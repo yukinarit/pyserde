@@ -2,7 +2,7 @@ SHELL:=/bin/bash
 PYTHON ?= python
 UV ?= uv
 
-.PHONY: all setup build test examples fmt check docs open-docs bench
+.PHONY: all setup build test examples fmt check check-format lint typecheck docs open-docs bench
 
 all: setup pep8 mypy docs test examples
 
@@ -28,6 +28,18 @@ fmt:
 
 check:
 	$(UV) run pre-commit run -a
+
+check-format:
+	$(UV) run pre-commit run trailing-whitespace -a
+	$(UV) run pre-commit run end-of-file-fixer -a
+	$(UV) run pre-commit run black -a
+
+lint:
+	$(UV) run pre-commit run ruff -a
+
+typecheck:
+	$(UV) run pre-commit run pyright -a
+	$(UV) run pre-commit run mypy -a
 
 docs:
 	$(UV) run mkdocs build

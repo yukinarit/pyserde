@@ -94,6 +94,8 @@ SETTINGS = {"debug": False}
 class UnionCacheKey:
     union: Hashable
     tagging: Tagging
+    # Union[int, str] == Union[str, int], but the generated code depends on the order.
+    order: str
 
 
 def init(debug: bool = False) -> None:
@@ -179,7 +181,7 @@ class Cache:
         the class and store it in the cache.
         """
         union_cls, tagging = _extract_from_with_tagging(cls)
-        cache_key = UnionCacheKey(union=union_cls, tagging=tagging)
+        cache_key = UnionCacheKey(union=union_cls, tagging=tagging, order=repr(union_cls))
         wrapper = self.classes.get(cache_key)
         return wrapper or self._generate_union_class(cls)
 
@@ -191,7 +193,7 @@ class Cache:
         import serde
 
         union_cls, tagging = _extract_from_with_tagging(cls)
-        cache_key = UnionCacheKey(union=union_cls, tagging=tagging)
+        cache_key = UnionCacheKey(union=union_cls, tagging=tagging, order=repr(union_cls))
         class_name = union_func_name(
             f"{tagging.produce_unique_class_name()}Union", list(type_args(union_cls))
         )

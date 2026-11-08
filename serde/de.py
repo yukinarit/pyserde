@@ -11,7 +11,7 @@ import dataclasses
 import functools
 import typing
 import jinja2
-from collections.abc import Callable, Sequence, Iterable
+from collections.abc import Callable, Sequence, Iterable, Mapping
 
 from beartype import beartype, BeartypeConf
 from beartype.door import is_bearable
@@ -61,6 +61,7 @@ from .compat import (
     is_union,
     is_variable_tuple,
     is_pep695_type_alias,
+    get_pep695_type_alias_value,
     iter_literals,
     iter_types,
     iter_unions,
@@ -230,7 +231,7 @@ def _make_deserialize(
 # The `deserialize` function can call itself recursively when it needs to generate code for
 # unmarked dataclasses. To avoid infinite recursion, this array remembers types for which code is
 # currently being generated.
-GENERATION_STACK = []
+GENERATION_STACK: list[type[Any]] = []
 
 
 @dataclass_transform()
@@ -337,6 +338,7 @@ def deserialize(
         g["class_deserializers"] = class_deserializers
         g["BeartypeCallHintParamViolation"] = BeartypeCallHintParamViolation
         g["is_bearable"] = is_bearable
+        g["_Mapping"] = Mapping
         if deserializer:
             g["serde_legacy_custom_class_deserializer"] = functools.partial(
                 serde_legacy_custom_class_deserializer, custom=deserializer
@@ -363,7 +365,7 @@ def deserialize(
                 g[typename(typ)] = typ
 
         # render all union functions
-        for union in iter_unions(cls):
+        for union in iter_unions(cls, skip_metadata_key="serde_deserializer"):
             union_args = type_args(union)
             add_func(
                 scope,
@@ -564,7 +566,7 @@ def from_obj(
     # A PEP 695 type alias (``type T = Foo | Bar``) is a TypeAliasType, not the
     # aliased type itself, so unwrap it to recognize e.g. a union.
     if is_pep695_type_alias(c):
-        c = c.__value__  # type: ignore[attr-defined]
+        c = get_pep695_type_alias_value(c)
 
     # It is possible that the parser already generates the correct data type requested
     # by the caller. Hence, it should be checked early to avoid doing anymore work.
@@ -1020,7 +1022,7 @@ class Renderer:
         elif is_any(arg.type) or is_ellipsis(arg.type):
             res = arg.data
         elif is_pep695_type_alias(arg.type):
-            res = self.render(dataclasses.replace(arg, type=arg.type.__value__))
+            res = self.render(dataclasses.replace(arg, type=get_pep695_type_alias_value(arg.type)))
         elif is_primitive(arg.type):
             # For subclasses for primitives e.g. class FooStr(str), coercing is always enabled
             res = self.primitive(arg, not is_primitive_subclass(arg.type))
@@ -1403,6 +1405,11 @@ def {{func}}(cls=cls, maybe_generic=None, maybe_generic_type_vars=None, data=Non
              variable_type_args=None, reuse_instances=None, deserialize_numbers=None):
   if reuse_instances is None:
     reuse_instances = {{serde_scope.reuse_instances_default}}
+
+  if data.__class__ is not dict and not isinstance(data, _Mapping):
+    raise SerdeError(
+      "Can not deserialize " + typename(type(data)) + " into {{class_name}}, expected a mapping"
+    )
 
   {% if deny_unknown_fields and not has_flatten_dict %}
   known_fields = {{ known_fields }}
