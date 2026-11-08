@@ -365,7 +365,7 @@ def deserialize(
                 g[typename(typ)] = typ
 
         # render all union functions
-        for union in iter_unions(cls):
+        for union in iter_unions(cls, skip_metadata_key="serde_deserializer"):
             union_args = type_args(union)
             add_func(
                 scope,

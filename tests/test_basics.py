@@ -1173,6 +1173,53 @@ def test_skip_with_unsupported_types() -> None:
     assert restored_bar.items == []
 
 
+def test_custom_field_serializer_with_unsupported_union_types() -> None:
+    """https://github.com/yukinarit/pyserde/issues/824"""
+
+    class UnsupportedClass:
+        def __init__(self, value: str) -> None:
+            self.value = value
+
+    def se_unsupported(v: UnsupportedClass | None) -> str | None:
+        return v.value if v else None
+
+    def de_unsupported(v: str | None) -> UnsupportedClass | None:
+        return UnsupportedClass(v) if v else None
+
+    @serde.serde
+    @dataclasses.dataclass(frozen=True)
+    class Foo:
+        a: UnsupportedClass | None = serde.field(
+            default=None, serializer=se_unsupported, deserializer=de_unsupported
+        )
+        b: list[UnsupportedClass | int] = serde.field(
+            default_factory=list,
+            serializer=lambda xs: [x.value if isinstance(x, UnsupportedClass) else x for x in xs],
+            deserializer=lambda xs: [UnsupportedClass(x) if isinstance(x, str) else x for x in xs],
+        )
+
+    d = serde.to_dict(Foo(UnsupportedClass("foo"), [UnsupportedClass("bar"), 10]))
+    assert d == {"a": "foo", "b": ["bar", 10]}
+    restored = serde.from_dict(Foo, d)
+    assert isinstance(restored.a, UnsupportedClass)
+    assert restored.a.value == "foo"
+    assert isinstance(restored.b[0], UnsupportedClass)
+    assert restored.b[0].value == "bar"
+    assert restored.b[1] == 10
+
+    assert serde.to_dict(Foo()) == {"a": None, "b": []}
+    assert serde.from_dict(Foo, {"a": None}).a is None
+
+    # Only a custom serializer is given, so deserialization still can't be generated.
+    with pytest.raises(serde.SerdeError) as ex:
+
+        @serde.serde
+        class Bar:
+            a: UnsupportedClass | None = serde.field(serializer=se_unsupported)
+
+    assert str(ex.value).startswith("Unsupported type: UnsupportedClass")
+
+
 def test_dataclass_inheritance() -> None:
     @serde.serde
     class Base:
