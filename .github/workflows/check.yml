@@ -10,7 +10,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.11", "3.12", "3.13", "3.14"]
+        python-version: ["3.11", "3.12", "3.13", "3.14", "3.15"]
     steps:
       - uses: actions/checkout@v7
       - name: Install uv
@@ -28,7 +28,7 @@ jobs:
       - name: Run examples
         run: |
           make examples
-        if: matrix.python-version == '3.14'
+        if: matrix.python-version == '3.15'
       - name: Run tests (orjson)
         run: |
           uv sync --extra orjson --frozen
@@ -36,7 +36,7 @@ jobs:
       - name: Run examples (orjson)
         run: |
           make examples
-        if: matrix.python-version == '3.14'
+        if: matrix.python-version == '3.15'
       - name: Run tests (sqlalchemy)
         run: |
           uv sync --extra sqlalchemy --frozen
@@ -44,7 +44,7 @@ jobs:
       - name: Run examples (sqlalchemy)
         run: |
           make examples
-        if: matrix.python-version == '3.14'
+        if: matrix.python-version == '3.15'
 
   check_formatting:
     name: Check formatting
