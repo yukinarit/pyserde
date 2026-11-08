@@ -12,6 +12,7 @@ are legal at class definition time.
 
 import dataclasses
 import enum
+import sys
 import typing
 from typing import ClassVar
 
@@ -127,6 +128,7 @@ def test_forward_reference_on_dataclass_type_check_disabled() -> None:
 
 
 @pytest.mark.xfail(
+    sys.version_info < (3, 15),
     raises=RuntimeError,
     strict=True,
     reason="beartype iterates cls.__dict__ while Python 3.14 lazily inserts "
