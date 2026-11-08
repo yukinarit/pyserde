@@ -399,9 +399,13 @@ def iter_types(cls: type[Any]) -> list[type[Any]]:
     return list(lst)
 
 
-def iter_unions(cls: TypeLike) -> list[TypeLike]:
+def iter_unions(cls: TypeLike, skip_metadata_key: str | None = None) -> list[TypeLike]:
     """
     Iterate over all unions that are used in the dataclass
+
+    Dataclass fields that have `skip_metadata_key` in their metadata are not traversed.
+    This is used to skip fields that have a custom field (de)serializer, because the
+    generated code never uses union functions for them.
     """
     lst: list[TypeLike] = []
     stack: list[TypeLike] = []  # To prevent infinite recursion
@@ -420,8 +424,11 @@ def iter_unions(cls: TypeLike) -> list[TypeLike]:
             stack.append(cls)
             if isinstance(cls, type):
                 for f in dataclass_fields(cls):
-                    if not f.metadata.get("serde_skip"):
-                        recursive(f.type)
+                    if f.metadata.get("serde_skip"):
+                        continue
+                    if skip_metadata_key and f.metadata.get(skip_metadata_key):
+                        continue
+                    recursive(f.type)
             stack.pop()
         elif is_opt(cls):
             args = type_args(cls)

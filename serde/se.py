@@ -306,7 +306,7 @@ def serialize(
             g[typename(typ)] = typ
 
         # render all union functions
-        for union in iter_unions(cls):
+        for union in iter_unions(cls, skip_metadata_key="serde_serializer"):
             union_args = list(type_args(union))
             union_key = union_func_name(UNION_SE_PREFIX, union_args)
             add_func(scope, union_key, render_union_func(cls, union_args, tagging), g)
