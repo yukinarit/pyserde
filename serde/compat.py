@@ -340,6 +340,10 @@ def iter_types(cls: type[Any]) -> list[type[Any]]:
     lst: set[type[Any] | Any] = set()
 
     def recursive(cls: type[Any] | Any) -> None:
+        if typing.get_origin(cls) is typing.Annotated:
+            recursive(typing.get_args(cls)[0])
+            return
+
         if cls in lst:
             return
 
@@ -411,6 +415,10 @@ def iter_unions(cls: TypeLike, skip_metadata_key: str | None = None) -> list[Typ
     stack: list[TypeLike] = []  # To prevent infinite recursion
 
     def recursive(cls: TypeLike) -> None:
+        if typing.get_origin(cls) is typing.Annotated:
+            recursive(typing.get_args(cls)[0])
+            return
+
         if cls in stack:
             return
 
@@ -459,6 +467,10 @@ def iter_literals(cls: type[Any]) -> list[TypeLike]:
     stack: list[TypeLike] = []  # To prevent infinite recursion
 
     def recursive(cls: type[Any] | Any) -> None:
+        if typing.get_origin(cls) is typing.Annotated:
+            recursive(typing.get_args(cls)[0])
+            return
+
         if cls in stack:
             return
 

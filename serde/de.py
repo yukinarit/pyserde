@@ -954,6 +954,12 @@ class Renderer:
         """
         Render rvalue
         """
+        if typing.get_origin(arg.type) is typing.Annotated:
+            return self.render(dataclasses.replace(arg, type=typing.get_args(arg.type)[0]))
+
+        return self._render_unwrapped(arg)
+
+    def _render_unwrapped(self, arg: DeField[Any]) -> str:
         implemented_methods: dict[type[Any], int] = {}
         class_deserializers: Iterable[ClassDeserializer] = itertools.chain(
             GLOBAL_CLASS_DESERIALIZER, [self.class_deserializer] if self.class_deserializer else []
