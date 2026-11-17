@@ -14,6 +14,7 @@
     * [`defaultdict`](https://docs.python.org/3/library/collections.html#collections.defaultdict) [^4]
     * [`deque`](https://docs.python.org/3/library/collections.html#collections.deque) [^25]
     * [`Counter`](https://docs.python.org/3/library/collections.html#collections.Counter) [^26]
+* [`typing.TypedDict`](https://docs.python.org/3/library/typing.html#typing.TypedDict) [^27]
 * [`typing.Optional`](https://docs.python.org/3/library/typing.html#typing.Optional)[^5]
 * [`typing.Union`](https://docs.python.org/3/library/typing.html#typing.Union) [^6] [^7] [^8]
 * [`@dataclass`](https://docs.python.org/3/library/dataclasses.html) を用いたユーザ定義クラス [^9] [^10]
@@ -49,6 +50,98 @@ class Foo:
     e: str | None
     f: Bar
 ```
+
+## TypedDict
+
+[`typing.TypedDict`](https://docs.python.org/3/library/typing.html#typing.TypedDict) は `@serde` を付けたクラスのフィールド型として使用できます。また、`from_dict` / `from_json` に直接渡すこともできます。
+
+```python
+from typing import NotRequired, TypedDict
+from serde import serde
+from serde.json import from_json, to_json
+
+class Movie(TypedDict):
+    title: str
+    year: int
+
+@serde
+class Cinema:
+    location: str
+    featured: Movie
+```
+
+```python
+>>> cinema = Cinema(location="Downtown", featured={"title": "Inception", "year": 2010})
+>>> to_json(cinema)
+'{"location":"Downtown","featured":{"title":"Inception","year":2010}}'
+>>> from_json(Cinema, to_json(cinema))
+Cinema(location='Downtown', featured={'title': 'Inception', 'year': 2010})
+```
+
+TypedDict は単独で（デ）シリアライズすることもできます。TypedDict の値は実行時には単なる `dict` であり型情報を持たないため、シリアライズの際は型を `c` で渡す必要があります。
+
+```python
+>>> from serde import from_dict, to_dict
+>>> from_dict(Movie, {"title": "Arrival", "year": 2016})
+{'title': 'Arrival', 'year': 2016}
+>>> to_dict({"title": "Arrival", "year": 2016}, c=Movie)
+{'title': 'Arrival', 'year': 2016}
+```
+
+キーは外側のクラスの `rename_all` の影響を受けません。TypedDict 自身は pyserde のデコレータを持たないため、そのキーがそのままデータ形式上の名前になります。
+
+### Required と NotRequired (PEP 655)
+
+[`NotRequired`](https://peps.python.org/pep-0655/) を付けたキー（および `total=False` の下のキー）は省略できます。省略されたキーは入出力のどちらでも省略されたままであり、`None` にはなりません。
+
+```python
+class Person(TypedDict):
+    name: str
+    email: NotRequired[str]
+```
+
+```python
+>>> to_dict({"name": "Alice"}, c=Person)
+{'name': 'Alice'}
+```
+
+必須のキーが存在しない場合は `SerdeError` が送出されます。
+
+### ReadOnly (PEP 705)
+
+[`ReadOnly`](https://peps.python.org/pep-0705/) はキーを型チェッカー上で読み取り専用として扱うための修飾子です。pyserde は `ReadOnly[NotRequired[T]]` と `NotRequired[ReadOnly[T]]` のどちらの入れ子順も受け付けます。シリアライズ結果には影響しません。
+
+### 未知のキー、closed と extra_items (PEP 728)
+
+TypedDict はキーの全体を宣言するものであるため、pyserde はデフォルトで未宣言のキーを含むデータを**拒否**します。
+
+```python
+>>> from_dict(Movie, {"title": "Arrival", "year": 2016, "director": "Villeneuve"})
+Traceback (most recent call last):
+    ...
+serde.compat.SerdeError: unknown fields: ['director'], expected one of ['title', 'year'] while deserializing Movie
+```
+
+未宣言のキーを許可するには [PEP 728](https://peps.python.org/pep-0728/) を使います。`closed=` と `extra_items=` は標準ライブラリには入っていないため、`typing_extensions.TypedDict` が必要です。
+
+```python
+import typing_extensions as te
+
+class Config(te.TypedDict, extra_items=int):  # 未宣言のキーを許可し、その値は int
+    name: str
+
+class Loose(te.TypedDict, closed=False):      # 未宣言のキーを型を指定せずに許可
+    name: str
+
+class Strict(te.TypedDict, closed=True):      # デフォルトの挙動を明示的に書いたもの
+    name: str
+```
+
+シリアライズ時は `closed` な TypedDict でもエラーにはならず、宣言されていないキーは単に出力から除かれます。
+
+### 制限事項
+
+ジェネリックな TypedDict (`class Box(TypedDict, Generic[T])`) と再帰的な TypedDict は未対応で、いずれもその旨を説明する `SerdeError` が送出されます。これらの用途には `@serde` を付けたデータクラスを使用してください。また `flatten` フィールド属性は TypedDict のフィールドには使用できません。
 
 ## Numpy
 
@@ -162,3 +255,5 @@ SQLAlchemy宣言的データクラスマッピング統合の実験的サポー�
 [^25]: [examples/deque.py](https://github.com/yukinarit/pyserde/blob/main/examples/deque.py) を参照
 
 [^26]: [examples/counter.py](https://github.com/yukinarit/pyserde/blob/main/examples/counter.py) を参照
+
+[^27]: [examples/typeddict.py](https://github.com/yukinarit/pyserde/blob/main/examples/typeddict.py) を参照
