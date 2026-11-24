@@ -65,7 +65,7 @@ class Foo:
 
 pyserde can (de)serialize dataclasses without `@serde` since v0.10.0. This feature is convenient when you want to use classes declared in external libraries or a type checker doesn't work with `@serde` decorator. See [this example](https://github.com/yukinarit/pyserde/blob/main/examples/plain_dataclass.py).
 
-How does it work? It's quite simple that pyserde add `@serde` decorator if a class doesn't has it. It may take for a while for the first API call, but the generated code will be cached internally. So it won't be a problem. See the following example to deserialize a class in a third party package.
+How does it work? It's quite simple that pyserde add `@serde` decorator if a class doesn't have it. It may take for a while for the first API call, but the generated code will be cached internally. So it won't be a problem. See the following example to deserialize a class in a third party package.
 
 ```python
 @dataclass
