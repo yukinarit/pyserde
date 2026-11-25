@@ -880,12 +880,12 @@ class DeField(Field[T]):
             return f"{self.datavar}[{self.index}]"
         optional = is_union(self.type) and type(None) in get_args(self.type)
         if self.alias:
-            # A field may be populated from any of its aliases (or its own name),
+            # A field may be populated from any of its aliases (or its converted name),
             # so read it through ``_get_by_aliases`` regardless of the field type.
             # This keeps ``alias`` working for containers, datetimes, nested
             # dataclasses etc. - not just the leaf renderers (primitive/enum/
             # Optional) that used to special-case it.
-            names = ", ".join(f'"{name}"' for name in [self.name, *self.alias])
+            names = ", ".join(f'"{name}"' for name in [self.conv_name(), *self.alias])
             raise_error = "False" if optional else "True"
             return f"_get_by_aliases({self.datavar}, [{names}], raise_error={raise_error})"
         elif optional:
@@ -1298,7 +1298,7 @@ class Renderer:
         """
 
         def get_aliased_fields(arg: Field[Any]) -> Iterator[str]:
-            return (f'"{s}"' for s in [arg.name, *arg.alias])
+            return (f'"{s}"' for s in [arg.conv_name(), *arg.alias])
 
         if arg.flatten:
             # When a field has the `flatten` attribute, iterate over its dataclass fields.

@@ -746,6 +746,8 @@ def test_rename_and_alias() -> None:
 
     f = Foo(a=1)
     assert '{"z":1}' == serde.json.to_json(f)
+    assert f == serde.json.from_json(Foo, serde.json.to_json(f))
+    assert f == serde.json.from_json(Foo, '{"z":1,"b":10}')
     ff = serde.json.from_json(Foo, '{"b":10}')
     assert ff.a == 10
 
@@ -757,6 +759,7 @@ def test_rename_all_and_alias() -> None:
 
     f = Foo(1)
     assert '{"AField":1}' == serde.json.to_json(f)
+    assert f == serde.json.from_json(Foo, serde.json.to_json(f))
     ff = serde.json.from_json(Foo, '{"b_field":1}')  # alias is not renamed
     assert f == ff
 
@@ -803,6 +806,7 @@ def test_default_rename_and_alias() -> None:
 
     f = Foo(a=1)
     assert '{"z":1}' == serde.json.to_json(f)
+    assert f == serde.json.from_json(Foo, serde.json.to_json(f))
     ff = serde.json.from_json(Foo, '{"b":10}')
     assert ff.a == 10
     ff = serde.json.from_json(Foo, '{"e":10}')
