@@ -2,11 +2,13 @@
 Tests for flatten attribute.
 """
 
-from typing import Any, Optional
+from dataclasses import dataclass
+from enum import Enum
+from typing import Any, Generic, Optional, TypeVar, Union
 
 import pytest
 
-from serde import field, from_dict, serde, SerdeError
+from serde import field, from_dict, serde, SerdeError, to_dict
 from serde.json import from_json, to_json
 
 from .common import all_formats
@@ -414,3 +416,197 @@ def test_flatten_sibling_fields_do_not_leak_between_children() -> None:
         right: Right = field(flatten=True)
 
     assert from_dict(Outer, {"a": 1, "b": 2}) == Outer(left=Left(a=1), right=Right(b=2))
+
+
+@pytest.mark.parametrize("se,de", all_formats)
+def test_flatten_generic(se: Any, de: Any) -> None:
+    T = TypeVar("T")
+
+    @serde
+    @dataclass
+    class Foo(Generic[T]):
+        v: T
+
+    @serde
+    @dataclass
+    class Bar(Generic[T]):
+        foo: Foo[T] = field(flatten=True)
+
+    bar = Bar[int](Foo[int](10))
+    assert de(Bar[int], se(bar)) == bar
+
+
+def test_flatten_generic_dict_and_type_resolution() -> None:
+    T = TypeVar("T")
+    U = TypeVar("U")
+    V = TypeVar("V")
+
+    @serde
+    @dataclass
+    class Item:
+        x: int
+
+    @serde
+    @dataclass
+    class Foo(Generic[T]):
+        v: T
+
+    @serde
+    @dataclass
+    class Bar(Generic[T]):
+        foo: Foo[T] = field(flatten=True)
+
+    bar_int = Bar[int](Foo[int](10))
+    d_int = to_dict(bar_int)
+    assert d_int == {"v": 10}
+    assert from_dict(Bar[int], d_int) == bar_int
+
+    bar_item = Bar[Item](Foo[Item](Item(x=42)))
+    d_item = to_dict(bar_item)
+    assert d_item == {"v": {"x": 42}}
+    assert from_dict(Bar[Item], d_item) == bar_item
+
+    @serde
+    @dataclass
+    class Inner(Generic[T, U]):
+        first: T
+        second: U
+
+    @serde
+    @dataclass
+    class Outer(Generic[U, V]):
+        tag: U
+        inner: Inner[V, U] = field(flatten=True)
+
+    outer = Outer[str, Item](tag="ok", inner=Inner[Item, str](first=Item(x=7), second="s"))
+    d_outer = to_dict(outer)
+    assert d_outer == {"tag": "ok", "first": {"x": 7}, "second": "s"}
+    assert from_dict(Outer[str, Item], d_outer) == outer
+
+
+def test_flatten_generic_nested_and_inner_types() -> None:
+    T = TypeVar("T")
+
+    class Color(Enum):
+        RED = "red"
+
+    @dataclass
+    class Leaf(Generic[T]):
+        v: T
+        color: Color
+        choice: Union[int, str]
+        formatted: int = field(serializer=str)
+
+    @serde
+    @dataclass
+    class Mid(Generic[T]):
+        leaf: Leaf[T] = field(flatten=True)
+
+    @serde
+    @dataclass
+    class Root(Generic[T]):
+        name: str
+        mid: Mid[T] = field(flatten=True)
+
+    root = Root[int](
+        name="r",
+        mid=Mid[int](leaf=Leaf[int](v=5, color=Color.RED, choice="a", formatted=3)),
+    )
+    assert to_dict(root) == {
+        "name": "r",
+        "v": 5,
+        "color": "red",
+        "choice": "a",
+        "formatted": "3",
+    }
+    assert (
+        from_dict(
+            Root[int],
+            {"name": "r", "v": 5, "color": "red", "choice": "a", "formatted": 3},
+        )
+        == root
+    )
+
+
+def test_flatten_generic_optional_and_default() -> None:
+    T = TypeVar("T")
+
+    @serde
+    @dataclass
+    class Item:
+        x: int
+
+    @serde
+    @dataclass
+    class Foo(Generic[T]):
+        v: T
+
+    @serde
+    @dataclass
+    class OptBar(Generic[T]):
+        a: int
+        foo: Optional[Foo[T]] = field(default=None, flatten=True)
+
+    present = OptBar[Item](a=1, foo=Foo[Item](Item(x=9)))
+    assert to_dict(present) == {"a": 1, "v": {"x": 9}}
+    assert from_dict(OptBar[Item], {"a": 1, "v": {"x": 9}}) == present
+    assert from_dict(OptBar[Item], {"a": 1}) == OptBar[Item](a=1, foo=None)
+
+    @serde
+    @dataclass
+    class DefaultFoo(Generic[T]):
+        v: Optional[T] = None
+
+    @serde
+    @dataclass
+    class DefaultBar(Generic[T]):
+        a: int
+        foo: DefaultFoo[T] = field(flatten=True, default_factory=DefaultFoo)
+
+    assert from_dict(DefaultBar[int], {"a": 1}) == DefaultBar[int](a=1, foo=DefaultFoo(v=None))
+    assert from_dict(DefaultBar[int], {"a": 1, "v": 2}) == DefaultBar[int](a=1, foo=DefaultFoo(v=2))
+
+
+def test_flatten_generic_deny_unknown_fields_and_extra() -> None:
+    T = TypeVar("T")
+
+    @serde(deny_unknown_fields=True)
+    @dataclass
+    class Inner(Generic[T]):
+        v: T
+
+    @serde(deny_unknown_fields=True)
+    @dataclass
+    class StrictOuter(Generic[T]):
+        a: int
+        inner: Inner[T] = field(flatten=True)
+
+    assert from_dict(StrictOuter[int], {"a": 1, "v": 2}) == StrictOuter[int](
+        a=1, inner=Inner[int](v=2)
+    )
+    with pytest.raises(SerdeError):
+        from_dict(StrictOuter[int], {"a": 1, "v": 2, "unknown": 3})
+
+    @serde
+    @dataclass
+    class ExtraOuter(Generic[T]):
+        a: int
+        inner: Inner[T] = field(flatten=True)
+        extra: dict[str, Any] = field(flatten=True, default_factory=dict)
+
+    assert from_dict(ExtraOuter[int], {"a": 1, "v": 2, "unknown": 3}) == ExtraOuter[int](
+        a=1, inner=Inner[int](v=2), extra={"unknown": 3}
+    )
+
+
+def test_flatten_non_dataclass_generic_rejected() -> None:
+    T = TypeVar("T")
+
+    class NotDataclass(Generic[T]):
+        pass
+
+    with pytest.raises(SerdeError):
+
+        @serde
+        class Bad(Generic[T]):
+            x: NotDataclass[T] = field(flatten=True)
