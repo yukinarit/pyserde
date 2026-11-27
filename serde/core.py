@@ -28,6 +28,7 @@ from .compat import (
     T,
     SerdeError,
     dataclass_fields,
+    get_dataclass_type,
     get_origin,
     is_bare_counter,
     is_bare_deque,
@@ -747,7 +748,7 @@ class Field(Generic[T]):
             flatten = FlattenOpts()
         if flatten:
             is_valid_flatten_type = (
-                dataclasses.is_dataclass(f.type)
+                get_dataclass_type(f.type) is not None
                 or is_opt_dataclass(f.type)
                 or is_flatten_dict(f.type)
             )

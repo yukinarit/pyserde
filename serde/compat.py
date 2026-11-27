@@ -392,6 +392,11 @@ def iter_types(cls: type[Any]) -> list[type[Any]]:
                 recursive(args[1])
         elif is_pep695_type_alias(cls):
             recursive(get_pep695_type_alias_value(cls))
+        elif is_generic(cls):
+            lst.add(cls)
+            origin = get_dataclass_type(cls)
+            if origin is not None:
+                recursive(origin)
         else:
             lst.add(cls)
 
@@ -446,6 +451,10 @@ def iter_unions(cls: TypeLike, skip_metadata_key: str | None = None) -> list[Typ
             if args and len(args) >= 2:
                 recursive(args[0])
                 recursive(args[1])
+        elif is_generic(cls):
+            origin = get_dataclass_type(cls)
+            if origin is not None:
+                recursive(origin)
 
     recursive(cls)
     return lst
@@ -492,6 +501,10 @@ def iter_literals(cls: type[Any]) -> list[TypeLike]:
             if args and len(args) >= 2:
                 recursive(args[0])
                 recursive(args[1])
+        elif is_generic(cls):
+            origin = get_dataclass_type(cls)
+            if origin is not None:
+                recursive(origin)
 
     recursive(cls)
     return list(lst)
@@ -560,6 +573,20 @@ def is_bare_opt(typ: Any) -> bool:
     return not type_args(typ) and typ is Optional
 
 
+def get_dataclass_type(typ: Any) -> type[Any] | None:
+    """
+    Return the underlying dataclass type for ``typ`` if it is a dataclass
+    class or a subscripted generic dataclass (e.g. ``Foo[T]``), else ``None``.
+    """
+    if isinstance(typ, type) and is_dataclass(typ):
+        return typ
+    if is_generic(typ):
+        origin = get_origin(typ)
+        if isinstance(origin, type) and is_dataclass(origin):
+            return origin
+    return None
+
+
 # Not memoized: like ``is_opt``, the result depends on the order of union
 # arguments even though ``Optional[T]`` and ``Union[None, T]`` compare equal.
 def is_opt_dataclass(typ: Any) -> bool:
@@ -577,7 +604,7 @@ def is_opt_dataclass(typ: Any) -> bool:
     True
     """
     args = get_args(typ)
-    return is_opt(typ) and len(args) > 0 and is_dataclass(args[0])
+    return is_opt(typ) and len(args) > 0 and get_dataclass_type(args[0]) is not None
 
 
 @cache

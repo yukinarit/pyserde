@@ -30,6 +30,7 @@ from .compat import (
     SerdeError,
     SerdeSkip,
     T,
+    get_dataclass_type,
     get_origin,
     is_any,
     is_bare_counter,
@@ -303,7 +304,10 @@ def serialize(
 
             if is_primitive(typ) and not is_enum(typ):
                 continue
-            g[typename(typ)] = typ
+            if is_generic(typ):
+                g[typename(typ)] = get_origin(typ)
+            else:
+                g[typename(typ)] = typ
 
         # render all union functions
         for union in iter_unions(cls, skip_metadata_key="serde_serializer"):
@@ -647,9 +651,10 @@ def add_field_serializers_to_scope(
             g[f.serializer.name] = f.serializer
         if f.flatten:
             inner = f[0] if is_opt(f.type) else f
-            if is_dataclass(inner.type):
+            inner_cls = get_dataclass_type(inner.type)
+            if inner_cls is not None:
                 add_field_serializers_to_scope(
-                    sefields(inner.type, serialize_class_var), g, serialize_class_var
+                    sefields(inner_cls, serialize_class_var), g, serialize_class_var
                 )
 
 
@@ -880,15 +885,16 @@ class LRenderer:
         """
         Render lvalue
         """
-        if is_dataclass(arg.type) and arg.flatten:
-            return self.flatten(arg)
-        elif is_opt(arg.type) and arg.flatten:
-            inner = arg[0]
-            if is_dataclass(inner.type):
-                return self.flatten(inner)
-        elif is_flatten_dict(arg.type) and arg.flatten:
-            # Special marker for flatten dict - handled by template
-            return "__FLATTEN_DICT__"
+        if arg.flatten:
+            if get_dataclass_type(arg.type) is not None:
+                return self.flatten(arg)
+            elif is_opt(arg.type):
+                inner = arg[0]
+                if get_dataclass_type(inner.type) is not None:
+                    return self.flatten(inner)
+            elif is_flatten_dict(arg.type):
+                # Special marker for flatten dict - handled by template
+                return "__FLATTEN_DICT__"
 
         return f'res["{arg.conv_name(self.case)}"]'
 
@@ -896,8 +902,10 @@ class LRenderer:
         """
         Render field with flatten attribute.
         """
+        cls = get_dataclass_type(arg.type)
+        assert cls is not None
         flattened = []
-        for f in sefields(arg.type, self.serialize_class_var):
+        for f in sefields(cls, self.serialize_class_var):
             flattened.append(self.render(f))
         return ", ".join(flattened)
 
@@ -982,8 +990,7 @@ class Renderer:
         elif is_generic(arg.type):
             origin = get_origin(arg.type)
             assert origin
-            arg.type = origin
-            res = self.render(arg)
+            return self.render(dataclasses.replace(arg, type=origin))
         elif is_literal(arg.type):
             res = self.literal(arg)
         elif is_class_var(arg.type):

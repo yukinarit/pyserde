@@ -29,6 +29,7 @@ from .compat import (
     UserError,
     find_generic_arg,
     get_args,
+    get_dataclass_type,
     get_generic_arg,
     get_origin,
     get_type_var_names,
@@ -971,11 +972,11 @@ class Renderer:
         elif arg.deserializer and arg.deserializer.inner is not default_deserializer:
             res = self.custom_field_deserializer(arg)
         elif is_generic(arg.type):
-            arg.type_args = list(get_args(arg.type))
             origin = get_origin(arg.type)
             assert origin
-            arg.type = origin
-            res = self.render(arg)
+            return self.render(
+                dataclasses.replace(arg, type=origin, type_args=list(get_args(arg.type)))
+            )
         elif is_dataclass(arg.type):
             res = self.dataclass(arg)
         elif is_opt(arg.type):
@@ -1114,10 +1115,12 @@ class Renderer:
             exists = f"{arg.data} is not None"
         elif arg.flatten:
             # Check nullabilities of all nested fields.
+            inner_cls = get_dataclass_type(inner.type)
+            assert inner_cls is not None
             exists = " and ".join(
                 [
                     f'{arg.datavar}.get("{f.name}") is not None'
-                    for f in dataclasses.fields(inner.type)
+                    for f in dataclasses.fields(inner_cls)
                 ]
             )
         else:
@@ -1305,8 +1308,10 @@ class Renderer:
             # This ensures that the code checks keys in the data while considering aliases.
             # An optional flattened field holds the dataclass in its type argument.
             inner = arg[0] if is_opt(arg.type) else arg
+            inner_cls = get_dataclass_type(inner.type)
+            assert inner_cls is not None
             flattened = []
-            for subarg in defields(inner.type):
+            for subarg in defields(inner_cls):
                 if subarg.alias:
                     aliases = get_aliased_fields(subarg)
                     flattened.append(f"_exists_by_aliases({arg.datavar}, [{','.join(aliases)}])")
@@ -1604,16 +1609,10 @@ def _collect_flattened_dataclass_child_scopes(fields: list[DeField[Any]]) -> dic
         if not f.flatten or is_flatten_dict(f.type) or f.name is None:
             continue
 
-        child_cls: type[Any] | None = None
-        if isinstance(f.type, type) and is_dataclass(f.type):
-            child_cls = cast(type[Any], f.type)
-        elif is_opt(f.type):
+        child_cls = get_dataclass_type(f.type)
+        if child_cls is None and is_opt(f.type):
             child_cls = next(
-                (
-                    cast(type[Any], arg)
-                    for arg in get_args(f.type)
-                    if isinstance(arg, type) and is_dataclass(arg)
-                ),
+                (cls for arg in get_args(f.type) if (cls := get_dataclass_type(arg)) is not None),
                 None,
             )
 
